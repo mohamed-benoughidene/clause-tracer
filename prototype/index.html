@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>First launch · Clause Tracer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* First launch only: an open book. Text on the left page, the painting on the right, edge to edge. No sidebar, no floating card. */
+  body { background: var(--bg-paper); }
+  .launch { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+  .launch-form { display: flex; flex-direction: column; padding: 32px clamp(32px, 5vw, 72px) 28px; }
+  .launch-body { margin: auto 0; padding: 48px 0 32px; max-width: 470px; }
+  .launch-form .display { font-size: clamp(32px, 2.9vw, 42px); line-height: 1.04; letter-spacing: -0.02em; margin-bottom: 26px; }
+  .launch-form .display em { display: block; font-style: italic; font-weight: 400; color: var(--text-2); }
+  .launch-foot { margin: 0; font-size: 12.5px; color: var(--text-2); }
+  .lede { margin: 0 0 28px; max-width: 400px; font-size: 14.5px; line-height: 1.55; color: var(--text-2); }
+  .key-input { position: relative; }
+  .key-input .input { padding-right: 84px; }
+  .key-input .btn { position: absolute; right: 6px; top: 5px; height: 28px; padding: 0 8px; font-size: 12.5px; }
+  .key-actions { flex-wrap: wrap; margin-top: 12px; }
+  .key-actions .btn-primary { min-width: 120px; justify-content: center; }
+  /* How to get a key: folded, so a returning user isn't made to read it. */
+  .key-form { padding: 20px; border-radius: 10px; background: var(--bg-tone); }
+  .key-form label { display: block; margin-bottom: 8px; font-weight: 500; }
+  .more { display: grid; gap: 10px; justify-items: start; margin-top: 20px; }
+  .key-how { margin: 0; }
+  .key-how summary { cursor: pointer; font-weight: 500; list-style: none; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-strong); }
+  .key-how summary::-webkit-details-marker { display: none; }
+  .key-steps { display: grid; gap: 12px; margin: 14px 0 4px; }
+  .key-steps li { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 6px; align-items: start; }
+  .key-n { font: 600 15px/1.35 var(--serif); color: var(--text-2); }
+  .key-steps .btn { height: 26px; padding: 0 8px; font-size: 12px; }
+  .sample p { margin: 4px 0 0; max-width: 400px; }
+  .sample-link { font-weight: 500; color: var(--text); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-strong); justify-self: start; }
+  /* Key check (states: checking, key-ok, key-error). Red is for walk-away only, so the error uses the unsure colour. */
+  .save-busy { display: inline-flex; align-items: center; gap: 8px; }
+  .save-busy .icon { color: currentColor; }
+  .key-line { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; line-height: 1.45; color: var(--text-2); }
+  .key-line .icon { margin-top: 2px; }
+  .key-line.ok .icon { color: var(--ok); }
+  .key-line.error { color: var(--text); }
+  .key-line.error .icon { color: var(--unsure); }
+  .field:has(.key-error.on) .input { outline: 2px solid var(--unsure); outline-offset: 2px; }
+  /* The hero: a page of etched butterflies, one of them red (brand file, section 5). */
+  .launch-art { position: relative; margin: 0; min-height: 100vh; overflow: hidden; background: var(--bg-tone); border-left: 1px solid var(--line); }
+  .launch-art > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; }
+  .launch-logo img { width: clamp(200px, 17vw, 240px); }
+  @media (max-width: 900px) {
+    .launch { grid-template-columns: 1fr; }
+    .launch-art { order: -1; min-height: 240px; border-left: 0; border-bottom: 1px solid var(--line); }
+    .launch-form { padding: 20px 16px 24px; }
+    .launch-body { padding: 28px 0; }
+    .launch-form .display { font-size: 30px; }
+  }
+</style>
+</head>
+<body>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<main>
+  <div class="launch">
+    <section class="launch-form" aria-labelledby="launch-title">
+      <a class="logo launch-logo" href="index.html"><img class="on-light" src="logo.svg" alt="Clause Tracer"><img class="on-dark" src="logo-dark.svg" alt="Clause Tracer"></a>
+      <div class="launch-body">
+      <h1 class="display" id="launch-title">Check a contract <em>against your own rules.</em></h1>
+
+      <p class="lede">Every label shows the exact words it rests on, so you can check it yourself. It runs on your computer with your own OpenRouter key, the account that pays for the AI.</p>
+
+      <div class="key-form">
+          <div class="field">
+            <label for="key">OpenRouter key</label>
+            <div class="key-input">
+              <input class="input" id="key" type="password" placeholder="sk-or-…" autocomplete="off" spellcheck="false" aria-describedby="key-error">
+              <button class="btn btn-ghost btn-sm" id="show-key" type="button" aria-controls="key" aria-pressed="false"><svg class="icon"><use href="#i-eye-off"/></svg><span class="show-label">Show</span></button>
+            </div>
+            <p class="key-line ok" data-state="key-ok" role="status"><svg class="icon"><use href="#i-check"/></svg><span>Key works. Credit left: $3.10. Opening your reviews…</span></p>
+            <p class="key-line error key-error" id="key-error" data-state="key-error" role="alert"><svg class="icon"><use href="#i-help"/></svg><span>OpenRouter didn't accept this key. Check you copied all of it, starting with sk-or-.</span></p>
+          </div>
+          <div class="row key-actions">
+            <button class="btn btn-primary" id="save-key" type="button" data-state-hide="key-ok">
+              <span class="save-idle" data-state-hide="checking">Save key</span>
+              <span class="save-busy" data-state="checking"><svg class="icon"><use href="#i-clock"/></svg>Checking key…</span>
+            </button>
+            <a class="btn btn-ghost" href="home.html" data-state-hide="key-ok">Skip for now</a>
+            <span class="small muted" id="key-status" role="status"></span>
+          </div>
+      </div>
+
+      <div class="more">
+        <details class="key-how">
+          <summary>No key yet? Get one in 4 steps</summary>
+          <ol class="key-steps">
+            <li>
+              <span class="key-n">1</span>
+              <div><p class="h3">Create an OpenRouter account</p><p class="small muted">openrouter.ai · free to sign up</p></div>
+              <a class="btn" href="https://openrouter.ai" target="_blank" rel="noopener">Open site<span class="visually-hidden"> (opens in your browser)</span><svg class="icon"><use href="#i-arrow-right"/></svg></a>
+            </li>
+            <li>
+              <span class="key-n">2</span>
+              <div><p class="h3">Add credit</p><p class="small muted">A typical review costs about $0.30 to $0.60.</p></div>
+              <span></span>
+            </li>
+            <li>
+              <span class="key-n">3</span>
+              <div><p class="h3">Turn off Safety Retention</p><p class="small muted">In OpenRouter: Settings › Privacy. Then providers don't keep your contract, except for legally required safety screening.</p></div>
+              <span></span>
+            </li>
+            <li>
+              <span class="key-n">4</span>
+              <div><p class="h3">Create a key and paste it above</p><p class="small muted">It starts with sk-or-.</p></div>
+              <span></span>
+            </li>
+          </ol>
+        </details>
+        <div class="sample">
+          <a class="sample-link" href="review.html?sample">Or try a sample contract first, free</a>
+          <p class="small muted">One label in it is wrong on purpose. Find it, and see why real reviews need checking too.</p>
+        </div>
+      </div>
+      </div>
+
+      <p class="note launch-foot">Not legal advice. Check every result yourself.</p>
+
+    </section>
+
+    <figure class="launch-art">
+      <img src="hero-butterflies.webp" width="1536" height="1024" alt="A page of black-and-white etched butterflies on aged paper. In the middle, one butterfly is red, with four eyespots: three black and one red.">
+    </figure>
+  </div>
+</main>
+<script src="icons.js"></script>
+<script src="app.js"></script>
+<script>
+  (function () {
+    var save = document.getElementById('save-key');
+    var status = document.getElementById('key-status');
+    var key = document.getElementById('key');
+    var show = document.getElementById('show-key');
+    var idle = save.querySelector('.save-idle');
+    var busy = save.querySelector('.save-busy');
+    var state = new URLSearchParams(location.search).get('state');
+
+    show.addEventListener('click', function () {
+      var hidden = key.type === 'password';
+      key.type = hidden ? 'text' : 'password';
+      show.querySelector('.show-label').textContent = hidden ? 'Hide' : 'Show';
+      show.setAttribute('aria-pressed', String(hidden));
+    });
+
+    // Demo states (?state=checking, key-ok, key-error): fill a key so the state reads correctly.
+    if (state === 'checking' || state === 'key-ok' || state === 'key-error') {
+      key.value = state === 'key-error' ? 'sk-or-abc' : 'sk-or-v1-prototype';
+      if (state === 'checking') save.disabled = true;
+      if (state === 'key-error') { key.setAttribute('aria-invalid', 'true'); key.focus(); }
+    }
+
+    save.addEventListener('click', function () {
+      if (!key.value.trim()) {
+        status.textContent = 'Paste your key first. It starts with sk-or-.';
+        key.focus();
+        return;
+      }
+      save.disabled = true;
+      idle.hidden = true;
+      busy.classList.add('on');
+      status.textContent = '';
+      // The key works: say so, then open Reviews without another click.
+      setTimeout(function () {
+        busy.classList.remove('on'); save.hidden = true;
+        document.querySelector('[data-state="key-ok"]').classList.add('on');
+        setTimeout(function () { location.href = 'home.html'; }, 1200);
+      }, 1000);
+    });
+  })();
+</script>
+</body>
+</html>

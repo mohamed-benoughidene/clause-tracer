@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Review running · Clause Tracer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* Review running (screen 6): contract area on the left, progress and reading log on the right. */
+  .flow { min-height: 100%; display: flex; flex-direction: column; }
+  .work { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 380px; min-height: 0; }
+  .doc { padding: 24px 32px 48px; min-width: 0; }
+  .doc-caption { text-align: center; font-size: 12.5px; color: var(--text-2); margin-bottom: 16px; }
+  .doc .sheet { margin: 0 auto; max-width: 600px; padding: 40px 48px; font-size: 14px; }
+  .doc .sheet h2 { text-align: left; text-transform: none; font: 700 15px/1.4 var(--contract); margin: 0 0 6px; }
+  .doc .sheet h3 { font: 700 14px/1.4 var(--contract); text-transform: none; margin: 14px 0 8px; }
+  .cl { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 4px; margin: 10px 0; text-align: justify; }
+  .cl .num { font: 500 12px/1.9 var(--mono); color: #55524C; }
+  .margin { background: var(--bg-surface); border-left: 1px solid var(--line); padding: 24px; display: flex; flex-direction: column;
+    gap: 16px; min-height: 0; }
+  .margin h2 { font: 600 14px/1.4 var(--sans); }
+  .bars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 8px; }
+  .bars span { height: 3px; border-radius: 2px; background: var(--line-strong); }
+  .bars span.on { background: var(--text); }
+  .bars span.stop { background: var(--unsure); }
+  .log { display: grid; gap: 10px; }
+  .log li { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 10px; align-items: baseline; }
+  .log li.stop span { color: var(--unsure-fg); font-weight: 500; }
+  .log time { font: 500 12px/1.5 var(--mono); color: var(--text-3); }
+  .log span { font: 15px/1.45 var(--serif); }
+  #log.hide-done .log li:not(:last-child) { display: none; }
+  .actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .margin-foot { margin-top: auto; display: grid; gap: 12px; }
+  .stage { display: grid; gap: 4px; }
+  .cost { font-size: 12.5px; color: var(--text-2); }
+  /* warnings: unsure colours, never red (Spec 14.4) */
+  .notice.warn { align-items: flex-start; flex-wrap: wrap; background: var(--unsure-bg); color: var(--unsure-fg); }
+  .notice.warn .icon { color: var(--unsure); margin-top: 2px; }
+  .notice.warn p + p { margin-top: 6px; }
+  .notice .actions { margin-top: 10px; }
+  @media (max-width: 860px) {
+    .work { grid-template-columns: 1fr; }
+    .margin { border-left: 0; border-top: 1px solid var(--line); }
+    .doc { padding: 16px; }
+    .doc .sheet { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<div class="flow">
+
+  <header class="appbar">
+    <a class="btn btn-ghost btn-sm" href="home.html"><svg class="icon"><use href="#i-arrow-left"/></svg>Home</a>
+    <span class="h3">Brightline web build</span>
+    <span class="status small" data-state-hide="wrong-key no-credit no-internet no-private-model done"><svg class="icon"><use href="#i-clock"/></svg>Running</span>
+    <span class="status small warn-text" data-state="wrong-key no-credit no-internet no-private-model"><svg class="icon"><use href="#i-pause"/></svg>Interrupted</span>
+    <span class="status small" data-state="done"><svg class="icon" style="color:var(--pref)"><use href="#i-check"/></svg>Done</span>
+    <span class="spacer"></span>
+    <button class="search-commands" type="button" style="width:220px;margin:0"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
+    <button class="btn btn-sm" type="button" data-menu="privacy-menu" aria-haspopup="menu"><svg class="icon" style="color:var(--pref)"><use href="#i-shield"/></svg>Private mode: On<svg class="icon"><use href="#i-chev-down"/></svg></button>
+  </header>
+
+  <div class="work">
+    <main class="doc" aria-label="Contract being read">
+      <p class="doc-caption">Brightline_Developer_Agreement.pdf · 5 pages</p>
+      <article class="sheet">
+        <h2>Development Services Agreement</h2>
+        <h3>Fees and payment</h3>
+        <p class="cl"><span class="num">5.1</span><span>The total Charges for the Services are £9,600, split by Milestone as set out in Schedule 1.</span></p>
+        <p class="cl"><span class="num">5.2</span><span>The Agency will pay 25% of the total Charges on signing this Agreement.</span></p>
+        <p class="cl"><span class="num">5.4</span><span>Invoices will be paid within 60 days of the invoice date.</span></p>
+      </article>
+    </main>
+
+    <aside class="margin" aria-label="Review progress">
+
+      <!-- Running (default view) -->
+      <div class="stage" data-state-hide="wrong-key no-credit no-internet no-private-model done">
+        <h2 class="h3">Step 1 of 4 · Reading the pages</h2>
+        <div class="bars" aria-hidden="true"><span class="on"></span><span></span><span></span><span></span></div>
+        <p class="small muted" style="margin-top:10px">Spent so far $0.05 of about $0.42 · About 1 min left</p>
+      </div>
+
+      <!-- Interrupted: wrong key, at step 2 -->
+      <div class="stage" data-state="wrong-key">
+        <h2 class="h3">Interrupted at step 2 of 4 · Matching clauses</h2>
+        <div class="bars" aria-hidden="true"><span class="on"></span><span class="stop"></span><span></span><span></span></div>
+        <p class="small muted" style="margin-top:10px">Spent so far $0.02 of about $0.42 · Paused</p>
+        <div class="notice warn" role="note" style="margin-top:12px">
+          <svg class="icon"><use href="#i-warn"/></svg>
+          <div>
+            <p>OpenRouter turned down your key. Check it in Settings, then resume.</p>
+            <div class="actions">
+              <a class="btn btn-sm" href="settings.html#ai-key">Open key settings</a>
+              <a class="btn btn-primary btn-sm" href="running.html">Resume</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interrupted: internet dropped, at step 2 -->
+      <div class="stage" data-state="no-internet">
+        <h2 class="h3">Interrupted at step 2 of 4 · Matching clauses</h2>
+        <div class="bars" aria-hidden="true"><span class="on"></span><span class="stop"></span><span></span><span></span></div>
+        <p class="small muted" style="margin-top:10px">Spent so far $0.03 of about $0.42 · Paused</p>
+        <div class="notice warn" role="note" style="margin-top:12px">
+          <svg class="icon"><use href="#i-cloud-off"/></svg>
+          <div>
+            <p>The internet dropped at step 2. Resume picks up from here.</p>
+            <div class="actions">
+              <a class="btn btn-primary btn-sm" href="running.html">Resume</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interrupted: credit ran out, at step 3 -->
+      <div class="stage" data-state="no-credit">
+        <h2 class="h3">Interrupted at step 3 of 4 · Judging the labels</h2>
+        <div class="bars" aria-hidden="true"><span class="on"></span><span class="on"></span><span class="stop"></span><span></span></div>
+        <p class="small muted" style="margin-top:10px">Spent so far $0.30 of about $0.42 · Paused</p>
+        <div class="notice warn" role="note" style="margin-top:12px">
+          <svg class="icon"><use href="#i-warn"/></svg>
+          <div>
+            <p>Your OpenRouter credit ran out at step 3. Add credit, then resume. Nothing done so far is lost.</p>
+            <div class="actions">
+              <a class="btn btn-sm" href="https://openrouter.ai" target="_blank" rel="noopener">Add credit<span class="visually-hidden"> (opens in your browser)</span></a>
+              <a class="btn btn-primary btn-sm" href="running.html">Resume</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interrupted: no zero-retention model free, at step 3 -->
+      <div class="stage" data-state="no-private-model">
+        <h2 class="h3">Interrupted at step 3 of 4 · Judging the labels</h2>
+        <div class="bars" aria-hidden="true"><span class="on"></span><span class="on"></span><span class="stop"></span><span></span></div>
+        <p class="small muted" style="margin-top:10px">Spent so far $0.12 of about $0.42 · Paused</p>
+        <div class="notice warn" role="note" style="margin-top:12px">
+          <svg class="icon"><use href="#i-shield"/></svg>
+          <div>
+            <p>No private-mode model is available for step 3 right now. Wait and resume, or turn private mode off for this review.</p>
+            <div class="actions">
+              <a class="btn btn-primary btn-sm" href="running.html">Resume</a>
+              <button class="btn btn-sm" type="button" data-open="private-off">Turn private mode off…</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Done -->
+      <div class="stage" data-state="done">
+        <h2 class="h3">Your review is ready</h2>
+        <div class="bars" aria-hidden="true"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span></div>
+        <p class="small muted" style="margin-top:10px">Cost $0.39 · Took 4 min</p>
+      </div>
+
+      <section aria-labelledby="log-h">
+        <div class="row" style="justify-content:space-between;margin-bottom:10px">
+          <h3 class="h3" id="log-h">Reading log</h3>
+          <button class="link" type="button" id="toggle-done" aria-controls="log" aria-expanded="true" data-state-hide="done">Hide finished lines</button>
+        </div>
+        <div id="log">
+          <ol class="log" data-state-hide="wrong-key no-credit no-internet no-private-model done">
+            <li><time>0:04</time><span>Read 5 pages.</span></li>
+            <li><time>0:09</time><span>Found 45 clauses.</span></li>
+          </ol>
+          <ol class="log" data-state="wrong-key">
+            <li><time>0:04</time><span>Read 5 pages.</span></li>
+            <li><time>0:09</time><span>Found 45 clauses.</span></li>
+            <li class="stop"><time>0:12</time><span>Stopped at step 2. OpenRouter turned down the key.</span></li>
+          </ol>
+          <ol class="log" data-state="no-internet">
+            <li><time>0:04</time><span>Read 5 pages.</span></li>
+            <li><time>0:09</time><span>Found 45 clauses.</span></li>
+            <li><time>0:21</time><span>Matched 12 of 45 clauses to positions.</span></li>
+            <li class="stop"><time>0:24</time><span>Stopped at step 2. The internet dropped.</span></li>
+          </ol>
+          <ol class="log" data-state="no-credit">
+            <li><time>0:04</time><span>Read 5 pages.</span></li>
+            <li><time>0:09</time><span>Found 45 clauses.</span></li>
+            <li><time>0:31</time><span>Matched all 45 clauses to 11 positions.</span></li>
+            <li><time>1:40</time><span>Judged 6 of 11 positions.</span></li>
+            <li class="stop"><time>1:52</time><span>Stopped at step 3. Credit ran out.</span></li>
+          </ol>
+          <ol class="log" data-state="no-private-model">
+            <li><time>0:04</time><span>Read 5 pages.</span></li>
+            <li><time>0:09</time><span>Found 45 clauses.</span></li>
+            <li><time>0:31</time><span>Matched all 45 clauses to 11 positions.</span></li>
+            <li class="stop"><time>0:58</time><span>Stopped at step 3. No private-mode model was available.</span></li>
+          </ol>
+          <ol class="log" data-state="done">
+            <li><time>0:04</time><span>Read 5 pages.</span></li>
+            <li><time>0:09</time><span>Found 45 clauses.</span></li>
+            <li><time>0:31</time><span>Matched all 45 clauses to 11 positions.</span></li>
+            <li><time>2:40</time><span>Judged the labels for 11 positions.</span></li>
+            <li><time>3:52</time><span>Wrote the explanations and the summary of not-covered parts.</span></li>
+            <li><time>4:05</time><span>Finished.</span></li>
+          </ol>
+        </div>
+      </section>
+
+      <div class="margin-foot">
+        <div class="actions" data-state-hide="done">
+          <button class="btn" type="button" data-open="cancel-review">Cancel</button>
+          <button class="btn btn-ghost" type="button" data-toast="Running in the background" data-state-hide="wrong-key no-credit no-internet no-private-model done">Run in background</button>
+        </div>
+        <p data-state-hide="wrong-key no-credit no-internet no-private-model"><a class="btn btn-primary" href="review.html">Open the review<svg class="icon"><use href="#i-arrow-right"/></svg></a></p>
+        <p class="small muted" data-state-hide="wrong-key no-credit no-internet no-private-model done">Closing the app pauses the review. Resume picks up from the last finished step.</p>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="flow-foot">
+    <span class="small muted" data-state-hide="wrong-key no-credit no-internet no-private-model done">Credit left: $3.10 · about 3 minutes</span>
+    <span class="small muted" data-state="wrong-key no-internet no-private-model">Paused · credit left: $3.10</span>
+    <span class="small muted" data-state="no-credit">Credit left: $0.00 · paused</span>
+    <span class="small muted" data-state="done">Cost $0.39 · credit left: $2.71</span>
+    <span class="spacer"></span>
+    <span class="small muted">Private mode is on. Providers don't keep your contract if you've turned off Safety Retention in OpenRouter, except for legally required safety screening.</span>
+  </footer>
+
+</div>
+
+<div class="menu" id="privacy-menu" hidden role="menu">
+  <button type="button" role="menuitem" data-open="private-off"><svg class="icon"><use href="#i-shield"/></svg>Turn private mode off…</button>
+  <a href="settings.html#advanced" role="menuitem"><svg class="icon"><use href="#i-gear"/></svg>Change models in Settings</a>
+</div>
+
+<dialog id="cancel-review" aria-labelledby="cancel-title">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="h2" id="cancel-title">Cancel this review?</h2>
+      <p class="muted">So far it has cost <span data-state-hide="wrong-key no-internet no-credit no-private-model">$0.05</span><span data-state="wrong-key">$0.02</span><span data-state="no-internet">$0.03</span><span data-state="no-credit">$0.30</span><span data-state="no-private-model">$0.12</span> of about $0.42. Finished steps are kept, so you won't pay for them again.</p>
+    </div>
+    <div class="dialog-foot">
+      <button class="btn" value="cancel">Keep running</button>
+      <a class="btn btn-primary" href="home.html">Cancel review</a>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="private-off" aria-labelledby="private-title">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="h2" id="private-title">Turn private mode off for this review?</h2>
+      <p class="muted">The contract goes to the AI models as it is, names and addresses included. The models may keep it.</p>
+    </div>
+    <div class="dialog-foot">
+      <button class="btn" value="cancel">Cancel</button>
+      <button class="btn btn-primary" value="ok" data-toast="Private mode off for this review">Turn off</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="icons.js"></script>
+<script src="app.js"></script>
+<script>
+  // Page-only behaviour: hide or show the finished reading-log lines.
+  (function () {
+    var log = document.getElementById('log');
+    var btn = document.getElementById('toggle-done');
+    btn.addEventListener('click', function () {
+      var hiding = log.classList.toggle('hide-done');
+      btn.textContent = hiding ? 'Show finished lines' : 'Hide finished lines';
+      btn.setAttribute('aria-expanded', String(!hiding));
+    });
+  })();
+</script>
+</body>
+</html>

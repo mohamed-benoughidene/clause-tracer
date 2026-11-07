@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Playbooks · Clause Tracer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* playbooks */
+  .filter-row { margin: 24px 0 20px; flex-wrap: wrap; }
+  .playbook-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .playbook-grid > .card { margin-top: 0; display: flex; flex-direction: column; }
+  .playbook-name { display: flex; align-items: center; gap: 8px; }
+  .facts { display: grid; gap: 6px; font-size: 13px; margin: 14px 0 12px; }
+  .facts div { display: grid; grid-template-columns: 84px 1fr; gap: 8px; }
+  .facts dt { color: var(--text-2); }
+  .facts dd { margin: 0; }
+  .playbook-actions { margin-top: auto; padding-top: 16px; gap: 6px; flex-wrap: wrap; }
+  .starter-card { display: flex; align-items: center; gap: 24px; margin-top: 24px; }
+  .starter-card > div { flex: 1; display: grid; gap: 4px; }
+  @media (max-width: 1100px) { .playbook-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 860px) { .playbook-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<div class="app">
+  <aside class="sidebar">
+    <a class="logo" href="home.html"><img class="on-light" src="logo.svg" alt="Clause Tracer"><img class="on-dark" src="logo-dark.svg" alt="Clause Tracer"></a>
+    <a class="btn btn-primary btn-block" href="new-review.html"><svg class="icon"><use href="#i-plus"/></svg>New review</a>
+    <button class="search-commands" type="button"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
+    <nav class="nav" aria-label="Main">
+      <a href="home.html"><svg class="icon"><use href="#i-list"/></svg>Reviews</a>
+      <a href="playbooks.html" aria-current="page"><svg class="icon"><use href="#i-book"/></svg>Playbooks</a>
+      <a href="customers.html"><svg class="icon"><use href="#i-users"/></svg>Customers</a>
+      <a href="settings.html"><svg class="icon"><use href="#i-gear"/></svg>Settings</a>
+      <a href="help.html"><svg class="icon"><use href="#i-help"/></svg>Help</a>
+    </nav>
+    <div class="sidebar-foot">
+      <p><svg class="icon"><use href="#i-key"/></svg>OpenRouter key saved</p>
+      <p><svg class="icon"><use href="#i-shield"/></svg>Private mode: On</p>
+      <p><svg class="icon"><use href="#i-info"/></svg>Credit left: $3.10</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="page-head">
+      <div>
+        <h1 class="h1">Playbooks</h1>
+        <p>The positions you want in a contract. Each review keeps its own copy, so editing a playbook never changes past reviews.</p>
+      </div>
+      <div class="row">
+        <button class="btn" type="button" data-pick-playbook><svg class="icon"><use href="#i-upload"/></svg>Import</button>
+        <input type="file" id="playbook-file" accept=".ctplaybook" hidden>
+        <a class="btn" href="starter-preview.html"><svg class="icon"><use href="#i-copy"/></svg>Copy a starter</a>
+        <a class="btn btn-primary" href="playbook-editor.html?state=blank"><svg class="icon"><use href="#i-plus"/></svg>Create blank</a>
+      </div>
+    </header>
+
+    <div class="notice" role="alert" data-state="import-failed" style="margin-bottom:20px;background:var(--unsure-bg);color:var(--unsure-fg)">
+      <svg class="icon"><use href="#i-warn"/></svg>
+      <span>That file isn't a Clause Tracer playbook, so it can't be imported. Playbook files end in .ctplaybook.</span>
+      <span class="spacer"></span>
+      <button class="btn btn-sm" type="button" data-pick-playbook>Choose another file</button>
+    </div>
+
+    <div class="row filter-row">
+      <div class="search" style="width:320px"><svg class="icon"><use href="#i-search"/></svg><input class="input" type="search" placeholder="Search positions" aria-label="Search positions"></div>
+      <button class="btn" type="button" data-menu="customer-menu"><svg class="icon"><use href="#i-users"/></svg>Customer: All<svg class="icon"><use href="#i-chev-down"/></svg></button>
+    </div>
+
+    <section class="playbook-grid" aria-label="Your playbooks">
+      <article class="card">
+        <h2 class="h3 playbook-name"><svg class="icon"><use href="#i-book"/></svg>Freelancer service agreement</h2>
+        <dl class="facts">
+          <div><dt>Side</dt><dd>service provider</dd></div>
+          <div><dt>Customer</dt><dd>None</dd></div>
+          <div><dt>Positions</dt><dd>11 positions</dd></div>
+        </dl>
+        <p class="small muted">Used by 4 reviews · edited 2 Nov</p>
+        <div class="row playbook-actions">
+          <a class="btn btn-sm" href="playbook-editor.html"><svg class="icon"><use href="#i-pencil"/></svg>Edit</a>
+          <button class="btn btn-sm btn-ghost" type="button" data-toast="Copy made: Freelancer service agreement (copy)"><svg class="icon"><use href="#i-copy"/></svg>Duplicate</button>
+          <button class="btn btn-sm btn-ghost" type="button" data-toast="Exported as freelancer-service-agreement.ctplaybook"><svg class="icon"><use href="#i-download"/></svg>Export</button>
+          <span class="spacer"></span>
+          <button class="icon-btn" type="button" aria-label="Delete Freelancer service agreement" data-open="delete-freelancer"><svg class="icon"><use href="#i-trash"/></svg></button>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2 class="h3 playbook-name"><svg class="icon"><use href="#i-book"/></svg>Design retainer</h2>
+        <dl class="facts">
+          <div><dt>Side</dt><dd>service provider</dd></div>
+          <div><dt>Customer</dt><dd>Atlas Media</dd></div>
+          <div><dt>Positions</dt><dd>9 positions</dd></div>
+        </dl>
+        <p class="small muted">Used by 2 reviews · edited 14 Oct</p>
+        <div class="row playbook-actions">
+          <a class="btn btn-sm" href="playbook-editor.html"><svg class="icon"><use href="#i-pencil"/></svg>Edit</a>
+          <button class="btn btn-sm btn-ghost" type="button" data-toast="Copy made: Design retainer (copy)"><svg class="icon"><use href="#i-copy"/></svg>Duplicate</button>
+          <button class="btn btn-sm btn-ghost" type="button" data-toast="Exported as design-retainer.ctplaybook"><svg class="icon"><use href="#i-download"/></svg>Export</button>
+          <span class="spacer"></span>
+          <button class="icon-btn" type="button" aria-label="Delete Design retainer" data-open="delete-design"><svg class="icon"><use href="#i-trash"/></svg></button>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2 class="h3 playbook-name"><svg class="icon"><use href="#i-book"/></svg>NDA I receive</h2>
+        <dl class="facts">
+          <div><dt>Side</dt><dd>receiving party</dd></div>
+          <div><dt>Customer</dt><dd>None</dd></div>
+          <div><dt>Positions</dt><dd>6 positions</dd></div>
+        </dl>
+        <p class="small muted">Not used by any review · edited 1 Oct</p>
+        <div class="row playbook-actions">
+          <a class="btn btn-sm" href="playbook-editor.html"><svg class="icon"><use href="#i-pencil"/></svg>Edit</a>
+          <button class="btn btn-sm btn-ghost" type="button" data-toast="Copy made: NDA I receive (copy)"><svg class="icon"><use href="#i-copy"/></svg>Duplicate</button>
+          <button class="btn btn-sm btn-ghost" type="button" data-toast="Exported as nda-i-receive.ctplaybook"><svg class="icon"><use href="#i-download"/></svg>Export</button>
+          <span class="spacer"></span>
+          <button class="icon-btn" type="button" aria-label="Delete NDA I receive" data-open="delete-nda"><svg class="icon"><use href="#i-trash"/></svg></button>
+        </div>
+      </article>
+    </section>
+
+    <section class="card starter-card">
+      <div>
+        <p class="note">Want a place to start? The freelancer starter has 11 example positions. Copy it, then make the limits yours.</p>
+        <p class="small muted">Starter · Freelancer receiving a service agreement · read-only</p>
+      </div>
+      <a class="btn" href="starter-preview.html">Preview starter</a>
+    </section>
+  </main>
+</div>
+
+<div class="menu" id="customer-menu" hidden>
+  <button type="button" data-toast="Showing playbooks for every customer">All customers</button>
+  <button type="button" data-toast="Showing playbooks with no customer">None</button>
+  <button type="button" data-toast="Showing playbooks for Atlas Media">Atlas Media</button>
+</div>
+
+<dialog id="delete-freelancer" aria-labelledby="delete-freelancer-title">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="h2" id="delete-freelancer-title">Delete “Freelancer service agreement”?</h2>
+      <p class="muted">4 reviews use this playbook. Those reviews keep their own copy and won't change. You just can't re-run them. This can't be undone.</p>
+    </div>
+    <div class="dialog-foot"><button class="btn" value="cancel">Cancel</button><button class="btn btn-primary" value="ok" data-toast="Playbook deleted">Delete playbook</button></div>
+  </form>
+</dialog>
+
+<dialog id="delete-design" aria-labelledby="delete-design-title">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="h2" id="delete-design-title">Delete “Design retainer”?</h2>
+      <p class="muted">2 reviews use this playbook. Those reviews keep their own copy and won't change. You just can't re-run them. This can't be undone.</p>
+    </div>
+    <div class="dialog-foot"><button class="btn" value="cancel">Cancel</button><button class="btn btn-primary" value="ok" data-toast="Playbook deleted">Delete playbook</button></div>
+  </form>
+</dialog>
+
+<dialog id="delete-nda" aria-labelledby="delete-nda-title">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="h2" id="delete-nda-title">Delete “NDA I receive”?</h2>
+      <p class="muted">No reviews use this playbook. This can't be undone.</p>
+    </div>
+    <div class="dialog-foot"><button class="btn" value="cancel">Cancel</button><button class="btn btn-primary" value="ok" data-toast="Playbook deleted">Delete playbook</button></div>
+  </form>
+</dialog>
+
+<script src="icons.js"></script>
+<script src="app.js"></script>
+<script>
+  // Import (Spec 14.1, 13 and 15): choose a file, then preview it. A file that isn't a playbook shows "Import failed".
+  const picker = document.getElementById('playbook-file');
+  document.querySelectorAll('[data-pick-playbook]').forEach(b => b.addEventListener('click', () => { picker.value = ''; picker.click(); }));
+  picker.addEventListener('change', () => {
+    const f = picker.files[0];
+    if (!f) return;
+    location.href = /\.ctplaybook$/i.test(f.name)
+      ? 'import-preview.html?file=' + encodeURIComponent(f.name)
+      : 'playbooks.html?state=import-failed';
+  });
+</script>
+</body>
+</html>

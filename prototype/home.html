@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reviews · Clause Tracer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* Review status (Spec 14.4): a 16px gauge and a next step, no pill. Status never uses red. */
+  .gauge { width: 16px; height: 16px; flex: none; color: var(--text-2); }
+  .gauge-ready { color: var(--text); }
+  .gauge-done { color: var(--grey); }
+  .status-done { color: var(--grey-fg); }
+  /* Ready to check is the only row in bold. */
+  tr.is-ready td { color: var(--text); font-weight: 600; }
+  tr.is-ready td.name small { font-weight: 400; }
+
+  /* Empty state (Spec 14.2) */
+  .empty-block { display: grid; gap: 12px; justify-items: start; max-width: 560px; padding: 32px; }
+  .empty-block p { color: var(--text-2); }
+  .empty-actions { flex-wrap: wrap; margin-top: 4px; }
+</style>
+</head>
+<body>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="g-draft" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.6 2.2"/></symbol>
+  <symbol id="g-running" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.75A6.25 6.25 0 0 1 8 14.25Z" fill="currentColor"/></symbol>
+  <symbol id="g-interrupted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="5.6" y="5" width="1.8" height="6" rx=".4" fill="currentColor"/><rect x="8.6" y="5" width="1.8" height="6" rx=".4" fill="currentColor"/></symbol>
+  <symbol id="g-failed" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 4.6v4.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="8" cy="11.4" r="1" fill="currentColor"/></symbol>
+  <symbol id="g-done" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5 8.3l2.1 2.1L11 6.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="g-ready" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.25" fill="currentColor"/></symbol>
+</svg>
+
+<div class="app">
+  <aside class="sidebar">
+    <a class="logo" href="home.html"><img class="on-light" src="logo.svg" alt="Clause Tracer"><img class="on-dark" src="logo-dark.svg" alt="Clause Tracer"></a>
+    <a class="btn btn-primary btn-block" href="new-review.html"><svg class="icon"><use href="#i-plus"/></svg>New review</a>
+    <button class="search-commands" type="button"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
+    <nav class="nav" aria-label="Main">
+      <a href="home.html" aria-current="page"><svg class="icon"><use href="#i-list"/></svg>Reviews</a>
+      <a href="playbooks.html"><svg class="icon"><use href="#i-book"/></svg>Playbooks</a>
+      <a href="customers.html"><svg class="icon"><use href="#i-users"/></svg>Customers</a>
+      <a href="settings.html"><svg class="icon"><use href="#i-gear"/></svg>Settings</a>
+      <a href="help.html"><svg class="icon"><use href="#i-help"/></svg>Help</a>
+    </nav>
+    <div class="sidebar-foot">
+      <p><svg class="icon"><use href="#i-key"/></svg>OpenRouter key saved</p>
+      <p><svg class="icon"><use href="#i-shield"/></svg>Private mode: On</p>
+      <p><svg class="icon"><use href="#i-info"/></svg>Credit left: $3.10</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="page-head">
+      <div>
+        <h1 class="h1">Reviews</h1>
+        <p>Saved on this computer, encrypted. Each one deletes itself after 30 days without changes.</p>
+      </div>
+    </header>
+
+    <div class="notice" id="offline" role="status" data-state="offline">
+      <svg class="icon"><use href="#i-cloud-off"/></svg>
+      <span>You're offline. Saved reviews still open, and you can prepare drafts. Running a review needs the internet.</span>
+    </div>
+
+    <div class="notice" id="auto-delete" role="status" data-state-hide="empty">
+      <svg class="icon"><use href="#i-info"/></svg>
+      <span>2 reviews were deleted because they hadn't changed in 30 days.</span>
+      <span class="spacer"></span>
+      <a class="link" href="settings.html#storage">Change in Settings</a>
+      <button class="icon-btn" type="button" aria-label="Dismiss" onclick="this.parentElement.remove()"><svg class="icon"><use href="#i-x"/></svg></button>
+    </div>
+
+    <div class="row" style="margin:24px 0 20px" data-state-hide="empty">
+      <div class="search" style="width:320px"><svg class="icon"><use href="#i-search"/></svg><input class="input" type="search" placeholder="Search reviews" aria-label="Search reviews"></div>
+      <span class="spacer"></span>
+      <span class="small muted">6 reviews</span>
+    </div>
+
+    <table class="table reviews" data-state-hide="empty">
+      <thead>
+        <tr><th scope="col">Name ⇅</th><th scope="col">Date ↓</th><th scope="col">Status ⇅</th><th scope="col">Next step</th><th scope="col">Auto-delete</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr>
+      </thead>
+      <tbody>
+        <tr class="is-ready">
+          <td class="name">Brightline web build<small>Freelancer service agreement</small></td>
+          <td>Edited 2 min ago</td>
+          <td><span class="status"><svg class="gauge gauge-ready" aria-hidden="true"><use href="#g-ready"/></svg>Ready to check</span></td>
+          <td><a class="btn btn-primary btn-sm" href="review.html">Check 9 →</a></td>
+          <td>In 30 days</td>
+          <td><button class="icon-btn" type="button" aria-label="More for Brightline web build" data-menu="row-menu"><svg class="icon"><use href="#i-dots"/></svg></button></td>
+        </tr>
+        <tr class="is-running">
+          <td class="name">Osprey booking app<small>Freelancer service agreement</small></td>
+          <td>Edited just now</td>
+          <td><span class="status"><svg class="gauge" aria-hidden="true"><use href="#g-running"/></svg>Running</span></td>
+          <td><a class="link" href="running.html">Step 2 of 4 · about 40 s</a></td>
+          <td>In 30 days</td>
+          <td><button class="icon-btn" type="button" aria-label="More for Osprey booking app" data-menu="row-menu"><svg class="icon"><use href="#i-dots"/></svg></button></td>
+        </tr>
+        <tr>
+          <td class="name">Kestrel app MVP<small>Freelancer service agreement</small></td>
+          <td>Edited 1 hour ago</td>
+          <td><span class="status"><svg class="gauge" aria-hidden="true"><use href="#g-draft"/></svg>Draft</span></td>
+          <td><a class="link" href="new-review.html">Continue</a></td>
+          <td>In 30 days</td>
+          <td><button class="icon-btn" type="button" aria-label="More for Kestrel app MVP" data-menu="row-menu"><svg class="icon"><use href="#i-dots"/></svg></button></td>
+        </tr>
+        <tr>
+          <td class="name">Northwind logo refresh<small>Freelancer service agreement · Stopped at: matching clauses</small></td>
+          <td>Yesterday, 16:20</td>
+          <td><span class="status"><svg class="gauge" aria-hidden="true"><use href="#g-interrupted"/></svg>Interrupted</span></td>
+          <td><a class="link" href="running.html" data-state-hide="offline">Resume</a><span class="small muted" data-state="offline">Needs internet</span></td>
+          <td>In 29 days</td>
+          <td><button class="icon-btn" type="button" aria-label="More for Northwind logo refresh" data-menu="row-menu"><svg class="icon"><use href="#i-dots"/></svg></button></td>
+        </tr>
+        <tr>
+          <td class="name">Harbour Café menu site<small>Design retainer · Couldn't read Schedule 2</small></td>
+          <td>3 Nov 2026</td>
+          <td><span class="status"><svg class="gauge" aria-hidden="true"><use href="#g-failed"/></svg>Failed</span></td>
+          <td><a class="link" href="running.html" data-state-hide="offline">Retry</a><span class="small muted" data-state="offline">Needs internet</span></td>
+          <td>In 27 days</td>
+          <td><button class="icon-btn" type="button" aria-label="More for Harbour Café menu site" data-menu="row-menu"><svg class="icon"><use href="#i-dots"/></svg></button></td>
+        </tr>
+        <tr>
+          <td class="name">Atlas Media retainer<small>Design retainer</small></td>
+          <td>8 Oct 2026</td>
+          <td><span class="status status-done"><svg class="gauge gauge-done" aria-hidden="true"><use href="#g-done"/></svg>Done</span></td>
+          <td><a class="link" href="output.html">Open message</a></td>
+          <td><span class="warn-text"><svg class="icon" style="color:inherit"><use href="#i-clock"/></svg> Deletes in 2 days</span><br>
+            <button class="link" type="button" data-toast="Kept for another 30 days">Keep it</button>&nbsp;&nbsp;
+            <button class="link" type="button" data-open="delete-review">Delete now</button></td>
+          <td><button class="icon-btn" type="button" aria-label="More for Atlas Media retainer" data-menu="row-menu"><svg class="icon"><use href="#i-dots"/></svg></button></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <section class="card empty-block" aria-labelledby="empty-title" data-state="empty">
+      <h2 class="h2" id="empty-title">No reviews yet</h2>
+      <p>Check a contract against your playbook. It takes about 3 minutes and costs about $0.39.</p>
+      <div class="row empty-actions">
+        <a class="btn btn-primary" href="new-review.html">Start your first review</a>
+        <a class="btn" href="review.html?sample">Try a sample contract</a>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="menu" id="row-menu" hidden>
+  <a href="review.html"><svg class="icon"><use href="#i-doc"/></svg>Open</a>
+  <button type="button" data-open="rename-review"><svg class="icon"><use href="#i-pencil"/></svg>Rename</button>
+  <button type="button" data-open="delete-review"><svg class="icon"><use href="#i-trash"/></svg>Delete…</button>
+</div>
+
+<dialog id="rename-review" aria-labelledby="rename-title">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="h2" id="rename-title">Rename review</h2>
+      <div class="field"><label for="rename-input">Name</label><input class="input" id="rename-input" value="Atlas Media retainer"></div>
+    </div>
+    <div class="dialog-foot"><button class="btn" value="cancel">Cancel</button><button class="btn btn-primary" value="ok" data-toast="Saved">Save</button></div>
+  </form>
+</dialog>
+
+<dialog id="delete-review" aria-labelledby="delete-title">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="h2" id="delete-title">Delete “Atlas Media retainer”?</h2>
+      <p class="muted">This removes the review, its labels and your notes from this computer. This can't be undone.</p>
+      <p class="muted" id="delete-running" hidden>This review is running. It will be stopped first.</p>
+    </div>
+    <div class="dialog-foot"><button class="btn" value="cancel">Cancel</button><button class="btn btn-primary" value="ok" data-toast="Review deleted">Delete review</button></div>
+  </form>
+</dialog>
+
+<script src="icons.js"></script>
+<script src="app.js"></script>
+<script>
+  // The menus and the Delete and Rename dialogs are shared, so fill them with the row they were opened from.
+  (function () {
+    var current = null;
+    var renameInput = document.getElementById('rename-input');
+    var deleteTitle = document.getElementById('delete-title');
+    var deleteRunning = document.getElementById('delete-running');
+
+    document.addEventListener('click', function (e) {
+      var row = e.target.closest('tbody tr');
+      if (row) current = row;
+      if (!current) return;
+      var name = current.querySelector('td.name').firstChild.textContent.trim();
+      if (e.target.closest('[data-open="rename-review"]')) renameInput.value = name;
+      if (e.target.closest('[data-open="delete-review"]')) {
+        deleteTitle.textContent = 'Delete “' + name + '”?';
+        deleteRunning.hidden = !current.classList.contains('is-running');
+      }
+    });
+  })();
+</script>
+</body>
+</html>

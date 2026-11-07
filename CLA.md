@@ -1,40 +1,52 @@
 # Contributor License Agreement (CLA)
 
-Thank you for your interest in contributing to openreview.
+Thank you for helping with Clause Tracer.
 
-By submitting a contribution (pull request, patch, file, or any other code or content) to openreview, you agree to the following:
+This agreement covers any contribution you send to this repository (clause-tracer): a pull request, patch, file, document, design or any other code or content. By sending one, you agree to the terms below.
 
-## 1. Grant of Copyright License
+**In short:** you keep the copyright in your work. You give the Licensor the right to use it and to license it to others, including under a commercial licence. That lets the project stay free under the Functional Source License while selling commercial licences to pay for its work.
 
-You grant the Licensor a perpetual, worldwide, non-exclusive, royalty-free, irrevocable copyright license to:
+"**Licensor**" means Mohamed Benoughidene, the owner of Clause Tracer, and anyone the project is later transferred to.
 
-- Reproduce, prepare derivative works of, publicly display, publicly perform, sublicense, and distribute your contributions
-- Relicense your contributions under any license, including commercial licenses and the existing AGPL-3.0 license
+## 1. Copyright licence
 
-## 2. Original Work
+You keep the copyright in your contributions. You grant the Licensor a perpetual, worldwide, non-exclusive, royalty-free, irrevocable copyright licence to:
 
-You represent that:
+- reproduce your contributions, prepare derivative works of them, publicly display them, publicly perform them, sublicense them and distribute them;
+- relicense your contributions under any licence. That includes commercial licences and the project's current licence, the Functional Source License (FSL-1.1-ALv2).
 
-- Each contribution is your original creation
-- You have the legal authority to grant this license
-- The contribution does not violate any third party's rights
+## 2. Your contribution is yours to give
 
-## 3. Patent License
+You confirm that:
 
-You grant a perpetual, worldwide, royalty-free patent license to make, use, sell, and distribute your contributions. If you initiate patent litigation against the Licensor or any licensee alleging your contribution infringes a patent, this patent license terminates.
+- each contribution is your original work;
+- you have the legal right to grant this licence. If your employer has rights in your work, you have their permission;
+- the contribution doesn't break anyone else's rights.
 
-## 4. No Obligation
+If part of a contribution isn't your own work, say so in the pull request. Name where it comes from and its licence.
 
-The Licensor is not obligated to accept, merge, or use your contribution. The Licensor may reject contributions at any time.
+## 3. Patent licence
 
-## 5. Why We Need a CLA
+You grant the Licensor, and everyone who receives the software from the Licensor, a perpetual, worldwide, non-exclusive, royalty-free, irrevocable patent licence. It covers making, using, selling and distributing your contributions, alone or combined with the project.
 
-The CLA allows the Licensor to offer commercial licenses to organizations that need them, while keeping openreview open source under AGPL-3.0. Without the CLA, all contributions would be locked to AGPL-3.0 and could not be relicensed commercially.
+If you start a patent lawsuit claiming that Clause Tracer, or a contribution in it, infringes a patent, this patent licence ends for you on the date the lawsuit is filed.
 
-## 6. How to Sign
+## 4. No obligation
 
-When you open a pull request, a bot will ask you to agree to this CLA electronically. If you cannot agree to the CLA, please open an issue instead of a pull request.
+The Licensor doesn't have to accept, merge or use your contribution, and may reject a contribution at any time.
 
-## 7. Contact
+## 5. Why we need a CLA
 
-If you have questions about this CLA, contact: mohamedbenoughidene@gmail.com
+Clause Tracer is free to use under the Functional Source License (FSL-1.1-ALv2), and each version becomes Apache 2.0 two years after its release. The Licensor also sells commercial licences (see [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md)). Without this agreement, your contributions couldn't be part of a commercial licence, so they couldn't be merged.
+
+## 6. How to agree
+
+Add this line to the description of your pull request:
+
+> I have read the CLA in CLA.md and I agree to it.
+
+You only need to do this once. It then covers all your later contributions. If you can't agree, please open an issue that describes your idea instead of a pull request.
+
+## 7. Questions
+
+If you have questions about this agreement, email mohamedbenoughidene@gmail.com.

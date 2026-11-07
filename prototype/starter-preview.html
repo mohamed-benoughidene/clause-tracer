@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Starter preview · Clause Tracer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* starter preview */
+  .back-link { margin-bottom: 16px; }
+  .readonly-note { display: grid; gap: 4px; margin-bottom: 20px; }
+  .table td.num { width: 44px; color: var(--text-3); }
+  .table td.position { color: var(--text); font-size: 14px; }
+  .table td.position .why { display: block; margin-top: 2px; color: var(--text-2); font-size: 12.5px; }
+</style>
+</head>
+<body>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<div class="app">
+  <aside class="sidebar">
+    <a class="logo" href="home.html"><img class="on-light" src="logo.svg" alt="Clause Tracer"><img class="on-dark" src="logo-dark.svg" alt="Clause Tracer"></a>
+    <a class="btn btn-primary btn-block" href="new-review.html"><svg class="icon"><use href="#i-plus"/></svg>New review</a>
+    <button class="search-commands" type="button"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
+    <nav class="nav" aria-label="Main">
+      <a href="home.html"><svg class="icon"><use href="#i-list"/></svg>Reviews</a>
+      <a href="playbooks.html" aria-current="page"><svg class="icon"><use href="#i-book"/></svg>Playbooks</a>
+      <a href="customers.html"><svg class="icon"><use href="#i-users"/></svg>Customers</a>
+      <a href="settings.html"><svg class="icon"><use href="#i-gear"/></svg>Settings</a>
+      <a href="help.html"><svg class="icon"><use href="#i-help"/></svg>Help</a>
+    </nav>
+    <div class="sidebar-foot">
+      <p><svg class="icon"><use href="#i-key"/></svg>OpenRouter key saved</p>
+      <p><svg class="icon"><use href="#i-shield"/></svg>Private mode: On</p>
+      <p><svg class="icon"><use href="#i-info"/></svg>Credit left: $3.10</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <a class="btn btn-ghost btn-sm back-link" id="back-link" href="playbooks.html"><svg class="icon"><use href="#i-arrow-left"/></svg><span>Playbooks</span></a>
+
+    <header class="page-head">
+      <div>
+        <h1 class="h1">Freelancer receiving a service agreement</h1>
+        <p>Starter · side: service provider · example positions, edit them for your situation.</p>
+      </div>
+      <a class="btn btn-primary" id="copy-starter" href="playbook-editor.html?state=copied"><svg class="icon"><use href="#i-copy"/></svg>Copy to your playbooks</a>
+    </header>
+
+    <section class="card readonly-note">
+      <p class="note">These are examples, so you can't change them here. Copy them, then make the limits yours.</p>
+      <p class="small muted">Reviews that use an unedited copy say “by the example playbook”.</p>
+    </section>
+
+    <table class="table">
+      <caption class="visually-hidden">Positions in the freelancer starter</caption>
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Position</th>
+          <th scope="col">Type</th>
+          <th scope="col">Preferred</th>
+          <th scope="col">Acceptable</th>
+          <th scope="col">Walk-away</th>
+          <th scope="col">Missing</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="num">1</td>
+          <td class="position">Days until I'm paid, from invoice date<span class="why">Why this matters: Rent is due on the 1st. Long waits mean I borrow.</span></td>
+          <td>Number · days ↓</td>
+          <td>≤ 15</td>
+          <td>≤ 30</td>
+          <td>> 30</td>
+          <td>Unsure</td>
+        </tr>
+        <tr>
+          <td class="num">2</td>
+          <td class="position">Upfront deposit<span class="why">Why this matters: A deposit shows they're committed, and I'm not working for free if they vanish.</span></td>
+          <td>Number · % ↑</td>
+          <td>≥ 50</td>
+          <td>≥ 25</td>
+          <td>&lt; 25</td>
+          <td>Walk-away</td>
+        </tr>
+        <tr>
+          <td class="num">3</td>
+          <td class="position">Late payment fee exists<span class="why">Why this matters: Without a fee, paying me late costs them nothing.</span></td>
+          <td>Yes/no</td>
+          <td>Yes</td>
+          <td>No / unclear</td>
+          <td>—</td>
+          <td>Acceptable</td>
+        </tr>
+        <tr>
+          <td class="num">4</td>
+          <td class="position">Paid for work done if the other side cancels<span class="why">Why this matters: If they cancel halfway, I've still spent the hours.</span></td>
+          <td>Yes/no</td>
+          <td>Yes</td>
+          <td>—</td>
+          <td>No / unclear</td>
+          <td>Walk-away</td>
+        </tr>
+        <tr>
+          <td class="num">5</td>
+          <td class="position">Revision rounds included<span class="why">Why this matters: Endless rounds can double the work for the same price.</span></td>
+          <td>Number · rounds ↓</td>
+          <td>≤ 2</td>
+          <td>≤ 3</td>
+          <td>> 3, unlimited</td>
+          <td>Walk-away</td>
+        </tr>
+        <tr>
+          <td class="num">6</td>
+          <td class="position">Extra work is paid extra<span class="why">Why this matters: New requests should be new work, not free work.</span></td>
+          <td>Yes/no</td>
+          <td>Yes</td>
+          <td>—</td>
+          <td>No / unclear</td>
+          <td>Walk-away</td>
+        </tr>
+        <tr>
+          <td class="num">7a</td>
+          <td class="position">Ownership passes only after full payment<span class="why">Why this matters: Until I'm paid, the work should still be mine.</span></td>
+          <td>Yes/no</td>
+          <td>Yes</td>
+          <td>—</td>
+          <td>No / unclear</td>
+          <td>Walk-away</td>
+        </tr>
+        <tr>
+          <td class="num">7b</td>
+          <td class="position">If unpaid, I can reuse or resell the work<span class="why">Why this matters: If they don't pay, I can still get something for the work.</span></td>
+          <td>Yes/no</td>
+          <td>Yes</td>
+          <td>No / unclear</td>
+          <td>—</td>
+          <td>Acceptable</td>
+        </tr>
+        <tr>
+          <td class="num">8</td>
+          <td class="position">I can show the work in my portfolio<span class="why">Why this matters: My portfolio is how I get the next job.</span></td>
+          <td>Yes/no</td>
+          <td>Yes</td>
+          <td>No / unclear</td>
+          <td>—</td>
+          <td>Acceptable</td>
+        </tr>
+        <tr>
+          <td class="num">9</td>
+          <td class="position">Non-compete length<span class="why">Why this matters: A long non-compete can stop me working in my own field.</span></td>
+          <td>Number · months ↓</td>
+          <td>0 (none)</td>
+          <td>≤ 6</td>
+          <td>> 6</td>
+          <td>Preferred</td>
+        </tr>
+        <tr>
+          <td class="num">10</td>
+          <td class="position">My liability is capped<span class="why">Why this matters: One mistake shouldn't cost me more than the job paid.</span></td>
+          <td>Words</td>
+          <td>At most fees paid</td>
+          <td>Above fees, up to 2× fees</td>
+          <td>Above 2×, a fixed sum, uncapped</td>
+          <td>Walk-away</td>
+        </tr>
+      </tbody>
+    </table>
+  </main>
+</div>
+
+<script src="icons.js"></script>
+<script src="app.js"></script>
+<script>
+  // Opened from New review (Spec 3, step 4): the copy goes back to that review, picked.
+  if (new URLSearchParams(location.search).get('from') === 'new-review') {
+    const back = document.getElementById('back-link');
+    back.href = 'new-review.html'; back.querySelector('span').textContent = 'New review';
+    document.getElementById('copy-starter').href = 'new-review.html?state=copied-starter';
+  }
+</script>
+</body>
+</html>

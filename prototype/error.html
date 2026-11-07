@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Error · Clause Tracer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* Error only: a centred card with no sidebar. */
+  .topbar { position: absolute; top: 16px; right: 24px; }
+  .topbar .search-commands { width: 194px; margin: 0; white-space: nowrap; }
+  .solo { min-height: 100vh; display: grid; place-items: center; padding: 72px 16px 32px; }
+  .error-card { width: min(540px, 100%); padding: 32px 36px; }
+  .error-log { display: grid; gap: 10px; }
+  .error-log li { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 8px; align-items: baseline; }
+</style>
+</head>
+<body>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+
+<header class="topbar">
+  <button class="search-commands" type="button"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
+</header>
+
+<main class="solo">
+  <section class="card error-card" aria-labelledby="error-title">
+    <h1 class="visually-hidden" id="error-title">Something in the app broke</h1>
+
+    <ol class="error-log">
+      <li><span class="small faint">0:00</span><span class="note">Opened your review.</span></li>
+      <li><span class="small faint">0:01</span><span class="note">Something in the app broke while loading it.</span></li>
+    </ol>
+
+    <p class="note" style="margin-top:18px">Your files are safe. Copy the details and report the problem on GitHub.</p>
+
+    <p class="small" style="margin-top:20px"><strong>Details</strong></p>
+    <p class="mono" style="margin-top:4px">ERR-STEP6B-412</p>
+    <p class="small muted" style="margin-top:4px">The details hold only the app version, the step and this code. No contract text.</p>
+
+    <div class="row" style="margin-top:20px">
+      <button class="btn btn-primary" type="button" data-toast="Copied"><svg class="icon"><use href="#i-copy"/></svg>Copy the details</button>
+      <a class="link" href="home.html">Back to reviews</a>
+    </div>
+  </section>
+</main>
+
+<script src="icons.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
