@@ -2,11 +2,21 @@
 __pycache__/
 *.py[cod]
 .venv/
+.cache/
 venv/
 .mypy_cache/
 .pytest_cache/
 .ruff_cache/
 .hypothesis/
+.import_linter_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Build output
+dist/
+build/
+*.egg-info/
 
 # Editors / OS
 .vscode/
@@ -16,5 +26,15 @@ venv/
 # Project-specific
 *.log
 
+# Secrets: API keys and local settings never go in git
+.env
+.env.*
+!.env.example
+
 # Tool-specific
 .commandcode/
+.claude/settings.local.json
+.claude/worktrees/
+
+# Research working notes (kept locally; the reports carry the findings)
+research_notes/

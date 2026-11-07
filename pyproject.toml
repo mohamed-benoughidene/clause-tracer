@@ -1,0 +1,118 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "clause-tracer"
+version = "0.0.0"
+description = "Local-first contract review."
+readme = "README.md"
+requires-python = ">=3.12"
+license = {file = "LICENSE"}
+dependencies = []
+
+[project.scripts]
+clause-tracer = "clause_tracer.cli.__main__:main"
+
+[dependency-groups]
+dev = ["pytest", "ruff", "mypy", "import-linter", "uv"]  # uv lives in .venv, so sync must keep it
+
+[tool.uv]
+# Keep everything inside the repo: the download cache, and the system Python (no managed downloads).
+cache-dir = ".cache/uv"
+python-preference = "only-system"
+python-downloads = "never"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/clause_tracer"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.format]
+exclude = ["*.md"]  # existing docs hold illustrative, non-formatted code blocks
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.mypy]
+strict = true
+files = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["src", "tests"]
+addopts = "--import-mode=importlib"
+
+[tool.importlinter]
+root_package = "clause_tracer"
+
+[[tool.importlinter.contracts]]
+name = "core imports no other module"
+type = "forbidden"
+source_modules = ["clause_tracer.core"]
+forbidden_modules = [
+    "clause_tracer.ingest",
+    "clause_tracer.privacy",
+    "clause_tracer.links",
+    "clause_tracer.checking",
+    "clause_tracer.writing",
+    "clause_tracer.outputs",
+    "clause_tracer.adapters",
+    "clause_tracer.cli",
+]
+
+[[tool.importlinter.contracts]]
+name = "pipeline modules never import adapters or cli"
+type = "forbidden"
+source_modules = [
+    "clause_tracer.ingest",
+    "clause_tracer.privacy",
+    "clause_tracer.links",
+    "clause_tracer.checking",
+    "clause_tracer.writing",
+    "clause_tracer.outputs",
+]
+forbidden_modules = ["clause_tracer.adapters", "clause_tracer.cli"]
+
+[[tool.importlinter.contracts]]
+name = "adapters import only core"
+type = "forbidden"
+source_modules = ["clause_tracer.adapters"]
+forbidden_modules = [
+    "clause_tracer.ingest",
+    "clause_tracer.privacy",
+    "clause_tracer.links",
+    "clause_tracer.checking",
+    "clause_tracer.writing",
+    "clause_tracer.outputs",
+    "clause_tracer.cli",
+]
+
+[[tool.importlinter.contracts]]
+name = "only cli wires modules together"
+type = "forbidden"
+source_modules = [
+    "clause_tracer.core",
+    "clause_tracer.ingest",
+    "clause_tracer.privacy",
+    "clause_tracer.links",
+    "clause_tracer.checking",
+    "clause_tracer.writing",
+    "clause_tracer.outputs",
+    "clause_tracer.adapters",
+]
+forbidden_modules = ["clause_tracer.cli"]
+
+[[tool.importlinter.contracts]]
+name = "pipeline modules are independent"
+type = "independence"
+modules = [
+    "clause_tracer.ingest",
+    "clause_tracer.privacy",
+    "clause_tracer.links",
+    "clause_tracer.checking",
+    "clause_tracer.writing",
+    "clause_tracer.outputs",
+]
