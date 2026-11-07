@@ -1,48 +1,59 @@
-# Commercial License
+# Commercial licence
 
-openreview is dual-licensed:
+Clause Tracer (this repository, clause-tracer) is available under two licences:
 
-1. **GNU Affero General Public License v3.0** (AGPL-3.0) — see [LICENSE](./LICENSE)
-2. **Commercial License** (paid) — for organizations that want to avoid AGPL-3.0's source-disclosure obligations or need commercial support
+1. **The Functional Source License 1.1, with an Apache 2.0 future licence** (FSL-1.1-ALv2). It's free. See [LICENSE](LICENSE).
+2. **A commercial licence**, which you pay for. It's for anyone who wants to use Clause Tracer in a way the FSL doesn't allow, or who needs commercial support.
 
-## When a commercial license is recommended
+**Most people don't need a commercial licence.** If you use Clause Tracer as a tool, it's free, whatever the size of your business.
 
-You should consider a commercial license if you:
+## What's free under the FSL
 
-- **Run openreview as a network service** (SaaS) and have modified it (AGPL-3.0 Section 13 requires you to publish your modifications)
-- **Embed openreview** in a commercial product you distribute
-- **Distribute a modified version** of openreview to your customers under a closed-source license
-- **Need commercial support** with response-time SLAs
-- **Need legal indemnification**
+You **don't** need a commercial licence to:
 
-## When you don't need a commercial license
+- install Clause Tracer and use it for your own work, including paid work for your customers. For example, a freelancer checking a contract they were sent, or a lawyer reviewing contracts for clients;
+- use it inside a for-profit company;
+- use it to deliver professional services to your own customers;
+- fork it and change it for your own internal use;
+- use it for non-commercial education or research;
+- send contributions back to the project (see the [CLA](CLA.md)).
 
-You do **not** need a commercial license to:
+## When you need a commercial licence
 
-- Install openreview and use it for your own work, including paid client work (e.g., a lawyer using openreview to review contracts for their clients)
-- Use openreview internally at a for-profit company
-- Use openreview to deliver professional services to your own clients (the output of that work is yours, not a "service")
-- Fork openreview and modify it for your own internal use
-- Submit contributions back to the project
+The FSL doesn't allow a **Competing Use**. That means offering the software to others in a commercial product or service that replaces it, or that offers the same or similar features. You need a commercial licence to:
 
-In short: if you're a solo lawyer, small firm, or large firm using openreview as a tool, you don't need a commercial license.
+- **host it as a service** (SaaS) for other people to use;
+- **build it into a commercial product** that offers the same or similar features;
+- **white-label it**, or resell it under another name.
 
-## What a commercial license gives you
+Not sure whether your use counts? [Email us](#contact) and describe it. We'll tell you.
 
-- Full right to modify and keep modifications private
-- No AGPL-3.0 source disclosure obligation
-- Commercial support SLA
-- Legal indemnification
-- Pre-built integrations (Clio, NetDocuments, etc.)
-- Custom playbook templates (industry-specific)
+## Each version becomes Apache 2.0 after two years
+
+Two years after each version is released, that version is also available under the Apache License 2.0, and the Competing Use limit no longer applies to it. So a commercial licence matters only for versions less than two years old.
+
+## What a commercial licence gives you
+
+- The right to offer Clause Tracer, or something built on it, as a competing product or service.
+- Optional extras, agreed in each contract:
+  - support with agreed response times;
+  - legal indemnification;
+  - help with integrations, such as document or practice management systems;
+  - custom playbooks for your industry.
 
 ## Pricing
 
-- **SaaS providers:** per-host or per-user pricing
-- **Embedded products:** per-product or per-distribution pricing
-- **White-label:** custom pricing
-- **Enterprise / custom terms:** contact us
+Prices depend on how you use Clause Tracer:
 
-Contact: mohamedbenoughidene@gmail.com
+| Use | Priced |
+| --- | --- |
+| Hosting it as a service (SaaS) | Per host or per user |
+| Building it into a product | Per product or per distribution |
+| White-label | By agreement |
+| Enterprise or custom terms | By agreement |
 
-A commercial license is a separate written agreement between you and the Licensor. The terms in this document are a summary; the signed agreement is the binding contract.
+## Contact
+
+Email mohamedbenoughidene@gmail.com, with `Commercial licence` in the subject line. Tell us who you are, how you plan to use Clause Tracer, and roughly how many users or customers you expect.
+
+This page is a summary. A commercial licence is a separate written agreement between you and the Licensor, and that signed agreement is the binding contract.
