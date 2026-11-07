@@ -3,8 +3,7 @@
 </p>
 
 <p align="center">
-  <strong>AI contract review you can check.</strong><br>
-  A private, local-first desktop app that checks a contract against your own rules and shows the evidence for every result.
+  Private AI contract review for freelancers, solo lawyers and small law firms, on Linux and Windows.
 </p>
 
 <p align="center">
@@ -16,7 +15,7 @@
 
 ---
 
-**Clause Tracer** is contract review software for freelancers, solo lawyers and small firms. You write a **playbook**, your rules for a good deal: "paid within 30 days", "liability capped at the fee", "no non-compete". Clause Tracer reads the contract, labels every clause your playbook covers, and links each label to the exact words that support it. You check each result in one click, then send the other side a clear reply.
+With **Clause Tracer**, you write a **playbook**, your rules for a good deal: "paid within 30 days", "liability capped at the fee", "no non-compete". Clause Tracer reads the contract, labels every clause your playbook covers, and links each label to the exact words that support it. You check each result in one click, then send the other side a clear reply.
 
 It runs on your own computer, with your own [OpenRouter](https://openrouter.ai) key. Names and addresses are replaced before anything is sent to an AI model. There's no account, no server run by the project and no telemetry.
 
