@@ -1,8 +1,5 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/clause-tracer-logo-reversed.svg">
-    <img src="assets/clause-tracer-logo.svg" alt="Clause Tracer" width="360">
-  </picture>
+  <img src="assets/clause-tracer-readme-banner.jpg" alt="Clause Tracer: AI contract review you can check. Local-first, your own playbook, evidence for every label." width="100%">
 </p>
 
 <p align="center">
