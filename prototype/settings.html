@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings · Clause Tracer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* settings page only */
+  .card > .h2 { margin-bottom: 12px; }
+  .setting { display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: start; }
+  .setting + .setting { margin-top: 14px; }
+  .setting .toggle { margin-top: 2px; }
+  .setting .small { margin-top: 2px; }
+  .split { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0;
+    border-top: 1px solid var(--line); }
+  .split:first-of-type { border-top: 0; }
+  .card .row + .divider { margin: 14px 0; }
+  .subhead { margin: 16px 0 8px; }
+  .models-note { margin-top: 12px; }
+  .model-field + .model-field { margin-top: 14px; }
+  details.models > summary { list-style: none; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  details.models > summary::-webkit-details-marker { display: none; }
+  details.models > summary .icon { transition: transform .15s; }
+  details.models[open] > summary .icon { transform: rotate(90deg); }
+  details.models > .models-body { margin-top: 14px; }
+  .mono-path { font: 500 12px/1.4 var(--mono); color: var(--text-2); }
+</style>
+</head>
+<body>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<div class="app">
+  <aside class="sidebar">
+    <a class="logo" href="home.html"><img class="on-light" src="logo.svg" alt="Clause Tracer"><img class="on-dark" src="logo-dark.svg" alt="Clause Tracer"></a>
+    <a class="btn btn-primary btn-block" href="new-review.html"><svg class="icon"><use href="#i-plus"/></svg>New review</a>
+    <button class="search-commands" type="button"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
+    <nav class="nav" aria-label="Main">
+      <a href="home.html"><svg class="icon"><use href="#i-list"/></svg>Reviews</a>
+      <a href="playbooks.html"><svg class="icon"><use href="#i-book"/></svg>Playbooks</a>
+      <a href="customers.html"><svg class="icon"><use href="#i-users"/></svg>Customers</a>
+      <a href="settings.html" aria-current="page"><svg class="icon"><use href="#i-gear"/></svg>Settings</a>
+      <a href="help.html"><svg class="icon"><use href="#i-help"/></svg>Help</a>
+    </nav>
+    <div class="sidebar-foot">
+      <p><svg class="icon"><use href="#i-key"/></svg>OpenRouter key saved</p>
+      <p><svg class="icon"><use href="#i-shield"/></svg>Private mode: On</p>
+      <p><svg class="icon"><use href="#i-info"/></svg>Credit left: $3.10</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="page-head">
+      <div>
+        <h1 class="h1">Settings</h1>
+      </div>
+    </header>
+
+    <div class="grid-2">
+      <div>
+        <section class="card" aria-labelledby="ai-key-title" id="ai-key">
+          <h2 class="h2" id="ai-key-title">OpenRouter key</h2>
+          <div class="row" style="justify-content:space-between; align-items:flex-start">
+            <p class="mono-path" style="max-width:260px">sk-or-v1-8f2c…a91e · saved in your password store</p>
+            <div class="row" style="gap:6px">
+              <button class="btn btn-sm" type="button" data-open="change-key">Change</button>
+              <button class="btn btn-ghost btn-sm" type="button" data-open="remove-key">Remove</button>
+            </div>
+          </div>
+          <p class="small" style="margin-top:10px"><a class="link" href="index.html">Open the key guide</a></p>
+        </section>
+
+        <section class="card" aria-labelledby="privacy-title" id="privacy">
+          <h2 class="h2" id="privacy-title">Privacy</h2>
+          <div class="setting">
+            <input class="toggle" type="checkbox" id="priv-mode" checked data-toast="Saved">
+            <div>
+              <label class="h3" for="priv-mode">Private mode for new reviews</label>
+              <p class="small muted">Only providers that don't keep your contract. Reviews you've already started keep their own setting.</p>
+            </div>
+          </div>
+          <div class="setting">
+            <input class="toggle" type="checkbox" id="send-notes" data-toast="Saved">
+            <div>
+              <label class="h3" for="send-notes">Send “why this matters” notes to the AI</label>
+              <p class="small muted">Gives better explanations. Known names are replaced, but the privacy check doesn't cover notes.</p>
+            </div>
+          </div>
+          <p class="small" style="margin-top:14px"><a class="link" href="help.html#sent">What gets sent</a></p>
+        </section>
+
+        <section class="card" aria-labelledby="notify-title" id="notifications">
+          <h2 class="h2" id="notify-title">Notifications</h2>
+          <div class="setting">
+            <input class="toggle" type="checkbox" id="notify-done" checked data-toast="Saved">
+            <div>
+              <label class="h3" for="notify-done">Notify when a review finishes</label>
+              <p class="small muted">Shows a notification when a review is done, even if you're in another window.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="data-title" id="data">
+          <h2 class="h2" id="data-title">Data</h2>
+          <p class="note-s muted" style="margin-bottom:6px">Nothing is removed without asking first.</p>
+          <div class="split">
+            <div>
+              <p class="h3">Everything</p>
+              <p class="small muted">Reviews, playbooks, customers, settings and the key, all from this computer.</p>
+            </div>
+            <button class="btn btn-sm" type="button" data-open="delete-all"><svg class="icon"><use href="#i-trash"/></svg>Delete everything</button>
+          </div>
+        </section>
+      </div>
+
+      <div>
+        <section class="card" aria-labelledby="appearance-title" id="appearance">
+          <h2 class="h2" id="appearance-title">Appearance</h2>
+          <h3 class="h3 subhead">Colours</h3>
+          <div class="segmented" role="group" aria-label="Colours">
+            <button type="button" data-theme-set="system" data-toast="Saved" aria-pressed="true">Match system</button>
+            <button type="button" data-theme-set="light" data-toast="Saved" aria-pressed="false">Light</button>
+            <button type="button" data-theme-set="dark" data-toast="Saved" aria-pressed="false">Dark</button>
+          </div>
+          <p class="small muted" style="margin-top:8px">Follows your computer's setting.</p>
+
+          <div class="row" style="margin-top:18px; gap:10px">
+            <h3 class="h3" id="text-size-label">Text size</h3>
+            <span class="small muted" data-text-label>100%</span>
+          </div>
+          <div class="segmented" role="group" aria-labelledby="text-size-label" style="margin-top:8px">
+            <button type="button" aria-pressed="true" data-text-set="100" data-toast="Saved">100%</button>
+            <button type="button" aria-pressed="false" data-text-set="125" data-toast="Saved">125%</button>
+            <button type="button" aria-pressed="false" data-text-set="150" data-toast="Saved">150%</button>
+            <button type="button" aria-pressed="false" data-text-set="200" data-toast="Saved">200%</button>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="storage-title" id="storage">
+          <h2 class="h2" id="storage-title">Storage</h2>
+          <p class="small muted" id="storage-days-label">Delete reviews after no changes for</p>
+          <div class="segmented" id="storage-days" role="group" aria-labelledby="storage-days-label" style="margin-top:8px">
+            <button type="button" aria-pressed="false" data-open="lower-autodelete">7 days</button>
+            <button type="button" aria-pressed="true" data-toast="Saved">30 days</button>
+            <button type="button" aria-pressed="false" data-toast="Saved">90 days</button>
+          </div>
+          <p class="small muted" style="margin-top:10px">12 reviews on this computer</p>
+          <div class="divider"></div>
+          <div class="row" style="justify-content:space-between; flex-wrap:wrap; gap:12px">
+            <button class="btn btn-sm" type="button" data-open="delete-reviews"><svg class="icon"><use href="#i-trash"/></svg>Delete all reviews</button>
+            <span class="mono-path">~/.local/share/clause-tracer</span>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="advanced-title" id="advanced">
+          <h2 class="h2" id="advanced-title">Advanced</h2>
+          <details class="models" id="models-details">
+            <summary>
+              <svg class="icon"><use href="#i-chev-right"/></svg>
+              <span class="h3">Model choice</span>
+              <span class="small muted">Which AI model does each step. The recommended one is already picked.</span>
+            </summary>
+            <div class="models-body">
+              <div class="segmented" role="group" aria-label="Model choice">
+                <button type="button" data-models="one" aria-pressed="true">One for every step</button>
+                <button type="button" data-models="step" aria-pressed="false">One per step</button>
+              </div>
+
+              <div id="models-one" class="models-note">
+                <div class="field model-field">
+                  <label for="model-one">Model</label>
+                  <select class="input" id="model-one">
+                    <option value="sonnet" selected>Claude Sonnet 5.5 (recommended)</option>
+                    <option value="haiku">Claude Haiku 5.5</option>
+                    <option value="some">Some-model-7b</option>
+                  </select>
+                </div>
+              </div>
+
+              <div id="models-step" class="models-note" hidden>
+                <div class="field model-field">
+                  <label for="model-match">Match</label>
+                  <select class="input" id="model-match">
+                    <option value="sonnet" selected>Claude Sonnet 5.5 (recommended)</option>
+                    <option value="haiku">Claude Haiku 5.5</option>
+                    <option value="jev">Jev</option>
+                    <option value="some">Some-model-7b</option>
+                  </select>
+                </div>
+                <div class="field model-field">
+                  <label for="model-extract">Extract</label>
+                  <select class="input" id="model-extract">
+                    <option value="sonnet" selected>Claude Sonnet 5.5 (recommended)</option>
+                    <option value="haiku">Claude Haiku 5.5</option>
+                    <option value="some">Some-model-7b</option>
+                  </select>
+                  <p class="small" data-state="model-cant" style="color:var(--unsure-fg)"><svg class="icon" style="color:inherit"><use href="#i-warn"/></svg> This model can't do this step. Pick another.</p>
+                </div>
+                <div class="field model-field">
+                  <label for="model-judge">Judge words positions</label>
+                  <select class="input" id="model-judge">
+                    <option value="sonnet" selected>Claude Sonnet 5.5 (recommended)</option>
+                    <option value="haiku">Claude Haiku 5.5</option>
+                    <option value="jev">Jev</option>
+                    <option value="some">Some-model-7b</option>
+                  </select>
+                </div>
+                <div class="field model-field">
+                  <label for="model-explain">Explain</label>
+                  <select class="input" id="model-explain">
+                    <option value="sonnet" selected>Claude Sonnet 5.5 (recommended)</option>
+                    <option value="haiku">Claude Haiku 5.5</option>
+                    <option value="some">Some-model-7b</option>
+                  </select>
+                  <p class="small" data-state="model-cant" style="color:var(--unsure-fg)"><svg class="icon" style="color:inherit"><use href="#i-warn"/></svg> Not tested with Clause Tracer. Results may be worse.</p>
+                </div>
+                <div class="field model-field">
+                  <label for="model-summarise">Summarise not-covered parts</label>
+                  <select class="input" id="model-summarise">
+                    <option value="sonnet" selected>Claude Sonnet 5.5 (recommended)</option>
+                    <option value="haiku">Claude Haiku 5.5</option>
+                    <option value="some">Some-model-7b</option>
+                  </select>
+                </div>
+                <div class="field model-field">
+                  <label for="model-rewrite">Rewrite</label>
+                  <select class="input" id="model-rewrite">
+                    <option value="sonnet" selected>Claude Sonnet 5.5 (recommended)</option>
+                    <option value="haiku">Claude Haiku 5.5</option>
+                    <option value="some">Some-model-7b</option>
+                  </select>
+                </div>
+                <div class="field model-field">
+                  <label for="model-message">Write message</label>
+                  <select class="input" id="model-message">
+                    <option value="sonnet" selected>Claude Sonnet 5.5 (recommended)</option>
+                    <option value="haiku">Claude Haiku 5.5</option>
+                    <option value="some">Some-model-7b</option>
+                  </select>
+                </div>
+                <p class="small muted" style="margin-top:14px">Jev is only offered for match and judge. In private mode, only models that don't keep your contract are offered.</p>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section class="card" aria-labelledby="about-title" id="about">
+          <h2 class="h2" id="about-title">About</h2>
+          <p class="muted">Clause Tracer 1.0.0 · Functional Source License</p>
+          <p class="small muted">Not legal advice.</p>
+          <div class="row" style="margin-top:12px">
+            <button class="btn btn-sm" type="button" data-toast="You have the latest version." data-state-hide="update-available"><svg class="icon"><use href="#i-refresh"/></svg>Check for updates</button>
+          </div>
+          <p class="small muted" style="margin-top:10px" role="status" data-state="up-to-date">You have the latest version.</p>
+          <div class="notice" role="status" style="margin-top:12px" data-state="update-available">
+            <svg class="icon"><use href="#i-info"/></svg>
+            <span>Version 1.1.0 is available.</span>
+            <span class="spacer"></span>
+            <a class="btn btn-sm" href="https://github.com" target="_blank" rel="noopener">Open release page<span class="visually-hidden"> (opens in your browser)</span></a>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+
+<dialog id="change-key" aria-labelledby="change-key-title">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="h2" id="change-key-title">Change the OpenRouter key</h2>
+      <div class="field">
+        <label for="new-key">New key</label>
+        <input class="input" id="new-key" type="password" placeholder="sk-or-…" autocomplete="off">
+        <span class="hint">It's checked with OpenRouter, then replaces the old one in your password store.</span>
+      </div>
+    </div>
+    <div class="dialog-foot"><button class="btn" value="cancel">Cancel</button><button class="btn btn-primary" value="ok" data-toast="Key works. Saved.">Check and save</button></div>
+  </form>
+</dialog>
+
+<dialog id="remove-key" aria-labelledby="remove-key-title">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="h2" id="remove-key-title">Remove the OpenRouter key?</h2>
+      <p class="muted">This removes the key from your password store. Reviews won't run until you paste a key again.</p>
+    </div>
+    <div class="dialog-foot"><button class="btn" value="cancel">Cancel</button><button class="btn btn-primary" value="ok" data-toast="Key removed">Remove key</button></div>
+  </form>
+</dialog>
+
+<dialog id="delete-all" aria-labelledby="delete-all-title">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="h2" id="delete-all-title">Delete everything?</h2>
+      <p class="muted">Reviews, playbooks, customers, settings and the key are all removed from this computer. This can't be undone.</p>
+    </div>
+    <div class="dialog-foot"><button class="btn" value="cancel">Cancel</button><button class="btn btn-primary" value="ok" data-toast="Everything deleted">Delete everything</button></div>
+  </form>
+</dialog>
+
+<dialog id="delete-reviews" aria-labelledby="delete-reviews-title">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="h2" id="delete-reviews-title">Delete all 12 reviews?</h2>
+      <p class="muted">This removes every review on this computer, with its labels and notes. Your playbooks, customers and key stay. This can't be undone.</p>
+    </div>
+    <div class="dialog-foot"><button class="btn" value="cancel">Cancel</button><button class="btn btn-primary" value="ok" data-toast="Reviews deleted">Delete all reviews</button></div>
+  </form>
+</dialog>
+
+<dialog id="lower-autodelete" aria-labelledby="lower-autodelete-title">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="h2" id="lower-autodelete-title">Lower auto-delete to 7 days?</h2>
+      <p class="muted">4 reviews haven't changed in 7 days. They'll be deleted on 9 Nov, in 3 days, unless you change them first.</p>
+    </div>
+    <div class="dialog-foot"><button class="btn" value="cancel">Cancel</button><button class="btn btn-primary" value="ok" data-toast="Saved">Lower to 7 days</button></div>
+  </form>
+</dialog>
+
+<script src="icons.js"></script>
+<script src="app.js"></script>
+<script>
+  (function () {
+    var state = (new URLSearchParams(location.search).get('state') || '').split(/\s+/);
+
+    // Model choice: "One per step" shows the per-step selects.
+    document.querySelectorAll('[data-models]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.getElementById('models-one').hidden = btn.dataset.models !== 'one';
+        document.getElementById('models-step').hidden = btn.dataset.models !== 'step';
+      });
+    });
+    document.querySelectorAll('#models-one select, #models-step select').forEach(function (sel) {
+      sel.addEventListener('change', function () { window.CT.toast('Saved'); });
+    });
+
+    // State model-cant: open Model choice, one model per step, with Extract set to a model that can't do it.
+    if (state.indexOf('model-cant') !== -1) {
+      document.getElementById('models-details').open = true;
+      document.querySelector('[data-models="step"]').click();
+      document.getElementById('model-extract').value = 'some';
+      document.getElementById('model-explain').value = 'some';
+    }
+
+    // Storage: choosing 7 days opens the confirmation. Cancel (or Esc) puts 30 days back.
+    var dialog = document.getElementById('lower-autodelete');
+    dialog.addEventListener('close', function () {
+      if (dialog.returnValue !== 'ok') {
+        document.querySelectorAll('#storage-days > button').forEach(function (b) {
+          b.setAttribute('aria-pressed', String(b.textContent.trim() === '30 days'));
+        });
+      }
+      dialog.returnValue = '';
+    });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>New review · Clause Tracer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* New review only: the flow columns, the file row, the party picker and the warnings. */
+  .flow-main { padding: 24px 32px 32px; }
+  .flow-main .grid-2 { align-items: start; gap: 24px; }
+  .flow-main .stack { gap: 16px; }
+  .appbar .divider-v { width: 1px; height: 22px; background: var(--line); }
+  .appbar .search-commands { width: 210px; margin: 0 0 0 12px; white-space: nowrap; }
+  .card-head { margin-bottom: 16px; }
+  .step-no { color: var(--text-3); margin-right: 4px; }
+  .file-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; padding-bottom: 14px;
+    border-bottom: 1px solid var(--line); }
+  .file-row > .icon { width: 20px; height: 20px; }
+  .file-name { display: grid; line-height: 1.35; }
+  .preview { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 16px; padding-top: 16px; }
+  .thumb { width: 64px; height: 84px; border: 1px solid var(--line); border-radius: 2px; background: var(--bg-paper);
+    padding: 10px 8px; display: grid; align-content: start; gap: 5px; }
+  .thumb span { height: 2px; background: var(--line-strong); }
+  .thumb span:first-child { height: 4px; width: 60%; background: var(--text-2); margin-bottom: 4px; }
+  .thumb span:nth-child(3) { width: 80%; }
+  .thumb span:nth-child(5) { width: 70%; }
+  .preview .link { text-align: left; }
+  .party-pick { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: 12px; }
+  .party-pick legend { padding: 0; margin-bottom: 14px; }
+  .party-option { align-items: flex-start; }
+  .party-option input { margin-top: 4px; }
+  .party-option span { display: grid; gap: 2px; }
+  .party-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+  .dropzone { border: 1px dashed var(--line-strong); border-radius: var(--r-lg); padding: 28px 20px; display: grid;
+    justify-items: center; gap: 8px; color: var(--text-2); text-align: center; }
+
+  /* warnings: unsure colours, never red (Spec 14.4) */
+  .notice.warn { flex-wrap: wrap; align-items: flex-start; background: var(--unsure-bg); color: var(--unsure-fg); }
+  .notice.warn .icon { color: var(--unsure); margin-top: 2px; }
+  .notice-body { display: grid; gap: 8px; min-width: 0; }
+  .notice-body p + p { margin-top: 0; }
+  .notice-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .notices { margin-bottom: 0; }
+  .input.is-flagged { border-color: var(--unsure); box-shadow: 0 0 0 1px var(--unsure); }
+  .paste-panel { display: grid; gap: 8px; padding-top: 16px; }
+
+  @media (max-width: 860px) {
+    .flow-main { padding: 16px; }
+    .appbar { height: auto; min-height: 56px; flex-wrap: wrap; padding: 10px 16px; }
+    .appbar .search-commands { width: 100%; margin: 0; }
+    .party-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+
+<header class="appbar">
+  <a class="btn btn-ghost btn-sm" href="home.html"><svg class="icon"><use href="#i-arrow-left"/></svg>Home</a>
+  <span class="divider-v" aria-hidden="true"></span>
+  <h1 class="h3">New review</h1>
+  <span class="status small"><svg class="icon"><use href="#i-pencil"/></svg>Draft</span>
+  <span class="spacer"></span>
+  <ol class="steps" aria-label="Steps">
+    <li aria-current="step"><span class="n">1</span>Contract</li>
+    <li><span class="n">2</span>Contract check</li>
+    <li><span class="n">3</span>Privacy check</li>
+    <li><span class="n">4</span>Review</li>
+  </ol>
+  <button class="search-commands" type="button"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
+</header>
+
+<main class="flow-main">
+  <div class="stack notices" data-state="no-key offline">
+    <div class="notice warn" role="note" data-state="no-key">
+      <svg class="icon"><use href="#i-key"/></svg>
+      <div class="notice-body">
+        <p>Add your OpenRouter key to run a review. What you've done here is kept.</p>
+        <div class="notice-actions"><a class="btn btn-sm" href="index.html">Add key</a></div>
+      </div>
+    </div>
+    <div class="notice warn" role="note" data-state="offline">
+      <svg class="icon"><use href="#i-cloud-off"/></svg>
+      <div class="notice-body">
+        <p>You're offline. You can prepare this draft, but sending it for review needs the internet.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+
+    <div class="stack">
+      <section class="card" aria-labelledby="step-load">
+        <input type="file" id="contract-file" accept=".pdf,.docx,.txt,.md" hidden>
+        <div class="row card-head">
+          <h2 class="h3" id="step-load"><span class="step-no">1</span>Load the contract</h2>
+          <span class="spacer"></span>
+          <div class="segmented" role="group" aria-label="How to add the contract">
+            <button type="button" aria-pressed="true" id="seg-upload">Upload</button>
+            <button type="button" aria-pressed="false" id="seg-paste">Paste text</button>
+          </div>
+        </div>
+
+        <div class="notice warn" role="note" data-state="scanned">
+          <svg class="icon"><use href="#i-warn"/></svg>
+          <div class="notice-body">
+            <p>This PDF is pictures of pages, so its text can't be read.</p>
+            <p class="small">Upload a Word version, or paste the text.</p>
+            <div class="notice-actions">
+              <button class="btn btn-sm" type="button" data-show-paste><svg class="icon"><use href="#i-paste"/></svg>Paste text</button>
+              <button class="btn btn-sm" type="button" data-pick-file><svg class="icon"><use href="#i-upload"/></svg>Replace file</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="notice warn" role="note" data-state="mixed">
+          <svg class="icon"><use href="#i-warn"/></svg>
+          <div class="notice-body">
+            <p>Pages 7 and 8 are pictures, not text. They're skipped unless you paste their text.</p>
+            <div class="notice-actions">
+              <button class="btn btn-sm" type="button" data-show-paste><svg class="icon"><use href="#i-paste"/></svg>Paste their text</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="notice warn" role="note" data-state="too-large">
+          <svg class="icon"><use href="#i-warn"/></svg>
+          <div class="notice-body">
+            <p>This file is 48 MB. The limit is 20 MB. Paste only the pages you want reviewed.</p>
+            <div class="notice-actions">
+              <button class="btn btn-sm" type="button" data-pick-file><svg class="icon"><use href="#i-upload"/></svg>Choose another file</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="notice warn" role="note" data-state="empty">
+          <svg class="icon"><use href="#i-warn"/></svg>
+          <div class="notice-body">
+            <p>This file has no text. Choose another file, or paste the text.</p>
+            <div class="notice-actions">
+              <button class="btn btn-sm" type="button" data-pick-file><svg class="icon"><use href="#i-upload"/></svg>Choose another file</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="notice warn" role="note" data-state="old-word">
+          <svg class="icon"><use href="#i-warn"/></svg>
+          <div class="notice-body">
+            <p>This is an old Word file. Open it in Word, save it as .docx, then load that.</p>
+            <div class="notice-actions">
+              <button class="btn btn-sm" type="button" data-pick-file><svg class="icon"><use href="#i-upload"/></svg>Choose another file</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="notice warn" role="note" data-state="not-english">
+          <svg class="icon"><use href="#i-warn"/></svg>
+          <div class="notice-body">
+            <p>This contract doesn't look like it's in English. Clause Tracer is built and tested for English contracts only, so:</p>
+            <ul class="small" style="margin:6px 0 0;padding-left:18px">
+              <li>fewer names and addresses are found for you. Check the privacy step carefully.</li>
+              <li>more labels may be wrong or unsure.</li>
+            </ul>
+            <div class="notice-actions">
+              <button class="btn btn-sm" type="button" data-pick-file><svg class="icon"><use href="#i-upload"/></svg>Choose another file</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="file-panel">
+          <div class="file-row">
+            <svg class="icon"><use href="#i-doc"/></svg>
+            <div class="file-name">
+              <strong data-state-hide="old-word">Brightline_Developer_Agreement.pdf</strong><strong data-state="old-word">Brightline_Developer_Agreement.doc</strong>
+              <span class="small muted" data-state-hide="mixed scanned too-large empty not-english old-word">PDF · 5 pages · 929 words · real text</span>
+              <span class="small muted" data-state="mixed">PDF · 9 pages · 929 words · pages 7 and 8 scanned</span>
+              <span class="small muted" data-state="scanned">PDF · 5 pages · scanned images, no text</span>
+              <span class="small muted" data-state="too-large">PDF · 48 MB</span>
+              <span class="small muted" data-state="empty">PDF · 0 pages · no text</span>
+              <span class="small muted" data-state="not-english">PDF · 5 pages · not English</span>
+              <span class="small muted" data-state="old-word">Word 97–2003 (.doc) · can't be read</span>
+            </div>
+            <span class="spacer"></span>
+            <button class="btn btn-ghost btn-sm" type="button" data-pick-file>Replace</button>
+          </div>
+
+          <div class="preview" data-state-hide="scanned too-large empty old-word">
+            <div class="thumb" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div>
+              <p class="small"><strong class="muted">First page · is this the right contract?</strong></p>
+              <p class="h3" style="margin-top:4px">Developer Agreement</p>
+              <p class="small muted" style="margin-top:4px">This Agreement is dated 5 November 2026. Parties: (1) Brightline Studio Ltd, a company registered in England and Wales …</p>
+              <p class="small muted" style="margin-top:8px">Wrong file? Click Replace, or drop another file on this card.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="paste-panel" id="paste-panel" hidden>
+          <div class="field">
+            <label for="paste-inline">Contract text</label>
+            <textarea class="input" id="paste-inline" rows="8"></textarea>
+            <p class="hint">Keep the clause numbers and headings. Paste only the pages you want reviewed.</p>
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:18px">
+          <label for="review-name">Review name</label>
+          <input class="input" id="review-name" type="text" value="Brightline web build" aria-describedby="review-name-hint">
+          <p class="hint" id="review-name-hint">Pick a name you'll recognise later.</p>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="step-playbook">
+        <div class="row card-head">
+          <h2 class="h3" id="step-playbook"><span class="step-no">2</span>Pick a playbook</h2>
+          <span class="spacer"></span>
+          <a class="btn btn-ghost btn-sm" href="starter-preview.html?from=new-review"><svg class="icon"><use href="#i-copy"/></svg>Copy a starter</a>
+        </div>
+        <div class="notice warn" role="note" data-state="playbook-deleted">
+          <svg class="icon"><use href="#i-warn"/></svg>
+          <div class="notice-body">
+            <p>The playbook this draft used is gone. Pick another one.</p>
+          </div>
+        </div>
+        <div class="field">
+          <label for="playbook">Playbook</label>
+          <select class="input" id="playbook" aria-describedby="playbook-hint">
+            <option selected>Freelancer service agreement</option>
+            <option>Design retainer</option>
+          </select>
+          <p class="hint" id="playbook-hint" data-state-hide="playbook-deleted copied-starter">Side: service provider · 11 positions · edited 2 Nov</p>
+          <p class="hint" data-state="copied-starter">Copied from the starter · side: service provider · 11 example positions. You haven't changed them yet. <a href="playbook-editor.html?state=copied">Make the limits yours</a></p>
+        </div>
+      </section>
+    </div>
+
+    <div class="stack">
+      <section class="card">
+        <fieldset class="party-pick">
+          <legend class="h3"><span class="step-no">3</span>Which party in this contract is the service provider?</legend>
+          <label class="check party-option">
+            <input type="radio" name="party" checked>
+            <span>Karim Benali (“the Developer”) <span class="small muted">Picked last time</span></span>
+          </label>
+          <label class="check party-option">
+            <input type="radio" name="party">
+            <span>Brightline Studio Ltd (“the Agency”)</span>
+          </label>
+          <button class="btn btn-ghost btn-sm" type="button" data-open="add-party" style="justify-self:start"><svg class="icon"><use href="#i-plus"/></svg>Add a missing party</button>
+        </fieldset>
+      </section>
+
+      <section class="card" aria-labelledby="party-details">
+        <h2 class="h3" id="party-details" style="margin-bottom:8px">Party details</h2>
+        <p class="note" style="margin-bottom:16px">Filled in from the contract's opening lines. Every copy of them is replaced before anything is sent.</p>
+        <div class="party-grid">
+          <div class="field">
+            <label for="your-name">Your party · name</label>
+            <input class="input" id="your-name" type="text" value="Karim Benali">
+          </div>
+          <div class="field">
+            <label for="your-address">Address</label>
+            <input class="input" id="your-address" type="text" value="27 Rue Didouche Mourad, Algiers 16000">
+          </div>
+          <div class="field">
+            <label for="other-name">Other side · name</label>
+            <input class="input" id="other-name" type="text" value="Brightline Studio Ltd">
+          </div>
+          <div class="field">
+            <label for="other-address">Address</label>
+            <input class="input" id="other-address" type="text" value="14 Harbour Street, Leeds LS1 4AB">
+          </div>
+        </div>
+      </section>
+    </div>
+
+  </div>
+</main>
+
+<footer class="flow-foot">
+  <span class="row small muted"><svg class="icon"><use href="#i-check"/></svg>Saved as a draft</span>
+  <span class="spacer"></span>
+  <a class="btn btn-primary" href="contract-check.html" data-state-hide="scanned too-large empty old-word playbook-deleted">Continue<svg class="icon"><use href="#i-arrow-right"/></svg></a>
+  <button class="btn btn-primary" type="button" disabled data-state="scanned too-large empty old-word playbook-deleted">Continue<svg class="icon"><use href="#i-arrow-right"/></svg></button>
+</footer>
+
+
+
+<dialog id="add-party" aria-labelledby="add-title">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="h2" id="add-title">Add a party</h2>
+      <p class="muted">Use the name exactly as the contract writes it.</p>
+      <div class="field">
+        <label for="add-name">Party name</label>
+        <input class="input" id="add-name" type="text">
+      </div>
+      <div class="field">
+        <label for="add-address">Address</label>
+        <input class="input" id="add-address" type="text">
+      </div>
+    </div>
+    <div class="dialog-foot"><button class="btn" value="cancel">Cancel</button><button class="btn btn-primary" value="ok" data-toast="Party added">Add party</button></div>
+  </form>
+</dialog>
+
+<script src="icons.js"></script>
+<script src="app.js"></script>
+<script>
+  // Back from Copy a starter: the new copy is added and picked.
+  if (document.body.querySelector('[data-state="copied-starter"].on')) {
+    const sel = document.getElementById('playbook');
+    sel.add(new Option('Freelancer receiving a service agreement (copy)', '', true, true), 0);
+  }
+</script>
+<script>
+  // Page-only behaviour: Upload and Paste text switch the contract panel, and a deleted
+  // playbook leaves the picker empty and highlighted.
+  (function () {
+    var upload = document.getElementById('seg-upload');
+    var paste = document.getElementById('seg-paste');
+    var filePanel = document.getElementById('file-panel');
+    var pastePanel = document.getElementById('paste-panel');
+
+    function show(mode) {
+      var pasting = mode === 'paste';
+      filePanel.hidden = pasting;
+      pastePanel.hidden = !pasting;
+      upload.setAttribute('aria-pressed', String(!pasting));
+      paste.setAttribute('aria-pressed', String(pasting));
+    }
+    upload.addEventListener('click', function () { show('upload'); });
+    paste.addEventListener('click', function () { show('paste'); });
+    document.querySelectorAll('[data-show-paste]').forEach(function (b) {
+      b.addEventListener('click', function () { show('paste'); });
+    });
+
+    // Upload, Replace and Choose another file open the system picker straight away.
+    // Dropping a file anywhere on the card does the same.
+    var picker = document.getElementById('contract-file');
+    var card = picker.closest('.card');
+    function useFile(f) {
+      if (!f) return;
+      show('upload');
+      document.querySelector('.file-name strong').textContent = f.name;
+      CT.toast('Loaded ' + f.name);
+    }
+    document.querySelectorAll('[data-pick-file]').forEach(function (b) {
+      b.addEventListener('click', function () { picker.value = ''; picker.click(); });
+    });
+    upload.addEventListener('click', function () { if (upload.getAttribute('aria-pressed') === 'true') picker.click(); });
+    picker.addEventListener('change', function () { useFile(picker.files[0]); });
+    card.addEventListener('dragover', function (e) { e.preventDefault(); card.classList.add('is-drop'); });
+    card.addEventListener('dragleave', function () { card.classList.remove('is-drop'); });
+    card.addEventListener('drop', function (e) { e.preventDefault(); card.classList.remove('is-drop'); useFile(e.dataTransfer.files[0]); });
+
+    var states = (new URLSearchParams(location.search).get('state') || '').split(/\s+/);
+    if (states.indexOf('playbook-deleted') !== -1) {
+      var select = document.getElementById('playbook');
+      select.selectedIndex = -1;
+      select.classList.add('is-flagged');
+      select.setAttribute('aria-invalid', 'true');
+    }
+  })();
+</script>
+</body>
+</html>

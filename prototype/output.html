@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Output · Clause Tracer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* output.html only: the ask-for checklist lines */
+  .ask { display: grid; gap: 4px; }
+  .ask-line { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--r);
+    background: var(--bg-paper); cursor: pointer; }
+  .ask-line input { width: 16px; height: 16px; accent-color: var(--text); margin: 0; flex: none; }
+  .ask-line .item { flex: 1; }
+  .ask-line .left-out { display: none; font-size: 12.5px; color: var(--text-3); white-space: nowrap; }
+  .ask-line input:not(:checked) ~ .item { text-decoration: line-through; color: var(--text-3); }
+  .ask-line input:not(:checked) ~ .left-out { display: inline; }
+  .ask-line input:not(:checked) { opacity: .6; }
+  .output-body { display: grid; gap: 16px; }
+  .output-body textarea { min-height: 240px; background: var(--bg-paper); font: 14.5px/1.65 var(--contract); }
+</style>
+</head>
+<body>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<div>
+  <header class="appbar">
+    <a class="btn btn-ghost btn-sm" href="review.html"><svg class="icon"><use href="#i-arrow-left"/></svg>Back to review</a>
+    <span aria-hidden="true" style="width:1px;height:24px;background:var(--line)"></span>
+    <div class="title"><strong>Output · Brightline web build</strong></div>
+    <span class="spacer"></span>
+    <button class="search-commands" type="button" style="width:240px;margin:0"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
+    <div class="tabs" role="tablist" aria-label="Output type" style="width:260px">
+      <button type="button" role="tab" id="tab-message" aria-controls="panel-message" aria-selected="true">Message</button>
+      <button type="button" role="tab" id="tab-report" aria-controls="panel-report" aria-selected="false">Report</button>
+      <button type="button" role="tab" id="tab-both" aria-controls="panel-both" aria-selected="false">Both</button>
+    </div>
+  </header>
+
+  <main class="main" style="max-width:860px;margin:0 auto;padding-bottom:24px">
+    <div class="notice" role="status" style="margin-bottom:20px" data-state-hide="all-checked">
+      <svg class="icon"><use href="#i-warn"/></svg>
+      <span>9 positions aren't checked yet.</span>
+      <span class="spacer"></span>
+      <button class="link" type="button" data-open="unchecked">What this means</button>
+      <a class="link" href="review.html">Check them in review</a>
+    </div>
+
+    <section id="panel-message" role="tabpanel" aria-labelledby="tab-message" class="output-body">
+      <div class="grid-2">
+        <div class="field">
+          <label for="to">To</label>
+          <input class="input" id="to" type="text" value="Sarah Jones, Brightline Studio Ltd">
+        </div>
+        <div class="field">
+          <label for="from">From</label>
+          <input class="input" id="from" type="text" value="Karim Benali">
+        </div>
+      </div>
+
+      <div class="row" style="justify-content:space-between;align-items:flex-end">
+        <p class="small muted"><svg class="icon"><use href="#i-info"/></svg> Not legal advice. Read the message before you send it.</p>
+        <div class="field" style="gap:6px">
+          <span class="label" id="tone-label">Tone</span>
+          <div class="segmented" role="group" aria-labelledby="tone-label">
+            <button type="button" aria-pressed="true" data-tone="friendly">Friendly</button>
+            <button type="button" aria-pressed="false" data-tone="formal">Formal</button>
+          </div>
+        </div>
+      </div>
+
+      <fieldset style="border:0;padding:0;margin:0" class="field" data-state-hide="nothing-to-ask">
+        <legend class="label" style="padding:0;margin-bottom:6px">Ask for</legend>
+        <p class="hint">One line for each issue. Tick a line to send it, untick it to leave it out.</p>
+        <div class="ask" id="ask-list">
+          <label class="ask-line"><input type="checkbox" checked value="Payment (5.4): could invoices be paid within 15 days of the invoice date?"><span class="item">Payment (5.4): could invoices be paid within 15 days of the invoice date?</span><span class="left-out">Left out</span></label>
+          <label class="ask-line"><input type="checkbox" checked value="Ending early (12.2): if the project stops, could work already done be paid for?"><span class="item">Ending early (12.2): if the project stops, could work already done be paid for?</span><span class="left-out">Left out</span></label>
+          <label class="ask-line"><input type="checkbox" checked value="Ownership (7.1): could the work pass to Brightline once it's paid in full?"><span class="item">Ownership (7.1): could the work pass to Brightline once it's paid in full?</span><span class="left-out">Left out</span></label>
+          <label class="ask-line"><input type="checkbox" checked value="Non-compete (9.1 and 14.3): these give 12 months, and 6 to 9 months. Which applies, and could we remove it?"><span class="item">Non-compete (9.1 and 14.3): these give 12 months, and 6 to 9 months. Which applies, and could we remove it?</span><span class="left-out">Left out</span></label>
+          <label class="ask-line"><input type="checkbox" checked value="Revisions (3.2): could we agree 2 rounds are included, with extra rounds at the hourly rate?"><span class="item">Revisions (3.2): could we agree 2 rounds are included, with extra rounds at the hourly rate?</span><span class="left-out">Left out</span></label>
+          <label class="ask-line"><input type="checkbox" checked value="Liability (11.1): could you send the Master Agreement mentioned here?"><span class="item">Liability (11.1): could you send the Master Agreement mentioned here?</span><span class="left-out">Left out</span></label>
+          <label class="ask-line"><input type="checkbox" value="Deposit (5.2): could the deposit on signing be smaller?"><span class="item">Deposit (5.2): could the deposit on signing be smaller?</span><span class="left-out">Left out</span></label>
+          <label class="ask-line"><input type="checkbox" value="Late payment (new clause): could we add a late fee of 2% of the unpaid amount for each month an invoice is late?"><span class="item">Late payment (new clause): could we add a late fee of 2% of the unpaid amount for each month an invoice is late?</span><span class="left-out">Left out</span></label>
+        </div>
+      </fieldset>
+
+      <div class="card" data-state="nothing-to-ask">
+        <p><strong>Nothing to ask for from your playbook.</strong> This only means the contract matches your playbook. It doesn't mean it's safe to sign.</p>
+      </div>
+
+      <div class="notice" role="status" data-state="labels-changed" style="background:var(--unsure-bg);color:var(--unsure-fg)">
+        <svg class="icon"><use href="#i-warn"/></svg>
+        <span>Labels changed. Regenerate?</span>
+        <span class="spacer"></span>
+        <button class="btn btn-sm" type="button" data-toast="Message regenerated"><svg class="icon"><use href="#i-refresh"/></svg>Regenerate</button>
+      </div>
+
+      <div class="field">
+        <label for="message-text">Message</label>
+        <textarea class="input" id="message-text" rows="12">Hi Sarah,
+
+Thanks for sending the development agreement. Before I sign, could we look at a few points?
+
+Payment (5.4): could invoices be paid within 15 days of the invoice date?
+Ending early (12.2): if the project stops, could work already done be paid for?
+Ownership (7.1): could the work pass to Brightline once it's paid in full?
+Non-compete (9.1 and 14.3): these give 12 months, and 6 to 9 months. Which applies, and could we remove it?
+Revisions (3.2): could we agree 2 rounds are included, with extra rounds at the hourly rate?
+Liability (11.1): could you send the Master Agreement mentioned here?
+
+Thanks,
+Karim Benali</textarea>
+        <p class="hint"><svg class="icon"><use href="#i-shield"/></svg> Contains your wording only, no placeholders.</p>
+      </div>
+    </section>
+
+    <section id="panel-report" role="tabpanel" aria-labelledby="tab-report" class="output-body" hidden>
+      <div class="row">
+        <div class="segmented" role="group" aria-label="Report length">
+          <button type="button" aria-pressed="true">Summary</button>
+          <button type="button" aria-pressed="false">Full contract</button>
+        </div>
+        <span class="spacer"></span>
+        <label class="check"><input type="checkbox">Include your notes</label>
+      </div>
+
+      <article class="sheet" style="margin:0;max-width:none;padding:40px 48px" aria-label="Report preview">
+        <h2>Review report</h2>
+        <p style="text-align:center;font-size:13px">Brightline web build</p>
+        <h3>Asked for</h3>
+        <ol style="padding-left:20px">
+          <li>Payment (5.4): invoices paid within 15 days of the invoice date.</li>
+          <li>Ending early (12.2): payment for work already done if the project stops.</li>
+          <li>Ownership (7.1): work passes to Brightline once paid in full.</li>
+          <li>Non-compete (9.1 and 14.3): which period applies, and removal.</li>
+          <li>Revisions (3.2): 2 rounds included, extra rounds at the hourly rate.</li>
+          <li>Liability (11.1): the Master Agreement.</li>
+        </ol>
+        <h3 data-state-hide="all-checked">Not checked</h3>
+        <p data-state-hide="all-checked">9 positions aren't checked yet. They're marked here as unchecked.</p>
+      </article>
+
+      <footer class="flow-foot" style="position:static;padding:12px 0;background:none;border:0">
+        <span class="small muted">Saved with the review.</span>
+        <span class="spacer"></span>
+        <button class="btn btn-primary" type="button" data-open="save-pdf"><svg class="icon"><use href="#i-download"/></svg>Save PDF</button>
+      </footer>
+    </section>
+
+    <section id="panel-both" role="tabpanel" aria-labelledby="tab-both" class="output-body" hidden>
+      <div class="grid-2">
+        <div class="card">
+          <h2 class="h3" style="margin-bottom:8px">Message</h2>
+          <output for="message-text" class="small" id="both-message" style="display:block;white-space:pre-line">Hi Sarah,
+
+Payment (5.4): could invoices be paid within 15 days of the invoice date?
+Ending early (12.2): if the project stops, could work already done be paid for?
+Ownership (7.1): could the work pass to Brightline once it's paid in full?
+Non-compete (9.1 and 14.3): these give 12 months, and 6 to 9 months. Which applies, and could we remove it?
+Revisions (3.2): could we agree 2 rounds are included, with extra rounds at the hourly rate?
+Liability (11.1): could you send the Master Agreement mentioned here?
+
+Thanks,
+Karim Benali</output>
+          <p class="hint" style="margin-top:12px">Edit the text on the Message tab.</p>
+        </div>
+        <div class="card">
+          <h2 class="h3" style="margin-bottom:8px">Report</h2>
+          <p class="small muted">Summary of the six points asked for, with the review labels. Includes your notes only when you turn that on.</p>
+          <div class="row" style="margin-top:16px">
+            <button class="btn btn-primary" type="button" data-open="save-pdf"><svg class="icon"><use href="#i-download"/></svg>Save PDF</button>
+            <a class="link" href="#" data-tab="report">Open the report</a>
+          </div>
+        </div>
+      </div>
+      <footer class="flow-foot" style="position:static;padding:12px 0;background:none;border:0">
+        <span class="small muted">Saved with the review.</span>
+        <span class="spacer"></span>
+        <button class="btn" type="button" data-open="labels-changed"><svg class="icon"><use href="#i-refresh"/></svg>Regenerate</button>
+        <button class="btn btn-primary" type="button" data-toast="Copied"><svg class="icon"><use href="#i-copy"/></svg>Copy message</button>
+      </footer>
+    </section>
+
+    <footer class="flow-foot" id="message-foot" style="position:static;padding:12px 0;background:none;border:0">
+      <span class="small muted">Saved with the review.</span>
+      <span class="spacer"></span>
+      <button class="btn" type="button" data-open="labels-changed"><svg class="icon"><use href="#i-refresh"/></svg>Regenerate</button>
+      <button class="btn btn-primary" type="button" data-toast="Copied"><svg class="icon"><use href="#i-copy"/></svg>Copy message</button>
+    </footer>
+  </main>
+</div>
+
+
+<dialog id="unchecked" aria-labelledby="unchecked-title">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="h2" id="unchecked-title">9 positions aren't checked yet</h2>
+      <p class="muted">Unchecked items are marked in the report and the checklist, never in the message.</p>
+    </div>
+    <div class="dialog-foot">
+      <a class="btn" href="review.html">Go back and check</a>
+      <button class="btn btn-primary" value="ok" data-toast="Continuing with unchecked positions">Continue anyway</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="labels-changed" aria-labelledby="labels-title">
+  <form method="dialog">
+    <div class="dialog-body">
+      <div class="notice"><svg class="icon"><use href="#i-warn"/></svg><span>Labels changed. Regenerate?</span></div>
+      <h2 class="h2" id="labels-title">Labels changed since this message</h2>
+      <p class="muted">Regenerate to use the new labels. This replaces your current text.</p>
+    </div>
+    <div class="dialog-foot">
+      <button class="btn" value="cancel">Keep this message</button>
+      <button class="btn btn-primary" value="ok" data-toast="Message regenerated">Regenerate</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="save-pdf" aria-labelledby="save-title">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="h2" id="save-title">Save report as PDF</h2>
+      <div class="notice"><svg class="icon"><use href="#i-shield"/></svg><span>This PDF isn't encrypted, and auto-delete won't remove it. It has your contract text and real names.</span></div>
+    </div>
+    <div class="dialog-foot">
+      <button class="btn" value="cancel">Cancel</button>
+      <button class="btn btn-primary" value="ok" data-toast="Saved">Save PDF</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="icons.js"></script>
+<script src="app.js"></script>
+<script>
+  // The message is built from the ticked lines, the greeting and sign-off (Tone) and From.
+  // State nothing-to-ask swaps the lines for a short thank-you.
+  (function () {
+    var list = document.getElementById('ask-list');
+    var text = document.getElementById('message-text');
+    var both = document.getElementById('both-message');
+    var from = document.getElementById('from');
+    var toneButtons = document.querySelectorAll('[aria-labelledby="tone-label"] > button');
+    var nothing = (new URLSearchParams(location.search).get('state') || '').split(/\s+/).indexOf('nothing-to-ask') !== -1;
+    var tone = 'friendly';
+
+    function greeting() { return tone === 'formal' ? 'Dear Sarah Jones,' : 'Hi Sarah,'; }
+    function signoff() { return tone === 'formal' ? 'Kind regards,' : 'Thanks,'; }
+    function show() { both.textContent = text.value; }
+
+    function rebuild() {
+      var body;
+      if (nothing) {
+        body = greeting() + '\n\nThanks for sending the development agreement. I\'ve read it and have no changes to ask for.\n\n' +
+          signoff() + '\n' + from.value;
+      } else {
+        var lines = [];
+        list.querySelectorAll('input[type=checkbox]').forEach(function (cb) { if (cb.checked) lines.push(cb.value); });
+        body = greeting() + '\n\nThanks for sending the development agreement. Before I sign, could we look at a few points?\n\n' +
+          lines.join('\n') + '\n\n' + signoff() + '\n' + from.value;
+      }
+      text.value = body;
+      show();
+    }
+
+    // Tone changes only the greeting and sign-off, so any edits to the rest of the text stay.
+    toneButtons.forEach(function (button) {
+      button.addEventListener('click', function () {
+        tone = button.dataset.tone;
+        text.value = text.value
+          .replace(/^(Hi Sarah,|Dear Sarah Jones,)$/m, greeting())
+          .replace(/^(Thanks|Kind regards),$/m, signoff());
+        show();
+      });
+    });
+
+    list.addEventListener('change', rebuild);
+    from.addEventListener('input', rebuild);
+    if (nothing) { rebuild(); } else { show(); }
+
+    // Report and Message tabs share the Both panel and the footer; the footer repeats per panel.
+    document.querySelectorAll('[role="tab"]').forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        document.getElementById('message-foot').hidden = tab.id !== 'tab-message';
+      });
+    });
+    document.querySelectorAll('[data-tab]').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.getElementById('tab-report').click();
+      });
+    });
+  })();
+</script>
+</body>
+</html>

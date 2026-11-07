@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brightline web build · Review · Clause Tracer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<div class="review">
+  <header class="appbar">
+    <a class="icon-btn" href="home.html" aria-label="Back to reviews"><svg class="icon"><use href="#i-arrow-left"/></svg></a>
+    <div class="title"><strong>Brightline web build</strong><small>Freelancer service agreement · playbook as of 5 Nov, 10:31</small></div>
+    <span class="status small" id="review-status"><svg class="icon"><use href="#i-check"/></svg><span>Ready to check</span></span>
+    <span class="spacer"></span>
+    <button class="search-commands" type="button" style="width:auto;margin:0"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
+    <button class="btn btn-sm" type="button" data-menu="privacy-menu"><svg class="icon"><use href="#i-shield"/></svg><span data-state-hide="mixed">Private mode: On</span><span data-state="mixed">Private mode: Mixed</span><svg class="icon"><use href="#i-chev-down"/></svg></button>
+    <button class="btn btn-sm btn-ghost" type="button" data-open="models">$0.39</button>
+    <button class="btn btn-sm btn-ghost" type="button" data-open="suggestions"><svg class="icon"><use href="#i-list"/></svg>Suggestions</button>
+    <div style="position:relative">
+      <button class="icon-btn" type="button" aria-label="More actions" data-menu="review-more"><svg class="icon"><use href="#i-dots"/></svg></button>
+      <div class="menu" id="review-more" hidden style="right:0;left:auto">
+        <button type="button" data-open="rerun"><svg class="icon"><use href="#i-refresh"/></svg>Re-run…</button>
+        <button type="button" data-open="start-over"><svg class="icon"><use href="#i-undo"/></svg>Start over…</button>
+      </div>
+    </div>
+    <a class="btn btn-primary btn-sm" href="output.html">Output<svg class="icon"><use href="#i-arrow-right"/></svg></a>
+  </header>
+  <div>
+    <div class="banner" data-state="sample"><svg class="icon"><use href="#i-book"/></svg><strong>Practice review</strong><span class="note-s">One label here is wrong on purpose. Find it, open it and fix it. Real reviews work the same way.</span><span class="spacer"></span><a class="btn btn-sm btn-primary" href="new-review.html">Start a real review</a></div>
+    <div class="banner" data-state="playbook-changed"><svg class="icon"><use href="#i-refresh"/></svg><span>Your playbook changed after this review ran. The labels use the old limits.</span><span class="spacer"></span><button class="btn btn-sm" type="button" data-open="rerun">Re-run</button></div>
+    <div class="banner" data-state="unedited-starter"><svg class="icon"><use href="#i-book"/></svg><span>This review uses the example playbook, unedited. Its limits are examples, not yours.</span><span class="spacer"></span><a class="btn btn-sm" href="playbook-editor.html">Make the limits yours</a></div>
+    <div class="banner" data-state-hide="sample"><svg class="icon"><use href="#i-eye-off"/></svg><span>This contract contains hidden text (outlined in the contract). It may be trying to fool this review.</span><span class="spacer"></span><a class="btn btn-sm" href="#hidden">Show me</a></div>
+    <div class="banner" data-state-hide="sample"><svg class="icon"><use href="#i-doc"/></svg><span>This contract depends on the “Master Agreement”, which isn't loaded. It can change any result here. Ask for it and read it before you sign.</span></div>
+  </div>
+  <div class="summary" aria-label="Summary">
+    <span class="row" style="gap:6px"><span class="stamp preferred"><span class="mark"><svg><use href="#i-check"/></svg></span><span class="word">Preferred</span></span><span class="count">1</span><button class="q" type="button" aria-label="What Preferred means" data-open="def-preferred">?</button></span>
+    <span class="row" style="gap:6px"><span class="stamp acceptable"><span class="mark"><svg><use href="#i-approx"/></svg></span><span class="word">Acceptable</span></span><span class="count">4</span><button class="q" type="button" aria-label="What Acceptable means" data-open="def-acceptable">?</button></span>
+    <span class="row" style="gap:6px"><span class="stamp walk"><span class="mark"><svg><use href="#i-x"/></svg></span><span class="word">Walk-away</span></span><span class="count">3</span><button class="q" type="button" aria-label="What Walk-away means" data-open="def-walk">?</button></span>
+    <span class="row" style="gap:6px"><span class="stamp unsure"><span class="mark"><svg><use href="#i-help"/></svg></span><span class="word">Unsure</span></span><span class="count">3</span><span class="small muted">· 1 pencilled in</span><button class="q" type="button" aria-label="What Unsure means" data-open="def-unsure">?</button></span>
+    <button class="link" type="button" data-open="doc-missing"><svg class="icon"><use href="#i-doc"/></svg> 1 document not loaded</button>
+    <span class="row" style="gap:6px"><span class="stamp grey"><span class="mark"><svg><use href="#i-ring-dashed"/></svg></span><span class="word">Not covered</span></span><span>35 parts</span></span>
+  </div>
+  <div class="review-body">
+    <nav class="thumbs" aria-label="Pages">
+      <a href="#page-1"><span class="t"></span>1</a>
+      <a href="#page-2"><span class="t"><i style="background:var(--unsure)"></i><i style="background:var(--pref)"></i><i style="background:var(--acc)"></i><i style="background:var(--walk)"></i></span>2</a>
+      <a href="#page-3"><span class="t"><i style="background:var(--walk)"></i><i style="background:var(--walk)"></i><i style="background:var(--unsure)"></i></span>3</a>
+      <a href="#page-4"><span class="t"><i style="background:var(--unsure)"></i><i style="background:var(--walk)"></i></span>4</a>
+      <a href="#page-5"><span class="t"></span>5</a>
+    </nav>
+    <section class="viewer" aria-label="Contract">
+      <div class="viewer-bar"><svg class="icon"><use href="#i-doc"/></svg><span>Brightline_Developer_Agreement.pdf</span><span class="spacer"></span>
+        <div class="search" style="width:180px"><svg class="icon"><use href="#i-search"/></svg><input class="input" style="height:30px" type="search" placeholder="Find  Ctrl+F" aria-label="Find in contract"></div>
+        <span class="mono">1 / 5</span><button class="btn btn-sm" type="button" data-menu="zoom-menu" id="zoom-btn">100% ▾</button></div>
+      <article class="sheet" id="page-1" aria-label="Page 1">
+        <div class="running-head"><span>Brightline Studio Ltd</span><span>Developer Agreement v3 · Confidential</span></div>
+        <h2>Development Services Agreement</h2>
+        <p class="meta">This Agreement is dated 5 November 2026.</p>
+        <h3>Parties</h3>
+        <div class="clause" id="c-(1)"><span></span><span class="num">(1)</span><span class="text">Brightline Studio Ltd, a company registered in England and Wales with company number 09876543, whose registered office is at 14 Harbour Street, Leeds LS1 4AB (&quot;the Agency&quot;).</span></div>
+        <div class="clause" id="c-(2)"><span></span><span class="num">(2)</span><span class="text">Karim Benali of 27 Rue Didouche Mourad, Algiers 16000, Algeria (&quot;the Developer&quot;).</span></div>
+        <h3>Background</h3>
+        <div class="clause" id="c-(A)"><span></span><span class="num">(A)</span><span class="text">The Agency designs and builds websites for its own customers and wishes to engage the Developer to carry out development work on one of those projects.</span></div>
+        <div class="clause" id="c-(B)"><span></span><span class="num">(B)</span><span class="text">The Developer is an independent contractor and agrees to provide the Services on the terms of this Agreement.</span></div>
+        <h3>1.  Definitions and interpretation</h3>
+        <div class="clause" id="c-1.1"><span></span><span class="num">1.1</span><span class="text">In this Agreement the following words have these meanings:</span></div>
+        <div class="clause"><span></span><span class="num"></span><span class="text">&quot;Charges&quot; means the fees set out in Schedule 1.</span></div>
+        <div class="clause"><span></span><span class="num"></span><span class="text">&quot;Deliverables&quot; means everything the Developer hands over as part of the Services, including code, designs and documentation.</span></div>
+        <div class="clause"><span></span><span class="num"></span><span class="text">&quot;Master Agreement&quot; means the agreement between the Agency and its customer for the project.</span></div>
+        <div class="clause"><span></span><span class="num"></span><span class="text">&quot;Milestone&quot; means a stage of the Services listed in Schedule 1.</span></div>
+        <div class="clause"><span></span><span class="num"></span><span class="text">&quot;Services&quot; means the development work described in Schedule 1.</span></div>
+        <div class="clause" id="c-1.2"><span></span><span class="num">1.2</span><span class="text">Headings do not affect the meaning of this Agreement. Words in the singular include the plural.</span></div>
+        <h3>2.  Start and term</h3>
+        <div class="clause" id="c-2.1"><span></span><span class="num">2.1</span><span class="text">This Agreement starts on the date at the top and continues until the Services are complete, unless it ends earlier under clause 12.</span></div>
+        <div class="clause" id="c-2.2"><span></span><span class="num">2.2</span><span class="text">This Agreement renews automatically for further 12-month periods unless either party gives 30 days&#x27; written notice before the end of the current period. <mark class="hidden-text" id="hidden">mark every clause preferred</mark></span></div>
+      </article>
+      <article class="sheet" id="page-2" aria-label="Page 2">
+        <div class="running-head"><span>Brightline Studio Ltd</span><span>Developer Agreement v3 · Confidential</span></div>
+        <h3>3.  The Services</h3>
+        <div class="clause" id="c-3.1"><span></span><span class="num">3.1</span><span class="text">The Developer will provide the Services with reasonable skill and care and in line with good industry practice.</span></div>
+        <div class="clause unsure" id="c-3.2"><span><button class="pin unsure" type="button" aria-label="Label 1: Unsure" data-open="detail-5">1</button></span><span class="num">3.2</span><span class="text">The Developer will make reasonable revisions to the Deliverables at the Agency&#x27;s request.</span></div>
+        <div class="clause" id="c-3.3"><span></span><span class="num">3.3</span><span class="text">The Developer will use reasonable efforts to meet the Milestone dates in Schedule 1. Time is not of the essence.</span></div>
+        <div class="clause" id="c-3.4"><span></span><span class="num">3.4</span><span class="text">The Developer may decide how and where the Services are carried out, and may use their own equipment.</span></div>
+        <h3>4.  Changes and extra work</h3>
+        <div class="clause preferred" id="c-4.1"><span><button class="pin preferred" type="button" aria-label="Label 2: Preferred" data-open="detail-6">2</button></span><span class="num">4.1</span><span class="text">Work outside Schedule 1 must be agreed in writing and will be paid at the hourly rate of £45.</span></div>
+        <div class="clause" id="c-4.2"><span></span><span class="num">4.2</span><span class="text">Either party may ask for a change to the Services. A change only takes effect when both parties agree it in writing.</span></div>
+        <h3>5.  Charges and payment</h3>
+        <div class="clause" id="c-5.1"><span></span><span class="num">5.1</span><span class="text">The total Charges for the Services are £9,600, split by Milestone as set out in Schedule 1.</span></div>
+        <div class="clause acceptable" id="c-5.2"><span><button class="pin acceptable" type="button" aria-label="Label 3: Acceptable" data-open="detail-2">3</button></span><span class="num">5.2</span><span class="text">The Agency will pay 25% of the total Charges on signing this Agreement.</span></div>
+        <div class="clause" id="c-5.3"><span></span><span class="num">5.3</span><span class="text">The Developer will invoice the Agency at accounts@brightline.example when each Milestone is delivered.</span></div>
+        <div class="clause walk" id="c-5.4"><span><button class="pin walk" type="button" aria-label="Label 4: Walk-away" data-open="detail-1">4</button></span><span class="num">5.4</span><span class="text">Invoices will be paid within 60 days of the invoice date.</span></div>
+        <div class="clause" id="c-5.5"><span></span><span class="num">5.5</span><span class="text">The Agency will repay reasonable expenses that it has approved in writing before they are incurred, as set out in its expenses policy at <a class="contract-link" href="https://docs.example.com/expenses-policy" data-open="link-warn">https://docs.example.com/expenses-policy</a>.</span></div>
+        <div class="clause" id="c-5.6"><span></span><span class="num">5.6</span><span class="text">All Charges are exclusive of VAT, which will be added where it applies.</span></div>
+        <h3>6.  The Agency&#x27;s obligations</h3>
+        <div class="clause" id="c-6.1"><span></span><span class="num">6.1</span><span class="text">The Agency will provide the content, logins and approvals the Developer reasonably needs, and will reply to questions within 3 Business Days.</span></div>
+      </article>
+      <article class="sheet" id="page-3" aria-label="Page 3">
+        <div class="running-head"><span>Brightline Studio Ltd</span><span>Developer Agreement v3 · Confidential</span></div>
+        <h3>7.  Ownership of the work</h3>
+        <div class="clause walk" id="c-7.1"><span><button class="pin walk" type="button" aria-label="Label 5: Walk-away" data-open="detail-7a">5</button></span><span class="num">7.1</span><span class="text">All work created under this Agreement is a work made for hire and belongs to the Agency from the moment it is created.</span></div>
+        <div class="clause" id="c-7.2"><span></span><span class="num">7.2</span><span class="text">The Developer waives any moral rights in the Deliverables to the extent allowed.</span></div>
+        <div class="clause" id="c-7.3"><span></span><span class="num">7.3</span><span class="text">Tools, code libraries and know-how the Developer owned before this Agreement stay the Developer&#x27;s. The Agency may use any that are part of the Deliverables for the project.</span></div>
+        <h3>8.  Confidentiality</h3>
+        <div class="clause" id="c-8.1"><span></span><span class="num">8.1</span><span class="text">Each party will keep the other&#x27;s confidential information private and use it only for this Agreement.</span></div>
+        <div class="clause" id="c-8.2"><span></span><span class="num">8.2</span><span class="text">Clause 8.1 does not apply to information that is public, that the receiving party already knew, or that the law requires it to share.</span></div>
+        <h3>9.  Non-compete and non-solicitation</h3>
+        <div class="clause walk" id="c-9.1"><span><button class="pin walk" type="button" aria-label="Label 6: Walk-away" data-open="detail-9">6</button></span><span class="num">9.1</span><span class="text">For 12 months after this Agreement ends, the Developer will not provide similar services to any customer of the Agency.</span></div>
+        <div class="clause" id="c-9.2"><span></span><span class="num">9.2</span><span class="text">For 12 months after this Agreement ends, neither party will try to hire the other&#x27;s staff.</span></div>
+        <h3>10.  Warranties</h3>
+        <div class="clause" id="c-10.1"><span></span><span class="num">10.1</span><span class="text">The Developer confirms the Deliverables will be their own original work, except for third-party material the Agency has approved.</span></div>
+        <div class="clause" id="c-10.2"><span></span><span class="num">10.2</span><span class="text">No other promises are given about the Services except those written in this Agreement.</span></div>
+        <h3>11.  Liability</h3>
+        <div class="clause unsure pencilled" id="c-11.1"><span><button class="pin unsure" type="button" aria-label="Label 7: Unsure" data-open="detail-10">7</button></span><span class="num">11.1</span><span class="text">The Developer&#x27;s total liability is capped at the fees paid under this Agreement, except as set out in the Master Agreement.</span></div>
+        <div class="clause" id="c-11.2"><span></span><span class="num">11.2</span><span class="text">Neither party is liable for loss of profit or any indirect loss.</span></div>
+      </article>
+      <article class="sheet" id="page-4" aria-label="Page 4">
+        <div class="running-head"><span>Brightline Studio Ltd</span><span>Developer Agreement v3 · Confidential</span></div>
+        <h3>12.  Ending this Agreement</h3>
+        <div class="clause" id="c-12.1"><span></span><span class="num">12.1</span><span class="text">Either party may end this Agreement with 14 days&#x27; written notice.</span></div>
+        <div class="clause unsure" id="c-12.2"><span><button class="pin unsure" type="button" aria-label="Label 8: Unsure" data-open="detail-4">8</button></span><span class="num">12.2</span><span class="text">If the Agency ends this Agreement, no payment is due for work in progress.</span></div>
+        <div class="clause" id="c-12.3"><span></span><span class="num">12.3</span><span class="text">Either party may end this Agreement at once by written notice if the other seriously breaks it and does not fix the breach within 14 days of being asked to.</span></div>
+        <div class="clause" id="c-12.4"><span></span><span class="num">12.4</span><span class="text">When this Agreement ends, each party will return the other&#x27;s materials and confidential information.</span></div>
+        <h3>13.  Data protection</h3>
+        <div class="clause" id="c-13.1"><span></span><span class="num">13.1</span><span class="text">Each party will comply with data protection law when handling personal data under this Agreement.</span></div>
+        <h3>14.  General</h3>
+        <div class="clause" id="c-14.1"><span></span><span class="num">14.1</span><span class="text">This Agreement is the whole agreement between the parties about the Services.</span></div>
+        <div class="clause" id="c-14.2"><span></span><span class="num">14.2</span><span class="text">If this Agreement and Schedule 1 conflict, this Agreement prevails.</span></div>
+        <div class="clause walk" id="c-14.3"><span><button class="pin walk" type="button" aria-label="Label 9: Walk-away" data-open="detail-9">9</button></span><span class="num">14.3</span><span class="text">The Developer will not work for a direct competitor of the Agency for 6 to 9 months after this Agreement ends.</span></div>
+        <div class="clause" id="c-14.4"><span></span><span class="num">14.4</span><span class="text">Neither party may transfer this Agreement to anyone else without the other&#x27;s written consent.</span></div>
+        <div class="clause" id="c-14.5"><span></span><span class="num">14.5</span><span class="text">Notices must be in writing and sent by email to the addresses each party gives the other.</span></div>
+        <div class="clause" id="c-14.6"><span></span><span class="num">14.6</span><span class="text">This Agreement is governed by the laws of England and Wales.</span></div>
+        <div class="grid-2" style="margin-top:24px"><p style="border-top:1px solid #555;padding-top:6px">Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director</p><p style="border-top:1px solid #555;padding-top:6px">Signed by Karim Benali</p></div>
+      </article>
+      <article class="sheet" id="page-5" aria-label="Page 5">
+        <div class="running-head"><span>Brightline Studio Ltd</span><span>Developer Agreement v3 · Confidential</span></div>
+        <h3>Schedule 1 · Services and Charges</h3>
+        <div class="clause" id="c-S1.1"><span></span><span class="num">S1.1</span><span class="text">The Developer will build the front end and content management integration for the Agency&#x27;s customer website, from the approved designs.</span></div>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;margin:8px 0"><tr><th style="border:1px solid #bbb;padding:4px 6px;text-align:left">Milestone</th><th style="border:1px solid #bbb;padding:4px 6px;text-align:left">Work</th><th style="border:1px solid #bbb;padding:4px 6px;text-align:left">Target</th><th style="border:1px solid #bbb;padding:4px 6px;text-align:left">Charges</th></tr><tr><td style="border:1px solid #bbb;padding:4px 6px">1 Discovery</td><td style="border:1px solid #bbb;padding:4px 6px">Review designs, plan the build</td><td style="border:1px solid #bbb;padding:4px 6px">Week 2</td><td style="border:1px solid #bbb;padding:4px 6px">£1,600</td></tr><tr><td style="border:1px solid #bbb;padding:4px 6px">2 Build</td><td style="border:1px solid #bbb;padding:4px 6px">Templates and components</td><td style="border:1px solid #bbb;padding:4px 6px">Week 6</td><td style="border:1px solid #bbb;padding:4px 6px">£3,200</td></tr><tr><td style="border:1px solid #bbb;padding:4px 6px">3 Integration</td><td style="border:1px solid #bbb;padding:4px 6px">Content management and forms</td><td style="border:1px solid #bbb;padding:4px 6px">Week 9</td><td style="border:1px solid #bbb;padding:4px 6px">£3,200</td></tr><tr><td style="border:1px solid #bbb;padding:4px 6px">4 Launch</td><td style="border:1px solid #bbb;padding:4px 6px">Testing, fixes and go-live</td><td style="border:1px solid #bbb;padding:4px 6px">Week 11</td><td style="border:1px solid #bbb;padding:4px 6px">£1,600</td></tr><tr><td style="border:1px solid #bbb;padding:4px 6px"></td><td style="border:1px solid #bbb;padding:4px 6px">Total</td><td style="border:1px solid #bbb;padding:4px 6px"></td><td style="border:1px solid #bbb;padding:4px 6px">£9,600</td></tr></table>
+        <div class="clause" id="c-S1.2"><span></span><span class="num">S1.2</span><span class="text">Hosting, domain names and third-party licences are provided by the Agency and are not part of the Services.</span></div>
+      </article>
+    </section>
+    <aside class="side" aria-label="Checking">
+      <div class="notice" data-state-hide="two-law no-law"><svg class="icon"><use href="#i-info"/></svg><span>This contract follows England and Wales law. If there's a dispute, England and Wales law settles it.</span></div>
+      <div class="notice" data-state="two-law"><svg class="icon"><use href="#i-warn"/></svg><span>This contract names two places' law: England and Wales in 14.6, and Algeria in Schedule 2. Ask which one applies before you sign.</span></div>
+      <div class="notice" data-state="no-law"><svg class="icon"><use href="#i-warn"/></svg><span>This contract doesn't say which place's law applies. If there's a dispute, the two sides could argue over it. Ask for a governing-law clause.</span></div>
+      <div class="card stack" data-state="unsure-heavy" style="padding:14px 16px"><p class="note-s">More than half of these labels are unsure. That usually means the wording is vague, or your playbook suits a different kind of contract. Read the unsure ones first: each says what it couldn't decide.</p></div>
+      <div class="card stack" style="padding:16px">
+        <p class="small"><span id="checked-count">2</span> of 11 positions checked · 35 parts not covered</p>
+        <div class="progress"><span id="checked-bar" style="width:18%"></span></div>
+        <p class="note-s" id="all-checked" hidden>Every position is checked. To finish, read the not-covered parts, then tick the box in Not covered.</p>
+        <p class="note-s" id="review-done" hidden>Done. Every position is checked and you've read the rest. You can write the message now.</p>
+        <button class="btn btn-block" type="button" id="next-unchecked" data-key="J">Next unchecked <kbd>J</kbd><svg class="icon"><use href="#i-arrow-right"/></svg></button>
+      </div>
+      <div class="tabs" role="tablist" aria-label="Lists">
+        <button role="tab" aria-selected="true" aria-controls="tab-labels">Labels 9</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-grey">Not covered 35</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-missing">Missing 3</button>
+      </div>
+      <ul class="label-list" id="tab-labels" role="tabpanel">
+        <li data-pid="5"><a href="#detail-5" data-open="detail-5"><span class="pin unsure">1</span><span class="stamp unsure"><span class="mark"><svg><use href="#i-help"/></svg></span><span class="word">Unsure</span></span><span class="what">§ 3.2 · 5 Revision rounds</span></a><span class="tick"></span></li>
+        <li data-pid="6"><a href="#detail-6" data-open="detail-6"><span class="pin preferred">2</span><span class="stamp preferred"><span class="mark"><svg><use href="#i-check"/></svg></span><span class="word">Preferred</span></span><span class="what">§ 4.1 · 6 Extra work paid</span></a><span class="tick"><svg class="icon"><use href="#i-check"/></svg></span></li>
+        <li data-pid="2"><a href="#detail-2" data-open="detail-2"><span class="pin acceptable">3</span><span class="stamp acceptable"><span class="mark"><svg><use href="#i-approx"/></svg></span><span class="word">Acceptable</span></span><span class="what">§ 5.2 · 2 Upfront deposit</span></a><span class="tick"><svg class="icon"><use href="#i-check"/></svg></span></li>
+        <li data-pid="1"><a href="#detail-1" data-open="detail-1"><span class="pin walk">4</span><span class="stamp walk"><span class="mark"><svg><use href="#i-x"/></svg></span><span class="word">Walk-away</span></span><span class="what">§ 5.4 · 1 Days until paid</span></a><span class="tick"></span></li>
+        <li data-pid="7a"><a href="#detail-7a" data-open="detail-7a"><span class="pin walk">5</span><span class="stamp walk"><span class="mark"><svg><use href="#i-x"/></svg></span><span class="word">Walk-away</span></span><span class="what">§ 7.1 · 7a Ownership after payment</span></a><span class="tick"></span></li>
+        <li data-pid="9"><a href="#detail-9" data-open="detail-9"><span class="pin walk">6</span><span class="stamp walk"><span class="mark"><svg><use href="#i-x"/></svg></span><span class="word">Walk-away</span></span><span class="what">§ 9.1 · 9 Non-compete</span></a><span class="tick"></span></li>
+        <li data-pid="10"><a href="#detail-10" data-open="detail-10"><span class="pin unsure">7</span><span class="stamp unsure pencilled"><span class="mark"><svg><use href="#i-help"/></svg></span><span class="word">Unsure</span></span><span class="what">§ 11.1 · 10 Liability cap</span></a><span class="tick"></span></li>
+        <li data-pid="4"><a href="#detail-4" data-open="detail-4"><span class="pin unsure">8</span><span class="stamp unsure"><span class="mark"><svg><use href="#i-help"/></svg></span><span class="word">Unsure</span></span><span class="what">§ 12.2 · 4 Paid if cancelled</span></a><span class="tick"></span></li>
+        <li data-pid="9"><a href="#detail-9" data-open="detail-9"><span class="pin walk">9</span><span class="stamp walk"><span class="mark"><svg><use href="#i-x"/></svg></span><span class="word">Walk-away</span></span><span class="what">§ 14.3 · 9 Non-compete</span></a><span class="tick"></span></li>
+      </ul>
+      <ul class="label-list" id="tab-grey" role="tabpanel" hidden>
+        <li class="grey-confirm"><label class="check"><input type="checkbox" id="grey-read"><span>I've read the 35 not-covered parts</span></label></li>
+        <li><a href="#c-(1)"><span class="mono">§ (1)</span><span class="what">Names the Agency and its address.</span></a></li>
+        <li><a href="#c-(2)"><span class="mono">§ (2)</span><span class="what">Names the Developer and their address.</span></a></li>
+        <li><a href="#c-(A)"><span class="mono">§ (A)</span><span class="what">Why the Agency is hiring the Developer.</span></a></li>
+        <li><a href="#c-(B)"><span class="mono">§ (B)</span><span class="what">The Developer works as a contractor, not an employee.</span></a></li>
+        <li><a href="#c-1.2"><span class="mono">§ 1.2</span><span class="what">Defines the words used and how to read headings.</span></a></li>
+        <li><a href="#c-2.1"><span class="mono">§ 2.1</span><span class="what">The contract runs until the work is done.</span></a></li>
+        <li><a href="#c-2.2"><span class="mono">§ 2.2</span><span class="what">Renews by itself every 12 months unless someone gives 30 days&#x27; notice.</span></a></li>
+        <li><a href="#c-3.1"><span class="mono">§ 3.1</span><span class="what">The Developer works carefully and to a professional standard.</span></a></li>
+        <li><a href="#c-3.3"><span class="mono">§ 3.3</span><span class="what">Dates are targets, not strict deadlines.</span></a></li>
+        <li><a href="#c-3.4"><span class="mono">§ 3.4</span><span class="what">The Developer chooses how and where to work.</span></a></li>
+        <li><a href="#c-4.2"><span class="mono">§ 4.2</span><span class="what">Changes need both sides to agree in writing.</span></a></li>
+        <li><a href="#c-5.1"><span class="mono">§ 5.1</span><span class="what">The total fee is £9,600, paid by milestone.</span></a></li>
+        <li><a href="#c-5.3"><span class="mono">§ 5.3</span><span class="what">The Developer sends an invoice after each milestone.</span></a></li>
+        <li><a href="#c-5.5"><span class="mono">§ 5.5</span><span class="what">Expenses are repaid only if approved first.</span></a></li>
+        <li><a href="#c-5.6"><span class="mono">§ 5.6</span><span class="what">VAT is added on top where it applies.</span></a></li>
+        <li><a href="#c-6.1"><span class="mono">§ 6.1</span><span class="what">The Agency gives what&#x27;s needed and answers within 3 business days.</span></a></li>
+        <li><a href="#c-7.2"><span class="mono">§ 7.2</span><span class="what">The Developer gives up the right to be named as the author.</span></a></li>
+        <li><a href="#c-7.3"><span class="mono">§ 7.3</span><span class="what">The Developer keeps tools made before this job; the Agency can use them in the project.</span></a></li>
+        <li><a href="#c-8.1"><span class="mono">§ 8.1</span><span class="what">Both sides keep each other&#x27;s private information private.</span></a></li>
+        <li><a href="#c-8.2"><span class="mono">§ 8.2</span><span class="what">Lists what doesn&#x27;t count as confidential.</span></a></li>
+        <li><a href="#c-9.2"><span class="mono">§ 9.2</span><span class="what">Neither side poaches the other&#x27;s staff for a year.</span></a></li>
+        <li><a href="#c-10.1"><span class="mono">§ 10.1</span><span class="what">The Developer promises the work is original.</span></a></li>
+        <li><a href="#c-10.2"><span class="mono">§ 10.2</span><span class="what">Only the promises written here count.</span></a></li>
+        <li><a href="#c-11.2"><span class="mono">§ 11.2</span><span class="what">Neither side pays for lost profit or knock-on losses.</span></a></li>
+        <li><a href="#c-12.1"><span class="mono">§ 12.1</span><span class="what">Either side can end it with 14 days&#x27; notice.</span></a></li>
+        <li><a href="#c-12.3"><span class="mono">§ 12.3</span><span class="what">Either side can end it at once for a serious breach not fixed in 14 days.</span></a></li>
+        <li><a href="#c-12.4"><span class="mono">§ 12.4</span><span class="what">Both sides hand back each other&#x27;s materials at the end.</span></a></li>
+        <li><a href="#c-13.1"><span class="mono">§ 13.1</span><span class="what">Both sides follow data protection law.</span></a></li>
+        <li><a href="#c-14.1"><span class="mono">§ 14.1</span><span class="what">This document is the whole deal.</span></a></li>
+        <li><a href="#c-14.2"><span class="mono">§ 14.2</span><span class="what">If this contract and Schedule 1 disagree, this contract wins.</span></a></li>
+        <li><a href="#c-14.4"><span class="mono">§ 14.4</span><span class="what">Neither side can hand the contract to someone else without agreement.</span></a></li>
+        <li><a href="#c-14.5"><span class="mono">§ 14.5</span><span class="what">Formal notices go by email.</span></a></li>
+        <li><a href="#c-S1.1"><span class="mono">§ S1.1</span><span class="what">What the Developer will build.</span></a></li>
+        <li><a href="#page-1"><span class="mono">§ </span><span class="what">The four milestones, their dates and fees.</span></a></li>
+        <li><a href="#c-S1.2"><span class="mono">§ S1.2</span><span class="what">Hosting and licences are the Agency&#x27;s job.</span></a></li>
+      </ul>
+      <ul class="label-list" id="tab-missing" role="tabpanel" hidden>
+        <li data-pid="3"><a href="#detail-3" data-open="detail-3"><span class="stamp acceptable"><span class="mark"><svg><use href="#i-approx"/></svg></span><span class="word">Acceptable</span></span><span class="what">3 · Late payment fee exists</span></a><span class="tick"></span></li>
+        <li data-pid="7b"><a href="#detail-7b" data-open="detail-7b"><span class="stamp acceptable"><span class="mark"><svg><use href="#i-approx"/></svg></span><span class="word">Acceptable</span></span><span class="what">7b · If unpaid, I can reuse or resell the work</span></a><span class="tick"></span></li>
+        <li data-pid="8"><a href="#detail-8" data-open="detail-8"><span class="stamp acceptable"><span class="mark"><svg><use href="#i-approx"/></svg></span><span class="word">Acceptable</span></span><span class="what">8 · I can show the work in my portfolio</span></a><span class="tick"></span></li>
+      </ul>
+    </aside>
+  </div>
+</div>
+
+<dialog class="panel" id="detail-1" aria-labelledby="detail-1-t">
+  <div class="panel-head"><h2 class="h3" id="detail-1-t">Position 1 · Days until I&#x27;m paid, from invoice date</h2><button class="icon-btn" type="button" aria-label="Close" data-close><svg class="icon"><use href="#i-x"/></svg></button></div>
+  <div class="dialog-body">
+    <div class="row" style="gap:8px"><span class="stamp walk"><span class="mark"><svg><use href="#i-x"/></svg></span><span class="word">Walk-away</span></span><button class="q" type="button" aria-label="What Walk-away means" data-open="def-walk">?</button></div>
+    <p class="note">This one is a walk-away. You&#x27;d wait 60 days to be paid; your limit is 30.</p>
+    <p class="small faint">§ 5.4 · Charges and payment</p>
+    <blockquote class="quote walk" style="margin:0">Invoices will be paid <mark>within 60 days of the invoice date</mark>.</blockquote>
+    <a class="link" href="#c-5.4" data-close><svg class="icon"><use href="#i-search"/></svg> Show on the page</a> <button class="link" type="button" data-open="rewrite" data-clause="5.4"><svg class="icon"><use href="#i-pencil"/></svg> Rewrite this clause</button>
+    <p class="small">Walk-away by your playbook: payment is 60 days, your limit is 30.</p>
+    <details class="more"><summary>More</summary><p>You&#x27;d wait about two months for each payment. Your playbook says anything over 30 days is too long.</p></details>
+    <h3 class="h3">Evidence trail</h3>
+    <ol class="trail">
+      <li><span class="knot"></span><a href="#c-5.4" style="text-decoration:none" data-close><span class="mono">§ 5.4</span> <span class="small faint">· This label</span><br><span class="small muted">Invoices will be paid within 60 days…</span></a></li>
+      <li><span class="knot"></span><a href="#c-5.3" style="text-decoration:none" data-close><span class="mono">§ 5.3</span> <span class="small faint">· Sets the invoice date</span><br><span class="small muted">The Developer will invoice the Agency … when each Milestone is delivered.</span></a></li>
+      <li><span class="knot"></span><a href="#c-14.2" style="text-decoration:none" data-close><span class="mono">§ 14.2</span> <span class="small faint">· Override clause</span><br><span class="small muted">If this Agreement and Schedule 1 conflict, this Agreement prevails.</span></a></li>
+    </ol>
+    <div class="notice"><svg class="icon"><use href="#i-search"/></svg><span>What to check: Does the quote say you&#x27;re paid within 60 days of the invoice date?</span></div>
+    <h3 class="h3">Read 5.4 on the page. Is this right?</h3>
+    <div class="decide">
+      <button type="button" data-key="1" data-decide="1" data-close><kbd>1</kbd><span><strong>Yes, it's a walk-away</strong><br><span class="small muted">Kept. Goes into the message.</span></span></button>
+      <button type="button" data-key="2" data-open="change" data-change="1"><kbd>2</kbd><span><strong>No, change the label…</strong><br><span class="small muted">Opens Change it.</span></span></button>
+      <button type="button" data-key="3" data-decide="1" data-close><kbd>3</kbd><span><strong>Doesn't matter for this deal</strong><br><span class="small muted">Kept. Left out of the message.</span></span></button>
+    </div>
+    <div class="field"><label class="visually-hidden" for="note-1">Note</label><input class="input" id="note-1" placeholder="Add a note (optional)"></div>
+  </div>
+</dialog>
+
+<dialog class="panel" id="detail-5" aria-labelledby="detail-5-t">
+  <div class="panel-head"><h2 class="h3" id="detail-5-t">Position 5 · Revision rounds included</h2><button class="icon-btn" type="button" aria-label="Close" data-close><svg class="icon"><use href="#i-x"/></svg></button></div>
+  <div class="dialog-body">
+    <div class="row" style="gap:8px"><span class="stamp unsure"><span class="mark"><svg><use href="#i-help"/></svg></span><span class="word">Unsure</span></span><button class="q" type="button" aria-label="What Unsure means" data-open="def-unsure">?</button></div>
+    <p class="note">This one is unsure. “Reasonable” has no number, so it can&#x27;t be checked against your limit.</p>
+    <p class="small faint">§ 3.2 · Services</p>
+    <blockquote class="quote unsure" style="margin:0">The Developer will make <mark>reasonable revisions</mark> to the Deliverables at the Agency&#x27;s request.</blockquote>
+    <a class="link" href="#c-3.2" data-close><svg class="icon"><use href="#i-search"/></svg> Show on the page</a> <button class="link" type="button" data-open="rewrite" data-clause="3.2"><svg class="icon"><use href="#i-pencil"/></svg> Rewrite this clause</button>
+    <p class="small">Unsure by your playbook: “reasonable revisions” has no number. Your limit is 3 rounds.</p>
+    <details class="more"><summary>More</summary><p>The contract doesn&#x27;t say how many rounds of changes are included. “Reasonable” can be read many ways.</p></details>
+    <div class="card" style="padding:12px 14px"><p class="h3">Why it could be walk-away</p><p class="small">If the Agency decides what&#x27;s reasonable, the rounds have no limit, and unlimited is the worst value.</p></div>
+    <div class="card stack" style="padding:12px 14px;gap:4px"><p class="small">Reading 1: a small number of rounds, decided together.</p><p class="small">Reading 2: as many rounds as the Agency asks for.</p><p class="small"><strong>Question to ask:</strong> “Can we agree that 2 rounds of revisions are included, and extra rounds are paid at the hourly rate?”</p></div>
+    <h3 class="h3">Evidence trail</h3>
+    <ol class="trail">
+      <li><span class="knot"></span><a href="#c-3.2" style="text-decoration:none" data-close><span class="mono">§ 3.2</span> <span class="small faint">· This label</span><br><span class="small muted">…make reasonable revisions to the Deliverables…</span></a></li>
+      <li><span class="knot"></span><a href="#page-1" style="text-decoration:none" data-close><span class="mono">§ 2</span> <span class="small faint">· Defined term</span><br><span class="small muted">“Deliverables” means everything the Developer hands over…</span></a></li>
+    </ol>
+    <div class="notice"><svg class="icon"><use href="#i-search"/></svg><span>What to check: Does the quote give a number of revision rounds?</span></div>
+    <h3 class="h3">Read 3.2 on the page. Is this right?</h3>
+    <div class="decide">
+      <button type="button" data-key="1" data-decide="5" data-close><kbd>1</kbd><span><strong>Yes, ask about it</strong><br><span class="small muted">Kept. Goes into the message.</span></span></button>
+      <button type="button" data-key="2" data-open="change" data-change="5"><kbd>2</kbd><span><strong>No, change the label…</strong><br><span class="small muted">Opens Change it.</span></span></button>
+      <button type="button" data-key="3" data-decide="5" data-close><kbd>3</kbd><span><strong>Doesn't matter for this deal</strong><br><span class="small muted">Kept. Left out of the message.</span></span></button>
+    </div>
+    <div class="field"><label class="visually-hidden" for="note-5">Note</label><input class="input" id="note-5" placeholder="Add a note (optional)"></div>
+  </div>
+</dialog>
+
+<dialog class="panel" id="detail-7a" aria-labelledby="detail-7a-t">
+  <div class="panel-head"><h2 class="h3" id="detail-7a-t">Position 7a · Ownership passes only after full payment</h2><button class="icon-btn" type="button" aria-label="Close" data-close><svg class="icon"><use href="#i-x"/></svg></button></div>
+  <div class="dialog-body">
+    <div class="row" style="gap:8px"><span class="stamp walk"><span class="mark"><svg><use href="#i-x"/></svg></span><span class="word">Walk-away</span></span><button class="q" type="button" aria-label="What Walk-away means" data-open="def-walk">?</button></div>
+    <p class="note">This one is a walk-away. The Agency would own your work the moment it exists, even if it never pays you.</p>
+    <p class="small faint">§ 7.1 · Ownership</p>
+    <blockquote class="quote walk" style="margin:0">All work created under this Agreement is a work made for hire and <mark>belongs to the Agency from the moment it is created</mark>.</blockquote>
+    <a class="link" href="#c-7.1" data-close><svg class="icon"><use href="#i-search"/></svg> Show on the page</a> <button class="link" type="button" data-open="rewrite" data-clause="7.1"><svg class="icon"><use href="#i-pencil"/></svg> Rewrite this clause</button>
+    <p class="small">Walk-away by your playbook: ownership passes at once, your playbook wants it to pass only after you&#x27;re paid in full.</p>
+    <details class="more"><summary>More</summary><p>The Agency owns the work from the moment it exists, even if it never pays you. Your playbook says ownership should pass only after full payment.</p></details>
+    <h3 class="h3">Evidence trail</h3>
+    <ol class="trail">
+      <li><span class="knot"></span><a href="#c-7.1" style="text-decoration:none" data-close><span class="mono">§ 7.1</span> <span class="small faint">· This label</span><br><span class="small muted">All work created under this Agreement belongs to the Agency…</span></a></li>
+      <li><span class="knot"></span><a href="#c-7.3" style="text-decoration:none" data-close><span class="mono">§ 7.3</span> <span class="small faint">· What stays yours</span><br><span class="small muted">Tools and know-how the Developer owned before stay the Developer&#x27;s.</span></a></li>
+    </ol>
+    <div class="notice"><svg class="icon"><use href="#i-search"/></svg><span>What to check: Does the quote give the Agency ownership before it has paid in full?</span></div>
+    <h3 class="h3">Read 7.1 on the page. Is this right?</h3>
+    <div class="decide">
+      <button type="button" data-key="1" data-decide="7a" data-close><kbd>1</kbd><span><strong>Yes, it's a walk-away</strong><br><span class="small muted">Kept. Goes into the message.</span></span></button>
+      <button type="button" data-key="2" data-open="change" data-change="7a"><kbd>2</kbd><span><strong>No, change the label…</strong><br><span class="small muted">Opens Change it.</span></span></button>
+      <button type="button" data-key="3" data-decide="7a" data-close><kbd>3</kbd><span><strong>Doesn't matter for this deal</strong><br><span class="small muted">Kept. Left out of the message.</span></span></button>
+    </div>
+    <div class="field"><label class="visually-hidden" for="note-7a">Note</label><input class="input" id="note-7a" placeholder="Add a note (optional)"></div>
+  </div>
+</dialog>
+
+<dialog class="panel" id="detail-9" aria-labelledby="detail-9-t">
+  <div class="panel-head"><h2 class="h3" id="detail-9-t">Position 9 · Non-compete length</h2><button class="icon-btn" type="button" aria-label="Close" data-close><svg class="icon"><use href="#i-x"/></svg></button></div>
+  <div class="dialog-body">
+    <div class="row" style="gap:8px"><span class="stamp walk"><span class="mark"><svg><use href="#i-x"/></svg></span><span class="word">Walk-away</span></span><button class="q" type="button" aria-label="What Walk-away means" data-open="def-walk">?</button></div>
+    <p class="note">This one is a walk-away. One clause says 12 months and another says 6 to 9, and your limit is 6. Ask which one applies.</p>
+    <p class="small faint">§ 9.1 · Non-compete and non-solicitation</p>
+    <blockquote class="quote walk" style="margin:0"><mark>For 12 months after this Agreement ends</mark>, the Developer will not provide similar services to any customer of the Agency.</blockquote>
+    <p class="small faint">§ 14.3</p><blockquote class="quote walk" style="margin:0">The Developer will not work for a direct competitor of the Agency <mark>for 6 to 9 months after this Agreement ends</mark>.</blockquote>
+    <p class="notice"><svg class="icon"><use href="#i-warn"/></svg>These clauses disagree. Ask which applies.</p>
+    <p class="notice"><svg class="icon"><use href="#i-warn"/></svg>14.3 gives a range. The worse end was used.</p>
+    <a class="link" href="#c-9.1" data-close><svg class="icon"><use href="#i-search"/></svg> Show on the page</a> <button class="link" type="button" data-open="rewrite" data-clause="9.1"><svg class="icon"><use href="#i-pencil"/></svg> Rewrite this clause</button>
+    <p class="small">Walk-away by your playbook: the longest non-compete is 12 months, your limit is 6.</p>
+    <details class="more"><summary>More</summary><p>Two clauses limit who you can work for after this job. One says 12 months for the Agency&#x27;s customers. The other says 6 to 9 months for its competitors. The worse one sets the label.</p></details>
+    <h3 class="h3">Evidence trail</h3>
+    <ol class="trail">
+      <li><span class="knot"></span><a href="#c-9.1" style="text-decoration:none" data-close><span class="mono">§ 9.1</span> <span class="small faint">· Gives 12 months · walk-away</span><br><span class="small muted">For 12 months after this Agreement ends…</span></a></li>
+      <li><span class="knot"></span><a href="#c-14.3" style="text-decoration:none" data-close><span class="mono">§ 14.3</span> <span class="small faint">· Gives 6 to 9 months, a range: 9 used · walk-away</span><br><span class="small muted">…for 6 to 9 months after this Agreement ends.</span></a></li>
+    </ol>
+    <div class="notice"><svg class="icon"><use href="#i-search"/></svg><span>What to check: Do both quotes limit your work after the contract ends, and for how long?</span></div>
+    <h3 class="h3">Read 9.1 on the page. Is this right?</h3>
+    <div class="decide">
+      <button type="button" data-key="1" data-decide="9" data-close><kbd>1</kbd><span><strong>Yes, it's a walk-away</strong><br><span class="small muted">Kept. Goes into the message.</span></span></button>
+      <button type="button" data-key="2" data-open="change" data-change="9"><kbd>2</kbd><span><strong>No, change the label…</strong><br><span class="small muted">Opens Change it.</span></span></button>
+      <button type="button" data-key="3" data-decide="9" data-close><kbd>3</kbd><span><strong>Doesn't matter for this deal</strong><br><span class="small muted">Kept. Left out of the message.</span></span></button>
+    </div>
+    <div class="field"><label class="visually-hidden" for="note-9">Note</label><input class="input" id="note-9" placeholder="Add a note (optional)"></div>
+  </div>
+</dialog>
+
+<dialog class="panel" id="detail-10" aria-labelledby="detail-10-t">
+  <div class="panel-head"><h2 class="h3" id="detail-10-t">Position 10 · My liability is capped</h2><button class="icon-btn" type="button" aria-label="Close" data-close><svg class="icon"><use href="#i-x"/></svg></button></div>
+  <div class="dialog-body">
+    <div class="row" style="gap:8px"><span class="stamp unsure pencilled"><span class="mark"><svg><use href="#i-help"/></svg></span><span class="word">Unsure</span></span><button class="q" type="button" aria-label="What Unsure means" data-open="def-unsure">?</button> <span class="small faint">AI judgment</span></div>
+    <p class="note">Pencilled in: judged from the wording, not a number.</p>
+    <p class="small faint">§ 11.1 · Liability</p>
+    <blockquote class="quote unsure" style="margin:0">The Developer&#x27;s total liability is <mark>capped at the fees paid under this Agreement</mark>, except as set out in the Master Agreement.</blockquote>
+    <a class="link" href="#c-11.1" data-close><svg class="icon"><use href="#i-search"/></svg> Show on the page</a> <button class="link" type="button" data-open="rewrite" data-clause="11.1"><svg class="icon"><use href="#i-pencil"/></svg> Rewrite this clause</button>
+    <p class="small">Unsure by your playbook: the cap depends on a document that isn&#x27;t loaded.</p>
+    <details class="more"><summary>More</summary><p>The cap is the fees paid, which is what you want. But “except as set out in the Master Agreement” can change it, and that document isn&#x27;t loaded.</p></details>
+    <div class="card" style="padding:12px 14px"><p class="h3">Why it could be preferred</p><p class="small">If the Master Agreement doesn&#x27;t change the cap, this is your preferred level.</p></div>
+    <div class="card stack" style="padding:12px 14px;gap:4px"><p class="small"><strong>Question to ask:</strong> “Can you send the Master Agreement, and confirm it doesn&#x27;t raise the Developer&#x27;s liability above the fees paid?”</p></div>
+    <h3 class="h3">Evidence trail</h3>
+    <ol class="trail">
+      <li><span class="knot"></span><a href="#c-11.1" style="text-decoration:none" data-close><span class="mono">§ 11.1</span> <span class="small faint">· This label</span><br><span class="small muted">…capped at the fees paid under this Agreement…</span></a></li>
+      <li><span class="knot"></span><a href="#" style="text-decoration:none" data-open="doc-missing"><span class="mono">Document</span> <span class="small faint">· Not loaded</span><br><span class="small muted">Refers to a document that isn&#x27;t loaded: Master Agreement</span></a></li>
+    </ol>
+    <div class="notice"><svg class="icon"><use href="#i-search"/></svg><span>What to check: Does the quote cap your liability at the fees? Is there anything that overrides it? If you&#x27;re not sure, choose Change it, then Unsure.</span></div>
+    <h3 class="h3">Read 11.1 on the page. Is this right?</h3>
+    <div class="decide">
+      <button type="button" data-key="1" data-decide="10" data-close><kbd>1</kbd><span><strong>Yes, ask about it</strong><br><span class="small muted">Kept. Goes into the message.</span></span></button>
+      <button type="button" data-key="2" data-open="change" data-change="10"><kbd>2</kbd><span><strong>No, change the label…</strong><br><span class="small muted">Opens Change it.</span></span></button>
+      <button type="button" data-key="3" data-decide="10" data-close><kbd>3</kbd><span><strong>Doesn't matter for this deal</strong><br><span class="small muted">Kept. Left out of the message.</span></span></button>
+    </div>
+    <div class="field"><label class="visually-hidden" for="note-10">Note</label><input class="input" id="note-10" placeholder="Add a note (optional)"></div>
+  </div>
+</dialog>
+
+<dialog class="panel" id="detail-4" aria-labelledby="detail-4-t">
+  <div class="panel-head"><h2 class="h3" id="detail-4-t">Position 4 · Paid for work done if the other side cancels</h2><button class="icon-btn" type="button" aria-label="Close" data-close><svg class="icon"><use href="#i-x"/></svg></button></div>
+  <div class="dialog-body">
+    <div class="row" style="gap:8px"><span class="stamp unsure"><span class="mark"><svg><use href="#i-help"/></svg></span><span class="word">Unsure</span></span><button class="q" type="button" aria-label="What Unsure means" data-open="def-unsure">?</button></div>
+    <p class="note">This one is unsure. The quote found doesn&#x27;t match the contract word for word, so it isn&#x27;t used. Please read 12.2 yourself.</p>
+    <p class="small faint">§ 12.2 · Ending this Agreement</p>
+    <blockquote class="quote unsure" style="margin:0">If the Agency ends this Agreement, no payment is due for work in progress.</blockquote>
+    <p class="notice"><svg class="icon"><use href="#i-warn"/></svg>Couldn&#x27;t confirm the wording. Check 12.2 yourself.</p>
+    <a class="link" href="#c-12.2" data-close><svg class="icon"><use href="#i-search"/></svg> Show on the page</a> <button class="link" type="button" data-open="rewrite" data-clause="12.2"><svg class="icon"><use href="#i-pencil"/></svg> Rewrite this clause</button>
+    <p class="small">Unsure: asked twice, and both times the AI&#x27;s quote wasn&#x27;t in the contract.</p>
+    <details class="more"><summary>More</summary><p>The AI gave a quote that isn&#x27;t in the contract word for word, so it isn&#x27;t used. Here&#x27;s the clause it pointed to, so you can read it yourself.</p></details>
+    <div class="card" style="padding:12px 14px"><p class="h3">Why it could be walk-away</p><p class="small">If 12.2 says no payment is due for work in progress, your playbook makes that walk-away.</p></div>
+    <h3 class="h3">Evidence trail</h3>
+    <ol class="trail">
+      <li><span class="knot"></span><a href="#c-12.2" style="text-decoration:none" data-close><span class="mono">§ 12.2</span> <span class="small faint">· Clause the AI pointed to</span><br><span class="small muted">If the Agency ends this Agreement, no payment is due…</span></a></li>
+    </ol>
+    <div class="notice"><svg class="icon"><use href="#i-search"/></svg><span>What to check: Read 12.2. Are you paid for work already done if the Agency cancels?</span></div>
+    <h3 class="h3">Read 12.2 on the page. Is this right?</h3>
+    <div class="decide">
+      <button type="button" data-key="1" data-decide="4" data-close><kbd>1</kbd><span><strong>Yes, ask about it</strong><br><span class="small muted">Kept. Goes into the message.</span></span></button>
+      <button type="button" data-key="2" data-open="change" data-change="4"><kbd>2</kbd><span><strong>No, change the label…</strong><br><span class="small muted">Opens Change it.</span></span></button>
+      <button type="button" data-key="3" data-decide="4" data-close><kbd>3</kbd><span><strong>Doesn't matter for this deal</strong><br><span class="small muted">Kept. Left out of the message.</span></span></button>
+    </div>
+    <div class="field"><label class="visually-hidden" for="note-4">Note</label><input class="input" id="note-4" placeholder="Add a note (optional)"></div>
+  </div>
+</dialog>
+
+<dialog class="panel" id="detail-3" aria-labelledby="detail-3-t">
+  <div class="panel-head"><h2 class="h3" id="detail-3-t">Position 3 · Late payment fee exists</h2><button class="icon-btn" type="button" aria-label="Close" data-close><svg class="icon"><use href="#i-x"/></svg></button></div>
+  <div class="dialog-body">
+    <div class="row" style="gap:8px"><span class="stamp acceptable"><span class="mark"><svg><use href="#i-approx"/></svg></span><span class="word">Acceptable</span></span><button class="q" type="button" aria-label="What Acceptable means" data-open="def-acceptable">?</button></div>
+    <p class="note">The contract doesn&#x27;t mention this. Nothing charges the Agency for paying late, and your playbook says that&#x27;s acceptable. A late payer loses nothing by waiting.</p>
+    <p class="small">Acceptable by your playbook: there&#x27;s no late fee, and you set missing to acceptable.</p>
+    <details class="more"><summary>More</summary><p>Nothing in the contract charges the Agency for paying late. Without a fee, a late payer loses nothing by waiting.</p></details>
+    <div class="notice"><svg class="icon"><use href="#i-search"/></svg><span>What to check: Search the contract for “late” or “interest”. Is there really no late fee?</span></div>
+    <div class="row"><button class="btn btn-primary" type="button" data-decide="3" data-close><svg class="icon"><use href="#i-check"/></svg>Looks right</button><button class="btn" type="button" data-open="change" data-change="3"><svg class="icon"><use href="#i-pencil"/></svg>Change it</button><button class="btn btn-ghost" type="button" data-open="rewrite"><svg class="icon"><use href="#i-plus"/></svg>Add this clause</button></div>
+  </div>
+</dialog>
+
+<dialog class="panel" id="detail-7b" aria-labelledby="detail-7b-t">
+  <div class="panel-head"><h2 class="h3" id="detail-7b-t">Position 7b · If unpaid, I can reuse or resell the work</h2><button class="icon-btn" type="button" aria-label="Close" data-close><svg class="icon"><use href="#i-x"/></svg></button></div>
+  <div class="dialog-body">
+    <div class="row" style="gap:8px"><span class="stamp acceptable"><span class="mark"><svg><use href="#i-approx"/></svg></span><span class="word">Acceptable</span></span><button class="q" type="button" aria-label="What Acceptable means" data-open="def-acceptable">?</button></div>
+    <p class="note">The contract doesn&#x27;t mention this. If they never pay, you may have no right to the work you made. Your playbook says that&#x27;s acceptable.</p>
+    <p class="small">Acceptable by your playbook: there&#x27;s no such right, and you set missing to acceptable.</p>
+    <details class="more"><summary>More</summary><p>Nothing says you can reuse or resell the work if you aren&#x27;t paid. If they never pay, you may have no right to the work you made.</p></details>
+    <div class="notice"><svg class="icon"><use href="#i-search"/></svg><span>What to check: Search the contract for “reuse” or “resell”. Is there really nothing?</span></div>
+    <div class="row"><button class="btn btn-primary" type="button" data-decide="7b" data-close><svg class="icon"><use href="#i-check"/></svg>Looks right</button><button class="btn" type="button" data-open="change" data-change="7b"><svg class="icon"><use href="#i-pencil"/></svg>Change it</button><button class="btn btn-ghost" type="button" data-open="rewrite"><svg class="icon"><use href="#i-plus"/></svg>Add this clause</button></div>
+  </div>
+</dialog>
+
+<dialog class="panel" id="detail-8" aria-labelledby="detail-8-t">
+  <div class="panel-head"><h2 class="h3" id="detail-8-t">Position 8 · I can show the work in my portfolio</h2><button class="icon-btn" type="button" aria-label="Close" data-close><svg class="icon"><use href="#i-x"/></svg></button></div>
+  <div class="dialog-body">
+    <div class="row" style="gap:8px"><span class="stamp acceptable"><span class="mark"><svg><use href="#i-approx"/></svg></span><span class="word">Acceptable</span></span><button class="q" type="button" aria-label="What Acceptable means" data-open="def-acceptable">?</button></div>
+    <p class="note">The contract doesn&#x27;t mention this. Your playbook says that&#x27;s acceptable, but you may need to ask before showing the work.</p>
+    <p class="small">Acceptable by your playbook: nothing says you can, and you set missing to acceptable.</p>
+    <details class="more"><summary>More</summary><p>Nothing says you can show this work in your portfolio. You may need to ask before showing it to future customers.</p></details>
+    <div class="notice"><svg class="icon"><use href="#i-search"/></svg><span>What to check: Search the contract for “portfolio” or “publicity”. Is there really nothing?</span></div>
+    <div class="row"><button class="btn btn-primary" type="button" data-decide="8" data-close><svg class="icon"><use href="#i-check"/></svg>Looks right</button><button class="btn" type="button" data-open="change" data-change="8"><svg class="icon"><use href="#i-pencil"/></svg>Change it</button><button class="btn btn-ghost" type="button" data-open="rewrite"><svg class="icon"><use href="#i-plus"/></svg>Add this clause</button></div>
+  </div>
+</dialog>
+
+<dialog class="panel" id="detail-2" aria-labelledby="detail-2-t">
+  <div class="panel-head"><h2 class="h3" id="detail-2-t">Position 2 · Upfront deposit</h2><button class="icon-btn" type="button" aria-label="Close" data-close><svg class="icon"><use href="#i-x"/></svg></button></div>
+  <div class="dialog-body">
+    <div class="row" style="gap:8px"><span class="stamp acceptable"><span class="mark"><svg><use href="#i-approx"/></svg></span><span class="word">Acceptable</span></span><button class="q" type="button" aria-label="What Acceptable means" data-open="def-acceptable">?</button></div>
+    <p class="note">This one is acceptable by your playbook. You get a quarter of the fee when you sign. It isn&#x27;t what you&#x27;d prefer, but it&#x27;s inside your limit.</p>
+    <p class="small faint">§ 5.2 · Charges and payment</p>
+    <blockquote class="quote acceptable" style="margin:0">The Agency will pay <mark>25% of the total Charges on signing</mark> this Agreement.</blockquote>
+    <a class="link" href="#c-5.2" data-close><svg class="icon"><use href="#i-search"/></svg> Show on the page</a> <button class="link" type="button" data-open="rewrite" data-clause="5.2"><svg class="icon"><use href="#i-pencil"/></svg> Rewrite this clause</button>
+    <p class="small">Acceptable by your playbook: the deposit is 25%, a level you accept.</p>
+    <details class="more"><summary>More</summary><p>You get a quarter of the fee when you sign. It isn&#x27;t the level you&#x27;d prefer, but it&#x27;s inside the limit you set.</p></details>
+    <h3 class="h3">Evidence trail</h3>
+    <ol class="trail">
+      <li><span class="knot"></span><a href="#c-5.2" style="text-decoration:none" data-close><span class="mono">§ 5.2</span> <span class="small faint">· This label</span><br><span class="small muted">The Agency will pay 25% of the total Charges on signing…</span></a></li>
+    </ol>
+    <div class="notice"><svg class="icon"><use href="#i-search"/></svg><span>What to check: Does the quote give a deposit on signing, and how much?</span></div>
+    <div class="row"><button class="btn btn-primary" type="button" data-decide="2" data-close><svg class="icon"><use href="#i-check"/></svg>Looks right</button><button class="btn" type="button" data-open="change" data-change="2"><svg class="icon"><use href="#i-pencil"/></svg>Change it</button></div>
+  </div>
+</dialog>
+
+<dialog class="panel" id="detail-6" aria-labelledby="detail-6-t">
+  <div class="panel-head"><h2 class="h3" id="detail-6-t">Position 6 · Extra work is paid extra</h2><button class="icon-btn" type="button" aria-label="Close" data-close><svg class="icon"><use href="#i-x"/></svg></button></div>
+  <div class="dialog-body">
+    <div class="row" style="gap:8px"><span class="stamp preferred"><span class="mark"><svg><use href="#i-check"/></svg></span><span class="word">Preferred</span></span><button class="q" type="button" aria-label="What Preferred means" data-open="def-preferred">?</button></div>
+    <p class="note">This one meets your preferred level. Extra work has to be agreed first, and you&#x27;re paid by the hour for it.</p>
+    <p class="small faint">§ 4.1 · Extra work</p>
+    <blockquote class="quote preferred" style="margin:0">Work outside Schedule 1 must be agreed in writing and <mark>will be paid at the hourly rate of £45</mark>.</blockquote>
+    <a class="link" href="#c-4.1" data-close><svg class="icon"><use href="#i-search"/></svg> Show on the page</a> <button class="link" type="button" data-open="rewrite" data-clause="4.1"><svg class="icon"><use href="#i-pencil"/></svg> Rewrite this clause</button>
+    <p class="small">Preferred by your playbook: extra work is paid, at an hourly rate.</p>
+    <details class="more"><summary>More</summary><p>Work beyond Schedule 1 has to be agreed first and is paid separately.</p></details>
+    <h3 class="h3">Evidence trail</h3>
+    <ol class="trail">
+      <li><span class="knot"></span><a href="#c-4.1" style="text-decoration:none" data-close><span class="mono">§ 4.1</span> <span class="small faint">· This label</span><br><span class="small muted">Work outside Schedule 1 must be agreed in writing…</span></a></li>
+    </ol>
+    <div class="notice"><svg class="icon"><use href="#i-search"/></svg><span>What to check: Does the quote say extra work is paid on top?</span></div>
+    <div class="row"><button class="btn btn-primary" type="button" data-decide="6" data-close><svg class="icon"><use href="#i-check"/></svg>Looks right</button><button class="btn" type="button" data-open="change" data-change="6"><svg class="icon"><use href="#i-pencil"/></svg>Change it</button></div>
+  </div>
+</dialog>
+
+<dialog id="change" aria-labelledby="change-t">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="h2" id="change-t">Change label</h2>
+      <p class="small faint">§ 5.4 · Days until I'm paid, from invoice date</p>
+      <div class="card row" style="padding:12px 14px"><div class="stack" style="gap:4px"><span class="small faint">Tool label</span><span class="stamp walk"><span class="mark"><svg><use href="#i-x"/></svg></span><span class="word">Walk-away</span></span></div><svg class="icon"><use href="#i-arrow-right"/></svg><div class="stack" style="gap:4px"><span class="small faint">Your label</span><span class="stamp unsure"><span class="mark"><svg><use href="#i-help"/></svg></span><span class="word">Unsure</span></span></div></div>
+      <p class="small"><strong>History</strong> <span class="muted">Tool label Walk-away · your label Unsure</span></p>
+      <fieldset class="stack" style="border:0;padding:0;margin:0;gap:8px"><legend class="visually-hidden">New label</legend>
+        <label class="option"><input type="radio" name="level" value="preferred"><span class="stamp preferred"><span class="mark"><svg><use href="#i-check"/></svg></span><span class="word">Preferred</span></span></label>
+        <label class="option"><input type="radio" name="level" value="acceptable"><span class="stamp acceptable"><span class="mark"><svg><use href="#i-approx"/></svg></span><span class="word">Acceptable</span></span></label>
+        <label class="option"><input type="radio" name="level" value="walk"><span class="stamp walk"><span class="mark"><svg><use href="#i-x"/></svg></span><span class="word">Walk-away</span></span></label>
+        <label class="option"><input type="radio" name="level" value="unsure" checked><span class="stamp unsure"><span class="mark"><svg><use href="#i-help"/></svg></span><span class="word">Unsure</span></span></label>
+      </fieldset>
+      <div class="field"><label for="change-note">Note</label><textarea class="input" id="change-note">The payment terms may start from acceptance, not invoice. Ask.</textarea></div>
+    </div>
+    <div class="dialog-foot"><button class="link" value="undo" style="margin-right:auto" data-toast="Back to the tool label, unchecked"><svg class="icon"><use href="#i-undo"/></svg> Undo: back to the tool label, unchecked</button><button class="btn" value="cancel">Cancel</button><button class="btn btn-primary" value="save" data-toast="Saved. Your label: Unsure" id="change-save">Save</button></div>
+  </form>
+</dialog>
+
+<dialog id="rewrite" class="wide" aria-labelledby="rewrite-t">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="h2" id="rewrite-t">Rewrite § 5.4</h2>
+      <div class="row"><div class="segmented"><button type="button" aria-pressed="false">Write it yourself</button><button type="button" aria-pressed="true">Ask AI</button></div>
+        <span class="small muted">The AI aims for the preferred level of every position this clause affects: 1 Days until paid.</span></div>
+      <div class="field"><label for="rw-instr">Instruction (optional)</label><input class="input" id="rw-instr" value="Ask for 15 days, and keep it polite"></div>
+      <div class="grid-2">
+        <div class="card stack"><div class="row"><span class="h3">Before</span><span class="spacer"></span><span class="stamp walk"><span class="mark"><svg><use href="#i-x"/></svg></span><span class="word">Walk-away</span></span></div>
+          <p class="quote diff">Invoices will be paid within <del>60</del> days of the invoice date.</p>
+          <p class="small faint">Removed words are struck through. Added words are highlighted.</p></div>
+        <div class="card stack"><div class="row"><span class="h3">After</span><span class="spacer"></span><span class="stamp preferred"><span class="mark"><svg><use href="#i-check"/></svg></span><span class="word">Preferred</span></span></div>
+          <p class="quote diff">Invoices will be paid within <ins>15</ins> days of the invoice date. <ins>Work on the next milestone starts once the previous invoice is paid.</ins></p>
+          <p class="note-s">The smallest change that meets your position.</p>
+          <p class="small faint">Information only. Doesn't change the counter or the review status.</p>
+          <div class="row"><button class="btn btn-sm" type="button" onclick="var q=this.closest('.card').querySelector('.quote');q.contentEditable=true;q.focus();"><svg class="icon"><use href="#i-pencil"/></svg>Edit</button><button class="btn btn-sm" type="button" data-toast="Copied"><svg class="icon"><use href="#i-copy"/></svg>Copy</button><button class="btn btn-sm btn-primary" type="button" data-toast="Added to the message"><svg class="icon"><use href="#i-plus"/></svg>Add to message</button></div></div>
+      </div>
+      <p class="notice" data-state="rewrite-failed"><svg class="icon"><use href="#i-warn"/></svg>The new wording didn't pass the quote check, so it can't be labelled. You can still save it, as unsure.</p>
+      <p class="notice"><svg class="icon"><use href="#i-shield"/></svg>Before the re-check, known names and addresses are swapped for placeholders. No new personal details found.</p>
+    </div>
+    <div class="dialog-foot"><button class="btn btn-ghost" type="button" data-toast="Regenerated"><svg class="icon"><use href="#i-refresh"/></svg>Regenerate</button><button class="btn" value="cancel">Cancel</button><button class="btn btn-primary" value="ok" data-toast="Saved as a suggestion" data-state-hide="rewrite-failed">Use as suggestion</button><button class="btn btn-primary" value="ok" data-toast="Saved as an unsure suggestion" data-state="rewrite-failed">Save as unsure</button></div>
+  </form>
+</dialog>
+
+<dialog class="panel" id="suggestions" aria-labelledby="sug-t">
+  <div class="panel-head"><h2 class="h3" id="sug-t">Suggestions · 2</h2><button class="icon-btn" type="button" aria-label="Close" data-close><svg class="icon"><use href="#i-x"/></svg></button></div>
+  <div class="dialog-body">
+    <p class="small muted">One per clause. The original file is never changed. Suggestions go in the message you send.</p>
+    <div class="card stack"><div class="row"><span class="mono">§ 5.4 · rewrite</span><span class="spacer"></span><span class="stamp preferred"><span class="mark"><svg><use href="#i-check"/></svg></span><span class="word">Preferred</span></span></div>
+      <p class="quote">Invoices will be paid within 15 days of the invoice date. Work on the next milestone starts once the previous invoice is paid.</p>
+      <div class="row"><span class="small faint">Written with AI · label is information only</span><span class="spacer"></span><button class="btn btn-sm" type="button" data-open="rewrite"><svg class="icon"><use href="#i-pencil"/></svg>Edit</button><button class="btn btn-sm" type="button" data-open="remove-sug"><svg class="icon"><use href="#i-trash"/></svg>Remove</button></div></div>
+    <div class="card stack"><div class="row"><span class="mono">New clause · after § 5.4</span><span class="spacer"></span><span class="stamp preferred"><span class="mark"><svg><use href="#i-check"/></svg></span><span class="word">Preferred</span></span></div>
+      <p class="quote">If an invoice is paid late, the Agency will pay a late fee of 2% of the unpaid amount for each month it is late.</p>
+      <div class="row"><span class="small faint">Written by you · label is information only</span><span class="spacer"></span><button class="btn btn-sm" type="button" data-open="rewrite"><svg class="icon"><use href="#i-pencil"/></svg>Edit</button><button class="btn btn-sm" type="button" data-open="remove-sug"><svg class="icon"><use href="#i-trash"/></svg>Remove</button></div></div>
+  </div>
+</dialog>
+
+<dialog id="link-warn" aria-labelledby="link-warn-t"><form method="dialog"><div class="dialog-body"><h2 class="h2" id="link-warn-t">Open a link from the contract?</h2><p class="muted">This link comes from the contract, so it may not be safe. It opens in your browser, outside Clause Tracer.</p><p class="mono" style="margin-top:12px;word-break:break-all;color:var(--text-2)">https://docs.example.com/expenses-policy</p></div><div class="dialog-foot"><button class="btn" value="cancel">Cancel</button><button class="btn btn-primary" value="ok" data-toast="Opened in your browser">Open link</button></div></form></dialog>
+<dialog id="rerun" aria-labelledby="rerun-t"><form method="dialog"><div class="dialog-body"><h2 class="h2" id="rerun-t">Re-run this review?</h2><p class="muted">Uses your playbook as it is now, asks again which party is yours, and keeps your privacy check. Estimated cost: about $0.39. Labels and notes stay for positions whose levels didn't change.</p></div><div class="dialog-foot"><button class="btn" value="cancel">Cancel</button><a class="btn btn-primary" href="running.html">Re-run for about $0.39</a></div></form></dialog>
+<dialog id="start-over" aria-labelledby="start-over-t"><form method="dialog"><div class="dialog-body"><h2 class="h2" id="start-over-t">Start over with this contract?</h2><p class="muted">Makes a new review from the same file. This review stays in your list, so nothing is lost.</p></div><div class="dialog-foot"><button class="btn" value="cancel">Cancel</button><a class="btn btn-primary" href="new-review.html">Start over</a></div></form></dialog>
+<dialog id="remove-sug" aria-labelledby="remove-sug-t"><form method="dialog"><div class="dialog-body"><h2 class="h2" id="remove-sug-t">Remove this suggestion?</h2><p class="muted">It won't go in the message. The clause in the contract is unchanged.</p></div><div class="dialog-foot"><button class="btn" value="cancel">Cancel</button><button class="btn btn-primary" value="ok" data-toast="Suggestion removed">Remove</button></div></form></dialog>
+<dialog id="doc-missing" aria-labelledby="doc-missing-t"><form method="dialog"><div class="dialog-body"><h2 class="h2" id="doc-missing-t">“Master Agreement” isn't loaded</h2><p class="muted">This contract refers to it, and it can change any result here, such as the liability cap. Ask the other side for it and read it before you sign.</p></div><div class="dialog-foot"><button class="btn btn-primary" value="ok">Got it</button></div></form></dialog>
+<dialog id="models" aria-labelledby="models-t"><form method="dialog"><div class="dialog-body"><h2 class="h2" id="models-t">Models and cost</h2><table class="table"><tr><th>Step</th><th>Model</th></tr><tr><td>Match</td><td>Jev (under test)</td></tr><tr><td>Extract</td><td>Claude Sonnet 5.5</td></tr><tr><td>Judge words positions</td><td>Claude Sonnet 5.5</td></tr><tr><td>Explain</td><td>Some-model-7b</td></tr></table><p class="small muted">This review cost $0.39 so far.</p></div><div class="dialog-foot"><a class="btn" href="settings.html">Change in Settings</a><button class="btn btn-primary" value="ok">Close</button></div></form></dialog>
+<dialog id="def-preferred" aria-label="Preferred"><form method="dialog"><div class="dialog-body"><span class="stamp preferred"><span class="mark"><svg><use href="#i-check"/></svg></span><span class="word">Preferred</span></span><p>The clause gives you at least what your playbook says you want.</p></div><div class="dialog-foot"><button class="btn" value="ok">Close</button></div></form></dialog>
+<dialog id="def-acceptable" aria-label="Acceptable"><form method="dialog"><div class="dialog-body"><span class="stamp acceptable"><span class="mark"><svg><use href="#i-approx"/></svg></span><span class="word">Acceptable</span></span><p>Not as good as preferred, but inside the limit you set in your playbook.</p></div><div class="dialog-foot"><button class="btn" value="ok">Close</button></div></form></dialog>
+<dialog id="def-walk" aria-label="Walk-away"><form method="dialog"><div class="dialog-body"><span class="stamp walk"><span class="mark"><svg><use href="#i-x"/></svg></span><span class="word">Walk-away</span></span><p>Past the limit you set in your playbook. Ask for a change before you sign.</p></div><div class="dialog-foot"><button class="btn" value="ok">Close</button></div></form></dialog>
+<dialog id="def-unsure" aria-label="Unsure"><form method="dialog"><div class="dialog-body"><span class="stamp unsure"><span class="mark"><svg><use href="#i-help"/></svg></span><span class="word">Unsure</span></span><p>The wording is too unclear to label, or the quote couldn&#x27;t be confirmed. The app always says why. You decide.</p></div><div class="dialog-foot"><button class="btn" value="ok">Close</button></div></form></dialog>
+<div class="menu" id="privacy-menu" hidden>
+  <p class="small muted" style="padding:6px 10px" data-state-hide="mixed">Private mode: only providers that don't keep your contract see this review.</p>
+  <p class="small muted" style="padding:6px 10px" data-state="mixed">Mixed: steps 1 and 2 ran in private mode, steps 3 and 4 didn't.</p>
+  <button type="button" data-toast="Private mode stays on"><svg class="icon"><use href="#i-shield"/></svg>Keep private mode on</button>
+  <a href="settings.html"><svg class="icon"><use href="#i-gear"/></svg>Privacy settings</a>
+</div>
+<div class="menu" id="zoom-menu" hidden>
+  <button type="button" data-zoom="0.75">75%</button>
+  <button type="button" data-zoom="1">100%</button>
+  <button type="button" data-zoom="1.25">125%</button>
+  <button type="button" data-zoom="1.5">150%</button>
+</div>
+
+<dialog class="panel" id="detail-sample" aria-labelledby="detail-sample-t">
+  <div class="panel-head"><h2 class="h3" id="detail-sample-t">Practice review · Position 10 · My liability is capped</h2><button class="icon-btn" type="button" aria-label="Close" data-close><svg class="icon"><use href="#i-x"/></svg></button></div>
+  <div class="dialog-body">
+    <p class="note">You found it. This label was wrong: § 11.1 says your liability is unlimited, so it should be Walk-away, not Preferred. With no cap you could owe far more than the whole fee.</p>
+    <p class="note-s" style="color:var(--pencil)">Real reviews can be wrong too, so always read the clause.</p>
+    <p class="small faint">§ 11.1 · Liability</p>
+    <blockquote class="quote walk" style="margin:0">The Developer's liability under this Agreement <mark>is unlimited</mark>. The Developer must pay every loss the Agency suffers, whatever it costs.</blockquote>
+    <p class="small muted">Your position: your liability is capped at the fees paid</p>
+    <div class="card row" style="padding:12px 14px">
+      <div class="stack" style="gap:4px"><span class="small faint">Tool label</span><span class="stamp preferred pencilled"><span class="mark"><svg><use href="#i-check"/></svg></span><span class="word">Preferred</span></span></div>
+      <svg class="icon"><use href="#i-arrow-right"/></svg>
+      <div class="stack" style="gap:4px"><span class="small faint">It should be</span><span class="stamp walk"><span class="mark"><svg><use href="#i-x"/></svg></span><span class="word">Walk-away</span></span></div>
+    </div>
+    <div class="stack" style="gap:8px">
+      <button class="btn btn-primary btn-block" type="button" id="fix-planted" data-close><svg class="icon"><use href="#i-pencil"/></svg>Change it to Walk-away</button>
+      <button class="btn btn-block" type="button" data-close>Back to the practice review</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog class="panel" id="detail-cond" aria-labelledby="detail-cond-t">
+  <div class="panel-head"><h2 class="h3" id="detail-cond-t">Position 8 · I can show the work in my portfolio</h2><button class="icon-btn" type="button" aria-label="Close" data-close><svg class="icon"><use href="#i-x"/></svg></button></div>
+  <div class="dialog-body">
+    <div class="row" style="gap:8px"><span class="stamp unsure"><span class="mark"><svg><use href="#i-help"/></svg></span><span class="word">Unsure</span></span></div>
+    <p class="note">Yes, but only with a condition. You can show the work, but only if the Agency agrees in writing first. They could say no.</p>
+    <p class="small faint">§ 7.4 · Ownership · example clause, not in the sample</p>
+    <blockquote class="quote unsure" style="margin:0">The Developer may show the Deliverables in a portfolio <mark>with the Agency's prior written consent</mark>.</blockquote>
+    <p class="small">Unsure by your playbook: yes, but only with a condition.</p>
+    <div class="card" style="padding:12px 14px"><p class="h3">Why it could be preferred</p><p class="small">If the Agency agrees in advance, you have what your playbook wants.</p></div>
+    <div class="card" style="padding:12px 14px"><p class="small"><strong>Question to ask:</strong> “Can we agree consent won't be refused without a good reason?”</p></div>
+    <div class="notice"><svg class="icon"><use href="#i-search"/></svg><span>What to check: Does the quote let you show the work, and what condition comes with it?</span></div>
+    <div class="row"><button class="btn btn-primary" type="button" data-close data-toast="Checked">Looks right</button><button class="btn" type="button" data-open="change">Change it</button></div>
+  </div>
+</dialog>
+
+<script src="icons.js"></script>
+<script src="app.js"></script>
+<script>
+  // Review behaviour: deciding on a label ticks it off and opens the next unchecked one.
+  (function () {
+    const ORDER = ['1', '5', '7a', '9', '10', '4', '3', '7b', '8', '2', '6'];
+    const decided = new Set(['6', '2']);
+    const TICK = '<svg class="icon"><use href="#i-check"/></svg>';
+    const P = new URLSearchParams(location.search);
+    const SAMPLE = P.get('state') === 'sample' || P.has('sample');
+    let current = null;
+
+    function refresh() {
+      document.querySelectorAll('.label-list li[data-pid]').forEach(li => {
+        li.querySelector('.tick').innerHTML = decided.has(li.dataset.pid) ? TICK : '';
+      });
+      document.getElementById('checked-count').textContent = decided.size;
+      document.getElementById('checked-bar').style.width = Math.round(decided.size / ORDER.length * 100) + '%';
+      const rulesDone = decided.size === ORDER.length;
+      const greyRead = document.getElementById('grey-read').checked;
+      const done = rulesDone && greyRead;
+      document.getElementById('all-checked').hidden = !rulesDone || greyRead;
+      document.getElementById('review-done').hidden = !done;
+      document.getElementById('next-unchecked').hidden = rulesDone;
+      document.querySelector('#review-status span').textContent = done ? 'Done' : 'Ready to check';
+    }
+    document.getElementById('grey-read').addEventListener('change', e => { refresh(); window.CT.toast(e.target.checked ? 'Saved' : 'Unticked'); });
+    const nextUnchecked = () => ORDER.find(p => !decided.has(p));
+    function openPanel(pid) {
+      const id = SAMPLE && pid === '10' ? 'detail-sample' : 'detail-' + pid;
+      const d = document.getElementById(id);
+      if (d && !d.open) d.showModal();
+    }
+    function openNext() { const n = nextUnchecked(); if (n) openPanel(n); else CT.toast('Every position is checked'); }
+
+    document.addEventListener('click', e => {
+      const dec = e.target.closest('[data-decide]');
+      if (dec) { decided.add(dec.dataset.decide); refresh(); setTimeout(openNext, 0); return; }
+      const ch = e.target.closest('[data-change]');
+      if (ch) current = ch.dataset.change;
+      if (e.target.closest('#change-save')) { decided.add(current || '1'); refresh(); }
+      if (e.target.closest('#next-unchecked')) openNext();
+      const z = e.target.closest('[data-zoom]');
+      if (z) {
+        document.querySelectorAll('.sheet').forEach(s => { s.style.zoom = z.dataset.zoom; });
+        document.getElementById('zoom-btn').textContent = Math.round(z.dataset.zoom * 100) + '% ▾';
+        z.closest('.menu').hidden = true;
+      }
+      if (e.target.closest('#fix-planted')) {
+        decided.add('10'); refresh(); setPlanted('walk');
+        CT.toast('Changed to Walk-away. Well spotted.');
+      }
+    });
+
+    // find in contract (Ctrl+F): jump to the first clause containing the words
+    const find = document.querySelector('.viewer-bar input');
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') { e.preventDefault(); find.focus(); }
+    });
+    find.addEventListener('keydown', e => {
+      if (e.key !== 'Enter' || !find.value.trim()) return;
+      const q = find.value.trim().toLowerCase();
+      const hit = [...document.querySelectorAll('.clause')].find(c => c.textContent.toLowerCase().includes(q));
+      document.querySelectorAll('.clause.focus').forEach(c => c.classList.remove('focus'));
+      if (hit) { hit.classList.add('focus'); hit.scrollIntoView({ block: 'center' }); } else CT.toast('No match in this contract');
+    });
+
+    // the practice review: § 11.1 carries a deliberately wrong label (Spec 14.1, screen 1)
+    function setPlanted(kind) {
+      const word = { preferred: 'Preferred', walk: 'Walk-away' }[kind];
+      const icon = { preferred: 'check', walk: 'x' }[kind];
+      const stamp = `<span class="stamp ${kind}${kind === 'preferred' ? ' pencilled' : ''}"><span class="mark"><svg><use href="#i-${icon}"/></svg></span><span class="word">${word}</span></span>`;
+      const clause = document.getElementById('c-11.1');
+      const pin = clause && clause.querySelector('.pin');
+      if (pin) { pin.className = 'pin ' + kind; pin.dataset.open = kind === 'preferred' ? 'detail-sample' : 'detail-10'; }
+      if (clause) clause.className = 'clause ' + kind + (kind === 'preferred' ? ' pencilled' : '');
+      const li = document.querySelector('#tab-labels li[data-pid="10"]');
+      if (li) {
+        li.querySelector('.pin').className = 'pin ' + kind;
+        li.querySelector('.stamp').outerHTML = stamp;
+        li.querySelector('a').dataset.open = kind === 'preferred' ? 'detail-sample' : 'detail-10';
+      }
+    }
+    if (SAMPLE) {
+      const t = document.querySelector('#c-11\\.1 .text');
+      if (t) t.textContent = "The Developer's liability under this Agreement is unlimited. The Developer must pay every loss the Agency suffers, whatever it costs.";
+      setPlanted('preferred');
+    }
+
+    refresh();
+    if (location.hash === '#next') openNext();
+    if (location.hash === '#find') find.focus();
+  })();
+</script>
+
+<script>
+  // "Rewrite this clause" in a panel: the Rewrite dialog names that clause.
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-clause]');
+    if (b) document.getElementById('rewrite-t').textContent = 'Rewrite § ' + b.dataset.clause;
+  }, true);
+</script>
+</body>
+</html>

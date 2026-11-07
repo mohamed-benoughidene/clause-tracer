@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Playbook editor · Clause Tracer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* playbook editor */
+  .editor { display: grid; grid-template-columns: 340px 1fr; min-height: calc(100vh - 56px); }
+  .editor-list { background: var(--bg-tone); padding: 20px 16px; display: grid; align-content: start; gap: 14px; }
+  .editor-form { padding: 24px 32px 48px; display: grid; gap: 18px; align-content: start; min-width: 0; }
+  .pos-head { justify-content: space-between; }
+  .pos-list { display: grid; gap: 2px; }
+  .pos-list li { display: flex; align-items: center; gap: 2px; border-radius: var(--r); }
+  .pos-list li[aria-current="true"] { background: var(--bg-surface); }
+  .pos-list a { flex: 1; min-width: 0; display: flex; gap: 8px; padding: 6px 4px; font-size: 13px; text-decoration: none; }
+  .pos-no { min-width: 26px; color: var(--text-3); }
+  .pos-bar { flex-wrap: wrap; }
+  .type-row { align-items: flex-end; flex-wrap: wrap; gap: 16px; }
+  .type-row .field { min-width: 0; }
+  .levels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .stack { display: grid; gap: 12px; }
+  .levels > .card, .stack > .card { margin-top: 0; display: grid; gap: 12px; align-content: start; }
+  .form-section[hidden], .field[hidden] { display: none; }
+  .field-error { display: flex; gap: 6px; align-items: flex-start; font-size: 12.5px; color: var(--unsure-fg); }
+  .field-error .icon { color: currentColor; margin-top: 2px; }
+  .input[aria-invalid="true"] { border-color: var(--unsure); }
+  .yn-preview { margin-top: 4px; }
+  @media (max-width: 860px) {
+    .editor { grid-template-columns: 1fr; }
+    .levels { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<header class="appbar">
+  <button class="btn btn-ghost btn-sm" type="button" data-open="leave-dialog"><svg class="icon"><use href="#i-arrow-left"/></svg>Playbooks</button>
+  <span class="visually-hidden">Editing</span>
+  <div class="title"><strong id="pb-title">Freelancer service agreement</strong><small id="pb-sub">Unsaved changes</small></div>
+  <span class="spacer"></span>
+  <button class="search-commands" type="button" style="width:240px;margin:0"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
+  <button class="btn btn-primary" type="button" data-toast="Saved">Save</button>
+</header>
+
+<div class="editor">
+  <aside class="editor-list" aria-label="Playbook details and positions">
+    <div class="field">
+      <label for="pb-name">Name</label>
+      <input class="input" id="pb-name" value="Freelancer service agreement">
+    </div>
+
+    <div class="grid-2">
+      <div class="field">
+        <label for="pb-side">Side</label>
+        <input class="input" id="pb-side" value="service provider">
+      </div>
+      <div class="field">
+        <label for="pb-customer">Customer</label>
+        <select class="input" id="pb-customer">
+          <option selected>None</option>
+          <option>Atlas Media</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row pos-head">
+      <h2 class="h3" id="pos-count">Positions · 11</h2>
+      <button class="btn btn-sm btn-ghost" type="button" id="add-pos"><svg class="icon"><use href="#i-plus"/></svg>Add</button>
+    </div>
+
+    <ol class="pos-list">
+      <li aria-current="true">
+        <button class="icon-btn" type="button" aria-label="Drag position 1 to reorder" data-toast="Drag the row to move it"><svg class="icon"><use href="#i-drag"/></svg></button>
+        <a href="playbook-editor.html"><span class="pos-no">1</span>Days until I'm paid, from invoice date</a>
+        <button class="icon-btn" type="button" aria-label="Delete position 1" data-open="delete-position"><svg class="icon"><use href="#i-trash"/></svg></button>
+      </li>
+      <li>
+        <button class="icon-btn" type="button" aria-label="Drag position 2 to reorder" data-toast="Drag the row to move it"><svg class="icon"><use href="#i-drag"/></svg></button>
+        <a href="playbook-editor.html"><span class="pos-no">2</span>Upfront deposit</a>
+        <button class="icon-btn" type="button" aria-label="Delete position 2" data-open="delete-position"><svg class="icon"><use href="#i-trash"/></svg></button>
+      </li>
+      <li>
+        <button class="icon-btn" type="button" aria-label="Drag position 3 to reorder" data-toast="Drag the row to move it"><svg class="icon"><use href="#i-drag"/></svg></button>
+        <a href="playbook-editor.html"><span class="pos-no">3</span>Late payment fee exists</a>
+        <button class="icon-btn" type="button" aria-label="Delete position 3" data-open="delete-position"><svg class="icon"><use href="#i-trash"/></svg></button>
+      </li>
+      <li>
+        <button class="icon-btn" type="button" aria-label="Drag position 4 to reorder" data-toast="Drag the row to move it"><svg class="icon"><use href="#i-drag"/></svg></button>
+        <a href="playbook-editor.html"><span class="pos-no">4</span>Paid for work done if the other side cancels</a>
+        <button class="icon-btn" type="button" aria-label="Delete position 4" data-open="delete-position"><svg class="icon"><use href="#i-trash"/></svg></button>
+      </li>
+      <li>
+        <button class="icon-btn" type="button" aria-label="Drag position 5 to reorder" data-toast="Drag the row to move it"><svg class="icon"><use href="#i-drag"/></svg></button>
+        <a href="playbook-editor.html"><span class="pos-no">5</span>Revision rounds included</a>
+        <button class="icon-btn" type="button" aria-label="Delete position 5" data-open="delete-position"><svg class="icon"><use href="#i-trash"/></svg></button>
+      </li>
+      <li>
+        <button class="icon-btn" type="button" aria-label="Drag position 6 to reorder" data-toast="Drag the row to move it"><svg class="icon"><use href="#i-drag"/></svg></button>
+        <a href="playbook-editor.html"><span class="pos-no">6</span>Extra work is paid extra</a>
+        <button class="icon-btn" type="button" aria-label="Delete position 6" data-open="delete-position"><svg class="icon"><use href="#i-trash"/></svg></button>
+      </li>
+      <li>
+        <button class="icon-btn" type="button" aria-label="Drag position 7a to reorder" data-toast="Drag the row to move it"><svg class="icon"><use href="#i-drag"/></svg></button>
+        <a href="playbook-editor.html"><span class="pos-no">7a</span>Ownership passes only after full payment</a>
+        <button class="icon-btn" type="button" aria-label="Delete position 7a" data-open="delete-position"><svg class="icon"><use href="#i-trash"/></svg></button>
+      </li>
+      <li>
+        <button class="icon-btn" type="button" aria-label="Drag position 7b to reorder" data-toast="Drag the row to move it"><svg class="icon"><use href="#i-drag"/></svg></button>
+        <a href="playbook-editor.html"><span class="pos-no">7b</span>If unpaid, I can reuse or resell the work</a>
+        <button class="icon-btn" type="button" aria-label="Delete position 7b" data-open="delete-position"><svg class="icon"><use href="#i-trash"/></svg></button>
+      </li>
+      <li>
+        <button class="icon-btn" type="button" aria-label="Drag position 8 to reorder" data-toast="Drag the row to move it"><svg class="icon"><use href="#i-drag"/></svg></button>
+        <a href="playbook-editor.html"><span class="pos-no">8</span>I can show the work in my portfolio</a>
+        <button class="icon-btn" type="button" aria-label="Delete position 8" data-open="delete-position"><svg class="icon"><use href="#i-trash"/></svg></button>
+      </li>
+      <li>
+        <button class="icon-btn" type="button" aria-label="Drag position 9 to reorder" data-toast="Drag the row to move it"><svg class="icon"><use href="#i-drag"/></svg></button>
+        <a href="playbook-editor.html"><span class="pos-no">9</span>Non-compete length</a>
+        <button class="icon-btn" type="button" aria-label="Delete position 9" data-open="delete-position"><svg class="icon"><use href="#i-trash"/></svg></button>
+      </li>
+      <li>
+        <button class="icon-btn" type="button" aria-label="Drag position 10 to reorder" data-toast="Drag the row to move it"><svg class="icon"><use href="#i-drag"/></svg></button>
+        <a href="playbook-editor.html"><span class="pos-no">10</span>My liability is capped</a>
+        <button class="icon-btn" type="button" aria-label="Delete position 10" data-open="delete-position"><svg class="icon"><use href="#i-trash"/></svg></button>
+      </li>
+    </ol>
+  </aside>
+
+  <section class="editor-form" aria-labelledby="pos-title">
+    <div class="notice" role="status" data-state="copied" style="margin-bottom:16px">
+      <svg class="icon"><use href="#i-check"/></svg>
+      <div class="notice-body">
+        <p>Copied to your playbooks. These are example positions, so make the limits yours. Until you do, reviews say “by the example playbook”.</p>
+      </div>
+    </div>
+
+    <div class="row pos-bar">
+      <h2 class="h2" id="pos-title">Position 1</h2>
+      <span class="spacer"></span>
+      <a class="btn btn-sm" href="review.html" id="test-rule" data-state-hide="blank"><svg class="icon"><use href="#i-search"/></svg>Test this rule on the open contract</a>
+      <button class="btn btn-sm btn-ghost" type="button" data-open="delete-position"><svg class="icon"><use href="#i-trash"/></svg>Delete position</button>
+    </div>
+
+    <div class="field">
+      <label for="pos-topic">Topic</label>
+      <input class="input" id="pos-topic" value="Days until I'm paid, from invoice date">
+    </div>
+
+    <div class="row type-row">
+      <div class="field">
+        <span class="label" id="type-label">Type</span>
+        <div class="segmented" role="group" aria-labelledby="type-label">
+          <button type="button" aria-pressed="true" data-type="number">Number</button>
+          <button type="button" aria-pressed="false" data-type="yesno">Yes/no</button>
+          <button type="button" aria-pressed="false" data-type="words">Words</button>
+        </div>
+      </div>
+      <div class="field" data-only="number" style="width:180px">
+        <label for="pos-unit">Unit</label>
+        <select class="input" id="pos-unit">
+          <option selected>days</option>
+          <option>%</option>
+          <option>months</option>
+          <option>rounds</option>
+        </select>
+      </div>
+      <div class="field" data-only="number">
+        <span class="label" id="dir-label">Direction</span>
+        <div class="segmented" role="group" aria-labelledby="dir-label">
+          <button type="button" aria-pressed="true">Lower is better</button>
+          <button type="button" aria-pressed="false">Higher is better</button>
+        </div>
+      </div>
+    </div>
+
+    <section class="form-section" data-form="number" aria-label="Number levels">
+      <div class="levels">
+        <div class="card">
+          <span class="stamp preferred"><span class="mark"><svg><use href="#i-check"/></svg></span><span class="word">Preferred</span></span>
+          <div class="field">
+            <label for="n-pref">At or under</label>
+            <input class="input" id="n-pref" inputmode="numeric" value="15">
+            <span class="hint">days, 1–120</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <span class="stamp acceptable"><span class="mark"><svg><use href="#i-approx"/></svg></span><span class="word">Acceptable</span></span>
+          <div class="field">
+            <label for="n-accept">At or under</label>
+            <input class="input" id="n-accept" inputmode="numeric" value="30" aria-describedby="n-accept-error">
+            <span class="field-error" id="n-accept-error" data-state="invalid"><svg class="icon"><use href="#i-warn"/></svg>Acceptable has to be more than 15, the preferred limit.</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <span class="stamp walk"><span class="mark"><svg><use href="#i-x"/></svg></span><span class="word">Walk-away</span></span>
+          <div class="field">
+            <label for="n-walk">Everything beyond Acceptable</label>
+            <input class="input" id="n-walk" value="> 30" readonly aria-describedby="n-walk-hint">
+            <span class="hint" id="n-walk-hint">Filled in from Acceptable</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="field" style="width:280px">
+        <label for="n-missing">If the contract says nothing</label>
+        <select class="input" id="n-missing">
+          <option selected>Unsure</option>
+          <option>Preferred</option>
+          <option>Acceptable</option>
+          <option>Walk-away</option>
+        </select>
+        <span class="hint">The level used when no clause matches</span>
+      </div>
+    </section>
+
+    <section class="form-section" data-form="yesno" aria-label="Yes/no levels" hidden>
+      <div class="card">
+        <div class="grid-2">
+          <div class="field">
+            <label for="yn-yes">If the answer is yes</label>
+            <select class="input" id="yn-yes">
+              <option selected>Preferred</option>
+              <option>Acceptable</option>
+            </select>
+            <span class="hint">Must be better than the no level</span>
+          </div>
+          <div class="field">
+            <label for="yn-no">If no, unclear or missing</label>
+            <select class="input" id="yn-no">
+              <option selected>Acceptable</option>
+              <option>Walk-away</option>
+            </select>
+            <span class="hint">Missing always counts as no, so there is no separate missing level</span>
+          </div>
+        </div>
+        <p class="small muted yn-preview">Reads as: Yes counts as <strong>Preferred</strong> · No, unclear or missing counts as <strong>Acceptable</strong></p>
+      </div>
+    </section>
+
+    <section class="form-section" data-form="words" aria-label="Words levels" hidden>
+      <div class="stack">
+        <div class="card">
+          <span class="stamp preferred"><span class="mark"><svg><use href="#i-check"/></svg></span><span class="word">Preferred</span></span>
+          <div class="field">
+            <label for="w-pref">Preferred reads as</label>
+            <textarea class="input" id="w-pref" placeholder="Describe this level in a sentence"></textarea>
+          </div>
+        </div>
+        <div class="card">
+          <span class="stamp acceptable"><span class="mark"><svg><use href="#i-approx"/></svg></span><span class="word">Acceptable</span></span>
+          <div class="field">
+            <label for="w-accept">Acceptable reads as</label>
+            <textarea class="input" id="w-accept" placeholder="Describe this level in a sentence"></textarea>
+          </div>
+        </div>
+        <div class="card">
+          <span class="stamp walk"><span class="mark"><svg><use href="#i-x"/></svg></span><span class="word">Walk-away</span></span>
+          <div class="field">
+            <label for="w-walk">Walk-away reads as</label>
+            <textarea class="input" id="w-walk" placeholder="Describe this level in a sentence"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="field" style="width:280px">
+        <label for="w-missing">If the contract says nothing</label>
+        <select class="input" id="w-missing">
+          <option selected>Unsure</option>
+          <option>Preferred</option>
+          <option>Acceptable</option>
+          <option>Walk-away</option>
+        </select>
+        <span class="hint">The level used when no clause matches</span>
+      </div>
+    </section>
+
+    <div class="field">
+      <label for="pos-why">Why this matters to me (optional)</label>
+      <textarea class="input" id="pos-why">Rent is due on the 1st. Long waits mean I borrow.</textarea>
+      <span class="hint">Never exported. Only sent to the AI if you turn that on in Settings.</span>
+    </div>
+  </section>
+</div>
+
+<dialog id="leave-dialog" aria-labelledby="leave-title">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="h2" id="leave-title">Leave without saving?</h2>
+      <p class="muted" id="leave-text">If you leave now, you'll lose your changes to “Freelancer service agreement”.</p>
+    </div>
+    <div class="dialog-foot"><button class="btn" value="cancel">Stay</button><a class="btn btn-primary" href="playbooks.html">Leave without saving</a></div>
+  </form>
+</dialog>
+
+<dialog id="delete-position" aria-labelledby="delete-position-title">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="h2" id="delete-position-title">Delete “<span id="delete-position-name">Days until I'm paid, from invoice date</span>”?</h2>
+      <p class="muted">It's removed from this playbook when you save. Once you save, it can't be undone. The other positions stay.</p>
+    </div>
+    <div class="dialog-foot"><button class="btn" value="cancel">Cancel</button><button class="btn btn-primary" value="ok" data-toast="Position deleted">Delete position</button></div>
+  </form>
+</dialog>
+
+<script src="icons.js"></script>
+<script src="app.js"></script>
+<script>
+  // Just copied from the starter: the copy's own name, nothing changed yet.
+  if (document.querySelector('[data-state="copied"].on')) {
+    const name = 'Freelancer receiving a service agreement (copy)';
+    document.getElementById('pb-name').value = name;
+    document.getElementById('pb-title').textContent = name;
+    document.getElementById('pb-sub').textContent = 'Saved · not changed yet';
+  }
+</script>
+<script>
+  // Show the form that matches the chosen type.
+  (function () {
+    var typeButtons = document.querySelectorAll('[data-type]');
+    typeButtons.forEach(function (button) {
+      button.addEventListener('click', function () {
+        var type = button.dataset.type;
+        document.querySelectorAll('[data-form]').forEach(function (section) {
+          section.hidden = section.dataset.form !== type;
+        });
+        document.querySelectorAll('[data-only]').forEach(function (field) {
+          field.hidden = field.dataset.only !== type;
+        });
+      });
+    });
+  })();
+</script>
+<script>
+  // State invalid: Acceptable is 10, which is not more than Preferred (15), so the error shows.
+  // By default Acceptable is 30.
+  (function () {
+    var invalid = (new URLSearchParams(location.search).get('state') || '').split(/\s+/).indexOf('invalid') !== -1;
+    var accept = document.getElementById('n-accept');
+    var walk = document.getElementById('n-walk');
+    accept.value = invalid ? '10' : '30';
+    accept.setAttribute('aria-invalid', String(invalid));
+    walk.value = '> ' + accept.value;
+
+    // The delete dialog names the position it will delete.
+    var nameEl = document.getElementById('delete-position-name');
+    document.querySelectorAll('[data-open="delete-position"]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var li = btn.closest('li');
+        nameEl.textContent = li ? li.querySelector('a').lastChild.textContent.trim()
+                                : document.getElementById('pos-topic').value;
+      });
+    });
+  })();
+</script>
+<script>
+  // Create blank (Spec 4.1): no name, no side, and one empty position to start from.
+  (function () {
+    if ((new URLSearchParams(location.search).get('state') || '').split(/\s+/).indexOf('blank') === -1) return;
+    var name = document.getElementById('pb-name'), side = document.getElementById('pb-side');
+    name.value = ''; name.placeholder = 'For example, Design retainer';
+    side.value = ''; side.placeholder = 'For example, service provider';
+    document.getElementById('pb-title').textContent = 'New playbook';
+    document.getElementById('pb-sub').textContent = 'Not saved yet';
+    document.getElementById('leave-text').textContent = "If you leave now, you'll lose this new playbook.";
+    document.getElementById('pos-count').textContent = 'Positions · 1';
+    var items = document.querySelectorAll('.pos-list li');
+    items.forEach(function (li, i) { if (i) li.remove(); });
+    items[0].querySelector('a').lastChild.textContent = 'Untitled position';
+    var topic = document.getElementById('pos-topic');
+    topic.value = ''; topic.placeholder = "For example, Days until I'm paid, from invoice date";
+    ['n-pref', 'n-accept', 'n-walk', 'pos-why'].forEach(function (id) { document.getElementById(id).value = ''; });
+    document.getElementById('pos-why').placeholder = 'Optional. A line to remind you why you set this limit.';
+    document.getElementById('pos-title').textContent = 'Position 1';
+    name.focus();
+  })();
+</script>
+<script>
+  // Add: a new empty position at the end of the list, opened in the form.
+  (function () {
+    var list = document.querySelector('.pos-list');
+    document.getElementById('add-pos').addEventListener('click', function () {
+      var items = list.querySelectorAll('li');
+      var li = items[0].cloneNode(true), n = items.length + 1;
+      li.querySelector('.pos-no').textContent = n;
+      li.querySelector('a').lastChild.textContent = 'Untitled position';
+      li.querySelectorAll('[aria-label]').forEach(function (b) { b.setAttribute('aria-label', b.getAttribute('aria-label').replace(/position \S+/, 'position ' + n)); });
+      items.forEach(function (x) { x.removeAttribute('aria-current'); });
+      li.setAttribute('aria-current', 'true');
+      list.appendChild(li);
+      document.getElementById('pos-count').textContent = 'Positions · ' + n;
+      document.getElementById('pos-title').textContent = 'Position ' + n;
+      var topic = document.getElementById('pos-topic');
+      topic.value = ''; topic.placeholder = "For example, Days until I'm paid, from invoice date";
+      ['n-pref', 'n-accept', 'n-walk', 'pos-why'].forEach(function (id) { document.getElementById(id).value = ''; });
+      topic.focus();
+    });
+  })();
+</script>
+</body>
+</html>

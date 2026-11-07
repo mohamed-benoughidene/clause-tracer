@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Import playbook · Clause Tracer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* import preview */
+  .import-note { display: grid; gap: 4px; margin-bottom: 20px; }
+  .import-actions { justify-content: flex-end; margin-top: 20px; }
+  .table td.num { width: 44px; color: var(--text-3); }
+  .table td.position { color: var(--text); font-size: 14px; }
+</style>
+</head>
+<body>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<div class="app">
+  <aside class="sidebar">
+    <a class="logo" href="home.html"><img class="on-light" src="logo.svg" alt="Clause Tracer"><img class="on-dark" src="logo-dark.svg" alt="Clause Tracer"></a>
+    <a class="btn btn-primary btn-block" href="new-review.html"><svg class="icon"><use href="#i-plus"/></svg>New review</a>
+    <button class="search-commands" type="button"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
+    <nav class="nav" aria-label="Main">
+      <a href="home.html"><svg class="icon"><use href="#i-list"/></svg>Reviews</a>
+      <a href="playbooks.html" aria-current="page"><svg class="icon"><use href="#i-book"/></svg>Playbooks</a>
+      <a href="customers.html"><svg class="icon"><use href="#i-users"/></svg>Customers</a>
+      <a href="settings.html"><svg class="icon"><use href="#i-gear"/></svg>Settings</a>
+      <a href="help.html"><svg class="icon"><use href="#i-help"/></svg>Help</a>
+    </nav>
+    <div class="sidebar-foot">
+      <p><svg class="icon"><use href="#i-key"/></svg>OpenRouter key saved</p>
+      <p><svg class="icon"><use href="#i-shield"/></svg>Private mode: On</p>
+      <p><svg class="icon"><use href="#i-info"/></svg>Credit left: $3.10</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="page-head">
+      <div>
+        <h1 class="h1">Import “<span id="file-name">web_dev_terms.ctplaybook</span>”?</h1>
+        <p>Freelancer service agreement · side: service provider · 7 positions</p>
+        <p>This file came from someone else. Read every position before you import it.</p>
+      </div>
+    </header>
+
+    <section class="card import-note">
+      <p class="note">You already have “Freelancer service agreement”, so this one is saved as “Freelancer service agreement (imported)”.</p>
+      
+    </section>
+
+    <table class="table">
+      <caption class="visually-hidden">Positions in web_dev_terms.ctplaybook</caption>
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Position</th>
+          <th scope="col">Type</th>
+          <th scope="col">Preferred</th>
+          <th scope="col">Acceptable</th>
+          <th scope="col">Walk-away</th>
+          <th scope="col">Missing</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="num">1</td>
+          <td class="position">Days until I'm paid, from invoice date</td>
+          <td>Number · days ↓</td>
+          <td>≤ 15</td>
+          <td>≤ 30</td>
+          <td>> 30</td>
+          <td>Unsure</td>
+        </tr>
+        <tr>
+          <td class="num">2</td>
+          <td class="position">Upfront deposit</td>
+          <td>Number · % ↑</td>
+          <td>≥ 50</td>
+          <td>≥ 25</td>
+          <td>&lt; 25</td>
+          <td>Walk-away</td>
+        </tr>
+        <tr>
+          <td class="num">3</td>
+          <td class="position">Late payment fee exists</td>
+          <td>Yes/no</td>
+          <td>Yes</td>
+          <td>No / unclear</td>
+          <td>—</td>
+          <td>Acceptable</td>
+        </tr>
+        <tr>
+          <td class="num">4</td>
+          <td class="position">Paid for work done if the other side cancels</td>
+          <td>Yes/no</td>
+          <td>Yes</td>
+          <td>—</td>
+          <td>No / unclear</td>
+          <td>Walk-away</td>
+        </tr>
+        <tr>
+          <td class="num">5</td>
+          <td class="position">Revision rounds included</td>
+          <td>Number · rounds ↓</td>
+          <td>≤ 2</td>
+          <td>≤ 3</td>
+          <td>> 3, unlimited</td>
+          <td>Walk-away</td>
+        </tr>
+        <tr>
+          <td class="num">6</td>
+          <td class="position">Extra work is paid extra</td>
+          <td>Yes/no</td>
+          <td>Yes</td>
+          <td>—</td>
+          <td>No / unclear</td>
+          <td>Walk-away</td>
+        </tr>
+        <tr>
+          <td class="num">7a</td>
+          <td class="position">Ownership passes only after full payment</td>
+          <td>Yes/no</td>
+          <td>Yes</td>
+          <td>—</td>
+          <td>No / unclear</td>
+          <td>Walk-away</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="row import-actions">
+      <a class="btn" href="playbooks.html">Cancel</a>
+      <button class="btn btn-primary" type="button" id="import-button" data-toast="Imported">Import</button>
+    </div>
+  </main>
+</div>
+
+<script src="icons.js"></script>
+<script src="app.js"></script>
+<script>
+  // The file chosen on Playbooks.
+  const chosen = new URLSearchParams(location.search).get('file');
+  if (chosen) document.getElementById('file-name').textContent = chosen;
+  // Import: the toast shows for a moment, then the list of playbooks opens.
+  document.getElementById('import-button').addEventListener('click', function () {
+    setTimeout(function () { location.href = 'playbooks.html'; }, 600);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototype map · Clause Tracer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .map { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 16px; align-items: start; }
+  .map h2 { margin-bottom: 8px; }
+  .map li { padding: 6px 0; border-top: 1px solid var(--line); font-size: 13px; }
+  .map li:first-child { border-top: 0; }
+  .map a { font-weight: 500; }
+  .map li span { display: block; color: var(--text-2); font-size: 12.5px; }
+  .flow { counter-reset: s; }
+  .flow li::before { counter-increment: s; content: counter(s) ". "; color: var(--text-3); }
+</style>
+</head>
+<body>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<div class="app">
+  <aside class="sidebar">
+    <a class="logo" href="home.html"><img class="on-light" src="logo.svg" alt="Clause Tracer"><img class="on-dark" src="logo-dark.svg" alt="Clause Tracer"></a>
+    <a class="btn btn-primary btn-block" href="new-review.html"><svg class="icon"><use href="#i-plus"/></svg>New review</a>
+    <button class="search-commands" type="button"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
+    <nav class="nav" aria-label="Main">
+      <a href="home.html"><svg class="icon"><use href="#i-list"/></svg>Reviews</a>
+      <a href="playbooks.html"><svg class="icon"><use href="#i-book"/></svg>Playbooks</a>
+      <a href="customers.html"><svg class="icon"><use href="#i-users"/></svg>Customers</a>
+      <a href="settings.html"><svg class="icon"><use href="#i-gear"/></svg>Settings</a>
+      <a href="help.html"><svg class="icon"><use href="#i-help"/></svg>Help</a>
+    </nav>
+    <div class="sidebar-foot">
+      <p><svg class="icon"><use href="#i-key"/></svg>OpenRouter key saved</p>
+      <p><svg class="icon"><use href="#i-shield"/></svg>Private mode: On</p>
+      <p><svg class="icon"><use href="#i-info"/></svg>Credit left: $3.10</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="page-head">
+      <div>
+        <h1 class="h1">Prototype map</h1>
+        <p>Every screen in Spec 14.1 and every state in Spec 14.2, one click away. This page is for reviewing the prototype; it isn't part of the app.</p>
+      </div>
+      <div class="row">
+        <div class="segmented" aria-label="Colours"><button type="button" data-theme-set="light">Light</button><button type="button" data-theme-set="dark">Dark</button><button type="button" data-theme-set="system">System</button></div>
+        <a class="btn btn-primary" href="index.html">Start the prototype<svg class="icon"><use href="#i-arrow-right"/></svg></a>
+      </div>
+    </header>
+
+    <div class="map">
+      <section class="card">
+        <h2 class="h2">Flows to click through</h2>
+        <ol class="flow">
+          <li><a href="index.html">First launch → key → Reviews</a><span>Paste any key, Save key. It opens Reviews by itself.</span></li>
+          <li><a href="review.html?sample">Practice review</a><span>Find the wrong label (§ 11.1), open it, fix it.</span></li>
+          <li><a href="new-review.html">New review → checks → running → review</a><span>Continue, Looks right, Send for review, Open the review.</span></li>
+          <li><a href="review.html">Check every label</a><span>Press J, then 1, 2 or 3 on each walk-away and unsure. The counter fills.</span></li>
+          <li><a href="output.html">Write the message and save the report</a><span>Tick or untick asks, change the tone, Copy, Save PDF.</span></li>
+          <li><a href="playbook-editor.html">Edit a playbook</a><span>From Playbooks → Edit. Back with changes asks first.</span></li>
+        </ol>
+      </section>
+
+      <section class="card">
+        <h2 class="h2">1 First launch</h2>
+        <ul>
+          <li><a href="index.html">Default</a><span>Not legal advice, key guide, Save key, Skip for now, the sample contract.</span></li>
+          <li><a href="index.html?state=checking">Checking key</a></li>
+          <li><a href="index.html?state=key-ok">Key works</a></li>
+          <li><a href="index.html?state=key-error">Key error</a><span>Plain fix, no red.</span></li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2 class="h2">2 Home</h2>
+        <ul>
+          <li><a href="home.html">Default</a><span>Every status: Ready to check, Running, Draft, Interrupted, Failed, Done; auto-delete notice; “Deletes in 2 days” with Keep it / Delete now.</span></li>
+          <li><a href="home.html?state=empty">No reviews yet</a></li>
+          <li><a href="home.html?state=offline">Offline</a></li>
+          <li><a href="home.html#delete-review">Delete a review</a><span>Names it and says it can't be undone.</span></li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2 class="h2">3 New review</h2>
+        <ul>
+          <li><a href="new-review.html">Default</a></li>
+          <li><a href="new-review.html?state=no-key">No key saved</a></li>
+          <li><a href="new-review.html?state=offline">Offline</a></li>
+          <li><a href="new-review.html?state=scanned">Scanned PDF</a></li>
+          <li><a href="new-review.html?state=mixed">Mixed file, some pages scanned</a></li>
+          <li><a href="new-review.html?state=too-large">Too large</a></li>
+          <li><a href="new-review.html?state=empty">Empty file</a></li>
+          <li><a href="new-review.html?state=not-english">Not English</a><span>A warning names the risks; Continue still works.</span></li>
+          <li><a href="new-review.html?state=old-word">Old Word file (.doc)</a></li>
+          <li><a href="new-review.html?state=playbook-deleted">Draft whose playbook was deleted</a></li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2 class="h2">4 Contract check · 5 Privacy check</h2>
+        <ul>
+          <li><a href="contract-check.html">Contract check</a><span>Hidden text found and marked; merge and split.</span></li>
+          <li><a href="privacy-check.html">Privacy check</a></li>
+          <li><a href="privacy-check.html?state=name-variants">Name variant: same or different person</a></li>
+          <li><a href="privacy-check.html?state=private-off">Private mode turned off</a></li>
+          <li><a href="privacy-check.html?state=over-credit">Cost above remaining credit, “Send anyway”</a></li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2 class="h2">6 Review running</h2>
+        <ul>
+          <li><a href="running.html">Running</a><span>Reading log, cost, time left, Cancel shows the cost so far.</span></li>
+          <li><a href="running.html?state=wrong-key">Interrupted: wrong key</a></li>
+          <li><a href="running.html?state=no-credit">Interrupted: no credit</a></li>
+          <li><a href="running.html?state=no-internet">Interrupted: no internet</a></li>
+          <li><a href="running.html?state=no-private-model">Interrupted: no private-mode model</a></li>
+          <li><a href="running.html?state=done">Done</a></li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2 class="h2">7 Review</h2>
+        <ul>
+          <li><a href="review.html">Default</a><span>Hidden text and unloaded-document banners, governing law, counter, Next unchecked (J).</span></li>
+          <li><a href="review.html?state=playbook-changed">Playbook changed: Re-run</a></li>
+          <li><a href="review.html?state=unsure-heavy">More than half unsure: guidance</a></li>
+          <li><a href="review.html?state=unedited-starter">Unedited starter playbook</a></li>
+          <li><a href="review.html?state=two-law">Two governing-law clauses</a></li>
+          <li><a href="review.html?state=no-law">No governing-law clause</a></li>
+          <li><a href="review.html?state=mixed">Privacy badge “Mixed”</a></li>
+          <li><a href="review.html#rerun">Re-run</a> · <a href="review.html#start-over">Start over</a> · <a href="review.html#doc-missing">Document not loaded</a></li>
+          <li><a href="review.html#link-warn">Link in the contract</a><span>Clicking the link in 5.5 asks first, then opens it outside the app.</span></li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2 class="h2">8 Detail panel · 9 Change it</h2>
+        <ul>
+          <li><a href="review.html#detail-1">Walk-away with evidence trail</a></li>
+          <li><a href="review.html#detail-4">Unsure: the quote couldn't be confirmed</a></li>
+          <li><a href="review.html#detail-9">Conflict: clauses disagree, all shown; range note</a></li>
+          <li><a href="review.html#detail-cond">Conditional yes, with the condition quoted</a></li>
+          <li><a href="review.html#detail-10">AI judgment tag, unloaded document</a></li>
+          <li><a href="review.html#detail-5">Unsure: vague wording, readings and a question</a></li>
+          <li><a href="review.html#detail-3">Missing item, “Add this clause”</a></li>
+          <li><a href="review.html#change">Change it</a><span>Tool label beside yours, history, undo.</span></li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2 class="h2">10 Rewrite · 11 Suggestions</h2>
+        <ul>
+          <li><a href="review.html#rewrite">Rewrite with AI, before and after</a></li>
+          <li><a href="review.html?state=rewrite-failed#rewrite">Rewrite failed its quote check, save as unsure</a></li>
+          <li><a href="review.html#suggestions">Suggestions</a></li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2 class="h2">12 Output</h2>
+        <ul>
+          <li><a href="output.html">Items unchecked</a></li>
+          <li><a href="output.html?state=all-checked">Everything checked</a></li>
+          <li><a href="output.html?state=nothing-to-ask">Nothing to ask for</a></li>
+          <li><a href="output.html?state=labels-changed">Labels changed since the message</a></li>
+          <li><a href="output.html#save-pdf">Save PDF</a></li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2 class="h2">13–16 Playbooks</h2>
+        <ul>
+          <li><a href="playbooks.html">Playbooks</a></li>
+          <li><a href="playbooks.html?state=import-failed">Import failed: not a playbook file</a></li>
+          <li><a href="starter-preview.html">Starter preview</a> · <a href="starter-preview.html?from=new-review">from New review</a></li>
+          <li><a href="playbook-editor.html?state=copied">Starter just copied</a> · <a href="new-review.html?state=copied-starter">Copy picked in New review</a></li>
+          <li><a href="import-preview.html">Import preview</a></li>
+          <li><a href="playbook-editor.html">Playbook editor</a> · <a href="playbook-editor.html?state=blank">Create blank</a></li>
+          <li><a href="playbook-editor.html?state=invalid">Validation error</a></li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2 class="h2">17–20 Customers, Settings, Help, Error</h2>
+        <ul>
+          <li><a href="customers.html">Customers</a></li>
+          <li><a href="settings.html">Settings</a></li>
+          <li><a href="settings.html?state=model-cant">A model can't do a step; untested warning</a></li>
+          <li><a href="settings.html?state=update-available">Update available</a> · <a href="settings.html?state=up-to-date">Up to date</a></li>
+          <li><a href="settings.html#lower-autodelete">Lowering auto-delete: confirm</a></li>
+          <li><a href="help.html">Help</a></li>
+          <li><a href="error.html">Error</a></li>
+        </ul>
+      </section>
+    </div>
+  </main>
+</div>
+<script src="icons.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Help · Clause Tracer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* help page only */
+  .card > .h2 { margin-bottom: 12px; }
+  .numbered { list-style: decimal; padding-left: 22px; display: grid; gap: 4px; }
+  .numbered li::marker { color: var(--text-3); }
+  .glossary { display: grid; grid-template-columns: 170px 1fr; }
+  .glossary > dt, .glossary > dd { margin: 0; padding: 12px 0; border-top: 1px solid var(--line); }
+  .glossary > dt { display: flex; align-items: center; }
+  .glossary > dd { color: var(--text-2); }
+  .glossary > dt:first-child, .glossary > dd:first-of-type { border-top: 0; }
+  .glossary dt.term { font: 600 13px/1.4 var(--sans); }
+  .glossary dd.def { font-size: 13px; }
+  .subhead { margin: 18px 0 4px; }
+  .shortcuts td { padding: 10px 20px; }
+  .shortcuts td:first-child { white-space: nowrap; }
+  .shortcuts td:last-child { color: var(--text); font-size: 13px; }
+  kbd { border: 1px solid var(--line-strong); border-radius: 3px; padding: 1px 6px; background: var(--bg-surface);
+    color: var(--text); }
+  .keys { display: inline-flex; align-items: center; gap: 6px; }
+  .keys .sep { color: var(--text-3); }
+</style>
+</head>
+<body>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<div class="app">
+  <aside class="sidebar">
+    <a class="logo" href="home.html"><img class="on-light" src="logo.svg" alt="Clause Tracer"><img class="on-dark" src="logo-dark.svg" alt="Clause Tracer"></a>
+    <a class="btn btn-primary btn-block" href="new-review.html"><svg class="icon"><use href="#i-plus"/></svg>New review</a>
+    <button class="search-commands" type="button"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
+    <nav class="nav" aria-label="Main">
+      <a href="home.html"><svg class="icon"><use href="#i-list"/></svg>Reviews</a>
+      <a href="playbooks.html"><svg class="icon"><use href="#i-book"/></svg>Playbooks</a>
+      <a href="customers.html"><svg class="icon"><use href="#i-users"/></svg>Customers</a>
+      <a href="settings.html"><svg class="icon"><use href="#i-gear"/></svg>Settings</a>
+      <a href="help.html" aria-current="page"><svg class="icon"><use href="#i-help"/></svg>Help</a>
+    </nav>
+    <div class="sidebar-foot">
+      <p><svg class="icon"><use href="#i-key"/></svg>OpenRouter key saved</p>
+      <p><svg class="icon"><use href="#i-shield"/></svg>Private mode: On</p>
+      <p><svg class="icon"><use href="#i-info"/></svg>Credit left: $3.10</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="page-head">
+      <div>
+        <h1 class="h1">Help</h1>
+      </div>
+    </header>
+
+    <div class="grid-2">
+      <div>
+        <section class="card" aria-labelledby="how-title" id="how">
+          <h2 class="h2" id="how-title">How a review works</h2>
+          <ol class="numbered">
+            <li>Load a contract and pick a playbook.</li>
+            <li>Check the split and the private details.</li>
+            <li>The app labels each position and shows its evidence.</li>
+            <li>You check every label: confirm it or change it.</li>
+            <li>Write a message to the other side, or save a report.</li>
+          </ol>
+          <div class="row" style="margin-top:16px; flex-wrap:wrap">
+            <a class="btn" href="new-review.html"><svg class="icon"><use href="#i-plus"/></svg>Start a review</a>
+            <a class="btn" href="review.html?sample"><svg class="icon"><use href="#i-doc"/></svg>Try a sample contract</a>
+            <button class="btn btn-ghost" type="button" data-toast="Tips will show again"><svg class="icon"><use href="#i-refresh"/></svg>Replay tips</button>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="words-title" id="words">
+          <h2 class="h2" id="words-title">Words used in this app</h2>
+          <p class="note-s muted" style="margin-top:2px">There are four labels, plus grey for parts no position covers. Each is shown as a stamp.</p>
+          <dl class="glossary" style="margin-top:12px">
+            <dt><span class="stamp preferred"><span class="mark"><svg><use href="#i-check"/></svg></span><span class="word">Preferred</span></span></dt>
+            <dd>The clause gives you at least what your playbook says you want.</dd>
+            <dt><span class="stamp acceptable"><span class="mark"><svg><use href="#i-approx"/></svg></span><span class="word">Acceptable</span></span></dt>
+            <dd>Not as good as preferred, but inside the limit you set in your playbook.</dd>
+            <dt><span class="stamp walk"><span class="mark"><svg><use href="#i-x"/></svg></span><span class="word">Walk-away</span></span></dt>
+            <dd>Past the limit you set in your playbook. Ask for a change before you sign.</dd>
+            <dt><span class="stamp unsure"><span class="mark"><svg><use href="#i-help"/></svg></span><span class="word">Unsure</span></span></dt>
+            <dd>The wording is too unclear to label, or the quote couldn't be confirmed. The app always says why. You decide.</dd>
+            <dt><span class="stamp grey"><span class="mark"><svg><use href="#i-ring-dashed"/></svg></span><span class="word">Not covered</span></span></dt>
+            <dd>No position covers this part.</dd>
+          </dl>
+
+          <h3 class="h3 subhead">Legal terms in plain English</h3>
+          <dl class="glossary">
+            <dt class="term">Indemnity</dt>
+            <dd class="def">A promise to pay the other side's costs if something goes wrong, such as a claim from a third party. Check who promises what.</dd>
+            <dt class="term">Limitation of liability</dt>
+            <dd class="def">A cap on how much one side can owe the other if things go wrong. “Uncapped” means there is no limit.</dd>
+            <dt class="term">Governing law</dt>
+            <dd class="def">Which country's or state's law decides what the contract means, and where a dispute is heard.</dd>
+            <dt class="term">Termination</dt>
+            <dd class="def">Ending the contract. Check how much notice each side must give, and whether you're paid for work already done.</dd>
+            <dt class="term">Confidential information</dt>
+            <dd class="def">Anything you must keep private. Check what counts and how long the promise lasts.</dd>
+            <dt class="term">Intellectual property (IP)</dt>
+            <dd class="def">Who owns the work you make: you, or the other side. Check when it passes to the other side: when you make it, or once you're paid.</dd>
+            <dt class="term">Work made for hire</dt>
+            <dd class="def">A rule that the other side owns what you create from the moment it exists.</dd>
+            <dt class="term">Non-compete</dt>
+            <dd class="def">A promise not to work for competitors for a set time after the contract ends.</dd>
+            <dt class="term">Warranty</dt>
+            <dd class="def">A promise that the work meets a standard. Check what you're promising, and what happens if the work falls short.</dd>
+            <dt class="term">Force majeure</dt>
+            <dd class="def">Events nobody controls, such as floods or strikes, that excuse a side from its duties.</dd>
+          </dl>
+        </section>
+      </div>
+
+      <div>
+        <section class="card" aria-labelledby="key-title" id="key">
+          <h2 class="h2" id="key-title">Get an OpenRouter key</h2>
+          <p class="muted">Create an account, add credit, turn off Safety Retention, create a key.</p>
+          <div class="row" style="margin-top:14px; flex-wrap:wrap">
+            <a class="btn" href="index.html"><svg class="icon"><use href="#i-key"/></svg>Open the key guide</a>
+            <a class="btn" href="settings.html#ai-key"><svg class="icon"><use href="#i-gear"/></svg>Key settings</a>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="sent-title" id="sent">
+          <h2 class="h2" id="sent-title">What gets sent</h2>
+          <p class="muted">Only your positions and the contract go to OpenRouter, with names swapped for placeholders like “Person 1”. Never playbook names, customers, your notes, or To and From names. No telemetry.</p>
+          <p class="small" style="margin-top:12px"><a class="link" href="settings.html#privacy">Change what gets sent in Settings</a></p>
+        </section>
+
+        <section class="card" aria-labelledby="shortcuts-title" id="shortcuts">
+          <h2 class="h2" id="shortcuts-title">Keyboard shortcuts</h2>
+          <table class="table shortcuts">
+            <thead>
+              <tr><th scope="col"><span class="visually-hidden">Keys</span></th><th scope="col"><span class="visually-hidden">What it does</span></th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="keys"><kbd>Ctrl</kbd><span class="sep">+</span><kbd>K</kbd></span></td>
+                <td>Commands</td>
+              </tr>
+              <tr>
+                <td><kbd>J</kbd></td>
+                <td>Next unchecked</td>
+              </tr>
+              <tr>
+                <td><span class="keys"><kbd>]</kbd><span class="sep">/</span><kbd>[</kbd></span></td>
+                <td>Next / previous label</td>
+              </tr>
+              <tr>
+                <td><span class="keys"><kbd>1</kbd><span class="sep">/</span><kbd>2</kbd><span class="sep">/</span><kbd>3</kbd></span></td>
+                <td>Decide on a walk-away or unsure label</td>
+              </tr>
+              <tr>
+                <td><span class="keys"><kbd>Ctrl</kbd><span class="sep">+</span><kbd>F</kbd></span></td>
+                <td>Find in contract</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="row" style="margin-top:14px">
+            <button class="btn btn-sm" type="button" data-open="all-shortcuts"><svg class="icon"><use href="#i-list"/></svg>See all shortcuts</button>
+          </div>
+          <p class="small muted" style="margin-top:10px">Ctrl+/ opens the full list.</p>
+        </section>
+
+        <section class="card" aria-labelledby="legal-title" id="legal">
+          <h2 class="h2" id="legal-title">Not legal advice</h2>
+          <p class="note">Clause Tracer isn't a lawyer, and this isn't legal advice.</p>
+          <p class="small muted" style="margin-top:8px">Free to use, including for paid work. Source available under the Functional Source License, with no warranty. Each version becomes Apache 2.0 two years after its release. Sample contract: Dominic Fallows, CC BY-SA 4.0.</p>
+          <p class="small" style="margin-top:10px"><a class="link" href="https://fsl.software/" target="_blank" rel="noopener">Read the licence<span class="visually-hidden"> (opens in your browser)</span></a></p>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+
+<dialog id="all-shortcuts" aria-labelledby="all-shortcuts-title">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="h2" id="all-shortcuts-title">Keyboard shortcuts</h2>
+      <table class="table shortcuts">
+        <thead>
+          <tr><th scope="col"><span class="visually-hidden">Keys</span></th><th scope="col"><span class="visually-hidden">What it does</span></th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="keys"><kbd>Ctrl</kbd><span class="sep">+</span><kbd>K</kbd></span></td><td>Commands</td></tr>
+          <tr><td><kbd>J</kbd></td><td>Next unchecked</td></tr>
+          <tr><td><span class="keys"><kbd>]</kbd><span class="sep">/</span><kbd>[</kbd></span></td><td>Next / previous label</td></tr>
+          <tr><td><span class="keys"><kbd>1</kbd><span class="sep">/</span><kbd>2</kbd><span class="sep">/</span><kbd>3</kbd></span></td><td>Decide on a walk-away or unsure label</td></tr>
+          <tr><td><span class="keys"><kbd>Ctrl</kbd><span class="sep">+</span><kbd>F</kbd></span></td><td>Find in contract</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="dialog-foot"><button class="btn btn-primary" value="ok">Close</button></div>
+  </form>
+</dialog>
+
+<script src="icons.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
