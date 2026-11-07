@@ -29,6 +29,8 @@ There are two shapes, each in four colour versions. Every file comes as an SVG a
 | --- | --- |
 | `Red-Eyed Butterfly Engraving Collage.png` | The full-size original of the First launch picture (1535 × 1024): a page of etched butterflies, with one red one. |
 | `hero-butterflies.webp` | The compressed copy of that picture used in the app (360 KB). The prototype has the same file at `prototype/hero-butterflies.webp`. |
+| `clause-tracer-social-preview.png` | GitHub social preview, 1280 × 640. Upload in Settings → General → Social preview. |
+| `clause-tracer-readme-banner.jpg` | Banner at the top of the root README, 1600 × 500. |
 
 ## Colours
 
