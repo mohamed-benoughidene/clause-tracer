@@ -349,6 +349,9 @@ Design code that is easy to check, and use tests to find bad architecture early.
 - **T8.** **Only if the project uses AI:** keep a small set of real examples with known good answers. Run it now and then to track quality, apart from the fast tests, because it costs money and varies.
 - **T9.** Test the architecture too: check that the core never imports from adapters, treat a circular-import crash as a real signal, and run the tests in CI.
 - **T10.** When testing hurts, fix the design. Do not just write a bigger test.
+- **T11.** Expected answers have a human owner. Keep the expected values of acceptance tests in tables a person edits. Regenerate saved expected output only with a named command, and have a person read the difference. Never change code and its expected answers in one step without that read.
+- **T12.** **Only if the project uses AI:** a replay fake fails on a request it has no saved reply for, and on a saved reply nothing used. When you measure quality, count cases, not repeated runs of the same case.
+- **T13.** Every promise made to users has a test that fails when the promise breaks. If no test can prove a promise, reword the promise.
 
 1. Keep the core pure
 

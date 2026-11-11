@@ -383,13 +383,16 @@ The test set runs after every change to prompts, models, or labeling code.
 
 ## 13. Open decisions before coding
 
-- [ ] Desktop shell: Tauri or Electron.
-- [ ] How Presidio and its language model are bundled, and the download size.
+Each open item now has a recommendation in a decision record (ADR) with status *proposed*. None is settled until the ADR is accepted. [`system-design.md`](system-design.md) section 13 lists them all, with more that came up during design.
+
+- [ ] Desktop shell: Tauri or Electron. Recommended: neither; pywebview, so all shell code is Python ([ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md)).
+- [ ] How Presidio and its language model are bundled, and the download size. Recommended: the medium spaCy model, bundled in the installer ([ADR 0008](adr/0008-personal-data-detection-bundle.md)).
 - [x] License: Functional Source License, FSL-1.1-ALv2 (decided 7 Nov 2026).
-- [ ] Which 2 or 3 models to start testing with, from OpenRouter's zero-retention list.
-- [ ] Whether Jev beats an AI model on steps 6a and 9, and whether it can run under the same privacy rules.
+- [ ] Which 2 or 3 models to start testing with, from OpenRouter's zero-retention list. Recommended: Claude Sonnet 5.5, with GPT-6.1 Terra and DeepSeek V4.1 Flash as comparisons ([ADR 0010](adr/0010-starting-models.md)).
+- [ ] Whether Jev beats an AI model on steps 6a and 9, and whether it can run under the same privacy rules. Recommended: keep it as an experiment only ([ADR 0010](adr/0010-starting-models.md)).
 - [ ] Final input limits and the cost per review, from testing.
 - [ ] Review screen layout, settled with a rough prototype. Later: add at least one outside tester, who must also catch a planted wrong label.
+- [ ] Design decisions that change what this spec says, if accepted: who writes the message and the not-covered summaries ([ADR 0011](adr/0011-who-writes-the-words.md)); Rule 7, disagreeing searches, quotes that can't be placed on the page, and tracked changes ([ADR 0012](adr/0012-missing-unsure-and-evidence-failures.md)); the release gates added to section 11 ([ADR 0013](adr/0013-test-layers-and-release-gates.md)).
 
 ## 14. Prototype handoff
 

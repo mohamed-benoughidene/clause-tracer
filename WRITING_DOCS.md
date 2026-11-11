@@ -19,6 +19,8 @@ Every fact has one home. Other files may repeat it, but the home wins. If they d
 | Privacy and security promises | `docs/spec.md` section 8 | `README.md`, `SECURITY.md`, Help and Settings pages, ux-copy |
 | The licence | `LICENSE` | `README.md`, `COMMERCIAL_LICENSE.md`, `CLA.md`, Help and Settings pages |
 | How the code is built | `Constitution.md` | ADR 0004, `src/clause_tracer/README.md`, `AGENTS.md` |
+| How the parts of the system fit together | `docs/system-design.md` | ADRs 0005 to 0015, the architecture report in `reports/` |
+| How the app is tested, and what must pass before a release | `docs/testing-strategy.md` | Spec 11, ADR 0013, `tests/README.md` |
 | How the code is laid out | `docs/adr/0004-code-layout.md` | `src/clause_tracer/README.md`, the import rules in `pyproject.toml`, `AGENTS.md` |
 | Terms for contributors and paying users | `CLA.md`, `COMMERCIAL_LICENSE.md` | `README.md` |
 | How to keep the docs up to date | This file | `AGENTS.md`, `docs/README.md` |
@@ -36,6 +38,8 @@ Find your change in the left column. Update every file in the right column in th
 | **Add or rename a term** (a label, a status, a button name) | Spec section 2 (glossary), then the ux-copy word list (section 2). Search for the old word everywhere (see section 4 of this guide). |
 | **Change a setting, or add one** | Spec 14.3, the Settings page, ux-copy (Settings in section 4), and README if users would look for it there. |
 | **Change the AI steps or models** | Spec section 6. If what is sent to the AI changes, treat it as a privacy change too (the row below). |
+| **Change how the parts fit together** (a process, a port, storage, the engine protocol, packaging) | `docs/system-design.md`, and an ADR if the choice is hard to undo. |
+| **Add or change a kind of test, a release gate or a coverage target** | `docs/testing-strategy.md`, and Spec 11 if an acceptance test changes. |
 | **Make a decision someone may later ask "why?" about** | Write an ADR (section 6). |
 | **Change a token or a component** | `styles.css` first, then the matching part of `design-system.md`. If the change fixes an audit item, mark it ✅ in design-system section 8. |
 | **Change what data the app stores, sends or keeps** | Spec section 8, the SECURITY.md scope, the README privacy lines and badges, and the Help and Settings copy. See section 3. |
@@ -115,9 +119,11 @@ These rules apply to every doc. The app's own words follow `ux-copy.md` too.
 Write an ADR for a decision that is hard to undo, or that someone will later ask "why did we do this?" about.
 
 - **Name:** `docs/adr/NNNN-short-title.md`, with the next number.
-- **Front matter:** `status` (proposed, accepted or superseded) and `date`.
+- **Two formats.** ADRs 0001 to 0004 use the short format below. From ADR 0005 on, use the long format (chosen on 11 Nov 2026): a `# ADR-NNNN: title` heading, then **Status**, **Date** and **Deciders** lines, then `## Context`, `## Decision`, `## Options Considered` (a small table, pros and cons for each option), `## Trade-off Analysis`, `## Consequences` and `## Action Items`. Copy [ADR 0005](docs/adr/0005-engine-runner-shapes-and-ports.md) to start one. Don't convert the older ADRs.
+- **Status:** proposed, accepted or superseded. A proposed ADR is a recommendation. Only the project owner changes it to accepted.
+- **Short format, front matter:** `status` and `date`.
 - **First paragraph:** the decision, in plain words.
-- **Then:** `## Considered options` and `## Consequences`, as in the existing ADRs.
+- **Then:** `## Considered options` and `## Consequences`, as in ADRs 0001 to 0004.
 
 ```markdown
 ---

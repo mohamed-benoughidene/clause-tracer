@@ -27,7 +27,9 @@ The design is done. The code is an empty skeleton: every module exists, runs alo
 - `assets/`: the logo master files.
 - `reports/`: research reports on how to build the app. [The architecture report](reports/Clause%20Tracer%20pipeline%20architecture.md) is the build design; read it before planning a build stage.
 
-The build plan in Spec section 9 is a Python command-line tool first, which is then wrapped as a desktop app. The decisions in Spec section 13 are still open (the desktop shell, how Presidio is bundled, which models to use). Bring those to the user as a question. Don't pick one yourself.
+Two design docs sit on top of the reports. Read both before planning a build stage: [docs/system-design.md](docs/system-design.md) says how the parts fit together, and [docs/testing-strategy.md](docs/testing-strategy.md) says which tests each stage needs. Both are **proposed**, and so are ADRs 0005 to 0015: they hold recommendations, not decisions. Before you build on one, ask the user whether it is accepted.
+
+The build plan in Spec section 9 is a Python command-line tool first, which is then wrapped as a desktop app. The decisions in Spec section 13 are still open (the desktop shell, how Presidio is bundled, which models to use). Each now has a recommendation in a proposed ADR. Bring those to the user as a question. Don't pick one yourself.
 
 ## Before you write code
 
@@ -37,6 +39,7 @@ Read [Constitution.md](Constitution.md) before you write, move or split any code
 - **Work inside one module.** Each module folder holds its code, its `tests/`, its `samples/` and a README with its input and output shapes. When a shape changes, update that README in the same change (Constitution S3).
 - **Keep the import rules.** `core` imports nothing else. Pipeline modules import only `core`. Adapters are passed in, never imported. Only `cli` wires modules together. `lint-imports` enforces this. When a rule blocks you, put the shared shape in `core` or ask the user. Leave the contracts in `pyproject.toml` as they are.
 - **Test with fakes.** Unit tests use fake adapters and saved AI replies from `samples/` or `tests/fixtures/`. They run with no network, no API key and no cost.
+- **Leave expected answers to the user.** Don't change code and the expected values of its acceptance tests in one step (Constitution T11). Regenerate saved expected output only with the named command, and say so.
 - Put complex conditions into well-named boolean variables.
 
 ## Before you change docs or the prototype
