@@ -24,7 +24,7 @@ Clause Tracer checks one contract against the user's own playbook and shows the 
 | Privacy | No confirmed personal item, note or name in any outgoing request or log. Proven by test on every change | Spec 11 |
 | Correct labels | Every planted walk-away found. At least 90% of numbers and labels correct on the test set | Spec 11 |
 | Evidence | No quote reaches the screen unless code found it word for word in the contract | Spec 11 |
-| Cost per review | `[Assumption]` about $0.28 for a 10,000-word contract and $0.82 for 50,000 words on the recommended default model | [ADR 0010](adr/0010-starting-models.md) |
+| Cost per review | `[Assumption]` about $0.28 for a 10,000-word contract and $0.82 for 50,000 words on a Sonnet-class model; a few cents on a cheap model | [ADR 0010](adr/0010-starting-models.md) |
 | Input size | `[Assumption]` files up to 20 MB and 50,000 words (about 65,000 tokens, about 2,500 sentences) | Spec 9 |
 | Offline | Saved reviews open offline. A draft can be prepared offline. Only AI steps need the internet | Spec 9 |
 | Systems | Linux and Windows 10/11. Mac later | Spec 9 |
@@ -38,7 +38,7 @@ There is no load or scaling target. The app serves one user on one computer, and
 
 - **One developer, who reviews Python.** AI agents write most code. Any Rust or TypeScript would ship unreviewed, so the design avoids both.
 - **No Windows machine.** The developer works on Debian. Windows builds must be built and tested by CI.
-- **Licence rule.** The project is source available under FSL-1.1-ALv2. Runtime dependencies must be MIT, BSD or Apache. No GPL or AGPL. MPL needs an explicit decision.
+- **Licence rule.** The project is source available under FSL-1.1-ALv2. Runtime dependencies must be MIT, BSD or Apache. No GPL or AGPL. One named exception: `pikepdf` (MPL-2.0), allowed on 12 Nov 2026 for reading hidden PDF layers ([ADR 0007](adr/0007-document-reading-stack.md)).
 - **Tie-break.** When two good options conflict, the better experience for non-technical freelancers wins: a small download, a quick start and a smooth install.
 - **Later, not now.** A future version may let the project itself become the AI provider, with optional accounts. Version 1 must not block that (section 11).
 
@@ -375,7 +375,7 @@ If a hosted option is ever added, these promises change and every copy must be u
 
 ## 13. Decisions
 
-Every row is a recommendation with status *proposed*. Nothing is settled until the owner accepts the ADR.
+The owner accepted ADRs 0005, 0006 and 0007 on 12 Nov 2026. Every other row is a recommendation with status *proposed*, and is not settled until the owner accepts its ADR.
 
 | Decision | Recommendation | Record |
 | --- | --- | --- |
@@ -394,7 +394,6 @@ Every row is a recommendation with status *proposed*. Nothing is settled until t
 **Still open after this work.** These were not researched well enough to recommend, or need a measurement or a lawyer:
 
 - The Linux package format (AppImage, `.deb` or Flatpak).
-- Whether MPL-2.0 `pikepdf` is acceptable for reading hidden PDF layers.
 - Whether the pages are served from `file://` or a loopback server (section 3.2).
 - Final input limits and the real cost per review, from the first paid run (Spec 13).
 - Whether EU AI Act Article 50 puts a marking duty on this app. Take legal advice; the docs must not say it does not apply.

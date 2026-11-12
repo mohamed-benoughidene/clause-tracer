@@ -1,6 +1,6 @@
 # ADR-0006: Store reviews in an encrypted SQLite file plus per-review keys
 
-**Status:** Proposed
+**Status:** Accepted (12 Nov 2026)
 **Date:** 2026-11-11
 **Deciders:** Project owner
 
@@ -10,7 +10,7 @@
 The [pipeline architecture report](../../reports/Clause%20Tracer%20pipeline%20architecture.md) left two designs open: one SQLCipher database, or plain SQLite with per-record AES-GCM blobs. [The v1 design decisions report](../../reports/Clause%20Tracer%20v1%20design%20decisions.md) corrected it on 11 Nov 2026. `sqlcipher3` no longer relies on a community wheel fork. SQLite3 Multiple Ciphers (`apsw-sqlite3mc`) was missing from the comparison. The runner in [ADR 0005](0005-engine-runner-shapes-and-ports.md) keeps its state in this store. D1 (keep raw data unchanged) and D8 (save the AI's exact reply) mean the store holds contract bytes and raw replies.
 
 ## Decision
-We recommend a hybrid. It awaits the owner's decision.
+The project owner accepted a hybrid on 12 Nov 2026. The choice between the two SQLite encryption packages stays an action item until both are tried.
 
 - **One encrypted SQLite file** holds the index and small records. Prefer `apsw-sqlite3mc` if the owner accepts its non-standard API. Otherwise use `sqlcipher3`.
 - **A per-review AES-GCM key** encrypts raw contract bytes and AI replies. A random master key wraps each review key. Deleting a review destroys its key.

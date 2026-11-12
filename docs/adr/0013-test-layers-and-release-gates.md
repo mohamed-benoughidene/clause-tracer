@@ -19,7 +19,7 @@ We recommend the following. It awaits the owner's decision.
 - **Mutation.** mutmut on `core` and the pure rule modules, as a scheduled or pre-release report.
 - **Agent guard.** Human-owned acceptance tables in CSV or TOML. Agents may write the loader but may not change expected values in the same change as the code. A named command, `--update-goldens`, regenerates golden files.
 - **Gates.** Hard, zero-tolerance gates per case: every planted walk-away found in all three runs, no fabricated quote ever, zero dangerous false-Missings on built cases. Rates are reported, not gated: number accuracy and label match at or above 90%, and overall false-Missing, each with an exact interval.
-- **Budget.** Two tiers: the 100-case set on every prompt, model or labelling change (about $34 on Sonnet); the full 300-case set before a release or model switch (about $67).
+- **Budget.** The owner set a total of about $10.76 for paid testing on 12 Nov 2026, so paid runs use a cheap model: `[Assumption]` about $2 for the 100-case set and $3 to $4 for the 300-case set. A Sonnet-class model would cost about $34 and $67 for the same runs, which is outside the budget. [`testing-strategy.md`](../testing-strategy.md) section 7.5 has the spending plan.
 
 ## Options Considered
 
@@ -82,5 +82,5 @@ The gate numbers are the project's own. No published release threshold exists, s
 1. [ ] Build the replay fake in `core` test support, with `UnrecordedRequest` and `unused_keys()`.
 2. [ ] Add the `golden` marker, deselect it in `scripts/check.sh`, and add the CI check that guards the acceptance tables.
 3. [ ] Check the pytest-httpx licence and audit Inspect AI for network calls before any use.
-4. [ ] Re-query prices and set the spend cap before the first paid run.
+4. [ ] Re-query prices before the first paid run. Build the spend ledger first: a cap per run and a total cap of $10, so a run stops itself.
 5. [ ] If accepted, rewrite Spec 11 to state hard gates per case and reported rates with exact intervals.

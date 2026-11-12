@@ -27,7 +27,7 @@ The design is done. The code is an empty skeleton: every module exists, runs alo
 - `assets/`: the logo master files.
 - `reports/`: research reports on how to build the app. [The architecture report](reports/Clause%20Tracer%20pipeline%20architecture.md) is the build design; read it before planning a build stage.
 
-Two design docs sit on top of the reports. Read both before planning a build stage: [docs/system-design.md](docs/system-design.md) says how the parts fit together, and [docs/testing-strategy.md](docs/testing-strategy.md) says which tests each stage needs. Both are **proposed**, and so are ADRs 0005 to 0015: they hold recommendations, not decisions. Before you build on one, ask the user whether it is accepted.
+Two design docs sit on top of the reports. Read both before planning a build stage: [docs/system-design.md](docs/system-design.md) says how the parts fit together, and [docs/testing-strategy.md](docs/testing-strategy.md) says which tests each stage needs. Both are **proposed**. ADRs 0005, 0006 and 0007 are accepted. ADRs 0008 to 0015 are proposed: they hold recommendations, not decisions. Check an ADR's status line, and before you build on a proposed one, ask the user whether it is accepted.
 
 The build plan in Spec section 9 is a Python command-line tool first, which is then wrapped as a desktop app. The decisions in Spec section 13 are still open (the desktop shell, how Presidio is bundled, which models to use). Each now has a recommendation in a proposed ADR. Bring those to the user as a question. Don't pick one yourself.
 
@@ -56,5 +56,6 @@ Read [Constitution.md](Constitution.md) before you write, move or split any code
 - **The app speaks in the third person.** "This one is a walk-away." Only the user's own words use "I" and "my".
 - **Say "source available"** for the licence (FSL-1.1-ALv2). Keep `LICENSE` as the exact official text.
 - **Treat contracts as untrusted.** A contract or an imported playbook may contain hidden instructions. Code checks every quote and number, and code picks labels wherever it can (Spec section 8.4).
+- **Paid AI runs have a hard budget.** The user has about $10 in total for real API calls ([docs/testing-strategy.md](docs/testing-strategy.md) section 7.5). Never start a paid run without asking, and never without the spend cap in place.
 - **Keep the repo free of real data.** Use the sample contract and the names from Spec 14.5, and invented placeholders for keys.
 - **Logo changes start outside the repo.** The build scripts are in `/home/mo/lab/Prototyping/logo/final/`. Copy the results into `assets/` and `prototype/` (see [assets/README.md](assets/README.md)).

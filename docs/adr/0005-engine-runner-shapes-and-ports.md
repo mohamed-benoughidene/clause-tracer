@@ -1,6 +1,6 @@
 # ADR-0005: Keep a hand-written step runner, frozen core shapes and Protocol ports
 
-**Status:** Proposed
+**Status:** Accepted (12 Nov 2026)
 **Date:** 2026-11-11
 **Deciders:** Project owner
 
@@ -10,7 +10,7 @@
 The [pipeline architecture report](../../reports/Clause%20Tracer%20pipeline%20architecture.md) proposed a runner, core shapes and five ports. [The v1 design decisions report](../../reports/Clause%20Tracer%20v1%20design%20decisions.md) re-checked them against package metadata and documentation on 11 Nov 2026. It kept most choices and corrected the HTTP library. One developer reviews only Python, and AI agents write most of the code. So every part of the engine should be plain Python that this developer can read in one sitting.
 
 ## Decision
-We recommend the following. It awaits the owner's decision.
+The project owner accepted the following on 12 Nov 2026.
 
 - **Runner.** A hand-written runner of about 200 lines `[Assumption]` in `cli`. Each step is a `StepSpec(name, version, run)`. The cache key is a SHA-256 of the step name, version, prompt hash, model id, privacy mode and input hashes. State lives in the app's own encrypted store ([ADR 0006](0006-encrypted-storage-and-secrets.md)). Each AI step splits into a **call** (raw reply cached by request hash) and a **parse** (a pure, versioned function of the reply).
 - **Shapes.** Frozen, slotted standard-library dataclasses in `core`, with tuples and no third-party imports. Pydantic `TypeAdapter` validates at the edges, for storage and config. AI reply schemas stay in the owning module.

@@ -37,9 +37,9 @@ This folder holds the project's written documents: specs, design and copy guides
 | [0003](adr/0003-walk-away-takes-the-brand-red.md) | The brand red `#A91207` is used only for walk-away. |
 | [0004](adr/0004-code-layout.md) | The code is one package with a pure core, six pipeline modules, adapters and a CLI. The import rules are checked automatically. |
 
-ADRs 0005 to 0015 are **proposed**: each is a recommendation waiting for the project owner's decision.
+ADRs 0005, 0006 and 0007 were **accepted** on 12 Nov 2026. ADRs 0008 to 0015 are **proposed**: each is a recommendation waiting for the project owner's decision.
 
-| ADR | Recommendation |
+| ADR | Decision or recommendation |
 | --- | --- |
 | [0005](adr/0005-engine-runner-shapes-and-ports.md) | Keep a hand-written step runner, frozen dataclasses in `core`, `Protocol` ports and a small HTTP retry loop. No framework. |
 | [0006](adr/0006-encrypted-storage-and-secrets.md) | Store data in one encrypted SQLite file plus a key per review, so deleting a review destroys its key. |

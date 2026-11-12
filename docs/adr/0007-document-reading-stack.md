@@ -1,6 +1,6 @@
 # ADR-0007: Read PDFs with pypdfium2 alone and Word files with one hardened parser
 
-**Status:** Proposed
+**Status:** Accepted (12 Nov 2026)
 **Date:** 2026-11-11
 **Deciders:** Project owner
 
@@ -10,11 +10,11 @@
 The [pipeline architecture report](../../reports/Clause%20Tracer%20pipeline%20architecture.md) paired pdfplumber for geometry with pypdfium2 for page images. It called pypdfium2-alone "unverified". [The v1 design decisions report](../../reports/Clause%20Tracer%20v1%20design%20decisions.md) checked the PDFium headers on 11 Nov 2026 and found the fields are there. It also found two pdfplumber bugs still open. Runtime dependencies must be MIT, BSD or Apache, and MPL-2.0 needs an explicit decision. Contracts are untrusted input (Spec 8.4).
 
 ## Decision
-We recommend the following. It awaits the owner's decision.
+The project owner accepted the following on 12 Nov 2026.
 
 - **PDF.** pypdfium2 as the single engine, through its raw API, for page images, per-character geometry and hidden-text fields.
 - **Cross-check.** pdfplumber only in tests, never at runtime.
-- **Hidden layers.** pikepdf (MPL-2.0) or pypdf. The owner must decide whether MPL-2.0 is acceptable.
+- **Hidden layers.** pikepdf (MPL-2.0). The owner allowed it on 12 Nov 2026 as a named exception to the MIT, BSD and Apache rule. MPL-2.0 is file-level copyleft: use pikepdf unmodified as a dependency, and never copy its source files into this repo.
 - **Word.** Read the zip directly and parse every part with one explicit, hardened lxml parser. Reject any DOCTYPE. Cap sizes before reading.
 - **Sentences.** NUPunkt, which returns character spans. Quote checks tolerate a missed split.
 - **Report PDF.** ReportLab (BSD, pure Python, about 2 MB).
@@ -83,7 +83,7 @@ Gaps carried over: not verified that the bundled PDFium build includes every fun
 
 ## Action Items
 1. [ ] Check that the pypdfium2 build pinned in `uv.lock` exposes every needed PDFium function, including optional-content visibility.
-2. [ ] Decide on pikepdf (MPL-2.0) or pypdf for hidden layers, as an explicit licence decision.
+2. [x] Decide on pikepdf (MPL-2.0) or pypdf for hidden layers: pikepdf allowed, 12 Nov 2026. Add it to the licence check's allow-list by name, not MPL in general.
 3. [ ] Set the limits (member count, expanded size, ratio, page count, time, memory) and test each one. Values are `[Assumption]` until measured.
 4. [ ] Add the pdfplumber cross-check as a test-only dependency.
 5. [ ] If accepted, update `src/clause_tracer/ingest/README.md` and add the hidden-layer licence decision to Spec 13.

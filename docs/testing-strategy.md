@@ -161,17 +161,39 @@ These thresholds are the project's own. No regulator or bar has published an acc
 
 ### 7.5 Budget
 
-You asked for a recommendation. Prices were fetched on 11 Nov 2026 and change weekly, so re-check before budgeting.
+The owner set the budget on 12 Nov 2026: **about $10.76 in total** ($5.76 in hand, plus $5). The plan below fits inside it.
 
-| When | What runs | Recommended default model | A cheap model |
-| --- | --- | --- | --- |
-| Before a prompt, model or labelling change merges | Ten contracts, ten injected variants, 100 built cases, three runs each | about $34 | under $5 |
-| Before a release or a change of default model | The same with 300 built cases | about $67 | under $5 |
-| Comparing three models | The 300-case set on each | about $105 for the pass | — |
+**What a run costs.** Prices were fetched on 11 Nov 2026 and change weekly. All figures are estimates until the first paid run measures them.
 
-**Recommendation:** plan on the two-tier budget above, cap each run in the runner at about double its estimate by summing the cost each reply reports, and set aside about $150 a month while prompts are still changing. The cap and the monthly figure are judgement, not research.
+| Run | Cheap model (Claude Haiku 5.5, GPT-6 Luna or DeepSeek V4.1 Flash) | Sonnet-class model |
+| --- | --- | --- |
+| One review of a 10,000-word contract | `[Assumption]` 1 to 3 cents | about $0.28 |
+| Ten contracts, one run each | `[Assumption]` 10 to 30 cents | about $2.80 |
+| Ten contracts, ten injected variants and 100 built cases, three runs each | `[Assumption]` about $2 | about $34 |
+| The same with 300 built cases | $3 to $4 | about $67 |
 
-`[Assumption]` These figures assume prompt caching works and that a built case costs about a fifth of a full review. If caching misses on long contracts, costs rise four to five times. The first paid run measures both, and the table must be redone from its numbers.
+So the earlier figures of $34 and $67 hold only for a Sonnet-class model. With $10.76, paid testing runs on a cheap model, and that is workable.
+
+**The spending plan.**
+
+| Step | What | Planned spend |
+| --- | --- | --- |
+| 1 | First real run on the sample contract, cheap model. It measures real cost per review and whether caching hits | under $0.25 |
+| 2 | Ten contracts, one run, on two cheap models. Picks the model to carry forward | about $0.50 |
+| 3 | The 100-case set, three runs, on the chosen cheap model. The first full baseline | about $2 |
+| 4 | Two more 100-case runs after prompt fixes | about $4 |
+| 5 | One Sonnet-class pass of the ten contracts, one run, only if the cheap model fails a hard gate | about $2.80 |
+| Kept back | For price changes and mistakes | about $1.20 |
+
+**Rules that protect the budget.**
+
+- **A spend ledger comes first.** The paid runner sums the cost each reply reports and stops at a cap per run. A running total across runs stops at $10. Build and test this with the replay client before any key is used.
+- **Free tests do the daily work.** Prompt changes are tested on saved replies first. A paid run happens only when a change cannot be judged without the model.
+- **Every paid reply is saved** and becomes a free replay fixture, so no call is paid for twice.
+- **Three runs only where a hard gate needs them.** Other cases run once.
+- **Stop and re-plan after step 1.** If a review costs more than 5 cents on the cheap model, or caching misses, redo this table before spending more.
+
+**What this budget cannot do.** It cannot run the 300-case set on a Sonnet-class model, or compare three models at full size. It can show whether a cheap model passes the hard gates. That matters for users too: they pay per review with their own key, so a cheap model that passes is the better default. [ADR 0010](adr/0010-starting-models.md) recommends a Sonnet-class default and is still proposed; this budget is a reason to test a cheap model first.
 
 **Tooling.** A `@pytest.mark.golden` marker, left out of `scripts/check.sh` and CI, plus a small report script. No evaluation framework is needed yet. DeepEval and promptfoo are ruled out because both send telemetry by default. Inspect AI (MIT) is the upgrade path if many models are compared.
 
@@ -238,8 +260,8 @@ These are the project's own targets, anchored on a common industry guide (60% ac
 | **Every pull request, once files and paths are real** | The same suite on a Windows runner, without the highlight pictures |
 | **Nightly** | Property tests at 2,000 examples; file fuzzing |
 | **Weekly** | Vulnerability check of the lockfile |
-| **Before a release** | Mutation report; the 300-case paid run; installer builds and packaged-app tests on both systems; the network check; signed checksums and build attestations; the blind self-test |
-| **By hand** | The 100-case paid run before a prompt, model or labelling change merges. Never on push |
+| **Before a release** | Mutation report; the largest paid run the budget allows (section 7.5); installer builds and packaged-app tests on both systems; the network check; signed checksums and build attestations; the blind self-test |
+| **By hand** | A paid run, when a prompt, model or labelling change cannot be judged on saved replies. Never on push, and always under the spend cap |
 
 **Architecture tests** (T9) go beyond `lint-imports`: importing `core` loads only the standard library; importing `cli` does not load Presidio or spaCy; every module has a `README.md`, `tests/`, `samples/` and `__main__`.
 
