@@ -398,7 +398,8 @@ Each item has a decision record (ADR). Ticked items were decided on 12 Nov 2026.
 - [x] Who writes the message and the not-covered list ([ADR 0011](adr/0011-who-writes-the-words.md)); Rule 7, disagreeing searches, quotes that can't be placed on the page, and tracked changes ([ADR 0012](adr/0012-missing-unsure-and-evidence-failures.md)); the release gates in section 11 ([ADR 0013](adr/0013-test-layers-and-release-gates.md)). Decided 12 Nov 2026 and written into sections 2, 4.3, 4.7, 5, 6, 9 and 11.
 - [ ] Bring the copy deck (`ux-copy.md`), the prototype and sections 14.1 to 14.3 into line with those decisions. Until then they still describe an AI-written message and one-line summaries.
 - [ ] At what share of undecodable characters a page is warned about or blocked, from the test set ([ADR 0012](adr/0012-missing-unsure-and-evidence-failures.md)).
-- [ ] Protection and release integrity ([ADR 0014](adr/0014-protection-and-release-integrity.md), proposed).
+- [x] Protection and release integrity: no obfuscation, signed and attested releases, honest wording about what local encryption protects (decided 12 Nov 2026, [ADR 0014](adr/0014-protection-and-release-integrity.md)). Section 8 is not yet updated with that wording.
+- [ ] Whether to register a trade mark on the name. Ruled out for now because of its cost.
 
 ## 14. Prototype handoff
 

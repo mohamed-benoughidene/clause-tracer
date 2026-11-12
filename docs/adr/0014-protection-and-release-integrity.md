@@ -1,6 +1,6 @@
 # ADR-0014: Protect the project with signed releases and honest wording, not obfuscation
 
-**Status:** Proposed
+**Status:** Accepted (12 Nov 2026)
 **Date:** 2026-11-11
 **Deciders:** Project owner
 
@@ -10,7 +10,7 @@ The project is source available under FSL-1.1-ALv2. Anyone can read the code, an
 The owner asked how to protect the code, the builds, local data and any hidden parts. [The v1 design decisions report](../../reports/Clause%20Tracer%20v1%20design%20decisions.md) found that nothing technical stops a copy, because the source is public. Obfuscating a binary protects nothing against a copycat, who takes the repository. It only adds antivirus flags and contradicts the "read the source" promise. Nothing in this ADR is legal advice.
 
 ## Decision
-We recommend the following. It awaits the owner's decision.
+The project owner accepted the following on 12 Nov 2026, with the trade mark deferred.
 
 - **No obfuscation** of any kind.
 - **Copycats.** Keep FSL-1.1-ALv2. Enforce by polite email, then a DMCA notice for copied code, then a lawyer. **No trade mark for now:** the owner ruled it out on 12 Nov 2026 because of its cost. In its place, at no cost: use the name and logo the same way everywhere, and keep dated public proof of first use (signed Git tags, release dates, the repository history). This is weaker than a registered mark. How far an unregistered name is protected differs by country and needs a lawyer to say. Revisit registration before wide promotion, or if a copy appears under the same name.
