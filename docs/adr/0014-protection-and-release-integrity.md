@@ -37,8 +37,8 @@ The honest wording for local data: contracts and the API key are encrypted at re
 | Dimension | Assessment |
 |-----------|------------|
 | Complexity | Med to High |
-| Cost | Licence fees; antivirus flags |
-| Scalability | Breaks with each tool update |
+| Cost | Adds antivirus flags; measured rates not researched |
+| Scalability | Single user, not a scale question |
 | Team familiarity | Low |
 
 **Pros:** none against a copycat, who has the source.
