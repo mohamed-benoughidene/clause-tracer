@@ -147,6 +147,7 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | Too large (blocks) | This file is 48 MB. The limit is 20 MB. Paste only the pages you want reviewed. |
 | Empty (blocks) | This file has no text. Choose another file, or paste the text. |
 | Old Word (blocks) | This is an old Word file. Open it in Word, save it as .docx, then load that. |
+| Tracked changes (warns) | This Word file has 14 tracked changes, made by Sarah Jones and Karim Benali. The review reads it as if every change were accepted. · To check the earlier wording too, reject the changes in Word, save a copy, and load that as a second review. |
 | Not English (warns) | This contract doesn't look like it's in English. Clause Tracer is built and tested for English contracts only, so: · fewer names and addresses are found for you. Check the privacy step carefully. · more labels may be wrong or unsure. · [Choose another file] |
 | Section 2 | Pick a playbook · Playbook · [Copy a starter] |
 | Playbook line | Side: service provider · 11 positions · edited 2 Nov |
@@ -201,7 +202,7 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | --- | --- |
 | Stages | 1 Reading the pages · 2 Matching clauses · 3 Judging the labels · 4 Writing the notes |
 | Progress | Step 1 of 4 · Reading the pages · Spent so far $0.05 of about $0.42 · About 1 min left |
-| Log lines | Read 5 pages. · Found 45 clauses. · Matched all 45 clauses to 11 positions. · Judged the labels for 11 positions. · Wrote the explanations and the summary of not-covered parts. · Finished. |
+| Log lines | Read 5 pages. · Found 45 clauses. · Matched all 45 clauses to 11 positions. · Judged the labels for 11 positions. · Wrote the explanations and sorted the not-covered parts. · Finished. |
 | Privacy badge | Private mode is on. Providers don't keep your contract if you've turned off Safety Retention in OpenRouter. |
 | Background | [Run in background] · toast: Running in the background |
 | Close note | Closing the app pauses the review. Resume picks up from the last finished step. |
@@ -244,7 +245,9 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | Unsure-heavy | More than half of these labels are unsure. That usually means the wording is vague, or your playbook suits a different kind of contract. Read the unsure ones first: each says what it couldn't decide. |
 | Tabs | Labels [n] · Not covered [n] · Missing [n] |
 | Not-covered tick | I've read the 35 not-covered parts |
-| Not-covered row | § 2.2 · Renews by itself every 12 months unless someone gives 30 days' notice. |
+| Not-covered row | § 2.2 · **Length and renewal** · “This Agreement renews automatically for further 12-month periods…” (the clause type in bold, then the clause's own first line in quotes; no AI-written sentence) |
+| Not-covered clause types (draft list) | Parties · Background · Definitions · Length and renewal · Scope of work · Quality of work · Timing and deadlines · How the work is done · Changes to the deal · Fees · Invoices · Expenses · Tax · What the other side provides · Ownership and credit · Existing tools and materials · Confidentiality · Hiring each other's staff · Promises about the work · Limits on losses · Ending the contract · Handing things back · Data protection · Whole agreement · Which document wins · Passing the contract on · Notices · Disputes and law · Insurance · Something else. [Assumption] A first list of 30. Tune it on the test set. |
+| Searched, nothing found (Missing tab) | Searched, nothing found · [n] · Your playbook is happy when these are absent, so they need no action. Open one to check the search. |
 | Status | Ready to check · Done |
 | Find | Find · Ctrl+F |
 
@@ -268,6 +271,10 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | Conflict | These clauses disagree. Ask which applies. |
 | Range | 14.3 gives a range. The worse end was used. |
 | Quote failed | Couldn't confirm the wording. Check 12.2 yourself. · Unsure: asked twice, and both times the AI's quote wasn't in the contract. |
+| Searches disagreed | This one is unsure. One search found wording about this in 9.2, and a second check didn't agree. · The searches disagreed about 9.2. Read it yourself. · Unsure: a clause may cover this position, but it couldn't be confirmed. · What to check: Read 9.2. Does it limit who you can work for? |
+| Quote not marked on the page | These words are in the contract, but they couldn't be marked on the page. Find them in 5.4. · (the label is kept) · trail: Clause · not marked on the page |
+| Searched, nothing found | The contract doesn't mention this, and your playbook prefers it that way. No wording about it was found. · Where it was searched · Every clause was read for this position, twice: once position by position, and once clause by clause. · Words looked for: compete, competing, restrictive covenant, solicit, exclusive. · A search can miss a clause. This doesn't prove the contract has no non-compete. · Preferred by your playbook: nothing was found, and you set missing to preferred. · Nothing found. Is this right? · [Looks right] [Change it] |
+| AI wording line | Every quote and number was checked against the contract; the wording was written by AI. · Shown under every piece of text the AI wrote: the reasons for a pencilled label, an AI rewrite of a clause, an AI rewrite of the message. Text the app built itself carries no line. The short tag “Written with AI” stays on suggestions. |
 | Unloaded doc | Document · Not loaded · Refers to a document that isn't loaded: Master Agreement |
 | Trail heading | Evidence trail |
 | What to check | What to check: Does the quote say you're paid within 60 days of the invoice date? |
@@ -306,7 +313,8 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | Ask for | Ask for · One line for each issue. Tick a line to send it, untick it to leave it out. · unticked suffix: Left out |
 | Ask-for line | Payment (5.4): could invoices be paid within 15 days of the invoice date? |
 | Nothing to ask | Nothing to ask for from your playbook. This only means the contract matches your playbook. It doesn't mean it's safe to sign. |
-| Message | Message · [Regenerate] [Copy] · toasts: Message regenerated · Copied |
+| Message | Message · [Rewrite with AI] [Regenerate] [Copy] · toasts: Message regenerated · Copied |
+| Rewrite with AI | Rewrite with AI · The message was built from your ticked lines. The AI can reword it. The points, quotes and numbers stay the same. · Before / After · Removed words are struck through. Added words are highlighted. · [the AI wording line] · Only the message text is sent, with names swapped for placeholders. Your acceptable limits are never sent. · [Keep the current message] [Use the rewrite] · toast: Message rewritten |
 | Labels changed | Labels changed since this message · Regenerate to use the new labels. This replaces your current text. · [Keep this message] [Regenerate] |
 | Report options | Summary · Full contract · Include your notes |
 | Report preview | Review report · Asked for · Not checked: 9 positions aren't checked yet. They're marked here as unchecked. |
@@ -398,7 +406,7 @@ The eleven starter positions and their "why this matters" notes are in Spec 7; t
 | Lower auto-delete | Lower auto-delete to 7 days? · 4 reviews haven't changed in 7 days. They'll be deleted on 9 Nov, in 3 days, unless you change them first. · Cancel / Lower to 7 days |
 | Data | Nothing is removed without asking first. · Everything · Reviews, playbooks, customers, settings and the key, all from this computer. · [Delete everything] |
 | Delete everything | Delete everything? · Reviews, playbooks, customers, settings and the key are all removed from this computer. This can't be undone. · Cancel / Delete everything · toast: Everything deleted |
-| Advanced: models | Model choice: One for every step · One per step · Model: Claude Sonnet 5.5 (recommended) · Steps: Match · Extract · Judge words positions · Explain · Summarise not-covered parts · Rewrite · Write message · Jev is only offered for match and judge. In private mode, only models that don't keep your contract are offered. |
+| Advanced: models | Model choice: One for every step · One per step · Model: Claude Sonnet 5.5 (recommended) · Steps: Match · Extract · Judge words positions · Explain · Sort not-covered parts · Rewrite · Rewrite message · Jev is only offered for match and judge. In private mode, only models that don't keep your contract are offered. |
 | Model can't do step (new) | [Model] can't do this step. Pick another model. |
 | Untested model (new) | This model isn't tested with Clause Tracer yet. Labels may be less reliable. |
 | About | Clause Tracer 1.0.0 · Functional Source License · Not legal advice. · [Check for updates] · You have the latest version. · (new) Version [n] is out. [Open release page (opens in your browser)] |
@@ -412,6 +420,7 @@ The eleven starter positions and their "why this matters" notes are in Spec 7; t
 | Legal terms in plain English | Indemnity, Limitation of liability, Governing law, Termination, Confidential information, Intellectual property (IP), Work made for hire, Non-compete, Warranty, Force majeure (definitions as in the prototype) |
 | Key guide | Get an OpenRouter key · Create an account, add credit, turn off Safety Retention, create a key. |
 | What gets sent | Only your positions and the contract go to OpenRouter, with names swapped for placeholders like “Person 1”. Never playbook names, customers, your notes, or To and From names. No telemetry. · [Change what gets sent in Settings] |
+| What's protected | Your reviews, playbooks and key are encrypted on this computer. That protects them from other people who use the computer, and from someone who takes the disk. · It doesn't protect them from harmful software running in your own account. Keep your system up to date, and keep its disk encryption on. · Deleting a review destroys its key, so it can't be read again. A backup of this computer made earlier may still hold it. |
 | Shortcuts | Ctrl+K Commands · J Next unchecked · ] / [ Next / previous label · 1 / 2 / 3 Decide on a walk-away or unsure label · Ctrl+F Find in contract · Ctrl+/ opens the full list. |
 | Legal | Not legal advice · Clause Tracer isn't a lawyer, and this isn't legal advice. · Free to use, including for paid work. Source available under the Functional Source License, with no warranty. Each version becomes Apache 2.0 two years after its release. Sample contract: Dominic Fallows, CC BY-SA 4.0. · [Read the licence (opens in your browser)] |
 
@@ -531,3 +540,15 @@ The spec, this file, `design-system.md` and the prototype were compared. All fix
 | 5 | The Models dialog named the steps differently from Settings. | The Settings names in both. |
 | 6 | "The AI judgment tag" described a separate tag, but it's a pencilled stamp. | Word list updated. |
 
+### 6.8 Decisions of 12 Nov 2026 (ADRs 0011, 0012 and 0014)
+
+The copy deck and the prototype were brought into line with the three accepted decision records.
+
+| # | Problem | Fix |
+| --- | --- | --- |
+| 1 | The spec and this file said the AI writes the message and a one-line summary of each not-covered part. | The app builds the message from the ticked lines; “Rewrite with AI” is optional. Not-covered parts show a clause type and the clause's first line. |
+| 2 | ADR 0012 calls the link “show where I looked”, but the app never says “I”. | The heading is “Where it was searched”. |
+| 3 | Settings and the Models list named two steps “Summarise not-covered parts” and “Write message”. | “Sort not-covered parts” and “Rewrite message”. |
+| 4 | A position whose missing level is preferred vanished when nothing was found. | It is listed under “Searched, nothing found” in the Missing tab, and can be checked. |
+| 5 | Help promised encryption without saying what it does and doesn't cover. | The new “What's protected” section says both. |
+| 6 | Two parts of ADR 0012 have no copy yet: the warning for text that can't be decoded, and a way to check a Word file's earlier wording inside the app. | Left open (Spec 13). The first waits for numbers from the test set. |

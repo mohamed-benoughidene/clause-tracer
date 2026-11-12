@@ -304,6 +304,8 @@ A fixed sequence run by the app's code. The AI never decides what runs next and 
 - Auto-delete runs at startup and while the app is open. "Delete all reviews" also clears temporary files. Uninstall offers to remove all data and keys.
 - "Copy error details" includes only the app version, the step, and an error code.
 - Saved PDFs, exported playbooks and copied messages leave the app's protection. The app says so when saving.
+- Saved data is protected from other people who use the computer and from someone who takes the disk. It isn't protected from harmful software running in the user's own account, and Help says so.
+- Deleting a review destroys its encryption key, so the review can't be read again. The app never says data is erased from the disk, and it notes that a backup made earlier may still hold the review.
 
 ### 8.4 Security
 
@@ -313,7 +315,7 @@ A fixed sequence run by the app's code. The AI never decides what runs next and 
 - Every quote and number is checked by code.
 - Code picks labels for number and yes/no positions.
 - Every import is previewed first. Playbook files use a strict format with size limits. Word files are read with external links turned off.
-- Each release publishes checksums (fingerprints that prove a download wasn't changed).
+- Each release publishes signed checksums (fingerprints that prove a download wasn't changed) and a build record from GitHub that ties the download to its source code. The shipped code is never obfuscated (ADR 0014).
 
 ## 9. Running the app
 
@@ -396,9 +398,10 @@ Each item has a decision record (ADR). Ticked items were decided on 12 Nov 2026.
 - [ ] Final input limits and the cost per review, from testing.
 - [ ] Review screen layout, settled with a rough prototype. Later: add at least one outside tester, who must also catch a planted wrong label.
 - [x] Who writes the message and the not-covered list ([ADR 0011](adr/0011-who-writes-the-words.md)); Rule 7, disagreeing searches, quotes that can't be placed on the page, and tracked changes ([ADR 0012](adr/0012-missing-unsure-and-evidence-failures.md)); the release gates in section 11 ([ADR 0013](adr/0013-test-layers-and-release-gates.md)). Decided 12 Nov 2026 and written into sections 2, 4.3, 4.7, 5, 6, 9 and 11.
-- [ ] Bring the copy deck (`ux-copy.md`), the prototype and sections 14.1 to 14.3 into line with those decisions. Until then they still describe an AI-written message and one-line summaries.
+- [x] The copy deck (`ux-copy.md`), the prototype and sections 14.1 to 14.3 are in line with those decisions (12 Nov 2026).
+- [ ] Copy and a prototype state for two parts of ADR 0012 that have none yet: the warning for text that can't be decoded, and a way to check a Word file's earlier wording.
 - [ ] At what share of undecodable characters a page is warned about or blocked, from the test set ([ADR 0012](adr/0012-missing-unsure-and-evidence-failures.md)).
-- [x] Protection and release integrity: no obfuscation, signed and attested releases, honest wording about what local encryption protects (decided 12 Nov 2026, [ADR 0014](adr/0014-protection-and-release-integrity.md)). Section 8 is not yet updated with that wording.
+- [x] Protection and release integrity: no obfuscation, signed and attested releases, honest wording about what local encryption protects (decided 12 Nov 2026, [ADR 0014](adr/0014-protection-and-release-integrity.md)).
 - [ ] Whether to register a trade mark on the name. Ruled out for now because of its cost.
 
 ## 14. Prototype handoff
@@ -419,23 +422,23 @@ The brief for whoever designs the prototype. Read sections 1 to 13 first, plus t
 | --- | --- | --- |
 | 1 | First launch | "Not legal advice" notice. Key guide: create an OpenRouter account, add credit (with a typical review cost), turn off Safety Retention, create a key. Key field, "Save key" with "Checking key." "Skip for now." "Or try a sample contract first, free": a practice review with ready-made results, no key and no cost. A line under the link says up front that one label in it is wrong on purpose; checking that label shows why, and that real reviews can be wrong too. Only the sample ever contains a planted error. |
 | 2 | Home | Titled "Reviews" in the app. Saved reviews: name, playbook, date, status, "11 of 11 positions checked," days until auto-delete. Search, sort, rename, delete. "Resume" on Interrupted, "Retry" on Failed. Notice after auto-deletes. Buttons: New review, Playbooks, Customers, Settings, Help. |
-| 3 | New review | Load contract by upload, drag and drop, or paste (PDF, .docx, .txt, .md). Review name. Pick playbook, or "Copy a starter" (always shown). "Which party is the \[side\]?" with last choice preselected, or add a missing party. Each party's name and address, prefilled. "Continue." |
+| 3 | New review | Load contract by upload, drag and drop, or paste (PDF, .docx, .txt, .md). A Word file with tracked changes shows a notice. Review name. Pick playbook, or "Copy a starter" (always shown). "Which party is the \[side\]?" with last choice preselected, or add a missing party. Each party's name and address, prefilled. "Continue." |
 | 4 | Contract check | The contract split into numbered clauses, including tables and schedules. A note if it split by paragraph. Hidden text marked. Guidance: "Each box should hold one section. Merge or split if a sentence is cut or two sections share a box." "Looks right, continue." |
 | 5 | Privacy check | Contract with highlighted personal data. Legend on this screen only ("Person 1 = Sarah Jones"). List of every replacement. Select to replace more, untick false alarms, same or different person. The indirect-identifier hint. Back to party details. Private mode on or off. Estimated cost. "Send for review." |
 | 6 | Review running | Progress in four stages, each in plain words: 1 Reading the pages (step 5), 2 Matching clauses (6a, 6b, 7), 3 Judging the labels (8, 9), 4 Writing the notes (10, 11). Running cost, rough time left. Privacy badge, which can switch private mode. Cancel, which shows the cost so far. Note that closing the app pauses the review. |
-| 7 | Review | The whole contract as scrollable pages (original PDF pages, or typeset pages for Word, text and Markdown files and pasted text) with page thumbnails and zoom, label washes and numbered pins, outlined hidden text, link warning. Checking card, then tabs: Labels, Not covered (with the not-covered tick), Missing. Summary bar. Banners: hidden text, unloaded document, playbook changed, unedited starter. Governing-law chip. Counter, "Next unchecked." Find in the contract and zoom (text size is in Settings). Privacy badge (On, Off or Mixed), models and cost. Buttons: Output, Rewrite, Suggestions, Re-run, Start over. |
+| 7 | Review | The whole contract as scrollable pages (original PDF pages, or typeset pages for Word, text and Markdown files and pasted text) with page thumbnails and zoom, label washes and numbered pins, outlined hidden text, link warning. Checking card, then tabs: Labels, Not covered (with the not-covered tick), Missing. Not covered lists each part with its clause type and first line. Missing holds a second, collapsed list, "Searched, nothing found." Summary bar. Banners: hidden text, unloaded document, playbook changed, unedited starter. Governing-law chip. Counter, "Next unchecked." Find in the contract and zoom (text size is in Settings). Privacy badge (On, Off or Mixed), models and cost. Buttons: Output, Rewrite, Suggestions, Re-run, Start over. |
 | 8 | Detail panel | For a label or a Missing item: quoted evidence first with the exact words highlighted, then label word, icon and "?", why, "why it could be the other level" (AI judgment and unsure), level matched, evidence trail with back, AI judgment tag, unsure readings and question, "What to check." "Looks right," "Change it," note. |
 | 9 | Change it | New label (preferred, acceptable, walk-away, unsure), note, save. Tool label beside your label. Undo. |
 | 10 | Rewrite | Clause, "Write it yourself" or "Ask AI" with optional instruction. New personal data to confirm. Before and after with labels. "Use as suggestion." Also "Add this clause" from a Missing item. |
 | 11 | Suggestions | Every suggestion with its clause and label. Edit, remove. |
-| 12 | Output | Unchecked warning. Message, report, or both. Message: ask-for checklist, to, from, tone, editable text, regenerate, copy, "not legal advice" above. "Nothing to ask for" note. "Labels changed. Regenerate?" Report: summary or full contract, "Include your notes," preview, "Save PDF" with the save notice. |
+| 12 | Output | Unchecked warning. Message, report, or both. Message: ask-for checklist, to, from, tone, editable text, "Rewrite with AI" (optional, shown before and after), regenerate, copy, "not legal advice" above. "Nothing to ask for" note. "Labels changed. Regenerate?" Report: summary or full contract, "Include your notes," preview, "Save PDF" with the save notice. |
 | 13 | Playbooks | Playbooks with side and customer, filter by customer. Create blank, Copy a starter, Import, Export, Duplicate, Edit, Delete (with how many reviews use it). |
 | 14 | Starter preview | The starter's positions, read-only. "Copy to your playbooks." |
 | 15 | Import preview | Every position in the file, with a note that it comes from someone else. Duplicate names saved as "(imported)." Import or Cancel. |
 | 16 | Playbook editor | Name, side, customer. Positions with reorder and delete. Position form by type (see 4.1), missing level, "why this matters." Validation messages. Unsaved-changes warning. |
 | 17 | Customers | Customers with playbook counts. Add, rename, delete (unlinks playbooks, keeps them). |
 | 18 | Settings | See 14.3. |
-| 19 | Help | How a review works, "Words used in this app," key guide, "What gets sent," not legal advice, license, keyboard shortcuts. |
+| 19 | Help | How a review works, "Words used in this app," key guide, "What gets sent," "What's protected," not legal advice, license, keyboard shortcuts. |
 | 20 | Error | Unexpected error, "Your files are safe." "Copy the details" (version, step, error code), with a suggestion to report the problem on GitHub (the app opens nothing itself). "Back to reviews." |
 
 ### 14.2 States to show
@@ -449,6 +452,7 @@ The brief for whoever designs the prototype. Read sections 1 to 13 first, plus t
 | Home, New review | Offline: saved reviews open, drafts can be prepared, sending explains internet is needed. |
 | New review | No key saved: "Add your OpenRouter key to run a review," with a button to the guide. Progress kept. |
 | New review | Scanned PDF, mixed file naming scanned pages, too large, empty, or an old Word file (.doc), each blocking Continue. Not English: a warning, and Continue still works. |
+| New review | A Word file with tracked changes: a notice, and Continue still works. |
 | New review | Draft whose playbook was deleted: "Pick a playbook." |
 | Contract check | Hidden text found and marked. |
 | Privacy check | Private mode turned off warning. |
@@ -458,11 +462,15 @@ The brief for whoever designs the prototype. Read sections 1 to 13 first, plus t
 | Review | More than half unsure: guidance message. |
 | Review | Unloaded document, hidden text, unedited starter, two governing-law clauses, no governing-law clause. |
 | Review | Privacy badge "Mixed." |
+| Review | "Searched, nothing found" list in the Missing tab. |
 | Detail panel | Unsure because the quote couldn't be confirmed. |
+| Detail panel | Unsure because the searches disagreed, with the clause to read. |
+| Detail panel | Quote confirmed but not marked on the page: the label is kept and the words are shown. |
 | Detail panel | Conflict: clauses disagree, all shown. A range in one clause. |
 | Detail panel | Conditional yes, with the condition quoted. |
 | Detail panel | AI judgment tag. |
 | Rewrite | Rewrite failed its quote check, savable as unsure. |
+| Output | Rewrite with AI, before and after. |
 | Output | Items unchecked. Nothing to ask for. Labels changed since the message ("Labels changed. Regenerate?"). |
 | Playbook editor | Validation error. |
 | Playbooks | Import failed: not a valid playbook file. |
@@ -476,7 +484,7 @@ The brief for whoever designs the prototype. Read sections 1 to 13 first, plus t
 | --- | --- |
 | OpenRouter key | Change key, remove key, link to the key guide. |
 | Privacy | Private mode default for new reviews (on). "Send “why this matters” notes to the AI, for better explanations" (off), with a warning that notes aren't privacy-checked. Link to "What gets sent." |
-| Models | Collapsed by default. One model for every step (default), picked from one list, or one per step. Per step lists: match, extract, judge words positions, explain, summarise not-covered parts, rewrite, write message. Recommended tested model shown. Warning on untested choices. Jev only for match and judge. In private mode, only zero-retention models offered. |
+| Models | Collapsed by default. One model for every step (default), picked from one list, or one per step. Per step lists: match, extract, judge words positions, explain, sort not-covered parts, rewrite, rewrite message. Recommended tested model shown. Warning on untested choices. Jev only for match and judge. In private mode, only zero-retention models offered. |
 | Storage | Auto-delete after 7, 30 or 90 days (default 30). Delete all reviews. Where files are kept. |
 | Notifications | "Notify when a review finishes" (on): a system notification when a review running in the background is done. |
 | Data | "Delete everything": every review, playbook, customer, setting and the key, after a confirmation that names them and says it can't be undone. |

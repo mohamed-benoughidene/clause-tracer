@@ -178,6 +178,7 @@ Karim Benali</output>
       <footer class="flow-foot" style="position:static;padding:12px 0;background:none;border:0">
         <span class="small muted">Saved with the review.</span>
         <span class="spacer"></span>
+        <button class="btn" type="button" data-open="rewrite-ai"><svg class="icon"><use href="#i-pencil"/></svg>Rewrite with AI</button>
         <button class="btn" type="button" data-open="labels-changed"><svg class="icon"><use href="#i-refresh"/></svg>Regenerate</button>
         <button class="btn btn-primary" type="button" data-toast="Copied"><svg class="icon"><use href="#i-copy"/></svg>Copy message</button>
       </footer>
@@ -186,12 +187,34 @@ Karim Benali</output>
     <footer class="flow-foot" id="message-foot" style="position:static;padding:12px 0;background:none;border:0">
       <span class="small muted">Saved with the review.</span>
       <span class="spacer"></span>
-      <button class="btn" type="button" data-open="labels-changed"><svg class="icon"><use href="#i-refresh"/></svg>Regenerate</button>
+      <button class="btn" type="button" data-open="rewrite-ai"><svg class="icon"><use href="#i-pencil"/></svg>Rewrite with AI</button>
+        <button class="btn" type="button" data-open="labels-changed"><svg class="icon"><use href="#i-refresh"/></svg>Regenerate</button>
       <button class="btn btn-primary" type="button" data-toast="Copied"><svg class="icon"><use href="#i-copy"/></svg>Copy message</button>
     </footer>
   </main>
 </div>
 
+
+<dialog id="rewrite-ai" class="wide" aria-labelledby="rewrite-ai-t">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="h2" id="rewrite-ai-t">Rewrite with AI</h2>
+      <p class="muted">The message was built from your ticked lines. The AI can reword it. The points, quotes and numbers stay the same.</p>
+      <div class="grid-2">
+        <div class="card stack"><span class="h3">Before</span>
+          <p class="quote diff">Thanks for sending the development agreement. Before I sign, could we <del>look at a few points</del>?</p>
+          <p class="quote diff">Payment (5.4): could invoices be paid within 15 days of the invoice date?</p>
+          <p class="small faint">Removed words are struck through. Added words are highlighted.</p></div>
+        <div class="card stack"><span class="h3">After</span>
+          <p class="quote diff">Thanks for sending the development agreement. Before I sign, could we <ins>talk through a few things that matter to me</ins>?</p>
+          <p class="quote diff">Payment (5.4): could invoices be paid within 15 days of the invoice date? <ins>That would help me plan the work.</ins></p>
+          <p class="small faint">Every quote and number was checked against the contract; the wording was written by AI.</p></div>
+      </div>
+      <p class="notice"><svg class="icon"><use href="#i-shield"/></svg>Only the message text is sent, with names swapped for placeholders. Your acceptable limits are never sent.</p>
+    </div>
+    <div class="dialog-foot"><button class="btn" value="cancel">Keep the current message</button><button class="btn btn-primary" value="ok" data-toast="Message rewritten">Use the rewrite</button></div>
+  </form>
+</dialog>
 
 <dialog id="unchecked" aria-labelledby="unchecked-title">
   <form method="dialog">
