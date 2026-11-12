@@ -50,7 +50,7 @@ ADRs 0005 to 0013 and 0015 were **accepted** on 12 Nov 2026. ADR 0014 is **propo
 | [0011](adr/0011-who-writes-the-words.md) | Build the message from code templates, pick not-covered clause types from a closed list, and use one fixed line for AI wording. |
 | [0012](adr/0012-missing-unsure-and-evidence-failures.md) | Show a checkable "searched, nothing found" list, turn disagreeing searches into unsure, and keep the label when a quote can't be placed on the page. |
 | [0013](adr/0013-test-layers-and-release-gates.md) | Test in five layers, four of them free, with the project's own release gates and a paid-run budget. |
-| [0014](adr/0014-protection-and-release-integrity.md) | Use no obfuscation. Protect the project with a trade mark, signed and attested releases, and honest wording. |
+| [0014](adr/0014-protection-and-release-integrity.md) | Use no obfuscation. Protect the project with signed and attested releases and honest wording. A trade mark is deferred. |
 | [0015](adr/0015-provider-ready-seam.md) | Keep version 1 as specified, but keep the seams open for a later hosted option with accounts. |
 
 To record a new decision, copy [ADR 0005](adr/0005-engine-runner-shapes-and-ports.md) and give it the next number ([WRITING_DOCS.md](../WRITING_DOCS.md) section 6 has the format). ADRs 0001 to 0004 use an older, shorter format with front matter (`status`, `date`). If a later choice changes an ADR, add a dated **Amendment** section to it rather than rewriting it. ADR 0002 shows how.

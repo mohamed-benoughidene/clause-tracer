@@ -1,4 +1,4 @@
-# ADR-0014: Protect the project with a trade mark, signed releases and honest wording, not obfuscation
+# ADR-0014: Protect the project with signed releases and honest wording, not obfuscation
 
 **Status:** Proposed
 **Date:** 2026-11-11
@@ -13,7 +13,7 @@ The owner asked how to protect the code, the builds, local data and any hidden p
 We recommend the following. It awaits the owner's decision.
 
 - **No obfuscation** of any kind.
-- **Copycats.** Keep FSL-1.1-ALv2. Register a trade mark on the name and logo in the home market, with classes chosen by an attorney. Enforce by polite email, then a DMCA notice for copied code, then a lawyer.
+- **Copycats.** Keep FSL-1.1-ALv2. Enforce by polite email, then a DMCA notice for copied code, then a lawyer. **No trade mark for now:** the owner ruled it out on 12 Nov 2026 because of its cost. In its place, at no cost: use the name and logo the same way everywhere, and keep dated public proof of first use (signed Git tags, release dates, the repository history). This is weaker than a registered mark. How far an unregistered name is protected differs by country and needs a lawyer to say. Revisit registration before wide promotion, or if a copy appears under the same name.
 - **Tampered builds.** A GPG-signed `SHA256SUMS`, GitHub artifact attestations, and reproducible Linux builds with fixed `PYTHONHASHSEED` and `SOURCE_DATE_EPOCH`. Windows OV signing when affordable ([ADR 0009](0009-desktop-shell-protocol-and-packaging.md)). A notify-only, opt-in update check against GitHub Releases.
 - **Local data.** The planned design ([ADR 0006](0006-encrypted-storage-and-secrets.md)), a data directory with mode 0700, and an opt-in Argon2id passphrase. Publish the honest claim. Never promise memory wiping.
 - **Hidden parts.** Ship nothing that must stay secret. Prompts stay public. The golden test set stays in a private repository used only in CI.
@@ -22,11 +22,11 @@ The honest wording for local data: contracts and the API key are encrypted at re
 
 ## Options Considered
 
-### Option A: Trade mark, signed and attested releases, honest wording (recommended)
+### Option A: Signed and attested releases, honest wording, trade mark deferred (recommended)
 | Dimension | Assessment |
 |-----------|------------|
 | Complexity | Low to Med: release-workflow steps and paperwork |
-| Cost | EUIPO 850 euros for one class ([EUIPO](https://www.euipo.europa.eu/en/trade-marks/before-applying/fees-payable-direct-to-the-euipo)) or USPTO $350 per class ([USPTO](https://www.uspto.gov/trademarks/trademark-fee-information)); OV certificate about $99 a year |
+| Cost | Nothing now. Later, if the trade mark is taken up: EUIPO 850 euros for one class ([EUIPO](https://www.euipo.europa.eu/en/trade-marks/before-applying/fees-payable-direct-to-the-euipo)) or USPTO $350 per class ([USPTO](https://www.uspto.gov/trademarks/trademark-fee-information)); OV certificate about $99 a year |
 | Scalability | The name outlasts each version's two-year conversion to Apache 2.0 |
 | Team familiarity | High for the workflow; legal steps need an attorney |
 
@@ -80,7 +80,7 @@ Gaps carried over: UK and Madrid fees and app-store takedown routes were not ver
 - Revisit when a copy appears, when the budget allows OV signing, or when a later version plans a hosted service ([ADR 0015](0015-provider-ready-seam.md)).
 
 ## Action Items
-1. [ ] Take legal advice on: trade mark classes and market; FSL with any proprietary part, and its effect on the Apache 2.0 conversion; EU AI Act Article 50 (applies since 2 Aug 2026; do not state in the docs that it does not apply).
+1. [ ] When money allows, take legal advice on: whether to register a trade mark, and its classes and market; FSL with any proprietary part, and its effect on the Apache 2.0 conversion; EU AI Act Article 50 (applies since 2 Aug 2026; do not state in the docs that it does not apply).
 2. [ ] Add signed `SHA256SUMS`, `actions/attest` and a CycloneDX SBOM to the release workflow.
 3. [ ] Make the Linux build reproducible and test it by building twice.
 4. [ ] Create the private golden-set repository and give CI read access only.

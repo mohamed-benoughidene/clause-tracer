@@ -324,7 +324,7 @@ Checking the provider against OpenRouter's zero-retention list is a new kind of 
 
 The source is public, so nothing technical stops a copy, and hiding the shipped code would add antivirus warnings while protecting nothing. The design uses **no obfuscator** ([ADR 0014](adr/0014-protection-and-release-integrity.md)). Protection comes from elsewhere:
 
-- **Copycats:** the licence, and a registered trade mark on the name and logo.
+- **Copycats:** the licence. A registered trade mark on the name would be the stronger defence, but the owner ruled it out for now on cost (12 Nov 2026). Until then, keep dated public proof of first use of the name: signed Git tags and release dates.
 - **Tampered builds:** make the real build easy to verify (section 10).
 - **Secrets:** ship none. Prompts are public. The test set stays in a private repository used only by CI.
 
@@ -388,7 +388,7 @@ The owner accepted ADRs 0005 to 0013 and 0015 on 12 Nov 2026. ADR 0014 is still 
 | Who writes the message, summaries and AI mark | Code templates by default; clause types from a closed list; one fixed line saying what was checked | [ADR 0011](adr/0011-who-writes-the-words.md) |
 | Missing, unsure and failed evidence | A checkable "searched, nothing found" list; disagreeing searches become unsure; unplaceable quotes keep their label | [ADR 0012](adr/0012-missing-unsure-and-evidence-failures.md) |
 | Test layers and release gates | Five layers, a paid run on a budget, the project's own gates | [ADR 0013](adr/0013-test-layers-and-release-gates.md) |
-| Protection and release integrity | No obfuscation; trade mark; signed and attested releases; honest wording | [ADR 0014](adr/0014-protection-and-release-integrity.md) |
+| Protection and release integrity | No obfuscation; signed and attested releases; honest wording; trade mark deferred | [ADR 0014](adr/0014-protection-and-release-integrity.md) |
 | Room for a hosted option | Keep the seams in section 11 open; change nothing users see | [ADR 0015](adr/0015-provider-ready-seam.md) |
 
 **Still open after this work.** These were not researched well enough to recommend, or need a measurement or a lawyer:
@@ -397,7 +397,7 @@ The owner accepted ADRs 0005 to 0013 and 0015 on 12 Nov 2026. ADR 0014 is still 
 - Whether the pages are served from `file://` or a loopback server (section 3.2).
 - Final input limits and the real cost per review, from the first paid run (Spec 13).
 - Whether EU AI Act Article 50 puts a marking duty on this app. Take legal advice; the docs must not say it does not apply.
-- Trade mark classes, and how FSL would be enforced. Both need a lawyer.
+- Whether to register a trade mark later, and how FSL would be enforced. Both need a lawyer.
 - Presidio's speed on a real 60,000-character contract on an ordinary laptop.
 
 ## 14. Changes this work made to earlier documents
