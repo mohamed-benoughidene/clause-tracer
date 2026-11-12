@@ -94,3 +94,22 @@ This file's sections 1 to 7 describe the first day. On 12 Nov 2026 the project o
 | The owner decided the remaining technical points | `sqlcipher3`; a `.deb` for Linux; pages loaded from files; PyGObject allowed by name; the two missing parts of ADR 0012 |
 
 **Still open:** whether version 1 ships "Rewrite with AI" for the message; a trial build of the Linux package; the Windows checks in CI; and the legal questions, which need a lawyer.
+
+## 9. Closing the last open items (started 12 Nov 2026, unfinished)
+
+The owner said a lawyer is not an option, and asked to work on the four items left open. Where this stands:
+
+| Item | State |
+| --- | --- |
+| Legal questions | [ADR 0016](../docs/adr/0016-legal-positions-without-a-lawyer.md) written as **proposed**. The owner has not ruled on it. Nothing else was changed to match it yet |
+| Linux trial build | Being run without root, in a throwaway sandbox on the developer's machine. Results not yet written into the docs. Kept files and `RESULTS.md`, if the run finished, are in the session scratch folder under `linuxspike/keep/`, and a copy is on the local branch `spike/windows-checks` if it was saved in time |
+| Windows checks | Scripts for the PDF functions and the encrypted store are written and pass on Linux (pypdfium2 5.15.2, sqlcipher3 2.6.0, 12 Nov 2026). They are on the local branch `spike/windows-checks`, with a GitHub Actions workflow. **Not pushed:** running them needs the owner's go-ahead to push that branch. The page-loading check (`trial_app.py`) is still to be copied from the Linux trial |
+| First paid run | Not started. It needs the pipeline first. No money was spent |
+
+**Draft question for the EU's AI Act Service Desk** (the owner sends it, at <https://ai-act-service-desk.ec.europa.eu/en/form/helpdesk>):
+
+> I am an individual developer outside a company. I plan to release a free desktop application under my own name. It runs on the user's computer and reviews a contract. For some steps it sends text to a general-purpose AI model through a third-party API, using an API key that the user obtains and pays for. The application shows short AI-written reasons, and can rewrite a clause or a message on request. A fixed visible line says the wording was written by AI.
+>
+> 1. Am I the "provider" of an AI system under Article 3(3) for the purposes of Article 50, or is that the model's provider?
+> 2. If I am, does Article 50(2) apply to (a) reasons of one or two sentences and (b) a rewritten message that the user copies out as plain text? Plain text cannot carry metadata, and I cannot watermark the output of a model I do not run. Is relying on the model provider's marking, plus a metadata mark on exported PDF files, enough?
+> 3. Does a free download from a public code-hosting site count as placing the system on the Union market?

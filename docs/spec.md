@@ -413,7 +413,7 @@ Each item has a decision record (ADR). Ticked items were decided on 12 Nov 2026.
 - [x] The Linux download is a `.deb` file, with a plain archive for Fedora. The app loads its pages from files and opens no local port (decided 12 Nov 2026, [ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md)).
 - [ ] A trial build to confirm the Linux package works with the system's web view, and the same checks on Windows in CI.
 - [x] Version 1 keeps "Rewrite with AI" for the message, optional and labelled (decided 12 Nov 2026, [ADR 0011](adr/0011-who-writes-the-words.md)).
-- [ ] **Parked: the EU AI Act (Article 50).** Set aside for now, to work on later. The open questions are in section 10.
+- [ ] **Parked: the EU AI Act (Article 50).** Set aside for now, to work on later. The open questions are in section 10. A proposed record, [ADR 0016](adr/0016-legal-positions-without-a-lawyer.md), recommends working positions on this and on the two licence questions, since no lawyer is available. It is not accepted yet.
 - [ ] Whether to register a trade mark on the name. Ruled out for now because of its cost.
 
 ## 14. Prototype handoff
