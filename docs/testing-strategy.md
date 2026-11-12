@@ -104,7 +104,9 @@ A fast test renders every prompt version with sample inputs and asserts the Spec
 
 ### 6.4 The real adapter, without a key
 
-The OpenRouter adapter is tested against saved response bodies with `respx`, which fails on an unmatched request and on an unused route. One catch: a bare `@respx.mock` turns the unused-route check off, so tests use the explicit form. The same contract suite runs live inside the paid run.
+The OpenRouter adapter is tested against saved response bodies through `httpx2.MockTransport`, which is built into the HTTP client. A small handler refuses any request with no saved body and reports saved bodies nothing used. The same contract suite runs live inside the paid run.
+
+Do not use `respx` here. It patches `httpx`, not `httpx2`: in a local test on 12 Nov 2026 its mock did not intercept, and the request reached the real network. That is the failure the suite-wide socket block (section 8) exists to catch.
 
 ### 6.5 Where fixtures come from
 
@@ -168,12 +170,14 @@ The owner set the budget on 12 Nov 2026: **about $10.76 in total** ($5.76 in han
 
 **What a run costs.** Prices were fetched on 11 Nov 2026 and change weekly. All figures are estimates until the first paid run measures them.
 
-| Run | Cheap model (Claude Haiku 5.5, GPT-6 Luna or DeepSeek V4.1 Flash) | Sonnet-class model |
+| Run | Cheap model (Claude Haiku 5.5) | Sonnet-class model |
 | --- | --- | --- |
 | One review of a 10,000-word contract | `[Assumption]` 1 to 3 cents | about $0.28 |
 | Ten contracts, one run each | `[Assumption]` 10 to 30 cents | about $2.80 |
 | Ten contracts, ten injected variants and 100 built cases, three runs each | `[Assumption]` about $2 | about $34 |
 | The same with 300 built cases | $3 to $4 | about $67 |
+
+Claude Haiku 5.5 is the cheap model to use: on 12 Nov 2026 it cost $0.10 and $0.50 per million input and output tokens, with a zero-retention endpoint. DeepSeek V4.1 Flash is cheap only outside private mode; its zero-retention endpoints cost more than its list price.
 
 So the earlier figures of $34 and $67 hold only for a Sonnet-class model. With $10.76, paid testing runs on a cheap model, and that is workable.
 
@@ -260,7 +264,7 @@ These are the project's own targets, anchored on a common industry guide (60% ac
 | When | What |
 | --- | --- |
 | **Every pull request** (`scripts/check.sh`, Linux) | Lint, format, types, import rules, unit, golden-file, contract, integration and end-to-end replay tests, property tests on the `ci` profile, highlight pictures, fixture checks, architecture tests, dependency and licence checks, all with sockets blocked |
-| **Every pull request, once files and paths are real** | The same suite on a Windows runner, without the highlight pictures |
+| **Every pull request, once files and paths are real** | The same suite on a Windows runner pinned to `windows-2025`, without the highlight pictures |
 | **Nightly** | Property tests at 2,000 examples; file fuzzing |
 | **Weekly** | Vulnerability check of the lockfile |
 | **Before a release** | Mutation report; the largest paid run the budget allows (section 7.5); installer builds and packaged-app tests on both systems; the network check; signed checksums and build attestations; the blind self-test |

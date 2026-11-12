@@ -147,7 +147,7 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | Too large (blocks) | This file is 48 MB. The limit is 20 MB. Paste only the pages you want reviewed. |
 | Empty (blocks) | This file has no text. Choose another file, or paste the text. |
 | Old Word (blocks) | This is an old Word file. Open it in Word, save it as .docx, then load that. |
-| Tracked changes (warns) | This Word file has 14 tracked changes, made by Sarah Jones and Karim Benali. The review reads it as if every change were accepted. · To check the earlier wording too, reject the changes in Word, save a copy, and load that as a second review. |
+| Tracked changes (warns) | This Word file has 14 tracked changes, made by Sarah Jones and Karim Benali. The review reads it as if every change were accepted. · The next step lists every change, with the earlier wording. |
 | Not English (warns) | This contract doesn't look like it's in English. Clause Tracer is built and tested for English contracts only, so: · fewer names and addresses are found for you. Check the privacy step carefully. · more labels may be wrong or unsure. · [Choose another file] |
 | Section 2 | Pick a playbook · Playbook · [Copy a starter] |
 | Playbook line | Side: service provider · 11 positions · edited 2 Nov |
@@ -169,6 +169,8 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | Facts | Clauses: 45, split by section numbers · Schedules: Schedule 1 · 1 table kept · Pages: 5, all with real text |
 | Paragraph split note (new) | This contract has no section numbers, so it was split by paragraph. |
 | Hidden text | Found 1 piece of hidden text in 2.2: white text a reader can't see. It's kept and marked so you can see it. Any label that rests on it becomes unsure. [Show me] |
+| Unreadable text (warns) | Parts of pages 3 and 4 couldn't be read as text. The letters are stored in a way the app can't decode, so it can't check them. · Any result that rests on those parts will be marked unsure. Read pages 3 and 4 yourself before you rely on the review. |
+| Tracked changes | Tracked changes · [n] · This Word file has tracked changes. The review reads it as if every change were accepted. Here is what changed, so you can see the earlier wording. · columns: Clause · Who · Change · rows: Changed “30 days” to “60 days” · Added “…” · Removed “…” · [n] more changes · Removed words aren't part of the contract and are never sent to the AI. |
 | Cut box | One box looks cut · 12.1 ends mid-sentence and 12.2 starts with its end. “notice.” probably belongs at the end of 12.1. · [Fix it] [Show me] |
 | Box controls | Split box [n] · Merge box [n] with the box below · toasts: Split at the cursor · Merged with the box below · Merged 12.1 and 12.2 |
 | Keys hint | M merge with next · S split |
@@ -273,6 +275,7 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | Quote failed | Couldn't confirm the wording. Check 12.2 yourself. · Unsure: asked twice, and both times the AI's quote wasn't in the contract. |
 | Searches disagreed | This one is unsure. One search found wording about this in 9.2, and a second check didn't agree. · The searches disagreed about 9.2. Read it yourself. · Unsure: a clause may cover this position, but it couldn't be confirmed. · What to check: Read 9.2. Does it limit who you can work for? |
 | Quote not marked on the page | These words are in the contract, but they couldn't be marked on the page. Find them in 5.4. · (the label is kept) · trail: Clause · not marked on the page |
+| Unreadable text | Unsure: this wording sits in text the app couldn't read. Check [clause] yourself. |
 | Searched, nothing found | The contract doesn't mention this, and your playbook prefers it that way. No wording about it was found. · Where it was searched · Every clause was read for this position, twice: once position by position, and once clause by clause. · Words looked for: compete, competing, restrictive covenant, solicit, exclusive. · A search can miss a clause. This doesn't prove the contract has no non-compete. · Preferred by your playbook: nothing was found, and you set missing to preferred. · Nothing found. Is this right? · [Looks right] [Change it] |
 | AI wording line | Every quote and number was checked against the contract; the wording was written by AI. · Shown under every piece of text the AI wrote: the reasons for a pencilled label, an AI rewrite of a clause, an AI rewrite of the message. Text the app built itself carries no line. The short tag “Written with AI” stays on suggestions. |
 | Unloaded doc | Document · Not loaded · Refers to a document that isn't loaded: Master Agreement |
@@ -551,4 +554,4 @@ The copy deck and the prototype were brought into line with the three accepted d
 | 3 | Settings and the Models list named two steps “Summarise not-covered parts” and “Write message”. | “Sort not-covered parts” and “Rewrite message”. |
 | 4 | A position whose missing level is preferred vanished when nothing was found. | It is listed under “Searched, nothing found” in the Missing tab, and can be checked. |
 | 5 | Help promised encryption without saying what it does and doesn't cover. | The new “What's protected” section says both. |
-| 6 | Two parts of ADR 0012 have no copy yet: the warning for text that can't be decoded, and a way to check a Word file's earlier wording inside the app. | Left open (Spec 13). The first waits for numbers from the test set. |
+| 6 | Two parts of ADR 0012 had no copy: text that can't be decoded, and a way to see a Word file's earlier wording. | Contract check now warns about unreadable pages and lists every tracked change. A value resting on unreadable text is unsure. The 1-in-20 warning level is a guess to tune on the test set. |

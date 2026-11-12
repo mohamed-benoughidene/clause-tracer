@@ -79,3 +79,14 @@ Gaps carried over: no study compares templated and AI-written outbound messages,
 3. [ ] Take legal advice on Article 50 before stating anything about it in the docs.
 4. [x] Change Spec 4.7 item 3 and Spec 6.1 steps 11 and 13 (done 12 Nov 2026).
 5. [x] Update `docs/ux-copy.md` and add the new states to the prototype's `states.html` (done 12 Nov 2026; `ux-copy.md` section 6.8 records it).
+
+## Amendment (12 Nov 2026): what the Article 50 texts say about rewrites
+
+The Commission's guidelines on Article 50 and the Code of Practice were read on 12 Nov 2026. This is what the documents say, not legal advice.
+
+- Text shown only to the user who asked for it, and private messages between people, are given as examples outside the duty on published text.
+- "Paraphrasing or rewriting text that changes style, structure and meaning" is listed as needing a machine-readable mark. Grammar fixes and minor polishing are listed as exempt. Very short text is excepted from watermarking.
+- A visible label is described for the duty to tell people they are dealing with AI. Neither document says a visible label satisfies the marking duty.
+- Nothing addresses tools that call a model through the user's own key, so whether this app's developer is a "provider" is open.
+
+This supports the main decision here: the app's default message is built by code and is not AI text. It leaves the optional "Rewrite with AI" for the message as the one feature the guidelines point at directly. Whether version 1 ships it is with the owner.

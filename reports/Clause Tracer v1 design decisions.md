@@ -182,3 +182,27 @@ Gaps, stated plainly: GDPR duties for a solo developer running an LLM proxy that
 Three results change the plan more than the rest. First, a hand-checked, paired design beats clever tooling: the strongest guards here are a human-owned answer table, a canary scan with a positive control, and a socket block across the whole suite, and none needs a new framework. Second, several privacy promises cannot be proven and must be reworded. The app cannot prove OpenRouter ZDR, cannot overwrite an SSD block, and cannot stop same-user malware. A smaller promise that the tests can verify serves non-technical freelancers better than a larger one they cannot. Third, the "defend the code" questions mostly dissolve because the source is public. The money goes to a trade mark, a certificate and attestations, not obfuscation.
 
 The biggest unknowns are measurable, and the first paid run closes most of them. It will show how much cases of the same input correlate, what reasoning tokens cost, whether caching hits, whether each endpoint truly enforces strict schemas, and how often samples disagree. A short list of decisions still needs a person other than the researcher: legal advice on Article 50, the trade mark classes and FSL with proprietary parts; a one-off check of the pywebview licence and of `httpx2`'s maintainer; and a measurement of Presidio latency on a real 60,000-character contract on the developer's machine. The open choices in Spec section 13 (the shell, how Presidio is bundled, which models) should still go to the user as questions. This report gives a recommendation for each and the evidence behind it, but does not settle them.
+
+## Checks made after the decisions, 12 Nov 2026
+
+After the project owner accepted the decision records, the open points were checked again: by tests run on a Debian 13 machine, by reading primary sources, and by a second look at the facts above. Nothing in this report was found to be wrong. These points sharpen it.
+
+**Tested on the machine (Debian 13, Python 3.13).**
+
+- **PDF reading.** `pypdfium2` 5.15.2 (PDFium 159.0.8149) returned the right fill colour, font size and render mode for normal, white, 1-point and invisible text in a test PDF, and has every function the hidden-text checks need. The "not verified that the bundled build includes every function" gap is closed for Linux. Windows is untested.
+- **Encrypted storage.** `sqlcipher3` 0.6.5 and `apsw-sqlite3mc` 3.54.0.0 both kept a marker string out of the database and log files, refused a wrong key and no key, and are compiled with temporary storage in memory and secure delete on. So the report's reason to prefer `apsw-sqlite3mc` does not hold: both do it. The owner chose `sqlcipher3` for its standard interface.
+- **Mocking the HTTP client.** `respx` 0.23.1 does not intercept `httpx2`: the test request reached the real network. `httpx2.MockTransport` works and is built in. The recommendation to use `respx` or `pytest-httpx` in section 1 is withdrawn.
+
+**Read from primary sources.**
+
+- **`httpx2`** is maintained by the Pydantic organisation, BSD-3-Clause, version 2.16.0 of 21 Oct 2026, and the OpenAI SDK depends on it. The "maintainer not fetched" gap is closed.
+- **pywebview** is BSD 3-Clause (6.2.1). Its `js_api` bridge uses native message handlers, not a web server. Its built-in server needs fixed port 42001 to keep browser storage and has no token or origin check, so pages should load from files. PyGObject, needed on Linux, is LGPL.
+- **Linux packages.** A `.deb` fits best; Flathub requires builds from source and forbids AI-assisted manifests. Whether a PyInstaller build runs against the system's WebKitGTK is still untested.
+- **Prices on 12 Nov 2026** match the tables above. One addition: DeepSeek V4.1 Flash's zero-retention endpoints cost more than its list price, so Claude Haiku 5.5 ($0.10 and $0.50 per million tokens) is the cheap model in private mode.
+- **NUPunkt** has precision 0.90 but recall 0.69 on legal text.
+- **`windows-latest`** moves between versions over weeks; pin `windows-2025`. Inno Setup has its own non-OSI licence and is a build tool only.
+- **MPL-2.0** allows a larger work under other terms; an unmodified pikepdf needs its licence files, the MPL text and a pointer to its source.
+- **EU AI Act Article 50.** The Commission's guidelines list rewriting text as needing a machine-readable mark, treat private messages and results shown only to the requesting user as outside the published-text duty, and say nothing about tools that use the user's own key. Two dates were found for the guidelines (20 Jul and 5 Nov 2026).
+- **Licence enforcement.** No court ruling on FSL or similar licences was found.
+
+The decision records carry these points as dated amendments. The working notes behind them are kept locally and are not in the repository.

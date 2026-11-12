@@ -89,3 +89,9 @@ The facts about DBOS and Hamilton are verified. The choice of Option A over them
 2. [ ] Confirm that Pydantic `TypeAdapter` validates straight into frozen, slotted dataclasses on the pinned version.
 3. [ ] Write the runner's cache-key rule and the call/parse split into `src/clause_tracer/cli/README.md`.
 4. [ ] Record the `core` shapes and ports in `src/clause_tracer/core/README.md` when `core` is built (S3, write down input and output shapes).
+
+## Amendment (12 Nov 2026): `httpx2` checked, and how to fake it in tests
+
+- **`httpx2` is confirmed as the HTTP client.** It is maintained by the Pydantic organisation ([pydantic/httpx2](https://github.com/pydantic/httpx2)), which took over because `httpx` had gone quiet. Licence BSD-3-Clause, version 2.16.0 of 21 Oct 2026, and the OpenAI Python SDK depends on it. This closes action item 1.
+- **Do not use `respx` with it.** `respx` 0.23.1 patches `httpx`, not `httpx2`. In a local test on 12 Nov 2026 the mock did not intercept, and the request went to the real network. Use `httpx2.MockTransport` instead: it is built in, it was tested the same day, and a handler of a few lines can refuse an unrecorded request and report unused recordings.
+- **This is why tests block sockets.** A mocking tool that silently stops matching sends real requests. The suite-wide socket block in [`testing-strategy.md`](../testing-strategy.md) section 8 turns that into a failing test.

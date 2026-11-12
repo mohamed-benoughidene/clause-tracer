@@ -38,7 +38,7 @@ There is no load or scaling target. The app serves one user on one computer, and
 
 - **One developer, who reviews Python.** AI agents write most code. Any Rust or TypeScript would ship unreviewed, so the design avoids both.
 - **No Windows machine.** The developer works on Debian. Windows builds must be built and tested by CI.
-- **Licence rule.** The project is source available under FSL-1.1-ALv2. Runtime dependencies must be MIT, BSD or Apache. No GPL or AGPL. One named exception: `pikepdf` (MPL-2.0), allowed on 12 Nov 2026 for reading hidden PDF layers ([ADR 0007](adr/0007-document-reading-stack.md)).
+- **Licence rule.** The project is source available under FSL-1.1-ALv2. Runtime dependencies must be MIT, BSD or Apache. No GPL or AGPL. Two named exceptions, both allowed on 12 Nov 2026: `pikepdf` (MPL-2.0) for reading hidden PDF layers ([ADR 0007](adr/0007-document-reading-stack.md)), and PyGObject (LGPL) on Linux, the bridge that lets Python open the window ([ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md)). The app shows a third-party licences page.
 - **Tie-break.** When two good options conflict, the better experience for non-technical freelancers wins: a small download, a quick start and a smooth install.
 - **Later, not now.** A future version may let the project itself become the AI provider, with optional accounts. Version 1 must not block that (section 11).
 
@@ -108,7 +108,7 @@ The recommended shell is **pywebview** ([ADR 0009](adr/0009-desktop-shell-protoc
 
 - **The interface never talks to the engine directly.** JavaScript calls a narrow Python facade through `window.pywebview.api`. The facade checks its inputs and forwards typed requests to the engine.
 - **Untrusted content stays inert.** PDF pages are pictures. Contract, playbook and AI text is set with `textContent`, never as HTML. A strict content security policy forbids remote content. Links open in the system browser after the Spec 4.3 warning. Developer tools and the remote debugging port are off in release builds.
-- **Open point.** The prototype is several pages and remembers theme and text size in browser storage, which `file://` pages may forget. Serving the pages from pywebview's built-in server on `127.0.0.1` fixes that but opens a loopback port. This needs a decision and a test before the shell stage.
+- **Pages load from files, with no local server** (decided 12 Nov 2026, ADR 0009 amendment). pywebview is started with an absolute path and its built-in server off, so no port is opened. Browser storage is off in that mode, so theme and text size are saved by Python through the facade. This was read from pywebview's source and must be confirmed in a running build on both systems.
 
 ### 3.3 Why two processes
 
@@ -184,6 +184,7 @@ The recommended design is a **hybrid** ([ADR 0006](adr/0006-encrypted-storage-an
                                                                   placeholder map, AI replies
 ```
 
+- **The encrypted file uses `sqlcipher3`** (decided 12 Nov 2026 after both candidates passed the same leak test on Linux; ADR 0006 amendment).
 - **Deleting a review destroys its key.** The blobs cannot then be read, whatever the disk keeps. This matters because an app cannot overwrite a block on an SSD.
 - **Blobs are bound to their place.** `review_id | record_id | schema_version` is passed as associated data, so a blob cannot be swapped for another.
 - **Nothing readable is left in side files.** Temporary storage stays in memory, secure delete is on, and the write-ahead log is truncated after a delete and on close.
@@ -334,14 +335,14 @@ The source is public, so nothing technical stops a copy, and hiding the shipped 
 | --- | --- | --- |
 | Freeze the Python engine and shell | PyInstaller, one-folder build (one-file builds unpack on every start) | [ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md) |
 | Windows installer | Inno Setup, scripted on GitHub's Windows runner, with the WebView2 bootstrapper | ADR 0009 |
-| Linux package | **Open.** AppImage, `.deb` and Flatpak were not compared | Section 13 |
+| Linux package | A `.deb` on GitHub Releases, with WebKitGTK as a system dependency, plus a plain `tar.gz` for Fedora. A trial build must confirm it before the shell stage | ADR 0009 |
 | Personal-data model | Bundled in the installer, never downloaded on first run | [ADR 0008](adr/0008-personal-data-detection-bundle.md) |
 | Signing | Unsigned at first, with published checksums. An individual certificate later | ADR 0009 |
 | Integrity | Signed `SHA256SUMS`, GitHub build attestations, a reproducible Linux build | [ADR 0014](adr/0014-protection-and-release-integrity.md) |
 | Updates | "Check for updates" opens the GitHub release page, only when pressed (Spec 8.1) | Spec |
 | Windows testing | CI installs the build silently and drives the real window with Playwright for Python. A 90-day evaluation VM covers the manual look | ADR 0009 |
 
-CI runs `scripts/check.sh` on Linux on every pull request. A Windows job joins when the first code that touches files, paths or wheels lands, because the developer has no Windows machine to catch those problems by hand.
+CI runs `scripts/check.sh` on Linux on every pull request. A Windows job, pinned to the `windows-2025` image, joins when the first code that touches files, paths or wheels lands, because the developer has no Windows machine to catch those problems by hand.
 
 ## 11. Room for a hosted option later
 
@@ -393,11 +394,11 @@ The owner accepted ADRs 0005 to 0015 on 12 Nov 2026.
 
 **Still open after this work.** These were not researched well enough to recommend, or need a measurement or a lawyer:
 
-- The Linux package format (AppImage, `.deb` or Flatpak).
-- Whether the pages are served from `file://` or a loopback server (section 3.2).
 - Final input limits and the real cost per review, from the first paid run (Spec 13).
-- Whether EU AI Act Article 50 puts a marking duty on this app. Take legal advice; the docs must not say it does not apply.
-- Whether to register a trade mark later, and how FSL would be enforced. Both need a lawyer.
+- Whether EU AI Act Article 50 puts a marking duty on this app. The primary texts were read on 12 Nov 2026 (ADR 0011 and ADR 0014 amendments) and do not settle it. Take legal advice; the docs must not say it does not apply.
+- A trial showing that a PyInstaller build runs against the system's WebKitGTK on Linux.
+- The same checks on Windows, in CI: the PDF functions, the encrypted store, and loading pages from files.
+- Whether to register a trade mark later. How FSL would be enforced: no court has ruled on it, and the free routes do little (ADR 0014 amendment).
 - Presidio's speed on a real 60,000-character contract on an ordinary laptop.
 
 ## 14. Changes this work made to earlier documents

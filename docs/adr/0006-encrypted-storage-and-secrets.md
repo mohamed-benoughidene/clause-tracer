@@ -87,3 +87,21 @@ The honest claim is smaller than "erased", because an app cannot overwrite an SS
 4. [ ] Write tests: pragma read-back, canary byte scan with a positive control, crypto-shredding, and a crash between key deletion and row deletion.
 5. [x] Update Spec 8.3 with the honest claim and the backup note, and add matching lines to `docs/ux-copy.md` (done 12 Nov 2026).
 6. [ ] Try both `apsw-sqlite3mc` and `sqlcipher3` on Linux and in Windows CI, then bring the choice to the owner.
+
+## Amendment (12 Nov 2026): the SQLite encryption package is `sqlcipher3`
+
+The owner chose **`sqlcipher3`** on 12 Nov 2026. This closes action item 6 for Linux.
+
+Both packages were run through the same test on Debian 13 with Python 3.13 that day (`sqlcipher3` 0.6.5 and `apsw-sqlite3mc` 3.54.0.0). A marker string was written to an encrypted database in write-ahead-log mode, and every file on disk was searched for it.
+
+| Check | `sqlcipher3` | `apsw-sqlite3mc` |
+| --- | --- | --- |
+| Marker found in the database or log files | No | No |
+| Wrong key, or no key | Refused | Refused |
+| Temporary storage compiled to memory (`TEMP_STORE=2`) | Yes | Yes |
+| Secure delete on | Yes | Yes |
+| Positive control: plain SQLite shows the marker | Yes, so the scan works | |
+
+The research preferred `apsw-sqlite3mc` because it keeps temporary data in memory and has secure delete on. The test shows `sqlcipher3` does both too, so that reason no longer separates them. `sqlcipher3` wins because its interface matches Python's standard `sqlite3` module, which the developer and the agents already know.
+
+Still to do: run the same test in Windows CI; add the SQLCipher credit to the About screen; note that a wrong key makes SQLCipher print errors to standard error, which must not reach the log with any contract text (it carries none in the test). `apsw-sqlite3mc` stays the fallback. If it is ever used, set its cipher explicitly: its default (ChaCha20-Poly1305) checks each page, but the AES-CBC option in its README does not.

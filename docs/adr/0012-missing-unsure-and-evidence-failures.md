@@ -82,3 +82,12 @@ Gaps carried over: no study tests these exact screens. How many rows users will 
 5. [ ] Extend Rule 9 for text that can't be decoded, once the test set gives a threshold (Spec 13 lists this as open).
 6. [x] Add copy to `docs/ux-copy.md` and new states to the prototype's `states.html`: the searched-nothing-found list, the clause to read when searches disagree, the quote panel and the tracked-changes notice (done 12 Nov 2026).
 7. [ ] Still without copy or a prototype state: the warning for text that can't be decoded, and a way to check a Word file's earlier wording inside the app.
+
+## Amendment (12 Nov 2026): text that can't be decoded, and the list of tracked changes
+
+The owner accepted two additions on 12 Nov 2026. They close action items 5 and 7.
+
+1. **Text that can't be decoded.** A value whose quote includes text the app can't decode becomes unsure, exactly as Rule 9 does for hidden text. No new label is needed. A page where more than 1 in 20 characters can't be decoded `[Assumption]` gets a warning at the contract check, which names the page. The extreme case needs no new rule: a page with fewer than 50 readable characters already counts as scanned and blocks (Spec 9). Tune the 1-in-20 level on the test set.
+2. **Tracked changes are listed.** The contract check lists every tracked change with its earlier and new wording and who made it. The user sees the earlier wording there, so no second review is needed. The accepted view is still the contract. Removed words are not part of it and are never sent to the AI.
+
+The spec (Rule 9 and section 9), the copy deck and the prototype were updated the same day.

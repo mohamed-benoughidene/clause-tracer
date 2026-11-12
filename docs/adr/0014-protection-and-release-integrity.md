@@ -85,3 +85,14 @@ Gaps carried over: UK and Madrid fees and app-store takedown routes were not ver
 3. [ ] Make the Linux build reproducible and test it by building twice.
 4. [ ] Create the private golden-set repository and give CI read access only.
 5. [x] Update Spec 8.3 and 8.4 with the honest wording and the release chain, and `docs/ux-copy.md` with matching lines (done 12 Nov 2026).
+
+## Amendment (12 Nov 2026): what the primary legal texts say
+
+The licence text, GitHub's takedown policy and the Article 50 documents were read on 12 Nov 2026. This is what they say, not legal advice.
+
+- **Enforcing the licence.** No court ruling on FSL, BSL or the Elastic Licence was found, and no FSL enforcement case. The FSL template has no governing-law, termination or remedies clause. A takedown notice to GitHub is free, needs a sworn statement, covers only copies on GitHub, and names each fork. If the other side sends a counter-notice, the content returns in 10 to 14 days unless a court action is filed. A knowingly false notice carries liability.
+- **Free steps, and what each does not do.** Keep the licence file and copyright line in the repo (it stops no one). Keep dated commits and signed tags, and capture any copy (it supports a notice, and does not prove a competing use). Use a takedown notice only for a clear copy.
+- **Article 50.** It has applied since 2 Aug 2026, reaches developers outside the EU whose app is used there, and has no exemption for open or source-available software. Two dates were found for the Commission's guidelines (20 Jul 2026 and 5 Nov 2026), so confirm which version is current. Whether this app's developer is a "provider" when the user brings their own key is not addressed. [ADR 0011](0011-who-writes-the-words.md) has the points on rewrites.
+- **Third-party licences.** The app needs a third-party licences page and the installer a licences folder, covering pikepdf ([ADR 0007](0007-document-reading-stack.md)), PyGObject on Linux ([ADR 0009](0009-desktop-shell-protocol-and-packaging.md)) and SQLCipher ([ADR 0006](0006-encrypted-storage-and-secrets.md)).
+
+The research notes hold precise questions for a lawyer on each point. They are kept locally, not in the repo.

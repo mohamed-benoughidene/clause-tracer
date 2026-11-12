@@ -89,3 +89,19 @@ Two points stay open. The prototype keeps theme and text size in browser storage
 5. [x] Change Spec 13's shell item (done 12 Nov 2026).
 6. [ ] Update Spec 9's signing text, and add the shell folder that ADR 0004 promises.
 7. [ ] Gaps the research left, to close before the shell stage: no report was found of one developer shipping pywebview on both systems; the Qt fallback is unmeasured; orphan protection is untested; Wine, hourly cloud Windows machines and NSIS were not researched.
+
+## Amendment (12 Nov 2026): Linux package, how pages load, and two licence notes
+
+The owner decided three open points on 12 Nov 2026.
+
+1. **Linux package: a `.deb` on GitHub Releases, plus a plain `tar.gz` for Fedora.** The `.deb` names WebKitGTK and PyGObject as system dependencies, so the system installs them, and the user gets a menu entry and a clean uninstall. AppImage lost: it still needs the system's WebKitGTK, and its menu entry and uninstall are manual. Flathub does not fit now: it requires builds entirely from source, rejects projects with little history, and forbids AI-assisted manifests ([Flathub requirements](https://docs.flathub.org/docs/for-app-authors/requirements)). Evidence is low to medium. **Before the shell stage, a trial must show that a PyInstaller build runs against the system's WebKitGTK.** A stock Debian 13 desktop does not have the WebKitGTK bindings installed, which is what the `.deb` dependency fixes.
+2. **Pages load straight from files, with no local server.** Start pywebview with an absolute path and `http_server=False`. No port is opened. pywebview's built-in server would need a fixed port (42001) to keep browser storage, and it has no token, Host check or Origin check. The cost: with pywebview's default `private_mode=True`, browser storage is off, so theme and text size are saved by Python through the `js_api` facade and applied before each page loads. The prototype keeps using browser storage; the shell replaces those two calls. Set `ALLOW_FILE_URLS` to False explicitly, because pywebview's docs and code disagree on its default. This closes the open point on serving pages. It was read from pywebview's source, not run, and nothing was checked on Windows.
+3. **PyGObject is allowed on Linux, by name.** PyGObject (LGPL-2.1 or later) is the bridge that lets Python open a GTK window. pywebview cannot open a window on Linux without it or Qt. The owner allowed it on 12 Nov 2026 as a named exception to the MIT, BSD and Apache rule, like pikepdf. With a `.deb` it comes from the user's system. List it on the third-party licences page.
+
+Also checked that day:
+
+- **pywebview's licence is BSD 3-Clause** (version 6.2.1 of 15 Apr 2026). Its other required packages are MIT or PSF. Avoid its PyQt6 extra, which is GPL or commercial. This closes action item 1.
+- **The bridge needs no web server.** The GTK and WebView2 `js_api` bridges use native message handlers. Re-check this at the pinned version.
+- **pywebview cannot block navigation to outside addresses.** Use a strict content security policy in each page, no outside links in the pages, a test for both, and one `js_api` call that opens a link in the system browser after the Spec 4.3 warning.
+- **Pin the Windows CI image to `windows-2025`**, not `windows-latest`, which moves between versions over weeks.
+- **Inno Setup has its own licence**, not an OSI one. It is free to use and is a build tool, not shipped code, so the runtime licence rule does not apply. It is preinstalled on the `windows-2025` image.

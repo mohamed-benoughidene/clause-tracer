@@ -84,3 +84,9 @@ The gate numbers are the project's own. No published release threshold exists, s
 3. [ ] Check the pytest-httpx licence and audit Inspect AI for network calls before any use.
 4. [ ] Re-query prices before the first paid run. Build the spend ledger first: a cap per run and a total cap of $10, so a run stops itself.
 5. [x] Add the per-case hard gates and the reporting rule to Spec 11 (done 12 Nov 2026).
+
+## Amendment (12 Nov 2026): fake the HTTP client with its own mock transport
+
+The record named `respx` for testing the real OpenRouter adapter without a key. That does not work with `httpx2`: in a local test on 12 Nov 2026 the mock did not intercept and the request reached the real network ([ADR 0005](0005-engine-runner-shapes-and-ports.md), amendment). Use `httpx2.MockTransport` with a small handler that refuses any unrecorded request and reports unused recordings. It needs no extra package.
+
+Cheap paid runs use **Claude Haiku 5.5** in private mode. DeepSeek V4.1 Flash costs more than its list price on zero-retention endpoints ([ADR 0010](0010-starting-models.md), amendment).

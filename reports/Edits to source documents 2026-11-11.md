@@ -78,3 +78,19 @@ File: [docs/spec.md](../docs/spec.md), section 13 only (Open decisions before co
 - Prices, model lists and package versions were fetched on 11 Nov 2026 and change often. Re-check them at decision time.
 - Several checks were not done and are listed as action items: who maintains `httpx2`, the licence file of pywebview, whether the bundled PDFium build has every needed function, and Presidio's speed on a real contract.
 - Legal questions (EU AI Act Article 50, trade mark classes, enforcing the licence) are flagged for a lawyer. Nothing in these documents is legal advice.
+
+## 8. Later the same work: decisions, an audit and follow-up checks (12 Nov 2026)
+
+This file's sections 1 to 7 describe the first day. On 12 Nov 2026 the project owner ruled on the eleven decision records, and the documents were changed to match. Compare the branch with `main` for the exact text.
+
+| What happened | What changed |
+| --- | --- |
+| The owner accepted ADRs 0005 to 0015 | Each record's status. The trade mark was removed from ADR 0014 as too costly for now |
+| The owner set about $10.76 for paid AI testing | Testing strategy section 7.5 and ADR 0013: cheap models, a spend cap, a six-step plan |
+| The accepted decisions were written into the spec | Sections 2, 4.3, 4.7, 5 (Rules 3, 7, 8, 9), 6.1, 6.2, 8.3, 8.4, 9, 11, 12, 13 and 14.1 to 14.3 |
+| The copy deck and prototype were brought into line | New states and words for the not-covered list, "Searched, nothing found", disagreeing searches, a quote not marked on the page, "Rewrite with AI", tracked changes, unreadable text and "What's protected". `ux-copy.md` section 6.8 lists the clashes fixed |
+| Two reviewers audited the eleven records against the research | No wrong fact. Overstatements, dropped gaps and stale wording were fixed in place the same day |
+| Open points were tested and re-read from primary sources | Dated amendments on ADRs 0005 to 0007 and 0009 to 0014, and a new closing section in the v1 design decisions report |
+| The owner decided the remaining technical points | `sqlcipher3`; a `.deb` for Linux; pages loaded from files; PyGObject allowed by name; the two missing parts of ADR 0012 |
+
+**Still open:** whether version 1 ships "Rewrite with AI" for the message; a trial build of the Linux package; the Windows checks in CI; and the legal questions, which need a lawyer.

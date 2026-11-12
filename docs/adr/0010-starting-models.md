@@ -81,3 +81,9 @@ Caching is not decoration: a miss raises Sonnet 5.5 from $0.82 to $3.77 on a 50,
 4. [ ] Measure the golden-set disagreement rate before deciding on self-consistency sampling.
 5. [x] Tick the models item in Spec 13 (done 12 Nov 2026).
 6. [ ] Add the typical review cost to the key guide in `docs/ux-copy.md`, once measured.
+
+## Amendment (12 Nov 2026): prices checked, and which cheap model is private
+
+Prices were re-read from OpenRouter's public lists on 12 Nov 2026 (per million tokens, input / output): Claude Sonnet 5.5 $2.00 / $10.00; GPT-6.1 Terra $1.00 / $5.00; Claude Haiku 5.5 $0.10 / $0.50; DeepSeek V4.1 Flash $0.30 / $1.20. Each has a zero-retention endpoint that is not a Safety Retention one.
+
+One catch: DeepSeek V4.1 Flash's zero-retention endpoints cost more than its list price ($0.45 / $1.80 on one host and $3.00 / $12.00 on another, under the plain model name). So in private mode it is not the cheap option. **Claude Haiku 5.5 is the cheap private-mode model for paid testing.** Keep DeepSeek as a comparison only at its zero-retention price, on one pinned host.

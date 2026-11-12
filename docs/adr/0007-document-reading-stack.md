@@ -88,3 +88,9 @@ Gaps carried over: not verified that the bundled PDFium build includes every fun
 4. [ ] Add the pdfplumber cross-check as a test-only dependency.
 5. [x] Add the hidden-layer licence decision to Spec 13 (done 12 Nov 2026).
 6. [ ] Update `src/clause_tracer/ingest/README.md` when `ingest` is built.
+
+## Amendment (12 Nov 2026): PDFium checked, and what bundling pikepdf needs
+
+- **The bundled PDFium has every needed function.** On 12 Nov 2026 a test on Debian 13 built a PDF with normal, white, 1-point and invisible text, and read each character back through `pypdfium2` 5.15.2 (PDFium 159.0.8149). Fill colour, font size, render mode (3 for invisible text), character boxes and the generated, hyphen and Unicode-error flags all returned the right values. This closes action item 1 for Linux. Windows must be confirmed in CI.
+- **What MPL-2.0 asks for an unmodified pikepdf.** From the licence text and Mozilla's FAQ, not legal advice: ship pikepdf unchanged with its own licence files; include the MPL-2.0 text; say where the source of that exact version can be found; and keep the notices of the libraries its wheels bundle (qpdf, libjpeg-turbo, and OpenSSL and zlib on Windows). Section 3.3 of the licence allows a larger work "under terms of Your choice". So the app needs a third-party licences page, and the installer needs a licences folder. One question stays for a lawyer: whether the project's own licence could be read as limiting anyone's rights in the MPL files.
+- **NUPunkt misses sentence breaks.** Its own benchmark gives precision 0.90 but recall 0.69 on legal text. The design already tolerates this: a quote is checked inside the sentences the AI cites, and a missed break only makes a sentence longer.

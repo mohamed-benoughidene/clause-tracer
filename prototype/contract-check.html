@@ -69,6 +69,36 @@
         <button class="icon-btn" type="button" aria-label="Dismiss" onclick="this.parentElement.remove()"><svg class="icon"><use href="#i-x"/></svg></button>
       </div>
 
+      <div class="notice warn" role="note" data-state="unreadable-text" style="margin-top:16px">
+        <svg class="icon"><use href="#i-warn"/></svg>
+        <div class="notice-body">
+          <p>Parts of pages 3 and 4 couldn't be read as text. The letters are stored in a way the app can't decode, so it can't check them.</p>
+          <p class="small" style="margin-top:6px">Any result that rests on those parts will be marked unsure. Read pages 3 and 4 yourself before you rely on the review.</p>
+        </div>
+      </div>
+
+      <section class="card" data-state="tracked-changes" aria-labelledby="tracked-h" style="margin-top:16px">
+        <h2 class="h3" id="tracked-h">Tracked changes · 14</h2>
+        <p class="note-s" style="margin-top:8px">This Word file has tracked changes. The review reads it as if every change were accepted. Here is what changed, so you can see the earlier wording.</p>
+        <table class="table" style="margin-top:12px">
+          <caption class="visually-hidden">Tracked changes in this contract</caption>
+          <thead>
+            <tr>
+              <th scope="col">Clause</th>
+              <th scope="col">Who</th>
+              <th scope="col">Change</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>§ 5.4</td><td>Sarah Jones</td><td>Changed “30 days” to “60 days”</td></tr>
+            <tr><td>§ 9.1</td><td>Sarah Jones</td><td>Added “for 12 months after this Agreement ends”</td></tr>
+            <tr><td>§ 12.2</td><td>Karim Benali</td><td>Removed “The Agency will pay for work completed up to the end date.”</td></tr>
+          </tbody>
+        </table>
+        <p class="small muted" style="margin-top:8px">11 more changes</p>
+        <p class="small muted" style="margin-top:8px">Removed words aren't part of the contract and are never sent to the AI.</p>
+      </section>
+
       <ol class="boxes" aria-label="Clauses" style="margin-top:16px">
         <li class="box" id="box-2-2">
           <svg class="icon grip" aria-hidden="true"><use href="#i-drag"/></svg>
