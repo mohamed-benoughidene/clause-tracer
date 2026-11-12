@@ -46,11 +46,11 @@ The app's own text never uses the word "client," because contracts use it for on
 | Unsure | A label meaning the tool couldn't decide or couldn't confirm the wording. Always explains why. |
 | AI judgment | A label picked by AI (words positions), telling the user to look closer. It is drawn in pencil, not ink: a dashed graphite stamp with a hatched colour block and a grey dashed underline on the clause, and the note says "Pencilled in: judged from the wording, not a number." No sparkle icon. |
 | Missing | A value meaning the contract has no text for a position. It gets the missing level. |
-| Missing list | Positions with no text in the contract whose missing level isn't preferred. |
+| Missing list | Positions with no text in the contract whose missing level isn't preferred. Those whose missing level is preferred sit in a separate collapsed list, "Searched, nothing found". |
 | Clause | One numbered piece of the contract as the app splits it, or one paragraph when the contract has no numbers. |
 | Original pages | A PDF contract's own pages, shown as pictures of the page the way a PDF reader shows them. |
 | Typeset pages | Pages the app lays out itself for a Word file, a text or Markdown file, or pasted text, which have no pages of their own. |
-| Not covered | A clause no position covers. It gets no label and no mark on the page; it's listed with a one-line summary in the Not covered tab. |
+| Not covered | A clause no position covers. It gets no label and no mark on the page; it's listed with its clause type and first line in the Not covered tab. |
 | Evidence | The exact clause text behind a label, with its location. |
 | Evidence trail | Links from a label to every clause that affects it, including cross-references. |
 | Hidden text | Text in the file a reader can't see, such as white or tiny text, Word comments, or tracked changes. |
@@ -111,7 +111,7 @@ The review is saved at every step, so the user can stop and come back.
 - The contract is shown in full, with real names, page by page and scrollable, like reading it in a PDF reader. A PDF is shown as its original pages; a Word file, a text or Markdown file, or pasted text is shown as typeset pages. Both look and work the same way: page thumbnails, zoom, search. The user never sees placeholders after the privacy check.
 - A link printed in the contract opens only after a warning: "Open a link from the contract?" It then opens outside the app.
 - Each clause a position covers is highlighted on the page with a wash in its label's colour and a numbered pin in the margin. A clause affecting several positions shows several labels on its pin. Hidden text, which may be invisible on the original page, is outlined where it sits.
-- Clauses no position covers are not drawn on the page. Each one is listed, with its one-line summary, in the Not covered tab.
+- Clauses no position covers are not drawn on the page. Each one is listed, with its clause type and first line, in the Not covered tab.
 - **Summary bar:** counts of each label, pencilled-in labels, documents not loaded, and parts not covered. If more than half the labels are unsure, a note above the labels says: "More than half of these labels are unsure. That usually means the wording is vague, or your playbook suits a different kind of contract. Read the unsure ones first: each says what it couldn't decide."
 - **Governing-law chip:** "This contract follows \[place\] law. If there's a dispute, \[place\] law settles it." Or, with none: "This contract doesn't say which place's law applies. If there's a dispute, the two sides could argue over it. Ask for a governing-law clause." Or, with two: "This contract names two places' law: \[place\] in \[clause\], and \[place\] in \[clause\]. Ask which one applies before you sign." It is never judged.
 - **Unloaded document banner:** "This contract depends on the “\[document name\]”, which isn't loaded. It can change any result here. Ask for it and read it before you sign."
@@ -157,7 +157,7 @@ The user makes a message, a report, or both. If positions are unchecked, a warni
 
 1. A checklist of what to ask for. Ticked by default: walk-away labels, unsure labels, unloaded documents, and suggestions. Unticked: acceptable labels. Preferred labels aren't listed.
 2. To, from, and tone (friendly or formal), prefilled from the contract.
-3. The AI writes the message with "\[TO\]" and "\[FROM\]" markers. Code fills in real names afterwards.
+3. Code builds the message from templates, one paragraph for each ticked item, with "\[TO\]" and "\[FROM\]" markers. Code fills in real names afterwards. "Rewrite with AI" is optional: the rewrite is shown as a before-and-after, and code checks every quote, number and name in it before it can be used (ADR 0011).
 4. Editable text, regenerate, and copy. The "not legal advice" line shows above the message box, never inside the copied text.
 5. If nothing needs asking: "Nothing to ask for from your playbook. This only means the contract matches your rules. It doesn't mean it's safe to sign."
 6. The last message is saved with the review. If labels change afterwards: "Labels changed. Regenerate?"
@@ -184,7 +184,7 @@ These rules decide every label. Code applies them the same way every time.
 
 **Rule 2: "No" equals "missing."** For yes/no positions, a clear "no," an unclear answer, and silence get the same level. A clear "no" is a label on its clause, not a Missing list item. A conditional yes ("with prior written consent," "at the Client's discretion") is different: it gives unsure, with the condition quoted and a suggested question, such as "Can we agree consent won't be refused without a good reason?"
 
-**Rule 3: Failed quote, retry once.** If a quote isn't found in the text that was sent, or the extracted number isn't in its quote, the AI is asked again and told what failed. If it fails again, that value becomes unsure: "Couldn't confirm the wording. Check \[location\] yourself." Rule 4 then combines it with the position's other values. A position is never dropped silently.
+**Rule 3: Failed quote, retry once.** If a quote isn't found in the text that was sent, or the extracted number isn't in its quote, the AI is asked again and told what failed. If it fails again, that value becomes unsure: "Couldn't confirm the wording. Check \[location\] yourself." Rule 4 then combines it with the position's other values. A position is never dropped silently. A quote that is confirmed in the text but can't be placed on the page is different: the label is kept, and the panel shows the quote's words with a note that they couldn't be marked on the page (ADR 0012).
 
 **Rule 4: Mixed values, in this order.**
 
@@ -198,9 +198,9 @@ Whenever matching clauses give different values, every one appears in the eviden
 
 **Rule 6: Conversions.** One week is 7 days, one month 30 days, one year 12 months or 365 days, in either direction. Business days never convert. A range ("15 to 30 days") counts as two values, so Rule 4 applies, and the note says "This clause gives a range. The worse end was used." A deposit given as an amount becomes a percentage when the total is also found. Otherwise it's unsure. An amount and a percentage that disagree in one clause count as a conflict.
 
-**Rule 7: Missing.** A position with no matching text gets its missing level. It appears in the Missing list unless the missing level is preferred.
+**Rule 7: Missing.** A position with no matching text gets its missing level. It appears in the Missing list unless the missing level is preferred. A position whose missing level is preferred appears in a second, collapsed list in the Missing tab, "Searched, nothing found", where each row can be opened and checked, so a missed clause can't pass without a trace. If the searches disagree about whether a clause matches, the position is unsure, and the clause to read is named (ADR 0012).
 
-**Rule 8: Not covered.** Parts no position covers get no label and no mark on the page, only a one-line summary in the Not covered tab.
+**Rule 8: Not covered.** Parts no position covers get no label and no mark on the page, only a clause type and their first line in the Not covered tab.
 
 **Rule 9: Hidden text.** A value whose quote includes hidden text becomes unsure, and doesn't count as readable for Rule 4 step 1.
 
@@ -225,9 +225,9 @@ A fixed sequence run by the app's code. The AI never decides what runs next and 
 | 8 | Pick labels | Values, playbook snapshot | Labels for number and yes/no positions, by section 5 | Code |
 | 9 | Judge words positions | Matched clauses, level text | A level per clause. Evidence is the matched clause | AI or Jev |
 | 10 | Explain | Labels, quotes, Missing list | Plain-words why without limits, plus "why it could be the other level" for AI judgment and unsure labels, Missing item text, readings and one question for unsure labels. Code adds the "by your playbook" line with limits from the snapshot | AI. Can't change a label |
-| 11 | Summarise not-covered parts | Not-covered parts | One plain sentence each | AI |
+| 11 | Sort not-covered parts | Not-covered parts | A clause type for each, picked from a fixed list that ends with "Something else". Code shows the type and the clause's first line | AI |
 | 12 | Rewrite (on request) | Clause with placeholders, affected positions, optional instruction | New wording, then steps 6b to 10 on it, with the quote check against the suggestion's own text | AI, then code |
-| 13 | Write message | Ticked items, tone, quotes, preferred levels | Message with \[TO\] and \[FROM\] markers | AI. Code fills in names |
+| 13 | Write message | Ticked items, tone, quotes, preferred levels | Message with \[TO\] and \[FROM\] markers | Code, from templates. AI only when the user asks for a rewrite, which code then checks. Code fills in names |
 | 14 | Build report | Review data | PDF | Code |
 
 ### 6.2 Rules for every AI step
@@ -239,6 +239,7 @@ A fixed sequence run by the app's code. The AI never decides what runs next and 
 - **Models:** one model for every step by default, or one per step in Settings. Jev only for steps 6a and 9. Recommended models come from test-set scores. Each AI call records which model and privacy mode it used.
 - **Retries:** a broken, empty or unknown reply is retried once, then that value becomes unsure. A network error is retried 3 times, then the review becomes Interrupted.
 - **Display:** a PDF contract's original pages are shown as pictures of the page: nothing in the file runs, and its links open only after the warning in 4.3. All text the app pulls out of the contract (quotes, summaries), and all playbook and AI text, is shown as plain text in the app and the report PDF, never as formatted text or links. Placeholders are restored by code only when they exactly match a known placeholder. An unknown placeholder counts as a broken reply. No confidence percentages or meters are shown anywhere, including Jev's probabilities.
+- **AI wording:** every piece of text the AI wrote carries one fixed line: "Every quote and number was checked against the contract; the wording was written by AI." Text that code built carries no such line (ADR 0011).
 - **Mid-run changes:** a changed key, model or privacy mode applies from the next AI call.
 
 ### 6.3 Review statuses
@@ -321,7 +322,7 @@ A fixed sequence run by the app's code. The AI never decides what runs next and 
 - **API key:** first launch shows the key guide, including what a typical review costs and how to turn off Safety Retention. Clear messages for a wrong key, no credit, or no internet.
 - **Cost:** estimated before sending, shown while running, recorded per review. If the estimate is more than the remaining credit, a warning shows the exact amounts, with "Send anyway."
 - **Auto-delete:** 7, 30 or 90 days after a review's last change (default 30). A change is any edit, check, suggestion, output or rename. Opening isn't. "Keep it" restarts the clock. Reviews 3 or fewer days from deletion show a warning. Lowering the setting shows how many reviews it affects, asks to confirm, and deletes nothing sooner than 3 days later.
-- **File types:** PDF with real text, Word (.docx), text (.txt) and Markdown (.md). Text and Markdown files are read exactly like pasted text: Markdown symbols such as `#` and `**` are shown as plain characters, never as formatting. An old Word file (.doc) is not read; the app says: "This is an old Word file. Open it in Word, save it as .docx, then load that."
+- **File types:** PDF with real text, Word (.docx), text (.txt) and Markdown (.md). Text and Markdown files are read exactly like pasted text: Markdown symbols such as `#` and `**` are shown as plain characters, never as formatting. A Word file with tracked changes is read as if every change were accepted, with a notice saying how many changes it holds and who made them (ADR 0012). An old Word file (.doc) is not read; the app says: "This is an old Word file. Open it in Word, save it as .docx, then load that."
 - **Input limits:** \[Assumption\] files up to 20 MB and 50,000 words. A page with fewer than 50 readable characters counts as scanned. A mixed file names its scanned pages. A contract detected as mostly not English gets a warning, and the user can still continue: "This contract doesn't look like it's in English. Clause Tracer is built and tested for English contracts only, so fewer names and addresses are found for you (check the privacy step carefully), and more labels may be wrong or unsure." These numbers get tuned in testing.
 - **Offline:** saved reviews open offline. A Draft can be prepared offline. "Send for review" explains internet is needed.
 - **Language:** English contracts and an English interface only. Arabic and French, for contracts and the interface, are planned next; the research is in `Prototyping/clause-tracer/research/14-languages-and-models.md`.
@@ -349,6 +350,8 @@ Version 1 is done when all of these pass.
 - [ ] At least 90% of numbers are correct, out of positions with a stated value in the answer key. Unsure counts as wrong.
 - [ ] At least 90% of yes/no and words labels match the answer key.
 - [ ] No made-up quote ever reaches the screen.
+- [ ] No clause that exists is reported missing where the missing level is better than the right label, on any built test case.
+- [ ] The three rules above hold in every one of three runs of each case. Rates are reported with their margin of error, counted per case (ADR 0013).
 - [ ] Presidio plus typed details catch every planted name, company and address in the test set.
 
 **Privacy**
@@ -376,23 +379,26 @@ The test set runs after every change to prompts, models, or labeling code.
 - Reading scanned PDFs.
 - Languages other than English, for contracts or the interface (Arabic and French planned next).
 - Mac installer.
-- Accounts, sign-in, or any server run by the project.
+- Accounts, sign-in, or any server run by the project. (The design keeps room for an optional hosted service in a later version; see ADR 0015.)
 - AI agents that choose their own steps or use tools.
 - A guided-question playbook builder.
 - Sending unsure items to a lawyer.
 
 ## 13. Open decisions before coding
 
-Each open item now has a recommendation in a decision record (ADR) with status *proposed*. None is settled until the ADR is accepted. [`system-design.md`](system-design.md) section 13 lists them all, with more that came up during design.
+Each item has a decision record (ADR). Ticked items were decided on 12 Nov 2026. [`system-design.md`](system-design.md) section 13 lists them all, with more that came up during design.
 
-- [ ] Desktop shell: Tauri or Electron. Recommended: neither; pywebview, so all shell code is Python ([ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md)).
+- [x] Desktop shell: neither Tauri nor Electron. pywebview, so all shell code is Python (decided 12 Nov 2026, [ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md)).
 - [x] How Presidio and its language model are bundled: the medium spaCy model, bundled in the installer (decided 12 Nov 2026, [ADR 0008](adr/0008-personal-data-detection-bundle.md)). The download size is still to be measured.
 - [x] License: Functional Source License, FSL-1.1-ALv2 (decided 7 Nov 2026).
 - [x] Which 2 or 3 models to start testing with, from OpenRouter's zero-retention list: Claude Sonnet 5.5 as the default, with GPT-6.1 Terra and DeepSeek V4.1 Flash as comparisons (decided 12 Nov 2026, [ADR 0010](adr/0010-starting-models.md)).
 - [ ] Whether Jev beats an AI model on steps 6a and 9, and whether it can run under the same privacy rules. Version 1 isn't built on it; it stays an experiment ([ADR 0010](adr/0010-starting-models.md)).
 - [ ] Final input limits and the cost per review, from testing.
 - [ ] Review screen layout, settled with a rough prototype. Later: add at least one outside tester, who must also catch a planted wrong label.
-- [ ] Design decisions that change what this spec says, if accepted: who writes the message and the not-covered summaries ([ADR 0011](adr/0011-who-writes-the-words.md), accepted 12 Nov 2026; sections 4.7 and 6.1 are not yet updated); Rule 7, disagreeing searches, quotes that can't be placed on the page, and tracked changes ([ADR 0012](adr/0012-missing-unsure-and-evidence-failures.md)); the release gates to add to section 11 ([ADR 0013](adr/0013-test-layers-and-release-gates.md), accepted 12 Nov 2026; section 11 is not yet updated).
+- [x] Who writes the message and the not-covered list ([ADR 0011](adr/0011-who-writes-the-words.md)); Rule 7, disagreeing searches, quotes that can't be placed on the page, and tracked changes ([ADR 0012](adr/0012-missing-unsure-and-evidence-failures.md)); the release gates in section 11 ([ADR 0013](adr/0013-test-layers-and-release-gates.md)). Decided 12 Nov 2026 and written into sections 2, 4.3, 4.7, 5, 6, 9 and 11.
+- [ ] Bring the copy deck (`ux-copy.md`), the prototype and sections 14.1 to 14.3 into line with those decisions. Until then they still describe an AI-written message and one-line summaries.
+- [ ] At what share of undecodable characters a page is warned about or blocked, from the test set ([ADR 0012](adr/0012-missing-unsure-and-evidence-failures.md)).
+- [ ] Protection and release integrity ([ADR 0014](adr/0014-protection-and-release-integrity.md), proposed).
 
 ## 14. Prototype handoff
 

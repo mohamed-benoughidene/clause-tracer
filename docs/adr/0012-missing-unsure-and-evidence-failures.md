@@ -1,6 +1,6 @@
 # ADR-0012: Show silent negatives, turn disagreement into unsure, and keep labels whose quote can't be placed
 
-**Status:** Proposed
+**Status:** Accepted (12 Nov 2026)
 **Date:** 2026-11-11
 **Deciders:** Project owner
 
@@ -10,7 +10,7 @@
 The [pipeline seams report](../../reports/Clause%20Tracer%20pipeline%20seams.md) found these holes and listed them as owner decisions 1 to 4. The [pipeline architecture report](../../reports/Clause%20Tracer%20pipeline%20architecture.md) added tracked changes. [The v1 design decisions report](../../reports/Clause%20Tracer%20v1%20design%20decisions.md) recommended an answer for each. All are judgement, and most supporting sources were seen only in search summaries. The tie-break favours non-technical freelancers: unsure results say what to read, not "the tool gave up".
 
 ## Decision
-We recommend four rules. They await the owner's decision.
+The project owner accepted four rules on 12 Nov 2026.
 
 1. **The Rule 7 hole.** Show "searched, nothing found" positions in a collapsed list where each row can be checked. Keep them out of the walk-away and unsure counts. Each row has a one-click "show where I looked".
 2. **Disagreeing search passes.** When a search pass found a candidate but the pair check said no, the position becomes unsure with reason code `MATCH_UNCONFIRMED`. It names a clause to read ("read this clause") and what to look for. Unsure counts are reported separately.

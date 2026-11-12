@@ -1,6 +1,6 @@
 # ADR-0015: Ship version 1 with the user's own key, but keep one seam open for a hosted provider
 
-**Status:** Proposed
+**Status:** Accepted (12 Nov 2026)
 **Date:** 2026-11-11
 **Deciders:** Project owner
 
@@ -12,7 +12,7 @@
 **Assumption:** contract handling stays on the user's computer by default, even if a hosted option is added. Reading, privacy replacement, quote checks and label picking never move to a server.
 
 ## Decision
-We recommend keeping version 1 exactly as specified, and holding these seams open. This awaits the owner's decision.
+The project owner accepted this on 12 Nov 2026, including the assumption above: keep version 1 exactly as specified, and hold these seams open.
 
 1. **One provider port.** The AI call sits behind one port, `AiClient` ([ADR 0005](0005-engine-runner-shapes-and-ports.md)).
 2. **`AiRequest` carries both forms of the task.** The structured inputs: step, prompt id and version, typed inputs, schema id, model and privacy mode. And the rendered messages, built by the pipeline module that owns the step. The OpenRouter adapter sends the rendered messages. A future hosted adapter could send only the structured inputs and build prompts on its server.

@@ -27,9 +27,9 @@ The design is done. The code is an empty skeleton: every module exists, runs alo
 - `assets/`: the logo master files.
 - `reports/`: research reports on how to build the app. [The architecture report](reports/Clause%20Tracer%20pipeline%20architecture.md) is the build design; read it before planning a build stage.
 
-Two design docs sit on top of the reports. Read both before planning a build stage: [docs/system-design.md](docs/system-design.md) says how the parts fit together, and [docs/testing-strategy.md](docs/testing-strategy.md) says which tests each stage needs. The testing strategy is accepted; the system design is proposed where it rests on a proposed ADR. ADRs 0005 to 0008, 0010, 0011 and 0013 are accepted. ADRs 0009, 0012, 0014 and 0015 are proposed: they hold recommendations, not decisions. Check an ADR's status line, and before you build on a proposed one, ask the user whether it is accepted.
+Two design docs sit on top of the reports. Read both before planning a build stage: [docs/system-design.md](docs/system-design.md) says how the parts fit together, and [docs/testing-strategy.md](docs/testing-strategy.md) says which tests each stage needs. Both are accepted, and so are ADRs 0005 to 0013 and 0015. ADR 0014 (protection) is still proposed: it holds a recommendation, not a decision. Check an ADR's status line, and before you build on a proposed one, ask the user whether it is accepted. The copy deck and the prototype have not yet caught up with ADRs 0011 and 0012 (Spec 13 lists this).
 
-The build plan in Spec section 9 is a Python command-line tool first, which is then wrapped as a desktop app. The decisions in Spec section 13 are still open (the desktop shell, how Presidio is bundled, which models to use). Each now has a recommendation in a proposed ADR. Bring those to the user as a question. Don't pick one yourself.
+The build plan in Spec section 9 is a Python command-line tool first, which is then wrapped as a desktop app. Spec section 13 lists what is decided and what is still open. Bring open items to the user as a question. Don't pick one yourself.
 
 ## Before you write code
 

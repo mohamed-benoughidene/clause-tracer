@@ -1,10 +1,10 @@
 # System design: Clause Tracer version 1
 
-11 Nov 2026 · status: **proposed**
+11 Nov 2026 · status: **accepted** on 12 Nov 2026, except section 9.4 and the integrity rows of section 10, which rest on [ADR 0014](adr/0014-protection-and-release-integrity.md) (proposed)
 
 This is the design of the whole of version 1: the Python engine, the desktop shell around it, storage, packaging and release. It says how the parts fit, what each one promises, and which choices are still open. Nothing here is built yet. The code is an empty skeleton.
 
-**How to read it.** [`spec.md`](spec.md) says what the app does, and wins if this file disagrees with it. Each choice below that is hard to undo has a decision record (ADR) with status *proposed*: a recommendation with its runner-up, waiting for the project owner's decision. The evidence is in [the v1 design decisions report](../reports/Clause%20Tracer%20v1%20design%20decisions.md). How to test all of it is in [`testing-strategy.md`](testing-strategy.md). The rules the code must follow are in the [Constitution](../Constitution.md), cited here by ID.
+**How to read it.** [`spec.md`](spec.md) says what the app does, and wins if this file disagrees with it. Each choice below that is hard to undo has a decision record (ADR) with its runner-up. The project owner accepted all but one on 12 Nov 2026 (section 13). The evidence is in [the v1 design decisions report](../reports/Clause%20Tracer%20v1%20design%20decisions.md). How to test all of it is in [`testing-strategy.md`](testing-strategy.md). The rules the code must follow are in the [Constitution](../Constitution.md), cited here by ID.
 
 ## 1. Requirements
 
@@ -375,7 +375,7 @@ If a hosted option is ever added, these promises change and every copy must be u
 
 ## 13. Decisions
 
-The owner accepted ADRs 0005 to 0008, 0010, 0011 and 0013 on 12 Nov 2026. Every other row is a recommendation with status *proposed*, and is not settled until the owner accepts its ADR.
+The owner accepted ADRs 0005 to 0013 and 0015 on 12 Nov 2026. ADR 0014 is still *proposed*.
 
 | Decision | Recommendation | Record |
 | --- | --- | --- |

@@ -19,7 +19,7 @@ This folder holds the project's written documents: specs, design and copy guides
 | File | What it is |
 | --- | --- |
 | [`spec.md`](spec.md) | **The source of truth.** What version 1 is: the glossary, user flow, features, labelling rules, AI pipeline, privacy, acceptance tests and open decisions. Section 14 is the handoff to the prototype: the screens, states, visual rules and sample data. |
-| [`system-design.md`](system-design.md) | The design of the whole of version 1: processes, modules, data and storage, the engine protocol, failure handling, security, packaging, and every open decision with its recommendation. Status: proposed. |
+| [`system-design.md`](system-design.md) | The design of the whole of version 1: processes, modules, data and storage, the engine protocol, failure handling, security, packaging, and every decision with its record. Accepted on 12 Nov 2026, except the protection part (ADR 0014). |
 | [`testing-strategy.md`](testing-strategy.md) | The test plan: the five test layers, what each module must prove, the paid test set and its budget, privacy and security tests, release gates and coverage targets. Accepted on 12 Nov 2026. |
 | [`design-system.md`](design-system.md) | The visual system the prototype uses: tokens, icons, components, patterns and accessibility. Section 8 is an audit of where the prototype differs from the system, with fixed and open items. |
 | [`ux-copy.md`](ux-copy.md) | The copy deck: the voice, the word list, and the words for every screen. Section 6 records the clashes found between the spec, the prototype and the copy, and how each one was settled. |
@@ -37,7 +37,7 @@ This folder holds the project's written documents: specs, design and copy guides
 | [0003](adr/0003-walk-away-takes-the-brand-red.md) | The brand red `#A91207` is used only for walk-away. |
 | [0004](adr/0004-code-layout.md) | The code is one package with a pure core, six pipeline modules, adapters and a CLI. The import rules are checked automatically. |
 
-ADRs 0005 to 0008, 0010, 0011 and 0013 were **accepted** on 12 Nov 2026. ADRs 0009, 0012, 0014 and 0015 are **proposed**: each is a recommendation waiting for the project owner's decision.
+ADRs 0005 to 0013 and 0015 were **accepted** on 12 Nov 2026. ADR 0014 is **proposed**: a recommendation waiting for the project owner's decision.
 
 | ADR | Decision or recommendation |
 | --- | --- |

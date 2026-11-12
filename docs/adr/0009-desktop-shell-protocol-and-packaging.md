@@ -1,6 +1,6 @@
 # ADR-0009: Wrap the engine in pywebview, talk over stdio, ship one-dir with Inno Setup
 
-**Status:** Proposed
+**Status:** Accepted (12 Nov 2026)
 **Date:** 2026-11-11
 **Deciders:** Project owner
 
@@ -10,7 +10,7 @@
 The [pipeline architecture report](../../reports/Clause%20Tracer%20pipeline%20architecture.md) compared Tauri, Electron, PySide6, pywebview and Briefcase, and left the engine transport open. [The v1 design decisions report](../../reports/Clause%20Tracer%20v1%20design%20decisions.md) decided the question by who can review the code. The developer reviews only Python and has no Windows machine. The HTML prototype already exists. Spec 8.1 allows no telemetry and no outbound host beyond OpenRouter and GitHub.
 
 ## Decision
-We recommend the following. It awaits the owner's decision, and it replaces Spec 13's "Tauri or Electron" framing.
+The project owner accepted the following on 12 Nov 2026. It replaces Spec 13's "Tauri or Electron" framing.
 
 - **Shell.** pywebview 6.x, reusing the HTML prototype. The Qt backend stays as a Linux escape hatch only.
 - **UI to Python.** The UI calls `window.pywebview.api`, a narrow Python `js_api` facade.
