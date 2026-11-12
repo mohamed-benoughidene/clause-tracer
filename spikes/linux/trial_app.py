@@ -19,7 +19,7 @@ import time
 
 import webview
 
-HERE = os.path.dirname(os.path.abspath(getattr(sys, "_MEIPASS", None) or __file__))
+HERE = getattr(sys, "_MEIPASS", None) or os.path.dirname(os.path.abspath(__file__))
 
 
 class Api:
@@ -58,11 +58,17 @@ def proc_info(pid):
         with open(f"/proc/{pid}/maps") as fh:
             for line in fh:
                 p = line.split()[-1]
-                if "libwebkit2gtk" in p or "libjavascriptcoregtk" in p or "libgtk-3" in p or "libsoup-3" in p:
+                if any(k in p for k in ("libwebkit2gtk", "libjavascriptcoregtk", "libgtk-3", "libsoup-3", "libglib-2.0", "libstdc++")):
                     libs.add(p)
     except OSError:
         pass
-    return {"pid": pid, "exe": exe, "libs": sorted(libs)}
+    try:
+        with open(f"/proc/{pid}/environ", "rb") as fh:
+            env = dict(kv.split(b"=", 1) for kv in fh.read().split(b"\0") if b"=" in kv)
+        ldp = env.get(b"LD_LIBRARY_PATH", b"").decode()
+    except OSError:
+        ldp = "?"
+    return {"pid": pid, "exe": exe, "libs": sorted(libs), "LD_LIBRARY_PATH": ldp}
 
 
 def listening_sockets(pids):
