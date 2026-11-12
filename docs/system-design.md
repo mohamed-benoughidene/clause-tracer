@@ -136,7 +136,7 @@ The order is fixed and code runs it (P3). The AI never chooses a step and has no
 | Pick labels | 8 | `core` | No | Nothing |
 | Judge, explain, summarise | 9–11 | `checking` | Yes | Placeholder text, level text, fixed labels |
 | Rewrite (on request) | 12 | `writing`, then `checking` | Yes | One clause as placeholder text |
-| Message | 13 | `outputs` | Proposed: no | Nothing, if templated ([ADR 0011](adr/0011-who-writes-the-words.md)) |
+| Message | 13 | `outputs` | No, unless the user asks for a rewrite | Nothing by default ([ADR 0011](adr/0011-who-writes-the-words.md)) |
 | Report | 14 | `outputs` | No | Nothing |
 
 `links` runs before `privacy` so the privacy allow-list can reuse the defined terms ("the Contractor"). The Spec's step numbers do not change. `cli` passes `LinkMap.terms`, a `core` shape, into `privacy`.
@@ -375,7 +375,7 @@ If a hosted option is ever added, these promises change and every copy must be u
 
 ## 13. Decisions
 
-The owner accepted ADRs 0005, 0006 and 0007 on 12 Nov 2026. Every other row is a recommendation with status *proposed*, and is not settled until the owner accepts its ADR.
+The owner accepted ADRs 0005 to 0008, 0010, 0011 and 0013 on 12 Nov 2026. Every other row is a recommendation with status *proposed*, and is not settled until the owner accepts its ADR.
 
 | Decision | Recommendation | Record |
 | --- | --- | --- |

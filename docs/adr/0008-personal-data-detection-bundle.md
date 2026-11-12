@@ -1,6 +1,6 @@
 # ADR-0008: Bundle Presidio with spaCy en_core_web_md behind a code-first layer
 
-**Status:** Proposed
+**Status:** Accepted (12 Nov 2026)
 **Date:** 2026-11-11
 **Deciders:** Project owner
 
@@ -10,7 +10,7 @@
 The [pipeline architecture report](../../reports/Clause%20Tracer%20pipeline%20architecture.md) put deterministic finders before NER. It also said Presidio's default now uses a slim spaCy engine plus GLiNER. [The v1 design decisions report](../../reports/Clause%20Tracer%20v1%20design%20decisions.md) found that claim is not supported by the code on `main`. Runtime dependencies must be MIT, BSD or Apache. Spec 8.1 lists every outbound call, so a model download would add one.
 
 ## Decision
-We recommend the following. It awaits the owner's decision.
+The project owner accepted the following on 12 Nov 2026.
 
 - **Presidio** with the adapter's own pinned config file, never the packaged default.
 - **spaCy `en_core_web_md`** (31.9 MB), with the ORGANIZATION label switched back on.

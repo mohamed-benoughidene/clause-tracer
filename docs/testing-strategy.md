@@ -1,10 +1,10 @@
 # Testing strategy: Clause Tracer version 1
 
-11 Nov 2026 · status: **proposed**
+11 Nov 2026 · status: **accepted** on 12 Nov 2026, with [ADR 0013](adr/0013-test-layers-and-release-gates.md)
 
 This is the plan for testing version 1: which tests exist, what each must prove, which tools run them, when they run, and what must pass before a release. It covers the engine, the desktop shell and the installers.
 
-**Where things stand.** Today the repo has one smoke test per module and one end-to-end test of `--version`. Everything below is planned, not built. The plan follows the [Constitution](../Constitution.md)'s fifth principle (rules T1 to T13), and its choices are recorded in [ADR 0013](adr/0013-test-layers-and-release-gates.md) with status *proposed*. The evidence is in [the v1 design decisions report](../reports/Clause%20Tracer%20v1%20design%20decisions.md). The system being tested is described in [`system-design.md`](system-design.md).
+**Where things stand.** Today the repo has one smoke test per module and one end-to-end test of `--version`. Everything below is planned, not built. The plan follows the [Constitution](../Constitution.md)'s fifth principle (rules T1 to T13), and its choices are recorded in [ADR 0013](adr/0013-test-layers-and-release-gates.md), which the owner accepted on 12 Nov 2026. The evidence is in [the v1 design decisions report](../reports/Clause%20Tracer%20v1%20design%20decisions.md). The system being tested is described in [`system-design.md`](system-design.md).
 
 ## 1. What the tests must prove
 
@@ -182,7 +182,7 @@ So the earlier figures of $34 and $67 hold only for a Sonnet-class model. With $
 | 2 | Ten contracts, one run, on two cheap models. Picks the model to carry forward | about $0.50 |
 | 3 | The 100-case set, three runs, on the chosen cheap model. The first full baseline | about $2 |
 | 4 | Two more 100-case runs after prompt fixes | about $4 |
-| 5 | One Sonnet-class pass of the ten contracts, one run, only if the cheap model fails a hard gate | about $2.80 |
+| 5 | One pass of the ten contracts, one run, on the default Sonnet-class model | about $2.80 |
 | Kept back | For price changes and mistakes | about $1.20 |
 
 **Rules that protect the budget.**
@@ -193,7 +193,7 @@ So the earlier figures of $34 and $67 hold only for a Sonnet-class model. With $
 - **Three runs only where a hard gate needs them.** Other cases run once.
 - **Stop and re-plan after step 1.** If a review costs more than 5 cents on the cheap model, or caching misses, redo this table before spending more.
 
-**What this budget cannot do.** It cannot run the 300-case set on a Sonnet-class model, or compare three models at full size. It can show whether a cheap model passes the hard gates. That matters for users too: they pay per review with their own key, so a cheap model that passes is the better default. [ADR 0010](adr/0010-starting-models.md) recommends a Sonnet-class default and is still proposed; this budget is a reason to test a cheap model first.
+**What this budget cannot do.** It cannot run the 300-case set on a Sonnet-class model, or compare three models at full size. It can show whether a cheap model passes the hard gates. That matters for users too: they pay per review with their own key, so a cheap model that passes is the better default. The owner accepted a Sonnet-class default on 12 Nov 2026 ([ADR 0010](adr/0010-starting-models.md)). With this budget that default gets one pass of the ten contracts at most, so step 5 is no longer optional: run it before a release, and say in the release notes how much testing the default model had.
 
 **Tooling.** A `@pytest.mark.golden` marker, left out of `scripts/check.sh` and CI, plus a small report script. No evaluation framework is needed yet. DeepEval and promptfoo are ruled out because both send telemetry by default. Inspect AI (MIT) is the upgrade path if many models are compared.
 

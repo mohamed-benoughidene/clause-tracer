@@ -1,6 +1,6 @@
 # ADR-0010: Start testing with Claude Sonnet 5.5, compared against GPT-6.1 Terra and DeepSeek V4.1 Flash
 
-**Status:** Proposed
+**Status:** Accepted (12 Nov 2026)
 **Date:** 2026-11-11
 **Deciders:** Project owner
 
@@ -10,7 +10,7 @@
 [The v1 design decisions report](../../reports/Clause%20Tracer%20v1%20design%20decisions.md) queried the [ZDR endpoints API](https://openrouter.ai/api/v1/endpoints/zdr) and the [models API](https://openrouter.ai/api/v1/models) on 11 Nov 2026. The ZDR list had 1,078 endpoints. 151 models had a live non-Safety-Retention endpoint, strict structured outputs, 128k context and a cached-input price. Gemini models are out of private mode, because Google requires Safety Retention on Vertex from 18 Oct 2026. The top LegalBench models, Claude Fable 5 and 5.1, have no ZDR endpoint ([Vals AI LegalBench](https://www.vals.ai/benchmarks/legal_bench)). Under strict schemas, Claude routes only to Vertex and GPT-6.x only to Azure.
 
 ## Decision
-We recommend the following. It awaits the owner's decision.
+The project owner accepted the following on 12 Nov 2026. One known limit: the paid-test budget is about $10.76 in total ([`testing-strategy.md`](../testing-strategy.md) section 7.5), so most paid testing runs on cheap models. The Sonnet default gets one pass of the ten test contracts at most, and is less tested than the release gates intend until more budget exists.
 
 - **Default:** `anthropic/claude-sonnet-5.5`. 1M context, explicit caching, one fixed ZDR provider.
 - **Comparisons:** GPT-6.1 Terra (another vendor family, about half the price), and DeepSeek V4.1 Flash pinned to one fp8 host (about 20 times cheaper, 25+ ZDR hosts).

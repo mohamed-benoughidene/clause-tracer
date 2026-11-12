@@ -1,6 +1,6 @@
 # ADR-0011: Code writes the message and the not-covered headings; AI wording is opt-in and labelled
 
-**Status:** Proposed
+**Status:** Accepted (12 Nov 2026)
 **Date:** 2026-11-11
 **Deciders:** Project owner
 
@@ -10,7 +10,7 @@
 The [pipeline seams report](../../reports/Clause%20Tracer%20pipeline%20seams.md) listed these as owner decisions 5 and 6, plus the "Written with AI" mark. [The v1 design decisions report](../../reports/Clause%20Tracer%20v1%20design%20decisions.md) gave a recommendation for each. Its evidence here is thin: most items were seen only in search summaries, and no study tests any of these screens. Where evidence was thin, the tie-break favours the best experience for non-technical freelancers. [ADR 0002](0002-label-look-split-stamp.md) reserves dashed lines for pencilled labels.
 
 ## Decision
-We recommend three changes. They await the owner's decision.
+The project owner accepted three changes on 12 Nov 2026. The spec, the copy deck and the prototype still say the old thing until the action items below are done.
 
 1. **The message.** Code builds it from templates by default, one paragraph per ticked item, per kind and tone. An opt-in "Rewrite with AI" button shows the AI's version as a diff the user reads. Code re-checks every quote, number and name in it.
 2. **Not-covered clauses.** The model picks a clause type from a closed list of 20 to 30 plain-English types `[Assumption]`, plus "Something else". The project owns the list. Code shows the heading, and the app shows the first line of the clause.

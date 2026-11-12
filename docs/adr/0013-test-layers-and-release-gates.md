@@ -1,6 +1,6 @@
 # ADR-0013: Test in five layers on saved replies, with one paid layer and hard per-case gates
 
-**Status:** Proposed
+**Status:** Accepted (12 Nov 2026)
 **Date:** 2026-11-11
 **Deciders:** Project owner
 
@@ -10,7 +10,7 @@
 Live replies cannot be pinned. The chosen endpoints do not accept `temperature`, and Claude endpoints list no `seed` ([OpenRouter ZDR endpoints API](https://openrouter.ai/api/v1/endpoints/zdr)). Even at temperature 0, output varies because of server-side kernel behaviour ([Thinking Machines](https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference/)). Only replay makes an AI-dependent test repeatable. [The v1 design decisions report](../../reports/Clause%20Tracer%20v1%20design%20decisions.md) confirmed the five layers of the [pipeline architecture report](../../reports/Clause%20Tracer%20pipeline%20architecture.md), with changes in tools and targets. The full plan is in [the testing strategy](../testing-strategy.md).
 
 ## Decision
-We recommend the following. It awaits the owner's decision.
+The project owner accepted the following on 12 Nov 2026.
 
 - **Five layers.** Four run free on saved replies and one runs against the real model. They include Hypothesis property tests for the seven offset invariants, contract tests that run one suite against each fake and its real adapter, golden-file tests on each module's `samples/`, end-to-end replay tests and visual tests on Linux. [The testing strategy](../testing-strategy.md) names each layer.
 - **Replay fake.** A hand-written fake behind the AI port, keyed on a content hash (model id, schema id, normalised prompt, step version). It raises `UnrecordedRequest` on a miss and exposes `unused_keys()`, which a fixture asserts empty.
