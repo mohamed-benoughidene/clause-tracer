@@ -7,7 +7,7 @@
 ## Context
 [Spec 1](../spec.md) says the app runs on the user's computer with the user's own OpenRouter key, and nothing goes to a server run by the project. Spec 12 rules out accounts, sign-in and any project server in version 1. A later version may let the project itself become the AI provider, with optional user accounts. Version 1 must not block that.
 
-[The v1 design decisions report](../../reports/Clause%20Tracer%20v1%20design%20decisions.md) gives seven steps for this. Its authors say this section is **entirely judgement**: the research budget was spent before it, and it cites only OWASP and MASVS-based material ([MASVS-RESILIENCE](https://mas.owasp.org/MASVS/11-MASVS-RESILIENCE/)). The whole of this ADR is therefore judgement. A server is the only place a secret, a paid feature or a real licence check can be protected. It also makes the owner a processor of users' contracts.
+[The v1 design decisions report](../../reports/Clause%20Tracer%20v1%20design%20decisions.md) gives seven steps for this. This record lists eight: it changes the report's first step (the request carries the rendered prompt as well as the structured inputs, so the exact request can still be saved and replayed) and adds one, neutral core shapes, from [ADR 0005](0005-engine-runner-shapes-and-ports.md). Its authors say this section is **entirely judgement**: the research budget was spent before it, and it cites only OWASP and MASVS-based material ([MASVS-RESILIENCE](https://mas.owasp.org/MASVS/11-MASVS-RESILIENCE/)). The whole of this ADR is therefore judgement. A server is the only place a secret, a paid feature or a real licence check can be protected. It also makes the owner a processor of users' contracts.
 
 **Assumption:** contract handling stays on the user's computer by default, even if a hosted option is added. Reading, privacy replacement, quote checks and label picking never move to a server.
 
@@ -21,11 +21,11 @@ The project owner accepted this on 12 Nov 2026, including the assumption above: 
 5. **Credentials under a provider id**, so an account token could later sit in the same OS-store slot as the user's own key ([ADR 0006](0006-encrypted-storage-and-secrets.md)).
 6. **No licence or feature gating** built into the app in version 1. It would be crackable and set a pattern to undo.
 7. **Open wording.** Prefer "this version has no server; your contracts go only to the AI provider you choose" over "will never connect to any server".
-8. **Signed and attested releases from v1** ([ADR 0014](0014-protection-and-release-integrity.md)), and a notify-only, opt-in update check, so a future service cannot quietly become a telemetry channel.
+8. **Signed checksums and build attestations from v1** (the Windows installer itself is unsigned at first) ([ADR 0014](0014-protection-and-release-integrity.md)), and a notify-only, opt-in update check, so a future service cannot quietly become a telemetry channel.
 
 ## Options Considered
 
-### Option A: v1 as specified, seams held open (recommended)
+### Option A: v1 as specified, seams held open (chosen)
 | Dimension | Assessment |
 |-----------|------------|
 | Complexity | Low: a few extra fields and one naming rule |
@@ -67,7 +67,7 @@ These existing user promises would have to change if a hosted option is ever add
 |---------|-------|
 | "Accounts, sign-in, or any server run by the project" are not in v1 | Spec 12 |
 | "Nothing goes to a server run by the project" | Spec 1 |
-| "uses your own OpenRouter key" | Spec 1, `docs/ux-copy.md` intro |
+| The app uses the user's own OpenRouter key | Spec 1, `docs/ux-copy.md` intro |
 | "There's no account, no server run by the project and no telemetry" | `README.md` |
 | The outbound list (OpenRouter and GitHub only) | Spec 8.1 |
 
@@ -84,4 +84,4 @@ Gaps, stated plainly in the report: GDPR duties for a solo developer running an 
 2. [ ] Add an architecture test that `core` shapes contain no OpenRouter-specific field names.
 3. [ ] Store the API key under a provider id in the `SecretStore` adapter.
 4. [ ] Review the docs for wording that rules out a future opt-in service, and prefer the open wording above.
-5. [ ] If accepted, no Spec change is needed now. List this ADR in Spec 12 as the reason the seam exists.
+5. [x] List this ADR in Spec 12 as the reason the seam exists (done 12 Nov 2026). No other Spec change is needed now.

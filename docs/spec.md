@@ -118,7 +118,7 @@ The review is saved at every step, so the user can stop and come back.
 - **Hidden text banner:** "This contract contains hidden text (outlined in the contract). It may be trying to fool this review."
 - **Playbook changed banner:** "Your playbook changed after this review ran. The labels use the old limits." with a Re-run button. Shown when the playbook differs from the review's snapshot.
 - **Unedited starter banner:** "This review uses the example playbook, unedited. Its limits are examples, not yours." with a "Make the limits yours" button to the playbook editor. Labels then say "by the example playbook."
-- Beside the contract: the checking card (counter, "Next unchecked"), then three tabs. **Labels** lists every pinned label; **Not covered** lists the clauses no position covers and holds the not-covered tick; **Missing** is the Missing list, where each item says what's absent and why it matters.
+- Beside the contract: the checking card (counter, "Next unchecked"), then three tabs. **Labels** lists every pinned label; **Not covered** lists the clauses no position covers and holds the not-covered tick; **Missing** is the Missing list, where each item says what's absent and why it matters. Below it sits a collapsed list, "Searched, nothing found", for positions with no text whose missing level is preferred. Each row opens to show where the search looked, and can be checked.
 - Every label word has a "?" with a plain definition. Four warnings get a top banner, because each can change every result: hidden text, an unloaded document, a changed playbook, and an unedited starter. Everything else, such as governing law and the privacy badge, is a small chip, so the warnings that matter don't get lost among many.
 
 ### 4.4 Checking
@@ -214,7 +214,7 @@ A fixed sequence run by the app's code. The AI never decides what runs next and 
 
 | # | Step | Input | Output | Done by |
 | --- | --- | --- | --- | --- |
-| 1 | Read file | PDF, Word (.docx), text or Markdown (.txt, .md), or pasted text | Plain text with section numbers, tables and schedules kept. Hidden text, comments and tracked changes found and marked | Code |
+| 1 | Read file | PDF, Word (.docx), text or Markdown (.txt, .md), or pasted text | Plain text with section numbers, tables and schedules kept. Hidden text, comments and tracked changes found and marked. A Word file's tracked changes are read as if accepted | Code |
 | 2 | Split into clauses | Plain text | Clauses with numbers and locations, or paragraphs if there are no numbers | Code |
 | 3 | Find personal data | Clauses, typed party details | Suggested placeholders | Code plus Presidio, on the user's computer |
 | 4 | Privacy check | Suggestions | Confirmed placeholder text | User |
@@ -402,6 +402,7 @@ Each item has a decision record (ADR). Ticked items were decided on 12 Nov 2026.
 - [ ] Copy and a prototype state for two parts of ADR 0012 that have none yet: the warning for text that can't be decoded, and a way to check a Word file's earlier wording.
 - [ ] At what share of undecodable characters a page is warned about or blocked, from the test set ([ADR 0012](adr/0012-missing-unsure-and-evidence-failures.md)).
 - [x] Protection and release integrity: no obfuscation, signed and attested releases, honest wording about what local encryption protects (decided 12 Nov 2026, [ADR 0014](adr/0014-protection-and-release-integrity.md)).
+- [x] Licence rule for bundled code: MIT, BSD and Apache only, with one named exception, `pikepdf` (MPL-2.0), for reading hidden PDF layers (decided 12 Nov 2026, [ADR 0007](adr/0007-document-reading-stack.md)).
 - [ ] Whether to register a trade mark on the name. Ruled out for now because of its cost.
 
 ## 14. Prototype handoff

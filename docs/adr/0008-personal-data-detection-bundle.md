@@ -21,7 +21,7 @@ The project owner accepted the following on 12 Nov 2026.
 
 ## Options Considered
 
-### Option A: Presidio, en_core_web_md, ORGANIZATION on, deterministic layer (recommended)
+### Option A: Presidio, en_core_web_md, ORGANIZATION on, deterministic layer (chosen)
 | Dimension | Assessment |
 |-----------|------------|
 | Complexity | Med: a pinned config and several rule finders |
@@ -83,4 +83,6 @@ The recall figures are a vendor's, with code "available on request". No public b
 2. [ ] Build the planted-entity generator with Faker and real dictionaries, and score "any token survives in the placeholder text" per type.
 3. [ ] Write the pinned config and the test that asserts engine, model and recogniser list.
 4. [ ] Check spaCy model loading under PyInstaller one-dir ([ADR 0009](0009-desktop-shell-protocol-and-packaging.md)).
-5. [ ] If accepted, tick the Presidio bundling item in Spec 13 and state the download size in Spec 9.
+5. [x] Tick the Presidio bundling item in Spec 13 (done 12 Nov 2026).
+6. [ ] State the download size in Spec 9, once measured.
+7. [ ] Check the Text Anonymization Benchmark, which the research did not look at, before building the planted-entity set.

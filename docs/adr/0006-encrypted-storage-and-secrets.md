@@ -10,9 +10,9 @@
 The [pipeline architecture report](../../reports/Clause%20Tracer%20pipeline%20architecture.md) left two designs open: one SQLCipher database, or plain SQLite with per-record AES-GCM blobs. [The v1 design decisions report](../../reports/Clause%20Tracer%20v1%20design%20decisions.md) corrected it on 11 Nov 2026. `sqlcipher3` no longer relies on a community wheel fork. SQLite3 Multiple Ciphers (`apsw-sqlite3mc`) was missing from the comparison. The runner in [ADR 0005](0005-engine-runner-shapes-and-ports.md) keeps its state in this store. D1 (keep raw data unchanged) and D8 (save the AI's exact reply) mean the store holds contract bytes and raw replies.
 
 ## Decision
-The project owner accepted a hybrid on 12 Nov 2026. The choice between the two SQLite encryption packages stays an action item until both are tried.
+The project owner accepted a hybrid on 12 Nov 2026. One choice inside it is still open: which of the two SQLite encryption packages to use (action item 6).
 
-- **One encrypted SQLite file** holds the index and small records. Prefer `apsw-sqlite3mc` if the owner accepts its non-standard API. Otherwise use `sqlcipher3`.
+- **One encrypted SQLite file** holds the index and small records. The research prefers `apsw-sqlite3mc`, whose Python API differs from the standard `sqlite3` module. `sqlcipher3` is the fallback. The owner has not yet chosen between them.
 - **A per-review AES-GCM key** encrypts raw contract bytes and AI replies. A random master key wraps each review key. Deleting a review destroys its key.
 - **Associated data.** Each ciphertext passes `review_id|record_id|schema_version` as associated data, so blobs cannot be swapped between records.
 - **Pragmas.** `temp_store=2`, `secure_delete` on, `wal_checkpoint(TRUNCATE)` after a delete and on close, and `journal_size_limit=0`. A test reads them back.
@@ -21,7 +21,7 @@ The project owner accepted a hybrid on 12 Nov 2026. The choice between the two S
 
 ## Options Considered
 
-### Option A: Hybrid, apsw-sqlite3mc plus per-review AES-GCM keys (recommended)
+### Option A: Hybrid, apsw-sqlite3mc plus per-review AES-GCM keys (chosen)
 | Dimension | Assessment |
 |-----------|------------|
 | Complexity | Med: two layers of encryption and a key table |
@@ -65,7 +65,7 @@ The project owner accepted a hybrid on 12 Nov 2026. The choice between the two S
 **Pros:** mainstream library and natural per-review keys.
 **Cons:** leaks metadata such as review counts and timestamps.
 
-For the passphrase, scrypt from `cryptography` avoids a dependency. It lost narrowly to Argon2id.
+For the passphrase, scrypt from `cryptography` avoids a dependency. The research recommends Argon2id and names scrypt as a close runner-up; its wording on which one lost is unclear, so treat the two as near-equal until action item 2 is done.
 
 ## Trade-off Analysis
 The package and design facts are verified. The hybrid is judgement. It fixes the weakness of each single design: Option C cannot shred one review, and Option D leaks metadata. With a key per review, random 96-bit nonces stay far below the 2^32 limit in [NIST SP 800-38D](https://nvlpubs.nist.gov/nistpubs/legacy/sp/nistspecialpublication800-38d.pdf). Nonce reuse is still fatal, so tests must cover it. Keyring behaviour is verified; the rest of the secrets design is judgement.
@@ -85,4 +85,5 @@ The honest claim is smaller than "erased", because an app cannot overwrite an SS
 2. [ ] Check whether the pinned `cryptography` ships Argon2id and AES key wrap. If not, decide between `argon2-cffi` and scrypt.
 3. [ ] Confirm `keyring` works under PyInstaller on Windows and Linux, and check Credential Manager size limits.
 4. [ ] Write tests: pragma read-back, canary byte scan with a positive control, crypto-shredding, and a crash between key deletion and row deletion.
-5. [ ] If accepted, update Spec 8.3 with the honest claim and the backup note, and add matching lines to `docs/ux-copy.md`.
+5. [x] Update Spec 8.3 with the honest claim and the backup note, and add matching lines to `docs/ux-copy.md` (done 12 Nov 2026).
+6. [ ] Try both `apsw-sqlite3mc` and `sqlcipher3` on Linux and in Windows CI, then bring the choice to the owner.

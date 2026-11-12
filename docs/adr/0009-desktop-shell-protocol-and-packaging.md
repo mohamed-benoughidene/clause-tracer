@@ -5,7 +5,7 @@
 **Deciders:** Project owner
 
 ## Context
-[Spec 9](../spec.md) builds a command-line tool first, then wraps it as a desktop app with an installer for Linux and Windows. The Windows installer is built by GitHub Actions and tested in a Windows virtual machine. Spec 13 lists the desktop shell as open, framed as "Tauri or Electron". [ADR 0004](0004-code-layout.md) says the shell gets its own folder and ADR.
+[Spec 9](../spec.md) builds a command-line tool first, then wraps it as a desktop app with an installer for Linux and Windows. The Windows installer is built by GitHub Actions and tested in a Windows virtual machine. Before this decision, Spec 13 listed the desktop shell as open, framed as "Tauri or Electron". [ADR 0004](0004-code-layout.md) says the shell gets its own folder and ADR.
 
 The [pipeline architecture report](../../reports/Clause%20Tracer%20pipeline%20architecture.md) compared Tauri, Electron, PySide6, pywebview and Briefcase, and left the engine transport open. [The v1 design decisions report](../../reports/Clause%20Tracer%20v1%20design%20decisions.md) decided the question by who can review the code. The developer reviews only Python and has no Windows machine. The HTML prototype already exists. Spec 8.1 allows no telemetry and no outbound host beyond OpenRouter and GitHub.
 
@@ -22,7 +22,7 @@ The project owner accepted the following on 12 Nov 2026. It replaces Spec 13's "
 
 ## Options Considered
 
-### Option A: pywebview, stdio child, PyInstaller one-dir, Inno Setup (recommended)
+### Option A: pywebview, stdio child, PyInstaller one-dir, Inno Setup (chosen)
 | Dimension | Assessment |
 |-----------|------------|
 | Complexity | Med: a Python facade, a child process and an installer script |
@@ -42,7 +42,7 @@ The project owner accepted the following on 12 Nov 2026. It replaces Spec 13's "
 | Team familiarity | Low: none of it is Python |
 
 **Pros:** better installers, capabilities and an updater ([Tauri sidecar](https://v2.tauri.app/develop/sidecar/)).
-**Cons:** unreviewable by the developer. Same system webviews, so no rendering gain. A "Linux Graphics Issues" page and an open blank-window report ([issue #15050](https://github.com/tauri-apps/tauri/issues/15050)).
+**Cons:** unreviewable by the developer. Same system webviews, so no rendering gain. Its docs carry a "Linux Graphics Issues" page and there is an open blank-window report ([issue #15050](https://github.com/tauri-apps/tauri/issues/15050)); pywebview shares this Linux weak point, because both use WebKitGTK, so it is not a reason to prefer either.
 
 ### Option C: Electron with a Python child
 | Dimension | Assessment |
@@ -77,7 +77,7 @@ Two points stay open. The prototype keeps theme and text size in browser storage
 
 ## Consequences
 - Easier: the CLI and the desktop app share one engine and one protocol.
-- Easier: Windows is proven on every release without a Windows machine.
+- Easier: every release is built, installed and driven on Windows by CI, without the developer owning a Windows machine. This is a plan, not yet tried. CI runs a server edition of Windows, so the install warning a home user sees still needs a manual look on a 90-day evaluation machine, which must be rebuilt every 90 days.
 - Harder: the project writes its own update notice, installer script and security rules.
 - Revisit if antivirus flags the PyInstaller build (try Nuitka), or if start-up on the evaluation VM feels slow to a first-time user.
 
@@ -86,4 +86,6 @@ Two points stay open. The prototype keeps theme and text size in browser storage
 2. [ ] Check whether pywebview 6.x on GTK opens an internal HTTP server, and document any port bound to loopback.
 3. [ ] Make the CDP port unreachable in release builds and add a test for it.
 4. [ ] Measure start-up time and memory of a one-dir build with spaCy on Linux and the Windows VM.
-5. [ ] If accepted, change Spec 13's shell item and Spec 9's signing text, and add the shell folder that ADR 0004 promises.
+5. [x] Change Spec 13's shell item (done 12 Nov 2026).
+6. [ ] Update Spec 9's signing text, and add the shell folder that ADR 0004 promises.
+7. [ ] Gaps the research left, to close before the shell stage: no report was found of one developer shipping pywebview on both systems; the Qt fallback is unmeasured; orphan protection is untested; Wine, hourly cloud Windows machines and NSIS were not researched.

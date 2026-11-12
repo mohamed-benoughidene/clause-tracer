@@ -28,7 +28,7 @@ Cost per review, from prices fetched on 11 Nov 2026. The figures are the report'
 
 ## Options Considered
 
-### Option A: Claude Sonnet 5.5 as default, two comparisons (recommended)
+### Option A: Claude Sonnet 5.5 as default, two comparisons (chosen)
 | Dimension | Assessment |
 |-----------|------------|
 | Complexity | Low: one model for every step |
@@ -36,7 +36,7 @@ Cost per review, from prices fetched on 11 Nov 2026. The figures are the report'
 | Scalability | One ZDR provider means no fallback when Vertex is down |
 | Team familiarity | High: standard OpenRouter chat requests |
 
-**Pros:** repeatable, with a known cache-write price. The comparisons cover another vendor and a cheap open-weight model.
+**Pros:** one fixed zero-retention provider, so runs differ less (though no live reply can be pinned), and a known cache-write price. The comparisons cover another vendor and a cheap open-weight model.
 **Cons:** no published benchmark exists for the 5.5 and 6.x models on contract tasks. If Vertex is down, the app must show "no private model available".
 
 ### Option B: GPT-6.1 Sol as default
@@ -47,8 +47,8 @@ Cost per review, from prices fetched on 11 Nov 2026. The figures are the report'
 | Scalability | Azure only under strict schemas |
 | Team familiarity | High |
 
-**Pros:** same price, and a strong model family.
-**Cons:** lost on repeatability and cache-write price clarity. The report calls this close.
+**Pros:** same price.
+**Cons:** lost on the fixed-provider point and on cache-write price clarity. The report calls this close.
 
 ### Option C: Jev (TypeSafe) for steps 6a and 9
 | Dimension | Assessment |
@@ -79,4 +79,5 @@ Caching is not decoration: a miss raises Sonnet 5.5 from $0.82 to $3.77 on a 50,
 2. [ ] Test strict-schema enforcement on each chosen endpoint with a prompt that invites a schema break, and save the replies as fixtures.
 3. [ ] Record the provider per call and compare it with the ZDR list, flagging any `safety_retention: true` endpoint. That ZDR-list call is a fourth kind of OpenRouter request, so Spec 8.1 must list it.
 4. [ ] Measure the golden-set disagreement rate before deciding on self-consistency sampling.
-5. [ ] If accepted, tick the models item in Spec 13, and add the typical review cost to the key guide in `docs/ux-copy.md` once measured.
+5. [x] Tick the models item in Spec 13 (done 12 Nov 2026).
+6. [ ] Add the typical review cost to the key guide in `docs/ux-copy.md`, once measured.

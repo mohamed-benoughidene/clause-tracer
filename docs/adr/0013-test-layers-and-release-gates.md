@@ -12,18 +12,18 @@ Live replies cannot be pinned. The chosen endpoints do not accept `temperature`,
 ## Decision
 The project owner accepted the following on 12 Nov 2026.
 
-- **Five layers.** Four run free on saved replies and one runs against the real model. They include Hypothesis property tests for the seven offset invariants, contract tests that run one suite against each fake and its real adapter, golden-file tests on each module's `samples/`, end-to-end replay tests and visual tests on Linux. [The testing strategy](../testing-strategy.md) names each layer.
+- **Five layers.** Four run free, with no network: unit tests (with Hypothesis property tests for the seven offset invariants), golden-file tests on each module's `samples/`, contract and integration tests that run one suite against each fake and its real adapter, and end-to-end replay tests. The fifth is the paid test set, which runs against the real model. Visual tests of highlights on Linux sit across the free layers. [The testing strategy](../testing-strategy.md) names each layer.
 - **Replay fake.** A hand-written fake behind the AI port, keyed on a content hash (model id, schema id, normalised prompt, step version). It raises `UnrecordedRequest` on a miss and exposes `unused_keys()`, which a fixture asserts empty.
 - **Paid run.** A `@pytest.mark.golden` marker, deselected in `scripts/check.sh` and CI, plus a small `golden_report.py`. Run only by hand or on a labelled change, never on push.
 - **Coverage.** Branch coverage per package: `core` 95%, pipeline modules 85%, adapters 70%, `cli` 60%, plus 90% on changed lines. These targets are `[Assumption]`.
 - **Mutation.** mutmut on `core` and the pure rule modules, as a scheduled or pre-release report.
 - **Agent guard.** Human-owned acceptance tables in CSV or TOML. Agents may write the loader but may not change expected values in the same change as the code. A named command, `--update-goldens`, regenerates golden files.
-- **Gates.** Hard, zero-tolerance gates per case: every planted walk-away found in all three runs, no fabricated quote ever, zero dangerous false-Missings on built cases. Rates are reported, not gated: number accuracy and label match at or above 90%, and overall false-Missing, each with an exact interval.
+- **Gates.** Hard, zero-tolerance gates per case: every planted walk-away found in all three runs, no fabricated quote ever, zero dangerous false-Missings on built cases. Two rates must also pass, because Spec 11 requires them: number accuracy, and label match, each at or above 90%. They are reported with an exact interval. Other rates, such as overall false-Missing and the share of unsure labels, are reported and compared with the last baseline, with no pass mark.
 - **Budget.** The owner set a total of about $10.76 for paid testing on 12 Nov 2026, so paid runs use a cheap model: `[Assumption]` about $2 for the 100-case set and $3 to $4 for the 300-case set. A Sonnet-class model would cost about $34 and $67 for the same runs, which is outside the budget. [`testing-strategy.md`](../testing-strategy.md) section 7.5 has the spending plan.
 
 ## Options Considered
 
-### Option A: Hand-written replay fake, pytest marker, own gates (recommended)
+### Option A: Hand-written replay fake, pytest marker, own gates (chosen)
 | Dimension | Assessment |
 |-----------|------------|
 | Complexity | Low to Med: a fake, a marker and a report script |
@@ -70,7 +70,7 @@ The project owner accepted the following on 12 Nov 2026.
 ## Trade-off Analysis
 The statistics drive the gates. With zero failures in n independent cases, the 95% upper bound on the failure rate is about 3/n: 3.7% at 80 cases, 3.0% at 100 and 1.0% at 300 (one-sided exact). The unit is the case, not the run. Clustered standard errors can be over three times the naive ones ([Anthropic](https://www.anthropic.com/research/statistical-approach-to-model-evals)). So ten contracts are ten clusters, and rate claims need 20 to 50 small built cases per kind. "pass^3" is reported beside per-run accuracy, because a user gets one run.
 
-The gate numbers are the project's own. No published release threshold exists, so they must never be presented as an industry norm. The coverage targets are judgement, anchored on Google's 60, 75 and 90 per cent guidance (headline numbers only). LLM-written tests peak at a 0.546 mutation score against 0.690 for human tests ([arXiv 2511.21382](https://arxiv.org/html/2511.21382v1)), so coverage is a floor. The budget figures are the researcher's estimates; the 20% small-case factor and reasoning-token volume are unknown until the first paid run. A spend cap at about double the table figure is judgement `[Assumption]`. Other gaps: the pytest-httpx licence was not re-checked; Inspect AI was not audited for network calls; pytest-gremlins was not checked; the test-quality evidence is mostly Java.
+The gate numbers are the project's own. No published release threshold exists, so they must never be presented as an industry norm. The coverage targets are judgement, anchored on Google's 60, 75 and 90 per cent guidance (headline numbers only). LLM-written tests peak at a 0.546 mutation score against 0.690 for human tests ([arXiv 2511.21382](https://arxiv.org/html/2511.21382v1)), so coverage is a floor. The budget figures are the researcher's estimates; the 20% small-case factor and reasoning-token volume are unknown until the first paid run. Those table figures are for a Sonnet-class model and do not fit the owner's budget; the caps now in force are a cap per run and a total of $10 ([`testing-strategy.md`](../testing-strategy.md) section 7.5). Other gaps: the pytest-httpx licence was not re-checked; Inspect AI was not audited for network calls; pytest-gremlins was not checked; the test-quality evidence is mostly Java.
 
 ## Consequences
 - Easier: the keyless suite runs on every pull request at no cost, with sockets blocked suite-wide.
@@ -83,4 +83,4 @@ The gate numbers are the project's own. No published release threshold exists, s
 2. [ ] Add the `golden` marker, deselect it in `scripts/check.sh`, and add the CI check that guards the acceptance tables.
 3. [ ] Check the pytest-httpx licence and audit Inspect AI for network calls before any use.
 4. [ ] Re-query prices before the first paid run. Build the spend ledger first: a cap per run and a total cap of $10, so a run stops itself.
-5. [ ] If accepted, rewrite Spec 11 to state hard gates per case and reported rates with exact intervals.
+5. [x] Add the per-case hard gates and the reporting rule to Spec 11 (done 12 Nov 2026).

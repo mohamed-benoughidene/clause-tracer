@@ -7,7 +7,7 @@
 ## Context
 [Spec 6.1](../spec.md) fixes the pipeline: code runs a set sequence, and the AI only fills forms. Spec 6.2 sets the retry rules: one retry for a broken reply, three for a network error. Spec 6.3 says Resume continues from the first unfinished step, and finished steps aren't paid for again. [ADR 0004](0004-code-layout.md) puts the shapes in `core` and the wiring in `cli`.
 
-The [pipeline architecture report](../../reports/Clause%20Tracer%20pipeline%20architecture.md) proposed a runner, core shapes and five ports. [The v1 design decisions report](../../reports/Clause%20Tracer%20v1%20design%20decisions.md) re-checked them against package metadata and documentation on 11 Nov 2026. It kept most choices and corrected the HTTP library. One developer reviews only Python, and AI agents write most of the code. So every part of the engine should be plain Python that this developer can read in one sitting.
+The [pipeline architecture report](../../reports/Clause%20Tracer%20pipeline%20architecture.md) proposed a runner, core shapes and five ports. [The v1 design decisions report](../../reports/Clause%20Tracer%20v1%20design%20decisions.md) re-checked them against package metadata and documentation on 11 Nov 2026. For the choices in this record, it kept all but one and corrected the HTTP library. One developer reviews only Python, and AI agents write most of the code. So every part of the engine should be plain Python that this developer can read in one sitting.
 
 ## Decision
 The project owner accepted the following on 12 Nov 2026.
@@ -20,7 +20,7 @@ The project owner accepted the following on 12 Nov 2026.
 
 ## Options Considered
 
-### Option A: Hand-written runner, stdlib shapes, Protocol ports, httpx2 (recommended)
+### Option A: Hand-written runner, stdlib shapes, Protocol ports, httpx2 (chosen)
 | Dimension | Assessment |
 |-----------|------------|
 | Complexity | Low: a few hundred lines of plain Python in total |
@@ -88,4 +88,4 @@ The facts about DBOS and Hamilton are verified. The choice of Option A over them
 1. [ ] Check `httpx2`'s maintainer, changelog and licence file before adding it with `uv add`.
 2. [ ] Confirm that Pydantic `TypeAdapter` validates straight into frozen, slotted dataclasses on the pinned version.
 3. [ ] Write the runner's cache-key rule and the call/parse split into `src/clause_tracer/cli/README.md`.
-4. [ ] If accepted, record the `core` shapes and ports in `src/clause_tracer/core/README.md` (S3, write down input and output shapes).
+4. [ ] Record the `core` shapes and ports in `src/clause_tracer/core/README.md` when `core` is built (S3, write down input and output shapes).

@@ -22,15 +22,15 @@ The honest wording for local data: contracts and the API key are encrypted at re
 
 ## Options Considered
 
-### Option A: Signed and attested releases, honest wording, trade mark deferred (recommended)
+### Option A: Signed and attested releases, honest wording, trade mark deferred (chosen)
 | Dimension | Assessment |
 |-----------|------------|
 | Complexity | Low to Med: release-workflow steps and paperwork |
-| Cost | Nothing now. Later, if the trade mark is taken up: EUIPO 850 euros for one class ([EUIPO](https://www.euipo.europa.eu/en/trade-marks/before-applying/fees-payable-direct-to-the-euipo)) or USPTO $350 per class ([USPTO](https://www.uspto.gov/trademarks/trademark-fee-information)); OV certificate about $99 a year |
+| Cost | Nothing now. Later, if the trade mark is taken up: EUIPO 850 euros for one class ([EUIPO](https://www.euipo.europa.eu/en/trade-marks/before-applying/fees-payable-direct-to-the-euipo)) or USPTO $350 per class ([USPTO](https://www.uspto.gov/trademarks/trademark-fee-information)); an individual OV certificate at about $99 a year, the route the research suggests for a developer outside the US and Canada |
 | Scalability | The name outlasts each version's two-year conversion to Apache 2.0 |
 | Team familiarity | High for the workflow; legal steps need an attorney |
 
-**Pros:** the name is the durable asset. Users can verify a download. The wording matches what tests can prove.
+**Pros:** users can verify a download. The wording matches what tests can prove.
 **Cons:** costs money and legal time. Does not stop a copy that uses another name.
 
 ### Option B: Binary obfuscation (PyArmor or Nuitka Commercial)
@@ -80,8 +80,8 @@ Gaps carried over: UK and Madrid fees and app-store takedown routes were not ver
 - Revisit when a copy appears, when the budget allows OV signing, or when a later version plans a hosted service ([ADR 0015](0015-provider-ready-seam.md)).
 
 ## Action Items
-1. [ ] When money allows, take legal advice on: whether to register a trade mark, and its classes and market; FSL with any proprietary part, and its effect on the Apache 2.0 conversion; EU AI Act Article 50 (applies since 2 Aug 2026; do not state in the docs that it does not apply).
+1. [ ] When money allows, take legal advice on: whether to register a trade mark, and its classes and market; FSL with any proprietary part, and its effect on the Apache 2.0 conversion; EU AI Act Article 50 (applies since 2 Aug 2026; do not state in the docs that it does not apply). What is known about Article 50 is thin: the Commission's final guidelines were not opened and are known only through search summaries and law-firm alerts; how they treat tools that use the user's own key, and AI rewrites of the user's own wording, was not found; later amendments were not checked; and a date of 2 Dec 2026 is reported for machine-readable marking by systems already on the market. The private message a user sends probably falls outside the deployer duty, but whether this app has a provider's marking duty is unresolved.
 2. [ ] Add signed `SHA256SUMS`, `actions/attest` and a CycloneDX SBOM to the release workflow.
 3. [ ] Make the Linux build reproducible and test it by building twice.
 4. [ ] Create the private golden-set repository and give CI read access only.
-5. [ ] If accepted, update Spec 8.3 and 8.4 with the honest wording and the release chain, and `docs/ux-copy.md` with matching lines.
+5. [x] Update Spec 8.3 and 8.4 with the honest wording and the release chain, and `docs/ux-copy.md` with matching lines (done 12 Nov 2026).

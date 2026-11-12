@@ -12,14 +12,14 @@ The [pipeline seams report](../../reports/Clause%20Tracer%20pipeline%20seams.md)
 ## Decision
 The project owner accepted four rules on 12 Nov 2026.
 
-1. **The Rule 7 hole.** Show "searched, nothing found" positions in a collapsed list where each row can be checked. Keep them out of the walk-away and unsure counts. Each row has a one-click "show where I looked".
+1. **The Rule 7 hole.** Show "searched, nothing found" positions in a collapsed list where each row can be checked. Keep them out of the walk-away and unsure counts. Each row opens a panel headed "Where it was searched". (The research called it "show where I looked"; the app never says "I".)
 2. **Disagreeing search passes.** When a search pass found a candidate but the pair check said no, the position becomes unsure with reason code `MATCH_UNCONFIRMED`. It names a clause to read ("read this clause") and what to look for. Unsure counts are reported separately.
 3. **Quote found but not placeable.** If code confirms the quote in the text but cannot place it on the page, the label stays. The app says the quote could not be placed and shows the quote text in a panel. It warns or blocks when the share of undecodable font characters passes a threshold set from the golden set.
 4. **Tracked changes in Word.** The accepted (final) view is the contract. A notice names the count of changes and their authors, and offers a check of the original view. If time is short, warn or refuse and ask the user to accept or reject the changes first. Deleted text is never silently treated as hidden text.
 
 ## Options Considered
 
-### Option A: The four rules above (recommended)
+### Option A: The four rules above (chosen)
 | Dimension | Assessment |
 |-----------|------------|
 | Complexity | Med: one new list, one reason code, one panel, one notice |
@@ -78,5 +78,7 @@ Gaps carried over: no study tests these exact screens. How many rows users will 
 1. [ ] Add `MATCH_UNCONFIRMED` to `core`'s reason codes, with separate result types for "nothing found" and "call failed".
 2. [ ] Set the undecodable-character threshold from the golden set. Until then it is `[Assumption]`.
 3. [ ] Build Word tracked-change fixtures: insertions, deletions, several authors.
-4. [ ] If accepted, change Spec 5 Rule 7, add the unplaceable-quote case beside Rule 3, extend Rule 9 for undecodable text, update Spec 4.3 (the Missing tab), and add the tracked-changes rule to Spec 6.1 step 1.
-5. [ ] If accepted, add copy to `docs/ux-copy.md` and new states to the prototype's `states.html`: the searched-nothing-found list, "read this clause", the quote panel and the tracked-changes notice.
+4. [x] Change Spec 5 Rule 7, add the unplaceable-quote case beside Rule 3, update Spec 4.3 (the Missing tab), and add the tracked-changes rule to Spec 6.1 step 1 and Spec 9 (done 12 Nov 2026).
+5. [ ] Extend Rule 9 for text that can't be decoded, once the test set gives a threshold (Spec 13 lists this as open).
+6. [x] Add copy to `docs/ux-copy.md` and new states to the prototype's `states.html`: the searched-nothing-found list, the clause to read when searches disagree, the quote panel and the tracked-changes notice (done 12 Nov 2026).
+7. [ ] Still without copy or a prototype state: the warning for text that can't be decoded, and a way to check a Word file's earlier wording inside the app.

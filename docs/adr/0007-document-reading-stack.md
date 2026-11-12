@@ -14,7 +14,7 @@ The project owner accepted the following on 12 Nov 2026.
 
 - **PDF.** pypdfium2 as the single engine, through its raw API, for page images, per-character geometry and hidden-text fields.
 - **Cross-check.** pdfplumber only in tests, never at runtime.
-- **Hidden layers.** pikepdf (MPL-2.0). The owner allowed it on 12 Nov 2026 as a named exception to the MIT, BSD and Apache rule. MPL-2.0 is file-level copyleft: use pikepdf unmodified as a dependency, and never copy its source files into this repo.
+- **Hidden layers.** pikepdf (MPL-2.0). The owner allowed it on 12 Nov 2026 as a named exception to the MIT, BSD and Apache rule. As a working rule, not legal advice: use pikepdf unmodified as a dependency, and never copy its source files into this repo, because MPL-2.0 puts conditions on changed copies of its own files. Have a lawyer confirm this before a release that ships it.
 - **Word.** Read the zip directly and parse every part with one explicit, hardened lxml parser. Reject any DOCTYPE. Cap sizes before reading.
 - **Sentences.** NUPunkt, which returns character spans. Quote checks tolerate a missed split.
 - **Report PDF.** ReportLab (BSD, pure Python, about 2 MB).
@@ -22,7 +22,7 @@ The project owner accepted the following on 12 Nov 2026.
 
 ## Options Considered
 
-### Option A: pypdfium2 alone, hardened lxml, NUPunkt, ReportLab (recommended)
+### Option A: pypdfium2 alone, hardened lxml, NUPunkt, ReportLab (chosen)
 | Dimension | Assessment |
 |-----------|------------|
 | Complexity | Med: the raw PDFium API is low-level |
@@ -86,4 +86,5 @@ Gaps carried over: not verified that the bundled PDFium build includes every fun
 2. [x] Decide on pikepdf (MPL-2.0) or pypdf for hidden layers: pikepdf allowed, 12 Nov 2026. Add it to the licence check's allow-list by name, not MPL in general.
 3. [ ] Set the limits (member count, expanded size, ratio, page count, time, memory) and test each one. Values are `[Assumption]` until measured.
 4. [ ] Add the pdfplumber cross-check as a test-only dependency.
-5. [ ] If accepted, update `src/clause_tracer/ingest/README.md` and add the hidden-layer licence decision to Spec 13.
+5. [x] Add the hidden-layer licence decision to Spec 13 (done 12 Nov 2026).
+6. [ ] Update `src/clause_tracer/ingest/README.md` when `ingest` is built.
