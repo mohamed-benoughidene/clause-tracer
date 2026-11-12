@@ -90,3 +90,7 @@ The Commission's guidelines on Article 50 and the Code of Practice were read on 
 - Nothing addresses tools that call a model through the user's own key, so whether this app's developer is a "provider" is open.
 
 This supports the main decision here: the app's default message is built by code and is not AI text. It leaves the optional "Rewrite with AI" for the message as the one feature the guidelines point at directly. Whether version 1 ships it is with the owner.
+
+## Amendment (12 Nov 2026): the rewrite stays, and Article 50 is parked
+
+The owner decided on 12 Nov 2026 to keep "Rewrite with AI" for the message in version 1, optional and labelled, and to set the EU AI Act question aside for now. The question is flagged in [Spec 10](../spec.md) and Spec 13 so it can be worked on later. The risk is known and accepted for now: the Commission's guidelines list rewriting text as needing a machine-readable mark, which this app does not add. Nothing in the app or the docs may say Article 50 doesn't apply.

@@ -395,7 +395,7 @@ The owner accepted ADRs 0005 to 0015 on 12 Nov 2026.
 **Still open after this work.** These were not researched well enough to recommend, or need a measurement or a lawyer:
 
 - Final input limits and the real cost per review, from the first paid run (Spec 13).
-- Whether EU AI Act Article 50 puts a marking duty on this app. The primary texts were read on 12 Nov 2026 (ADR 0011 and ADR 0014 amendments) and do not settle it. Take legal advice; the docs must not say it does not apply.
+- Whether EU AI Act Article 50 puts a marking duty on this app. The primary texts were read on 12 Nov 2026 (ADR 0011 and ADR 0014 amendments) and do not settle it. The owner parked the question that day; Spec 10 lists what to work out later. The docs must not say it does not apply.
 - A trial showing that a PyInstaller build runs against the system's WebKitGTK on Linux.
 - The same checks on Windows, in CI: the PDF functions, the encrypted store, and loading pages from files.
 - Whether to register a trade mark later. How FSL would be enforced: no court has ruled on it, and the free routes do little (ADR 0014 amendment).

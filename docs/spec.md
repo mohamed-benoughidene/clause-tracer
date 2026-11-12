@@ -339,6 +339,13 @@ The tool compares contracts with positions the user chose. It doesn't know the l
 - AI text never states what a law allows (see 6.2).
 - The code is released under the Functional Source License (FSL-1.1-ALv2), which has a no-warranty clause. Anyone can use it for free, including for paid work, except to offer a competing product or service, which needs a commercial licence (`COMMERCIAL_LICENSE.md`). Each version becomes Apache 2.0 two years after its release. The app says "source available", never "open source".
 - Before wide promotion, check the wording with a lawyer.
+- **Parked for later: the EU AI Act, Article 50.** It has applied since 2 Aug 2026 and covers AI-written text. The project owner set it aside on 12 Nov 2026, so version 1 is designed without settling it. Nothing in the app or the docs may say the rule doesn't apply. What to work out later, with a lawyer:
+  - Whether the project counts as the "provider" when the user brings their own key. The official guidance doesn't say.
+  - Whether AI-written text needs a machine-readable mark. The guidance lists "rewriting text" as needing one. That touches "Rewrite with AI" for the message (4.7), the AI rewrite of a clause (4.6), and the reasons on pencilled labels.
+  - Whether the fixed line on AI wording (6.2) is enough for the duty to tell people they are dealing with AI.
+  - Which version of the Commission's guidelines is current: two dates were found, 20 Jul and 5 Nov 2026.
+
+  What was read is summarised in [ADR 0011](adr/0011-who-writes-the-words.md) and [ADR 0014](adr/0014-protection-and-release-integrity.md). The design already helps: the app builds the message itself by default, so most text it shows isn't AI-written.
 
 ## 11. Acceptance tests
 
@@ -405,7 +412,8 @@ Each item has a decision record (ADR). Ticked items were decided on 12 Nov 2026.
 - [x] The encrypted store uses `sqlcipher3` (decided 12 Nov 2026, [ADR 0006](adr/0006-encrypted-storage-and-secrets.md)).
 - [x] The Linux download is a `.deb` file, with a plain archive for Fedora. The app loads its pages from files and opens no local port (decided 12 Nov 2026, [ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md)).
 - [ ] A trial build to confirm the Linux package works with the system's web view, and the same checks on Windows in CI.
-- [ ] Whether version 1 ships "Rewrite with AI" for the message, given what the EU AI Act guidelines say about rewritten text ([ADR 0011](adr/0011-who-writes-the-words.md)).
+- [x] Version 1 keeps "Rewrite with AI" for the message, optional and labelled (decided 12 Nov 2026, [ADR 0011](adr/0011-who-writes-the-words.md)).
+- [ ] **Parked: the EU AI Act (Article 50).** Set aside for now, to work on later. The open questions are in section 10.
 - [ ] Whether to register a trade mark on the name. Ruled out for now because of its cost.
 
 ## 14. Prototype handoff
