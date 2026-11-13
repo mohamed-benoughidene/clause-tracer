@@ -2,11 +2,12 @@
 name: spike-windows
 on:
   push:
-    branches: ["spike/windows-checks"]
+    branches: ["spike/windows-checks", "tmp/windows-installer-base", "spike/packaging-windows-installer"]
 permissions:
   contents: read
 jobs:
   checks:
+    if: github.ref == 'refs/heads/spike/windows-checks'
     strategy:
       fail-fast: false
       matrix:
@@ -35,3 +36,125 @@ jobs:
         run: |
           pyinstaller --noconfirm --onedir --name trial --add-data "spikes/windows/pages;pages" spikes/windows/trial_app.py
           dist/trial/trial.exe
+
+  # Not yet merged into `checks` above: that job only runs the frozen one-folder
+  # build directly. This job wraps the same build in a real Inno Setup installer
+  # and runs a silent install / run / uninstall cycle, which nobody had tried yet.
+  installer:
+    if: github.ref == 'refs/heads/tmp/windows-installer-base' || github.ref == 'refs/heads/spike/packaging-windows-installer'
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install pywebview pyinstaller psutil
+
+      - name: Freeze trial_app.py one-folder with PyInstaller
+        run: |
+          pyinstaller --noconfirm --onedir --name trial --add-data "spikes/windows/pages;pages" spikes/windows/trial_app.py
+          dist/trial/trial.exe
+
+      - name: Install Inno Setup
+        run: |
+          $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          if (Test-Path $iscc) {
+            Write-Host "Inno Setup already present at $iscc"
+          } else {
+            Write-Host "Inno Setup not preinstalled; installing via Chocolatey"
+            choco install innosetup -y --no-progress
+          }
+          if (-not (Test-Path $iscc)) {
+            throw "ISCC.exe not found at $iscc after install attempt"
+          }
+          & $iscc /? | Select-Object -First 5
+
+      - name: Compile the trial installer
+        run: |
+          $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          & $iscc spikes\windows\trial.iss
+          if ($LASTEXITCODE -ne 0) { throw "ISCC compile failed with exit code $LASTEXITCODE" }
+          Get-ChildItem spikes\windows\installer_output
+
+      - name: Silent install
+        run: |
+          $setup = Get-ChildItem spikes\windows\installer_output -Filter *.exe | Select-Object -First 1
+          if (-not $setup) { throw "No compiled installer found in spikes\windows\installer_output" }
+          Write-Host "Running $($setup.FullName) /VERYSILENT /SUPPRESSMSGBOXES /NORESTART"
+          $p = Start-Process -FilePath $setup.FullName -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART" -Wait -PassThru
+          Write-Host "Installer exit code: $($p.ExitCode)"
+          if ($p.ExitCode -ne 0) { throw "Installer exited with code $($p.ExitCode)" }
+
+      - name: Confirm the install actually happened
+        run: |
+          $candidates = @(
+            (Join-Path $env:ProgramFiles "ClauseTracerTrial"),
+            (Join-Path ${env:ProgramFiles(x86)} "ClauseTracerTrial"),
+            (Join-Path $env:LOCALAPPDATA "Programs\ClauseTracerTrial")
+          )
+          $installDir = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $installDir) {
+            throw "Install directory not found in any of: $($candidates -join ', ')"
+          }
+          Write-Host "Install directory: $installDir"
+          "INSTALL_DIR=$installDir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+          $exe = Join-Path $installDir "trial.exe"
+          if (-not (Test-Path $exe)) { throw "trial.exe not found under $installDir" }
+          Write-Host "Found trial.exe: $exe"
+
+          $uninst = Join-Path $installDir "unins000.exe"
+          if (-not (Test-Path $uninst)) { throw "unins000.exe not found under $installDir" }
+          Write-Host "Found uninstaller: $uninst"
+
+          $shortcutCandidates = @(
+            (Join-Path $env:ProgramData "Microsoft\Windows\Start Menu\Programs\Clause Tracer Trial\Clause Tracer Trial.lnk"),
+            (Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\Clause Tracer Trial\Clause Tracer Trial.lnk")
+          )
+          $shortcut = $shortcutCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $shortcut) {
+            Write-Host "Start Menu shortcut not found at expected paths; searching more broadly"
+            $shortcut = Get-ChildItem -Path "$env:ProgramData\Microsoft\Windows\Start Menu","$env:APPDATA\Microsoft\Windows\Start Menu" -Recurse -Filter "*.lnk" -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "*Clause Tracer*" } | Select-Object -First 1 -ExpandProperty FullName
+          }
+          if (-not $shortcut) { throw "No Start Menu shortcut found for Clause Tracer Trial" }
+          Write-Host "Found Start Menu shortcut: $shortcut"
+
+          $uninstallKey = Get-ChildItem "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall","HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall","HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall" -ErrorAction SilentlyContinue |
+            Get-ItemProperty -ErrorAction SilentlyContinue |
+            Where-Object { $_.DisplayName -like "*Clause Tracer Trial*" } |
+            Select-Object -First 1
+          if (-not $uninstallKey) { throw "No uninstaller registry entry found for Clause Tracer Trial" }
+          Write-Host "Found uninstall registry entry: $($uninstallKey.PSPath)"
+
+      - name: Run the installed app
+        run: |
+          $exe = Join-Path $env:INSTALL_DIR "trial.exe"
+          Write-Host "Running installed app: $exe"
+          & $exe
+          if ($LASTEXITCODE -ne 0) { throw "Installed app exited with code $LASTEXITCODE" }
+
+      - name: Silent uninstall
+        run: |
+          $uninst = Join-Path $env:INSTALL_DIR "unins000.exe"
+          Write-Host "Running $uninst /VERYSILENT /SUPPRESSMSGBOXES /NORESTART"
+          $p = Start-Process -FilePath $uninst -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART" -Wait -PassThru
+          Write-Host "Uninstaller exit code: $($p.ExitCode)"
+          # Give the uninstaller's self-delete helper a moment to finish.
+          Start-Sleep -Seconds 5
+          if ($p.ExitCode -ne 0) { throw "Uninstaller exited with code $($p.ExitCode)" }
+
+      - name: Confirm the uninstall actually happened
+        run: |
+          if (Test-Path $env:INSTALL_DIR) {
+            Write-Host "Install directory still exists; listing contents:"
+            Get-ChildItem -Recurse $env:INSTALL_DIR | ForEach-Object { Write-Host $_.FullName }
+            $remaining = Get-ChildItem -Recurse $env:INSTALL_DIR -ErrorAction SilentlyContinue
+            if ($remaining) { throw "Install directory still contains files after uninstall: $($remaining.FullName -join ', ')" }
+          } else {
+            Write-Host "Install directory removed cleanly: $env:INSTALL_DIR"
+          }
+          $shortcutGone = -not (Get-ChildItem -Path "$env:ProgramData\Microsoft\Windows\Start Menu","$env:APPDATA\Microsoft\Windows\Start Menu" -Recurse -Filter "*.lnk" -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "*Clause Tracer*" })
+          Write-Host "Start Menu shortcut removed: $shortcutGone"
