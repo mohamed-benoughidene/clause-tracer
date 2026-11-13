@@ -348,7 +348,7 @@ The tool compares contracts with positions the user chose. It doesn't know the l
   - A PDF report that contains AI-written text carries a machine-readable mark in the file's metadata (4.7).
   - The fixed line on AI wording (6.2) stays on every screen and report page that shows AI text.
   - A rewrite the user copies out as plain text can't carry a hidden mark, and the app can't add one. This is an accepted, known gap, not a promise that's being kept.
-  - Before the first public release: send the provider question to the EU's AI Act Service Desk, re-read the Commission's guidelines, and check whether the project still counts as a "provider".
+  - Before the first public release: read the reply from the EU's AI Act Service Desk (the provider question was sent on 13 Nov 2026), re-read the Commission's guidelines, and check whether the project still counts as a "provider".
 
   What was read is summarised in [ADR 0016](adr/0016-legal-positions-without-a-lawyer.md), [ADR 0011](adr/0011-who-writes-the-words.md) and [ADR 0014](adr/0014-protection-and-release-integrity.md). The design already helps: the app builds the message itself by default, so most text it shows isn't AI-written.
 

@@ -107,7 +107,7 @@ The owner said a lawyer is not an option, and asked to work on the four items le
 | Real installs (Ubuntu, Fedora, Windows) | **Done, 13 Nov 2026.** Real `apt`, `dnf` and Windows (Inno Setup) installs all work on GitHub's own CI runners, which have real root, and the Windows installer needs no admin rights. The Ubuntu window was slow to start, not missing: the app now waits for the window's own start-up events, and it starts on Ubuntu 22.04 and 24.04. Linux Mint 22 and 21.3 pass in containers. **Still untried:** a real Ubuntu or Mint desktop session, and Wayland. Results are in the latest amendment of ADR 0009 |
 | First paid run | The real first run still needs the pipeline. On 13 Nov 2026 a small probe spent $0.07 and measured cost, caching and strict forms on one form; the numbers are in the last amendment of ADR 0010 and in testing strategy 7.5 |
 
-**Draft question for the EU's AI Act Service Desk** (the owner sends it, at <https://ai-act-service-desk.ec.europa.eu/en/form/helpdesk>):
+**Draft question for the EU's AI Act Service Desk** (the owner sent it on 13 Nov 2026, at <https://ai-act-service-desk.ec.europa.eu/en/form/helpdesk>):
 
 > I am an individual developer outside a company. I plan to release a free desktop application under my own name. It runs on the user's computer and reviews a contract. For some steps it sends text to a general-purpose AI model through a third-party API, using an API key that the user obtains and pays for. The application shows short AI-written reasons, and can rewrite a clause or a message on request. A fixed visible line says the wording was written by AI.
 >
