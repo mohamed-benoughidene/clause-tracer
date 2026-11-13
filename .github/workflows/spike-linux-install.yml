@@ -47,6 +47,7 @@ jobs:
           - {os: ubuntu-24.04, tag: u2404, dbus: "1"}
           - {os: ubuntu-24.04, tag: u2404, dbus: "0"}
           - {os: ubuntu-22.04, tag: u2204, dbus: "1"}
+          - {os: ubuntu-22.04, tag: u2204, dbus: "0"}
     runs-on: ${{ matrix.os }}
     name: vm-run (${{ matrix.os }}, dbus-run-session=${{ matrix.dbus }})
     steps:
@@ -130,6 +131,41 @@ jobs:
         if: always()
         with:
           name: log-ubuntu-container
+          path: run.log*
+
+  # Linux Mint (container images from linuxmintd). Mint 22 is Ubuntu 24.04 based, 21.3 is 22.04 based.
+  mint:
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {image: "linuxmintd/mint22-amd64", tag: u2404}
+          - {image: "linuxmintd/mint21.3-amd64", tag: u2204}
+    name: mint (${{ matrix.image }})
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.image }}
+      options: --user root
+    steps:
+      - run: apt-get update && apt-get install -y git ca-certificates
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: deb-${{ matrix.tag }}
+      - run: cat /etc/os-release | head -4; id
+      - run: apt-get install -y ./${{ env.DEB }} xvfb xauth dbus dbus-x11 iproute2 desktop-file-utils python3-minimal
+      - name: Run the installed app
+        run: spikes/linux/keep/ci-run.sh run.log clause-tracer-trial
+      - name: Check RESULT=
+        run: python3 spikes/linux/keep/check-result.py run.log.clean
+      - name: Desktop file, host libs, clean removal
+        if: always()
+        run: spikes/linux/keep/ci-deb-checks.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: log-mint-${{ matrix.tag }}
           path: run.log*
 
   # (d) Unfrozen app straight from a venv on the runner VM.
