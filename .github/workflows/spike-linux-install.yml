@@ -71,7 +71,7 @@ jobs:
           name: log-vm-${{ matrix.os }}-dbus${{ matrix.dbus }}
           path: run.log*
 
-  # No session bus, as in the failing first run: which variable or fix changes the 25 s stall?
+  # No usable portal, as in the failing first run: which variable or fix changes the 25 s stall?
   nodbus-experiments:
     needs: build
     runs-on: ubuntu-24.04
@@ -79,10 +79,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {name: baseline, env: "X=1"}
-          - {name: gtk-use-portal-0, env: "GTK_USE_PORTAL=0"}
-          - {name: bus-address-dead, env: "DBUS_SESSION_BUS_ADDRESS=unix:path=/nonexistent/bus"}
-          - {name: no-xdg-runtime-dir, env: "-u XDG_RUNTIME_DIR"}
+          - {name: control-impatient, run: "SPIKE_PATIENT=0 clause-tracer-trial", expect: fail}
+          - {name: app-fix-patient-wait, run: "clause-tracer-trial", expect: pass}
+          - {name: import-display-into-systemd-user, run: "systemctl --user import-environment DISPLAY XAUTHORITY; SPIKE_PATIENT=0 clause-tracer-trial", expect: pass}
+          - {name: launcher-dbus-run-session, run: "SPIKE_PATIENT=0 dbus-run-session -- clause-tracer-trial", expect: pass}
     name: nodbus (${{ matrix.name }})
     steps:
       - uses: actions/checkout@v4
@@ -90,12 +90,21 @@ jobs:
         with:
           name: deb-u2404
       - run: sudo apt-get update && sudo apt-get install -y ./${{ env.DEB }} xvfb xauth dbus dbus-x11 iproute2
-      - run: spikes/linux/keep/ci-bus-diag.sh
+      - name: Why is the portal not coming up?
+        run: |
+          spikes/linux/keep/ci-bus-diag.sh
+          echo "--- systemctl --user cat xdg-desktop-portal.service"; systemctl --user cat xdg-desktop-portal.service
+          echo "--- user manager environment"; systemctl --user show-environment | grep -E "DISPLAY|WAYLAND|DBUS|XDG" || echo "(no DISPLAY/WAYLAND in the systemd user environment)"
       - name: Run
-        run: NO_DBUS=1 spikes/linux/keep/ci-run.sh run.log env ${{ matrix.env }} clause-tracer-trial
-      - run: grep -E "\[trial|run took" run.log
+        run: NO_DBUS=1 spikes/linux/keep/ci-run.sh run.log bash -c '${{ matrix.run }}'
+      - name: What the user journal says about the portal
         if: always()
+        run: |
+          grep -E "\[trial|run took" run.log || true
+          journalctl --user --no-pager -n 40 2>&1 | cut -c1-220 || true
+          systemctl --user status xdg-desktop-portal.service --no-pager 2>&1 | head -12 || true
       - run: python3 spikes/linux/keep/check-result.py run.log.clean
+        continue-on-error: ${{ matrix.expect == 'fail' }}
 
   # (c) Plain ubuntu:24.04 container: root, like the Fedora job.
   ubuntu-container:
