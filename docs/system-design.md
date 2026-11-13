@@ -4,7 +4,7 @@
 
 This is the design of the whole of version 1: the Python engine, the desktop shell around it, storage, packaging and release. It says how the parts fit, what each one promises, and which choices are still open. Nothing here is built yet. The code is an empty skeleton.
 
-**How to read it.** [`spec.md`](spec.md) says what the app does, and wins if this file disagrees with it. Each choice below that is hard to undo has a decision record (ADR) with its runner-up. The project owner accepted them all on 12 Nov 2026 (section 13). The evidence is in [the v1 design decisions report](../reports/Clause%20Tracer%20v1%20design%20decisions.md). How to test all of it is in [`testing-strategy.md`](testing-strategy.md). The rules the code must follow are in the [Constitution](../Constitution.md), cited here by ID.
+**How to read it.** [`spec.md`](spec.md) says what the app does, and wins if this file disagrees with it. Each choice below that is hard to undo has a decision record (ADR) with its runner-up. The project owner accepted them all on 12 Nov 2026 (section 13). The evidence is in [the v1 design decisions report](../reports/Clause%20Tracer%20v1%20design%20decisions.md). How to test all of it is in [`testing-strategy.md`](testing-strategy.md). The rules the code must follow are in the [Constitution](../Constitution.md), cited here by ID. The order in which it is built is section 15.
 
 ## 1. Requirements
 
@@ -90,7 +90,7 @@ The engine keeps the layout in [ADR 0004](adr/0004-code-layout.md): a pure `core
 | `adapters` | OpenRouter, Presidio, storage, the password store | Each outside tool |
 | `cli` | Commands, the step runner, wiring, the stdio server | The order of steps and how resume works |
 
-**Ports.** `core` defines five small `typing.Protocol` ports, and `cli` passes the real adapters in (P4, T2). [ADR 0005](adr/0005-engine-runner-shapes-and-ports.md) records why each is a port.
+**Ports.** `core` defines five small `typing.Protocol` ports, and `cli` passes the real adapters in (P4, T2). [ADR 0005](adr/0005-engine-runner-shapes-and-ports.md) records why each is a port. Section 3.4 lists their methods and the shapes `core` defines in stage 1.
 
 | Port | Real adapter | Fake used in tests |
 | --- | --- | --- |
@@ -119,6 +119,123 @@ The engine runs as a child process of the shell, started from the same frozen ex
 - **A heavy or stuck step cannot freeze the window.** Personal-data detection and PDF reading are slow and run outside the interface process.
 - **No port is opened** between shell and engine. They talk over stdin and stdout.
 - **Hostile files are contained.** File parsing runs in its own short-lived child process with time and memory limits (section 8.4).
+
+### 3.4 Core shapes for stage 1
+
+This is the list of shapes and ports `core` defines in build stage 1 (section 15.1). It replaces the sketch in [the architecture report](../reports/Clause%20Tracer%20pipeline%20architecture.md#core-holds-the-shapes-the-rules-and-only-the-ports-that-earn-them), which predates ADRs 0005 to 0016. The list stays at the level of names, fields and types. Each module's README records the exact shapes it takes and returns (S3).
+
+**Rules for every shape** ([ADR 0005](adr/0005-engine-runner-shapes-and-ports.md)):
+
+- Frozen, slotted standard-library dataclasses, with tuples instead of lists and no third-party imports (T1, B3).
+- Outside data is validated once, at the edge, with Pydantic `TypeAdapter` (D4, I9). AI reply schemas are Pydantic models in the module that owns the step, never in `core`.
+- Ids are opaque strings made at the edge. `core` never makes an id or reads the clock (T1).
+- Offsets are half-open, count code points, and point into `Document.text` (section 4.2).
+- Stored records carry a schema version (D6). Shapes grow by new fields, never renames (D5).
+- Nothing provider-specific: no zero-retention flags, cost-field names or model lists ([ADR 0015](adr/0015-provider-ready-seam.md)).
+- Every piece of wording the app stores is a `Wording`, so it cannot be stored without its written-by value ([ADR 0016](adr/0016-legal-positions-without-a-lawyer.md), Spec 6.2). Contract quotes are spans into the contract, not wording.
+
+**Check first.** ADR 0005 action item 2 is still open: confirm that Pydantic `TypeAdapter` validates straight into frozen, slotted dataclasses on the pinned version. Do this at the start of stage 1, before the shapes are written. If it fails, bring it to the owner.
+
+**Ids and enums**
+
+| Shape | Values | Why |
+| --- | --- | --- |
+| `ReviewId`, `PlaybookId`, `CustomerId`, `PositionId`, `ClauseId`, `SentenceId`, `RecordId` | `NewType` over `str` | Opaque ids. Clause and sentence ids come from the clause number and span, so they survive a re-read (section 5.1) |
+| `Level` | preferred, acceptable, walk-away, unsure | The four labels, and the missing level (Spec 2) |
+| `PositionType` | number, yes/no, words | Decides whether code or AI picks the label (Spec 5) |
+| `Direction` | lower is better, higher is better | Number positions (Spec 4.1) |
+| `Unit` | days, percent, months, rounds | Playbook units (Spec 4.1). Units as written in the contract stay text until Rule 6 converts them |
+| `Answer` | yes, conditional yes, no, unclear, missing | Yes/no extraction (Spec 6.1 step 6b) |
+| `ReasonCode` | One code per cause, at least: quote not confirmed, number not in quote, vague wording, other start point, business days, conditional yes, range, clauses disagree, hidden text, undecodable text, unloaded document, reply broken twice, `MATCH_UNCONFIRMED` | Rules return codes, never prose. Templates turn codes into words ([ADR 0012](adr/0012-missing-unsure-and-evidence-failures.md), I7) |
+| `WrittenBy` | code, AI, user | ADR 0016 |
+| `ReviewStatus` | draft, running, interrupted, failed, ready to check, done | Spec 6.3 |
+| `PrivacyMode` | on, off | Neutral. The adapter maps it to the provider's settings (ADR 0015) |
+| `FileKind` | PDF, Word, text, Markdown, pasted | Spec 9 file types |
+| `PlaceholderKind` | person, company, address, email, phone, ID, bank | Spec 4.2 |
+| `SegmentKind` | copy, entity, escape | The placeholder map (section 4.2) |
+| `HiddenReason` | One value per hidden-text check, such as low contrast, tiny font, off the page, invisible text, hidden layer, Word hidden run, comment, zero-width or bidi character | Each finding names its cause |
+| `PiiSource` | party details, pattern, rule, NER, user | Overlaps resolve by source ([ADR 0008](adr/0008-personal-data-detection-bundle.md)) |
+
+**Shapes**
+
+| Shape | Fields | Why |
+| --- | --- | --- |
+| `Wording` | `text: str, written_by: WrittenBy` | Every stored label reason, Missing text, question, message, rewrite and note (ADR 0016) |
+| `Span` | `start: int, end: int` | A place in the canonical text |
+| `PageBox` | `page: int, x0, top, x1, bottom: float` | PDF points, top-left origin, one coordinate system ([ADR 0007](adr/0007-document-reading-stack.md)) |
+| `Page` | `number: int, width: float, height: float` | Lets the last check before drawing test that a box is inside its page |
+| `Glyph` | `page: int, box: PageBox` | One drawn character |
+| `SourceFile` | `name: str, kind: FileKind, sha256: str, size: int` | Points at the raw bytes, which the store keeps unchanged (D1) |
+| `HiddenText` | `span: Span \| None, reason: HiddenReason, boxes: tuple[PageBox, ...]` | Flagged, never removed (D1). No span when the text is not in the canonical text, such as a hidden layer |
+| `TrackedChange` | `earlier: str, new: str, author: str, span: Span \| None` | Listed at the contract check. The accepted view is the contract (ADR 0012) |
+| `InputWarning` | `code: str, page: int \| None` | Undecodable pages, scanned pages in a mixed file, not English (Spec 9) |
+| `Document` | `schema_version: int, source: SourceFile, text: str, char_map: tuple[int \| None, ...], glyphs: tuple[Glyph, ...], pages: tuple[Page, ...], furniture: tuple[Span, ...], hidden: tuple[HiddenText, ...], undecodable: tuple[Span, ...], tracked_changes: tuple[TrackedChange, ...], warnings: tuple[InputWarning, ...]` | The one canonical text. `char_map` gives each character its glyph, or `None` for a character the app inserted. Word comments are hidden text (Spec 2), so they sit in `hidden` |
+| `MatchKey` | `text: str, to_canonical: tuple[int, ...]` | Folded copy with its index map (section 4.2) |
+| `Sentence` | `id: SentenceId, span: Span` | Stable ids such as `4.2.s3`, which the AI points at |
+| `Clause` | `id: ClauseId, number: str \| None, heading: str \| None, level: int, parent_id: ClauseId \| None, span: Span, numbering_source: str, sentences: tuple[Sentence, ...]` | One clause, or one paragraph when the contract has no numbers (Spec 6.1 step 2) |
+| `CrossReference` | `source: Span, target: ClauseId \| None` | An unresolved target is kept, with no target |
+| `DefinedTerm` | `term: str, definition: Span, uses: tuple[Span, ...]` | Evidence trail, and the privacy allow-list (section 4.1) |
+| `Override` | `clause_id: ClauseId, target: ClauseId \| None, overrides_target: bool, evidence: Span` | Direction matters. No target means it joins every trail (Spec 4.5) |
+| `OutsideDocument` | `name: str, evidence: Span` | Feeds the unloaded-document banner and Rule 10 |
+| `LinkMap` | `references: tuple[CrossReference, ...], terms: tuple[DefinedTerm, ...], overrides: tuple[Override, ...], outside_documents: tuple[OutsideDocument, ...], undefined_terms: tuple[Span, ...]` | What `links` returns. `cli` passes `terms` into `privacy` |
+| `Party` | `name: str, address: str \| None, yours: bool` | Typed party details: raw data, and the first privacy finder |
+| `PiiSuggestion` | `span: Span, kind: PlaceholderKind, source: PiiSource` | What the `PiiDetector` port and the code finders return |
+| `PlaceholderEntity` | `id: str, kind: PlaceholderKind, number: int, spans: tuple[Span, ...]` | One placeholder, such as Person 1, for every variant of one name |
+| `Segment` | `kind: SegmentKind, sent: Span, original: Span, entity_id: str \| None` | Tiles both texts, so a quote maps back exactly |
+| `PlaceholderText` | `text: str, entities: tuple[PlaceholderEntity, ...], segments: tuple[Segment, ...]` | The only contract text that leaves the computer |
+| `NumberRule` | `unit: Unit, direction: Direction, preferred_limit: Decimal, acceptable_limit: Decimal` | Rule 1 |
+| `YesNoRule` | `question: str, yes_level: Level, no_level: Level` | Rule 2. The missing level is always the "no" level |
+| `WordsRule` | `preferred: str, acceptable: str, walk_away: str` | One sentence per level |
+| `Position` | `id: PositionId, topic: str, type: PositionType, rule: NumberRule \| YesNoRule \| WordsRule, missing_level: Level, why_note: str \| None` | One playbook rule (Spec 4.1) |
+| `Playbook` | `id: PlaybookId, schema_version: int, name: str, side: str, customer_id: CustomerId \| None, positions: tuple[Position, ...], starter: bool` | Starters are read-only |
+| `PlaybookSnapshot` | `playbook: Playbook, taken_at: datetime, unedited_starter: bool` | Taken at "Send for review". Drives "by the example playbook" |
+| `Evidence` | `clause_id: ClauseId, sentence_ids: tuple[SentenceId, ...], quote: Span, placed: bool` | A confirmed quote. `placed` is false when it could not be marked on the page; the label stays (ADR 0012) |
+| `CheckedValue` | `position_id, clause_id, evidence: Evidence \| None, raw_value: str \| None, number: Decimal \| None, range_high: Decimal \| None, unit_as_written: str \| None, start_point_as_written: str \| None, answer: Answer \| None, condition: Span \| None, vague: bool, amount: Decimal \| None, total: Decimal \| None, reasons: tuple[ReasonCode, ...]` | One value after the quote check: the input of `label_number` and `label_yes_no` (Spec 6.1 step 6b) |
+| `JudgedLevel` | `position_id, clause_id, evidence: Evidence \| None, level: Level` | One AI judgement for a words position (step 9) |
+| `MatchFound`, `NothingFound`, `CallFailed` | `position_id, clause_ids`; `position_id, searches: tuple[str, ...]`; `code: str` | Separate types, so a failed call can never pass as "nothing found" (I4). `searches` fills the "Where it was searched" panel (ADR 0012) |
+| `ToolLabel` | `position_id, level: Level, reasons: tuple[ReasonCode, ...], evidence: tuple[Evidence, ...], written_by: WrittenBy` | `written_by` is AI only for words positions, which are drawn in pencil ([ADR 0002](adr/0002-label-look-split-stamp.md)) |
+| `NotCoveredClause` | `clause_id: ClauseId, clause_type: str` | A type from the closed list, plus the clause's own first line ([ADR 0011](adr/0011-who-writes-the-words.md)). Replaces the sketch's `NotCoveredSummary` |
+| `PromptMessage` | `role: str, text: str` | One rendered prompt part |
+| `AiRequest` | `step, prompt_id: str, prompt_version: int, inputs, messages: tuple[PromptMessage, ...], schema_id: str, json_schema, model: str, privacy_mode: PrivacyMode, max_tokens: int` | The accepted form (section 6.3). It carries the structured inputs as well as the rendered prompt (ADR 0015) |
+| `Usage` | `input_tokens, cached_input_tokens, output_tokens: int` | Cached tokens are read on every call ([ADR 0010](adr/0010-starting-models.md)) |
+| `AiReply` | `raw_body: bytes, text: str, model_used: str, provider_used: str, usage: Usage, generation_id: str` | The exact reply, saved before it is parsed (D8) |
+| `AiRecord` | `record_id, review_id, step: str, attempt: int, request_sha256: str, request: AiRequest, reply: AiReply \| None, error_code: str \| None, started_at, finished_at: datetime` | Raw and append-only, failed calls too (D1, D8). Its hash keys the cache and the replay fake |
+| `Settings` | `default_model: str, step_models: tuple[tuple[str, str], ...], private_mode_default: bool, send_why_notes: bool, auto_delete_days: int, data_dir: str, log_level: str` | Loaded once at start-up and passed in (I13). Spec 14.3 |
+
+**Errors.** `ClauseTracerError(code, context)` and its tree (section 6.4). The list in [the report's errors section](../reports/Clause%20Tracer%20pipeline%20architecture.md#errors-carry-codes-and-only-the-edge-turns-them-into-words) is the starting list.
+
+**Ports** (section 3.1). The method lists are drafted against the fakes in stage 1. Each real adapter must later pass the same contract suite ([`testing-strategy.md`](testing-strategy.md) section 3).
+
+| Port | Methods | Notes |
+| --- | --- | --- |
+| `AiClient` | `complete(request: AiRequest) -> AiReply` | Raises model-service errors. Network retries live in the adapter; the one reask lives in the step (ADR 0005) |
+| `PiiDetector` | `find(text: str) -> tuple[PiiSuggestion, ...]` | Behind the code finders (ADR 0008) |
+| `ReviewStore` | Save and load raw records, derived records by cache key, and user state; list reviews; delete a review (idempotent, I8); purge expired reviews given `now` | Hides the encrypted store ([ADR 0006](adr/0006-encrypted-storage-and-secrets.md)) |
+| `SecretStore` | Get, put and delete a secret under a provider id | Raises `SecretStoreUnavailableError`. Never plain text (ADR 0006, ADR 0015) |
+| `Clock` | `now() -> datetime` | Auto-delete, timestamps and retry pauses stay testable (T2) |
+
+The replay fake lives in `core`'s test support: keyed by a hash of the exact request, it raises `UnrecordedRequest` on a miss and reports `unused_keys()` ([ADR 0013](adr/0013-test-layers-and-release-gates.md), T12).
+
+**Left to later stages.** These shapes are added to `core`, by new fields or new shapes (D5), in the stage that first needs them:
+
+| Shape | Stage | Why then |
+| --- | --- | --- |
+| User state: your label, the decision, notes, ticks, tone; `Customer` | 6 | Stored apart from derived data and keyed by stable ids (section 5.1), so it is built with the store |
+| Storage rows, the key table, migrations | 6 | Inside the storage adapter (ADR 0006) |
+| `StepSpec`, the cache key, runner events, the cancel token | 6 | The runner lives in `cli` (ADR 0005) |
+| Explanation parts: reasons, Missing text, unsure readings and the question | 8 | Their form follows the templates and fenced slots built there. Every text field is a `Wording` |
+| Keywords on `Position`, for the keyword search | 8 | Needed only by the match searches |
+| The outbound message and its items | 8, then 11 | Templates in stage 8, "Rewrite with AI" in stage 11 (ADR 0011) |
+| `Suggestion`; the report's contents | 11 | Built with `writing` and the report |
+| AI reply schemas | 8, 9, 11 | Pydantic models in the owning module, never in `core` (ADR 0005) |
+| Engine protocol requests and events; theme and text size | 12 | `cli` and the shell ([ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md)) |
+
+**Not yet decided** (bring each to the owner before stage 1 needs it):
+
+- **How JSON-like values sit in frozen shapes.** ADR 0015 says `AiRequest` carries "typed inputs" but not their Python type. The same is open for `json_schema`: each step's own input dataclass, or a read-only mapping.
+- **Whether `Usage` carries a cost amount.** ADR 0015 bans provider cost-field names in `core`, and section 11 puts cost fields in the adapter. Yet the runner's `CallFinished(cost, tokens)` event (section 6.1), the spend ledger ([`testing-strategy.md`](testing-strategy.md) section 7.5) and the per-review cost of Spec 9 all need the amount.
+- **Whether playbook text needs a written-by value.** ADR 0016 says "every stored text". Spec 6.2 names "labels, reasons, messages, rewrites". The list above applies `Wording` to review output and notes, not to playbook names, topics or level text.
+- **How a cancel reaches per-clause calls.** Section 8.3 checks a cancel token between per-clause calls, but those calls run inside `checking`. Either `checking` takes a cancel check, which needs a small shape in `core`, or the runner makes the per-clause calls itself.
 
 ## 4. Data flow
 
@@ -400,7 +517,165 @@ The owner accepted ADRs 0005 to 0015 on 12 Nov 2026, and ADR 0016 on 13 Nov 2026
 - Real-world installer checks (13 Nov 2026, new ADR 0009 amendment). **Closed:** the real `apt`/`.deb` install on Ubuntu 22.04 and 24.04 (correct `Depends:` names for each, clean removal), the real `dnf`/tar.gz install on Fedora, and a real Windows installer (Inno Setup, silent install, run, silent uninstall, no admin rights needed). The Ubuntu window puzzle is closed: the window was slow to start, not missing, and the app now waits for its own start-up events (ADR 0009, 13 Nov 2026). Linux Mint 22 and 21.3 pass in containers. Ubuntu 26.04 passes too, and the app runs under a headless Wayland compositor on Ubuntu and Fedora (13 Nov 2026, same ADR amendment). **Still untried:** a real Ubuntu or Mint desktop session.
 - Whether to register a trade mark later. How FSL would be enforced: no court has ruled on it, and the free routes do little (ADR 0014 amendment). ADR 0016 (accepted 13 Nov 2026) sets the working position: a polite message, then a GitHub DMCA notice for a plain copy only, never for a "competing use" dispute. Then stop.
 - Presidio's speed on a real 60,000-character contract on an ordinary laptop.
+- The smaller build questions marked "Not yet decided" in sections 3.4 and 15.
 
 ## 14. Changes this work made to earlier documents
 
 The research found facts in the earlier architecture report that are out of date or wrong, and rules worth adding to the Constitution. Each edit, with its reason and source, is listed in [the edit record](../reports/Edits%20to%20source%20documents%202026-11-11.md).
+
+## 15. Build stages
+
+This section is the home of the build plan. Spec 9 sets its shape: a Python command-line tool first, then wrapped as a desktop app. The order follows [the architecture report](../reports/Clause%20Tracer%20pipeline%20architecture.md#twelve-build-stages-lead-from-skeleton-to-installer): pure parts first, then the encrypted spine, then AI steps over a fake, then real calls, then the shell. **The report's stage table is historical.** It predates ADRs 0005 to 0016, and where it differs from this section, this section wins.
+
+The stage numbers and the module of each stage match the report's, so "build stage 12" in [ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md) and the gap table in [`testing-strategy.md`](testing-strategy.md) section 13 still point at the right stage.
+
+**Every stage:**
+
+- leaves `scripts/check.sh` passing;
+- updates its module's README with the shapes it takes and returns, in the same change (S3);
+- adds the tests that [`testing-strategy.md`](testing-strategy.md) asks for. The test pointers below name its sections and do not restate the tests;
+- stops for the owner at each "Not yet decided" point, and before any paid run ([`testing-strategy.md`](testing-strategy.md) section 7.5).
+
+| Stage | Module | In short |
+| --- | --- | --- |
+| 1 | `core` | Shapes, ports, errors, fakes, label rules, scans, the last check before drawing |
+| 2 | `ingest` (text) | Text, Markdown and pasted text; clauses, sentences, match keys |
+| 3 | `links` | Cross-references, defined terms, overrides, outside documents |
+| 4 | `privacy` | Code finders, placeholders, the segment map |
+| 5 | `ingest` (Word, PDF) | Word and PDF reading, hidden text, hostile-file limits |
+| 6 | `adapters/storage`, `adapters/keyring`, `cli` | Encrypted store, secrets, the runner, the first commands |
+| 7 | `adapters/presidio` | Presidio with its pinned config |
+| 8 | `checking`, message templates in `outputs` | Every AI step over the replay fake |
+| 9 | `adapters/openrouter` | The real AI client, the spend ledger, the first real run |
+| 10 | The paid test set | Real runs on the test set; results to the owner |
+| 11 | `writing`, `outputs` | Rewrites, "Rewrite with AI" for the message, the report |
+| 12 | Engine protocol, shell, packaging | `serve --stdio`, the pywebview shell, installers, release checks |
+
+### 15.1 Stage 1: `core`
+
+- **Builds.** The ids, enums, shapes and five ports of section 3.4; the error tree (section 6.4); the fakes, including the replay fake; the label rules 1 to 10 as pure functions, with `MATCH_UNCONFIRMED`, the unplaceable-quote case and undecodable text under Rule 9; unit conversion (Rule 6); the auto-delete date rules; the cost estimate; the output scans; the last check before drawing; a pure hash of the exact request.
+- **Governed by.** [ADR 0004](adr/0004-code-layout.md), [ADR 0005](adr/0005-engine-runner-shapes-and-ports.md), [ADR 0012](adr/0012-missing-unsure-and-evidence-failures.md), [ADR 0013](adr/0013-test-layers-and-release-gates.md), [ADR 0015](adr/0015-provider-ready-seam.md), [ADR 0016](adr/0016-legal-positions-without-a-lawyer.md).
+- **Start with** ADR 0005 action item 2 (section 3.4).
+- **Done when** importing `core` loads only the standard library; the label-rule tables cover every row of the Spec 14.5 sample; no shape has a provider-specific field; and `src/clause_tracer/core/README.md` records the shapes and ports (ADR 0005 action item 4). The owner starts writing the ten test contracts now, because they take longest.
+- **Tests, in the testing strategy.** Section 4 (the `core` row), section 5 (invariant 7), section 6.1, sections 10 and 14.
+- **Not yet decided:** the four points at the end of section 3.4.
+
+### 15.2 Stage 2: `ingest` for text, Markdown and pasted text
+
+- **Builds.** Strict UTF-8 reading (`NotUtf8Error`); Markdown shown as plain characters; the size limits `[Assumption]` (Spec 9); the clause splitter with its stack of open levels and continuity check, falling back to paragraphs; sentence ids with NUPunkt, tolerant of missed breaks; match keys with index maps; the not-English warning (Spec 9).
+- **Governed by.** ADR 0004, [ADR 0007](adr/0007-document-reading-stack.md) (NUPunkt).
+- **Done when** `python -m clause_tracer.ingest` reads the sample contract and prints its clauses and sentences, and the golden files match.
+- **Tests, in the testing strategy.** Section 4 (the `ingest` row), section 5 (invariants 2 and 4), section 3 (golden files).
+- **Not yet decided:** how the app detects that a contract is mostly not English. Spec 9 asks for the warning; no ADR names a method or a library.
+
+### 15.3 Stage 3: `links`
+
+- **Builds.** Cross-references, including ranges and "this Clause"; defined terms and terms used but never defined; overrides with their direction; references to documents that are not loaded. Every edge carries its evidence span. Unresolved targets are kept.
+- **Governed by.** ADR 0004. The run order puts `links` before `privacy` (section 4.1).
+- **Done when** `LinkMap` for the sample shows the Master Agreement reference and the defined roles that `privacy` will keep.
+- **Tests, in the testing strategy.** Section 4 (the `links` row).
+
+### 15.4 Stage 4: `privacy`, code finders and placeholders
+
+- **Builds.** The code layer that carries the promise: typed party details and their variants, checksum patterns, company-suffix and address rules; the allow-list from `LinkMap.terms`; placeholder numbering by kind (Spec 4.2); escaping; the segment map with `copy`, `entity` and `escape`; no entity across a sentence boundary; name variants sharing one placeholder; restore. Tested with the fake `PiiDetector`.
+- **Governed by.** [ADR 0008](adr/0008-personal-data-detection-bundle.md), ADR 0004.
+- **Done when** anonymise then restore gives the original text on the sample and on generated text, and every Spec 14.5 name and address is replaced by code alone.
+- **Tests, in the testing strategy.** Section 4 (the `privacy` row), section 5 (invariant 3), section 14.
+
+### 15.5 Stage 5: `ingest` for Word and PDF
+
+- **Builds.** Word: the zip read directly, every part through one hardened `lxml` parser, size caps before reading, external relationships never followed, list numbers rebuilt, hidden runs, comments, and tracked changes read as accepted, each one listed with its earlier and new wording and author; `.doc` detected by its bytes. PDF: `pypdfium2` alone through its raw API, with the canonical text built from glyphs, furniture, scanned pages, the undecodable count and its 1-in-20 page warning `[Assumption]`, the hidden-text checks, hidden layers through `pikepdf`, and one coordinate function. Then the Unicode checks. Hostile-file limits, with parsing in a child process with time and memory limits (section 8.4).
+- **Governed by.** ADR 0007 and its amendments, ADR 0012 and its amendment, [ADR 0001](adr/0001-show-contracts-as-original-pdf-pages.md).
+- **Changed from the report.** No cross-check between two PDF libraries at run time: `pdfplumber` is a test-only dependency (ADR 0007).
+- **Done when** the generated test PDFs and Word files give their known glyph positions and findings, every hostile fixture ends as a named input error inside its limits, and the highlight pictures match.
+- **Tests, in the testing strategy.** Section 4 (the `ingest` row), section 5 (invariants 1 and 6), section 8 (hostile files, hidden text and Unicode tricks). The Windows CI job joins at this stage or stage 6 (section 13 there, and section 10 here).
+- **Not yet decided:** which module starts the child process for parsing, since side effects belong at the edge (T2). And whether `ingest` renders pages itself for the contrast check, or `cli` passes page images in. ADR 0005 accepts no `PageRenderer` port.
+
+### 15.6 Stage 6: the encrypted store, secrets, the runner and the first commands
+
+- **Builds.**
+  - **Store:** `sqlcipher3` with a key per review, associated data, the pragmas, numbered migrations with a backup first, and raw, derived and user-state records. Every stored wording keeps its written-by value (ADR 0016).
+  - **Secrets:** `keyring` with its backend pinned per system, a passphrase fallback, and credentials under a provider id (ADR 0015).
+  - **Auto-delete:** runs at start-up and while the engine runs. "Delete all reviews" also clears temporary files and logs (Spec 8.3).
+  - **Runner:** the hand-written runner in `cli`, with `StepSpec`, cache keys, the call and parse split, statuses, cancel and events.
+  - **Commands:** settings loaded once, exit codes, logs that carry no contract text, and the `review` and `resume` commands (section 6.2).
+  - **Playbooks:** reading the starter playbook and playbook files with a strict format and size limits, and exporting without the customer link or "why this matters" notes (Spec 4.1, 8.4).
+- **Governed by.** [ADR 0006](adr/0006-encrypted-storage-and-secrets.md) and its amendments, ADR 0005, ADR 0015, ADR 0016.
+- **Changed from the report.** The storage choice is made: `sqlcipher3` in a hybrid design, not "after the A/B decision".
+- **Done when** a review of the sample runs through the steps built so far, is saved encrypted, can be interrupted and resumed with no step run twice, and is deleted on schedule by a fixed clock.
+- **Tests, in the testing strategy.** Section 4 (the `adapters` and `cli` rows), section 3 (the contract suite against each fake and real adapter), section 8 (encryption at rest, deleting a review, auto-delete, storage settings, leaks in logs).
+- **Not yet decided:**
+  - **The playbook file format**, and which module reads it. Spec 8.4 asks only for a strict format with size limits, and ADR 0004 names no module for it.
+  - **How the command-line tool does the privacy check.** Spec 6.1 step 4 needs the user to confirm before anything is sent, and the `review` command in section 6.2 has no step for it. Settle this before stage 9 sends anything.
+  - **Argon2id or scrypt** for the passphrase, if the pinned `cryptography` lacks Argon2id (ADR 0006 action item 2).
+
+### 15.7 Stage 7: the Presidio adapter
+
+- **Builds.** Presidio with the adapter's own pinned config, `en_core_web_md` with ORGANIZATION on, loaded only in the step that needs it; a test of the loaded engine, model and recognisers; the planted-entity set.
+- **Governed by.** ADR 0008.
+- **Changed from the report.** The bundle is decided: no recall race between bundling options. The medium model is measured on the planted-entity set, and a larger model or GLiNER comes in only under ADR 0008's switch rule.
+- **Done when** Presidio plus the code finders catch every planted name, company and address, and its speed on a 60,000-character contract is measured (section 13).
+- **Tests, in the testing strategy.** Section 1 (planted entities), section 4 (the `adapters` row).
+
+### 15.8 Stage 8: `checking` and the message templates
+
+- **Builds.** The quote check and number parser (pure). Then, over the replay fake: extraction with sentence-id forms; matching with the four searches, the pair check and `MATCH_UNCONFIRMED`; the "searched, nothing found" list; judging words positions; reasons in fenced slots; clause types from the closed list for not-covered clauses; code templates for leads, Missing text and unsure questions; the template fallback after a failed scan. Every piece of AI wording is stored as written by AI and shown with the fixed AI line. Prompts are versioned files, never edited once released. The code-built message from templates in `outputs`, moved here from stage 11 because it needs no AI.
+- **Governed by.** [ADR 0011](adr/0011-who-writes-the-words.md), ADR 0012, ADR 0005, ADR 0013, ADR 0016.
+- **Changed from the report.** Not-covered clauses get a clause type, not an AI summary (ADR 0011).
+- **Done when** the end-to-end replay test on the sample gives the Spec 14.5 labels.
+- **Tests, in the testing strategy.** Section 4 (the `checking` and `outputs` rows), sections 6.2 and 6.3, section 3 (end-to-end replay).
+
+### 15.9 Stage 9: the OpenRouter adapter and the first real run
+
+- **Builds.**
+  - **Requests:** the request builder with a strict `response_format` schema, `require_parameters`, and zero-retention routing in private mode. It never sends `temperature`, and Response Healing stays off.
+  - **Calls:** `httpx2` with timeouts and three tries with jitter and `Retry-After`, and no body or header ever logged.
+  - **Other calls:** the cached-token count on every call, with a warning when caching misses; the key check, credit balance and model list (Spec 8.1).
+  - **Spend ledger:** a cap per run and a $10 total, built and tested with the replay client before any key is used.
+- **Governed by.** ADR 0005 and its amendment, ADR 0010 and its amendments, ADR 0013 and its amendment, ADR 0015.
+- **Changed from the report.** No local stub server. The adapter is tested against saved bodies through `httpx2.MockTransport`, not `respx` (ADR 0005 and ADR 0013 amendments).
+- **Done when** the contract suite passes on saved bodies, and the first real run on the sample contract is made on the cheap model, only after the owner says go ([`testing-strategy.md`](testing-strategy.md) section 7.5, step 1).
+- **Tests, in the testing strategy.** Section 6.4, section 8 (private mode, leaks in requests).
+- **Not yet decided:** whether the app checks the provider used against OpenRouter's zero-retention list. It is a new kind of request, so Spec 8.1 must list it if the owner accepts it (section 9.3, ADR 0010 action item 3).
+
+### 15.10 Stage 10: the paid test set
+
+- **Builds.** The ten contracts and answer keys in a private repository; injected variants; built absence cases; the planted-entity set; the paid runner with the `paid` marker and a report script; the hard gates and reported rates.
+- **Governed by.** ADR 0013 and its amendments, ADR 0010, [ADR 0014](adr/0014-protection-and-release-integrity.md).
+- **Changed from the report.** The budget sets the model plan: paid testing runs on Claude Haiku 5.5, and the default Sonnet-class model gets one pass of the ten contracts at most ([`testing-strategy.md`](testing-strategy.md) section 7.5). Comparisons run only where the budget allows.
+- **Done when** a first baseline is recorded and the results are brought to the owner: real cost per review, input limits (Spec 13), the unsure share, the undecodable-character level, clause-type accuracy and the disagreement rate.
+- **Tests, in the testing strategy.** Section 7.
+
+### 15.11 Stage 11: `writing` and the rest of `outputs`
+
+- **Builds.**
+  - **Rewrite:** `writing.rewrite_clause` with the `{old, new}` edit form, applied by code. Known names are replaced and Presidio checks the new text (Spec 4.6). `cli` then passes it to `checking`, which re-checks every affected position (ADR 0004). One suggestion per clause.
+  - **Message:** the optional "Rewrite with AI", shown before and after, with every quote, number and name re-checked (ADR 0011 and its amendment). Code fills in names.
+  - **Report:** the PDF built with ReportLab, all text plain. When it contains AI wording, it carries the fixed AI line on those pages and the written-by mark in its metadata, using the IPTC "digital source type" terms (ADR 0016).
+- **Governed by.** ADR 0004, ADR 0011, ADR 0007 (ReportLab), ADR 0016.
+- **Done when** a rewrite of a sample clause is re-checked against every position it affects, and a report with AI wording carries the metadata mark.
+- **Tests, in the testing strategy.** Section 4 (the `writing` and `outputs` rows). ADR 0016 action item 3 asks for a test of the written-by value and of the metadata mark.
+
+### 15.12 Stage 12: the engine protocol, the shell and packaging
+
+- **Builds.**
+  - **Engine protocol:** `serve --stdio` with `protocol_version` and every request and event of section 6.1.
+  - **Shell:** the pywebview shell, in its own top-level folder, reusing the prototype pages. It also adds the screens the command line lacks, such as import preview, error details and the update check.
+  - **Packaging:** PyInstaller one-folder, the Inno Setup installer, the `.deb` and the `tar.gz`.
+  - **Licences:** the third-party licences page, a build test that `pikepdf` and PyGObject ship unchanged, and the `pikepdf` source archive on each release.
+  - **Release chain:** signed `SHA256SUMS`, build attestations, an SBOM and a reproducible Linux build.
+- **Shell rules from the trial builds** (ADR 0009, amendments of 12 and 13 Nov 2026):
+  - Load pages from a `file://` address, never a bare path, with the built-in server off and `ALLOW_FILE_URLS` off. Load them from `_internal/`.
+  - Refuse any navigation away from the app's own files, with a test (Spec 8.4).
+  - Use the page policy `default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'`. Pages get all data through the Python bridge.
+  - Python saves theme and text size.
+  - Before the first pywebview call, wait for the window's `shown` and `loaded` events with the app's own longer timeout.
+  - Keep the whole GTK stack out of the bundle, and undo PyInstaller's environment in the app's first lines.
+  - Turn off developer tools and the debugging port in release builds.
+  - Pin the Windows runner to `windows-2025`. The installer asks for no admin rights.
+  - Build the `.deb` on the oldest supported system, with the matching `Depends:` line.
+- **Governed by.** ADR 0009 and its amendments, ADR 0014, ADR 0016, ADR 0004.
+- **Done when** a full review runs from the installer on Linux and Windows (Spec 11). The release checks run as well: the app with and without a session bus, under Wayland and under X11, and the package installed on the newest Ubuntu as well as the oldest.
+- **Before the first public release:** the steps in Spec 10, including the reply from the AI Act Service Desk.
+- **Tests, in the testing strategy.** Section 9, section 8 (the app window, no telemetry, dependencies), section 12 (before a release).
+- **Not yet decided:** the oldest supported Linux system. ADR 0009 says Ubuntu 22.04 and Mint 21 would need an older build machine than 24.04, and no document says whether they are supported.

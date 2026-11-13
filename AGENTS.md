@@ -29,7 +29,7 @@ The design is done. The code is an empty skeleton: every module exists, runs alo
 
 Two design docs sit on top of the reports. Read both before planning a build stage: [docs/system-design.md](docs/system-design.md) says how the parts fit together, and [docs/testing-strategy.md](docs/testing-strategy.md) says which tests each stage needs. Both are accepted, and so are ADRs 0005 to 0016. Check an ADR's status line: a later one may be only proposed, which means a recommendation, not a decision. Before you build on a proposed one, ask the user whether it is accepted.
 
-The build plan in Spec section 9 is a Python command-line tool first, which is then wrapped as a desktop app. Spec section 13 lists what is decided and what is still open. Bring open items to the user as a question. Don't pick one yourself.
+Spec section 9 builds a Python command-line tool first, then wraps it as a desktop app. The build plan, with its twelve numbered stages, is [docs/system-design.md](docs/system-design.md) section 15; the stage table in the architecture report is historical. Spec section 13 lists what is decided and what is still open. Bring open items to the user as a question. Don't pick one yourself.
 
 ## Before you write code
 
