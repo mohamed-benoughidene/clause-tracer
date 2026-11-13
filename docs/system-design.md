@@ -27,7 +27,7 @@ Clause Tracer checks one contract against the user's own playbook and shows the 
 | Cost per review | `[Assumption]` about $0.28 for a 10,000-word contract and $0.82 for 50,000 words on a Sonnet-class model; a few cents on a cheap model | [ADR 0010](adr/0010-starting-models.md) |
 | Input size | `[Assumption]` files up to 20 MB and 50,000 words (about 95,000 tokens at the 1.9 tokens per word the 13 Nov 2026 probe measured, [ADR 0010](adr/0010-starting-models.md); about 2,500 sentences) | Spec 9 |
 | Offline | Saved reviews open offline. A draft can be prepared offline. Only AI steps need the internet | Spec 9 |
-| Systems | Linux and Windows 10/11. Mac later | Spec 9 |
+| Systems | Linux (Ubuntu 24.04 and later, Mint 22 and later, Debian 13, Fedora by archive) and Windows 10/11. Mac later | Spec 9 |
 | Download | As small as the personal-data model allows. `[Assumption]` roughly 150 to 250 MB installed with the medium model; not yet measured | [ADR 0008](adr/0008-personal-data-detection-bundle.md) |
 | Resume | An interrupted review continues from the first unfinished step. Finished AI calls are never paid for twice | Spec 6.3 |
 | Upkeep | One person can review every line that ships. That means Python, plus the HTML, CSS and JavaScript of the existing prototype | Constraint below |
@@ -249,13 +249,15 @@ The order is fixed and code runs it (P3). The AI never chooses a step and has no
 | Map links | 5 | `links` | No | Nothing |
 | Find personal data | 3 | `privacy` + Presidio | No | Nothing |
 | Privacy check | 4 | The user | No | Nothing |
-| Match, extract | 6a, 6b | `checking` | Yes | Placeholder text, position topics and types |
+| Match, extract | 6a, 6b | `checking` | Yes | Placeholder text, position topics and types, with known names replaced |
 | Quote check | 7 | `checking` (code) | No | Nothing (one retry call on a failed quote) |
 | Pick labels | 8 | `core` | No | Nothing |
-| Judge, explain, sort not-covered parts | 9–11 | `checking` | Yes | Placeholder text, level text, fixed labels |
-| Rewrite (on request) | 12 | `writing`, then `checking` | Yes | One clause as placeholder text |
+| Judge, explain, sort not-covered parts | 9–11 | `checking` | Yes | Placeholder text, level text (known names replaced), fixed labels |
+| Rewrite (on request) | 12 | `writing`, then `checking` | Yes | One clause as placeholder text, and the instruction with known names replaced |
 | Message | 13 | `outputs` | No, unless the user asks for a rewrite | Nothing by default ([ADR 0011](adr/0011-who-writes-the-words.md)) |
 | Report | 14 | `outputs` | No | Nothing |
+
+Known names are the confirmed personal items of the review and the typed party details. Code replaces them with their placeholders in position text and in rewrite instructions too, before anything is sent, and puts them back in what comes back (decided 13 Nov 2026, [ADR 0008](adr/0008-personal-data-detection-bundle.md)). The privacy canary test covers both fields ([`testing-strategy.md`](testing-strategy.md) section 8).
 
 `links` runs before `privacy` so the privacy allow-list can reuse the defined terms ("the Contractor"). The Spec's step numbers do not change. `cli` passes `LinkMap.terms`, a `core` shape, into `privacy`.
 
@@ -453,7 +455,7 @@ The source is public, so nothing technical stops a copy, and hiding the shipped 
 | --- | --- | --- |
 | Freeze the Python engine and shell | PyInstaller, one-folder build (one-file builds unpack on every start) | [ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md) |
 | Windows installer | Inno Setup, scripted on GitHub's Windows runner, with the WebView2 bootstrapper | ADR 0009 |
-| Linux package | A `.deb` on GitHub Releases, with WebKitGTK as a system dependency, plus a plain `tar.gz` for Fedora. A trial build confirmed it on 13 Nov 2026; release builds are made on the oldest supported system | ADR 0009 |
+| Linux package | A `.deb` on GitHub Releases, with WebKitGTK as a system dependency, plus a plain `tar.gz` for Fedora. A trial build confirmed it on 13 Nov 2026. One Linux build, made on Ubuntu 24.04, with one `Depends:` line (the `t64` names) | ADR 0009 |
 | Personal-data model | Bundled in the installer, never downloaded on first run | [ADR 0008](adr/0008-personal-data-detection-bundle.md) |
 | Signing | Unsigned at first, with published checksums. An individual certificate later | ADR 0009 |
 | Integrity | Signed `SHA256SUMS`, GitHub build attestations, a reproducible Linux build | [ADR 0014](adr/0014-protection-and-release-integrity.md) |
@@ -521,9 +523,7 @@ The owner accepted ADRs 0005 to 0015 on 12 Nov 2026, and ADR 0016 on 13 Nov 2026
 - The running screen's first stage is labelled "Reading the pages (step 5)" (Spec 14.1 row 6), but step 5 (`links`) already ran before the privacy check (section 4.1). What that stage shows is not decided.
 - How page pictures reach the window. The page policy has no `img-src data:`, pages cannot fetch files, and writing pictures to disk would break "everything saved is encrypted". Needed before build stage 12.
 - How CI drives the Windows window. ADR 0009 plans Playwright over the debugging port, which release builds turn off. A separate test build or another driver is needed.
-- Whether the update check only opens the release page or asks GitHub. Spec 8.1 says it opens the page; the About copy "You have the latest version" (`ux-copy.md`) needs a request.
-- Whether names typed into a playbook position or a rewrite instruction are replaced before they are sent to the AI. Spec 6.2 says known names are replaced only in notes, and step 12 sends the rewrite instruction as typed.
-- The oldest supported Windows version. The oldest supported Linux systems (Ubuntu 22.04 and Mint 21) are in section 15.
+- The oldest supported Windows version. The oldest supported Linux is decided: Ubuntu 24.04 (13 Nov 2026, ADR 0009).
 - The smaller build questions marked "Not yet decided" in sections 3.4 and 15.
 
 ## 14. Changes this work made to earlier documents
@@ -656,7 +656,7 @@ The stage numbers and the module of each stage match the report's, so "build sta
 ### 15.11 Stage 11: `writing` and the rest of `outputs`
 
 - **Builds.**
-  - **Rewrite:** `writing.rewrite_clause` with the `{old, new}` edit form, applied by code. Known names are replaced and Presidio checks the new text (Spec 4.6). `cli` then passes it to `checking`, which re-checks every affected position (ADR 0004). One suggestion per clause.
+  - **Rewrite:** `writing.rewrite_clause` with the `{old, new}` edit form, applied by code. Known names are replaced in the clause and in the instruction, and Presidio checks the new text (Spec 4.6). `cli` then passes it to `checking`, which re-checks every affected position (ADR 0004). One suggestion per clause.
   - **Message:** the optional "Rewrite with AI", shown before and after, with every quote, number and name re-checked (ADR 0011 and its amendment). Code fills in names.
   - **Report:** the PDF built with ReportLab, all text plain. When it contains AI wording, it carries the fixed AI line on those pages and the written-by mark in its metadata, using the IPTC "digital source type" terms (ADR 0016).
 - **Governed by.** ADR 0004, ADR 0011, ADR 0007 (ReportLab), ADR 0016.
@@ -680,9 +680,9 @@ The stage numbers and the module of each stage match the report's, so "build sta
   - Keep the whole GTK stack out of the bundle, and undo PyInstaller's environment in the app's first lines.
   - Turn off developer tools and the debugging port in release builds.
   - Pin the Windows runner to `windows-2025`. The installer asks for no admin rights.
-  - Build the `.deb` on the oldest supported system, with the matching `Depends:` line.
+  - Build the `.deb` on Ubuntu 24.04, with the one `Depends:` line (the `t64` names). Ubuntu 22.04 and Mint 21 are not supported (13 Nov 2026).
 - **Governed by.** ADR 0009 and its amendments, ADR 0014, ADR 0016, ADR 0004.
-- **Done when** a full review runs from the installer on Linux and Windows (Spec 11). The release checks run as well: the app with and without a session bus, under Wayland and under X11, and the package installed on the newest Ubuntu as well as the oldest.
+- **Done when** a full review runs from the installer on Linux and Windows (Spec 11). The release checks run as well: the app with and without a session bus, under Wayland and under X11, and the package installed on Ubuntu 24.04 and on the newest Ubuntu.
 - **Before the first public release:** the steps in Spec 10, including the reply from the AI Act Service Desk.
 - **Tests, in the testing strategy.** Section 9, section 8 (the app window, no telemetry, dependencies), section 12 (before a release).
-- **Not yet decided:** the oldest supported Linux system. ADR 0009 says Ubuntu 22.04 and Mint 21 would need an older build machine than 24.04, and no document says whether they are supported.
+- **Decided 13 Nov 2026:** version 1 supports Ubuntu 24.04 and later, Linux Mint 22 and later, Debian 13, and Fedora through the plain archive. There is one Linux build ([ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md) amendment). The oldest supported Windows version is still open.

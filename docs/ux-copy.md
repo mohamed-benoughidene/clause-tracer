@@ -413,7 +413,7 @@ The eleven starter positions and their "why this matters" notes are in Spec 7; t
 | Advanced: models | Model choice: One for every step · One per step · Model: Claude Sonnet 5.5 (recommended) · Steps: Match · Extract · Judge words positions · Explain · Sort not-covered parts · Rewrite · Rewrite message · Jev is only offered for match and judge. In private mode, only models that don't keep your contract are offered. |
 | Model can't do step (new) | [Model] can't do this step. Pick another model. |
 | Untested model (new) | This model isn't tested with Clause Tracer yet. Labels may be less reliable. |
-| About | Clause Tracer 1.0.0 · Functional Source License · Not legal advice. · [Check for updates] · You have the latest version. · (new) Version [n] is out. [Open release page (opens in your browser)] |
+| About | Clause Tracer 1.0.0 · Functional Source License · Not legal advice. · [Check for updates (opens the release page in your browser)] · This is version 1.0.0. The button opens the release page in your browser. |
 
 ### 4.15 Help (`help.html`)
 
@@ -423,7 +423,7 @@ The eleven starter positions and their "why this matters" notes are in Spec 7; t
 | Words used in this app | There are four labels, plus grey for parts no position covers. Each is shown as a stamp. · Preferred, Acceptable, Walk-away, Unsure: the same definitions as the review's “?” ·  Not covered: No position covers this part. |
 | Legal terms in plain English | Indemnity, Limitation of liability, Governing law, Termination, Confidential information, Intellectual property (IP), Work made for hire, Non-compete, Warranty, Force majeure (definitions as in the prototype) |
 | Key guide | Get an OpenRouter key · Create an account, add credit, turn off Safety Retention, create a key. |
-| What gets sent | Only your positions and the contract go to OpenRouter, with names swapped for placeholders like “Person 1”. Never playbook names, customers, your notes, or To and From names. No telemetry. · [Change what gets sent in Settings] |
+| What gets sent | Only your positions and the contract go to OpenRouter, with names swapped for placeholders like “Person 1”. That includes a name typed into a position or a rewrite instruction. Never playbook names, customers, your notes, or To and From names. No telemetry. · [Change what gets sent in Settings] |
 | What's protected | Your reviews, playbooks and key are encrypted on this computer. That protects them from other people who use the computer, and from someone who takes the disk. · It doesn't protect them from harmful software running in your own account. Keep your system up to date, and keep its disk encryption on. · Deleting a review destroys its key, so it can't be read again. A backup of this computer made earlier may still hold it. |
 | Shortcuts | Ctrl+K Commands · J Next unchecked · ] / [ Next / previous label · 1 / 2 / 3 Decide on a walk-away or unsure label · Ctrl+F Find in contract · Ctrl+/ opens the full list. |
 | Legal | Not legal advice · Clause Tracer isn't a lawyer, and this isn't legal advice. · Free to use, including for paid work. Source available under the Functional Source License, with no warranty. Each version becomes Apache 2.0 two years after its release. Sample contract: Dominic Fallows, CC BY-SA 4.0. · [Read the licence (opens in your browser)] |
@@ -567,3 +567,10 @@ The copy deck and the prototype were brought into line with the three accepted d
 | 4 | A position whose missing level is preferred vanished when nothing was found. | It is listed under “Searched, nothing found” in the Missing tab, and can be checked. |
 | 5 | Help promised encryption without saying what it does and doesn't cover. | The new “What's protected” section says both. |
 | 6 | Two parts of ADR 0012 had no copy: text that can't be decoded, and a way to see a Word file's earlier wording. | Contract check now warns about unreadable pages and lists every tracked change. A value resting on unreadable text is unsure. The 1-in-20 warning level is a guess to tune on the test set. |
+
+### 6.9 Decisions of 13 Nov 2026
+
+| # | Problem | Fix |
+| --- | --- | --- |
+| 1 | "What gets sent" didn't say that known names are replaced in positions and rewrite instructions too (ADR 0008, 13 Nov 2026). | The Help text says so. |
+| 2 | About said "You have the latest version", and the prototype had an "update available" state. Both need the app to ask GitHub, which version 1 never does (Spec 8.1). | The button opens the release page in the browser and the About card shows the current version. Both strings and the two prototype states are removed. |

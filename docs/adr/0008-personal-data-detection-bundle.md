@@ -86,3 +86,16 @@ The recall figures are a vendor's, with code "available on request". No public b
 5. [x] Tick the Presidio bundling item in Spec 13 (done 12 Nov 2026).
 6. [ ] State the download size in Spec 9, once measured.
 7. [ ] Check the Text Anonymization Benchmark, which the research did not look at, before building the planted-entity set.
+
+## Amendment (13 Nov 2026): known names are replaced in position text and rewrite instructions too
+
+Before this, only "why this matters" notes had known names replaced before they were sent. Position topics, types and level text, and the rewrite instruction (Spec 6.1 step 12), were sent as typed. A name typed into a position or an instruction could leave the computer.
+
+The project owner decided on 13 Nov 2026:
+
+- **Known names** are the confirmed personal items of this review and the typed party details.
+- Code replaces them with their placeholders in **position text** (topics, types and level text) and in **rewrite instructions**, as well as in the contract text and notes, before anything is sent. Code puts them back in what comes back.
+- The **privacy canary test** covers both fields: a known name typed into a position and one typed into a rewrite instruction must not appear in any request body ([testing strategy](../testing-strategy.md) section 8).
+- This does not change the bundle chosen above. It widens the text that the deterministic layer's replacement list is applied to.
+
+Spec sections 4.2, 4.6, 6.1, 6.2 and 13 say the same, and so does [the system design](../system-design.md) section 4.1.

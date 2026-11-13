@@ -119,7 +119,7 @@ A trial `.deb` of 7 MB was built, unpacked and run. Its dependency line, with ea
 
 `libc6 (>= 2.38), libwebkit2gtk-4.1-0, gir1.2-webkit2-4.1, gir1.2-gtk-3.0, libgirepository-1.0-1, libglib2.0-0t64, libcairo2, libcairo-gobject2, libffi8, libssl3t64, libbz2-1.0, liblzma5, zlib1g, libexpat1, libuuid1`
 
-`gir1.2-webkit2-4.1` is required: without it the app refused to start. The bundle needs glibc 2.38 or newer, which comes from the build machine's Python. So **release builds must be made on the oldest system the app supports** (Ubuntu 24.04 has 2.39, Debian 13 has 2.41; Ubuntu 22.04 and Mint 21, at 2.35, would need an older build machine).
+`gir1.2-webkit2-4.1` is required: without it the app refused to start. The bundle needs glibc 2.38 or newer, which comes from the build machine's Python. So **release builds must be made on the oldest system the app supports** (Ubuntu 24.04 has 2.39, Debian 13 has 2.41; Ubuntu 22.04 and Mint 21, at 2.35, would need an older build machine). *Update 13 Nov 2026: Ubuntu 22.04 and Mint 21 are not supported, so the oldest supported system is Ubuntu 24.04; see the last amendment.*
 
 **Windows: everything passed** on GitHub's Windows Server 2025 and 2022 runners, both run from source and frozen with PyInstaller: pages load from files, the Python bridge works, a link to a second page works and preferences survive it, no listening socket is opened, and another local file can't be read.
 
@@ -148,7 +148,7 @@ The items left untested above were tried for real, on GitHub Actions runners, wh
 
 **Still open: the app's window never starts under GitHub's Ubuntu CI runners.** The install succeeds, but running the installed app under a virtual screen times out with `WebViewException: Main window failed to start`, on both Ubuntu versions. Two likely causes were tried and neither fixed it: WebKitGTK's own process sandbox (bubblewrap-based, which some CI images restrict) turned off, and software-only GL rendering forced. Fedora's container has no GPU either and starts the window fine, so the cause isn't simply "no GPU". This looks like something specific to GitHub's Ubuntu CI image rather than Ubuntu itself, but that isn't proven. It needs a real Ubuntu desktop or VM to settle, which the developer doesn't have. **Update, the same day:** this puzzle is solved. See the next amendment.
 
-**What this changes for the shell stage:** the `.deb`'s `Depends:` line needs the Ubuntu 22.04 variant above when that target is supported. The Windows installer can safely ask for no admin rights. The one open question — does the real app's window start on a real Ubuntu desktop — is the same trial script, just run somewhere with an actual screen; it is not a new unknown, only an unconfirmed one.
+**What this changes for the shell stage:** the `.deb`'s `Depends:` line needs the Ubuntu 22.04 variant above when that target is supported. *Update 13 Nov 2026: that target is not supported, so the 22.04 variant is not needed; see the last amendment.* The Windows installer can safely ask for no admin rights. The one open question — does the real app's window start on a real Ubuntu desktop — is the same trial script, just run somewhere with an actual screen; it is not a new unknown, only an unconfirmed one.
 
 ## Amendment (13 Nov 2026): the Ubuntu window puzzle solved, and Linux Mint
 
@@ -193,6 +193,18 @@ Two of the items left open above were tried on GitHub's runners and in container
 
 **Not verified:** a real GNOME, KDE or Cinnamon desktop session on Ubuntu or Mint. A headless compositor does not cover the real GPU path, the real desktop portal back ends, HiDPI, input methods, the clipboard, or starting the app from its menu entry. Only amd64 was tested.
 
-**What this changes for the shell stage (build stage 12).** The `.deb` is still built on the oldest supported Ubuntu, as decided. That one build also covers 26.04 today. The release check should also install the package on the newest Ubuntu, so that the day Ubuntu drops `libgirepository-1.0-1` is noticed. The release check should run the app once under Wayland and once under X11.
+**What this changes for the shell stage (build stage 12).** The `.deb` is still built on the oldest supported Ubuntu, as decided (Ubuntu 24.04, per the last amendment). That one build also covers 26.04 today. The release check should also install the package on the newest Ubuntu, so that the day Ubuntu drops `libgirepository-1.0-1` is noticed. The release check should run the app once under Wayland and once under X11.
 
 **PyGObject is bundled, not taken from the system.** The earlier amendment's "comes from the user's system" is true only of the libraries around it. PyGObject's Python module (`gi`) is bundled, unchanged, inside the app, and the `.deb`'s `Depends:` line has no `python3-gi`. GTK, WebKitGTK, GLib, the girepository library and the typelibs come from the user's system. Its `_gi` extension links the system's girepository library, which is why the `Depends:` line names `libgirepository`.
+
+## Amendment (13 Nov 2026): the oldest supported Linux
+
+The project owner decided on 13 Nov 2026 which Linux systems version 1 supports.
+
+- **Supported:** Ubuntu 24.04 and later, Linux Mint 22 and later, Debian 13, and Fedora through the plain `tar.gz` archive.
+- **Not supported:** Ubuntu 22.04 and Linux Mint 21. Their glibc (2.35) is older than the 2.38 the bundle needs, and supporting them would mean a second build machine and a second `Depends:` line.
+- **One Linux build, made on Ubuntu 24.04**, with one `Depends:` line: the one with the `t64` names from the first trial amendment. The 22.04 variant in the amendment of 13 Nov 2026 about real installs is not used.
+- **Release checks:** install the `.deb` on Ubuntu 24.04 and on the newest Ubuntu ([testing strategy](../testing-strategy.md) section 12).
+- **History, not changed:** the trial results for Ubuntu 22.04 and Linux Mint 21.3 above stay as they are. They show what an older target would have cost. They do not promise support.
+
+The oldest supported Windows version is still open ([system design](../system-design.md) section 13).

@@ -16,7 +16,7 @@ A test plan for this app starts from its promises. Each acceptance test in Spec 
 | At least 90% of numbers and labels correct | The paid test set, with an exact interval | Paid |
 | No made-up quote reaches the screen | Quote-check unit tests; the last check before drawing; replay tests with a wrong quote | Unit, replay |
 | Every planted name, company and address is caught | Planted-entity contracts with computed offsets | Unit, integration |
-| No confirmed item, note or name in any AI request | Canary scan of every request body | Integration |
+| No confirmed item, note or name in any AI request, including position text and rewrite instructions | Canary scan of every request body | Integration |
 | Every private-mode request asks for zero retention | Request-builder contract test | Unit |
 | No acceptable limit reaches the message step | Prompt-render leak test; output scans | Unit |
 | No AI text states what a law allows | Output-scan tests | Unit |
@@ -215,7 +215,7 @@ So the earlier figures of $34 and $67 hold only for a Sonnet-class model. With $
 
 | What | How it is tested |
 | --- | --- |
-| **Leaks in requests and logs** | Give every private field a unique canary token. Assert that no token, in any letter case or split form, appears in any request body captured at the transport, any log line, or the "Copy error details" text. Assert the positive too: the placeholder marker does appear |
+| **Leaks in requests and logs** | Give every private field a unique canary token, including a known name typed into a playbook position and one typed into a rewrite instruction (both are replaced before sending, 13 Nov 2026, ADR 0008). Assert that no token, in any letter case or split form, appears in any request body captured at the transport, any log line, or the "Copy error details" text. Assert the positive too: the placeholder marker does appear |
 | **No telemetry** | The whole free suite runs with sockets blocked (`pytest-socket`). A static test allows only two host strings in the package: OpenRouter and the GitHub release page. At release, the packaged app runs once in a network namespace |
 | **Private mode** | A contract test over every step's request: private mode sends the zero-retention, no-data-collection and require-parameters fields, and no plugins or tools |
 | **Encryption at rest** | After a full fixture review, scan every file in the data and temporary folders for the canaries in UTF-8, UTF-16 and case-folded forms. Run it after a clean close and after a simulated crash. **Positive control:** the same scan on a deliberately unencrypted store must find the canary, or the test proves nothing |
@@ -240,7 +240,7 @@ The interface tests are written in Python, so the owner can review them.
 | **Untrusted text stays inert** | Load a review whose quotes, summaries and playbook text contain markup and script. Assert nothing runs and nothing renders as HTML |
 | **Engine protocol** | One contract suite for every request and event, run against a fake engine and the real one over stdio. A version mismatch must fail at start-up |
 | **Process life cycle** | Kill the shell mid-review: the engine exits and the review is Interrupted. Cancel returns the cost so far |
-| **Real app on Linux** | One smoke test of the real window under a virtual display |
+| **Real app on Linux** | One smoke test of the real window under a virtual display. Version 1 supports Ubuntu 24.04 and later, so the installs are checked on 24.04 and the newest Ubuntu, not on 22.04 |
 | **Windows** | CI builds the installer, installs it silently, drives the real window with Playwright, and uploads screenshots and video. A 90-day Windows evaluation machine covers the manual look at install warnings |
 | **Accessibility** | Keyboard paths for every control (Spec 14.4). Automated checks are an open point |
 
@@ -276,7 +276,7 @@ These are the project's own targets, anchored on a common industry guide (60% ac
 | **Every pull request, once files and paths are real** | The same suite on a Windows runner pinned to `windows-2025`, without the highlight pictures |
 | **Nightly** | Property tests at 2,000 examples; file fuzzing |
 | **Weekly** | Vulnerability check of the lockfile |
-| **Before a release** | Mutation report; the largest paid run the budget allows (section 7.5); installer builds and packaged-app tests on both systems; the network check; signed checksums and build attestations; the blind self-test |
+| **Before a release** | Mutation report; the largest paid run the budget allows (section 7.5); installer builds and packaged-app tests on both systems; the `.deb` installed on Ubuntu 24.04 and on the newest Ubuntu (the one Linux build, made on 24.04); the network check; signed checksums and build attestations; the blind self-test |
 | **By hand** | A paid run, when a prompt, model or labelling change cannot be judged on saved replies. Never on push, and always under the spend cap |
 
 **Architecture tests** (T9) go beyond `lint-imports`: importing `core` loads only the standard library; importing `cli` does not load Presidio or spaCy; every module has a `README.md`, `tests/`, `samples/` and `__main__`.

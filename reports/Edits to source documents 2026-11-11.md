@@ -114,3 +114,15 @@ The owner said a lawyer is not an option, and asked to work on the four items le
 > 1. Am I the "provider" of an AI system under Article 3(3) for the purposes of Article 50, or is that the model's provider?
 > 2. If I am, does Article 50(2) apply to (a) reasons of one or two sentences and (b) a rewritten message that the user copies out as plain text? Plain text cannot carry metadata, and I cannot watermark the output of a model I do not run. Is relying on the model provider's marking, plus a metadata mark on exported PDF files, enough?
 > 3. Does a free download from a public code-hosting site count as placing the system on the Union market?
+
+### Design review and owner decisions (13 Nov 2026)
+
+A full review of the docs was done on 13 Nov 2026. Its findings were fixed the same day: the build plan and the core shapes moved into system design sections 15 and 3.4, test names were corrected, missing test rows and the licence check were added, and stale text was fixed. The remaining open points are in the "Still open" list of [the system design](../docs/system-design.md) and in the "Not yet decided" points of its sections 3.4 and 15.
+
+The owner then decided three things the same day:
+
+| Decision | What changed |
+| --- | --- |
+| Known names are replaced in position text and in rewrite instructions too, not only in notes | Spec 4.2, 4.6, 6.1, 6.2, 11 and 13; system design section 4.1; testing strategy sections 1 and 8 (the canary test covers both fields); an amendment to [ADR 0008](../docs/adr/0008-personal-data-detection-bundle.md); the Help "What gets sent" text and `ux-copy.md` section 6.9 |
+| "Check for updates" only opens the GitHub release page. The app never asks GitHub itself in version 1 | Spec 8.1 (already said so), 12, 13, 14.2 and 14.3; `ux-copy.md` About row; the prototype's Settings About card and `states.html` (the two update states are gone); the system design "Still open" list. Asking GitHub or a backend is listed in Spec 12 as a later idea |
+| Version 1 supports Ubuntu 24.04 and later, Mint 22 and later, Debian 13, and Fedora by archive. Ubuntu 22.04 and Mint 21 are not supported | An amendment to [ADR 0009](../docs/adr/0009-desktop-shell-protocol-and-packaging.md), with pointers in its earlier amendments; Spec 9 and 13; system design 1.2, 10, 13 and 15 (stage 12); testing strategy sections 9 and 12. The 22.04 and Mint 21.3 trial results stay as history. The oldest supported Windows version is still open |

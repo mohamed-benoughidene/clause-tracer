@@ -100,7 +100,7 @@ The review is saved at every step, so the user can stop and come back.
 - Required before anything is sent to the AI. After "Send for review," the contract check, privacy check and party details are read-only. "Start over with this contract" makes a new review.
 - **Replaced:** names of people and companies, addresses, emails, phone numbers, ID numbers, bank numbers.
 - **Kept:** amounts, dates, durations, roles the contract defines (such as "the Contractor"), and the place named in the governing-law clause.
-- Every copy of a party's typed name and address is replaced. Presidio (a local tool that finds personal data) catches the rest, set up to detect company names and full addresses.
+- Every copy of a party's typed name and address is replaced. The same goes for every confirmed item of this review: known names are also replaced in position text and in rewrite instructions before anything is sent (decided 13 Nov 2026, ADR 0008). Presidio (a local tool that finds personal data) catches the rest, set up to detect company names and full addresses.
 - Placeholder types: Person N, Company N, Address N, Email N, Phone N, ID N, Bank N. They use a marker format ordinary contract text can't contain. Contract text that already looks like a placeholder is escaped first.
 - Name variants ("Sarah Jones," "Ms. Jones," "Sarah") share one placeholder. The user can split or merge them.
 - The user can select any text to replace it, or untick a false alarm.
@@ -143,7 +143,7 @@ This is the feature the product is named after.
 
 - The user highlights a clause and rewrites it by hand, or asks the AI with an optional instruction. The AI aims for the preferred level of every position the clause affects.
 - The user can add a clause from a Missing list item.
-- Before a rewrite is sent for re-check, code replaces every known name and address with its placeholder, and Presidio checks for new personal data, which the user confirms.
+- Before a rewrite is sent, code replaces every known name and address with its placeholder, in the clause and in the user's instruction. Before the re-check, Presidio checks the new wording for new personal data, which the user confirms. Placeholders are put back in what comes back.
 - Each suggestion is re-checked against every position its clause affects and shown before and after. Its label is for information only and doesn't change the counter or status.
 - One suggestion per clause. A new one replaces the old after confirmation. Suggestions can be edited or removed.
 - A suggestion that fails its quote check can still be saved, labelled unsure.
@@ -227,13 +227,13 @@ A fixed sequence run by the app's code. The AI never decides what runs next and 
 | 9 | Judge words positions | Matched clauses, level text | A level per clause. Evidence is the matched clause | AI or Jev |
 | 10 | Explain | Labels, quotes, Missing list | Plain-words why without limits, plus "why it could be the other level" for AI judgment and unsure labels, Missing item text, readings and one question for unsure labels. Code adds the "by your playbook" line with limits from the snapshot | AI. Can't change a label |
 | 11 | Sort not-covered parts | Not-covered parts | A clause type for each, picked from a fixed list that ends with "Something else". Code shows the type and the clause's first line | AI |
-| 12 | Rewrite (on request) | Clause with placeholders, affected positions, optional instruction | New wording, then steps 6b to 10 on it, with the quote check against the suggestion's own text | AI, then code |
+| 12 | Rewrite (on request) | Clause with placeholders, affected positions, optional instruction (known names replaced) | New wording, then steps 6b to 10 on it, with the quote check against the suggestion's own text | AI, then code |
 | 13 | Write message | Ticked items, tone, quotes, preferred levels | Message with \[TO\] and \[FROM\] markers | Code, from templates. AI only when the user asks for a rewrite, which code then checks. Code fills in names |
 | 14 | Build report | Review data | PDF | Code |
 
 ### 6.2 Rules for every AI step
 
-- **What the AI receives:** placeholder text, position topics, types and level text. Never playbook names, customers, the user's notes, or To and From names. "Why this matters" notes only if the user turns that on in Settings, with known names replaced.
+- **What the AI receives:** placeholder text, position topics, types and level text, and the rewrite instruction. Never playbook names, customers, the user's notes, or To and From names. "Why this matters" notes only if the user turns that on in Settings. **Known names replaced:** in all of this text, including position text and rewrite instructions, code replaces the confirmed personal items of this review and the typed party details with their placeholders before anything is sent, and puts them back in what comes back (decided 13 Nov 2026, ADR 0008).
 - **Acceptable levels:** steps 10 and 13 never receive acceptable limits. Code scans every message and unsure question for an acceptable limit and regenerates once if found.
 - **Law words:** AI text must never state what a law allows. Code scans for words like "legal," "illegal," "enforceable," "unenforceable" and "the law," and regenerates once if found.
 - **Requests:** each asks for zero retention when private mode is on, filled-form replies, and `require_parameters` (OpenRouter's setting that only uses providers supporting every requested feature).
@@ -324,7 +324,7 @@ A fixed sequence run by the app's code. The AI never decides what runs next and 
 ## 9. Running the app
 
 - **Form:** a desktop app with an installer. Built first as a Python command-line tool to test the review, then wrapped. The command-line tool follows the same storage and privacy rules.
-- **Systems:** Linux and Windows. The Windows installer is built by GitHub Actions and tested in a Windows virtual machine. It's unsigned, so the download page explains the "Windows protected your PC" warning: click "More info," then "Run anyway." Mac comes later.
+- **Systems:** Linux and Windows. Linux means Ubuntu 24.04 and later, Linux Mint 22 and later, Debian 13, and Fedora through the plain archive (decided 13 Nov 2026, ADR 0009). Ubuntu 22.04 and Linux Mint 21 are not supported. There is one Linux build. The Windows installer is built by GitHub Actions and tested in a Windows virtual machine. It's unsigned, so the download page explains the "Windows protected your PC" warning: click "More info," then "Run anyway." Mac comes later.
 - **API key:** first launch shows the key guide, including what a typical review costs and how to turn off Safety Retention. Clear messages for a wrong key, no credit, or no internet.
 - **Cost:** estimated before sending, shown while running, recorded per review. If the estimate is more than the remaining credit, a warning shows the exact amounts, with "Send anyway."
 - **Auto-delete:** 7, 30 or 90 days after a review's last change (default 30). A change is any edit, check, suggestion, output or rename. Opening isn't. "Keep it" restarts the clock. Reviews 3 or fewer days from deletion show a warning. Lowering the setting shows how many reviews it affects, asks to confirm, and deletes nothing sooner than 3 days later.
@@ -370,7 +370,7 @@ Version 1 is done when all of these pass.
 
 **Privacy**
 
-- [ ] No item confirmed in the privacy check, no note, and no To or From name appears in any request sent to the AI. Checked from request logs written only by a test build, kept locally, encrypted, and deleted after the test run.
+- [ ] No item confirmed in the privacy check, no note, and no To or From name appears in any request sent to the AI. This includes position text and rewrite instructions. Checked from request logs written only by a test build, kept locally, encrypted, and deleted after the test run.
 - [ ] Every request in private mode asks for zero retention.
 - [ ] No acceptable limit appears in any request to the message step, and a manual read of every test message finds none.
 - [ ] No AI text states what a law allows.
@@ -393,6 +393,7 @@ The free replay tests run on every change. The paid test set runs by hand, under
 - Reading scanned PDFs.
 - Languages other than English, for contracts or the interface (Arabic and French planned next).
 - Mac installer.
+- Asking GitHub or a backend whether a new version exists, so the app can say "up to date" or "update available". Version 1 only opens the release page.
 - Accounts, sign-in, or any server run by the project. (The design keeps room for an optional hosted service in a later version; see ADR 0015.)
 - AI agents that choose their own steps or use tools.
 - A guided-question playbook builder.
@@ -420,6 +421,9 @@ Each item has a decision record (ADR). Ticked items were decided on 12 Nov 2026.
 - [x] A real `apt`/`.deb` install on Ubuntu, a real `dnf`/tar.gz install on Fedora, and a real Windows installer (Inno Setup) all work (13 Nov 2026, [ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md)'s latest amendment). The Ubuntu window puzzle is solved. The window was slow to start, not missing: the desktop portal stalled for 25 seconds on GitHub's runners, which have no login session. The trial app now waits for the window's own events with a longer timeout, so the window starts on Ubuntu 22.04 and 24.04 in CI. Clause Tracer has no window code yet: the real shell must do the same (ADR 0009). Linux Mint 22 and 21.3 pass in containers. Ubuntu 26.04 passes too, and the trial app runs under a headless Wayland compositor on Ubuntu and Fedora (13 Nov 2026, same ADR amendment). **Still untried:** a real Ubuntu or Mint desktop session.
 - [x] Version 1 keeps "Rewrite with AI" for the message, optional and labelled (decided 12 Nov 2026, [ADR 0011](adr/0011-who-writes-the-words.md)).
 - [x] **The EU AI Act (Article 50), and the two licence questions:** no lawyer is available, so the project takes cautious working positions instead (accepted 13 Nov 2026, [ADR 0016](adr/0016-legal-positions-without-a-lawyer.md)). Section 10 has the positions and what is still unclear.
+- [x] Known names are replaced in position text and in rewrite instructions too, not only in notes. The privacy canary test covers both (decided 13 Nov 2026, amendment to [ADR 0008](adr/0008-personal-data-detection-bundle.md)).
+- [x] "Check for updates" only opens the GitHub release page in the system browser. The app never contacts GitHub itself in version 1, so "You have the latest version" and "A new version is available" are gone. Asking GitHub or a backend may come in a later version (decided 13 Nov 2026, Spec 8.1).
+- [x] The oldest supported Linux: Ubuntu 24.04 and later, Linux Mint 22 and later, Debian 13, and Fedora through the plain archive. Ubuntu 22.04 and Mint 21 are not supported, so there is one Linux build, made on Ubuntu 24.04 (decided 13 Nov 2026, amendment to [ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md)). The oldest supported Windows version is still open.
 - [ ] Whether to register a trade mark on the name. Ruled out for now because of its cost.
 
 ## 14. Prototype handoff
@@ -495,7 +499,7 @@ The brief for whoever designs the prototype. Read sections 1 to 13 first, plus t
 | Output | Items unchecked. Nothing to ask for. Labels changed since this message, with "Regenerate to use the new labels." |
 | Playbook editor | Validation error. |
 | Playbooks | Import failed: not a valid playbook file. |
-| Settings | Model can't do that step. Update available, or up to date. Lowering auto-delete confirmation. |
+| Settings | Model can't do that step. Lowering auto-delete confirmation. |
 | Any delete | Names what will be deleted and says it can't be undone. |
 | Anywhere | "Copied" and "Saved" confirmations. |
 
@@ -510,7 +514,7 @@ The brief for whoever designs the prototype. Read sections 1 to 13 first, plus t
 | Notifications | "Notify when a review finishes" (on): a system notification when a review running in the background is done. |
 | Data | "Delete everything": every review, playbook, customer, setting and the key, after a confirmation that names them and says it can't be undone. |
 | Appearance | Light or dark, text size. |
-| About | Version, "Check for updates" (opens GitHub only when pressed), licence, not legal advice. |
+| About | Version, "Check for updates" (opens the GitHub release page in the browser, only when pressed; the app never asks GitHub itself), licence, not legal advice. |
 
 ### 14.4 Visual rules
 
