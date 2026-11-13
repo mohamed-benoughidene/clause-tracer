@@ -10,7 +10,7 @@
 The [pipeline architecture report](../../reports/Clause%20Tracer%20pipeline%20architecture.md) left two designs open: one SQLCipher database, or plain SQLite with per-record AES-GCM blobs. [The v1 design decisions report](../../reports/Clause%20Tracer%20v1%20design%20decisions.md) corrected it on 11 Nov 2026. `sqlcipher3` no longer relies on a community wheel fork. SQLite3 Multiple Ciphers (`apsw-sqlite3mc`) was missing from the comparison. The runner in [ADR 0005](0005-engine-runner-shapes-and-ports.md) keeps its state in this store. D1 (keep raw data unchanged) and D8 (save the AI's exact reply) mean the store holds contract bytes and raw replies.
 
 ## Decision
-The project owner accepted a hybrid on 12 Nov 2026. One choice inside it is still open: which of the two SQLite encryption packages to use (action item 6).
+The project owner accepted a hybrid on 12 Nov 2026. One choice inside it is still open: which of the two SQLite encryption packages to use (action item 6). *Superseded: see the amendment of 12 Nov 2026, which chose `sqlcipher3`.*
 
 - **One encrypted SQLite file** holds the index and small records. The research prefers `apsw-sqlite3mc`, whose Python API differs from the standard `sqlite3` module. `sqlcipher3` is the fallback. The owner has not yet chosen between them.
 - **A per-review AES-GCM key** encrypts raw contract bytes and AI replies. A random master key wraps each review key. Deleting a review destroys its key.
@@ -22,6 +22,7 @@ The project owner accepted a hybrid on 12 Nov 2026. One choice inside it is stil
 ## Options Considered
 
 ### Option A: Hybrid, apsw-sqlite3mc plus per-review AES-GCM keys (chosen)
+*Superseded: the package is `sqlcipher3`, chosen in the amendment of 12 Nov 2026. The hybrid itself stands.*
 | Dimension | Assessment |
 |-----------|------------|
 | Complexity | Med: two layers of encryption and a key table |

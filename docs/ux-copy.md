@@ -101,6 +101,7 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | Key guide summary | No key yet? Get one in 4 steps |
 | Step 1 | Create an OpenRouter account · openrouter.ai · free to sign up · [Open site (opens in your browser)] |
 | Step 2 | Add credit · A typical review costs about $0.30 to $0.60. |
+| Maintainer note (not on screen) | The "$0.30 to $0.60" figure is an estimate, not a measurement (ADR 0010, action 6). Replace it with the measured cost after the first paid run (Spec 13). |
 | Step 3 | Turn off Safety Retention · In OpenRouter: Settings › Privacy. Then providers don't keep your contract, except for legally required safety screening. |
 | Step 4 | Create a key and paste it above · It starts with sk-or-. |
 | Sample link | Or try a sample contract first, free |
@@ -446,6 +447,17 @@ The eleven starter positions and their "why this matters" notes are in Spec 7; t
 | Close buttons | Close (icon label) |
 | Back | Back to reviews |
 | Legal line on every message and report page | Not legal advice. Check every result yourself. |
+
+### 4.18 Third-party licences (`licences.html`, not built yet)
+
+The prototype has no page for this yet. It is reached from Help, and Spec 14.1 row 21 says what it holds.
+
+| Element | Copy |
+| --- | --- |
+| Heading | Third-party licences |
+| Intro | Clause Tracer is built on other people's libraries. Each one is listed here with its version and licence. |
+| Fixed sentence (ADR 0016) | Clause Tracer's licence does not limit your rights to pikepdf's source code under the MPL-2.0. · [Source for this exact version (opens in your browser)] |
+| Way out | Back to Help |
 
 ## 5. Localisation notes
 

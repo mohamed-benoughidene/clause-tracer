@@ -19,7 +19,7 @@ Every fact has one home. Other files may repeat it, but the home wins. If they d
 | Privacy and security promises | `docs/spec.md` section 8 | `README.md`, `SECURITY.md`, Help and Settings pages, ux-copy |
 | The licence | `LICENSE` | `README.md`, `COMMERCIAL_LICENSE.md`, `CLA.md`, Help and Settings pages |
 | How the code is built | `Constitution.md` | ADR 0004, `src/clause_tracer/README.md`, `AGENTS.md` |
-| How the parts of the system fit together | `docs/system-design.md` | ADRs 0005 to 0015, the architecture report in `reports/` |
+| How the parts of the system fit together | `docs/system-design.md` | ADRs 0005 to 0016, the architecture report in `reports/` |
 | How the app is tested, and what must pass before a release | `docs/testing-strategy.md` | Spec 11, ADR 0013, `tests/README.md` |
 | How the code is laid out | `docs/adr/0004-code-layout.md` | `src/clause_tracer/README.md`, the import rules in `pyproject.toml`, `AGENTS.md` |
 | Terms for contributors and paying users | `CLA.md`, `COMMERCIAL_LICENSE.md` | `README.md` |

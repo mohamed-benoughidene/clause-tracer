@@ -13,8 +13,8 @@ Live replies cannot be pinned. The chosen endpoints do not accept `temperature`,
 The project owner accepted the following on 12 Nov 2026.
 
 - **Five layers.** Four run free, with no network: unit tests (with Hypothesis property tests for the seven offset invariants), golden-file tests on each module's `samples/`, contract and integration tests that run one suite against each fake and its real adapter, and end-to-end replay tests. The fifth is the paid test set, which runs against the real model. Visual tests of highlights on Linux sit across the free layers. [The testing strategy](../testing-strategy.md) names each layer.
-- **Replay fake.** A hand-written fake behind the AI port, keyed on a content hash (model id, schema id, normalised prompt, step version). It raises `UnrecordedRequest` on a miss and exposes `unused_keys()`, which a fixture asserts empty.
-- **Paid run.** A `@pytest.mark.golden` marker, deselected in `scripts/check.sh` and CI, plus a small `golden_report.py`. Run only by hand or on a labelled change, never on push.
+- **Replay fake.** A hand-written fake behind the AI port, keyed on a content hash (model id, schema id, normalised prompt, step version; see the amendment of 13 Nov 2026: the key is now a hash of the exact request). It raises `UnrecordedRequest` on a miss and exposes `unused_keys()`, which a fixture asserts empty.
+- **Paid run.** A `@pytest.mark.golden` marker (now `paid`, see the amendment of 13 Nov 2026), deselected in `scripts/check.sh` and CI, plus a small `golden_report.py`. Run only by hand or on a labelled change, never on push.
 - **Coverage.** Branch coverage per package: `core` 95%, pipeline modules 85%, adapters 70%, `cli` 60%, plus 90% on changed lines. These targets are `[Assumption]`.
 - **Mutation.** mutmut on `core` and the pure rule modules, as a scheduled or pre-release report.
 - **Agent guard.** Human-owned acceptance tables in CSV or TOML. Agents may write the loader but may not change expected values in the same change as the code. A named command, `--update-goldens`, regenerates golden files.
@@ -90,3 +90,9 @@ The gate numbers are the project's own. No published release threshold exists, s
 The record named `respx` for testing the real OpenRouter adapter without a key. That does not work with `httpx2`: in a local test on 12 Nov 2026 the mock did not intercept and the request reached the real network ([ADR 0005](0005-engine-runner-shapes-and-ports.md), amendment). Use `httpx2.MockTransport` with a small handler that refuses any unrecorded request and reports unused recordings. It needs no extra package.
 
 Cheap paid runs use **Claude Haiku 5.5** in private mode. DeepSeek V4.1 Flash costs more than its list price on zero-retention endpoints ([ADR 0010](0010-starting-models.md), amendment).
+
+## Amendment (13 Nov 2026): one key for the replay fake, and one word for the paid set
+
+The replay fake is keyed by a hash of the exact request, as [the system design](../system-design.md) and [the testing strategy](../testing-strategy.md) say, because that matches the cache design. The key list in the Decision above is replaced by that rule.
+
+"Golden" meant two things. From now on, "the golden set" in ADRs 0010 to 0014 means the paid test set. The pytest marker is `paid`, not `golden`. "Golden files" means only the free saved-output tests of layer 2.

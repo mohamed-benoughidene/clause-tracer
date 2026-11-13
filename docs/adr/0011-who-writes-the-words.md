@@ -76,7 +76,7 @@ Gaps carried over: no study compares templated and AI-written outbound messages,
 ## Action Items
 1. [ ] Draft the closed clause-type list (20 to 30 types plus "Something else") and measure it on the golden set.
 2. [ ] Write the message templates per item kind and tone, and the re-check for the rewrite diff.
-3. [ ] Take legal advice on Article 50 before stating anything about it in the docs.
+3. [ ] ~~Take legal advice on Article 50 before stating anything about it in the docs.~~ Superseded by [ADR 0016](0016-legal-positions-without-a-lawyer.md): no lawyer is available, so the working position and the AI Act Service Desk question replace it.
 4. [x] Change Spec 4.7 item 3 and Spec 6.1 steps 11 and 13 (done 12 Nov 2026).
 5. [x] Update `docs/ux-copy.md` and add the new states to the prototype's `states.html` (done 12 Nov 2026; `ux-copy.md` section 6.8 records it).
 

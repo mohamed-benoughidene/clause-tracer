@@ -24,7 +24,10 @@ A test plan for this app starts from its promises. Each acceptance test in Spec 
 | Auto-delete runs on schedule | Fixed-clock tests of the date rules and the store | Unit, integration |
 | Every evidence link scrolls to the right place | Offset invariants; highlight pictures | Unit, visual |
 | Hidden text shows the banner; values on it are unsure | Hidden-text fixtures with innocent look-alikes | Unit, replay |
-| A full review runs on Linux and Windows from the installer | Packaged-app smoke test in CI | Release |
+| A full review runs on Linux and Windows from the installer | Packaged-app smoke test in CI, plus one full review of the sample contract in the packaged build against saved replies (the replay fake), with no paid call. **To design at build stage 12:** how the packaged build is pointed at saved replies | Release |
+| Every stored text keeps a written-by value (code, AI or user) | A schema test that no text can be saved without one; replay tests that AI, code and user text each get the right value (Spec 4.7 and 6.2, [ADR 0016](adr/0016-legal-positions-without-a-lawyer.md)) | Unit, replay |
+| A PDF report with AI-written text carries a machine-readable AI mark in its metadata | Export the sample review, read the PDF's metadata back, and assert the mark is there. Assert it is absent from a report with no AI text (Spec 4.7, ADR 0016) | Integration |
+| Uninstall offers to remove all data and keys (Spec 8.3) | An uninstall test on each system: choose removal, then scan the data folder and the password store for the review data and both keys. Choose keep, and assert both stay. **The uninstall flow has no design yet.** It is settled at the shell stage (build stage 12) | Release |
 | Blind self-test: the owner catches a planted wrong label | Manual, with a script that plants the label | Manual |
 
 ## 2. Principles
@@ -42,7 +45,7 @@ A test plan for this app starts from its promises. Each acceptance test in Spec 
 | Layer | What it runs | Where it lives | Speed | Runs |
 | --- | --- | --- | --- | --- |
 | **1. Unit** | One module through its public call, with fakes. Label rules as tables. Property tests of pure invariants | `src/clause_tracer/<module>/tests/` | Milliseconds | Every change |
-| **2. Golden-file** | Each module's public call on its `samples/`, compared with a committed expected file | Beside each module | Fast | Every change |
+| **2. Golden-file** (free) | Each module's public call on its `samples/`, compared with a committed expected file | Beside each module | Fast | Every change |
 | **3. Contract and integration** | One behaviour suite against each fake **and** its real adapter. Real encrypted storage in a temporary folder. The OpenRouter adapter against saved bodies | `tests/` | Seconds | Every change |
 | **4. End-to-end replay** | The whole command-line tool on the sample contract with the replay AI client; asserts the Spec 14.5 labels | `tests/` | Seconds | Every change |
 | **5. Paid test set** | The real API on the ten test contracts and the built cases | Private repository, opt-in | Minutes, costs money | By hand, before a prompt, model or labelling change merges |
@@ -166,7 +169,7 @@ These thresholds are the project's own. No regulator or bar has published an acc
 
 ### 7.5 Budget
 
-The owner set the budget on 12 Nov 2026: **about $10.76 in total** ($5.76 in hand, plus $5). The plan below fits inside it.
+The owner set the budget on 12 Nov 2026: **about $10.76 in total** ($5.76 in hand, plus $5). The plan below fits inside what is left of it, with a small reserve.
 
 **What a run costs.** Prices were fetched on 11 Nov 2026 and change weekly. All figures are estimates until the first paid run measures them.
 
@@ -183,22 +186,22 @@ So the earlier figures of $34 and $67 hold only for a Sonnet-class model. With $
 
 **First measurements (13 Nov 2026).** A small probe spent $0.07 of the budget on eight calls ([ADR 0010](adr/0010-starting-models.md), last amendment). On a 12,616-word invented contract, the first call cost $0.0030 on Claude Haiku 5.5 and $0.0602 on Claude Sonnet 5.5; each later call, read from the cache, cost $0.00027 and about $0.003. That puts a 40-call review near 1.5 cents and 18 cents, in line with the table above. Caching hit on the zero-retention route. The table stays an estimate until step 1 runs the real pipeline.
 
-**Spent so far:** $0.07 (13 Nov 2026). About $10.69 is left.
+**Spent so far:** $0.07 (13 Nov 2026). About $10.69 is left, of which the plan below uses $9.90.
 
 **The spending plan.**
 
 | Step | What | Planned spend |
 | --- | --- | --- |
 | 1 | First real run on the sample contract, cheap model. It measures real cost per review and whether caching hits | under $0.25 |
-| 2 | Ten contracts, one run, on two cheap models. Picks the model to carry forward | about $0.50 |
+| 2 | Ten contracts, one run, on Haiku 5.5 and one other cheap model, chosen at run time. Picks the model to carry forward | about $0.50 |
 | 3 | The 100-case set, three runs, on the chosen cheap model. The first full baseline | about $2 |
 | 4 | Two more 100-case runs after prompt fixes | about $4 |
 | 5 | One pass of the ten contracts, one run, on the default Sonnet-class model | about $2.80 |
-| Kept back | For price changes and mistakes | about $1.20 |
+| Kept back | For price changes and mistakes | about $0.35 |
 
 **Rules that protect the budget.**
 
-- **A spend ledger comes first.** The paid runner sums the cost each reply reports and stops at a cap per run. A running total across runs stops at $10. Build and test this with the replay client before any key is used.
+- **A spend ledger comes first.** The paid runner sums the cost each reply reports and stops at a cap per run. A running total across runs stops at $10, counting the $0.07 already spent. The plan rows add up to $9.90, so the plan ends at $9.97. The rest of the $10.76 stays unspent unless the owner raises the stop. Build and test this with the replay client before any key is used.
 - **Free tests do the daily work.** Prompt changes are tested on saved replies first. A paid run happens only when a change cannot be judged without the model.
 - **Every paid reply is saved** and becomes a free replay fixture, so no call is paid for twice.
 - **Three runs only where a hard gate needs them.** Other cases run once.
@@ -206,7 +209,7 @@ So the earlier figures of $34 and $67 hold only for a Sonnet-class model. With $
 
 **What this budget cannot do.** It cannot run the 300-case set on a Sonnet-class model, or compare three models at full size. It can show whether a cheap model passes the hard gates. That matters for users too: they pay per review with their own key, so a cheap model that passes is the better default. The owner accepted a Sonnet-class default on 12 Nov 2026 ([ADR 0010](adr/0010-starting-models.md)). With this budget that default gets one pass of the ten contracts at most, so step 5 is no longer optional: run it before a release, and say in the release notes how much testing the default model had.
 
-**Tooling.** A `@pytest.mark.golden` marker, left out of `scripts/check.sh` and CI, plus a small report script. No evaluation framework is needed yet. DeepEval and promptfoo are ruled out because both send telemetry by default. Inspect AI (MIT) is the upgrade path if many models are compared.
+**Tooling.** A `@pytest.mark.paid` marker, left out of `scripts/check.sh` and CI, plus a small report script. No evaluation framework is needed yet. DeepEval and promptfoo are ruled out because both send telemetry by default. Inspect AI (MIT) is the upgrade path if many models are compared.
 
 ## 8. Privacy and security tests
 
@@ -222,7 +225,8 @@ So the earlier figures of $34 and $67 hold only for a Sonnet-class model. With $
 | **Hostile files** | Fixtures built in code: zip bombs, entity expansion, external relationships, huge page counts, deep nesting. Each must end as a named input error inside its time and memory limit. Hypothesis mutates files on every change; a heavier fuzzer (Atheris) runs at night |
 | **Hidden text and Unicode tricks** | Paired fixtures: one hostile, one innocent look-alike. Every hostile one raises the banner and every look-alike does not |
 | **The app window** | Added 13 Nov 2026, from the trial builds ([ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md)). The packaged app runs on Linux and Windows and checks itself: a link to a web address does not load inside the window, no socket is listening, and a page cannot read another local file. The trial script is the starting point. **Still to add:** the installed app starts both with and without a session bus on Ubuntu, which covers the slow desktop-portal case (ADR 0009, 13 Nov 2026). Also run the app once under Wayland and once under X11, and install the package on the newest Ubuntu as well as the oldest |
-| **Dependencies** | The lockfile is installed locked. Known vulnerabilities are checked on every change and weekly. A licence check fails on anything outside MIT, BSD and Apache in the runtime group. Secret scanning covers the whole history. GitHub Actions are pinned by commit |
+| **Bundled libraries are unchanged** | A build test compares the bundled `pikepdf` and PyGObject files with the hashes in each wheel's `RECORD` file. A changed file fails the build (Spec 8.4, ADR 0016) |
+| **Dependencies** | The lockfile is installed locked. Known vulnerabilities are checked on every change and weekly. A licence check fails on anything outside MIT, BSD and Apache in the runtime group, except `pikepdf` (MPL-2.0) and PyGObject (LGPL), which are allowed by name ([ADR 0007](adr/0007-document-reading-stack.md), [ADR 0016](adr/0016-legal-positions-without-a-lawyer.md)). Secret scanning covers the whole history. GitHub Actions are pinned by commit |
 
 Two honest limits. Sockets blocked in Python do not stop a native library, so the release-level network check matters. And no test can prove what an AI provider keeps, so that promise stays worded as "asks for" ([`system-design.md`](system-design.md) section 9.3).
 
@@ -245,7 +249,7 @@ Limits to state plainly: the CI Windows machine is a server edition, so it will 
 ## 10. Keeping agent-written tests honest
 
 - **Acceptance tables have an owner.** Expected labels, values and quotes live in CSV or TOML tables. Agents may write the loader. A CI check fails any change that edits both code and those tables, unless the owner approves it.
-- **Golden files are regenerated only by a named command**, `--update-goldens`. A change that alters both code and golden files needs a human read of the golden diff.
+- **Golden files are regenerated only by a named command**, `--update-goldens`. "Golden files" means only the free layer 2 outputs; the paid layer is "the test set", marked `paid`. A change that alters both code and golden files needs a human read of the golden diff.
 - **Red first.** A new test must be seen to fail for the right reason before the code that makes it pass.
 - **Mutation testing as a report.** Before a release, run `mutmut` on `core` and the pure rule modules. It changes the code in small ways and checks that some test notices. Aim for no surviving change in the label picker and the quote check. It is a report, not a gate, and it runs on Linux only.
 - **Coverage is a floor, not a goal.** Studies find coverage only weakly predicts whether tests catch real bugs.

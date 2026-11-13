@@ -319,7 +319,7 @@ A fixed sequence run by the app's code. The AI never decides what runs next and 
 - The app window shows only the app's own pages. A link to a web address never loads inside it; it opens in the user's browser or not at all (ADR 0009).
 - Every import is previewed first. Playbook files use a strict format with size limits. Word files are read with external links turned off.
 - Each release publishes signed checksums (fingerprints that prove a download wasn't changed) and a build record from GitHub that ties the download to its source code. The shipped code is never obfuscated (ADR 0014).
-- `pikepdf` and PyGObject are shipped unchanged; a build test compares installed files against the wheel's own hashes. A third-party licences page names every bundled library under a licence other than MIT, BSD or Apache, with its version, licence text and a link to its source (ADR 0016).
+- `pikepdf` and PyGObject are shipped unchanged; a build test compares installed files against the wheel's own hashes. A third-party licences page lists every bundled library with its version and licence. It carries the full notices that MPL-2.0, LGPL and BSD-style licences require, and a link to the source of each MPL-2.0 and LGPL library (ADR 0014, ADR 0016). The source archive of the exact `pikepdf` version is attached to each release, so the source stays available if the upstream link breaks (ADR 0016).
 
 ## 9. Running the app
 
@@ -365,7 +365,7 @@ Version 1 is done when all of these pass.
 - [ ] At least 90% of yes/no and words labels match the answer key.
 - [ ] No made-up quote ever reaches the screen.
 - [ ] No clause that exists is reported missing where the missing level is better than the right label, on any built test case.
-- [ ] The three rules above hold in every one of three runs of each case. Rates are reported with their margin of error, counted per case (ADR 0013).
+- [ ] Three rules hold in every one of three runs of each case: every planted walk-away gets the tool label walk-away, no made-up quote reaches the screen, and no clause that exists is reported missing where the missing level is better than the right label. Rates are reported with their margin of error, counted per case (ADR 0013).
 - [ ] Presidio plus typed details catch every planted name, company and address in the test set.
 
 **Privacy**
@@ -384,7 +384,7 @@ Version 1 is done when all of these pass.
 - [ ] A full review runs on Linux and in a Windows virtual machine from the installer.
 - [ ] Blind self-test: a script plants one wrong tool label at random in each of 3 sample contracts, without saying which. Mohammed reviews each one normally and catches all 3. Repeated after any change to the review or checking screens.
 
-The test set runs after every change to prompts, models, or labeling code.
+The free replay tests run on every change. The paid test set runs by hand, under the spend cap ([testing strategy](testing-strategy.md) section 7.5), when a prompt, model or labelling change cannot be judged on saved replies.
 
 ## 12. Not in version 1
 
@@ -417,7 +417,7 @@ Each item has a decision record (ADR). Ticked items were decided on 12 Nov 2026.
 - [x] The encrypted store uses `sqlcipher3` (decided 12 Nov 2026, [ADR 0006](adr/0006-encrypted-storage-and-secrets.md)).
 - [x] The Linux download is a `.deb` file, with a plain archive for Fedora. The app loads its pages from files and opens no local port (decided 12 Nov 2026, [ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md)).
 - [x] A trial build confirmed that the Linux package works with the system's web view, and the PDF, encrypted-store and page-loading checks passed on Windows (13 Nov 2026, amendments to ADRs [0006](adr/0006-encrypted-storage-and-secrets.md), [0007](adr/0007-document-reading-stack.md) and [0009](adr/0009-desktop-shell-protocol-and-packaging.md)).
-- [x] A real `apt`/`.deb` install on Ubuntu, a real `dnf`/tar.gz install on Fedora, and a real Windows installer (Inno Setup) all work (13 Nov 2026, [ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md)'s latest amendment). The Ubuntu window puzzle is solved. The window was slow to start, not missing: the desktop portal stalled for 25 seconds on GitHub's runners, which have no login session. The app now waits for the window's own events with a longer timeout, so the window starts on Ubuntu 22.04 and 24.04 in CI. Linux Mint 22 and 21.3 pass in containers. Ubuntu 26.04 passes too, and the app runs under a headless Wayland compositor on Ubuntu and Fedora (13 Nov 2026, same ADR amendment). **Still untried:** a real Ubuntu or Mint desktop session.
+- [x] A real `apt`/`.deb` install on Ubuntu, a real `dnf`/tar.gz install on Fedora, and a real Windows installer (Inno Setup) all work (13 Nov 2026, [ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md)'s latest amendment). The Ubuntu window puzzle is solved. The window was slow to start, not missing: the desktop portal stalled for 25 seconds on GitHub's runners, which have no login session. The trial app now waits for the window's own events with a longer timeout, so the window starts on Ubuntu 22.04 and 24.04 in CI. Clause Tracer has no window code yet: the real shell must do the same (ADR 0009). Linux Mint 22 and 21.3 pass in containers. Ubuntu 26.04 passes too, and the trial app runs under a headless Wayland compositor on Ubuntu and Fedora (13 Nov 2026, same ADR amendment). **Still untried:** a real Ubuntu or Mint desktop session.
 - [x] Version 1 keeps "Rewrite with AI" for the message, optional and labelled (decided 12 Nov 2026, [ADR 0011](adr/0011-who-writes-the-words.md)).
 - [x] **The EU AI Act (Article 50), and the two licence questions:** no lawyer is available, so the project takes cautious working positions instead (accepted 13 Nov 2026, [ADR 0016](adr/0016-legal-positions-without-a-lawyer.md)). Section 10 has the positions and what is still unclear.
 - [ ] Whether to register a trade mark on the name. Ruled out for now because of its cost.
@@ -458,6 +458,7 @@ The brief for whoever designs the prototype. Read sections 1 to 13 first, plus t
 | 18 | Settings | See 14.3. |
 | 19 | Help | How a review works, "Words used in this app," key guide, "What gets sent," "What's protected," not legal advice, license, keyboard shortcuts. |
 | 20 | Error | Unexpected error, "Your files are safe." "Copy the details" (version, step, error code), with a suggestion to report the problem on GitHub (the app opens nothing itself). "Back to reviews." |
+| 21 | Third-party licences | Every bundled library with its version and licence, the full notices the licences require, and a link to the source of the MPL-2.0 and LGPL libraries (`pikepdf`, PyGObject). Reached from Help. Copy in `ux-copy.md` section 4.18. Not in the prototype yet. |
 
 ### 14.2 States to show
 
