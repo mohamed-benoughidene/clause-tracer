@@ -146,6 +146,26 @@ The items left untested above were tried for real, on GitHub Actions runners, wh
 
 **Windows: a real Inno Setup installer works end to end.** A silent install (`/VERYSILENT`), without admin rights (`PrivilegesRequired=lowest`, which the installer quietly redirects to the user's own profile instead of `Program Files`), a Start Menu shortcut, running the app from its installed location, and a silent uninstall that leaves nothing behind. Inno Setup 6 was already on GitHub's Windows runner; nothing extra had to be installed.
 
-**Still open: the app's window never starts under GitHub's Ubuntu CI runners.** The install succeeds, but running the installed app under a virtual screen times out with `WebViewException: Main window failed to start`, on both Ubuntu versions. Two likely causes were tried and neither fixed it: WebKitGTK's own process sandbox (bubblewrap-based, which some CI images restrict) turned off, and software-only GL rendering forced. Fedora's container has no GPU either and starts the window fine, so the cause isn't simply "no GPU". This looks like something specific to GitHub's Ubuntu CI image rather than Ubuntu itself, but that isn't proven. It needs a real Ubuntu desktop or VM to settle, which the developer doesn't have.
+**Still open: the app's window never starts under GitHub's Ubuntu CI runners.** The install succeeds, but running the installed app under a virtual screen times out with `WebViewException: Main window failed to start`, on both Ubuntu versions. Two likely causes were tried and neither fixed it: WebKitGTK's own process sandbox (bubblewrap-based, which some CI images restrict) turned off, and software-only GL rendering forced. Fedora's container has no GPU either and starts the window fine, so the cause isn't simply "no GPU". This looks like something specific to GitHub's Ubuntu CI image rather than Ubuntu itself, but that isn't proven. It needs a real Ubuntu desktop or VM to settle, which the developer doesn't have. **Update, the same day:** this puzzle is solved. See the next amendment.
 
 **What this changes for the shell stage:** the `.deb`'s `Depends:` line needs the Ubuntu 22.04 variant above when that target is supported. The Windows installer can safely ask for no admin rights. The one open question — does the real app's window start on a real Ubuntu desktop — is the same trial script, just run somewhere with an actual screen; it is not a new unknown, only an unconfirmed one.
+
+## Amendment (13 Nov 2026): the Ubuntu window puzzle solved, and Linux Mint
+
+The window that "never starts" in the amendment above was not missing. It was late. The puzzle is solved, and the fix is in the app's own code.
+
+**Cause.** pywebview 6.2.1 raises `Main window failed to start` when the window's `shown` event does not arrive within a hard-coded 20 seconds of the first API call. On GitHub's Ubuntu 22.04 and 24.04 runners the window showed after about 26 seconds. GTK was blocked for 25 seconds, the D-Bus default timeout, on a call to the desktop portal (`org.freedesktop.portal.Desktop`). The runner has a systemd user bus but no login session, and no `DISPLAY` is imported into it. So `xdg-desktop-portal-gtk` exits with "cannot open display", and the portal never answers. Ubuntu installs the portal through WebKitGTK's `Recommends:`. The Fedora container has no portal, so it never stalled.
+
+**Not the cause:** the PyInstaller bundle, the environment reset in `use_host_gtk()`, WebKit's own process sandbox, and GPU or GL settings. The unfrozen app and a plain PyGObject and WebKit2 window both run on the runner.
+
+**Fix, in the app's own code.** Before any pywebview API call, the app waits for the window's `shown` and `loaded` events, using its own longer timeout (90 seconds in the trial). With that wait, every job passes on Ubuntu 22.04 and 24.04, with the checks unchanged. The 25-second delay itself remains in that unusual environment.
+
+**Who could meet the delay.** A normal GNOME, KDE, Xfce or Cinnamon login does not. The session owns the session manager and imports `DISPLAY`. A bare window manager started from a text console, or a session over ssh with the portal installed, could see a start-up delay of about 25 seconds. Two ways to remove the delay were tested and work: wrapping the app in `dbus-run-session`, or importing `DISPLAY` into the systemd user manager. Neither is adopted, because both change the user's session set-up. `GTK_USE_PORTAL=0` does not help.
+
+**Linux Mint.** Linux Mint 22, with the Ubuntu 24.04 `Depends:` line, and Linux Mint 21.3, with the Ubuntu 22.04 line, both pass in containers. Each does a real `apt` install, starts the window, loads a page, makes a Python bridge round trip, and removes the package cleanly. The Mint containers have no systemd, so they do not exercise the portal path.
+
+**Not verified:** a real Ubuntu or Mint desktop session, Wayland, and Ubuntu 26.04. GitHub's `ubuntu-latest` label is moving to Ubuntu 26, so the trial's checks pin `ubuntu-24.04`.
+
+**Rule for the shell stage (build stage 12).** Before the first pywebview call, the shell must wait for the window's `shown` and `loaded` events, with its own generous timeout. A release check should run the installed app both with and without a session bus.
+
+The trial ran on the throwaway branch `spike/packaging-linux-trial`, which was never merged.
