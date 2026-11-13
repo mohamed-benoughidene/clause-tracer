@@ -93,7 +93,7 @@ This file's sections 1 to 7 describe the first day. On 12 Nov 2026 the project o
 | Open points were tested and re-read from primary sources | Dated amendments on ADRs 0005 to 0007 and 0009 to 0014, and a new closing section in the v1 design decisions report |
 | The owner decided the remaining technical points | `sqlcipher3`; a `.deb` for Linux; pages loaded from files; PyGObject allowed by name; the two missing parts of ADR 0012 |
 
-**Still open:** whether version 1 ships "Rewrite with AI" for the message; a trial build of the Linux package; the Windows checks in CI; and the legal questions, which need a lawyer.
+**Still open at the end of that day:** whether version 1 ships "Rewrite with AI" for the message; a trial build of the Linux package; the Windows checks in CI; and the legal questions, which need a lawyer. Section 9 below says how each was closed the next day.
 
 ## 9. Closing the last open items (12 and 13 Nov 2026)
 
@@ -101,9 +101,10 @@ The owner said a lawyer is not an option, and asked to work on the four items le
 
 | Item | State |
 | --- | --- |
-| Legal questions | [ADR 0016](../docs/adr/0016-legal-positions-without-a-lawyer.md) written as **proposed**. The owner has not ruled on it. Nothing else was changed to match it yet |
-| Linux trial build | **Done, 13 Nov 2026.** It works, with two conditions. Run without root in a throwaway sandbox; nothing was installed. Results are in the last amendment of ADR 0009, and the full results file is on the local branch `spike/local-archive` |
-| Windows checks | **Done, 13 Nov 2026.** The owner agreed to push the branch `spike/windows-checks`, which holds only the trial scripts. All checks passed on two Windows runners. Results are in the last amendments of ADRs 0006, 0007 and 0009. The branch can be deleted from GitHub when no longer wanted |
+| Legal questions | **Done, 13 Nov 2026.** [ADR 0016](../docs/adr/0016-legal-positions-without-a-lawyer.md) accepted by the owner. The spec, system design and ADRs 0007, 0011 and 0014 were updated to match |
+| Linux trial build | **Done, 13 Nov 2026.** It works, with two conditions. Run without root in a throwaway sandbox; nothing was installed. Results are in an amendment of ADR 0009, and the full results file is on the local branch `spike/local-archive` |
+| Windows checks | **Done, 13 Nov 2026.** The owner agreed to push the branch `spike/windows-checks`, which holds only the trial scripts. All checks passed on two Windows runners. Results are in amendments of ADRs 0006, 0007 and 0009 |
+| Real installs (Ubuntu, Fedora, Windows) | **Mostly done, 13 Nov 2026.** Real `apt` and `dnf` installs tried on GitHub's own CI runners, which have real root. The installs themselves work on both; a real Windows installer (Inno Setup) also fully works, with no admin rights needed. **Still open:** the app's window won't start under GitHub's Ubuntu CI image specifically, for an unfound reason; Fedora's container (no GPU either) starts it fine. Needs a real Ubuntu desktop or VM. Results are in the latest amendment of ADR 0009 |
 | First paid run | The real first run still needs the pipeline. On 13 Nov 2026 a small probe spent $0.07 and measured cost, caching and strict forms on one form; the numbers are in the last amendment of ADR 0010 and in testing strategy 7.5 |
 
 **Draft question for the EU's AI Act Service Desk** (the owner sends it, at <https://ai-act-service-desk.ec.europa.eu/en/form/helpdesk>):

@@ -135,3 +135,17 @@ A trial `.deb` of 7 MB was built, unpacked and run. Its dependency line, with ea
 | PyInstaller 6 puts data files in `_internal/` | Load pages from there, not from beside the program |
 
 **Not tested:** installing the `.deb` with `dpkg` or apt; a real desktop session (the Linux runs used a virtual screen with no network); Wayland; Ubuntu, Mint and Fedora; a Windows installer; the navigation guard itself. Action items 1 and 2 of this record's trial are closed; these remain for the shell stage.
+
+## Amendment (13 Nov 2026): real installs on Ubuntu, Fedora and Windows, with one still-open puzzle
+
+The items left untested above were tried for real, on GitHub Actions runners, which have real root (unlike the developer's own machine). Scripts are on the local branches `spike/local-archive` (Linux) and `spike/windows-checks` (Windows, pushed, never to be merged).
+
+**Ubuntu, real `apt`/`.deb` install: the install itself works.** `apt-get install -y ./clause-tracer-trial.deb` really resolved dependencies and installed, on both Ubuntu 22.04 and 24.04. The `Depends:` line from the first trial needed one change for 22.04: it predates the "t64" package-rename, so `libglib2.0-0t64` becomes `libglib2.0-0`, `libssl3t64` becomes `libssl3`, and the glibc floor drops from `2.38` to `2.35`. Everything else matched. The desktop file, a clean `apt-get remove`, and the file layout all checked out.
+
+**Fedora, real `dnf` install: fully works, including running the app.** `python3-gobject`, `gtk3`, `webkit2gtk4.1` and `xorg-x11-server-Xvfb` installed by name, the tar.gz-style layout under `/opt` ran under Xvfb, and every check passed: the Python bridge, the link to a second page, no listening socket, the host's own WebKitGTK loaded (not a bundled copy).
+
+**Windows: a real Inno Setup installer works end to end.** A silent install (`/VERYSILENT`), without admin rights (`PrivilegesRequired=lowest`, which the installer quietly redirects to the user's own profile instead of `Program Files`), a Start Menu shortcut, running the app from its installed location, and a silent uninstall that leaves nothing behind. Inno Setup 6 was already on GitHub's Windows runner; nothing extra had to be installed.
+
+**Still open: the app's window never starts under GitHub's Ubuntu CI runners.** The install succeeds, but running the installed app under a virtual screen times out with `WebViewException: Main window failed to start`, on both Ubuntu versions. Two likely causes were tried and neither fixed it: WebKitGTK's own process sandbox (bubblewrap-based, which some CI images restrict) turned off, and software-only GL rendering forced. Fedora's container has no GPU either and starts the window fine, so the cause isn't simply "no GPU". This looks like something specific to GitHub's Ubuntu CI image rather than Ubuntu itself, but that isn't proven. It needs a real Ubuntu desktop or VM to settle, which the developer doesn't have.
+
+**What this changes for the shell stage:** the `.deb`'s `Depends:` line needs the Ubuntu 22.04 variant above when that target is supported. The Windows installer can safely ask for no admin rights. The one open question — does the real app's window start on a real Ubuntu desktop — is the same trial script, just run somewhere with an actual screen; it is not a new unknown, only an unconfirmed one.
