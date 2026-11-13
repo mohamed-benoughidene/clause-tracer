@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'">
+<title>Page A</title>
+<script src="csp-log.js"></script>
+<link rel="stylesheet" href="style.css">
+<script src="app.js" defer></script>
+</head>
+<body>
+<p id="probe">Page A</p>
+<img id="logo" src="logo.png" alt="logo">
+<p><a id="to-b" href="b.html">Go to page B</a></p>
+</body>
+</html>

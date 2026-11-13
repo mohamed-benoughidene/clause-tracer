@@ -1,0 +1,37 @@
+# Throwaway trial checks. This branch is never merged.
+name: spike-windows
+on:
+  push:
+    branches: ["spike/windows-checks"]
+permissions:
+  contents: read
+jobs:
+  checks:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, windows-2022]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install pypdfium2 sqlcipher3 reportlab keyring pywebview pyinstaller psutil
+      - run: python -m pip list
+      - name: PDF functions
+        if: always()
+        run: python spikes/windows/check_pdfium.py
+      - name: Encrypted store and key store
+        if: always()
+        run: python spikes/windows/check_store.py
+      - name: Pages from files, not frozen
+        if: always()
+        timeout-minutes: 5
+        run: python spikes/windows/trial_app.py
+      - name: Pages from files, frozen with PyInstaller
+        if: always()
+        timeout-minutes: 10
+        run: |
+          pyinstaller --noconfirm --onedir --name trial --add-data "spikes/windows/pages;pages" spikes/windows/trial_app.py
+          dist/trial/trial.exe
