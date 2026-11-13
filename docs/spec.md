@@ -167,6 +167,7 @@ The user makes a message, a report, or both. If positions are unchecked, a warni
 - **One-page summary:** a legend, label counts, each label with its quote, why, and changes you made, the Missing list, unsure questions, suggestions, the playbook name and snapshot date, and the privacy mode used. Quotes are cut at two lines. It may run to a second page.
 - **Full contract:** the whole contract with highlights, labels and suggestions.
 - An "Include your notes" tickbox, off by default. Every page has a "Private" footer and the "not legal advice" line. The save dialog notes that saved PDFs aren't encrypted and aren't removed by auto-delete.
+- Every piece of text keeps a written-by value: code, AI, or the user. A PDF report that contains any AI-written text carries that in the file's metadata (ADR 0016).
 
 ## 5. Labeling rules
 
@@ -240,6 +241,7 @@ A fixed sequence run by the app's code. The AI never decides what runs next and 
 - **Retries:** a broken, empty or unknown reply is retried once, then that value becomes unsure. A network error is retried 3 times, then the review becomes Interrupted.
 - **Display:** a PDF contract's original pages are shown as pictures of the page: nothing in the file runs, and its links open only after the warning in 4.3. All text the app pulls out of the contract (quotes, summaries), and all playbook and AI text, is shown as plain text in the app and the report PDF, never as formatted text or links. Placeholders are restored by code only when they exactly match a known placeholder. An unknown placeholder counts as a broken reply. No confidence percentages or meters are shown anywhere, including Jev's probabilities.
 - **AI wording:** every piece of text the AI wrote carries one fixed line: "Every quote and number was checked against the contract; the wording was written by AI." Text that code built carries no such line (ADR 0011).
+- **Written-by metadata:** every stored piece of text — labels, reasons, messages, rewrites — keeps a written-by value: code, AI, or the user. A PDF export that includes AI-written text carries a machine-readable mark in the file's own metadata (ADR 0016).
 - **Mid-run changes:** a changed key, model or privacy mode applies from the next AI call.
 
 ### 6.3 Review statuses
@@ -317,6 +319,7 @@ A fixed sequence run by the app's code. The AI never decides what runs next and 
 - The app window shows only the app's own pages. A link to a web address never loads inside it; it opens in the user's browser or not at all (ADR 0009).
 - Every import is previewed first. Playbook files use a strict format with size limits. Word files are read with external links turned off.
 - Each release publishes signed checksums (fingerprints that prove a download wasn't changed) and a build record from GitHub that ties the download to its source code. The shipped code is never obfuscated (ADR 0014).
+- `pikepdf` and PyGObject are shipped unchanged; a build test compares installed files against the wheel's own hashes. A third-party licences page names every bundled library under a licence other than MIT, BSD or Apache, with its version, licence text and a link to its source (ADR 0016).
 
 ## 9. Running the app
 
@@ -339,14 +342,15 @@ The tool compares contracts with positions the user chose. It doesn't know the l
 - A "not legal advice" notice appears on first launch, above every message, and on every report page.
 - AI text never states what a law allows (see 6.2).
 - The code is released under the Functional Source License (FSL-1.1-ALv2), which has a no-warranty clause. Anyone can use it for free, including for paid work, except to offer a competing product or service, which needs a commercial licence (`COMMERCIAL_LICENSE.md`). Each version becomes Apache 2.0 two years after its release. The app says "source available", never "open source".
-- Before wide promotion, check the wording with a lawyer.
-- **Parked for later: the EU AI Act, Article 50.** It has applied since 2 Aug 2026 and covers AI-written text. The project owner set it aside on 12 Nov 2026, so version 1 is designed without settling it. Nothing in the app or the docs may say the rule doesn't apply. What to work out later, with a lawyer:
-  - Whether the project counts as the "provider" when the user brings their own key. The official guidance doesn't say.
-  - Whether AI-written text needs a machine-readable mark. The guidance lists "rewriting text" as needing one. That touches "Rewrite with AI" for the message (4.7), the AI rewrite of a clause (4.6), and the reasons on pencilled labels.
-  - Whether the fixed line on AI wording (6.2) is enough for the duty to tell people they are dealing with AI.
-  - Which version of the Commission's guidelines is current: two dates were found, 20 Jul and 5 Nov 2026.
+- A lawyer isn't available, so the pikepdf licence, enforcing this project's own licence, and the EU AI Act are handled as cautious working positions instead of settled law ([ADR 0016](adr/0016-legal-positions-without-a-lawyer.md), accepted 13 Nov 2026). Nothing here is legal advice, and nobody qualified has checked it.
+- **The EU AI Act, Article 50.** It has applied since 2 Aug 2026 and covers AI-written text. The working position: act as if the project is a "provider". Nothing in the app or the docs may say the rule doesn't apply. What follows:
+  - A "written by" value (code, AI or user) is kept for every stored piece of text (4.7, 6.2).
+  - A PDF report that contains AI-written text carries a machine-readable mark in the file's metadata (4.7).
+  - The fixed line on AI wording (6.2) stays on every screen and report page that shows AI text.
+  - A rewrite the user copies out as plain text can't carry a hidden mark, and the app can't add one. This is an accepted, known gap, not a promise that's being kept.
+  - Before the first public release: send the provider question to the EU's AI Act Service Desk, re-read the Commission's guidelines, and check whether the project still counts as a "provider".
 
-  What was read is summarised in [ADR 0011](adr/0011-who-writes-the-words.md) and [ADR 0014](adr/0014-protection-and-release-integrity.md). The design already helps: the app builds the message itself by default, so most text it shows isn't AI-written.
+  What was read is summarised in [ADR 0016](adr/0016-legal-positions-without-a-lawyer.md), [ADR 0011](adr/0011-who-writes-the-words.md) and [ADR 0014](adr/0014-protection-and-release-integrity.md). The design already helps: the app builds the message itself by default, so most text it shows isn't AI-written.
 
 ## 11. Acceptance tests
 
@@ -414,7 +418,7 @@ Each item has a decision record (ADR). Ticked items were decided on 12 Nov 2026.
 - [x] The Linux download is a `.deb` file, with a plain archive for Fedora. The app loads its pages from files and opens no local port (decided 12 Nov 2026, [ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md)).
 - [x] A trial build confirmed that the Linux package works with the system's web view, and the PDF, encrypted-store and page-loading checks passed on Windows (13 Nov 2026, amendments to ADRs [0006](adr/0006-encrypted-storage-and-secrets.md), [0007](adr/0007-document-reading-stack.md) and [0009](adr/0009-desktop-shell-protocol-and-packaging.md)). Installing the package on Ubuntu, Mint and a real desktop is still to be tried at the shell stage.
 - [x] Version 1 keeps "Rewrite with AI" for the message, optional and labelled (decided 12 Nov 2026, [ADR 0011](adr/0011-who-writes-the-words.md)).
-- [ ] **Parked: the EU AI Act (Article 50).** Set aside for now, to work on later. The open questions are in section 10. A proposed record, [ADR 0016](adr/0016-legal-positions-without-a-lawyer.md), recommends working positions on this and on the two licence questions, since no lawyer is available. It is not accepted yet.
+- [x] **The EU AI Act (Article 50), and the two licence questions:** no lawyer is available, so the project takes cautious working positions instead (accepted 13 Nov 2026, [ADR 0016](adr/0016-legal-positions-without-a-lawyer.md)). Section 10 has the positions and what is still unclear.
 - [ ] Whether to register a trade mark on the name. Ruled out for now because of its cost.
 
 ## 14. Prototype handoff

@@ -1,6 +1,6 @@
 # ADR-0016: Take cautious working positions on three legal questions, because no lawyer is available
 
-**Status:** Proposed
+**Status:** Accepted (13 Nov 2026)
 **Date:** 2026-11-12
 **Deciders:** Project owner
 
@@ -24,7 +24,7 @@ What was read, all on 11 and 12 Nov 2026:
 One earlier doubt is closed. Two dates had been found for the guidelines. The Commission's page shows one document: published on 20 Jul 2026, with the page last updated on 5 Nov 2026, when the other language versions were added. There is one set of guidelines, not two.
 
 ## Decision
-*Proposed. Nothing below is settled until the owner accepts it.*
+The project owner accepted this on 13 Nov 2026.
 
 ### 1. `pikepdf` and the MPL-2.0: do exactly what the licence text asks
 The text is clear enough to follow without help. Section 3.2 asks for two things when the library is shipped in built form: the source must be available and people must be told how to get it, and the app's own licence must not limit their rights to that source. Section 3.3 lets the rest of the app use any licence.
@@ -126,8 +126,8 @@ What this record cannot do: it cannot tell whether a regulator would agree. Fine
 - Still true: none of this has been checked by a lawyer, and the docs must keep saying so.
 
 ## Action Items
-1. [ ] Owner: accept or change this record.
-2. [ ] On acceptance: rewrite the "parked" entry in Spec section 10 as a working position, replace "check the wording with a lawyer" there, and update Spec 13, `system-design.md` and ADRs 0007, 0011 and 0014 with dated amendments.
-3. [ ] Add to the spec: the "written by" field, and the metadata mark on PDF reports that contain AI wording (Spec 4.7 and 6.2). Add a test for each (Constitution T13).
-4. [ ] Add the build test that `pikepdf` is unchanged, and the third-party licences page with the sentences above.
+1. [x] Owner: accept or change this record. Accepted, 13 Nov 2026.
+2. [x] On acceptance: rewrite the "parked" entry in Spec section 10 as a working position, replace "check the wording with a lawyer" there, and update Spec 13, `system-design.md` and ADRs 0007, 0011 and 0014 with dated amendments. Done, 13 Nov 2026.
+3. [x] Add to the spec: the "written by" field, and the metadata mark on PDF reports that contain AI wording (Spec 4.7 and 6.2). Add a test for each (Constitution T13). Done, 13 Nov 2026 (the spec wording; the tests are written when this is coded).
+4. [x] Add the build test that `pikepdf` is unchanged, and the third-party licences page with the sentences above. Done, 13 Nov 2026 (described in Spec 8.4; built when the installer is coded).
 5. [ ] Owner: send the provider question to the AI Act Service Desk before the first public release. A draft is in section 9 of [the edit record](../../reports/Edits%20to%20source%20documents%202026-11-11.md).

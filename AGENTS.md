@@ -27,7 +27,7 @@ The design is done. The code is an empty skeleton: every module exists, runs alo
 - `assets/`: the logo master files.
 - `reports/`: research reports on how to build the app. [The architecture report](reports/Clause%20Tracer%20pipeline%20architecture.md) is the build design; read it before planning a build stage.
 
-Two design docs sit on top of the reports. Read both before planning a build stage: [docs/system-design.md](docs/system-design.md) says how the parts fit together, and [docs/testing-strategy.md](docs/testing-strategy.md) says which tests each stage needs. Both are accepted, and so are ADRs 0005 to 0015. Check an ADR's status line: a later one may be only proposed, which means a recommendation, not a decision. Before you build on a proposed one, ask the user whether it is accepted.
+Two design docs sit on top of the reports. Read both before planning a build stage: [docs/system-design.md](docs/system-design.md) says how the parts fit together, and [docs/testing-strategy.md](docs/testing-strategy.md) says which tests each stage needs. Both are accepted, and so are ADRs 0005 to 0016. Check an ADR's status line: a later one may be only proposed, which means a recommendation, not a decision. Before you build on a proposed one, ask the user whether it is accepted.
 
 The build plan in Spec section 9 is a Python command-line tool first, which is then wrapped as a desktop app. Spec section 13 lists what is decided and what is still open. Bring open items to the user as a question. Don't pick one yourself.
 

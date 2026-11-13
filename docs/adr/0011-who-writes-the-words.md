@@ -94,3 +94,7 @@ This supports the main decision here: the app's default message is built by code
 ## Amendment (12 Nov 2026): the rewrite stays, and Article 50 is parked
 
 The owner decided on 12 Nov 2026 to keep "Rewrite with AI" for the message in version 1, optional and labelled, and to set the EU AI Act question aside for now. The question is flagged in [Spec 10](../spec.md) and Spec 13 so it can be worked on later. The risk is known and accepted for now: the Commission's guidelines list rewriting text as needing a machine-readable mark, which this app does not add. Nothing in the app or the docs may say Article 50 doesn't apply.
+
+## Amendment (13 Nov 2026): the EU AI Act working position is accepted
+
+[ADR 0016](0016-legal-positions-without-a-lawyer.md) was accepted on 13 Nov 2026. It sets the working position on the open EU AI Act question this record raised: treat the project as a "provider", keep a written-by value on every stored text, and mark AI-written text in PDF export metadata (Spec 4.7, 6.2). The one accepted gap is a plain-text AI rewrite the user copies out, which can't carry a hidden mark.

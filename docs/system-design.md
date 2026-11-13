@@ -376,7 +376,7 @@ If a hosted option is ever added, these promises change and every copy must be u
 
 ## 13. Decisions
 
-The owner accepted ADRs 0005 to 0015 on 12 Nov 2026.
+The owner accepted ADRs 0005 to 0015 on 12 Nov 2026, and ADR 0016 on 13 Nov 2026.
 
 | Decision | Recommendation | Record |
 | --- | --- | --- |
@@ -395,9 +395,9 @@ The owner accepted ADRs 0005 to 0015 on 12 Nov 2026.
 **Still open after this work.** These were not researched well enough to recommend, or need a measurement or a lawyer:
 
 - Final input limits and the real cost per review, from the first paid run (Spec 13). A small probe on 13 Nov 2026 supports the estimates (ADR 0010's last amendment).
-- Whether EU AI Act Article 50 puts a marking duty on this app. The primary texts were read on 12 Nov 2026 (ADR 0011 and ADR 0014 amendments) and do not settle it. The owner parked the question that day; Spec 10 lists what to work out later. The docs must not say it does not apply.
+- Whether EU AI Act Article 50 puts a marking duty on this app. ADR 0016 (accepted 13 Nov 2026) takes a cautious working position: treat the project as a "provider", keep a written-by value on every text, mark AI text in PDF metadata, and accept the one known gap (a plain-text rewrite the user copies out can't carry a hidden mark). The docs must not say the rule does not apply.
 - Installing the Linux package on Ubuntu, Mint and a real desktop session. The trial build itself passed on Debian 13, and the Windows checks passed in CI (13 Nov 2026, ADR 0009's last amendment, which also lists what the shell must now do: a navigation guard, `file://` addresses only, and a reset of PyInstaller's environment on Linux).
-- Whether to register a trade mark later. How FSL would be enforced: no court has ruled on it, and the free routes do little (ADR 0014 amendment).
+- Whether to register a trade mark later. How FSL would be enforced: no court has ruled on it, and the free routes do little (ADR 0014 amendment). ADR 0016 (accepted 13 Nov 2026) sets the working position: a polite message, then a GitHub DMCA notice for a plain copy only, never for a "competing use" dispute. Then stop.
 - Presidio's speed on a real 60,000-character contract on an ordinary laptop.
 
 ## 14. Changes this work made to earlier documents

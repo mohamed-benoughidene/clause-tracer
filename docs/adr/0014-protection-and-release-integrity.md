@@ -96,3 +96,7 @@ The licence text, GitHub's takedown policy and the Article 50 documents were rea
 - **Third-party licences.** The app needs a third-party licences page and the installer a licences folder, covering pikepdf ([ADR 0007](0007-document-reading-stack.md)), PyGObject on Linux ([ADR 0009](0009-desktop-shell-protocol-and-packaging.md)) and SQLCipher ([ADR 0006](0006-encrypted-storage-and-secrets.md)).
 
 The research notes hold precise questions for a lawyer on each point. They are kept locally, not in the repo.
+
+## Amendment (13 Nov 2026): the licence-enforcement working position is accepted
+
+[ADR 0016](0016-legal-positions-without-a-lawyer.md) was accepted on 13 Nov 2026. It sets the working position on enforcing this project's own licence: a polite message, then a GitHub DMCA notice for a plain copy only, never for a "competing use" dispute, then stop. No court has ruled on the FSL, and a lawsuit is out of reach for one person.

@@ -98,3 +98,7 @@ Gaps carried over: not verified that the bundled PDFium build includes every fun
 ## Amendment (13 Nov 2026): the PDFium functions are present on Windows
 
 The check from 12 Nov was run on GitHub's Windows Server 2025 and 2022 runners with `pypdfium2` 5.15.2 (PDFium 159.0.8149.0). All nine functions the hidden-text checks need are present, and a test PDF gave the same readings as on Linux: white text, 1-point text and invisible-render-mode text were each told apart from normal text. This closes the last open check on the bundled PDFium build.
+
+## Amendment (13 Nov 2026): the licence working position is accepted
+
+[ADR 0016](0016-legal-positions-without-a-lawyer.md) was accepted on 13 Nov 2026. It sets the working position on the MPL-2.0 question above: ship `pikepdf` and PyGObject unchanged, a build test checks this, and the third-party licences page carries each one's version, licence text and a source link (Spec 8.4).
