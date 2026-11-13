@@ -95,3 +95,13 @@ The facts about DBOS and Hamilton are verified. The choice of Option A over them
 - **`httpx2` is confirmed as the HTTP client.** It is maintained by the Pydantic organisation ([pydantic/httpx2](https://github.com/pydantic/httpx2)), which took over because `httpx` had gone quiet. Licence BSD-3-Clause, version 2.16.0 of 21 Oct 2026, and the OpenAI Python SDK depends on it. This closes action item 1.
 - **Do not use `respx` with it.** `respx` 0.23.1 patches `httpx`, not `httpx2`. In a local test on 12 Nov 2026 the mock did not intercept, and the request went to the real network. Use `httpx2.MockTransport` instead: it is built in, it was tested the same day, and a handler of a few lines can refuse an unrecorded request and report unused recordings.
 - **This is why tests block sockets.** A mocking tool that silently stops matching sends real requests. The suite-wide socket block in [`testing-strategy.md`](../testing-strategy.md) section 8 turns that into a failing test.
+
+## Amendment (13 Nov 2026): three shape points settled for build stage 1
+
+A review of the docs found three points about `core` shapes that no record settled. The project owner decided them on 13 Nov 2026.
+
+- **Each step has its own input shape.** `AiRequest.inputs` holds the step's own frozen dataclass, never a free-form dictionary. `json_schema` is a read-only mapping built from the step's reply schema. Reason: stricter and easier to test.
+- **Playbook text carries no written-by value.** It is always the user's own words or a starter's fixed text. The written-by value of [ADR 0016](0016-legal-positions-without-a-lawyer.md) stays on review output, messages, rewrites and notes.
+- **`checking` is handed a cancel check.** `core` defines a small `CancelCheck` callable. The runner passes it in, and `checking` asks it between per-clause calls. Reason: the other way moves the per-clause calls into the runner and splits the checking logic across two places.
+
+[The system design](../system-design.md) section 3.4 lists the shapes.

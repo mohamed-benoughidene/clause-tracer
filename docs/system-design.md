@@ -222,7 +222,7 @@ The replay fake lives in `core`'s test support: keyed by a hash of the exact req
 | --- | --- | --- |
 | User state: your label, the decision, notes, ticks, tone; `Customer` | 6 | Stored apart from derived data and keyed by stable ids (section 5.1), so it is built with the store |
 | Storage rows, the key table, migrations | 6 | Inside the storage adapter (ADR 0006) |
-| `StepSpec`, the cache key, runner events, the cancel token | 6 | The runner lives in `cli` (ADR 0005) |
+| `StepSpec`, the cache key, runner events, the cancel token behind `CancelCheck` | 6 | The runner lives in `cli` (ADR 0005). `CancelCheck` itself is a stage 1 shape |
 | Explanation parts: reasons, Missing text, unsure readings and the question | 8 | Their form follows the templates and fenced slots built there. Every text field is a `Wording` |
 | Keywords on `Position`, for the keyword search | 8 | Needed only by the match searches |
 | The outbound message and its items | 8, then 11 | Templates in stage 8, "Rewrite with AI" in stage 11 (ADR 0011) |
@@ -230,11 +230,11 @@ The replay fake lives in `core`'s test support: keyed by a hash of the exact req
 | AI reply schemas | 8, 9, 11 | Pydantic models in the owning module, never in `core` (ADR 0005) |
 | Engine protocol requests and events; theme and text size | 12 | `cli` and the shell ([ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md)) |
 
-**Not yet decided** (bring each to the owner before stage 1 needs it):
+**Decided for stage 1** (owner, 13 Nov 2026, [ADR 0005](adr/0005-engine-runner-shapes-and-ports.md) amendment):
 
-- **How JSON-like values sit in frozen shapes.** ADR 0015 says `AiRequest` carries "typed inputs" but not their Python type. The same is open for `json_schema`: each step's own input dataclass, or a read-only mapping.
-- **Whether playbook text needs a written-by value.** ADR 0016 says "every stored text". Spec 6.2 names "labels, reasons, messages, rewrites". The list above applies `Wording` to review output and notes, not to playbook names, topics or level text.
-- **How a cancel reaches per-clause calls.** Section 8.3 checks a cancel token between per-clause calls, but those calls run inside `checking`. Either `checking` takes a cancel check, which needs a small shape in `core`, or the runner makes the per-clause calls itself.
+- **Each step has its own input shape.** `AiRequest.inputs` holds that step's own frozen dataclass, defined in `core` beside the step's other shapes. It is never a free-form dictionary. `json_schema` is a read-only mapping, built from the step's reply schema by the module that owns the step.
+- **Playbook text carries no written-by value.** Playbook names, topics and level text are always the user's own words or a starter's fixed text. `Wording` applies to review output, messages, rewrites and notes (ADR 0016, Spec 6.2).
+- **`checking` is handed a cancel check.** `core` defines a small `CancelCheck` shape: a callable that returns true once the user has cancelled. The runner passes it in, and `checking` asks it between per-clause calls and raises the cancellation error (section 6.4). The per-clause calls stay inside `checking`.
 
 ## 4. Data flow
 
@@ -564,7 +564,7 @@ The stage numbers and the module of each stage match the report's, so "build sta
 - **Start with** ADR 0005 action item 2 (section 3.4).
 - **Done when** importing `core` loads only the standard library; the label-rule tables cover every row of the Spec 14.5 sample; no shape has a provider-specific field; and `src/clause_tracer/core/README.md` records the shapes and ports (ADR 0005 action item 4). The owner starts writing the ten test contracts now, because they take longest.
 - **Tests, in the testing strategy.** Section 4 (the `core` row), section 5 (invariant 7), section 6.1, sections 10 and 14.
-- **Not yet decided:** the four points at the end of section 3.4.
+- **Decided 13 Nov 2026:** the points at the end of section 3.4. Nothing in stage 1 is left open, apart from the `TypeAdapter` check named there.
 
 ### 15.2 Stage 2: `ingest` for text, Markdown and pasted text
 
