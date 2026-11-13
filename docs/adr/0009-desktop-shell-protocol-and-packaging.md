@@ -164,8 +164,33 @@ The window that "never starts" in the amendment above was not missing. It was la
 
 **Linux Mint.** Linux Mint 22, with the Ubuntu 24.04 `Depends:` line, and Linux Mint 21.3, with the Ubuntu 22.04 line, both pass in containers. Each does a real `apt` install, starts the window, loads a page, makes a Python bridge round trip, and removes the package cleanly. The Mint containers have no systemd, so they do not exercise the portal path.
 
-**Not verified:** a real Ubuntu or Mint desktop session, Wayland, and Ubuntu 26.04. GitHub's `ubuntu-latest` label is moving to Ubuntu 26, so the trial's checks pin `ubuntu-24.04`.
+**Not verified:** a real Ubuntu or Mint desktop session, Wayland, and Ubuntu 26.04. GitHub's `ubuntu-latest` label is moving to Ubuntu 26, so the trial's checks pin `ubuntu-24.04`. Ubuntu 26.04 and Wayland were tried later the same day; see the next amendment.
 
 **Rule for the shell stage (build stage 12).** Before the first pywebview call, the shell must wait for the window's `shown` and `loaded` events, with its own generous timeout. A release check should run the installed app both with and without a session bus.
 
 The trial ran on the throwaway branch `spike/packaging-linux-trial`, which was never merged.
+
+## Amendment (13 Nov 2026): Ubuntu 26.04 and Wayland
+
+Two of the items left open above were tried on GitHub's runners and in containers, with the trial app. The trial ran on the throwaway branch `spike/packaging-linux-trial`, which was never merged.
+
+**Ubuntu 26.04 passes.** GitHub has an `ubuntu-26.04` runner (26.04.1 LTS, glibc 2.43, Python 3.14). The `ubuntu-latest` label still resolves to 24.04.
+
+- Ubuntu 26.04 still ships WebKitGTK 4.1 (`libwebkit2gtk-4.1-0` and `gir1.2-webkit2-4.1`, version 2.52.6) and GTK 3. The 4.0 packages are gone.
+- One package moved. `python3-gi` now uses `libgirepository-2.0-0`. `libgirepository-1.0-1` is still in the archive but is not installed by default.
+- A package built on 26.04 needs this `Depends:` line: `libc6 (>= 2.43), libwebkit2gtk-4.1-0, gir1.2-webkit2-4.1, gir1.2-gtk-3.0, libgirepository-2.0-0, libglib2.0-0t64, libcairo2, libcairo-gobject2, libffi8, libssl3t64, libbz2-1.0, liblzma5, zlib1g, libexpat1, libuuid1`. Compared with the 24.04 line, the only change is `libgirepository-1.0-1` becoming `libgirepository-2.0-0`, plus the glibc floor.
+- pywebview 6.2.1 works with PyGObject 3.56 and girepository 2.0.
+- The package built on 24.04 installs and runs on 26.04 unchanged. `apt` pulls in `libgirepository-1.0-1`. So one build serves 24.04 and 26.04 today. This holds only while Ubuntu keeps `libgirepository-1.0-1` in its archive.
+- Installing a 26.04-built package on 24.04 was not tried, and should not work, because 24.04 has no `libgirepository-2.0-0`.
+- Start-up on the 26.04 runner takes about 2 s inside a D-Bus session and about 27 s without one. This is the known portal stall, and it passes because of the app's own wait.
+
+**Wayland passes.** The installed app ran under a headless Wayland compositor (weston, pixman renderer), with no X server, `DISPLAY` unset and `GDK_BACKEND=wayland`. Every run reported the GDK display type `GdkWaylandDisplay`, and the check required it.
+
+- It passed on Ubuntu 24.04 and 26.04 runners, in `ubuntu:24.04` and `ubuntu:26.04` containers, and in a Fedora 41 container. The window, page load and Python bridge round trip all passed.
+- No extra environment variable was needed. `LIBGL_ALWAYS_SOFTWARE=1` and `WEBKIT_DISABLE_DMABUF_RENDERER=1` were tried as separate runs. Neither is required.
+- The launcher and the app never force X11.
+- The portal stall is not tied to Wayland or X11. On runners without a login session, start-up took between 1 and 30 seconds on Wayland. In containers it took under half a second.
+
+**Not verified:** a real GNOME, KDE or Cinnamon desktop session on Ubuntu or Mint. A headless compositor does not cover the real GPU path, the real desktop portal back ends, HiDPI, input methods, the clipboard, or starting the app from its menu entry. Only amd64 was tested.
+
+**What this changes for the shell stage (build stage 12).** The `.deb` is still built on the oldest supported Ubuntu, as decided. That one build also covers 26.04 today. The release check should also install the package on the newest Ubuntu, so that the day Ubuntu drops `libgirepository-1.0-1` is noticed. The release check should run the app once under Wayland and once under X11.
