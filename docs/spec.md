@@ -2,7 +2,7 @@
 
 Nov 4, 2026 · @Mohammed
 
-Version 2, after a five-reviewer inspection on 4 Nov 2026. This is the standalone description of what Clause Tracer version 1 is and how it works. The decision history lives in the Decision history tab.
+Version 2, after a five-reviewer inspection on 4 Nov 2026. This is the standalone description of what Clause Tracer version 1 is and how it works. The decision history lives in the decision records in [`adr/`](adr/).
 
 ## 1. What it is
 
@@ -146,7 +146,7 @@ This is the feature the product is named after.
 - Before a rewrite is sent for re-check, code replaces every known name and address with its placeholder, and Presidio checks for new personal data, which the user confirms.
 - Each suggestion is re-checked against every position its clause affects and shown before and after. Its label is for information only and doesn't change the counter or status.
 - One suggestion per clause. A new one replaces the old after confirmation. Suggestions can be edited or removed.
-- A suggestion that fails its quote check can still be saved, labeled unsure.
+- A suggestion that fails its quote check can still be saved, labelled unsure.
 - The original contract file is never changed.
 
 ### 4.7 Outputs
@@ -160,7 +160,7 @@ The user makes a message, a report, or both. If positions are unchecked, a warni
 3. Code builds the message from templates, one paragraph for each ticked item, with "\[TO\]" and "\[FROM\]" markers. Code fills in real names afterwards. "Rewrite with AI" is optional: the rewrite is shown as a before-and-after, and code checks every quote, number and name in it before it can be used (ADR 0011).
 4. Editable text, regenerate, and copy. The "not legal advice" line shows above the message box, never inside the copied text.
 5. If nothing needs asking: "Nothing to ask for from your playbook. This only means the contract matches your rules. It doesn't mean it's safe to sign."
-6. The last message is saved with the review. If labels change afterwards: "Labels changed. Regenerate?"
+6. The last message is saved with the review. If labels change afterwards: "Labels changed since this message," with "Regenerate to use the new labels. This replaces your current text."
 
 **Report**, saved as PDF, in one of two formats:
 
@@ -169,7 +169,7 @@ The user makes a message, a report, or both. If positions are unchecked, a warni
 - An "Include your notes" tickbox, off by default. Every page has a "Private" footer and the "not legal advice" line. The save dialog notes that saved PDFs aren't encrypted and aren't removed by auto-delete.
 - Every piece of text keeps a written-by value: code, AI, or the user. A PDF report that contains any AI-written text carries that in the file's metadata (ADR 0016).
 
-## 5. Labeling rules
+## 5. Labelling rules
 
 These rules decide every label. Code applies them the same way every time.
 
@@ -404,7 +404,7 @@ Each item has a decision record (ADR). Ticked items were decided on 12 Nov 2026.
 
 - [x] Desktop shell: neither Tauri nor Electron. pywebview, so all shell code is Python (decided 12 Nov 2026, [ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md)).
 - [x] How Presidio and its language model are bundled: the medium spaCy model, bundled in the installer (decided 12 Nov 2026, [ADR 0008](adr/0008-personal-data-detection-bundle.md)). The download size is still to be measured.
-- [x] License: Functional Source License, FSL-1.1-ALv2 (decided 7 Nov 2026).
+- [x] Licence: Functional Source License, FSL-1.1-ALv2 (decided 7 Nov 2026).
 - [x] Which 2 or 3 models to start testing with, from OpenRouter's zero-retention list: Claude Sonnet 5.5 as the default, with GPT-6.1 Terra and DeepSeek V4.1 Flash as comparisons (decided 12 Nov 2026, [ADR 0010](adr/0010-starting-models.md)).
 - [ ] Whether Jev beats an AI model on steps 6a and 9, and whether it can run under the same privacy rules. Version 1 isn't built on it; it stays an experiment ([ADR 0010](adr/0010-starting-models.md)).
 - [ ] Final input limits and the cost per review, from testing.
@@ -428,7 +428,7 @@ The brief for whoever designs the prototype. Read sections 1 to 13 first, plus t
 
 **Deliver**
 
-1. A design system: colors, type, spacing, and components (buttons, label chips, clause highlights, banners, panels, forms).
+1. A design system: colours, type, spacing, and components (buttons, label chips, clause highlights, banners, panels, forms).
 2. A clickable prototype of every screen below, linked into the user flow from section 3.
 3. Every state below, shown on its screen.
 
@@ -449,14 +449,14 @@ The brief for whoever designs the prototype. Read sections 1 to 13 first, plus t
 | 9 | Change it | New label (preferred, acceptable, walk-away, unsure), note, save. Tool label beside your label. Undo. |
 | 10 | Rewrite | Clause, "Write it yourself" or "Ask AI" with optional instruction. New personal data to confirm. Before and after with labels. "Use as suggestion." Also "Add this clause" from a Missing item. |
 | 11 | Suggestions | Every suggestion with its clause and label. Edit, remove. |
-| 12 | Output | Unchecked warning. Message, report, or both. Message: ask-for checklist, to, from, tone, editable text, "Rewrite with AI" (optional, shown before and after), regenerate, copy, "not legal advice" above. "Nothing to ask for" note. "Labels changed. Regenerate?" Report: summary or full contract, "Include your notes," preview, "Save PDF" with the save notice. |
+| 12 | Output | Unchecked warning. Message, report, or both. Message: ask-for checklist, to, from, tone, editable text, "Rewrite with AI" (optional, shown before and after), regenerate, copy, "not legal advice" above. "Nothing to ask for" note. "Labels changed since this message." Report: summary or full contract, "Include your notes," preview, "Save PDF" with the save notice. |
 | 13 | Playbooks | Playbooks with side and customer, filter by customer. Create blank, Copy a starter, Import, Export, Duplicate, Edit, Delete (with how many reviews use it). |
 | 14 | Starter preview | The starter's positions, read-only. "Copy to your playbooks." |
 | 15 | Import preview | Every position in the file, with a note that it comes from someone else. Duplicate names saved as "(imported)." Import or Cancel. |
 | 16 | Playbook editor | Name, side, customer. Positions with reorder and delete. Position form by type (see 4.1), missing level, "why this matters." Validation messages. Unsaved-changes warning. |
 | 17 | Customers | Customers with playbook counts. Add, rename, delete (unlinks playbooks, keeps them). |
 | 18 | Settings | See 14.3. |
-| 19 | Help | How a review works, "Words used in this app," key guide, "What gets sent," "What's protected," not legal advice, license, keyboard shortcuts. |
+| 19 | Help | How a review works, "Words used in this app," key guide, "What gets sent," "What's protected," not legal advice, licence, keyboard shortcuts. |
 | 20 | Error | Unexpected error, "Your files are safe." "Copy the details" (version, step, error code), with a suggestion to report the problem on GitHub (the app opens nothing itself). "Back to reviews." |
 | 21 | Third-party licences | Every bundled library with its version and licence, the full notices the licences require, and a link to the source of the MPL-2.0 and LGPL libraries (`pikepdf`, PyGObject). Reached from Help. Copy in `ux-copy.md` section 4.18. Not in the prototype yet. |
 
@@ -492,7 +492,7 @@ The brief for whoever designs the prototype. Read sections 1 to 13 first, plus t
 | Detail panel | AI judgment tag. |
 | Rewrite | Rewrite failed its quote check, savable as unsure. |
 | Output | Rewrite with AI, before and after. |
-| Output | Items unchecked. Nothing to ask for. Labels changed since the message ("Labels changed. Regenerate?"). |
+| Output | Items unchecked. Nothing to ask for. Labels changed since this message, with "Regenerate to use the new labels." |
 | Playbook editor | Validation error. |
 | Playbooks | Import failed: not a valid playbook file. |
 | Settings | Model can't do that step. Update available, or up to date. Lowering auto-delete confirmation. |
@@ -510,16 +510,16 @@ The brief for whoever designs the prototype. Read sections 1 to 13 first, plus t
 | Notifications | "Notify when a review finishes" (on): a system notification when a review running in the background is done. |
 | Data | "Delete everything": every review, playbook, customer, setting and the key, after a confirmation that names them and says it can't be undone. |
 | Appearance | Light or dark, text size. |
-| About | Version, "Check for updates" (opens GitHub only when pressed), license, not legal advice. |
+| About | Version, "Check for updates" (opens GitHub only when pressed), licence, not legal advice. |
 
 ### 14.4 Visual rules
 
 - Desktop app. \[Assumption\] Design for laptop screens about 1366 by 768 and up.
-- Every label has a color, an icon, and its word. Color is never the only signal.
+- Every label has a colour, an icon, and its word. Colour is never the only signal.
 - Four label looks (preferred, acceptable, walk-away, unsure) plus grey for not covered, drawn as split stamps: square corners, a solid colour block with the icon, and the word in small capitals (see ADR 0002). Two warning levels: top banners (hidden text, unloaded document, playbook changed, unedited starter) and small chips (everything else). No confidence meters. An AI judgment label is the same stamp drawn in pencil (a dashed graphite border and a hatched block), followed by the words "AI judgment". Only pencilled stamps are dashed. The hidden-text mark looks different from all of them.
 - Walk-away uses the brand's red (#A91207), and red means only one thing: a line you won't cross. No other UI uses red as decoration (see ADR 0003).
 - Review status is a small circle gauge plus a next step, with no pill. Draft is a dashed ring, Running fills by step ("Step 2 of 4 · about 40 s"), Interrupted shows a pause, Failed shows "!", and Done is a quiet grey tick. Only Ready to check is a solid disc, with its row in bold and its next step as the one dark button ("Check 9 →", the number of unchecked positions). The other next steps are text links (Continue, Resume, Retry, Open message). Status never uses red.
-- Text meets WCAG AA contrast (the common standard for readable color contrast).
+- Text meets WCAG AA contrast (the common standard for readable colour contrast).
 - Plain everyday words matching the glossary. Never "client" in the app's own text.
 - The app never speaks as "I". Its text is neutral: "Saved with the review," "This one is a walk-away," "The check can miss things." Buttons and checkboxes speak as the app or address the user ("your"), never as "my". "I" and "my" appear only in the user's own words: position names ("Days until I'm paid"), "why this matters" notes, the message written for the user to send, and the not-covered tick ("I've read the 35 not-covered parts").
 - App copy is British English (colour, summarise, recognise) with double curly quotes. Every string, the word list and the patterns are in `ux-copy.md`.

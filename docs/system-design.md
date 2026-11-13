@@ -25,7 +25,7 @@ Clause Tracer checks one contract against the user's own playbook and shows the 
 | Correct labels | Every planted walk-away found. At least 90% of numbers and labels correct on the test set | Spec 11 |
 | Evidence | No quote reaches the screen unless code found it word for word in the contract | Spec 11 |
 | Cost per review | `[Assumption]` about $0.28 for a 10,000-word contract and $0.82 for 50,000 words on a Sonnet-class model; a few cents on a cheap model | [ADR 0010](adr/0010-starting-models.md) |
-| Input size | `[Assumption]` files up to 20 MB and 50,000 words (about 65,000 tokens, about 2,500 sentences) | Spec 9 |
+| Input size | `[Assumption]` files up to 20 MB and 50,000 words (about 95,000 tokens at the 1.9 tokens per word the 13 Nov 2026 probe measured, [ADR 0010](adr/0010-starting-models.md); about 2,500 sentences) | Spec 9 |
 | Offline | Saved reviews open offline. A draft can be prepared offline. Only AI steps need the internet | Spec 9 |
 | Systems | Linux and Windows 10/11. Mac later | Spec 9 |
 | Download | As small as the personal-data model allows. `[Assumption]` roughly 150 to 250 MB installed with the medium model; not yet measured | [ADR 0008](adr/0008-personal-data-detection-bundle.md) |
@@ -84,7 +84,7 @@ The engine keeps the layout in [ADR 0004](adr/0004-code-layout.md): a pure `core
 | `ingest` | Read the file, build the canonical text, find hidden text, split clauses and sentences | Which PDF and Word libraries read a file |
 | `privacy` | Suggest personal data, number placeholders, keep the exact map between the two texts | How names become placeholders and back |
 | `links` | Cross-references, defined terms, overrides, references to other documents | The patterns that find a link |
-| `checking` | Match, extract, quote check, judge, explain, summarise | Prompts, reply forms and their checks |
+| `checking` | Match, extract, quote check, judge, explain, sort not-covered parts | Prompts, reply forms and their checks |
 | `writing` | Rewrite a clause as small edits that code applies | The rewrite form and its rules |
 | `outputs` | The message and the report | Templates and the PDF library |
 | `adapters` | OpenRouter, Presidio, storage, the password store | Each outside tool |
@@ -104,11 +104,11 @@ PDF and Word parsers, the report renderer and JSON handling are **not** ports. E
 
 ### 3.2 The shell
 
-The recommended shell is **pywebview** ([ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md)). It shows the pages of [`../prototype/`](../prototype/) in the system webview (WebView2 on Windows, WebKitGTK on Linux), and every line of shell code is Python. It will live in its own top-level folder, as ADR 0004 says.
+The shell is **pywebview** ([ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md)). It shows the pages of [`../prototype/`](../prototype/) in the system webview (WebView2 on Windows, WebKitGTK on Linux), and every line of shell code is Python. It will live in its own top-level folder, as ADR 0004 says.
 
 - **The interface never talks to the engine directly.** JavaScript calls a narrow Python facade through `window.pywebview.api`. The facade checks its inputs and forwards typed requests to the engine.
-- **Untrusted content stays inert.** PDF pages are pictures. Contract, playbook and AI text is set with `textContent`, never as HTML. A strict content security policy forbids remote content. Links open in the system browser after the Spec 4.3 warning. Developer tools and the remote debugging port are off in release builds.
-- **Pages load from files, with no local server** (decided 12 Nov 2026, ADR 0009 amendment). pywebview is started with an absolute path and its built-in server off, so no port is opened. Browser storage is off in that mode, so theme and text size are saved by Python through the facade. This was read from pywebview's source and must be confirmed in a running build on both systems.
+- **Untrusted content stays inert.** PDF pages are pictures. Contract, playbook and AI text is set with `textContent`, never as HTML. A content security policy forbids remote content: `default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'`. `'unsafe-eval'` is needed because pywebview injects its Python bridge with `eval` (ADR 0009, 13 Nov 2026). Links open in the system browser after the Spec 4.3 warning. Developer tools and the remote debugging port are off in release builds.
+- **Pages load from files, with no local server** (decided 12 Nov 2026; confirmed in trial builds on 13 Nov 2026, ADR 0009 amendments). pywebview is always given a `file://` address with its built-in server off; a bare path starts a local server. The shell must refuse any navigation away from its own files. Browser storage is not relied on (it is missing on Linux in private mode), so theme and text size are saved by Python through the facade.
 - **The shell waits for the window's own start-up events** (decided 13 Nov 2026, ADR 0009 amendment). Before the first pywebview call, the shell waits for the window's `shown` and `loaded` events with its own longer timeout, because pywebview's fixed 20-second limit is too short where the desktop portal stalls.
 
 ### 3.3 Why two processes
@@ -252,7 +252,7 @@ The order is fixed and code runs it (P3). The AI never chooses a step and has no
 | Match, extract | 6a, 6b | `checking` | Yes | Placeholder text, position topics and types |
 | Quote check | 7 | `checking` (code) | No | Nothing (one retry call on a failed quote) |
 | Pick labels | 8 | `core` | No | Nothing |
-| Judge, explain, summarise | 9–11 | `checking` | Yes | Placeholder text, level text, fixed labels |
+| Judge, explain, sort not-covered parts | 9–11 | `checking` | Yes | Placeholder text, level text, fixed labels |
 | Rewrite (on request) | 12 | `writing`, then `checking` | Yes | One clause as placeholder text |
 | Message | 13 | `outputs` | No, unless the user asks for a rewrite | Nothing by default ([ADR 0011](adr/0011-who-writes-the-words.md)) |
 | Report | 14 | `outputs` | No | Nothing |
@@ -289,7 +289,7 @@ Every stored record carries a schema version. Numbered migrations move derived d
 
 ### 5.2 Where it is stored
 
-The recommended design is a **hybrid** ([ADR 0006](adr/0006-encrypted-storage-and-secrets.md)).
+The design is a **hybrid** ([ADR 0006](adr/0006-encrypted-storage-and-secrets.md)). The passphrase fallback uses Argon2id or scrypt; that choice is still open (ADR 0006 action item 2).
 
 ```text
  OS password store ──► master key (32 random bytes) ──┬─► opens the encrypted SQLite file
@@ -340,7 +340,7 @@ Requests that change data are safe to repeat (I14's idempotency rule, applied to
 ### 6.2 The command line
 
 ```text
-clause-tracer review --input contract.pdf --playbook freelancer.json --output report.md
+clause-tracer review --input contract.pdf --playbook freelancer.json --output report.pdf
 clause-tracer resume --review <id>
 clause-tracer serve --stdio
 python -m clause_tracer.<module> --input samples/…        # any module alone (S1)
@@ -378,7 +378,7 @@ One base `ClauseTracerError(code, context)` in `core`, with a small tree of expe
 
 **Prompt caching.** Prompts put the byte-stable system text first, the contract block next, and the per-position task last, so the provider can reuse the prefix. The app reads the cached-token count on every call and warns when caching misses, because a miss raises the cost of a 50,000-word review from about $0.82 to about $3.77 on the recommended default model `[Assumption]`.
 
-**Estimate.** `[Assumption]` A review of 11 positions over about 50 clauses makes roughly 35 to 40 AI calls: one forward match per position, a few reverse-match batches, a handful of pair checks, one extraction per position, and the judge, explain and summarise calls. The pre-run estimate is shown as a range and is calibrated from the `usage.cost` of real runs.
+**Estimate.** `[Assumption]` A review of 11 positions over about 50 clauses makes roughly 35 to 40 AI calls: one forward match per position, a few reverse-match batches, a handful of pair checks, one extraction per position, and the judge, explain and sort-not-covered calls. The pre-run estimate is shown as a range and is calibrated from the `usage.cost` of real runs.
 
 ## 8. Reliability and failure handling
 
@@ -449,7 +449,7 @@ The source is public, so nothing technical stops a copy, and hiding the shipped 
 
 ## 10. Packaging and release
 
-| Step | Recommendation | Record |
+| Step | Decision | Record |
 | --- | --- | --- |
 | Freeze the Python engine and shell | PyInstaller, one-folder build (one-file builds unpack on every start) | [ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md) |
 | Windows installer | Inno Setup, scripted on GitHub's Windows runner, with the WebView2 bootstrapper | ADR 0009 |
@@ -496,11 +496,11 @@ If a hosted option is ever added, these promises change and every copy must be u
 
 The owner accepted ADRs 0005 to 0015 on 12 Nov 2026, and ADR 0016 on 13 Nov 2026.
 
-| Decision | Recommendation | Record |
+| Decision | What was accepted | Record |
 | --- | --- | --- |
 | Step runner, core shapes, ports, HTTP client | Hand-written runner; frozen dataclasses; `Protocol` ports; `httpx2` with a small retry loop | [ADR 0005](adr/0005-engine-runner-shapes-and-ports.md) |
 | Storage and secrets | Hybrid encrypted store with a key per review; OS password store with a passphrase fallback | [ADR 0006](adr/0006-encrypted-storage-and-secrets.md) |
-| Reading PDF and Word files; report PDF | `pypdfium2` alone at run time; hardened `lxml` for Word; NUPunkt; ReportLab | [ADR 0007](adr/0007-document-reading-stack.md) |
+| Reading PDF and Word files; report PDF | `pypdfium2` reads PDFs at run time through its raw API only; `pikepdf` also ships, for hidden layers; hardened `lxml` for Word; NUPunkt; ReportLab | [ADR 0007](adr/0007-document-reading-stack.md) |
 | Personal-data detection (Spec 13) | Presidio with a pinned config and the medium spaCy model, behind code-first finders | [ADR 0008](adr/0008-personal-data-detection-bundle.md) |
 | Desktop shell, protocol, packaging (Spec 13) | pywebview; engine child process over stdio; PyInstaller one-folder; Inno Setup | [ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md) |
 | Starting models and Jev (Spec 13) | Claude Sonnet 5.5 by default, two comparison models; Jev as an experiment only | [ADR 0010](adr/0010-starting-models.md) |
@@ -508,15 +508,22 @@ The owner accepted ADRs 0005 to 0015 on 12 Nov 2026, and ADR 0016 on 13 Nov 2026
 | Missing, unsure and failed evidence | A checkable "searched, nothing found" list; disagreeing searches become unsure; unplaceable quotes keep their label | [ADR 0012](adr/0012-missing-unsure-and-evidence-failures.md) |
 | Test layers and release gates | Five layers, a paid run on a budget, the project's own gates | [ADR 0013](adr/0013-test-layers-and-release-gates.md) |
 | Protection and release integrity | No obfuscation; signed and attested releases; honest wording; trade mark deferred | [ADR 0014](adr/0014-protection-and-release-integrity.md) |
+| Legal positions without a lawyer (not legal advice) | Cautious working positions: ship `pikepdf` unchanged with its licence and source; FSL enforcement by a polite message first, then a GitHub DMCA notice for a plain copy only; EU AI Act Article 50 handled as a working position, with a written-by value on each text and AI text marked in PDF metadata | [ADR 0016](adr/0016-legal-positions-without-a-lawyer.md) |
 | Room for a hosted option | Keep the seams in section 11 open; change nothing users see | [ADR 0015](adr/0015-provider-ready-seam.md) |
 
 **Still open after this work.** These were not researched well enough to recommend, or need a measurement or a lawyer:
 
 - Final input limits and the real cost per review, from the first paid run (Spec 13). A small probe on 13 Nov 2026 supports the estimates (ADR 0010's last amendment).
 - Whether EU AI Act Article 50 puts a marking duty on this app. ADR 0016 (accepted 13 Nov 2026) takes a cautious working position: treat the project as a "provider", keep a written-by value on every text, mark AI text in PDF metadata, and accept the one known gap (a plain-text rewrite the user copies out can't carry a hidden mark). The docs must not say the rule does not apply.
-- Real-world installer checks (13 Nov 2026, new ADR 0009 amendment). **Closed:** the real `apt`/`.deb` install on Ubuntu 22.04 and 24.04 (correct `Depends:` names for each, clean removal), the real `dnf`/tar.gz install on Fedora, and a real Windows installer (Inno Setup, silent install, run, silent uninstall, no admin rights needed). The Ubuntu window puzzle is closed: the window was slow to start, not missing, and the app now waits for its own start-up events (ADR 0009, 13 Nov 2026). Linux Mint 22 and 21.3 pass in containers. Ubuntu 26.04 passes too, and the app runs under a headless Wayland compositor on Ubuntu and Fedora (13 Nov 2026, same ADR amendment). **Still untried:** a real Ubuntu or Mint desktop session.
+- Real-world installer checks (13 Nov 2026, new ADR 0009 amendment). **Closed:** the real `apt`/`.deb` install on Ubuntu 22.04 and 24.04 (correct `Depends:` names for each, clean removal), the real `dnf`/tar.gz install on Fedora, and a real Windows installer (Inno Setup, silent install, run, silent uninstall, no admin rights needed). The Ubuntu window puzzle is closed: the window was slow to start, not missing, and the trial app now waits for its own start-up events (ADR 0009, 13 Nov 2026). Linux Mint 22 and 21.3 pass in containers. Ubuntu 26.04 passes too, and the trial app runs under a headless Wayland compositor on Ubuntu and Fedora (13 Nov 2026, same ADR amendment). **Still untried:** a real Ubuntu or Mint desktop session.
 - Whether to register a trade mark later. How FSL would be enforced: no court has ruled on it, and the free routes do little (ADR 0014 amendment). ADR 0016 (accepted 13 Nov 2026) sets the working position: a polite message, then a GitHub DMCA notice for a plain copy only, never for a "competing use" dispute. Then stop.
 - Presidio's speed on a real 60,000-character contract on an ordinary laptop.
+- The running screen's first stage is labelled "Reading the pages (step 5)" (Spec 14.1 row 6), but step 5 (`links`) already ran before the privacy check (section 4.1). What that stage shows is not decided.
+- How page pictures reach the window. The page policy has no `img-src data:`, pages cannot fetch files, and writing pictures to disk would break "everything saved is encrypted". Needed before build stage 12.
+- How CI drives the Windows window. ADR 0009 plans Playwright over the debugging port, which release builds turn off. A separate test build or another driver is needed.
+- Whether the update check only opens the release page or asks GitHub. Spec 8.1 says it opens the page; the About copy "You have the latest version" (`ux-copy.md`) needs a request.
+- Whether names typed into a playbook position or a rewrite instruction are replaced before they are sent to the AI. Spec 6.2 says known names are replaced only in notes, and step 12 sends the rewrite instruction as typed.
+- The oldest supported Windows version. The oldest supported Linux systems (Ubuntu 22.04 and Mint 21) are in section 15.
 - The smaller build questions marked "Not yet decided" in sections 3.4 and 15.
 
 ## 14. Changes this work made to earlier documents
