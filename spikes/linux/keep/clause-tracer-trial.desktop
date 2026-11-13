@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Clause Tracer trial
+Comment=Packaging trial
+Exec=clause-tracer-trial
+Terminal=false
+Categories=Office;

@@ -1,0 +1,10 @@
+Package: clause-tracer-trial
+Version: 0.0.1~spike1
+Architecture: amd64
+Maintainer: Clause Tracer spike <spike@example.invalid>
+Section: utils
+Priority: optional
+Depends: libc6 (>= 2.38), libwebkit2gtk-4.1-0, gir1.2-webkit2-4.1, gir1.2-gtk-3.0, libgirepository-1.0-1, libglib2.0-0t64, libcairo2, libcairo-gobject2, libffi8, libssl3t64, libbz2-1.0, liblzma5, zlib1g, libexpat1, libuuid1
+Description: Clause Tracer packaging trial (throwaway)
+ PyInstaller one-folder build of a pywebview GTK window that uses the
+ system WebKitGTK. Not a product.
