@@ -1,0 +1,46 @@
+{
+ "id": "gen-1794564391-NFjFi0ueW5vARiBtqtCH",
+ "object": "chat.completion",
+ "created": 1794564391,
+ "model": "anthropic/claude-haiku-5.5",
+ "provider": "Google",
+ "system_fingerprint": null,
+ "service_tier": null,
+ "choices": [
+  {
+   "index": 0,
+   "logprobs": null,
+   "finish_reason": "stop",
+   "native_finish_reason": "end_turn",
+   "message": {
+    "role": "assistant",
+    "content": "{\"found\": true, \"quote\": \"The Client shall pay each undisputed invoice within sixty (60) days of receipt of the invoice.\", \"number\": 60, \"unit\": \"days\"}",
+    "refusal": null,
+    "reasoning": null
+   }
+  }
+ ],
+ "usage": {
+  "prompt_tokens": 23845,
+  "completion_tokens": 61,
+  "total_tokens": 23906,
+  "cost": 0.003010175,
+  "is_byok": false,
+  "prompt_tokens_details": {
+   "cached_tokens": 0,
+   "cache_write_tokens": 23807,
+   "audio_tokens": 0,
+   "video_tokens": 0
+  },
+  "cost_details": {
+   "upstream_inference_cost": 0.003010175,
+   "upstream_inference_prompt_cost": 0.002979675,
+   "upstream_inference_completions_cost": 3.05e-05
+  },
+  "completion_tokens_details": {
+   "reasoning_tokens": 0,
+   "image_tokens": 0,
+   "audio_tokens": 0
+  }
+ }
+}
