@@ -197,7 +197,7 @@ This is the list of shapes and ports `core` defines in build stage 1 (section 15
 | `NotCoveredClause` | `clause_id: ClauseId, clause_type: str` | A type from the closed list, plus the clause's own first line ([ADR 0011](adr/0011-who-writes-the-words.md)). Replaces the sketch's `NotCoveredSummary` |
 | `PromptMessage` | `role: str, text: str` | One rendered prompt part |
 | `AiRequest` | `step, prompt_id: str, prompt_version: int, inputs, messages: tuple[PromptMessage, ...], schema_id: str, json_schema, model: str, privacy_mode: PrivacyMode, max_tokens: int` | The accepted form (section 6.3). It carries the structured inputs as well as the rendered prompt (ADR 0015) |
-| `Usage` | `input_tokens, cached_input_tokens, output_tokens: int` | Cached tokens are read on every call ([ADR 0010](adr/0010-starting-models.md)) |
+| `Usage` | `input_tokens, cached_input_tokens, output_tokens: int, cost_usd: Decimal \| None` | Cached tokens are read on every call ([ADR 0010](adr/0010-starting-models.md)). `cost_usd` is one neutral amount, filled in by the adapter from the provider's reply, or `None` when the provider reports none. It feeds the running cost, the spend ledger and the cost per review (decided 13 Nov 2026, [ADR 0015](adr/0015-provider-ready-seam.md) amendment) |
 | `AiReply` | `raw_body: bytes, text: str, model_used: str, provider_used: str, usage: Usage, generation_id: str` | The exact reply, saved before it is parsed (D8) |
 | `AiRecord` | `record_id, review_id, step: str, attempt: int, request_sha256: str, request: AiRequest, reply: AiReply \| None, error_code: str \| None, started_at, finished_at: datetime` | Raw and append-only, failed calls too (D1, D8). Its hash keys the cache and the replay fake |
 | `Settings` | `default_model: str, step_models: tuple[tuple[str, str], ...], private_mode_default: bool, send_why_notes: bool, auto_delete_days: int, data_dir: str, log_level: str` | Loaded once at start-up and passed in (I13). Spec 14.3 |
@@ -233,7 +233,6 @@ The replay fake lives in `core`'s test support: keyed by a hash of the exact req
 **Not yet decided** (bring each to the owner before stage 1 needs it):
 
 - **How JSON-like values sit in frozen shapes.** ADR 0015 says `AiRequest` carries "typed inputs" but not their Python type. The same is open for `json_schema`: each step's own input dataclass, or a read-only mapping.
-- **Whether `Usage` carries a cost amount.** ADR 0015 bans provider cost-field names in `core`, and section 11 puts cost fields in the adapter. Yet the runner's `CallFinished(cost, tokens)` event (section 6.1), the spend ledger ([`testing-strategy.md`](testing-strategy.md) section 7.5) and the per-review cost of Spec 9 all need the amount.
 - **Whether playbook text needs a written-by value.** ADR 0016 says "every stored text". Spec 6.2 names "labels, reasons, messages, rewrites". The list above applies `Wording` to review output and notes, not to playbook names, topics or level text.
 - **How a cancel reaches per-clause calls.** Section 8.3 checks a cancel token between per-clause calls, but those calls run inside `checking`. Either `checking` takes a cancel check, which needs a small shape in `core`, or the runner makes the per-clause calls itself.
 
@@ -471,7 +470,7 @@ The owner may later let Clause Tracer itself be the AI provider, with optional a
 | Seam | What version 1 does now |
 | --- | --- |
 | The AI call | One `AiClient` port. `AiRequest` carries structured inputs as well as the rendered prompt, so a hosted adapter could build prompts on a server |
-| Core shapes | Nothing OpenRouter-specific in `core`. Routing flags and cost fields live in the adapter |
+| Core shapes | Nothing OpenRouter-specific in `core`. Routing flags and provider cost-field names live in the adapter; `core` carries only the neutral `cost_usd` amount (section 3.4) |
 | Evidence guarantees | Quote checks, number checks and code-picked labels stay on the user's computer, whoever runs the model |
 | Credentials | Stored under a provider id, so an account token could later use the same slot |
 | Engine protocol | Transport-neutral requests and events; no screen logic in the engine |

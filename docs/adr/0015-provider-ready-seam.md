@@ -85,3 +85,11 @@ Gaps, stated plainly in the report: GDPR duties for a solo developer running an 
 3. [ ] Store the API key under a provider id in the `SecretStore` adapter.
 4. [ ] Review the docs for wording that rules out a future opt-in service, and prefer the open wording above.
 5. [x] List this ADR in Spec 12 as the reason the seam exists (done 12 Nov 2026). No other Spec change is needed now.
+
+## Amendment (13 Nov 2026): one neutral cost field in `core`
+
+The Decision keeps provider cost-field names out of `core`. That left open where the cost of a call lives, although the running cost on screen, the spend ledger and the cost per review all need it.
+
+The project owner decided on 13 Nov 2026: the `Usage` shape in `core` carries one neutral field, `cost_usd`, the cost of the call in US dollars. The adapter reads the provider's reply and fills it in, or leaves it empty when the provider reports no cost. No provider-specific field name enters `core`, so the rule above still holds and the architecture test of action item 2 is unchanged.
+
+[The system design](../system-design.md) section 3.4 lists the field.
