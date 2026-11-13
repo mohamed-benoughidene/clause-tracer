@@ -1,0 +1,15 @@
+      9012:	  trying file=/lib/x86_64-linux-gnu/glibc-hwcaps/x86-64-v3/libwebkit2gtk-4.1.so.0
+      9012:	  trying file=/lib/x86_64-linux-gnu/glibc-hwcaps/x86-64-v2/libwebkit2gtk-4.1.so.0
+      9012:	  trying file=/lib/x86_64-linux-gnu/libwebkit2gtk-4.1.so.0
+      9012:	calling init: /lib/x86_64-linux-gnu/libjavascriptcoregtk-4.1.so.0
+      9012:	calling init: /lib/x86_64-linux-gnu/libwebkit2gtk-4.1.so.0
+      9025:	  trying file=/lib/x86_64-linux-gnu/glibc-hwcaps/x86-64-v3/libwebkit2gtk-4.1.so.0
+      9025:	  trying file=/lib/x86_64-linux-gnu/glibc-hwcaps/x86-64-v2/libwebkit2gtk-4.1.so.0
+      9025:	  trying file=/lib/x86_64-linux-gnu/libwebkit2gtk-4.1.so.0
+      9025:	calling init: /lib/x86_64-linux-gnu/libjavascriptcoregtk-4.1.so.0
+      9025:	calling init: /lib/x86_64-linux-gnu/libwebkit2gtk-4.1.so.0
+      9025:	calling init: /usr/lib/x86_64-linux-gnu/webkit2gtk-4.1/injected-bundle/libwebkit2gtkinjectedbundle.so
+      9003:	  trying file=$W/build/distB/clause-tracer-trial/_internal/libwebkit2gtk-4.1.so.0
+      9003:	  trying file=/lib/x86_64-linux-gnu/libwebkit2gtk-4.1.so.0
+      9003:	calling init: /lib/x86_64-linux-gnu/libjavascriptcoregtk-4.1.so.0
+      9003:	calling init: /lib/x86_64-linux-gnu/libwebkit2gtk-4.1.so.0

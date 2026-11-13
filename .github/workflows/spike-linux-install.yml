@@ -1,0 +1,163 @@
+# Throwaway trial checks. This branch is never merged.
+# Why does the installed trial app's window not start on GitHub's Ubuntu runners
+# while it passes on Fedora and on a real Debian 13 desktop? One run, many jobs,
+# each saving stdout and stderr, so the causes separate.
+name: spike-linux-install
+on:
+  push:
+    branches: ["spike/packaging-linux-trial"]
+permissions:
+  contents: read
+
+env:
+  DEB: clause-tracer-trial_0.0.1~spike1_amd64.deb
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: ubuntu-24.04, tag: u2404, flavour: t64}
+          - {os: ubuntu-22.04, tag: u2204, flavour: jammy}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      # Distro python3 (not setup-python): PyGObject comes from python3-gi.
+      - run: sudo apt-get update && sudo apt-get install -y python3-venv python3-gi python3-gi-cairo gir1.2-gtk-3.0 binutils
+      - run: |
+          /usr/bin/python3 -m venv --system-site-packages .venv-spike
+          .venv-spike/bin/pip install --no-cache-dir pywebview pyinstaller
+          .venv-spike/bin/pip list
+      - run: |
+          . .venv-spike/bin/activate
+          spikes/linux/keep/ci-build-deb.sh ${{ matrix.flavour }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deb-${{ matrix.tag }}
+          path: ${{ env.DEB }}
+
+  # (a)+(b) Runner VMs, installed .deb, full diagnostics.
+  vm-run:
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: ubuntu-24.04, tag: u2404, dbus: "1"}
+          - {os: ubuntu-24.04, tag: u2404, dbus: "0"}
+          - {os: ubuntu-22.04, tag: u2204, dbus: "1"}
+    runs-on: ${{ matrix.os }}
+    name: vm-run (${{ matrix.os }}, dbus-run-session=${{ matrix.dbus }})
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: deb-${{ matrix.tag }}
+      - run: sudo apt-get update && sudo apt-get install -y ./${{ env.DEB }} xvfb xauth dbus dbus-x11 iproute2 desktop-file-utils
+      - name: Run the installed app (stdout and stderr saved)
+        run: |
+          if [ "${{ matrix.dbus }}" = "0" ]; then export NO_DBUS=1; fi
+          spikes/linux/keep/ci-run.sh run.log clause-tracer-trial
+      - name: Check RESULT=
+        run: python3 spikes/linux/keep/check-result.py run.log.clean
+      - name: Desktop file, host libs, clean removal
+        if: always()
+        run: spikes/linux/keep/ci-deb-checks.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: log-vm-${{ matrix.os }}-dbus${{ matrix.dbus }}
+          path: run.log*
+
+  # (c) Plain ubuntu:24.04 container: root, like the Fedora job.
+  ubuntu-container:
+    needs: build
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:24.04
+    steps:
+      - run: apt-get update && apt-get install -y git ca-certificates
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: deb-u2404
+      - run: apt-get install -y ./${{ env.DEB }} xvfb xauth dbus dbus-x11 iproute2 desktop-file-utils
+      - name: Run the installed app
+        run: spikes/linux/keep/ci-run.sh run.log clause-tracer-trial
+      - name: Check RESULT=
+        run: python3 spikes/linux/keep/check-result.py run.log.clean
+      - name: Desktop file, host libs, clean removal
+        if: always()
+        run: spikes/linux/keep/ci-deb-checks.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: log-ubuntu-container
+          path: run.log*
+
+  # (d) Unfrozen app straight from a venv on the runner VM.
+  unfrozen:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y python3-venv python3-gi python3-gi-cairo gir1.2-gtk-3.0 gir1.2-webkit2-4.1 xvfb xauth dbus dbus-x11 iproute2
+      - run: |
+          /usr/bin/python3 -m venv --system-site-packages .venv-spike
+          .venv-spike/bin/pip install --no-cache-dir pywebview
+      - name: Run trial_app.py unfrozen
+        run: spikes/linux/keep/ci-run.sh run.log .venv-spike/bin/python spikes/linux/keep/trial_app.py --pages spikes/linux/keep/pages-csp-eval
+      - name: Check RESULT=
+        run: python3 spikes/linux/keep/check-result.py run.log.clean unfrozen
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: log-unfrozen
+          path: run.log*
+
+  # (e) Plain PyGObject + WebKit2 window, no pywebview.
+  plain-gtk:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y python3-gi gir1.2-gtk-3.0 gir1.2-webkit2-4.1 xvfb xauth dbus dbus-x11
+      - name: Run plain_gtk.py
+        run: |
+          spikes/linux/keep/ci-run.sh run.log /usr/bin/python3 spikes/linux/keep/plain_gtk.py
+          grep -q 'load-changed finished' run.log || { echo "FAIL: plain WebKitGTK never finished loading"; exit 1; }
+          echo "PASS: plain WebKitGTK loaded a page"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: log-plain-gtk
+          path: run.log*
+
+  # Control: passed before.
+  fedora-dnf:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:41
+    steps:
+      - run: dnf install -y git
+      - uses: actions/checkout@v4
+      - run: |
+          dnf install -y python3 python3-pip python3-gobject gtk3 webkit2gtk4.1 xorg-x11-server-Xvfb \
+            desktop-file-utils findutils which binutils iproute dbus-daemon
+      - run: |
+          python3 -m venv --system-site-packages .venv-spike
+          .venv-spike/bin/pip install --no-cache-dir pywebview pyinstaller
+      - run: SPIKE_VARIANT=B .venv-spike/bin/pyinstaller --noconfirm spikes/linux/keep/trial.spec
+      - run: |
+          set -eu
+          mkdir -p /opt/clause-tracer-trial
+          cp -a dist/clause-tracer-trial/. /opt/clause-tracer-trial/
+          install -D -m 755 spikes/linux/keep/clause-tracer-trial.launcher /usr/bin/clause-tracer-trial
+          install -D -m 644 spikes/linux/keep/clause-tracer-trial.desktop /usr/share/applications/clause-tracer-trial.desktop
+      - name: Run the installed app (same diagnostics, no dbus-run-session, like the first Fedora pass)
+        run: NO_DBUS=1 spikes/linux/keep/ci-run.sh run.log clause-tracer-trial
+      - run: python3 spikes/linux/keep/check-result.py run.log.clean
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: log-fedora
+          path: run.log*

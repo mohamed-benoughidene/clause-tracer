@@ -1,0 +1,8 @@
+gir1.2-javascriptcoregtk-4.1
+gir1.2-soup-3.0
+gir1.2-webkit2-4.1
+libenchant-2-2
+libhidapi-hidraw0
+libjavascriptcoregtk-4.1-0
+libmanette-0.2-0
+libwebkit2gtk-4.1-0
