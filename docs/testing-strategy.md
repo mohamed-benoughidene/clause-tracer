@@ -181,6 +181,10 @@ Claude Haiku 5.5 is the cheap model to use: on 12 Nov 2026 it cost $0.10 and $0.
 
 So the earlier figures of $34 and $67 hold only for a Sonnet-class model. With $10.76, paid testing runs on a cheap model, and that is workable.
 
+**First measurements (13 Nov 2026).** A small probe spent $0.07 of the budget on eight calls ([ADR 0010](adr/0010-starting-models.md), last amendment). On a 12,616-word invented contract, the first call cost $0.0030 on Claude Haiku 5.5 and $0.0602 on Claude Sonnet 5.5; each later call, read from the cache, cost $0.00027 and about $0.003. That puts a 40-call review near 1.5 cents and 18 cents, in line with the table above. Caching hit on the zero-retention route. The table stays an estimate until step 1 runs the real pipeline.
+
+**Spent so far:** $0.07 (13 Nov 2026). About $10.69 is left.
+
 **The spending plan.**
 
 | Step | What | Planned spend |

@@ -87,3 +87,27 @@ Caching is not decoration: a miss raises Sonnet 5.5 from $0.82 to $3.77 on a 50,
 Prices were re-read from OpenRouter's public lists on 12 Nov 2026 (per million tokens, input / output): Claude Sonnet 5.5 $2.00 / $10.00; GPT-6.1 Terra $1.00 / $5.00; Claude Haiku 5.5 $0.10 / $0.50; DeepSeek V4.1 Flash $0.30 / $1.20. Each has a zero-retention endpoint that is not a Safety Retention one.
 
 One catch: DeepSeek V4.1 Flash's zero-retention endpoints cost more than its list price ($0.45 / $1.80 on one host and $3.00 / $12.00 on another, under the plain model name). So in private mode it is not the cheap option. **Claude Haiku 5.5 is the cheap private-mode model for paid testing.** Keep DeepSeek as a comparison only at its zero-retention price, on one pinned host.
+
+## Amendment (13 Nov 2026): first measurements from a small paid probe
+
+The owner supplied a short-lived key capped at $1. A probe made eight successful calls on an invented contract of 12,616 words (23,845 input tokens), with the planned request shape: zero-retention routing, a strict JSON form, and the contract marked for prompt caching. It spent **$0.07**. It tested one extraction form only, not the pipeline. The script and raw replies are on the local branch `spike/windows-checks`, under `spikes/paid-probe/`.
+
+| Measured | Claude Haiku 5.5 | Claude Sonnet 5.5 |
+| --- | --- | --- |
+| First call (writes the cache) | $0.0030 | $0.0602 |
+| Each later call (reads the cache) | $0.00027 | about $0.003 |
+| Time per call | 1.0 to 1.7 s | 1.2 to 2.0 s |
+| Strict form valid | 4 of 4 | 3 of 3 |
+| Quote copied exactly | 3 of 3 | 2 of 2 |
+| "Not in the contract" answered as not found | 1 of 1 | 1 of 1 |
+
+What this settles, and what it doesn't:
+
+- **Caching hits on the zero-retention route.** Every call after the first read 23,807 of 23,845 input tokens from the cache. A cached call cost about a tenth (Haiku) or a twentieth (Sonnet) of the first one.
+- **The cost estimates hold.** Forty calls on this contract come to roughly 1.5 cents on Haiku and 18 cents on Sonnet, before longer outputs. The earlier estimates were 1 to 3 cents and about 28 cents for 10,000 words. This is arithmetic from eight calls, not a measured review.
+- **Never send `temperature`.** With `require_parameters` on, a request that carried `temperature` found no endpoint at all (HTTP 404, "No endpoints found"). Without it, the same request worked. The adapter must leave the field out, and a contract test should pin that.
+- **Strict forms need `response_format`.** A forced tool call (`tool_choice`) found no zero-retention endpoint.
+- **Rate limits are real.** One call got HTTP 429 from the upstream's shared pool and worked on retry. The retry loop in [ADR 0005](0005-engine-runner-shapes-and-ports.md) is needed from day one.
+- **Both models were served by Google's endpoint**, which is on the zero-retention list.
+- **Not tested:** a prompt that invites a schema break (action item 2), reasoning tokens, hostile contracts, and anything beyond one form. The cache lasts minutes, so a slow review may pay for the first call more than once.
+

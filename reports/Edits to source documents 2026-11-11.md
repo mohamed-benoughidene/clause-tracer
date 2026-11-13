@@ -104,7 +104,7 @@ The owner said a lawyer is not an option, and asked to work on the four items le
 | Legal questions | [ADR 0016](../docs/adr/0016-legal-positions-without-a-lawyer.md) written as **proposed**. The owner has not ruled on it. Nothing else was changed to match it yet |
 | Linux trial build | Being run without root, in a throwaway sandbox on the developer's machine. Results not yet written into the docs. Kept files and `RESULTS.md`, if the run finished, are in the session scratch folder under `linuxspike/keep/`, and a copy is on the local branch `spike/windows-checks` if it was saved in time |
 | Windows checks | Scripts for the PDF functions and the encrypted store are written and pass on Linux (pypdfium2 5.15.2, sqlcipher3 2.6.0, 12 Nov 2026). They are on the local branch `spike/windows-checks`, with a GitHub Actions workflow. **Not pushed:** running them needs the owner's go-ahead to push that branch. The page-loading check (`trial_app.py`) is still to be copied from the Linux trial |
-| First paid run | Not started. It needs the pipeline first. No money was spent |
+| First paid run | The real first run still needs the pipeline. On 13 Nov 2026 a small probe spent $0.07 and measured cost, caching and strict forms on one form; the numbers are in the last amendment of ADR 0010 and in testing strategy 7.5 |
 
 **Draft question for the EU's AI Act Service Desk** (the owner sends it, at <https://ai-act-service-desk.ec.europa.eu/en/form/helpdesk>):
 
