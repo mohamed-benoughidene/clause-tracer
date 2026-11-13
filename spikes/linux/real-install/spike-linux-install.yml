@@ -1,7 +1,5 @@
 # Throwaway trial checks. This branch is never merged.
-# Why does the installed trial app's window not start on GitHub's Ubuntu runners
-# while it passes on Fedora and on a real Debian 13 desktop? One run, many jobs,
-# each saving stdout and stderr, so the causes separate.
+# Round 2: does the installed trial app work on Ubuntu 26.04 and under Wayland?
 name: spike-linux-install
 on:
   push:
@@ -13,22 +11,45 @@ env:
   DEB: clause-tracer-trial_0.0.1~spike1_amd64.deb
 
 jobs:
+  survey:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: ubuntu-latest}
+          - {os: ubuntu-26.04}
+    runs-on: ${{ matrix.os }}
+    name: survey (${{ matrix.os }})
+    steps:
+      - uses: actions/checkout@v4
+      - run: spikes/linux/keep/ci-pkg-survey.sh
+
+  survey-container:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:26.04
+    steps:
+      - run: apt-get update -qq && apt-get install -y git ca-certificates
+      - uses: actions/checkout@v4
+      - run: spikes/linux/keep/ci-pkg-survey.sh
+
   build:
     strategy:
       fail-fast: false
       matrix:
         include:
           - {os: ubuntu-24.04, tag: u2404, flavour: t64}
-          - {os: ubuntu-22.04, tag: u2204, flavour: jammy}
+          - {os: ubuntu-26.04, tag: r2604, flavour: auto}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      # Distro python3 (not setup-python): PyGObject comes from python3-gi.
+      - run: head -4 /etc/os-release; python3 --version
       - run: sudo apt-get update && sudo apt-get install -y python3-venv python3-gi python3-gi-cairo gir1.2-gtk-3.0 binutils
       - run: |
           /usr/bin/python3 -m venv --system-site-packages .venv-spike
           .venv-spike/bin/pip install --no-cache-dir pywebview pyinstaller
           .venv-spike/bin/pip list
+          dpkg -l | grep -E 'python3-gi|libgirepository|libglib2.0-0' || true
       - run: |
           . .venv-spike/bin/activate
           spikes/linux/keep/ci-build-deb.sh ${{ matrix.flavour }}
@@ -37,31 +58,49 @@ jobs:
           name: deb-${{ matrix.tag }}
           path: ${{ env.DEB }}
 
-  # (a)+(b) Runner VMs, installed .deb, full diagnostics.
+  # Runner VMs: installed .deb under X11 (xvfb) or headless Wayland (weston), with and without dbus-run-session.
   vm-run:
     needs: build
     strategy:
       fail-fast: false
       matrix:
         include:
-          - {os: ubuntu-24.04, tag: u2404, dbus: "1"}
-          - {os: ubuntu-24.04, tag: u2404, dbus: "0"}
-          - {os: ubuntu-22.04, tag: u2204, dbus: "1"}
-          - {os: ubuntu-22.04, tag: u2204, dbus: "0"}
+          # 24.04 control, native deb
+          - {os: ubuntu-24.04, deb: u2404, display: x11, dbus: "1", extra: "", cross: ""}
+          - {os: ubuntu-24.04, deb: u2404, display: wayland, dbus: "0", extra: "", cross: ""}
+          - {os: ubuntu-24.04, deb: u2404, display: wayland, dbus: "1", extra: "", cross: ""}
+          - {os: ubuntu-24.04, deb: u2404, display: wayland, dbus: "1", extra: "LIBGL_ALWAYS_SOFTWARE=1", cross: ""}
+          - {os: ubuntu-24.04, deb: u2404, display: wayland, dbus: "1", extra: "WEBKIT_DISABLE_DMABUF_RENDERER=1", cross: ""}
+          # 26.04, deb built on 26.04
+          - {os: ubuntu-26.04, deb: r2604, display: x11, dbus: "1", extra: "", cross: ""}
+          - {os: ubuntu-26.04, deb: r2604, display: x11, dbus: "0", extra: "", cross: ""}
+          - {os: ubuntu-26.04, deb: r2604, display: wayland, dbus: "0", extra: "", cross: ""}
+          - {os: ubuntu-26.04, deb: r2604, display: wayland, dbus: "1", extra: "", cross: ""}
+          - {os: ubuntu-26.04, deb: r2604, display: wayland, dbus: "1", extra: "LIBGL_ALWAYS_SOFTWARE=1", cross: ""}
+          - {os: ubuntu-26.04, deb: r2604, display: wayland, dbus: "1", extra: "WEBKIT_DISABLE_DMABUF_RENDERER=1", cross: ""}
+          # 26.04 with the deb built on 24.04 (forward compatibility of one build)
+          - {os: ubuntu-26.04, deb: u2404, display: x11, dbus: "1", extra: "", cross: "cross"}
+          - {os: ubuntu-26.04, deb: u2404, display: wayland, dbus: "1", extra: "", cross: "cross"}
     runs-on: ${{ matrix.os }}
-    name: vm-run (${{ matrix.os }}, dbus-run-session=${{ matrix.dbus }})
+    name: vm (${{ matrix.os }}, deb ${{ matrix.deb }}, ${{ matrix.display }}, dbus-run-session=${{ matrix.dbus }}, ${{ matrix.extra || 'no extras' }})
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: deb-${{ matrix.tag }}
-      - run: sudo apt-get update && sudo apt-get install -y ./${{ env.DEB }} xvfb xauth dbus dbus-x11 iproute2 desktop-file-utils
-      - run: spikes/linux/keep/ci-bus-diag.sh
-      - name: Run the installed app (stdout and stderr saved)
+          name: deb-${{ matrix.deb }}
+      - run: spikes/linux/keep/ci-install.sh "$DEB" ${{ matrix.cross }}
+      - run: head -3 /etc/os-release; spikes/linux/keep/ci-bus-diag.sh
+      - name: Run the installed app
         run: |
           if [ "${{ matrix.dbus }}" = "0" ]; then export NO_DBUS=1; fi
-          spikes/linux/keep/ci-run.sh run.log clause-tracer-trial
+          if [ "${{ matrix.display }}" = "wayland" ]; then
+            ${{ matrix.extra }} spikes/linux/keep/ci-run-wayland.sh run.log clause-tracer-trial
+          else
+            ${{ matrix.extra }} spikes/linux/keep/ci-run.sh run.log clause-tracer-trial
+          fi
       - name: Check RESULT=
+        env:
+          EXPECT_DISPLAY: ${{ matrix.display == 'wayland' && 'GdkWaylandDisplay' || 'GdkX11Display' }}
         run: python3 spikes/linux/keep/check-result.py run.log.clean
       - name: Desktop file, host libs, clean removal
         if: always()
@@ -69,143 +108,59 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: log-vm-${{ matrix.os }}-dbus${{ matrix.dbus }}
-          path: run.log*
+          name: log-vm-${{ matrix.os }}-${{ matrix.deb }}-${{ matrix.display }}-dbus${{ matrix.dbus }}-${{ matrix.extra }}
+          path: run*.log*
 
-  # No usable portal, as in the failing first run: which variable or fix changes the 25 s stall?
-  nodbus-experiments:
-    needs: build
-    runs-on: ubuntu-24.04
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - {name: control-impatient, run: "SPIKE_PATIENT=0 clause-tracer-trial", expect: fail}
-          - {name: app-fix-patient-wait, run: "clause-tracer-trial", expect: pass}
-          - {name: import-display-into-systemd-user, run: "systemctl --user import-environment DISPLAY XAUTHORITY; SPIKE_PATIENT=0 clause-tracer-trial", expect: pass}
-          - {name: launcher-dbus-run-session, run: "SPIKE_PATIENT=0 dbus-run-session -- clause-tracer-trial", expect: pass}
-    name: nodbus (${{ matrix.name }})
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: deb-u2404
-      - run: sudo apt-get update && sudo apt-get install -y ./${{ env.DEB }} xvfb xauth dbus dbus-x11 iproute2
-      - name: Why is the portal not coming up?
-        run: |
-          spikes/linux/keep/ci-bus-diag.sh
-          echo "--- systemctl --user cat xdg-desktop-portal.service"; systemctl --user cat xdg-desktop-portal.service
-          echo "--- user manager environment"; systemctl --user show-environment | grep -E "DISPLAY|WAYLAND|DBUS|XDG" || echo "(no DISPLAY/WAYLAND in the systemd user environment)"
-      - name: Run
-        run: NO_DBUS=1 spikes/linux/keep/ci-run.sh run.log bash -c '${{ matrix.run }}'
-      - name: What the user journal says about the portal
-        if: always()
-        run: |
-          grep -E "\[trial|run took" run.log || true
-          journalctl --user --no-pager -n 40 2>&1 | cut -c1-220 || true
-          systemctl --user status xdg-desktop-portal.service --no-pager 2>&1 | head -12 || true
-      - run: python3 spikes/linux/keep/check-result.py run.log.clean
-        continue-on-error: ${{ matrix.expect == 'fail' }}
-
-  # (c) Plain ubuntu:24.04 container: root, like the Fedora job.
-  ubuntu-container:
-    needs: build
-    runs-on: ubuntu-latest
-    container:
-      image: ubuntu:24.04
-    steps:
-      - run: apt-get update && apt-get install -y git ca-certificates
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: deb-u2404
-      - run: apt-get install -y ./${{ env.DEB }} xvfb xauth dbus dbus-x11 iproute2 desktop-file-utils python3-minimal
-      - name: Run the installed app
-        run: spikes/linux/keep/ci-run.sh run.log clause-tracer-trial
-      - name: Check RESULT=
-        run: python3 spikes/linux/keep/check-result.py run.log.clean
-      - name: Desktop file, host libs, clean removal
-        if: always()
-        run: spikes/linux/keep/ci-deb-checks.sh
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: log-ubuntu-container
-          path: run.log*
-
-  # Linux Mint (container images from linuxmintd). Mint 22 is Ubuntu 24.04 based, 21.3 is 22.04 based.
-  mint:
+  # Containers (root): image x deb, X11 then Wayland (both with and without dbus-run-session).
+  container-run:
     needs: build
     strategy:
       fail-fast: false
       matrix:
         include:
-          - {image: "linuxmintd/mint22-amd64", tag: u2404}
-          - {image: "linuxmintd/mint21.3-amd64", tag: u2204}
-    name: mint (${{ matrix.image }})
+          - {image: "ubuntu:26.04", deb: r2604, cross: ""}
+          - {image: "ubuntu:26.04", deb: u2404, cross: "cross"}
+          - {image: "ubuntu:24.04", deb: u2404, cross: ""}
+    name: container (${{ matrix.image }}, deb ${{ matrix.deb }})
     runs-on: ubuntu-latest
     container:
       image: ${{ matrix.image }}
-      options: --user root
     steps:
-      - run: apt-get update && apt-get install -y git ca-certificates
+      - run: apt-get update -qq && apt-get install -y git ca-certificates
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: deb-${{ matrix.tag }}
-      - run: cat /etc/os-release | head -4; id
-      - run: apt-get install -y ./${{ env.DEB }} xvfb xauth dbus dbus-x11 iproute2 desktop-file-utils python3-minimal
-      - name: Run the installed app
-        run: spikes/linux/keep/ci-run.sh run.log clause-tracer-trial
-      - name: Check RESULT=
-        run: python3 spikes/linux/keep/check-result.py run.log.clean
+          name: deb-${{ matrix.deb }}
+      - run: head -3 /etc/os-release; spikes/linux/keep/ci-install.sh "$DEB" ${{ matrix.cross }}
+      - name: X11 run
+        run: spikes/linux/keep/ci-run.sh run-x11.log clause-tracer-trial
+      - name: X11 check
+        env: {EXPECT_DISPLAY: GdkX11Display}
+        run: python3 spikes/linux/keep/check-result.py run-x11.log.clean
+      - name: Wayland run, no dbus-run-session
+        if: always()
+        run: NO_DBUS=1 spikes/linux/keep/ci-run-wayland.sh run-wl0.log clause-tracer-trial
+      - name: Wayland check (no dbus-run-session)
+        if: always()
+        env: {EXPECT_DISPLAY: GdkWaylandDisplay}
+        run: python3 spikes/linux/keep/check-result.py run-wl0.log.clean
+      - name: Wayland run, dbus-run-session
+        if: always()
+        run: spikes/linux/keep/ci-run-wayland.sh run-wl1.log clause-tracer-trial
+      - name: Wayland check (dbus-run-session)
+        if: always()
+        env: {EXPECT_DISPLAY: GdkWaylandDisplay}
+        run: python3 spikes/linux/keep/check-result.py run-wl1.log.clean
       - name: Desktop file, host libs, clean removal
         if: always()
         run: spikes/linux/keep/ci-deb-checks.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: log-mint-${{ matrix.tag }}
-          path: run.log*
+          name: log-container-${{ matrix.image }}-${{ matrix.deb }}
+          path: run*.log*
 
-  # (d) Unfrozen app straight from a venv on the runner VM.
-  unfrozen:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - run: sudo apt-get update && sudo apt-get install -y python3-venv python3-gi python3-gi-cairo gir1.2-gtk-3.0 gir1.2-webkit2-4.1 xvfb xauth dbus dbus-x11 iproute2
-      - run: |
-          /usr/bin/python3 -m venv --system-site-packages .venv-spike
-          .venv-spike/bin/pip install --no-cache-dir pywebview
-      - name: Run trial_app.py unfrozen
-        run: spikes/linux/keep/ci-run.sh run.log .venv-spike/bin/python spikes/linux/keep/trial_app.py --pages spikes/linux/keep/pages-csp-eval
-      - name: Check RESULT=
-        run: python3 spikes/linux/keep/check-result.py run.log.clean unfrozen
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: log-unfrozen
-          path: run.log*
-
-  # (e) Plain PyGObject + WebKit2 window, no pywebview.
-  plain-gtk:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - run: sudo apt-get update && sudo apt-get install -y python3-gi gir1.2-gtk-3.0 gir1.2-webkit2-4.1 xvfb xauth dbus dbus-x11
-      - name: Run plain_gtk.py
-        run: |
-          spikes/linux/keep/ci-run.sh run.log /usr/bin/python3 spikes/linux/keep/plain_gtk.py
-          grep -q 'load-changed finished' run.log || { echo "FAIL: plain WebKitGTK never finished loading"; exit 1; }
-          echo "PASS: plain WebKitGTK loaded a page"
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: log-plain-gtk
-          path: run.log*
-
-  # Control: passed before.
-  fedora-dnf:
+  fedora-wayland:
     runs-on: ubuntu-latest
     container:
       image: fedora:41
@@ -213,7 +168,7 @@ jobs:
       - run: dnf install -y git
       - uses: actions/checkout@v4
       - run: |
-          dnf install -y python3 python3-pip python3-gobject gtk3 webkit2gtk4.1 xorg-x11-server-Xvfb \
+          dnf install -y python3 python3-pip python3-gobject gtk3 webkit2gtk4.1 xorg-x11-server-Xvfb weston \
             desktop-file-utils findutils which binutils iproute dbus-daemon
       - run: |
           python3 -m venv --system-site-packages .venv-spike
@@ -224,12 +179,20 @@ jobs:
           mkdir -p /opt/clause-tracer-trial
           cp -a dist/clause-tracer-trial/. /opt/clause-tracer-trial/
           install -D -m 755 spikes/linux/keep/clause-tracer-trial.launcher /usr/bin/clause-tracer-trial
-          install -D -m 644 spikes/linux/keep/clause-tracer-trial.desktop /usr/share/applications/clause-tracer-trial.desktop
-      - name: Run the installed app (same diagnostics, no dbus-run-session, like the first Fedora pass)
-        run: NO_DBUS=1 spikes/linux/keep/ci-run.sh run.log clause-tracer-trial
-      - run: python3 spikes/linux/keep/check-result.py run.log.clean
+      - name: Wayland run, no dbus-run-session
+        run: NO_DBUS=1 spikes/linux/keep/ci-run-wayland.sh run-wl0.log clause-tracer-trial
+      - name: Check
+        env: {EXPECT_DISPLAY: GdkWaylandDisplay}
+        run: python3 spikes/linux/keep/check-result.py run-wl0.log.clean
+      - name: Wayland run, dbus-run-session
+        if: always()
+        run: spikes/linux/keep/ci-run-wayland.sh run-wl1.log clause-tracer-trial
+      - name: Check (dbus-run-session)
+        if: always()
+        env: {EXPECT_DISPLAY: GdkWaylandDisplay}
+        run: python3 spikes/linux/keep/check-result.py run-wl1.log.clean
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: log-fedora
-          path: run.log*
+          name: log-fedora-wayland
+          path: run*.log*

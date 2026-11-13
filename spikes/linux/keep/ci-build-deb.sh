@@ -11,7 +11,15 @@ cp -a dist/clause-tracer-trial/. "$ROOT/opt/clause-tracer-trial/"
 install -m 755 spikes/linux/keep/clause-tracer-trial.launcher "$ROOT/usr/bin/clause-tracer-trial"
 install -m 644 spikes/linux/keep/clause-tracer-trial.desktop "$ROOT/usr/share/applications/clause-tracer-trial.desktop"
 # Jammy (Ubuntu 22.04, Mint 21.x) predates the t64 transition.
-if [ "$FLAVOUR" = jammy ]; then
+echo "--- what the bundled gi extension links (diagnostic)"
+for f in $(find dist/clause-tracer-trial -name '_gi*.so*' | head -2); do echo "$f"; ldd "$f" | grep -E 'girepository|glib|gobject|ffi' || true; done
+if [ "$FLAVOUR" = auto ]; then
+  # Names taken from the build machine itself (Ubuntu 26.04: girepository 2.0, to be checked).
+  GIREPO=$(for f in $(find dist/clause-tracer-trial -name '_gi*.so*' | head -1); do ldd "$f" | awk '/girepository/{print $3}'; done | head -1 | xargs -r dpkg -S | head -1 | cut -d: -f1)
+  GLIBC=$(ldd --version | head -1 | grep -oE '[0-9]+\.[0-9]+$')
+  echo "auto: GIREPO=$GIREPO GLIBC=$GLIBC"
+  DEPENDS="libc6 (>= $GLIBC), libwebkit2gtk-4.1-0, gir1.2-webkit2-4.1, gir1.2-gtk-3.0, ${GIREPO:-libgirepository-1.0-1}, libglib2.0-0t64, libcairo2, libcairo-gobject2, libffi8, libssl3t64, libbz2-1.0, liblzma5, zlib1g, libexpat1, libuuid1"
+elif [ "$FLAVOUR" = jammy ]; then
   DEPENDS="libc6 (>= 2.35), libwebkit2gtk-4.1-0, gir1.2-webkit2-4.1, gir1.2-gtk-3.0, libgirepository-1.0-1, libglib2.0-0, libcairo2, libcairo-gobject2, libffi8, libssl3, libbz2-1.0, liblzma5, zlib1g, libexpat1, libuuid1"
 else
   DEPENDS="libc6 (>= 2.38), libwebkit2gtk-4.1-0, gir1.2-webkit2-4.1, gir1.2-gtk-3.0, libgirepository-1.0-1, libglib2.0-0t64, libcairo2, libcairo-gobject2, libffi8, libssl3t64, libbz2-1.0, liblzma5, zlib1g, libexpat1, libuuid1"

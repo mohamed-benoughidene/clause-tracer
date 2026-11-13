@@ -154,6 +154,23 @@ def main_checks(window, results):
             print("RESULT=" + json.dumps(results, sort_keys=True), flush=True)
             window.destroy()
             return
+    # --- Wayland spike addition (diagnostic only): which GDK backend really ran? ---
+    try:
+        import gi
+
+        gi.require_version("Gdk", "3.0")
+        from gi.repository import Gdk
+
+        display = Gdk.Display.get_default()
+        # __gtype__.name is the real class (GdkWaylandDisplay / GdkX11Display); the Python wrapper type is just "Display".
+        results["gdk_display_type"] = display.__gtype__.name if display else None
+        results["gdk_display_name"] = display.get_name() if display else None
+    except Exception as e:  # noqa: BLE001
+        results["gdk_display_type"] = f"error: {e!r}"
+    results["display_env"] = {k: os.environ.get(k) for k in ("GDK_BACKEND", "WAYLAND_DISPLAY", "DISPLAY", "XDG_SESSION_TYPE")}
+    log(f"GDK display type: {results['gdk_display_type']}  env: {results['display_env']}")
+    # --- end of Wayland spike addition ---
+
     def js(body):
         """Run a JS function body via run_js (no eval wrapper); return parsed JSON."""
         raw = window.run_js("JSON.stringify((function(){" + body + "})())")
