@@ -95,15 +95,15 @@ This file's sections 1 to 7 describe the first day. On 12 Nov 2026 the project o
 
 **Still open:** whether version 1 ships "Rewrite with AI" for the message; a trial build of the Linux package; the Windows checks in CI; and the legal questions, which need a lawyer.
 
-## 9. Closing the last open items (started 12 Nov 2026, unfinished)
+## 9. Closing the last open items (12 and 13 Nov 2026)
 
 The owner said a lawyer is not an option, and asked to work on the four items left open. Where this stands:
 
 | Item | State |
 | --- | --- |
 | Legal questions | [ADR 0016](../docs/adr/0016-legal-positions-without-a-lawyer.md) written as **proposed**. The owner has not ruled on it. Nothing else was changed to match it yet |
-| Linux trial build | Being run without root, in a throwaway sandbox on the developer's machine. Results not yet written into the docs. Kept files and `RESULTS.md`, if the run finished, are in the session scratch folder under `linuxspike/keep/`, and a copy is on the local branch `spike/windows-checks` if it was saved in time |
-| Windows checks | Scripts for the PDF functions and the encrypted store are written and pass on Linux (pypdfium2 5.15.2, sqlcipher3 2.6.0, 12 Nov 2026). They are on the local branch `spike/windows-checks`, with a GitHub Actions workflow. **Not pushed:** running them needs the owner's go-ahead to push that branch. The page-loading check (`trial_app.py`) is still to be copied from the Linux trial |
+| Linux trial build | **Done, 13 Nov 2026.** It works, with two conditions. Run without root in a throwaway sandbox; nothing was installed. Results are in the last amendment of ADR 0009, and the full results file is on the local branch `spike/local-archive` |
+| Windows checks | **Done, 13 Nov 2026.** The owner agreed to push the branch `spike/windows-checks`, which holds only the trial scripts. All checks passed on two Windows runners. Results are in the last amendments of ADRs 0006, 0007 and 0009. The branch can be deleted from GitHub when no longer wanted |
 | First paid run | The real first run still needs the pipeline. On 13 Nov 2026 a small probe spent $0.07 and measured cost, caching and strict forms on one form; the numbers are in the last amendment of ADR 0010 and in testing strategy 7.5 |
 
 **Draft question for the EU's AI Act Service Desk** (the owner sends it, at <https://ai-act-service-desk.ec.europa.eu/en/form/helpdesk>):

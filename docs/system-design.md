@@ -335,7 +335,7 @@ The source is public, so nothing technical stops a copy, and hiding the shipped 
 | --- | --- | --- |
 | Freeze the Python engine and shell | PyInstaller, one-folder build (one-file builds unpack on every start) | [ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md) |
 | Windows installer | Inno Setup, scripted on GitHub's Windows runner, with the WebView2 bootstrapper | ADR 0009 |
-| Linux package | A `.deb` on GitHub Releases, with WebKitGTK as a system dependency, plus a plain `tar.gz` for Fedora. A trial build must confirm it before the shell stage | ADR 0009 |
+| Linux package | A `.deb` on GitHub Releases, with WebKitGTK as a system dependency, plus a plain `tar.gz` for Fedora. A trial build confirmed it on 13 Nov 2026; release builds are made on the oldest supported system | ADR 0009 |
 | Personal-data model | Bundled in the installer, never downloaded on first run | [ADR 0008](adr/0008-personal-data-detection-bundle.md) |
 | Signing | Unsigned at first, with published checksums. An individual certificate later | ADR 0009 |
 | Integrity | Signed `SHA256SUMS`, GitHub build attestations, a reproducible Linux build | [ADR 0014](adr/0014-protection-and-release-integrity.md) |
@@ -394,10 +394,9 @@ The owner accepted ADRs 0005 to 0015 on 12 Nov 2026.
 
 **Still open after this work.** These were not researched well enough to recommend, or need a measurement or a lawyer:
 
-- Final input limits and the real cost per review, from the first paid run (Spec 13).
+- Final input limits and the real cost per review, from the first paid run (Spec 13). A small probe on 13 Nov 2026 supports the estimates (ADR 0010's last amendment).
 - Whether EU AI Act Article 50 puts a marking duty on this app. The primary texts were read on 12 Nov 2026 (ADR 0011 and ADR 0014 amendments) and do not settle it. The owner parked the question that day; Spec 10 lists what to work out later. The docs must not say it does not apply.
-- A trial showing that a PyInstaller build runs against the system's WebKitGTK on Linux.
-- The same checks on Windows, in CI: the PDF functions, the encrypted store, and loading pages from files.
+- Installing the Linux package on Ubuntu, Mint and a real desktop session. The trial build itself passed on Debian 13, and the Windows checks passed in CI (13 Nov 2026, ADR 0009's last amendment, which also lists what the shell must now do: a navigation guard, `file://` addresses only, and a reset of PyInstaller's environment on Linux).
 - Whether to register a trade mark later. How FSL would be enforced: no court has ruled on it, and the free routes do little (ADR 0014 amendment).
 - Presidio's speed on a real 60,000-character contract on an ordinary laptop.
 

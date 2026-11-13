@@ -314,6 +314,7 @@ A fixed sequence run by the app's code. The AI never decides what runs next and 
 - Hidden text is found in step 1 and shown to the user. Values resting on it become unsure.
 - Every quote and number is checked by code.
 - Code picks labels for number and yes/no positions.
+- The app window shows only the app's own pages. A link to a web address never loads inside it; it opens in the user's browser or not at all (ADR 0009).
 - Every import is previewed first. Playbook files use a strict format with size limits. Word files are read with external links turned off.
 - Each release publishes signed checksums (fingerprints that prove a download wasn't changed) and a build record from GitHub that ties the download to its source code. The shipped code is never obfuscated (ADR 0014).
 
@@ -411,7 +412,7 @@ Each item has a decision record (ADR). Ticked items were decided on 12 Nov 2026.
 - [x] Licence rule for bundled code: MIT, BSD and Apache only, with two named exceptions: `pikepdf` (MPL-2.0), for reading hidden PDF layers, and PyGObject (LGPL) on Linux, which lets the app open its window (decided 12 Nov 2026, [ADR 0007](adr/0007-document-reading-stack.md) and [ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md)). The app lists them on a third-party licences page.
 - [x] The encrypted store uses `sqlcipher3` (decided 12 Nov 2026, [ADR 0006](adr/0006-encrypted-storage-and-secrets.md)).
 - [x] The Linux download is a `.deb` file, with a plain archive for Fedora. The app loads its pages from files and opens no local port (decided 12 Nov 2026, [ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md)).
-- [ ] A trial build to confirm the Linux package works with the system's web view, and the same checks on Windows in CI.
+- [x] A trial build confirmed that the Linux package works with the system's web view, and the PDF, encrypted-store and page-loading checks passed on Windows (13 Nov 2026, amendments to ADRs [0006](adr/0006-encrypted-storage-and-secrets.md), [0007](adr/0007-document-reading-stack.md) and [0009](adr/0009-desktop-shell-protocol-and-packaging.md)). Installing the package on Ubuntu, Mint and a real desktop is still to be tried at the shell stage.
 - [x] Version 1 keeps "Rewrite with AI" for the message, optional and labelled (decided 12 Nov 2026, [ADR 0011](adr/0011-who-writes-the-words.md)).
 - [ ] **Parked: the EU AI Act (Article 50).** Set aside for now, to work on later. The open questions are in section 10. A proposed record, [ADR 0016](adr/0016-legal-positions-without-a-lawyer.md), recommends working positions on this and on the two licence questions, since no lawyer is available. It is not accepted yet.
 - [ ] Whether to register a trade mark on the name. Ruled out for now because of its cost.

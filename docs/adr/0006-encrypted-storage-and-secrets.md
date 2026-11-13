@@ -105,3 +105,7 @@ Both packages were run through the same test on Debian 13 with Python 3.13 that 
 The research preferred `apsw-sqlite3mc` because it keeps temporary data in memory and has secure delete on. The test shows `sqlcipher3` does both too, so that reason no longer separates them. `sqlcipher3` wins because its interface matches Python's standard `sqlite3` module, which the developer and the agents already know.
 
 Still to do: run the same test in Windows CI; add the SQLCipher credit to the About screen; note that a wrong key makes SQLCipher print errors to standard error, which must not reach the log with any contract text (it carries none in the test). `apsw-sqlite3mc` stays the fallback. If it is ever used, set its cipher explicitly: its default (ChaCha20-Poly1305) checks each page, but the AES-CBC option in its README does not.
+
+## Amendment (13 Nov 2026): the store checks pass on Windows
+
+The leak test from 12 Nov was run on GitHub's Windows Server 2025 and 2022 runners with `sqlcipher3` (SQLCipher 4.20.0). A marker string written to the encrypted file was found nowhere on disk, while open or after closing, including the write-ahead files. A wrong key and no key were both refused. A round trip through the Windows key store (`keyring`, WinVault backend) worked. The same script passes on Debian 13 with the Secret Service backend. Not tested: a real user desktop, and the passphrase fallback.
