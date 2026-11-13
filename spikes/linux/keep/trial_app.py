@@ -17,6 +17,13 @@ import sys
 import threading
 import time
 
+T0 = time.time()
+
+
+def log(msg):
+    """Timestamped diagnostic line on stderr (CI reads it; RESULT= stays on stdout)."""
+    print(f"[trial {time.time() - T0:7.2f}s] {msg}", file=sys.stderr, flush=True)
+
 
 def use_host_gtk():
     """Frozen build only: let the host's GTK/GLib/WebKitGTK stack configure itself.
@@ -42,9 +49,18 @@ def use_host_gtk():
         os.environ.pop("LD_LIBRARY_PATH", None)
 
 
+log("start")
 use_host_gtk()
+log("host-gtk env reset done")
+if os.environ.get("SPIKE_DIAG"):
+    import faulthandler
+
+    # Dump every thread's stack at 25 s: shows what the GTK/WebKit side is stuck on.
+    faulthandler.dump_traceback_later(15, exit=False)
 
 import webview  # noqa: E402
+
+log("webview imported")
 
 HERE = getattr(sys, "_MEIPASS", None) or os.path.dirname(os.path.abspath(__file__))
 
@@ -113,7 +129,31 @@ def listening_sockets(pids):
     return {"all_listening_lines": len(out.splitlines()), "owned_by_app": mine}
 
 
+def wait_patiently(window, results, seconds=90):
+    """Wait for the window to be shown and loaded with OUR timeout.
+
+    pywebview's own API calls give up after a hard-coded 20 s ("Main window failed to
+    start"). GTK can take longer than that to start when the session D-Bus is half there
+    (see RESULTS.md, section 6), so wait on the events first: once they are set, the
+    pywebview calls return at once.
+    """
+    for name in ("shown", "loaded"):
+        started = time.time()
+        if not getattr(window.events, name).wait(seconds):
+            raise RuntimeError(f"window never reached '{name}' within {seconds} s")
+        results[f"startup_{name}_s"] = round(time.time() - T0, 2)
+        log(f"patient wait: {name} after {time.time() - started:.1f} s of waiting")
+
+
 def main_checks(window, results):
+    if os.environ.get("SPIKE_PATIENT", "1") == "1":
+        try:
+            wait_patiently(window, results)
+        except Exception as e:  # noqa: BLE001
+            results["exception"] = f"{type(e).__name__}: {e}"
+            print("RESULT=" + json.dumps(results, sort_keys=True), flush=True)
+            window.destroy()
+            return
     def js(body):
         """Run a JS function body via run_js (no eval wrapper); return parsed JSON."""
         raw = window.run_js("JSON.stringify((function(){" + body + "})())")
@@ -256,8 +296,16 @@ def main():
     except Exception as e:  # noqa: BLE001
         results["gi_error"] = repr(e)
 
+    def watch_events():
+        for name in ("before_show", "shown", "loaded"):
+            ev = getattr(window.events, name)
+            ok = ev.wait(40)
+            log(f"event {name}: {'set' if ok else 'NOT set after 40 s'}")
+
     window = webview.create_window("Clause Tracer trial", url, js_api=Api(), width=800, height=600)
-    t = threading.Timer(60, lambda: os._exit(3))  # hard stop if anything hangs
+    threading.Thread(target=watch_events, daemon=True).start()
+    log("calling webview.start")
+    t = threading.Timer(120, lambda: os._exit(3))  # hard stop if anything hangs
     t.daemon = True
     t.start()
     webview.start(main_checks, (window, results), gui="gtk", http_server=False, private_mode=os.environ.get("SPIKE_PRIVATE", "1") == "1")
