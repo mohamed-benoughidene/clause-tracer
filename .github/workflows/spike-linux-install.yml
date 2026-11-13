@@ -55,6 +55,7 @@ jobs:
         with:
           name: deb-${{ matrix.tag }}
       - run: sudo apt-get update && sudo apt-get install -y ./${{ env.DEB }} xvfb xauth dbus dbus-x11 iproute2 desktop-file-utils
+      - run: spikes/linux/keep/ci-bus-diag.sh
       - name: Run the installed app (stdout and stderr saved)
         run: |
           if [ "${{ matrix.dbus }}" = "0" ]; then export NO_DBUS=1; fi
@@ -70,6 +71,32 @@ jobs:
           name: log-vm-${{ matrix.os }}-dbus${{ matrix.dbus }}
           path: run.log*
 
+  # No session bus, as in the failing first run: which variable or fix changes the 25 s stall?
+  nodbus-experiments:
+    needs: build
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {name: baseline, env: "X=1"}
+          - {name: gtk-use-portal-0, env: "GTK_USE_PORTAL=0"}
+          - {name: bus-address-dead, env: "DBUS_SESSION_BUS_ADDRESS=unix:path=/nonexistent/bus"}
+          - {name: no-xdg-runtime-dir, env: "-u XDG_RUNTIME_DIR"}
+    name: nodbus (${{ matrix.name }})
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: deb-u2404
+      - run: sudo apt-get update && sudo apt-get install -y ./${{ env.DEB }} xvfb xauth dbus dbus-x11 iproute2
+      - run: spikes/linux/keep/ci-bus-diag.sh
+      - name: Run
+        run: NO_DBUS=1 spikes/linux/keep/ci-run.sh run.log env ${{ matrix.env }} clause-tracer-trial
+      - run: grep -E "\[trial|run took" run.log
+        if: always()
+      - run: python3 spikes/linux/keep/check-result.py run.log.clean
+
   # (c) Plain ubuntu:24.04 container: root, like the Fedora job.
   ubuntu-container:
     needs: build
@@ -82,7 +109,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: deb-u2404
-      - run: apt-get install -y ./${{ env.DEB }} xvfb xauth dbus dbus-x11 iproute2 desktop-file-utils
+      - run: apt-get install -y ./${{ env.DEB }} xvfb xauth dbus dbus-x11 iproute2 desktop-file-utils python3-minimal
       - name: Run the installed app
         run: spikes/linux/keep/ci-run.sh run.log clause-tracer-trial
       - name: Check RESULT=
