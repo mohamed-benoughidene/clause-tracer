@@ -110,7 +110,7 @@
         <div class="notice warn" role="note" style="margin-top:12px">
           <svg class="icon"><use href="#i-cloud-off"/></svg>
           <div>
-            <p>The internet dropped at step 2. Resume picks up from here.</p>
+            <p>The internet dropped at step 2. Resume picks up from the first unfinished step.</p>
             <div class="actions">
               <a class="btn btn-primary btn-sm" href="running.html">Resume</a>
             </div>
@@ -254,16 +254,16 @@
           <button class="btn btn-ghost" type="button" data-toast="Running in the background" data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait">Run in background</button>
         </div>
         <p data-state-hide="wrong-key no-credit no-internet no-private-model rate-limit rate-limit-no-wait"><a class="btn btn-primary" href="review.html">Open the review<svg class="icon"><use href="#i-arrow-right"/></svg></a></p>
-        <p class="small muted" data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait">Closing the app pauses the review. Resume picks up from the last finished step.</p>
+        <p class="small muted" data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait">Closing the app pauses the review. Resume picks up from the first unfinished step.</p>
       </div>
     </aside>
   </div>
 
   <footer class="flow-foot">
-    <span class="small muted" data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait">Credit left: $3.10 · about 3 minutes</span>
+    <span class="small muted" data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait">Credit left: $3.10</span>
     <span class="small muted" data-state="wrong-key no-internet no-private-model rate-limit rate-limit-no-wait">Paused · credit left: $3.10</span>
     <span class="small muted" data-state="no-credit">Credit left: $0.00 · paused</span>
-    <span class="small muted" data-state="done">Cost $0.39 · credit left: $2.71</span>
+    <span class="small muted" data-state="done">Credit left: $2.71</span>
     <span class="spacer"></span>
     <span class="small muted">Private mode is on. Providers don't keep your contract if you've turned off Safety Retention in OpenRouter, except for legally required safety screening.</span>
   </footer>
@@ -292,7 +292,7 @@
   <form method="dialog">
     <div class="dialog-body">
       <h2 class="h2" id="private-title">Turn private mode off for this review?</h2>
-      <p class="muted">The contract goes to the AI models as it is, names and addresses included. The models may keep it.</p>
+      <p class="muted">The contract goes to AI models that may keep it. Names and addresses are still replaced.</p>
     </div>
     <div class="dialog-foot">
       <button class="btn" value="cancel">Cancel</button>

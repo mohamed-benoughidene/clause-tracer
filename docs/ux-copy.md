@@ -32,6 +32,60 @@ Clause Tracer talks like a careful friend who has read the contract and points a
 | Delete | Exact. Names the thing and says it can't be undone. | "Delete “Atlas Media retainer”?" |
 | Legal | Modest. The tool compares, it doesn't advise. | "Not legal advice. Check every result yourself." |
 
+### 1.1 Signs of machine-made text
+
+These signs are checked on every new string, by the lint where a machine can, and by the checklist below where it cannot.
+
+**Fixed copy**
+
+| Sign | Bad | Fixed |
+| --- | --- | --- |
+| A claim with no checkable fact | “The smallest change that meets your position.” | Delete it. |
+| Says what the screen already shows | A heading “Something in the app broke” and a log line “Something in the app broke while loading it.” | Keep one of them. |
+| The same fact more than once in one view | The same two numbers (cost and credit) in the notice, the footer and the button | Say them once, plus the quote. |
+| A courtesy or softener: please, just, simply, sorry | “Please look over the marked words.” “You just can't re-run them.” | “Look over the marked words.” “You can't re-run them.” |
+| Cheer, an exclamation mark or praise | “Great, all done!” | “Done.” |
+| A template used where it is untrue | “Unsure by your playbook: the cap depends on a document that isn't loaded.” | “Unsure: the cap depends on a document that isn't loaded.” |
+| An error with no next step, or a generic subject | “Something went wrong.” | What happened, what is kept and the fix: “Your OpenRouter credit ran out at step 3. Add credit, then resume. Nothing done so far is lost.” |
+
+**Text the AI writes**
+
+| Sign | Bad | Fixed |
+| --- | --- | --- |
+| Adds a point, a number or a motive that is not in the input | “That would help me plan the work.” | Removed. |
+| Evaluates instead of pointing | “This is a concerning clause.” | “5.4 says 60 days.” |
+| An opener or a closer | “Certainly! Here's…” and “I hope this helps” | Start with the fact. |
+| Stacked hedges | “may potentially perhaps” | One “may”, with the reason. |
+| A reason without the contract's words or a clause number | “The wording is vague.” | ““Reasonable” has no number.” |
+| “I”, “we” or “as an AI” in app text | “I'd flag this.” | “This one is unsure.” |
+
+**Two-minute check**
+
+Answer yes or no for each new or changed string. Any answer that is not the one shown fails the string.
+
+1. Does each sentence hold a fact from this contract, this playbook or this action?
+2. Is every fact on screen once only?
+3. Could a sentence be deleted and nothing lost? If yes, fail.
+4. Does it name the source (a clause number or “by your playbook”), and is that source true here?
+5. Is the next step one clear action?
+6. Is there no praise, apology, “please” or exclamation mark?
+7. Would the string fit any other app unchanged? If yes, fail.
+8. Does every visual element carry meaning that survives in greyscale?
+9. Is red only on walk-away, and dashed only on pencilled?
+10. Do the deck, the prototype and the spec show the same words?
+
+A machine cannot catch a fluent sentence that is wrong, or a tone that is slightly off. The owner reads AI text on the paid test set for those.
+
+**Keep.** These strings are models of the voice. Don't sand them down:
+
+- “This one is a walk-away. You'd wait 60 days to be paid; your limit is 30.”
+- ““Reasonable” has no number, so it can't be checked against your limit.”
+- “A late payer loses nothing by waiting.”
+- “A search can miss a clause. This doesn't prove the contract has no non-compete.”
+- “One label in it is wrong on purpose.”
+- “The check can miss things.”
+- “It doesn't mean it's safe to sign.”
+
 ## 2. Word list
 
 Use the left column everywhere: screens, buttons, toasts, Help and the spec. Terms come from the glossary (Spec 2).
@@ -74,7 +128,7 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | Primary button | Verb + object, says what happens | "Send for review", "Save key", "Delete review" |
 | Cost on a button | Put the cost in the label | "Re-run for about $0.39" |
 | Confirmation title | The action as a question, with the thing named | "Delete “Design retainer”?", "Turn private mode off for this review?" |
-| Confirmation body | What happens, what stays, "This can't be undone." last | "Those reviews keep their own copy and won't change. You just can't re-run them. This can't be undone." |
+| Confirmation body | What happens, what stays, "This can't be undone." last | "Those reviews keep their own copy and won't change. You can't re-run them. This can't be undone." |
 | Confirmation buttons | Cancel, then the action's own words | "Cancel" / "Delete playbook"; "Keep running" / "Cancel review" |
 | Error | What happened + what to do. Mention what's kept. Every error has a fix. | "This PDF is pictures of pages, so its text can't be read. Upload a Word version, or paste the text." |
 | Banner (top) | What's true + why it matters + one action | "Your playbook changed after this review ran. The labels use the old limits. [Re-run]" |
@@ -102,7 +156,8 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | Step 1 | Create an OpenRouter account · openrouter.ai · free to sign up · [Open site (opens in your browser)] |
 | Step 2 | Add credit · A typical review costs about $0.30 to $0.60. |
 | Maintainer note (not on screen) | The "$0.30 to $0.60" figure is an estimate, not a measurement (ADR 0010, action 6). Replace it with the measured cost after the first paid run (Spec 13). |
-| Step 3 | Turn off Safety Retention · In OpenRouter: Settings › Privacy. Then providers don't keep your contract, except for legally required safety screening. |
+| Step 3 | Turn off Safety Retention · In OpenRouter: Settings › Privacy. Then providers don't keep your contract, except for legally required safety screening. · [Open privacy settings (opens in your browser)] to `https://openrouter.ai/settings/privacy` |
+| Maintainer note (not on screen) | The privacy settings address is an assumption. Check it against OpenRouter before release (Spec 13). |
 | Step 4 | Create a key and paste it above · It starts with sk-or-. |
 | Sample link | Or try a sample contract first, free |
 | Sample note | One label in it is wrong on purpose. Find it, and see why real reviews need checking too. |
@@ -114,17 +169,18 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | Element | Copy |
 | --- | --- |
 | Heading | Reviews |
-| Storage note | Saved on this computer, encrypted. Each one deletes itself after 30 days without changes. [Change in Settings] |
+| Storage note | Saved on this computer, encrypted. Each one deletes itself after 30 days without changes. |
 | Search | Search reviews |
 | Columns | Name · Date · Status · Next step · Auto-delete · Actions |
-| Date cells | Edited 2 min ago · Edited just now · Yesterday, 16:20 · 3 Nov 2026 |
+| Date cells | Edited 2 min ago · Edited just now · Edited 1 hour ago · Yesterday, 16:20 · 3 Nov 2026 |
 | Next steps | Check 9 → (Ready to check: the unchecked count) · Step 2 of 4 · about 40 s (Running) · Continue (Draft) · Resume (Interrupted) · Retry (Failed) · Open message (Done) |
 | Row reasons | Stopped at: matching clauses · Couldn't read Schedule 2 |
-| Offline | Needs internet |
-| Auto-delete cell | In 30 days · In 3 days, with [Keep it] [Delete now] |
+| Offline | Needs internet (in the Next step cell) · You're offline. Saved reviews still open, and you can prepare drafts. Running a review needs the internet. |
+| Count | 6 reviews |
+| Auto-delete cell | In 30 days · Deletes in 2 days, with [Keep it] [Delete now] |
 | Keep it toast | Kept for another 30 days |
-| Row menu label | More for [review name] |
-| Auto-delete notice (new) | Deleted 2 reviews that hadn't changed in 30 days. |
+| Row menu | More for [review name] (icon label) · Open · Rename · Delete… |
+| Auto-delete notice (new) | 2 reviews were deleted because they hadn't changed in 30 days. · [Change in Settings] · Dismiss (icon label) |
 | Empty state | No reviews yet · Check a contract against your playbook. It takes about 3 minutes and costs about $0.39. · [Start your first review] [Try a sample contract] |
 | Rename dialog | Rename review · Name · Cancel / Save · toast: Saved |
 | Delete dialog | Delete “[name]”? · This removes the review, its labels and your notes from this computer. This can't be undone. · Running: This review is running. It will be stopped first. · Cancel / Delete review · toast: Review deleted |
@@ -141,6 +197,8 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | File card | [file name] · PDF · 5 pages · 929 words · real text · [Replace] |
 | Preview | First page · is this the right contract? |
 | Preview hint | Wrong file? Click Replace, or drop another file on this card. |
+| File card, other states | Mixed: PDF · 9 pages · 929 words · pages 7 and 8 scanned · Scanned: PDF · 5 pages · scanned images, no text · Too large: PDF · 48 MB · Empty: PDF · 0 pages · no text · Not English: PDF · 5 pages · not English · Old Word: Word 97–2003 (.doc) · can't be read |
+| Buttons on a blocking or warning notice | Paste text · Replace file · Paste their text · Choose another file |
 | Paste field | Contract text · Keep the clause numbers and headings. Paste only the pages you want reviewed. |
 | Review name | Review name · Pick a name you'll recognise later. |
 | Scanned (blocks) | This PDF is pictures of pages, so its text can't be read. Upload a Word version, or paste the text. |
@@ -148,17 +206,17 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | Too large (blocks) | This file is 48 MB. The limit is 20 MB. Paste only the pages you want reviewed. |
 | Empty (blocks) | This file has no text. Choose another file, or paste the text. |
 | Old Word (blocks) | This is an old Word file. Open it in Word, save it as .docx, then load that. |
-| Tracked changes (warns) | This Word file has 14 tracked changes, made by Sarah Jones and Karim Benali. The review reads it as if every change were accepted. · The next step lists every change, with the earlier wording. |
+| Tracked changes (warns) | This Word file has 14 tracked changes. The next step lists every change. |
 | Not English (warns) | This contract doesn't look like it's in English. Clause Tracer is built and tested for English contracts only, so: · fewer names and addresses are found for you. Check the privacy step carefully. · more labels may be wrong or unsure. · [Choose another file] |
 | Section 2 | Pick a playbook · Playbook · [Copy a starter] |
 | Playbook line | Side: service provider · 11 positions · edited 2 Nov |
 | Unedited starter | Copied from the starter · side: service provider · 11 example positions. You haven't changed them yet. [Make the limits yours] |
 | Playbook deleted | The playbook this draft used is gone. Pick another one. |
-| Section 3 | Which party in this contract is the [side]? · Picked last time · [Add a party] |
+| Section 3 | Which party in this contract is the [side]? · Picked last time · [Add a missing party] |
 | Party details | Filled in from the contract's opening lines. Every copy of them is replaced before anything is sent. |
 | Party fields | Your party · name · Address · Other side · name · Address |
 | Add party dialog | Add a party · Use the name exactly as the contract writes it. · Party name · Address · Cancel / Add party · toast: Party added |
-| Footer | Continue |
+| Footer | Saved as a draft · [Continue] |
 
 ### 4.4 Contract check (`contract-check.html`)
 
@@ -167,12 +225,13 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | Heading | Contract check |
 | Side card | Check the split |
 | Guidance | Each box should hold one section. Merge or split if a sentence is cut or two sections share a box. |
+| Drag hint | Drag [drag handle icon] onto the next box to join them, or click inside a box to split it. · Dismiss (icon label) |
 | Facts | Clauses: 45, split by section numbers · Schedules: Schedule 1 · 1 table kept · Pages: 5, all with real text |
 | Paragraph split note (new) | This contract has no section numbers, so it was split by paragraph. |
 | Hidden text | Found 1 piece of hidden text in 2.2: white text a reader can't see. It's kept and marked so you can see it. Any label that rests on it becomes unsure. [Show me] |
 | Unreadable text (warns) | Parts of pages 3 and 4 couldn't be read as text. The letters are stored in a way the app can't decode, so it can't check them. · Any result that rests on those parts will be marked unsure. Read pages 3 and 4 yourself before you rely on the review. |
 | Tracked changes | Tracked changes · [n] · This Word file has tracked changes. The review reads it as if every change were accepted. Here is what changed, so you can see the earlier wording. · columns: Clause · Who · Change · rows: Changed “30 days” to “60 days” · Added “…” · Removed “…” · [n] more changes · Removed words aren't part of the contract and are never sent to the AI. |
-| Cut box | One box looks cut · 12.1 ends mid-sentence and 12.2 starts with its end. “notice.” probably belongs at the end of 12.1. · [Fix it] [Show me] |
+| Cut box | One box looks cut · 12.1 ends mid-sentence and 12.2 starts with its end. “notice.” probably belongs at the end of 12.1. · [Fix it] [Show me] · after Fix it: Fixed. 12.1 and 12.2 each hold one whole sentence now. · [Undo] · toast: Fixed 12.1 and 12.2 |
 | Box controls | Split box [n] · Merge box [n] with the box below · toasts: Split at the cursor · Merged with the box below · Merged 12.1 and 12.2 |
 | Keys hint | M merge with next · S split |
 | Footer | Looks right, continue |
@@ -183,6 +242,7 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | --- | --- |
 | Heading | Privacy check |
 | Find to replace | Type words to find and replace · [Replace this] · toast: Replaced. Check the marked words. |
+| Legend | Will be replaced |
 | Select hint | Drag across any words on the pages to replace them, like selecting text anywhere else. Details like “the only bakery in town” can identify someone too. |
 | View switch | Pages show: Real text · What the AI sees |
 | List heading | What gets replaced · 7 items |
@@ -191,9 +251,9 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | Name variant | “Ms Jones” in 14.5 looks like Sarah Jones (Person 2). · [Same person] [Different person] · toasts: Both are Person 2 · “Ms Jones” is now Person 3 |
 | Kept note | Kept: amounts, dates, durations, roles like “the Developer”, and England and Wales in the governing-law clause. |
 | Private mode | Private mode for this review · Only providers that don't keep your contract. |
-| Private off warning | The contract goes to the AI models as it is, names and addresses included. The models may keep it. |
+| Private off warning | Private mode is off. The contract goes to AI models that may keep it. Names and addresses are still replaced. Turn it back on unless you're sure. |
 | Summary | 929 words go to OpenRouter, with 7 details replaced: 2 people, 1 company, 2 addresses, 1 email and 1 ID number. |
-| Caution | The check can miss things. Please look over the marked words. |
+| Caution | The check can miss things. Look over the marked words. |
 | Cost | About $0.42 and 3 minutes · credit left: $3.10 |
 | Over credit | This review costs about $0.42. You have $0.30 left. If the credit runs out, the review stops. You can resume it once you add credit. · [Add credit (opens in your browser)] [Send anyway] |
 | Offline (new) | Sending for review needs the internet. Your draft is saved. |
@@ -204,20 +264,22 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | Element | Copy |
 | --- | --- |
 | Stages | 1 Reading the pages · 2 Matching clauses · 3 Judging the labels · 4 Writing the notes |
-| Progress | Step 1 of 4 · Reading the pages · Spent so far $0.05 of about $0.42 · About 1 min left |
+| Progress | Step 1 of 4 · Reading the pages · Spent so far $0.05 of about $0.42 · About 1 min left · footer: Credit left: $3.10 |
 | Log lines | Read 5 pages. · Found 45 clauses. · Matched all 45 clauses to 11 positions. · Judged the labels for 11 positions. · Wrote the explanations and sorted the not-covered parts. · Finished. |
-| Privacy badge | Private mode is on. Providers don't keep your contract if you've turned off Safety Retention in OpenRouter. |
+| Privacy badge | Private mode is on. Providers don't keep your contract if you've turned off Safety Retention in OpenRouter, except for legally required safety screening. · menu: Turn private mode off… · Change models in Settings |
+| Reading log | Reading log · Hide finished lines · Show finished lines · other stop lines: Matched 12 of 45 clauses to positions. · Judged 6 of 11 positions. · Stopped at step 3. Credit ran out. · Stopped at step 3. No private-mode model was available. |
 | Background | [Run in background] · toast: Running in the background |
-| Close note | Closing the app pauses the review. Resume picks up from the last finished step. |
+| Close note | Closing the app pauses the review. Resume picks up from the first unfinished step. |
 | Wrong key | Interrupted at step 2 of 4 · Matching clauses · OpenRouter turned down your key. Check it in Settings, then resume. · [Open key settings] [Resume] · log: Stopped at step 2. OpenRouter turned down the key. |
-| No internet | The internet dropped at step 2. Resume picks up from here. · log: Stopped at step 2. The internet dropped. |
+| Interrupted progress | Interrupted at step [n] of 4 · [stage] · Spent so far $0.02 of about $0.42 · Paused · footer: Paused · credit left: $3.10 (no credit: Credit left: $0.00 · paused) |
+| No internet | The internet dropped at step 2. Resume picks up from the first unfinished step. · log: Stopped at step 2. The internet dropped. |
 | No credit | Your OpenRouter credit ran out at step 3. Add credit, then resume. Nothing done so far is lost. · [Add credit (opens in your browser)] |
 | Rate limit, with a wait time | Interrupted at step 2 of 4 · Matching clauses · The AI service is busy, or your key's limit is reached. It asked for a wait of 30 seconds. Resume picks up from the first unfinished step, and finished steps aren't paid for again. · [Resume] · log: Stopped at step 2. The AI service asked for a wait of 30 seconds. |
 | Rate limit, no wait time | The AI service is busy, or your key's limit is reached. It gave no wait time, so try again in a minute. Resume picks up from the first unfinished step, and finished steps aren't paid for again. · [Resume] · log: Stopped at step 2. The AI service is busy. |
 | No private model | No private-mode model is available for step 3 right now. Wait and resume, or turn private mode off for this review. · [Turn private mode off…] |
-| Done | Your review is ready · Cost $0.39 · Took 4 min · credit left: $2.71 · [Open the review] |
+| Done | Your review is ready · Cost $0.39 · Took 4 min · [Open the review] · footer: Credit left: $2.71 (the cost is shown once, above) |
 | Cancel dialog | Cancel this review? · So far it has cost $0.05 of about $0.42. Finished steps are kept, so you won't pay for them again. · Keep running / Cancel review |
-| Private off dialog | Turn private mode off for this review? · The contract goes to the AI models as it is, names and addresses included. The models may keep it. · Cancel / Turn off · toast: Private mode off for this review |
+| Private off dialog | Turn private mode off for this review? · The contract goes to AI models that may keep it. Names and addresses are still replaced. · Cancel / Turn off · toast: Private mode off for this review |
 
 ### 4.7 Review (`review.html`)
 
@@ -226,7 +288,7 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | Element | Copy |
 | --- | --- |
 | Title | [review name] · [playbook] · playbook as of 5 Nov, 10:31 |
-| Actions | Output · Rewrite · Suggestions · Re-run · Start over · [cost button: $0.39] |
+| Actions | Private mode: On (menu) · [cost button: $0.39] · Suggestions · More actions (Re-run… · Start over…) · Output. Rewrite is in the detail panel, as “Rewrite this clause”. |
 | Practice banner | Practice review · One label here is wrong on purpose. Find it, open it and fix it. Real reviews work the same way. [Start a real review] |
 | Playbook changed | Your playbook changed after this review ran. The labels use the old limits. [Re-run] |
 | Unedited starter | This review uses the example playbook, unedited. Its limits are examples, not yours. [Make the limits yours] |
@@ -268,25 +330,27 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | Lead, missing | The contract doesn't mention this. Nothing charges the Agency for paying late, and your playbook says that's acceptable. A late payer loses nothing by waiting. |
 | Lead, conditional yes | Yes, but only with a condition. You can show the work, but only if the Agency agrees in writing first. They could say no. |
 | Pencilled in | Pencilled in: judged from the wording, not a number. |
-| Source line | Walk-away by your playbook: payment is 60 days, your limit is 30. |
+| Source line | Walk-away by your playbook: payment is 60 days, your limit is 30. · An unsure label has no “by your playbook”, because the playbook's limit didn't produce it: “Unsure: the cap depends on a document that isn't loaded.” |
 | Starter source line (new) | Walk-away by the example playbook: payment is 60 days, the example limit is 30. |
 | Other level | Why it could be walk-away · If the Agency decides what's reasonable, the rounds have no limit, and unlimited is the worst value. |
 | Readings | Reading 1: a small number of rounds, decided together. · Reading 2: as many rounds as the Agency asks for. |
 | Question | Question to ask: “Can we agree that 2 rounds of revisions are included, and extra rounds are paid at the hourly rate?” |
 | Conflict | These clauses disagree. Ask which applies. |
 | Range | 14.3 gives a range. The worse end was used. |
-| Quote failed | Couldn't confirm the wording. Check 12.2 yourself. · Unsure: asked twice, and both times the AI's quote wasn't in the contract. |
+| Quote failed | This one is unsure. The quote found doesn't match the contract word for word, so it isn't used. · Couldn't confirm the wording. Check 12.2 yourself. · Unsure: asked twice, and both times the AI's quote wasn't in the contract. |
 | Searches disagreed | This one is unsure. One search found wording about this in 9.2, and a second check didn't agree. · The searches disagreed about 9.2. Read it yourself. · Unsure: a clause may cover this position, but it couldn't be confirmed. · What to check: Read 9.2. Does it limit who you can work for? |
 | Quote not marked on the page | These words are in the contract, but they couldn't be marked on the page. Find them in 5.4. · (the label is kept) · trail: Clause · not marked on the page |
 | Unreadable text | Unsure: this wording sits in text the app couldn't read. Check [clause] yourself. |
-| Searched, nothing found | The contract doesn't mention this, and your playbook prefers it that way. No wording about it was found. · Where it was searched · Every clause was read for this position, twice: once position by position, and once clause by clause. · Words looked for: compete, competing, restrictive covenant, solicit, exclusive. · A search can miss a clause. This doesn't prove the contract has no non-compete. · Preferred by your playbook: nothing was found, and you set missing to preferred. · Nothing found. Is this right? · [Looks right] [Change it] |
+| Searched, nothing found | The contract doesn't mention this, and your playbook prefers it that way. No wording about it was found. · Where it was searched · Every clause was read for this position, twice: once position by position, and once clause by clause. · Words looked for: compete, competing, restrictive covenant, solicit, exclusive. · A search can miss a clause. This doesn't prove the contract has no non-compete. · Preferred by your playbook: nothing was found, and you set missing to preferred. · Nothing found. Is it really not there? · [Looks right] [Change it] |
 | AI wording line | Every quote and number was checked against the contract; the wording was written by AI. · Shown under every piece of text the AI wrote: the reasons for a pencilled label, an AI rewrite of a clause, an AI rewrite of the message. Text the app built itself carries no line. The short tag “Written with AI” stays on suggestions. |
 | Unloaded doc | Document · Not loaded · Refers to a document that isn't loaded: Master Agreement |
 | Trail heading | Evidence trail |
 | What to check | What to check: Does the quote say you're paid within 60 days of the invoice date? |
+| What to check, pencilled | One question, then the line from Spec 4.4: What to check: Does the quote cap your liability at the fees, with nothing that overrides it? · If you're not sure, choose Change it, then Unsure. |
 | Decision (walk-away) | Read 5.4 on the page. Is this right? · 1 Yes, it's a walk-away · Kept. Goes into the message. · 2 No, change the label… · Opens Change it. · 3 Doesn't matter for this deal · Kept. Left out of the message. |
-| Decision (unsure) | 1 Yes, ask about it · Kept. Goes into the message. (2 and 3 as above) |
+| Decision (unsure) | Read 3.2 on the page. What do you want to do? · 1 Yes, ask about it · Kept. Goes into the message. (2 and 3 as above) |
 | Decision (others) | [Looks right] [Change it] · toast: Checked |
+| Panel links | Show on the page · Rewrite this clause · Add this clause (Missing items) |
 | Note | Note · Add a note (optional) |
 | More | More |
 
@@ -295,7 +359,7 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | Dialog | Copy |
 | --- | --- |
 | Change it | Change label · § [n] · [position] · Tool label · Your label · New label · Note · History: Tool label Walk-away · your label Unsure · Cancel / Save · toasts: Saved. Your label: Unsure · Back to the tool label, unchecked |
-| Rewrite | Rewrite § [n] · [Write it yourself] [Ask AI] · The AI aims for the preferred level of every position this clause affects: [positions]. · Instruction (optional) · Before / After · Removed words are struck through. Added words are highlighted. · The smallest change that meets your position. · Information only. Doesn't change the counter or the review status. · [Use as suggestion] · toast: Saved as a suggestion |
+| Rewrite | Rewrite § [n] · [Write it yourself] [Ask AI] · The AI aims for the preferred level of every position this clause affects: [positions]. · Instruction (optional) · Before / After · Removed words are struck through. Added words are highlighted. · Information only. Doesn't change the counter or the review status. · [Use as suggestion] · toast: Saved as a suggestion |
 | Rewrite, new details | Before the re-check, known names and addresses are swapped for placeholders. No new personal details found. |
 | Rewrite failed | The new wording didn't pass the quote check, so it can't be labelled. You can still save it, as unsure. · [Save as unsure] · toast: Saved as an unsure suggestion |
 | Suggestions | Suggestions · [n] · One per clause. The original file is never changed. Suggestions go in the message you send. · Written with AI · label is information only · Written by you · label is information only · [Edit] [Remove] |
@@ -313,19 +377,20 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | --- | --- |
 | Title | Output · [review name] |
 | Type | Message · Report · Both |
-| Unchecked warning | 9 positions aren't checked yet · Unchecked items are marked in the report and the checklist, never in the message. · [Go back and check] [Continue anyway] · toast: Continuing with unchecked positions |
-| Legal line | Not legal advice. Check every result yourself. [What this means] |
+| Unchecked warning | Notice: 9 positions aren't checked yet. · [What this means] [Go back and check] · Dialog: 9 positions aren't checked yet · Unchecked items are marked in the report and the checklist, never in the message. · [Go back and check] [Continue anyway] · toast: Continuing with unchecked positions |
+| Legal line | Not legal advice. Check every result yourself. |
 | Message fields | To · From · Tone: Friendly · Formal |
 | Ask for | Ask for · One line for each issue. Tick a line to send it, untick it to leave it out. · unticked suffix: Left out |
-| Ask-for line | Payment (5.4): could invoices be paid within 15 days of the invoice date? |
+| Ask-for line | Payment (5.4): could invoices be paid within 15 days of the invoice date? · Deposit (5.2), where the playbook wants more: could the deposit on signing be 50% of the total? |
 | Nothing to ask | Nothing to ask for from your playbook. This only means the contract matches your playbook. It doesn't mean it's safe to sign. |
-| Message | Message · [Rewrite with AI] [Regenerate] [Copy] · toasts: Message regenerated · Copied |
+| Message | Message · Contains your wording only, no placeholders. · Saved with the review. · [Rewrite with AI] [Regenerate] [Copy message] · toasts: Message regenerated · Copied |
 | Rewrite with AI | Rewrite with AI · The message was built from your ticked lines. The AI can reword it. The points, quotes and numbers stay the same. · Before / After · Removed words are struck through. Added words are highlighted. · [the AI wording line] · Only the message text is sent, with names swapped for placeholders. Your acceptable limits are never sent. · [Keep the current message] [Use the rewrite] · toast: Message rewritten |
-| Labels changed | Labels changed since this message · Regenerate to use the new labels. This replaces your current text. · [Keep this message] [Regenerate] |
+| Rewrite with AI, sample | Before: “Thanks for sending the development agreement. Before I sign, could we look at a few points?” · After: “Thanks for sending the agreement. Before I sign, could we look at a few points?” · A sample rewrite changes tone only. It adds no point, motive or number. |
+| Labels changed | Labels changed since this message · Regenerate to use the new labels. This replaces your current text. · [Keep this message] [Regenerate] · toasts: Message kept · Message regenerated |
 | Report options | Summary · Full contract · Include your notes |
 | Report preview | Review report · Asked for · Not checked: 9 positions aren't checked yet. They're marked here as unchecked. |
 | Both tab | Edit the text on the Message tab. · Summary of the six points asked for, with the review labels. Includes your notes only when you turn that on. · [Open the report] |
-| Save PDF | Save report as PDF · Cancel / Save PDF · notice: Saved with the review. · toast: Saved |
+| Save PDF | Save report as PDF · notice: This PDF isn't encrypted, and auto-delete won't remove it. It has your contract text and real names. · Cancel / Save PDF · footer: Saved with the review. · toast: Saved |
 
 ### 4.9 Playbooks (`playbooks.html`)
 
@@ -339,7 +404,7 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | Card actions | Edit · Duplicate · Export · Delete · toasts: Copy made: [name] (copy) · Exported as [file].ctplaybook |
 | Starter card | Want a place to start? The freelancer starter has 11 example positions. Copy it, then make the limits yours. · Starter · Freelancer receiving a service agreement · read-only · [Preview starter] |
 | Import failed | That file isn't a Clause Tracer playbook, so it can't be imported. Playbook files end in .ctplaybook. · [Choose another file] |
-| Delete, used | Delete “[name]”? · 4 reviews use this playbook. Those reviews keep their own copy and won't change. You just can't re-run them. This can't be undone. · Cancel / Delete playbook · toast: Playbook deleted |
+| Delete, used | Delete “[name]”? · 4 reviews use this playbook. Those reviews keep their own copy and won't change. You can't re-run them. This can't be undone. · Cancel / Delete playbook · toast: Playbook deleted |
 | Delete, unused | Delete “[name]”? · No reviews use this playbook. This can't be undone. |
 
 ### 4.10 Starter preview (`starter-preview.html`)
@@ -372,7 +437,7 @@ The eleven starter positions and their "why this matters" notes are in Spec 7; t
 | --- | --- |
 | Header | [playbook name] · Unsaved changes · [Save] · toast: Saved |
 | Details | Name · Side · Customer (None) |
-| List | Positions · [n] · Drag position [n] to reorder · Delete position [n] |
+| List | Positions · [n] · [Add] · Drag position [n] to reorder · Delete position [n] |
 | Starter copy note | Copied to your playbooks. These are example positions, so make the limits yours. Until you do, reviews say “by the example playbook”. |
 | Position form | Position [n] · Topic · Type: Number · Yes/no · Words |
 | Number | Unit (days, %, months, rounds) · Direction: Lower is better · Higher is better · At or under · [unit], 1–120 · Everything beyond Acceptable · Filled in from Acceptable |
@@ -380,7 +445,8 @@ The eleven starter positions and their "why this matters" notes are in Spec 7; t
 | Yes/no | If the answer is yes · Must be better than the no level · If no, unclear or missing · Missing always counts as no, so there is no separate missing level · Reads as: Yes counts as Preferred · No, unclear or missing counts as Acceptable |
 | Words | Preferred reads as · Acceptable reads as · Walk-away reads as · placeholder: Describe this level in a sentence |
 | Why this matters | Why this matters to me (optional) · Never exported. Only sent to the AI if you turn that on in Settings. |
-| Validation (new) | Acceptable must be worse than Preferred. · Enter a number from 1 to 120. · Give the position a topic. |
+| Validation (new) | Acceptable has to be [more than / less than] [value], the preferred limit. (“more than” when lower is better, “less than” when higher is better. [value] is the Preferred number.) · Enter a number from 1 to 120. · Give the position a topic. |
+| Blank playbook (new) | New playbook · Not saved yet · Name placeholder: For example, Design retainer · Side placeholder: For example, service provider · Topic placeholder: For example, Days until I'm paid, from invoice date · Untitled position · Note placeholder: Optional. A line to remind you why you set this limit. · Leave dialog text: If you leave now, you'll lose this new playbook. · After a starter copy: Saved · not changed yet |
 | Leave dialog | Leave without saving? · If you leave now, you'll lose your changes to “[name]”. · Stay / Leave without saving |
 | Delete position | Delete “[position]”? · It's removed from this playbook when you save. Once you save, it can't be undone. The other positions stay. · Cancel / Delete position · toast: Position deleted |
 
@@ -407,44 +473,45 @@ The eleven starter positions and their "why this matters" notes are in Spec 7; t
 | Notes toggle | Send “why this matters” notes to the AI · Gives better explanations. Known names are replaced, but the privacy check doesn't cover notes. · [What gets sent] |
 | Notifications | Notify when a review finishes · Shows a notification when a review is done, even if you're in another window. |
 | Appearance | Colours: Match system · Light · Dark · Follows your computer's setting. · Text size: 100% · 125% · 150% · 200% |
-| Storage | Delete reviews after no changes for: 7 days · 30 days · 90 days · 12 reviews on this computer · [Delete all reviews] |
+| Storage | Delete reviews after no changes for: 7 days · 30 days · 90 days · 12 reviews on this computer · [Delete all reviews] · path line: ~/.local/share/clause-tracer (where files are kept) |
 | Delete reviews | Delete all 12 reviews? · This removes every review on this computer, with its labels and notes. Your playbooks, customers and key stay. This can't be undone. · Cancel / Delete all reviews · toast: Reviews deleted |
 | Lower auto-delete | Lower auto-delete to 7 days? · 4 reviews haven't changed in 7 days. They'll be deleted on 9 Nov, in 3 days, unless you change them first. · Cancel / Lower to 7 days |
 | Data | Nothing is removed without asking first. · Everything · Reviews, playbooks, customers, settings and the key, all from this computer. · [Delete everything] |
 | Delete everything | Delete everything? · Reviews, playbooks, customers, settings and the key are all removed from this computer. This can't be undone. · Cancel / Delete everything · toast: Everything deleted |
-| Advanced: models | Model choice: One for every step · One per step · Model: Claude Sonnet 5.5 (recommended) · Steps: Match · Extract · Judge words positions · Explain · Sort not-covered parts · Rewrite · Rewrite message · Jev is only offered for match and judge. In private mode, only models that don't keep your contract are offered. |
-| Model can't do step (new) | [Model] can't do this step. Pick another model. |
-| Untested model (new) | This model isn't tested with Clause Tracer yet. Labels may be less reliable. |
-| About | Clause Tracer 1.0.0 · Functional Source License · Not legal advice. · [Check for updates (opens the release page in your browser)] · This is version 1.0.0. The button opens the release page in your browser. |
+| Advanced: models | Model choice · Which AI model does each step. The recommended one is already picked. · One for every step · One per step · Model: Claude Sonnet 5.5 (recommended) · Steps: Match · Extract · Judge words positions · Explain · Sort not-covered parts · Rewrite · Rewrite message · Jev is only offered for match and judge. In private mode, only models that don't keep your contract are offered. |
+| Model can't do step (new) | This model can't do this step. Pick another model. |
+| Untested model (new) | This model isn't tested with Clause Tracer yet. Results may be less reliable. |
+| About | Clause Tracer 1.0.0 · Functional Source License · Not legal advice. · [Check for updates (opens the release page in your browser)] · This is version 1.0.0. |
 
 ### 4.15 Help (`help.html`)
 
 | Element | Copy |
 | --- | --- |
-| How a review works | Load a contract and pick a playbook. · Check the split and the private details. · The app labels each position and shows its evidence. · You check every label: confirm it or change it. · Write a message to the other side, or save a report. |
+| How a review works | Load a contract and pick a playbook. · Check the split and the private details. · The app labels each position and shows its evidence. · You check every label: confirm it or change it. · Write a message to the other side, or save a report. · [Start a review] [Try a sample contract] |
 | Words used in this app | There are four labels, plus grey for parts no position covers. Each is shown as a stamp. · Preferred, Acceptable, Walk-away, Unsure: the same definitions as the review's “?” ·  Not covered: No position covers this part. |
 | Legal terms in plain English | Indemnity, Limitation of liability, Governing law, Termination, Confidential information, Intellectual property (IP), Work made for hire, Non-compete, Warranty, Force majeure (definitions as in the prototype) |
-| Key guide | Get an OpenRouter key · Create an account, add credit, turn off Safety Retention, create a key. |
+| Key guide | Get an OpenRouter key · Create an account, add credit, turn off Safety Retention, create a key. · [Open the key guide] [Key settings] |
 | What gets sent | Only your positions and the contract go to OpenRouter, with names swapped for placeholders like “Person 1”. That includes a name typed into a position or a rewrite instruction. Never playbook names, customers, your notes, or To and From names. No telemetry. · [Change what gets sent in Settings] |
 | What's protected | Your reviews, playbooks and key are encrypted on this computer. That protects them from other people who use the computer, and from someone who takes the disk. · It doesn't protect them from harmful software running in your own account. Keep your system up to date, and keep its disk encryption on. · Deleting a review destroys its key, so it can't be read again. A backup of this computer made earlier may still hold it. |
-| Shortcuts | Ctrl+K Commands · J Next unchecked · ] / [ Next / previous label · 1 / 2 / 3 Decide on a walk-away or unsure label · Ctrl+F Find in contract · Ctrl+/ opens the full list. |
+| Shortcuts | Ctrl+K Commands · J Next unchecked · ] / [ Next / previous label · 1 / 2 / 3 Decide on a walk-away or unsure label · Ctrl+F Find in contract · [See all shortcuts] · Ctrl+/ opens the full list. The full list opens in a “Keyboard shortcuts” dialog with a Close button. |
 | Legal | Not legal advice · Clause Tracer isn't a lawyer, and this isn't legal advice. · Free to use, including for paid work. Source available under the Functional Source License, with no warranty. Each version becomes Apache 2.0 two years after its release. Sample contract: Dominic Fallows, CC BY-SA 4.0. · [Read the licence (opens in your browser)] |
 
 ### 4.16 Error (`error.html`)
 
 | Element | Copy |
 | --- | --- |
-| Heading | Something in the app broke |
-| Log | Opened your review. · Something in the app broke while loading it. |
-| Reassurance | Your files are safe. Copy the details and report the problem on GitHub. |
+| Heading | The review couldn't be opened |
+| Log | Tried to open your review. |
+| Reassurance | Your files are safe. Copy the details and report the problem on GitHub, at github.com/mohamed-benoughidene/clause-tracer/issues. (Plain text: the app opens nothing itself, Spec 14.1.) |
 | Details | Details · ERR-STEP6B-412 · The details hold only the app version, the step and this code. No contract text. · [Copy the details] · toast: Copied |
-| Way out | Back to reviews |
+| Way out | [Try again] · Back to reviews |
 
 ### 4.17 Everywhere
 
 | Element | Copy |
 | --- | --- |
 | Command palette | Search commands · Ctrl+K |
+| Sidebar | New review · Reviews · Playbooks · Customers · Settings · Help · OpenRouter key saved · Private mode: On · Credit left: $3.10 |
 | Toasts | Saved · Copied |
 | Close buttons | Close (icon label) |
 | Back | Back to reviews |
@@ -582,3 +649,76 @@ The copy deck and the prototype were brought into line with the three accepted d
 | # | Problem | Fix |
 | --- | --- | --- |
 | 1 | A rate limit from the AI service had no message of its own. It was handled like any network error. | Review running has a rate-limit state, with and without a wait time (section 4.6, and `running.html?state=rate-limit`). The Interrupted review offers Resume. |
+
+### 6.11 Review for friction and machine-made text, 14 Nov 2026
+
+Found by reading every screen as a first-time user and checking each string against the new signs in section 1.1. The prototype and this file were fixed together.
+
+**Wrong or false text**
+
+| # | Problem | Fix |
+| --- | --- | --- |
+| 1 | The deposit ask-for line asked for a smaller deposit. The starter wants a bigger one (Spec 7: preferred is 50% or more; the sample gives 25%). | “Deposit (5.2): could the deposit on signing be 50% of the total?” in Output. It was the only copy: the message text and report preview don't list the deposit line. |
+| 2 | The private-mode-off warning said names and addresses go to the AI as they are. Spec 4.2 and 8.2 say the privacy check always replaces them; private mode only controls whether providers may keep the contract. | “The contract goes to AI models that may keep it. Names and addresses are still replaced.” in the deck (4.5, 4.6), the privacy check warning and the running dialog. No other page held the old sentence. |
+| 3 | “Unsure by your playbook” on three sources, though the playbook's limit didn't produce the label. | “Unsure:” on the liability cap, the conditional yes and the vague “reasonable revisions” source line. “By your playbook” stays on preferred, acceptable and walk-away. |
+| 4 | “The smallest change that meets your position.” was never checked. | Deleted from the Rewrite dialog and the deck. |
+| 5 | “Please” twice, and the quote-failed panel used a different wording from the deck. | “Look over the marked words.” The quote-failed lead now ends after “so it isn't used.” and the notice under it carries the deck's “Couldn't confirm the wording. Check 12.2 yourself.”, so the fact is said once. |
+| 6 | “You just can't re-run them.” | “You can't re-run them.” (Playbooks, the pattern example in section 3, and 4.9.) |
+| 7 | The About card said the button opens the release page twice. | The button keeps its hidden label. The line under it is “This is version 1.0.0.” The card still shows “Clause Tracer 1.0.0” above it, so the version appears twice. Owner to decide. |
+| 8 | The error heading was generic, and the heading and the log line said the same thing. | Heading “The review couldn't be opened”, shown on screen. One log line, “Tried to open your review.”, because the old first line (“Opened your review.”) contradicted the heading. The GitHub issues address is shown as text (the app opens nothing itself). “Try again” was added before “Back to reviews”. |
+
+**Sample AI texts that break the app's promises**
+
+| # | Problem | Fix |
+| --- | --- | --- |
+| 9 | The sample rewrite of 5.4 added a second sentence, a new term nobody asked for. | The After text is “Invoices will be paid within 15 days of the invoice date.” The suggestion card shows the same text. |
+| 10 | The message rewrite promised the points stay the same, then added “That would help me plan the work” and “things that matter to me”. | The After text is “Thanks for sending the agreement. Before I sign, could we look at a few points?” and the payment line is unchanged. A sample rewrite changes tone only. |
+| 11 | “What to check” on the liability cap was three sentences. | One question. The Spec 4.4 line “If you're not sure, choose Change it, then Unsure.” stays, as its own line below it, because the spec requires it for pencilled labels. |
+
+**Friction**
+
+| # | Problem | Fix |
+| --- | --- | --- |
+| 12 | Three wordings for what Resume does. | “Resume picks up from the first unfinished step.” (Spec 6.3 uses the same words.) The rate-limit rows already said it. |
+| 13 | The done screen showed the cost twice, and the running screen showed “About 1 min left” and “about 3 minutes”. | The cost is in the progress block only; the footer shows the credit left. The footer keeps no time estimate. |
+| 14 | The hardest key step had no link. | “[Open privacy settings (opens in your browser)]” to `https://openrouter.ai/settings/privacy`, with a maintainer note that the address is an assumption. Help's key guide is one line and doesn't repeat the step, so it has no link. |
+| 15 | Tracked changes were warned about twice. | New review: “This Word file has 14 tracked changes. The next step lists every change.” Contract check keeps the full list and the “as if every change were accepted” sentence. |
+| 16 | “Is this right?” didn't fit an unsure label or a search that found nothing. | Unsure: “Read 3.2 on the page. What do you want to do?” Nothing found: “Nothing found. Is it really not there?” Preferred, acceptable and walk-away keep “Is this right?”. The unsure answers (“Yes, ask about it”) still read as answers to a yes/no question. Owner to decide. |
+
+**Prototype and deck disagreed**
+
+Order of choice: the spec, then the deck's voice rules, then the clearer wording.
+
+| Where | Choice |
+| --- | --- |
+| Home, auto-delete notice | The prototype's “2 reviews were deleted because they hadn't changed in 30 days.” (it says why). The “Change in Settings” link sits on that notice, not on the storage note. |
+| Home, near-deletion cell | “Deletes in 2 days”: it names what happens. The spec only says 3 days or fewer. |
+| New review, “Add a missing party” | The button says “Add a missing party” (Spec 14.1 words). The dialog keeps “Add a party” and its “Add party” button. |
+| New review, “Saved as a draft” | Added to the deck as the footer text. |
+| Contract check, drag hint | Added to the deck. “You can also press M or S.” was dropped from it, because the footer already says “M merge with next · S split”. |
+| Running, privacy badge | The prototype's ending, “except for legally required safety screening”. Spec 8.2 gives that wording. The deck was fixed. |
+| Output, “Check them in review” | “Go back and check” in the notice and the dialog: one name for one action. |
+| Output, legal line | “Not legal advice. Check every result yourself.” Section 4.17 and the voice rules set it for every message and report page. “[What this means]” belongs to the unchecked notice, not the legal line. |
+| Output, “Copy message” | “Copy message”: on the Both tab a bare “Copy” could mean the report. |
+| Output, “Contains your wording only, no placeholders.” | Added to the deck. |
+| Output, labels changed | The prototype now shows the deck's text, with both buttons. The dialog's duplicate notice (“Labels changed. Regenerate?”) was removed. A “Keep this message” toast, “Message kept”, was added. |
+| Output, save PDF | The prototype's notice, as Spec 4.7 requires. “Saved with the review.” stays as the footer line. |
+| Playbook editor, invalid | “Acceptable has to be more than 15, the preferred limit.” as a pattern, with the Preferred number as the value, and “less than” when higher is better. |
+| Settings, model can't do a step | “This model can't do this step. Pick another model.” in both. |
+| Settings, untested model | “This model isn't tested with Clause Tracer yet. Results may be less reliable.” in both. “Results”, not “labels”, because the untested step may be a rewrite. |
+| Settings, storage path and model-choice line | Rows added to the deck. |
+| Help, “Start a review”, “Key settings”, “See all shortcuts” | Rows added to the deck. |
+| Other rows added from the prototype | Home: sidebar, count, row menu, “Edited 1 hour ago”, offline notice. New review: other file card states and notice buttons. Contract check: the state after Fix it. Privacy check: legend. Running: reading log, interrupted progress and footer. Review: top bar actions, panel links. Editor: Add, blank playbook. Everywhere: sidebar. |
+| Privacy check, over credit | The footer repeated the cost and the credit left from the notice above it. The footer text was removed in that state. |
+
+**Open: owner to decide**
+
+- “Test this rule on the open contract” (`playbook-editor.html`): matches no feature in the spec. Not removed, not added to the deck.
+- “Replay tips” (`help.html`): matches no feature in the spec. Not removed, not added to the deck.
+
+**Left as found**
+
+- Praise in the practice review: “You found it.” in the answer card and “Changed to Walk-away. Well spotted.” in the toast. Both break section 1.1. Not in this review's list.
+- Help's “See all shortcuts” opens a dialog with the same five rows as the card above it.
+- Spec 4.7 point 5 says “matches your rules”, but the app says “playbook”.
+- The About card shows the version twice (item 7).

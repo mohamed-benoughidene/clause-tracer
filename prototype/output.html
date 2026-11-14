@@ -45,7 +45,7 @@
       <span>9 positions aren't checked yet.</span>
       <span class="spacer"></span>
       <button class="link" type="button" data-open="unchecked">What this means</button>
-      <a class="link" href="review.html">Check them in review</a>
+      <a class="link" href="review.html">Go back and check</a>
     </div>
 
     <section id="panel-message" role="tabpanel" aria-labelledby="tab-message" class="output-body">
@@ -61,7 +61,7 @@
       </div>
 
       <div class="row" style="justify-content:space-between;align-items:flex-end">
-        <p class="small muted"><svg class="icon"><use href="#i-info"/></svg> Not legal advice. Read the message before you send it.</p>
+        <p class="small muted"><svg class="icon"><use href="#i-info"/></svg> Not legal advice. Check every result yourself.</p>
         <div class="field" style="gap:6px">
           <span class="label" id="tone-label">Tone</span>
           <div class="segmented" role="group" aria-labelledby="tone-label">
@@ -81,7 +81,7 @@
           <label class="ask-line"><input type="checkbox" checked value="Non-compete (9.1 and 14.3): these give 12 months, and 6 to 9 months. Which applies, and could we remove it?"><span class="item">Non-compete (9.1 and 14.3): these give 12 months, and 6 to 9 months. Which applies, and could we remove it?</span><span class="left-out">Left out</span></label>
           <label class="ask-line"><input type="checkbox" checked value="Revisions (3.2): could we agree 2 rounds are included, with extra rounds at the hourly rate?"><span class="item">Revisions (3.2): could we agree 2 rounds are included, with extra rounds at the hourly rate?</span><span class="left-out">Left out</span></label>
           <label class="ask-line"><input type="checkbox" checked value="Liability (11.1): could you send the Master Agreement mentioned here?"><span class="item">Liability (11.1): could you send the Master Agreement mentioned here?</span><span class="left-out">Left out</span></label>
-          <label class="ask-line"><input type="checkbox" value="Deposit (5.2): could the deposit on signing be smaller?"><span class="item">Deposit (5.2): could the deposit on signing be smaller?</span><span class="left-out">Left out</span></label>
+          <label class="ask-line"><input type="checkbox" value="Deposit (5.2): could the deposit on signing be 50% of the total?"><span class="item">Deposit (5.2): could the deposit on signing be 50% of the total?</span><span class="left-out">Left out</span></label>
           <label class="ask-line"><input type="checkbox" value="Late payment (new clause): could we add a late fee of 2% of the unpaid amount for each month an invoice is late?"><span class="item">Late payment (new clause): could we add a late fee of 2% of the unpaid amount for each month an invoice is late?</span><span class="left-out">Left out</span></label>
         </div>
       </fieldset>
@@ -92,8 +92,9 @@
 
       <div class="notice" role="status" data-state="labels-changed" style="background:var(--unsure-bg);color:var(--unsure-fg)">
         <svg class="icon"><use href="#i-warn"/></svg>
-        <span>Labels changed. Regenerate?</span>
+        <span><strong>Labels changed since this message.</strong> Regenerate to use the new labels. This replaces your current text.</span>
         <span class="spacer"></span>
+        <button class="btn btn-sm" type="button" data-toast="Message kept">Keep this message</button>
         <button class="btn btn-sm" type="button" data-toast="Message regenerated"><svg class="icon"><use href="#i-refresh"/></svg>Regenerate</button>
       </div>
 
@@ -202,12 +203,12 @@ Karim Benali</output>
       <p class="muted">The message was built from your ticked lines. The AI can reword it. The points, quotes and numbers stay the same.</p>
       <div class="grid-2">
         <div class="card stack"><span class="h3">Before</span>
-          <p class="quote diff">Thanks for sending the development agreement. Before I sign, could we <del>look at a few points</del>?</p>
+          <p class="quote diff">Thanks for sending the <del>development </del>agreement. Before I sign, could we look at a few points?</p>
           <p class="quote diff">Payment (5.4): could invoices be paid within 15 days of the invoice date?</p>
           <p class="small faint">Removed words are struck through. Added words are highlighted.</p></div>
         <div class="card stack"><span class="h3">After</span>
-          <p class="quote diff">Thanks for sending the development agreement. Before I sign, could we <ins>talk through a few things that matter to me</ins>?</p>
-          <p class="quote diff">Payment (5.4): could invoices be paid within 15 days of the invoice date? <ins>That would help me plan the work.</ins></p>
+          <p class="quote diff">Thanks for sending the agreement. Before I sign, could we look at a few points?</p>
+          <p class="quote diff">Payment (5.4): could invoices be paid within 15 days of the invoice date?</p>
           <p class="small faint">Every quote and number was checked against the contract; the wording was written by AI.</p></div>
       </div>
       <p class="notice"><svg class="icon"><use href="#i-shield"/></svg>Only the message text is sent, with names swapped for placeholders. Your acceptable limits are never sent.</p>
@@ -232,7 +233,6 @@ Karim Benali</output>
 <dialog id="labels-changed" aria-labelledby="labels-title">
   <form method="dialog">
     <div class="dialog-body">
-      <div class="notice"><svg class="icon"><use href="#i-warn"/></svg><span>Labels changed. Regenerate?</span></div>
       <h2 class="h2" id="labels-title">Labels changed since this message</h2>
       <p class="muted">Regenerate to use the new labels. This replaces your current text.</p>
     </div>

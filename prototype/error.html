@@ -27,14 +27,13 @@
 
 <main class="solo">
   <section class="card error-card" aria-labelledby="error-title">
-    <h1 class="visually-hidden" id="error-title">Something in the app broke</h1>
+    <h1 class="h2" id="error-title">The review couldn't be opened</h1>
 
-    <ol class="error-log">
-      <li><span class="small faint">0:00</span><span class="note">Opened your review.</span></li>
-      <li><span class="small faint">0:01</span><span class="note">Something in the app broke while loading it.</span></li>
+    <ol class="error-log" style="margin-top:14px">
+      <li><span class="small faint">0:00</span><span class="note">Tried to open your review.</span></li>
     </ol>
 
-    <p class="note" style="margin-top:18px">Your files are safe. Copy the details and report the problem on GitHub.</p>
+    <p class="note" style="margin-top:18px">Your files are safe. Copy the details and report the problem on GitHub, at <span class="mono">github.com/mohamed-benoughidene/clause-tracer/issues</span>.</p>
 
     <p class="small" style="margin-top:20px"><strong>Details</strong></p>
     <p class="mono" style="margin-top:4px">ERR-STEP6B-412</p>
@@ -42,6 +41,7 @@
 
     <div class="row" style="margin-top:20px">
       <button class="btn btn-primary" type="button" data-toast="Copied"><svg class="icon"><use href="#i-copy"/></svg>Copy the details</button>
+      <a class="btn" href="review.html">Try again</a>
       <a class="link" href="home.html">Back to reviews</a>
     </div>
   </section>
