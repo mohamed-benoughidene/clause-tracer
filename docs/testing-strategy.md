@@ -58,7 +58,7 @@ This keeps the shape the Constitution asks for (T4): many unit tests, some integ
 
 | Module | Main promises to test | Example cases |
 | --- | --- | --- |
-| `core` | Label rules 1 to 10; unit conversion; playbook checks (Spec 4.1); auto-delete dates; cost estimate; output scans; the last check before drawing | One table row per rule and per row of the Spec 14.5 sample. "Unlimited" is walk-away when lower is better and unsure when higher is better. Business days never convert. A hidden-text value is not readable for Rule 4. A scan fails "Dear John", a web address, "safe to sign", an acceptable limit, a wrong label word |
+| `core` | Label rules 1 to 10; unit conversion; playbook checks (Spec 4.1); auto-delete dates; cost estimate; output scans; the last check before drawing | One table row per rule and per row of the Spec 14.5 sample. "Unlimited" is walk-away when lower is better and unsure when higher is better. Business days never convert. A hidden-text value is not readable for Rule 4. A scan fails "Dear John", a web address, "safe to sign", an acceptable limit, a wrong label word. The style scans (Spec 6.2, 14 Nov 2026) fail "I", "Certainly!", "unfair", a reason with no clause number or quoted word, and a rewrite that adds a sentence. The "Keep" strings of [ux-copy 1.1](ux-copy.md#11-signs-of-machine-made-text) pass them. The starter playbook over 50 clauses makes 30 estimated calls |
 | `ingest` | Canonical text built from glyphs; clause and sentence splitting; hidden-text checks; file limits | "2.5 days" is not a clause number. Ligature "ﬁ" is one glyph and two letters. A line-end hyphen is kept. White text, tiny fonts and zero-width characters are flagged, never removed. A `.doc` is detected by its bytes. A zip bomb ends as `UnreadableFileError` |
 | `privacy` | Placeholders, the segment map, name variants | Anonymise then restore gives the original. A `⟦` already in the contract is escaped. No entity crosses a sentence boundary. "Ms Jones" and "Sarah" share one placeholder |
 | `links` | Cross-references, defined terms, override direction, outside documents | "Notwithstanding Clause 4" overrides its target; "Subject to Clause 4" is qualified by it. An unresolved target is kept, not dropped |
@@ -164,6 +164,7 @@ Three checks compare runs with each other, so they need no answer key:
 - The overall false-Missing rate, with its upper limit.
 - **Pass in all three runs**, shown beside per-run accuracy. A user gets one run, so a case that passes two times in three fails one user in three.
 - The share of labels that are unsure, the first-try quote pass rate, the highlight fallback rate, what each match search found on its own, and cost per review.
+- The owner's read-through of the AI text (section 7.5): the share marked "no" for each question.
 
 These thresholds are the project's own. No regulator or bar has published an accuracy standard for this kind of tool, so the docs must never present them as an industry norm.
 
@@ -209,6 +210,17 @@ So the earlier figures of $34 and $67 hold only for a Sonnet-class model. With $
 
 **What this budget cannot do.** It cannot run the 300-case set on a Sonnet-class model, or compare three models at full size. It can show whether a cheap model passes the hard gates. That matters for users too: they pay per review with their own key, so a cheap model that passes is the better default. The owner accepted a Sonnet-class default on 12 Nov 2026 ([ADR 0010](adr/0010-starting-models.md)). With this budget that default gets one pass of the ten contracts at most, so step 5 is no longer optional: run it before a release, and say in the release notes how much testing the default model had.
 
+**The owner's read-through** (decided 14 Nov 2026). The scans catch signs of machine-made text, not a fluent sentence that is wrong (Spec 6.2). So the report of every paid run lists each piece of AI text (reasons, readings, questions and rewrites) with a read-through column. The owner marks each one yes or no for each question that applies to it:
+
+| Question | Applies to |
+| --- | --- |
+| True to the clause? | Every AI text |
+| Are the two readings really different? | Readings |
+| Is it a question a person would send? | Questions |
+| Did the rewrite keep the meaning? | Message and clause rewrites |
+
+The report script adds the empty column; the owner fills it in. The shares marked "no" are reported rates with no pass mark (section 7.4). Reading costs no money, so it never counts against the budget.
+
 **Tooling.** A `@pytest.mark.paid` marker, left out of `scripts/check.sh` and CI, plus a small report script. No evaluation framework is needed yet. DeepEval and promptfoo are ruled out because both send telemetry by default. Inspect AI (MIT) is the upgrade path if many models are compared.
 
 ## 8. Privacy and security tests
@@ -242,7 +254,7 @@ The interface tests are written in Python, so the owner can review them.
 | **Process life cycle** | Kill the shell mid-review: the engine exits and the review is Interrupted. Cancel returns the cost so far |
 | **Real app on Linux** | One smoke test of the real window under a virtual display. Version 1 supports Ubuntu 24.04 and later, so the installs are checked on 24.04 and the newest Ubuntu, not on 22.04 |
 | **Windows** | CI builds the installer, installs it silently, drives the real window with Playwright, and uploads screenshots and video. A 90-day Windows evaluation machine covers the manual look at install warnings |
-| **Accessibility** | Keyboard paths for every control (Spec 14.4). Automated checks are an open point |
+| **Accessibility** | Keyboard paths for every control (Spec 14.4). Automated checks are an open point. **Release check** (decided 14 Nov 2026): with text at 200%, every page fits a window 1366 px wide with no sideways scrolling, in version 1 |
 
 Limits to state plainly: the CI Windows machine is a server edition, so it will not show the install warning a home user sees. Screen-reader behaviour has not been checked on either system.
 
@@ -277,11 +289,11 @@ These are the project's own targets, anchored on a common industry guide (60% ac
 
 | When | What |
 | --- | --- |
-| **Every pull request** (`scripts/check.sh`, Linux) | Lint, format, types, import rules, unit, golden-file, contract, integration and end-to-end replay tests, property tests on the `ci` profile, highlight pictures, fixture checks, architecture tests, dependency and licence checks, all with sockets blocked (from build stage 6). Also branch coverage per package and the owner-table guard (from stage 1) |
+| **Every pull request** (`scripts/check.sh`, Linux) | Lint, format, types, import rules, unit, golden-file, contract, integration and end-to-end replay tests, property tests on the `ci` profile, highlight pictures, fixture checks, architecture tests, dependency and licence checks, all with sockets blocked (from build stage 6). Also branch coverage per package and the owner-table guard (from stage 1). Also the copy lint for fixed copy: it fails on sure signs of machine-made text and warns on soft ones ([ux-copy 1.1](ux-copy.md#11-signs-of-machine-made-text), decided 14 Nov 2026; a separate task builds the script) |
 | **Every pull request, once files and paths are real** | The same suite on a Windows runner pinned to `windows-2025`, without the highlight pictures |
 | **Nightly** (from build stage 5) | Property tests at 2,000 examples; file fuzzing |
 | **Weekly** | Vulnerability check of the lockfile |
-| **Before a release** | Mutation report; the largest paid run the budget allows (section 7.5); installer builds and packaged-app tests on both systems; the `.deb` installed on Ubuntu 24.04 and on the newest Ubuntu (the one Linux build, made on 24.04); the network check; signed checksums and build attestations; the blind self-test |
+| **Before a release** | Mutation report; the largest paid run the budget allows (section 7.5); installer builds and packaged-app tests on both systems; the `.deb` installed on Ubuntu 24.04 and on the newest Ubuntu (the one Linux build, made on 24.04); the network check; signed checksums and build attestations; the blind self-test; text at 200% fits a 1366 px window with no sideways scrolling (section 9) |
 | **By hand** | A paid run, when a prompt, model or labelling change cannot be judged on saved replies. Never on push, and always under the spend cap |
 
 **Architecture tests** (T9) go beyond `lint-imports`: importing `core` loads only the standard library; importing `cli` does not load Presidio or spaCy; every module has a `README.md`, `tests/`, `samples/` and `__main__`.

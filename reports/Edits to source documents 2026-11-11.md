@@ -130,3 +130,21 @@ The owner then decided three things the same day:
 ### Task plans (14 Nov 2026)
 
 The owner asked for a `docs/plans/` folder with a README, a template and the first task plan: stage 1, `core`. The plan is Draft and not yet accepted. On 14 Nov 2026 the owner answered the plan's 15 open questions. Each answer is recorded in its home: Spec 6.2, 9 and 13; system design sections 3.4, 7, 13 and 15; the testing strategy sections 6.1, 10 to 13; and dated amendments to ADRs 0005, 0012 and 0013. The owner also set a rule for every plan: a strong model writes it, a cheaper model implements it, and no task leaves the implementer a design choice (a name, a field, a type, a signature or a test case). The plans README and template now say so, and the stage 1 plan was rewritten to that standard. Later that day the owner answered questions 16 and 17, the label and scan edge cases, under one principle: when the checker cannot be sure, the label is unsure, the reason is named and the user is shown the clause. The owner also added the rate-limit case: after the retries the review becomes Interrupted with a message of its own, recorded in Spec 6.2, 6.3, 9 and 14.2, the copy deck, the prototype, the system design and the plan's error-tree task.
+
+### Review for friction and machine-made text (14 Nov 2026)
+
+A review of the design system, the copy deck and the prototype looked for friction and for text that reads as machine-made. Its findings were fixed the same day. The owner then made eleven decisions:
+
+1. Code writes a label's panel words; the AI writes only for words labels it judged and for values unsure because of vague wording (Spec 6.1 step 10, [ADR 0011](../docs/adr/0011-who-writes-the-words.md) amendment).
+2. Five new scans on AI text, built in stage 1 (Spec 6.2, [ADR 0012](../docs/adr/0012-missing-unsure-and-evidence-failures.md) amendment, the stage 1 plan).
+3. A lint for fixed copy in the project check (testing strategy section 12).
+4. The source line moves under "More".
+5. Read banners shrink to chips.
+6. A first review preselects a copy of the starter.
+7. "Show on the page" keeps the panel open.
+8. Two stray controls are removed: "Test this rule" and "Replay tips".
+9. One rewrite button is removed: the rewrite dialog keeps "Use as suggestion" only.
+10. Text at 200% must fit a 1366 px window (testing strategy section 9).
+11. No praise, including in the practice review.
+
+The spec, the system design, the testing strategy, the copy deck, the design system, the prototype and the stage 1 plan were updated to match. Two details of the new scans are open as question 18 of the stage 1 plan.

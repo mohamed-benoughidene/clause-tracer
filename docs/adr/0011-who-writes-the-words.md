@@ -98,3 +98,16 @@ The owner decided on 12 Nov 2026 to keep "Rewrite with AI" for the message in ve
 ## Amendment (13 Nov 2026): the EU AI Act working position is accepted
 
 [ADR 0016](0016-legal-positions-without-a-lawyer.md) was accepted on 13 Nov 2026. It sets the working position on the open EU AI Act question this record raised: treat the project as a "provider", keep a written-by value on every stored text, and mark AI-written text in PDF export metadata (Spec 4.7, 6.2). The one accepted gap is a plain-text AI rewrite the user copies out, which can't carry a hidden mark.
+
+## Amendment (14 Nov 2026): code writes a label's words, with two AI cases
+
+The spec and the system design disagreed. Spec 6.1 step 10 had the AI write the "why" of every label, while system design 15.8 had code templates write the leads, Missing text and questions. The project owner settled it on 14 Nov 2026.
+
+1. **Number and yes/no positions.** Code builds every sentence of the panel from templates and checked values: the lead, the source line, "why it could be the other level", "What to check", the question to ask and Missing text. No AI call is made for these words, except case (b) below.
+2. **The AI writes text in exactly two cases.** (a) A words position where the AI judged the level (the pencilled label): the reason, the two readings and the question to ask. (b) A value of any position type that is unsure because its wording is vague (reason code `VAGUE_WORDING`, such as "reasonable revisions"): the two readings and the question to ask only. Code still writes its lead ("“Reasonable” has no number, so it can't be checked against your limit.") and everything else.
+3. **How AI text is handled.** It passes the scans, is stored as written by AI and shows the AI wording line. If a scan still fails after one regeneration, the code template is used: for case (b) that means no readings and a template question.
+4. **Every other sentence is code's.** Every other unsure reason and every Missing label gets words from code only. A label a rule made unsure stays written by code (Spec 5), even when its readings are AI text: only those text blocks are written by AI.
+
+The same day the owner added five style scans on AI text (first-person words, filler, evaluating words, a reason with no anchor, added sentences), recorded in [ADR 0012](0012-missing-unsure-and-evidence-failures.md)'s amendment of 14 Nov 2026 and in Spec 6.2.
+
+This extends the main decision above: templates by default now cover a label's panel as well as the message. Outside the two AI cases, planted contract text reaches a label's words only as quotes and values that code inserts. The estimate of AI calls per review falls from about 35 to 40 to about 30 to 35, plus one per vague value `[Assumption]`, because only words positions and vague values get an explain call ([system design](../system-design.md) section 7). Spec 4.4, 6.1 step 10 and 6.2, and system design sections 3.4, 7 and 15.8, hold the details.
