@@ -20,7 +20,7 @@ Each section says what the system is, then what the prototype does differently. 
 
 ## 1. Principles
 
-These are the ten rules everything else follows. Each one comes from a decision that has already been made.
+These are the rules everything else follows. The Source column names the decision behind each.
 
 | # | Rule | Source |
 | --- | --- | --- |
@@ -34,6 +34,7 @@ These are the ten rules everything else follows. Each one comes from a decision 
 | 8 | **Group by space, then tone, then border.** A group sits on a slightly darker warm tone, with no border. | Principle 7 |
 | 9 | **Two voices.** IBM Plex Sans is used for the interface. IBM Plex Serif is used for headings, the friend's notes (in italic) and quotes from the contract. Typeset contract pages use Liberation Serif, the look of the document itself. | Principle 4 |
 | 10 | **Real content in every state.** Empty, error and loading states use real words and real numbers. There are no spinners and no fake delays; the reading log shows the actual work. | Principle 8 |
+| 11 | **Nothing machine-made.** Every element carries meaning. No effect is used for its own sake, and nothing borrows the look of other AI tools. Section 4.1 lists what is never used. | Owner, 14 Nov 2026; `ux-copy.md` section 1.1 |
 
 ## 2. Brand and logo
 
@@ -246,9 +247,26 @@ There are 46 icons in the sprite:
 - Never use a sparkle for AI. "AI judgment" is a pencilled stamp plus the plain words.
 - The label icons are fixed: ✓ `check` preferred, ≈ `approx` acceptable, ✕ `x` walk-away, ? `help` unsure, and `ring-dashed` not covered (ADR 0002). Don't reuse them for other meanings next to labels.
 
-## 5. Components
+### 4.1 Never
 
-Each entry gives the class, the variants, the states and the main rule.
+These make an app look machine-made, or look like every other AI tool. None is used, in the prototype or in the build.
+
+| Never | Use instead |
+| --- | --- |
+| A sparkle, a wand or a robot to mean AI | The pencilled stamp and the plain words “AI judgment” |
+| Gradients, glow and blur | Flat tone. The pencil hatch is the one pattern, and it means "pencilled" |
+| Emoji | An icon from the drawn set, next to a word |
+| Illustration beyond the First launch picture | Real content |
+| Skeleton loaders, shimmer and spinners | The reading log and the step gauges |
+| Typing or streaming effects on text | The finished text, shown at once |
+| Pill badges for status | The gauge (5.8) and the square stamp (5.2) |
+| The names "assistant", "copilot" or "agent" for the AI | "the AI", or the plain action ("Ask AI") |
+| A third corner radius, or a second in-page shadow | `--r` and `--r-lg`; the sheet shadow only |
+| Meaning carried by colour alone | A colour, an icon and a word (rule 5) |
+
+The signs of machine-made words are in `ux-copy.md` section 1.1.
+
+## 5. Components
 
 ### 5.1 Button `.btn`
 
@@ -361,7 +379,7 @@ There are two warning levels and three types of message.
 
 | Component | Class | Use |
 | --- | --- | --- |
-| Banner | `.banner` | Top of the review only: hidden text, unloaded document, playbook changed, unedited starter. It uses a banner colour, sits full width below the app bar, and holds an icon, the words and one small action. |
+| Banner | `.banner` | Top of the review only: hidden text, unloaded document, playbook changed, unedited starter, and the practice review. It uses a banner colour, sits full width below the app bar, and holds an icon, the words and one small action. |
 | Notice | `.notice` | An inline tone strip with an icon and text. It is used for information such as the governing-law chip and auto-delete. |
 | Warning notice | `.notice.warn` | Unsure colours, for anything that blocks or needs a fix. *(Defined per page; see 8.1.)* |
 | Toast | `.toast` | An ink bar (8 px corners) at the bottom centre with short past-tense words: "Copied", "Saved", "Replaced. Check the marked words." It is triggered by `data-toast`. |
@@ -465,7 +483,7 @@ There are two warning levels and three types of message.
 
 ## 8. Audit: where the prototype drifts
 
-**Summary.** 17 screens, about 60 shared classes and 46 icons. 14 issues found, 4 fixed (7 Nov 2026). Score: 88 / 100. The tokens are well used in shared CSS. Most drift sits in page-local `<style>` blocks and inline styles.
+**Summary.** 17 screens, about 60 shared classes and 46 icons. 14 issues found, 4 fixed (7 Nov 2026). The tokens are well used in shared CSS. Most drift sits in page-local `<style>` blocks and inline styles.
 
 ### 8.1 Naming and duplication
 
@@ -503,6 +521,9 @@ There are two warning levels and three types of message.
 | The reading log isn't pencilled while running and inked when done | Design direction, principle 8 | Style running lines in `--pencil` and finished lines in `--text` |
 | ✅ **Fixed.** The rewrite diff showed deleted words in walk-away red, which is decoration | ADR 0003 | Struck through in `--text-2` |
 | 72 inline `style=` attributes in review.html (mostly `gap` and contract-table cells) | review.html | Fine for a prototype; don't carry them into the build |
+| Page-thumbnail label dots in the review use colour alone | Rule 5, Spec 14.4 (found 14 Nov 2026) | Add the label's icon or a count beside each dot |
+| At 200% text size, 11 of 15 pages scroll sideways in a 1366 px window (measured by script, not checked by eye) | Spec 14.4, section 7 "Text size" (found 14 Nov 2026) | Owner to decide whether 200% must fit without sideways scrolling in version 1; then let rows wrap and tables stack |
+| The detail panel's order differs: the prototype shows the stamp first, section 6 and Spec 14.1 say the quote first | Section 6, Spec 14.1 screen 8 (found 14 Nov 2026) | Put the quote first in the prototype |
 
 ### 8.4 Component completeness
 
@@ -522,6 +543,7 @@ There are two warning levels and three types of message.
 1. ~~Give each label its own icon, and settle "dashed means two things".~~ Fixed 7 Nov 2026.
 2. Move the shared warning, flow, clause and thumbnail CSS into `styles.css`, and the swap tokens into `:root`.
 3. Fix the control-border contrast, and finish the pencilled look (hatch and underline) and the pin tint.
+4. Fix the three gaps found on 14 Nov 2026 (thumbnail dots, 200% text, panel order).
 
 ## 9. Using the prototype
 
