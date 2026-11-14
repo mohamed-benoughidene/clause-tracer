@@ -11,7 +11,7 @@ Prompts in italics tell you what belongs in each part. Replace them with your ow
 | --- | --- |
 | Stage | *N, and the module name. For example: 1, `core`* |
 | Status | Draft *(one of: Draft, Accepted, In progress, Done. See [the README](README.md). Only the owner accepts a plan. The agent records it)* |
-| Branch | *The branch the stage is built on, named under [GIT_CONVENTIONS.md](../../GIT_CONVENTIONS.md)* |
+| Branch | *The branch pattern, one branch for each milestone. For example: `feat/core-mN-short-name`. See [the README](README.md), "Branches and pull requests"* |
 | Accepted on | Not yet |
 | Stage outline | [System design section 15.N](../system-design.md) *(replace N, and link to the heading)* |
 

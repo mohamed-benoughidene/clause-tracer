@@ -66,6 +66,7 @@ A footer is a `Token: value` line after the body, with one blank line before it.
 | --- | --- |
 | `BREAKING CHANGE: <what breaks>` | A change that breaks a module's input or output shape, or a public command. Add `!` after the scope as well: `feat(core)!:`. Say what callers must change. Saved data never breaks: a change to its shape ships a migration, as D5 (add fields rather than rename) and D6 (migrations and a schema version) require. |
 | `Refs: #12` | The issue or pull request the commit relates to. |
+| `Task: S1-M2-T3` | The task of a build-stage plan that the commit completes ([docs/plans/README.md](docs/plans/README.md)). |
 | `Co-Authored-By: Name <email>` | Credit for a co-author. Agents add their own attribution line. |
 
 ### One change per commit
@@ -97,6 +98,7 @@ A pull request (PR) asks the owner to merge your branch into `main`.
 - **Title:** follow the subject rules in section 1, with the type and scope.
 - **Squash-merge.** This joins all commits of a PR into one. `main` then reads as one Conventional Commit per PR. The PR title becomes that commit's subject.
 - **Description:** say what changed and why. Link the issue.
+- **Build stages:** one pull request for each milestone of a stage's plan, on its own branch cut from `main` ([docs/plans/README.md](docs/plans/README.md), "Branches and pull requests"). The description lists the task ids it holds.
 - **Outside contributors:** add this line, from [CLA.md](CLA.md) section 6: "I have read the CLA in CLA.md and I agree to it."
 
 ## 4. Good and bad

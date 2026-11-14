@@ -130,12 +130,23 @@ If two docs disagree, do not choose. List it as an open question.
 4. **Take one task at a time, in the listed order.** Do not work on two at once. If a task waits on the owner, go on to the next task that does not depend on it.
 5. **Write the tests first.** Use fakes and saved replies. Unit tests need no network, no key and no cost. See each new test fail for the right reason before you write the code.
 6. **Run `scripts/check.sh`.** A task is not done until it passes. Never skip, disable or loosen a check or a test to make it pass. If it fails for a reason outside your task, stop and tell the owner; fix it in a commit of its own.
-7. **Tick the task in the same commit as its code.** Put the task id in the commit message. Follow [GIT_CONVENTIONS.md](../../GIT_CONVENTIONS.md).
+7. **Tick the task in the same commit as its code.** End the commit message with the footer `Task: S1-M2-T3`, using the task's own id. Follow [GIT_CONVENTIONS.md](../../GIT_CONVENTIONS.md).
 8. **Update the module's README** when a shape changes, in the same change (Constitution S3).
 9. **Leave expected answers to the owner.** Never write or edit the expected values of an acceptance table (testing strategy section 10). Write the loader and the test, then stop at the owner task. Regenerate golden files only with `--update-goldens`, in a commit of their own, and ask the owner to read the diff (Constitution T11).
 10. **Stop at an open question.** Ask the owner. Do not pick an answer.
 11. **Never start a paid AI run without asking**, and never without the spend cap in place (testing strategy section 7.5).
 12. **Keep tasks small.** If a task proves bigger than half a day, split it in the plan and note it in the change log.
+
+### Branches and pull requests
+
+The owner decided on 14 Nov 2026: **one pull request for each milestone.**
+
+- **One branch for each milestone**, cut from `main`. The plan's header gives the pattern, for example `feat/core-m1-basic-shapes`. Name it under [GIT_CONVENTIONS.md](../../GIT_CONVENTIONS.md) section 2.
+- **One commit for each task** on that branch.
+- **When the milestone's last task is ticked**, and `scripts/check.sh` passes, ask the owner whether to open the pull request. Its description lists the task ids it holds.
+- **The owner approves and squash-merges it.** `main` then has one commit for each milestone, and always holds working code.
+- **Start the next milestone's branch from the new `main`**, after the merge. If the owner has not merged yet, wait or ask. Do not stack a branch on an unmerged one.
+- **The Draft plan itself** is committed on a `docs/` branch and reaches `main` by its own pull request, before the first milestone starts.
 
 ### When the plan is wrong
 
