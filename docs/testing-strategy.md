@@ -58,7 +58,7 @@ This keeps the shape the Constitution asks for (T4): many unit tests, some integ
 
 | Module | Main promises to test | Example cases |
 | --- | --- | --- |
-| `core` | Label rules 1 to 10; unit conversion; auto-delete dates; cost estimate; output scans; the last check before drawing | One table row per rule and per row of the Spec 14.5 sample. "Unlimited" is the worst value. Business days never convert. A hidden-text value is not readable for Rule 4. A scan fails "Dear John", a web address, "safe to sign", an acceptable limit, a wrong label word |
+| `core` | Label rules 1 to 10; unit conversion; playbook checks (Spec 4.1); auto-delete dates; cost estimate; output scans; the last check before drawing | One table row per rule and per row of the Spec 14.5 sample. "Unlimited" is the worst value. Business days never convert. A hidden-text value is not readable for Rule 4. A scan fails "Dear John", a web address, "safe to sign", an acceptable limit, a wrong label word |
 | `ingest` | Canonical text built from glyphs; clause and sentence splitting; hidden-text checks; file limits | "2.5 days" is not a clause number. Ligature "ﬁ" is one glyph and two letters. A line-end hyphen is kept. White text, tiny fonts and zero-width characters are flagged, never removed. A `.doc` is detected by its bytes. A zip bomb ends as `UnreadableFileError` |
 | `privacy` | Placeholders, the segment map, name variants | Anonymise then restore gives the original. A `⟦` already in the contract is escaped. No entity crosses a sentence boundary. "Ms Jones" and "Sarah" share one placeholder |
 | `links` | Cross-references, defined terms, override direction, outside documents | "Notwithstanding Clause 4" overrides its target; "Subject to Clause 4" is qualified by it. An unresolved target is kept, not dropped |
@@ -90,7 +90,7 @@ The product is named after its evidence trail, so the chain from an AI quote to 
 
 ### 6.1 The replay fake
 
-One fake serves every AI module: a pure, in-memory replay client in `core`'s test support, keyed by a hash of the request. It has two checks built in:
+One fake serves every AI module: a pure, in-memory replay client, `ReplayAiClient` in `clause_tracer.core.fakes`, keyed by a hash of the exact request ([`system-design.md`](system-design.md) section 3.4, decided 14 Nov 2026). It has two checks built in:
 
 - **Fail on an unrecorded request.** A changed prompt cannot silently fall through to "no answer".
 - **Fail on an unused recording.** Stale fixtures cannot pile up, and a step that stopped making a call is noticed.
@@ -248,7 +248,12 @@ Limits to state plainly: the CI Windows machine is a server edition, so it will 
 
 ## 10. Keeping agent-written tests honest
 
-- **Acceptance tables have an owner.** Expected labels, values and quotes live in CSV or TOML tables. Agents may write the loader. A CI check fails any change that edits both code and those tables, unless the owner approves it.
+- **Acceptance tables have an owner.** Expected labels, values and quotes live in CSV or TOML tables. Agents may write the loader. A CI check fails any change that edits both code and those tables, unless the owner approves it. It arrives in build stage 1 (decided 14 Nov 2026, [ADR 0013](adr/0013-test-layers-and-release-gates.md) amendment) and works like this:
+  - **An owner table** is any file in a folder named `tables` directly inside a `tests` folder: `src/clause_tracer/<module>/tests/tables/` or `tests/tables/`.
+  - **Code** is any other file whose name ends in `.py`, and any file in `scripts/`.
+  - **A change fails** when it holds at least one owner table and at least one code file.
+  - **What counts as one change.** `scripts/check_owner_tables.py` checks the uncommitted work against the last commit, as one change, inside `scripts/check.sh`. In CI, on every pull request, it checks each commit of the pull request on its own. It does not run on pushes to `main`, because a squash-merged milestone joins commits that were separate.
+  - **The owner's own change passes** when its commit touches owner tables and no code. When the owner must change both in one commit, the commit message carries the line `Owner-Approved-Tables: yes`, and the CI check lets that commit pass. Only the owner writes that line. An agent never does.
 - **Golden files are regenerated only by a named command**, `--update-goldens`. "Golden files" means only the free layer 2 outputs; the paid layer is "the test set", marked `paid`. A change that alters both code and golden files needs a human read of the golden diff.
 - **Red first.** A new test must be seen to fail for the right reason before the code that makes it pass.
 - **Mutation testing as a report.** Before a release, run `mutmut` on `core` and the pure rule modules. It changes the code in small ways and checks that some test notices. Aim for no surviving change in the label picker and the quote check. It is a report, not a gate, and it runs on Linux only.
@@ -256,7 +261,7 @@ Limits to state plainly: the CI Windows machine is a server edition, so it will 
 
 ## 11. Coverage targets
 
-Branch coverage, set per package, because one global number lets a large well-tested module hide a weak one.
+Branch coverage, set per package, because one global number lets a large well-tested module hide a weak one. Measurement arrives in build stage 1 with `coverage` (decided 14 Nov 2026): `scripts/check.sh` runs the tests under `coverage run --branch` and fails when `core` is under 95%. Each later package gets its floor in the stage that builds it.
 
 | Package | Branch coverage |
 | --- | --- |
@@ -272,9 +277,9 @@ These are the project's own targets, anchored on a common industry guide (60% ac
 
 | When | What |
 | --- | --- |
-| **Every pull request** (`scripts/check.sh`, Linux) | Lint, format, types, import rules, unit, golden-file, contract, integration and end-to-end replay tests, property tests on the `ci` profile, highlight pictures, fixture checks, architecture tests, dependency and licence checks, all with sockets blocked |
+| **Every pull request** (`scripts/check.sh`, Linux) | Lint, format, types, import rules, unit, golden-file, contract, integration and end-to-end replay tests, property tests on the `ci` profile, highlight pictures, fixture checks, architecture tests, dependency and licence checks, all with sockets blocked (from build stage 6). Also branch coverage per package and the owner-table guard (from stage 1) |
 | **Every pull request, once files and paths are real** | The same suite on a Windows runner pinned to `windows-2025`, without the highlight pictures |
-| **Nightly** | Property tests at 2,000 examples; file fuzzing |
+| **Nightly** (from build stage 5) | Property tests at 2,000 examples; file fuzzing |
 | **Weekly** | Vulnerability check of the lockfile |
 | **Before a release** | Mutation report; the largest paid run the budget allows (section 7.5); installer builds and packaged-app tests on both systems; the `.deb` installed on Ubuntu 24.04 and on the newest Ubuntu (the one Linux build, made on 24.04); the network check; signed checksums and build attestations; the blind self-test |
 | **By hand** | A paid run, when a prompt, model or labelling change cannot be judged on saved replies. Never on push, and always under the spend cap |
@@ -287,6 +292,9 @@ These are the project's own targets, anchored on a common industry guide (60% ac
 | --- | --- |
 | No label-rule tables, no property tests | 1 (`core`) |
 | No replay fake | 1 |
+| No coverage measurement; no guard on owner tables | 1 |
+| No suite-wide socket block (`pytest-socket`) | 6, with the first adapters |
+| No nightly job (Hypothesis at 2,000 examples, file fuzzing) | 5, with the hostile-file fuzzing |
 | No samples or golden files in any module | 2 to 5, with each module |
 | No hostile-file fixtures or test PDFs | 5 (`ingest`) |
 | No storage, deletion or leak tests | 6 (storage and runner) |
@@ -300,21 +308,27 @@ Each stage leaves `scripts/check.sh` passing, as the build plan already requires
 
 ## 14. Example tests
 
-A label-rule table (Rule 1 and Rule 6), with rows the owner edits:
+A label-rule table, with rows the owner edits in `src/clause_tracer/core/tests/tables/label_rules.toml`. The test reads each row, builds the inputs, and compares the label (the stage 1 plan gives the full format):
+
+```toml
+[[case]]
+id = "payment-days-60-is-walk-away"
+rule = "rule1"
+position = "1"                 # Spec 7 starter position
+match = "found"
+values = [{ clause = "c1", number = "60", unit = "days", quote = "confirmed", on = "visible" }]
+level = "walk_away"
+reasons = []
+written_by = "code"
+```
 
 ```python
-@pytest.mark.parametrize(
-    ("value", "unit", "expected"),
-    [
-        (15, "days", Level.PREFERRED),      # at the limit counts
-        (30, "days", Level.ACCEPTABLE),
-        (60, "days", Level.WALK_AWAY),      # the Spec 14.5 sample
-        (2, "weeks", Level.PREFERRED),      # Rule 6: one week is 7 days
-        (10, "business days", Level.UNSURE),  # business days never convert
-    ],
-)
-def test_payment_days_label(value, unit, expected):
-    assert label_number(PAYMENT_DAYS, value, unit).level == expected
+@pytest.mark.parametrize("case", label_rule_cases(), ids=lambda case: case.id)
+def test_label_rules_table(case: LabelCase) -> None:
+    label = label_position(case.label_input, case.unreadable)
+    assert label.level == case.level
+    assert set(label.reasons) == set(case.reasons)
+    assert label.written_by == case.written_by
 ```
 
 A property test for invariant 3:

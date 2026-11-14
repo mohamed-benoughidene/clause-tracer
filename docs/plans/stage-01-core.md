@@ -10,22 +10,24 @@
 
 ## 1. Goal
 
-`core` holds every shape, port, error, fake and pure rule that system design section 15.1 lists, with table-driven and property tests. Importing `core` loads only the standard library, and `python -m clause_tracer.core` prints the labels of the Spec 14.5 sample.
+`core` holds every shape, port, error, fake and pure rule that system design section 15.1 lists, with table-driven and property tests. Importing `core` loads only the standard library, branch coverage of `core` is at least 95%, and `python -m clause_tracer.core` prints the labels of the Spec 14.5 sample.
 
 ## 2. Scope
 
-**Where the code starts.** The skeleton is empty. `src/clause_tracer/core/` holds only `__init__.py` (an empty `__all__`), `__main__.py` (prints "not built yet"), a README with "planned" shapes, `tests/test_smoke.py` and `samples/.gitkeep`. `pyproject.toml` has no runtime dependencies. Its dev group has `pytest`, `ruff`, `mypy`, `import-linter` and `uv`, but no Hypothesis, no Pydantic and no coverage tool. There is no `conftest.py` anywhere. The five import contracts in `pyproject.toml` already cover `core` and stay as they are.
+**Where the code starts.** The skeleton is empty. `src/clause_tracer/core/` holds only `__init__.py` (an empty `__all__`), `__main__.py` (prints "not built yet"), a README with "planned" shapes, `tests/__init__.py`, `tests/test_smoke.py` and `samples/.gitkeep`. `pyproject.toml` has no runtime dependencies. Its dev group has `pytest`, `ruff`, `mypy`, `import-linter` and `uv`, but no Hypothesis, no Pydantic and no coverage tool. There is no `conftest.py` anywhere. The five import contracts in `pyproject.toml` already cover `core` and stay as they are. `mypy` checks `src/` in strict mode, so every test in `src/` needs type annotations.
 
 ### Builds
 
-- The ids, enums and shapes of [system design 3.4](../system-design.md#34-core-shapes-for-stage-1), including the three points "Decided for stage 1" (step input shapes, no written-by value on playbook text, `CancelCheck`).
-- The error tree of [system design 6.4](../system-design.md#64-errors).
-- The five ports as `typing.Protocol` classes, and their fakes: the replay fake, a fake personal-data detector, in-memory review and secret stores, and a fixed clock.
+- The ids, enums, shapes, ports and fakes of [system design 3.4](../system-design.md#34-core-shapes-for-stage-1), including both "Decided for stage 1" lists (13 and 14 Nov 2026) and the table "Shapes for the stage 1 functions".
+- The error tree of [system design 3.4](../system-design.md#34-core-shapes-for-stage-1) ("Errors") and [6.4](../system-design.md#64-errors).
+- The five ports as `typing.Protocol` classes, and their fakes in `clause_tracer.core.fakes`, with behaviour suites in `tests/contracts/`.
 - A pure hash of the exact AI request.
 - Label rules 1 to 10 as pure functions, with `MATCH_UNCONFIRMED`, the unplaceable-quote case, and undecodable text under Rule 9. Unit conversion (Rule 6).
-- The auto-delete date rules, the cost estimate, the output scans, and the last check before drawing.
-- Owner-owned expected-answer tables for the label rules, the Spec 14.5 sample, auto-delete dates, scans and the cost estimate (Constitution T11).
-- Architecture tests: importing `core` loads only the standard library; no shape has a provider-specific field.
+- The playbook checks of Spec 4.1.
+- The auto-delete date rules, the cost estimate, the output scans, the quote-check fold and the last check before drawing.
+- Owner-owned expected-answer tables (Constitution T11): label rules, units, the Spec 14.5 sample, playbook checks, auto-delete dates, scans and the cost estimate.
+- Tooling: Hypothesis, Pydantic, branch-coverage measurement with a 95% floor for `core`, and the owner-table guard ([testing strategy 10 and 11](../testing-strategy.md#10-keeping-agent-written-tests-honest)).
+- Architecture tests: importing `core` loads only the standard library; no shape has a provider-specific field; every shape is frozen, slotted and keyword-only.
 - Property tests with Hypothesis, including offset invariant 7.
 - `python -m clause_tracer.core --input …` on a sample (S1), and the module README with every shape, port and function (S3).
 
@@ -33,446 +35,735 @@
 
 - Golden files and the `--update-goldens` command: stage 2, the first module with golden files ([testing strategy 13](../testing-strategy.md#13-gaps-today-and-the-order-to-close-them)).
 - Building match keys and the fold for them, and offset invariants 2 and 4: stage 2. The placeholder map and invariant 3: stage 4. Glyphs, page boxes and invariants 1, 5 (in `checking`) and 6: stages 5 and 8.
-- User state and `Customer`; storage rows, the key table and migrations; `StepSpec`, the cache key, runner events and the cancel token: stage 6 ([system design 3.4, "Left to later stages"](../system-design.md#34-core-shapes-for-stage-1)).
+- The nightly job with the 2,000-example Hypothesis profile: stage 5. The suite-wide socket block: stage 6 ([testing strategy 13](../testing-strategy.md#13-gaps-today-and-the-order-to-close-them)).
+- User state and `Customer`; storage rows, the key table and migrations; derived records and user state in `ReviewStore`; `StepSpec`, the cache key, runner events and the cancel token: stage 6 ([system design 3.4, "Left to later stages"](../system-design.md#34-core-shapes-for-stage-1)).
 - Mapping errors to review statuses and exit codes, loading and validating `Settings`, reading playbook files: stage 6.
-- The contract suite run against real adapters: stage 6 (store, secrets), 7 (Presidio), 9 (OpenRouter).
-- The number parser and the quote check; the "searched, nothing found" list; explanation parts; keywords on `Position`; the step input shapes of each AI step; the template fallback after a failed scan: stage 8.
+- The contract suites run against real adapters: stage 6 (store, secrets), 7 (Presidio), 9 (OpenRouter).
+- The number parser and the quote check; how a start point is compared; who builds the evidence trail; the "searched, nothing found" list; explanation parts; keywords on `Position`; the step input shapes of each AI step; the template fallback after a failed scan: stage 8 ([system design 15.8](../system-design.md#158-stage-8-checking-and-the-message-templates)).
 - AI reply schemas (Pydantic, in the owning module): stages 8, 9 and 11.
 - The spend ledger: stage 9. The `paid` marker and the report script: stage 10.
-- `Suggestion` and the report's contents: stage 11. Engine protocol shapes, theme and text size: stage 12.
-- The Windows CI job: stage 5 or 6. The mutation report: before a release.
+- `Suggestion` and the report's contents: stage 11. Engine protocol shapes, theme and text size, and the count of reviews affected when auto-delete is lowered: stage 12.
+- Coverage floors for the other packages: the stage that builds each one. The Windows CI job: stage 5 or 6. The mutation report: before a release.
 
 ## 3. Read first
 
 - [AGENTS.md](../../AGENTS.md), the [Constitution](../../Constitution.md), [GIT_CONVENTIONS.md](../../GIT_CONVENTIONS.md), and [WRITING_DOCS.md](../../WRITING_DOCS.md) sections 2 and 9.
-- [System design](../system-design.md): [3.1](../system-design.md#31-the-engine) (parts and ports), [3.4](../system-design.md#34-core-shapes-for-stage-1) (all of it), [4.2](../system-design.md#42-the-offset-chain), [5.1](../system-design.md#51-three-kinds-of-data), [6.3](../system-design.md#63-the-ai-request), [6.4](../system-design.md#64-errors), [7](../system-design.md#7-caching-resume-and-cost), [8.2](../system-design.md#82-calls-to-the-ai-service), [15](../system-design.md#15-build-stages) and [15.1](../system-design.md#151-stage-1-core). Skim 15.2 to 15.12 to see what later stages take from `core`.
-- [Testing strategy](../testing-strategy.md): sections [1](../testing-strategy.md#1-what-the-tests-must-prove), [2](../testing-strategy.md#2-principles), [3](../testing-strategy.md#3-five-layers), [4](../testing-strategy.md#4-what-to-test-in-each-module) (the `core` row), [5](../testing-strategy.md#5-the-offset-chain-seven-invariants) (invariant 7 and the hazard alphabet), [6.1](../testing-strategy.md#61-the-replay-fake), [10](../testing-strategy.md#10-keeping-agent-written-tests-honest), [11](../testing-strategy.md#11-coverage-targets), [12](../testing-strategy.md#12-when-each-test-runs) (architecture tests), [14](../testing-strategy.md#14-example-tests).
-- [Spec](../spec.md): [2](../spec.md#2-glossary) (glossary), [4.1](../spec.md#41-playbooks), [5](../spec.md#5-labelling-rules) (every rule), [6.1](../spec.md#61-steps) (steps 6a to 8), [6.2](../spec.md#62-rules-for-every-ai-step), [6.3](../spec.md#63-review-statuses), [7](../spec.md#7-starter-playbook), [8.3](../spec.md#83-stored-data), [9](../spec.md#9-running-the-app) (cost and auto-delete), [11](../spec.md#11-acceptance-tests), [14.5](../spec.md#145-sample-data).
-- Decision records: [ADR 0002](../adr/0002-label-look-split-stamp.md) (pencilled labels), [ADR 0004](../adr/0004-code-layout.md), [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) with both amendments, [ADR 0012](../adr/0012-missing-unsure-and-evidence-failures.md) with its amendment, [ADR 0013](../adr/0013-test-layers-and-release-gates.md) with its amendments, [ADR 0015](../adr/0015-provider-ready-seam.md) with its amendment, [ADR 0016](../adr/0016-legal-positions-without-a-lawyer.md) (section 3 and action item 3).
-- [The architecture report](../../reports/Clause%20Tracer%20pipeline%20architecture.md), three parts only: [errors](../../reports/Clause%20Tracer%20pipeline%20architecture.md#errors-carry-codes-and-only-the-edge-turns-them-into-words) (the starting list of error classes), [labels](../../reports/Clause%20Tracer%20pipeline%20architecture.md#labels-8-are-pure-functions-and-unsure-is-the-abstention-channel), and [scans](../../reports/Clause%20Tracer%20pipeline%20architecture.md#judge-9-explain-10-and-summarise-11-templates-first-fenced-slots-for-the-rest) ("Plain-code scans are the gate"). Where the report and the system design differ, the system design wins.
-- The current code: [`src/clause_tracer/README.md`](../../src/clause_tracer/README.md), everything in [`src/clause_tracer/core/`](../../src/clause_tracer/core/), [`pyproject.toml`](../../pyproject.toml) and [`scripts/check.sh`](../../scripts/check.sh).
+- [System design](../system-design.md): [3.1](../system-design.md#31-the-engine) (parts and ports), [3.4](../system-design.md#34-core-shapes-for-stage-1) (all of it: it holds the exact shapes), [4.2](../system-design.md#42-the-offset-chain), [5.1](../system-design.md#51-three-kinds-of-data), [6.3](../system-design.md#63-the-ai-request), [6.4](../system-design.md#64-errors), [7](../system-design.md#7-caching-resume-and-cost) (with the estimate formula), [8.2](../system-design.md#82-calls-to-the-ai-service), [15](../system-design.md#15-build-stages) and [15.1](../system-design.md#151-stage-1-core). Skim 15.2 to 15.12 to see what later stages take from `core`.
+- [Testing strategy](../testing-strategy.md): sections [1](../testing-strategy.md#1-what-the-tests-must-prove), [2](../testing-strategy.md#2-principles), [3](../testing-strategy.md#3-five-layers), [4](../testing-strategy.md#4-what-to-test-in-each-module) (the `core` row), [5](../testing-strategy.md#5-the-offset-chain-seven-invariants) (invariant 7 and the hazard alphabet), [6.1](../testing-strategy.md#61-the-replay-fake), [10](../testing-strategy.md#10-keeping-agent-written-tests-honest) (with the owner-table guard), [11](../testing-strategy.md#11-coverage-targets), [12](../testing-strategy.md#12-when-each-test-runs) (architecture tests), [14](../testing-strategy.md#14-example-tests).
+- [Spec](../spec.md): [2](../spec.md#2-glossary) (glossary, and the quote check), [4.1](../spec.md#41-playbooks), [5](../spec.md#5-labelling-rules) (every rule), [6.1](../spec.md#61-steps) (steps 6a to 8), [6.2](../spec.md#62-rules-for-every-ai-step) (with the length caps), [6.3](../spec.md#63-review-statuses), [7](../spec.md#7-starter-playbook), [8.3](../spec.md#83-stored-data), [9](../spec.md#9-running-the-app) (cost and auto-delete), [11](../spec.md#11-acceptance-tests), [14.5](../spec.md#145-sample-data).
+- Decision records: [ADR 0002](../adr/0002-label-look-split-stamp.md) (pencilled labels), [ADR 0004](../adr/0004-code-layout.md), [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) with all three amendments, [ADR 0012](../adr/0012-missing-unsure-and-evidence-failures.md) with both amendments, [ADR 0013](../adr/0013-test-layers-and-release-gates.md) with all three amendments, [ADR 0015](../adr/0015-provider-ready-seam.md) with its amendment, [ADR 0016](../adr/0016-legal-positions-without-a-lawyer.md) (section 3 and action item 3).
+- [The architecture report](../../reports/Clause%20Tracer%20pipeline%20architecture.md), three parts only, as background: [errors](../../reports/Clause%20Tracer%20pipeline%20architecture.md#errors-carry-codes-and-only-the-edge-turns-them-into-words), [labels](../../reports/Clause%20Tracer%20pipeline%20architecture.md#labels-8-are-pure-functions-and-unsure-is-the-abstention-channel), and [scans](../../reports/Clause%20Tracer%20pipeline%20architecture.md#judge-9-explain-10-and-summarise-11-templates-first-fenced-slots-for-the-rest). Where the report and the system design or this plan differ, the system design and this plan win.
+- The current code: [`src/clause_tracer/README.md`](../../src/clause_tracer/README.md), everything in [`src/clause_tracer/core/`](../../src/clause_tracer/core/), [`pyproject.toml`](../../pyproject.toml), [`scripts/check.sh`](../../scripts/check.sh) and [`.github/workflows/check.yml`](../../.github/workflows/check.yml).
 
 ## 4. Checks before starting
 
-- [ ] **The plan is Accepted**, and the owner has answered every open question in section 6 whose "Needed by" task is in M1 or M2.
-- [ ] **The skeleton passes.** Run `.venv/bin/uv sync`, then `scripts/check.sh`. It must pass with no errors before any change. Confirm that `core` holds only the files listed in section 2.
-- [ ] **Pydantic `TypeAdapter` builds frozen, slotted dataclasses** ([ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) action item 2, [system design 3.4](../system-design.md#34-core-shapes-for-stage-1) "Check first"). Run it after S1-M1-T2, and before any shape or enum is written (S1-M1-T4 onwards). How:
+- [ ] **The plan is Accepted.** Questions 1 to 15 in section 6 are answered. Question 16 must be answered before S1-M3-T6, and question 17 before S1-M5-T1.
+- [ ] **The skeleton passes.** Run `.venv/bin/uv sync`, then `scripts/check.sh`. It must exit 0 before any change. Confirm that `core` holds only the files listed in section 2.
+- [ ] **Pydantic `TypeAdapter` builds frozen, slotted, keyword-only dataclasses** ([ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) action item 2, [system design 3.4](../system-design.md#34-core-shapes-for-stage-1) "Check first"). Run it after S1-M1-T2 (Pydantic installed) and before S1-M1-T7 (the first enum). How:
   1. Write a throwaway test file in your scratch folder, outside the repo. Never commit it.
-  2. In it, define frozen, slotted standard-library dataclasses that use every kind of field the shapes need: `int`, `str`, `bytes`, `Decimal`, `datetime`, a `NewType` over `str`, an `Enum`, `X | None`, `tuple[X, ...]`, `tuple[int | None, ...]`, a nested dataclass, a `Mapping[str, object]` field, and a field typed as a union of three dataclasses (like `Position.rule`).
-  3. Run `.venv/bin/uv run pytest <that file>`. Assert, for `TypeAdapter(...).validate_python(...)` and `validate_json(...)`: the result is an instance of the dataclass itself (not a Pydantic copy); assigning a field raises `FrozenInstanceError`; the instance has no `__dict__`; a JSON list becomes a tuple; a wrong type raises `ValidationError`; the union field becomes the right one of the three dataclasses for each input; and note what type the `Mapping` field comes back as.
-  4. Pass: write the Pydantic and Python versions and the result in this plan's change log, and tell the owner. Ticking the ADR's action item is the owner's call.
-  5. Fail, or any surprise (for example the union picks the wrong class): **stop**. Bring it to the owner before any shape is written.
+  2. In it, define `@dataclass(frozen=True, slots=True, kw_only=True)` classes that use every kind of field the shapes need: `int`, `str`, `bytes`, `bool`, `float`, `Decimal`, `datetime` (aware), a `NewType` over `str`, a `StrEnum`, `X | None`, `tuple[X, ...]`, `tuple[int | None, ...]`, a nested dataclass, a field with a default (`unlimited: bool = False`), a `Mapping[str, object]` field that `__post_init__` wraps in `MappingProxyType`, a field typed as a union of three dataclasses (like `Position.rule`), and a field typed as an empty base dataclass given a subclass instance (like `AiRequest.inputs: StepInputs`).
+  3. Run `.venv/bin/uv run pytest <that file>`. Assert, for `TypeAdapter(...).validate_python(...)` and `validate_json(...)`: the result is an instance of the dataclass itself (not a Pydantic copy); assigning a field raises `FrozenInstanceError`; the instance has no `__dict__`; a JSON list becomes a tuple; a wrong type raises `ValidationError`; the union field becomes the right one of the three dataclasses for each input; `__post_init__` ran (the mapping is a `MappingProxyType`). Note what type comes back for the base-class field given a subclass, and for a JSON-loaded `Decimal` and `datetime`.
+  4. Pass: write the Pydantic and Python versions and the result, including the base-class note, in this plan's change log, and tell the owner. Ticking the ADR's action item is the owner's call. The base-class note feeds the stage 6 question in [system design 15.6](../system-design.md#156-stage-6-the-encrypted-store-secrets-the-runner-and-the-first-commands).
+  5. Fail, or any other surprise: **stop**. Bring it to the owner before any shape is written. A base-class field that comes back as the base class is not a failure: write it down.
 - [ ] **Remind the owner** to start writing the ten test contracts now, because they take longest ([system design 15.1](../system-design.md#151-stage-1-core)).
 
 ## 5. Milestones and tasks
 
-Notes for every task:
+Rules for every task:
 
-- File names are suggestions. Keep them unless there is a reason, and record the real names in the core README.
-- Other modules import only from `clause_tracer.core` (its `__all__`), never from a file inside it (B2).
-- Every shape task updates `src/clause_tracer/core/README.md` in the same commit (S3).
-- If a shape must differ from system design 3.4, stop and ask the owner. An approved change also updates section 3.4 in the same commit ([WRITING_DOCS](../../WRITING_DOCS.md) section 2).
-- Shapes get no third-party imports and no validation beyond the type (D4, I9: outside data is checked at the edge).
+- File names, class names, function names and signatures are fixed by this plan. Do not rename anything. If a name seems wrong, stop and ask the owner.
+- Every shape is `@dataclass(frozen=True, slots=True, kw_only=True)` with exactly the fields of [system design 3.4](../system-design.md#34-core-shapes-for-stage-1), in that order, and no more. Every enum is an `enum.StrEnum` whose member values are the member names in lower case. Shapes get no validation beyond the type (D4, I9). The one exception is `AiRequest.__post_init__` (S1-M2-T6).
+- "Export" means: import the name in `src/clause_tracer/core/__init__.py` and add it to `__all__`, which stays sorted alphabetically. Other modules import only from `clause_tracer.core`, never from a file inside it (B2).
+- Every task that adds a public name adds it to `src/clause_tracer/core/README.md` in the same commit, under the heading the task names (S3). The README headings are: "Ids and enums", "Errors", "Shapes", "Ports", "Fakes", "Functions", "Owner tables", "Run alone".
+- Every datetime in `core` is timezone-aware. A function that takes a datetime raises `ValueError("datetime must be timezone-aware")` when given a naive one.
+- Tests in `src/clause_tracer/core/tests/` have full type annotations (mypy strict). Use `-> None` on every test function.
+- A task that reads an owner table never writes to that table. The owner-table guard (S1-M1-T5) fails a commit that changes code and an owner table together.
+- "Done when" always includes: `scripts/check.sh` exits 0.
 
 ### M1: Foundations
 
-The stage's dependencies are locked, the architecture tests guard `core`, and `from clause_tracer.core import Level, ClauseTracerError` works.
+The stage's tools are locked, coverage and the owner-table guard run in `scripts/check.sh`, the architecture tests guard `core`, and `from clause_tracer.core import Level, ClauseTracerError` works.
 
 - [ ] **S1-M1-T1: Add Hypothesis**
-  - **Build:** Run `.venv/bin/uv add --dev hypothesis`. Commit `pyproject.toml` and `uv.lock` together, as `build(deps): add hypothesis for property tests`.
+  - **Build:** Run `.venv/bin/uv add --dev hypothesis`. Commit `pyproject.toml` and `uv.lock` together, with the message `build(deps): add hypothesis for property tests`.
   - **Files:** `pyproject.toml`, `uv.lock`.
   - **Tests first:** None. This task adds a tool.
-  - **Done when:** `.venv/bin/uv sync --locked` and `scripts/check.sh` pass.
-  - **Rules:** [Testing strategy 5](../testing-strategy.md#5-the-offset-chain-seven-invariants) (Hypothesis), [ADR 0013](../adr/0013-test-layers-and-release-gates.md); AGENTS.md (commit `uv.lock`).
+  - **Done when:** `.venv/bin/uv sync --locked` exits 0, `.venv/bin/uv run python -c "import hypothesis"` exits 0, and `scripts/check.sh` exits 0.
+  - **Rules:** [Testing strategy 5](../testing-strategy.md#5-the-offset-chain-seven-invariants), [ADR 0013](../adr/0013-test-layers-and-release-gates.md); AGENTS.md (commit `uv.lock`).
   - **Depends on:** None.
 
-- [ ] **S1-M1-T2: Pin Pydantic for the TypeAdapter check**
-  - **Build:** Only if question 1 is answered "add it now": run `.venv/bin/uv add pydantic` and commit `pyproject.toml` and `uv.lock` as `build(deps): add pydantic for edge validation`. Nothing in `core` imports it. Otherwise skip this task and run the check with `.venv/bin/uv run --with pydantic`.
-  - **Files:** `pyproject.toml`, `uv.lock`.
-  - **Tests first:** None. The check in section 4 runs right after this task.
-  - **Done when:** `scripts/check.sh` passes, and the TypeAdapter check result is in the change log.
-  - **Rules:** [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) (Pydantic at the edges, action item 2), D4, I9.
-  - **Depends on:** S1-M1-T1, question 1.
+- [ ] **S1-M1-T2: Add Pydantic as a runtime dependency**
+  - **Build:** Run `.venv/bin/uv add pydantic`. It goes into `[project] dependencies`. Commit `pyproject.toml` and `uv.lock` together, with the message `build(deps): add pydantic for edge validation`. Nothing in `core` imports it. Then run the TypeAdapter check of section 4 and write its result in the change log (section 8) in the same commit.
+  - **Files:** `pyproject.toml`, `uv.lock`, `docs/plans/stage-01-core.md` (change log).
+  - **Tests first:** None. The check in section 4 runs right after the install.
+  - **Done when:** `.venv/bin/uv sync --locked` exits 0, the TypeAdapter check result is in the change log, and `scripts/check.sh` exits 0.
+  - **Rules:** [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) (amendment of 14 Nov 2026, action item 2), D4, I9.
+  - **Depends on:** S1-M1-T1.
 
-- [ ] **S1-M1-T3: Architecture tests for `core`**
+- [ ] **S1-M1-T3: Measure branch coverage, with a 95% floor for `core`**
+  - **Build:**
+    1. Run `.venv/bin/uv add --dev coverage`.
+    2. In `pyproject.toml` add:
+       ```toml
+       [tool.coverage.run]
+       branch = true
+       source = ["clause_tracer"]
+
+       [tool.coverage.report]
+       exclude_also = ["if __name__ == .__main__.:"]
+       show_missing = true
+       ```
+    3. In `scripts/check.sh`, replace the line `run pytest -q` with two lines:
+       ```bash
+       run coverage run -m pytest -q
+       run coverage report --include='src/clause_tracer/core/*' --fail-under=95
+       ```
+    4. Add `.coverage` to `.gitignore`.
+  - **Files:** `pyproject.toml`, `uv.lock`, `scripts/check.sh`, `.gitignore`.
+  - **Tests first:** None. Check by hand once: add a function with an untested `if` branch to a scratch copy of `core/__main__.py`, run `scripts/check.sh`, see the coverage step fail, then remove the change before the commit.
+  - **Done when:** `scripts/check.sh` exits 0 and prints a coverage table with a `TOTAL` line for `core`; `git status` shows no `.coverage` file.
+  - **Rules:** [Testing strategy 11](../testing-strategy.md#11-coverage-targets), [ADR 0013](../adr/0013-test-layers-and-release-gates.md) amendment of 14 Nov 2026.
+  - **Depends on:** S1-M1-T1.
+
+- [ ] **S1-M1-T4: The owner-table guard: its rules**
+  - **Build:** A new script `scripts/check_owner_tables.py`, standard library only, with these functions. This task writes the pure part; S1-M1-T5 adds the git part.
+    - `OWNER_TABLE_PATTERN = re.compile(r"(^|/)tests/tables/")` and `APPROVAL_LINE = "Owner-Approved-Tables: yes"`.
+    - `def is_owner_table(path: str) -> bool`: true when `OWNER_TABLE_PATTERN.search(path)` matches. Paths use `/` and are relative to the repo root.
+    - `def is_code(path: str) -> bool`: false when `is_owner_table(path)`; otherwise true when `path.endswith(".py")` or `path.startswith("scripts/")`.
+    - `def change_fails(paths: Iterable[str]) -> bool`: true when at least one path is an owner table and at least one path is code.
+    - `def is_approved(message: str) -> bool`: true when any line of `message`, stripped of spaces at both ends, equals `APPROVAL_LINE`.
+  - **Files:** `scripts/check_owner_tables.py`, `tests/test_check_owner_tables.py`.
+  - **Tests first:** in `tests/test_check_owner_tables.py`, which loads the script with `importlib.util.spec_from_file_location`:
+    - `test_owner_table_paths`: `is_owner_table` is true for `src/clause_tracer/core/tests/tables/label_rules.toml` and `tests/tables/x.csv`; false for `src/clause_tracer/core/tests/test_labels.py`, `src/clause_tracer/core/samples/spec-14-5.toml` and `docs/tables/x.toml`.
+    - `test_code_paths`: `is_code` is true for `src/clause_tracer/core/labels.py` and `scripts/check.sh`; false for `docs/plans/stage-01-core.md`, `uv.lock` and `src/clause_tracer/core/tests/tables/label_rules.toml`.
+    - `test_change_fails_only_when_both`: `["a/tests/tables/t.toml", "src/x.py"]` fails; `["a/tests/tables/t.toml", "docs/plans/p.md"]` passes; `["src/x.py", "README.md"]` passes; `[]` passes.
+    - `test_approval_line`: `"fix\n\nOwner-Approved-Tables: yes\n"` is approved; `"Owner-Approved-Tables: no"` and `"owner-approved-tables: yes"` are not.
+  - **Done when:** `.venv/bin/uv run pytest tests/test_check_owner_tables.py` reports 4 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** T11, [testing strategy 10](../testing-strategy.md#10-keeping-agent-written-tests-honest), [ADR 0013](../adr/0013-test-layers-and-release-gates.md) action item 2 and amendment of 14 Nov 2026.
+  - **Depends on:** None.
+
+- [ ] **S1-M1-T5: The owner-table guard in `check.sh` and CI**
+  - **Build:** In `scripts/check_owner_tables.py` add:
+    - `def working_tree_paths(repo: Path) -> tuple[str, ...]`: the sorted, unique paths from `git diff --name-only HEAD` plus `git ls-files --others --exclude-standard`, run with `subprocess.run(..., cwd=repo, check=True, capture_output=True, text=True)`.
+    - `def commit_paths(repo: Path, sha: str) -> tuple[str, ...]`: from `git diff-tree --no-commit-id --name-only -r <sha>`.
+    - `def commits_since(repo: Path, base: str) -> tuple[str, ...]`: from `git rev-list --no-merges --reverse <base>..HEAD`.
+    - `def commit_message(repo: Path, sha: str) -> str`: from `git log -1 --format=%B <sha>`.
+    - `def main(argv: list[str] | None = None) -> int`: parses `--commits BASE` with `argparse`. With no argument it checks `working_tree_paths(Path.cwd())` as one change, and an approval line does not apply. With `--commits BASE` it checks each commit of `commits_since` on its own and skips a commit whose message `is_approved`. For each failing change it prints `owner-table guard: <change> edits code and an owner table: <table paths>` to standard error, where `<change>` is `working tree` or the short commit hash. It returns 1 if any change fails, else 0. End the file with `if __name__ == "__main__": raise SystemExit(main())`.
+    - In `scripts/check.sh`, add `run python scripts/check_owner_tables.py` as the first `run` line, before `run ruff check`.
+    - In `.github/workflows/check.yml`, set `fetch-depth: 0` on `actions/checkout@v4`, and add a last step:
+      ```yaml
+      - if: github.event_name == 'pull_request'
+        run: uv run python scripts/check_owner_tables.py --commits origin/${{ github.base_ref }}
+      ```
+  - **Files:** `scripts/check_owner_tables.py`, `scripts/check.sh`, `.github/workflows/check.yml`, `tests/test_check_owner_tables.py`.
+  - **Tests first:** in `tests/test_check_owner_tables.py`, each test makes a fresh repo in `tmp_path` with `git init`, sets `user.name` and `user.email` locally, and commits one file `README.md` as the base commit:
+    - `test_working_tree_mixed_change_fails`: write `src/a.py` and `pkg/tests/tables/t.toml`, uncommitted; `main([])` run with that repo as the working directory returns 1.
+    - `test_working_tree_tables_only_passes`: only `pkg/tests/tables/t.toml` changed; `main([])` returns 0.
+    - `test_commits_checked_one_by_one`: commit `src/a.py` alone, then `pkg/tests/tables/t.toml` alone; `main(["--commits", <base sha>])` returns 0.
+    - `test_mixed_commit_fails`: one commit with both files; `main(["--commits", <base sha>])` returns 1.
+    - `test_approved_mixed_commit_passes`: the same commit with `Owner-Approved-Tables: yes` as the last line of its message; returns 0.
+    Use `monkeypatch.chdir(repo)` to set the working directory.
+  - **Done when:** `.venv/bin/uv run pytest tests/test_check_owner_tables.py` reports 9 passed; `scripts/check.sh` exits 0 on a clean tree; and, by hand once, `scripts/check.sh` exits 1 with a scratch change to both `src/clause_tracer/core/__main__.py` and a new `src/clause_tracer/core/tests/tables/x.toml` (remove both before the commit).
+  - **Rules:** T11, I12 (exit codes), [testing strategy 10](../testing-strategy.md#10-keeping-agent-written-tests-honest).
+  - **Depends on:** S1-M1-T4.
+
+- [ ] **S1-M1-T6: Architecture tests for `core`**
   - **Build:** Tests that guard the rules of `core` itself. They pass on the empty skeleton and keep passing as code is added.
   - **Files:** `src/clause_tracer/core/tests/test_architecture.py`.
-  - **Tests first:** (1) In a fresh subprocess, `import clause_tracer.core` loads no module outside `clause_tracer` and `sys.stdlib_module_names`. (2) Every public dataclass in `core` is frozen and slotted, and no field is typed `list`, `dict` or `set`. (3) No field name of any public `core` dataclass contains a provider-specific word (`openrouter`, `zdr`, `data_collection`, `require_parameters`, `response_format`, and similar). Show each test failing once by a temporary bad change (for example `import pydantic` in `core/__init__.py`), then remove that change before the commit.
-  - **Done when:** `scripts/check.sh` passes, and each test was seen to fail for the right reason.
-  - **Rules:** T9, T1, B3, [ADR 0015](../adr/0015-provider-ready-seam.md) action item 2, [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md), [system design 15.1](../system-design.md#151-stage-1-core) "Done when", [testing strategy 12](../testing-strategy.md#12-when-each-test-runs).
+  - **Tests first:**
+    - `test_import_core_loads_only_stdlib`: runs `[sys.executable, "-c", "import sys, clause_tracer.core; print('\\n'.join(sorted(sys.modules)))"]` with `subprocess.run`, then asserts every printed module's top-level name (the part before the first `.`) is `clause_tracer` or is in `sys.stdlib_module_names`, or starts with `_`.
+    - `test_public_dataclasses_are_frozen_slotted_keyword_only`: for every name in `clause_tracer.core.__all__` that is a dataclass class: `__dataclass_params__.frozen` is true, `"__slots__"` is in its `__dict__`, and every field has `kw_only` true.
+    - `test_no_mutable_container_fields`: for those dataclasses, no field's type annotation string contains `list[`, `dict[` or `set[`.
+    - `test_no_provider_specific_field_names`: for those dataclasses, no field name contains any of `openrouter`, `zdr`, `data_collection`, `require_parameters`, `response_format`, `provider_order`, `usage_cost`, `anthropic`, `openai`.
+    - `test_enums_are_str_enums`: every `enum.Enum` subclass in `__all__` is a `StrEnum`, and each member's value equals `member.name.lower()`.
+    Show each test failing once by a temporary bad change, exported from `core/__init__.py`: a line `import pydantic` (first test); a dataclass with `frozen=False` (second); a field typed `list[int]` (third); a field named `zdr` (fourth); a plain `Enum` (fifth). Remove every bad change before the commit.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_architecture.py` reports 5 passed, each was seen to fail for the right reason, and `scripts/check.sh` exits 0.
+  - **Rules:** T9, T1, B3, [ADR 0015](../adr/0015-provider-ready-seam.md) action item 2, [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md), [testing strategy 12](../testing-strategy.md#12-when-each-test-runs).
   - **Depends on:** None.
 
-- [ ] **S1-M1-T4: Ids and enums**
-  - **Build:** The seven `NewType` ids and the fourteen enums of system design 3.4 ("Ids and enums"). `ReasonCode` has one code per cause in that row, including `MATCH_UNCONFIRMED`. Add a code for each other cause Spec 5 names (for example a deposit amount with no total) and list them in the README for the owner.
-  - **Files:** `src/clause_tracer/core/ids.py`, `src/clause_tracer/core/enums.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_enums.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** Each enum has exactly the members that 3.4 lists, no more and no fewer. `ReasonCode` has `MATCH_UNCONFIRMED` and a code for every cause in 3.4. Each id is a plain `str` at run time.
-  - **Done when:** `scripts/check.sh` passes, and the README lists every enum and its values.
+- [ ] **S1-M1-T7: Ids, enums and constants**
+  - **Build:**
+    - `src/clause_tracer/core/ids.py`: the seven ids of system design 3.4, each `X = NewType("X", str)`.
+    - `src/clause_tracer/core/enums.py`: the enums `Level`, `PositionType`, `Direction`, `Unit`, `Answer`, `ReasonCode`, `WrittenBy`, `ReviewStatus`, `PrivacyMode`, `FileKind`, `PlaceholderKind`, `SegmentKind`, `HiddenReason`, `PiiSource`, `TextSlot`, `ScanFinding`, `DrawFailure` and `PlaybookProblemCode`, with exactly the members of system design 3.4 in the listed order. Then `UNSURE_REASONS: frozenset[ReasonCode] = frozenset(ReasonCode) - {ReasonCode.RANGE, ReasonCode.CLAUSES_DISAGREE, ReasonCode.AMOUNT_PERCENT_DISAGREE}`, and `PLACEHOLDER_OPEN = "⟦"`, `PLACEHOLDER_CLOSE = "⟧"`.
+    - Export every name.
+  - **Files:** `src/clause_tracer/core/ids.py`, `src/clause_tracer/core/enums.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_enums.py`, `src/clause_tracer/core/README.md` ("Ids and enums").
+  - **Tests first:** in `test_enums.py`:
+    - `test_enum_members_match_system_design`: a dict in the test maps each enum to the tuple of member names copied from system design 3.4; `tuple(m.name for m in enum) ==` that tuple for every enum.
+    - `test_unsure_reasons`: `UNSURE_REASONS` has 16 members and holds neither `RANGE`, `CLAUSES_DISAGREE` nor `AMOUNT_PERCENT_DISAGREE`.
+    - `test_ids_are_plain_str_at_run_time`: `type(PositionId("1")) is str`.
+    - `test_placeholder_markers`: `PLACEHOLDER_OPEN == "⟦"` and `PLACEHOLDER_CLOSE == "⟧"`.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_enums.py` reports 4 passed, `from clause_tracer.core import Level` works, and `scripts/check.sh` exits 0.
   - **Rules:** [System design 3.4](../system-design.md#34-core-shapes-for-stage-1), [ADR 0012](../adr/0012-missing-unsure-and-evidence-failures.md) action item 1, I7 (rules return codes, never prose), T1.
-  - **Depends on:** S1-M1-T3, the TypeAdapter check.
+  - **Depends on:** S1-M1-T6, the TypeAdapter check.
 
-- [ ] **S1-M1-T5: The error tree**
-  - **Build:** One base `ClauseTracerError(code, context)` and four groups: input errors, model-service errors, local errors, and cancellation. Start from the error classes in the architecture report's errors section. `context` holds ids, step names and counts only, never contract text.
-  - **Files:** `src/clause_tracer/core/errors.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_errors.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** Every error class is a `ClauseTracerError` and sits in exactly one of the four groups. Every class has its own fixed, unique `code`. `context` cannot be changed after the error is made. `SecretStoreUnavailableError`, `ModelTimeoutError` and `ReviewCancelled` exist (later tasks and stages use them).
-  - **Done when:** `scripts/check.sh` passes, and the README lists each error, its group and its code.
+- [ ] **S1-M1-T8: The error tree**
+  - **Build:** In `src/clause_tracer/core/errors.py`, the classes of [system design 3.4, "Errors"](../system-design.md#34-core-shapes-for-stage-1), exactly: the base, the four groups and the 19 leaf classes with their codes. The base:
+    ```python
+    class ClauseTracerError(Exception):
+        code: ClassVar[str] = ""
+
+        def __init__(self, context: Mapping[str, str | int] | None = None) -> None:
+            super().__init__(self.code)
+            self.context: Mapping[str, str | int] = MappingProxyType(dict(context or {}))
+    ```
+    Each leaf class sets only `code`. Export every class.
+  - **Files:** `src/clause_tracer/core/errors.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_errors.py`, `src/clause_tracer/core/README.md` ("Errors": a table of class, group, code).
+  - **Tests first:** in `test_errors.py`, with `LEAVES` a tuple of the 19 leaf classes written out in the test:
+    - `test_every_leaf_is_in_exactly_one_group`: for each leaf, exactly one of `InputError`, `ModelServiceError`, `LocalError`, `ReviewCancelled` is a superclass (a class counts as its own superclass).
+    - `test_codes_are_unique_lower_snake_case`: every leaf code matches `^[a-z][a-z0-9_]*$`, and the 19 codes are unique.
+    - `test_codes_match_system_design`: a dict in the test copies each class's code from system design 3.4; each class's `code` equals it.
+    - `test_context_is_read_only`: `ModelTimeoutError({"step": "match"}).context["step"] = "x"` raises `TypeError`.
+    - `test_context_defaults_to_empty`: `ConfigError().context == {}`.
+    - `test_message_is_the_code`: `str(NoCreditError()) == "no_credit"`.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_errors.py` reports 6 passed, and `scripts/check.sh` exits 0.
   - **Rules:** I5, I6, I7, [system design 6.4](../system-design.md#64-errors), [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md).
-  - **Depends on:** S1-M1-T4.
+  - **Depends on:** S1-M1-T7.
 
 ### M2: Shapes
 
-Every shape in system design 3.4 exists as a frozen, slotted dataclass, is exported from `clause_tracer.core`, and is listed in the core README.
+Every shape in system design 3.4 exists as a frozen, slotted, keyword-only dataclass, is exported from `clause_tracer.core`, and is listed in the core README.
+
+Every task in M2 extends one shared test, `test_fields_match_system_design` in `src/clause_tracer/core/tests/test_shapes.py`. It holds a dict `EXPECTED_FIELDS: dict[type, tuple[str, ...]]` that maps each shape to its field names, copied in order from system design 3.4, and asserts `tuple(f.name for f in dataclasses.fields(shape)) == EXPECTED_FIELDS[shape]` for each entry (one `pytest.mark.parametrize` case per shape). Each task adds its shapes to the dict. Each task also adds its shapes to the README under "Shapes".
 
 - [ ] **S1-M2-T1: Wording and page-location shapes**
-  - **Build:** `Wording`, `Span`, `PageBox`, `Page` and `Glyph`, with the fields of 3.4, and the `CancelCheck` type: a callable that returns true once the user has cancelled.
-  - **Files:** `src/clause_tracer/core/wording.py`, `src/clause_tracer/core/document.py`, `src/clause_tracer/core/ports.py` (for `CancelCheck`), `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_shapes.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** A shared test checks each shape's field names against the list in 3.4 (it grows with each task). **Promise test** "every stored text keeps a written-by value" (Spec 4.7 and 6.2): a `Wording` cannot be made without `written_by`, which has no default.
-  - **Done when:** `scripts/check.sh` passes, and the architecture tests cover the new shapes.
+  - **Build:** In `src/clause_tracer/core/wording.py`: `Wording` and `Span`. In `src/clause_tracer/core/document.py`: `PageBox`, `Page` and `Glyph`. Each exactly as in system design 3.4, no more fields. In `src/clause_tracer/core/ports.py`: `CancelCheck = Callable[[], bool]` (a type alias, with a one-line docstring comment above it: `# Returns True once the user has cancelled.`). Export all six names.
+  - **Files:** `src/clause_tracer/core/wording.py`, `src/clause_tracer/core/document.py`, `src/clause_tracer/core/ports.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_shapes.py`, `src/clause_tracer/core/README.md`.
+  - **Tests first:** in `test_shapes.py`: `test_fields_match_system_design` (the five shapes); `test_wording_needs_written_by` (**promise test**, "every stored text keeps a written-by value", Spec 4.7 and 6.2): `Wording(text="x")` raises `TypeError`, and `dataclasses.fields(Wording)` shows `written_by` with no default; `test_shapes_need_keywords`: `Span(1, 2)` raises `TypeError`.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_shapes.py` passes, the architecture tests cover the new shapes, and `scripts/check.sh` exits 0.
   - **Rules:** [ADR 0016](../adr/0016-legal-positions-without-a-lawyer.md), [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) and its 13 Nov amendment, T13, T1, S3.
-  - **Depends on:** S1-M1-T4.
+  - **Depends on:** S1-M1-T7.
 
 - [ ] **S1-M2-T2: Document shapes**
-  - **Build:** `SourceFile`, `HiddenText`, `TrackedChange`, `InputWarning`, `Document`, `MatchKey`, `Sentence` and `Clause`, with the fields of 3.4. Offsets are half-open and count code points.
+  - **Build:** In `src/clause_tracer/core/document.py`: `SourceFile`, `HiddenText`, `TrackedChange`, `InputWarning`, `Document`, `MatchKey`, `Sentence` and `Clause`, each exactly as in system design 3.4, no more fields. Export all eight.
   - **Files:** `src/clause_tracer/core/document.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_shapes.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** Field names match 3.4. `Document` carries `schema_version`. A `Span` over a string with an astral character (such as an emoji) slices the right code points.
-  - **Done when:** `scripts/check.sh` passes.
+  - **Tests first:** `test_fields_match_system_design` (the eight shapes); `test_document_without_glyphs`: a `Document` with `text="Pay in 30 days."`, `char_map=()`, `glyphs=()`, `pages=()` builds; `test_span_counts_code_points`: for `text = "\U0001F600 fee"`, `text[Span(start=2, end=5).start:Span(start=2, end=5).end] == "fee"`.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_shapes.py` passes, and `scripts/check.sh` exits 0.
   - **Rules:** [System design 3.4 and 4.2](../system-design.md#42-the-offset-chain), D1, D6, S3.
   - **Depends on:** S1-M2-T1.
 
 - [ ] **S1-M2-T3: Link and placeholder shapes**
-  - **Build:** `CrossReference`, `DefinedTerm`, `Override`, `OutsideDocument`, `LinkMap`, `Party`, `PiiSuggestion`, `PlaceholderEntity`, `Segment` and `PlaceholderText`, with the fields of 3.4.
+  - **Build:** In `src/clause_tracer/core/link_map.py`: `CrossReference`, `DefinedTerm`, `Override`, `OutsideDocument` and `LinkMap`. In `src/clause_tracer/core/placeholders.py`: `Party`, `PiiSuggestion`, `PlaceholderEntity`, `Segment` and `PlaceholderText`. Each exactly as in system design 3.4, no more fields. Export all ten.
   - **Files:** `src/clause_tracer/core/link_map.py`, `src/clause_tracer/core/placeholders.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_shapes.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** Field names match 3.4. An unresolved `CrossReference` and an `Override` with no target can be made (the target is `None`, never dropped).
-  - **Done when:** `scripts/check.sh` passes.
+  - **Tests first:** `test_fields_match_system_design` (the ten shapes); `test_unresolved_targets_are_kept`: `CrossReference(source=Span(start=0, end=4), target=None)` and `Override(clause_id=ClauseId("4"), target=None, overrides_target=True, evidence=Span(start=0, end=4))` build, and their `target` is `None`.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_shapes.py` passes, and `scripts/check.sh` exits 0.
   - **Rules:** [System design 3.4](../system-design.md#34-core-shapes-for-stage-1), [ADR 0008](../adr/0008-personal-data-detection-bundle.md), S3.
   - **Depends on:** S1-M2-T2.
 
 - [ ] **S1-M2-T4: Playbook and settings shapes**
-  - **Build:** `NumberRule`, `YesNoRule`, `WordsRule`, `Position`, `Playbook`, `PlaybookSnapshot` and `Settings`, with the fields of 3.4. Limits are `Decimal`.
+  - **Build:** In `src/clause_tracer/core/playbook.py`: `NumberRule`, `YesNoRule`, `WordsRule`, `Position`, `Playbook` and `PlaybookSnapshot`. In `src/clause_tracer/core/settings.py`: `Settings`. Each exactly as in system design 3.4, no more fields. Export all seven.
   - **Files:** `src/clause_tracer/core/playbook.py`, `src/clause_tracer/core/settings.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_shapes.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** Field names match 3.4. `Playbook` carries `schema_version`. Playbook names, topics and level text are plain `str`, not `Wording` (decided 13 Nov 2026).
-  - **Done when:** `scripts/check.sh` passes.
-  - **Rules:** [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) 13 Nov amendment, [Spec 4.1](../spec.md#41-playbooks), I13 (settings passed in), D6, S3.
-  - **Depends on:** S1-M2-T1, question 15.
+  - **Tests first:** `test_fields_match_system_design` (the seven shapes); `test_playbook_text_is_plain_str`: the type hints (`typing.get_type_hints`) of `Playbook.name`, `Position.topic`, `YesNoRule.question` and the three `WordsRule` fields are `str`, not `Wording` (decided 13 Nov 2026).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_shapes.py` passes, and `scripts/check.sh` exits 0.
+  - **Rules:** [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) 13 Nov amendment, [Spec 4.1](../spec.md#41-playbooks), I13, D6, S3.
+  - **Depends on:** S1-M2-T1.
 
 - [ ] **S1-M2-T5: Review result shapes**
-  - **Build:** `Evidence`, `CheckedValue`, `JudgedLevel`, `MatchFound`, `NothingFound`, `CallFailed`, `ToolLabel` and `NotCoveredClause`, with the fields of 3.4, plus whatever questions 6 and 8 add.
+  - **Build:** In `src/clause_tracer/core/results.py`: `Evidence`, `CheckedValue` (with `unlimited: bool = False` as its last field), `JudgedLevel`, `MatchFound`, `NothingFound`, `MatchUnconfirmed`, `CallFailed`, `ToolLabel` and `NotCoveredClause`, each exactly as in system design 3.4, no more fields. Then the alias `MatchResult = MatchFound | NothingFound | MatchUnconfirmed | CallFailed`. Export all ten names.
   - **Files:** `src/clause_tracer/core/results.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_shapes.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** Field names match 3.4. `MatchFound`, `NothingFound` and `CallFailed` are three unrelated types: a `CallFailed` is never an instance of `NothingFound`, and the reverse. `reasons` fields hold `ReasonCode` values, never strings.
-  - **Done when:** `scripts/check.sh` passes.
-  - **Rules:** I4, [ADR 0012](../adr/0012-missing-unsure-and-evidence-failures.md), [ADR 0002](../adr/0002-label-look-split-stamp.md), S3.
-  - **Depends on:** S1-M2-T2, S1-M2-T4, questions 6 and 8.
+  - **Tests first:** `test_fields_match_system_design` (the nine shapes); `test_match_results_are_unrelated`: for each ordered pair of the four match types, neither is a subclass of the other; `test_unlimited_defaults_to_false`: a `CheckedValue` built without `unlimited` has `unlimited is False`; `test_reason_fields_hold_reason_codes`: the type hint of `CheckedValue.reasons` and `ToolLabel.reasons` is `tuple[ReasonCode, ...]`.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_shapes.py` passes, and `scripts/check.sh` exits 0.
+  - **Rules:** I4, [ADR 0012](../adr/0012-missing-unsure-and-evidence-failures.md) and its 14 Nov amendment, [ADR 0002](../adr/0002-label-look-split-stamp.md), D5, S3.
+  - **Depends on:** S1-M2-T2, S1-M2-T4.
 
 - [ ] **S1-M2-T6: AI request and record shapes**
-  - **Build:** `PromptMessage`, `AiRequest`, `Usage`, `AiReply` and `AiRecord`, with the fields of 3.4. `AiRequest.inputs` holds a frozen dataclass, typed as question 4 settles. `json_schema` is a read-only mapping. `Usage.cost_usd` is `Decimal | None`.
-  - **Files:** `src/clause_tracer/core/ai.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_shapes.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** Field names match 3.4. Changing an item of `json_schema` raises `TypeError`. Passing a plain `dict` as `inputs` fails mypy (check this once by hand, and do not commit the failing file). The architecture test finds no provider-specific field.
-  - **Done when:** `scripts/check.sh` passes.
-  - **Rules:** [ADR 0015](../adr/0015-provider-ready-seam.md) and its amendment, [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) 13 Nov amendment, [system design 6.3](../system-design.md#63-the-ai-request), D8, S3.
-  - **Depends on:** S1-M2-T1, questions 4 and 10.
+  - **Build:** In `src/clause_tracer/core/ai.py`: `StepInputs` (no fields, docstring `"""Base class of every step's own input shape."""`), `PromptMessage`, `AiRequest`, `Usage`, `AiReply` and `AiRecord`, each exactly as in system design 3.4, no more fields. `AiRequest` gets:
+    ```python
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "json_schema", MappingProxyType(dict(self.json_schema)))
+    ```
+    Export all six. In `src/clause_tracer/core/tests/shapes_for_tests.py` (not exported), add the test-only step input shape `EchoInputs(StepInputs)` with fields `clause_id: ClauseId, text: str`, and a function `def make_request(**changes: object) -> AiRequest` that builds one fixed `AiRequest` (step `"echo"`, prompt id `"echo"`, prompt version 1, `EchoInputs(clause_id=ClauseId("4.2"), text="Pay in 30 days.")`, one `PromptMessage(role="user", text="Quote the clause.")`, schema id `"echo-reply"`, json schema `{"type": "object"}`, model `"test-model"`, `PrivacyMode.ON`, max tokens 200) and applies `dataclasses.replace(request, **changes)`.
+  - **Files:** `src/clause_tracer/core/ai.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/shapes_for_tests.py`, `src/clause_tracer/core/tests/test_shapes.py`, `src/clause_tracer/core/README.md`.
+  - **Tests first:** `test_fields_match_system_design` (the six shapes); `test_json_schema_is_read_only`: `make_request().json_schema["type"] = "array"` raises `TypeError`; `test_json_schema_is_copied`: a dict passed in and then changed leaves the request's `json_schema` unchanged; `test_record_has_schema_version`: `"schema_version"` is the second field of `AiRecord`. Check by hand once that `make_request(inputs={"a": 1})` written in a scratch file fails mypy, and do not commit that file.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_shapes.py` passes, the architecture test finds no provider-specific field, and `scripts/check.sh` exits 0.
+  - **Rules:** [ADR 0015](../adr/0015-provider-ready-seam.md) and its amendment, [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) 13 and 14 Nov amendments, [system design 6.3](../system-design.md#63-the-ai-request), D6, D8, S3.
+  - **Depends on:** S1-M2-T1.
 
-### M3: Label rules
+- [ ] **S1-M2-T7: Shapes for the stage 1 functions**
+  - **Build:** In `src/clause_tracer/core/results.py`: `UnreadableSpans`, `LabelInput` and `ValueVerdict`. In `src/clause_tracer/core/checks.py`: `ScanContext`, `QuoteFold`, `DrawAllowed`, `DrawRefused`, `CallPrices`, `CostInputs`, `CostRange` and `PlaybookProblem`. Each exactly as in the system design 3.4 table "Shapes for the stage 1 functions", no more fields. Export all eleven.
+  - **Files:** `src/clause_tracer/core/results.py`, `src/clause_tracer/core/checks.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_shapes.py`, `src/clause_tracer/core/README.md`.
+  - **Tests first:** `test_fields_match_system_design` (the eleven shapes); `test_draw_results_are_unrelated`: neither `DrawAllowed` nor `DrawRefused` is a subclass of the other.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_shapes.py` passes, and `scripts/check.sh` exits 0.
+  - **Rules:** [System design 3.4](../system-design.md#34-core-shapes-for-stage-1) (14 Nov 2026), I3, I4, S3.
+  - **Depends on:** S1-M2-T5.
 
-Table-driven tests over the owner's tables pass for Rules 1 to 10 and for every row of the Spec 14.5 sample.
+### M3: Playbook checks and label rules
 
-- [ ] **S1-M3-T1: Owner table format and loader**
-  - **Build:** A small loader that reads the owner's TOML tables with the standard library's `tomllib` (typed values such as `Decimal` and enum names read cleanly from TOML). Create each table file with a header comment ("Expected answers. Only the owner edits this file. Constitution T11.") and no rows.
-  - **Files:** `src/clause_tracer/core/tests/owner_tables.py`, `src/clause_tracer/core/tests/test_owner_tables.py`, `src/clause_tracer/core/tests/tables/label_rules.toml`, `src/clause_tracer/core/tests/tables/spec_14_5.toml`, `src/clause_tracer/core/tests/tables/auto_delete.toml`, `src/clause_tracer/core/tests/tables/scans.toml`, `src/clause_tracer/core/tests/tables/cost_estimate.toml`.
-  - **Tests first:** On a small test-only table (not an owner file), the loader reads `Decimal`, `Level` and `ReasonCode` values, and rejects an unknown column or an unknown enum name with a clear error.
-  - **Done when:** `scripts/check.sh` passes, and the table files hold only their header.
+Table-driven tests over the owner's tables pass for the playbook checks, for unit conversion, for Rules 1 to 10, and for every row of the Spec 14.5 sample.
+
+**Owner tables.** They live in `src/clause_tracer/core/tests/tables/`. Each is a TOML file whose first line is exactly `# Expected answers. Only the owner edits this file. Constitution T11.` Each row is a `[[case]]` table with a unique string `id`. Numbers are written as TOML strings (`"15"`, `"7/30"` where a fraction is allowed) or integers, never as TOML floats. Enum values are written as their lower-case values (`"walk_away"`). A table-driven test reads its table through the loader of S1-M3-T1, builds the inputs, calls the function, and compares the result with the row. Each table also gets a test that fails when the table has no rows, so an empty table can never pass.
+
+**Sample format.** The Spec 14.5 sample file (S1-M3-T5) and the label-rule table use one format for positions and inputs, read by `clause_tracer.core.sample_input` (S1-M3-T3 and T4).
+
+- [ ] **S1-M3-T1: The owner-table loader**
+  - **Build:** In `src/clause_tracer/core/tests/owner_tables.py`:
+    - `HEADER = "# Expected answers. Only the owner edits this file. Constitution T11."` and `TABLES_DIR = Path(__file__).parent / "tables"`.
+    - `class OwnerTableError(ValueError)`.
+    - `@dataclass(frozen=True, slots=True, kw_only=True) class OwnerTable` with fields `sections: Mapping[str, Mapping[str, object]]` and `cases: tuple[Mapping[str, object], ...]`.
+    - `def load_table(path: Path, *, case_keys: frozenset[str], required: frozenset[str], sections: frozenset[str] = frozenset()) -> OwnerTable`. It raises `OwnerTableError` when: the first line is not `HEADER`; a top-level key is neither `case` nor in `sections`; a case has a key outside `case_keys`; a case lacks a key in `required`; a case's `id` is not a string; two cases share an `id`. A file with no `case` key has `cases == ()`. Every message starts with `f"{path.name}: "` and names the case id and key.
+    - Converters, each `(value: object, where: str) -> X`, raising `OwnerTableError(f"{where}: …")`: `as_str` (a `str`), `as_bool` (a `bool`), `as_int` (an `int` that is not a `bool`), `as_decimal` (an `int`, or a `str` that `Decimal` parses; a `float` or `bool` raises), `as_fraction` (an `int`, or a `str` that `fractions.Fraction` parses), `as_datetime` (a `datetime` whose `tzinfo` is not `None`), `as_str_tuple` (a list of `str`), `as_enum(enum_type: type[E], value: object, where: str) -> E` (a `str` equal to a member's value), and `as_enum_tuple(enum_type, value, where) -> tuple[E, ...]`.
+  - **Files:** `src/clause_tracer/core/tests/owner_tables.py`, `src/clause_tracer/core/tests/test_owner_tables.py`, `src/clause_tracer/core/tests/fixtures/owner_table_example.toml` (a test-only table with the header and two cases, `id = "a"` and `id = "b"`, each with `level = "walk_away"` and `limit = "15"`).
+  - **Tests first:** in `test_owner_tables.py`: `test_reads_cases` (the fixture gives two cases with ids `a` and `b`); `test_missing_header_raises`; `test_unknown_top_level_key_raises`; `test_unknown_case_key_raises`; `test_missing_required_key_raises`; `test_duplicate_id_raises`; `test_header_only_file_has_no_cases`; `test_as_decimal` (`"1.5"` gives `Decimal("1.5")`, `15` gives `Decimal(15)`, `1.5` raises, `True` raises); `test_as_fraction` (`"7/30"` gives `Fraction(7, 30)`); `test_as_enum` (`"walk_away"` gives `Level.WALK_AWAY`, `"walk-away"` raises); `test_as_datetime_rejects_naive` (a naive `datetime` raises). Tests that need a bad file write it to `tmp_path`.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_owner_tables.py` reports 11 passed, and `scripts/check.sh` exits 0.
   - **Rules:** T11, [testing strategy 10](../testing-strategy.md#10-keeping-agent-written-tests-honest), [ADR 0013](../adr/0013-test-layers-and-release-gates.md) "Agent guard".
-  - **Depends on:** S1-M1-T4.
+  - **Depends on:** S1-M1-T7.
 
-- [ ] **S1-M3-T2: Spec 14.5 sample inputs**
-  - **Build:** A sample file with the starter playbook of Spec 7 and, for each position, the values Spec 14.5 describes (`CheckedValue`, `JudgedLevel` or a match result). These are inputs, not expected labels. `__main__` and the sample test both read this file.
-  - **Files:** `src/clause_tracer/core/samples/spec-14-5.toml`, `src/clause_tracer/core/samples/.gitkeep` (removed).
-  - **Tests first:** The loader turns every entry into the shapes of M2 without error.
-  - **Done when:** `scripts/check.sh` passes, and the file has one entry for each of the 11 starter positions.
-  - **Rules:** S1 (a sample input), D1, AGENTS.md (sample names from Spec 14.5 only).
-  - **Depends on:** S1-M2-T5, S1-M3-T1.
+- [ ] **S1-M3-T2: Create the seven empty owner tables**
+  - **Build:** Create these files, each holding exactly two lines: the `HEADER` line, then `# Format: docs/plans/stage-01-core.md, task <id>.` with the id of the owner task that fills it: `label_rules.toml` (S1-M3-T6), `units.toml` (S1-M3-T7), `spec_14_5.toml` (S1-M3-T8), `playbook_checks.toml` (S1-M3-T9), `auto_delete.toml` (S1-M4-T5), `scans.toml` (S1-M5-T1), `cost_estimate.toml` (S1-M5-T5). This commit holds these seven files and the plan tick, and no code, so the owner-table guard passes.
+  - **Files:** the seven files in `src/clause_tracer/core/tests/tables/`.
+  - **Tests first:** None. The loader test of S1-M3-T1 already covers a header-only file.
+  - **Done when:** `.venv/bin/uv run python scripts/check_owner_tables.py` exits 0 before the commit, and `scripts/check.sh` exits 0.
+  - **Rules:** T11.
+  - **Depends on:** S1-M3-T1, S1-M1-T5.
 
-- [ ] **S1-M3-T3: Label-rule table (Owner)**
-  - **Build:** Owner only. The rows of `label_rules.toml`: one row per case, giving the inputs and the expected level and reason codes. It must cover Rule 1 in both directions (the limit itself counts; "none" counts as 0; "unlimited" is the worst value), Rule 2 (including conditional yes), Rule 3 (quote not confirmed, number not in quote; a quote that is confirmed but not placed keeps its label), Rule 4's order, every Rule 5 cause, Rule 6 (week, month and year in both directions; business days never convert; a range; a deposit amount with and without a total; an amount and a percentage that disagree), the unit spellings Rule 6 accepts, Rule 7 (including an unsure missing level, `MATCH_UNCONFIRMED`, and a failed call that never gives the missing level), Rule 9 (hidden and undecodable text), and Rule 10. The AI agent does not write or change it (T11). It may list, in chat, which Spec lines still have no row.
+- [ ] **S1-M3-T3: Read positions and playbooks from the sample format**
+  - **Build:** In `src/clause_tracer/core/sample_input.py` (not exported; only `__main__` and tests use it). Every error is `ValueError(f"{where}: …")` naming the key.
+    - `def parse_position(data: Mapping[str, object], where: str) -> Position`. Keys: `id` (str, required), `topic` (str, required), `type` (`"number"`, `"yes_no"` or `"words"`, required), `why_note` (str, optional, default `None`). For `number`: `unit` (a `Unit` value), `direction` (a `Direction` value), `preferred_limit` and `acceptable_limit` (a TOML integer or a string `Decimal` parses), `missing_level` (a `Level` value), all required. For `yes_no`: `question`, `yes_level`, `no_level` required; `missing_level` optional, defaulting to the `no_level`. For `words`: `preferred`, `acceptable`, `walk_away` (str) and `missing_level`, all required. Any other key raises. A TOML float raises.
+    - `def parse_playbook(data: Mapping[str, object], *, schema_version: int) -> Playbook`. Keys: `id`, `name`, `side` (str), `starter` (bool), `positions` (a list of position tables, read with `parse_position(..., where=f"position {i}")`). `customer_id` is `None`.
+  - **Files:** `src/clause_tracer/core/sample_input.py`, `src/clause_tracer/core/tests/test_sample_input.py`.
+  - **Tests first:** in `test_sample_input.py`, each test parses an inline TOML string with `tomllib.loads`: `test_number_position` (all fields map, limits are `Decimal`); `test_yes_no_missing_level_defaults_to_no_level`; `test_yes_no_missing_level_given_is_kept`; `test_words_position`; `test_unknown_key_raises` (the message contains the key); `test_float_limit_raises`; `test_playbook_fields` (id, name, side, starter, two positions in order, `customer_id is None`, `schema_version` as passed).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_sample_input.py` reports 7 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** S1 (sample input), D4, T1 (pure: it parses data already read; only `__main__` reads files).
+  - **Depends on:** S1-M2-T4.
+
+- [ ] **S1-M3-T4: Read label inputs from the sample format**
+  - **Build:** In `src/clause_tracer/core/sample_input.py`:
+    - `def parse_label_inputs(entries: Sequence[Mapping[str, object]], playbook: Playbook) -> tuple[tuple[LabelInput, ...], UnreadableSpans]`. Each entry has keys `position` (str, required: a position id of `playbook`, or `ValueError`), `match` (`"found"`, `"nothing"`, `"unconfirmed"` or `"failed"`, required), `values` (list, default empty), `judged` (list, default empty), `clauses_to_read` (list of str, default empty), `outside_documents` (list of str, default empty).
+    - A value table has keys `clause` (str, required), `raw`, `number`, `range_high`, `unit`, `start_point`, `answer` (an `Answer` value), `vague` (bool, default false), `amount`, `total`, `reasons` (list of `ReasonCode` values, default empty), `unlimited` (bool, default false), `quote` (`"confirmed"`, `"unplaced"` or `"none"`, default `"confirmed"`), `on` (`"visible"`, `"hidden"` or `"undecodable"`, default `"visible"`). It becomes a `CheckedValue` with `raw_value=raw`, `unit_as_written=unit`, `start_point_as_written=start_point`, `condition=None`, and the other fields by name.
+    - A judged table has keys `clause` and `level` (required), `quote` and `on` (as above). It becomes a `JudgedLevel`.
+    - Quote spans: a counter `k` starts at 0 for each call and goes up by 1 for each value and each judged table, in file order. The span is `Span(start=k * 100, end=k * 100 + 10)`. `quote = "none"` gives `evidence=None`; otherwise `Evidence(clause_id=clause, sentence_ids=(SentenceId(f"{clause}.s1"),), quote=span, placed=(quote == "confirmed"))`. `on = "hidden"` adds the span to `UnreadableSpans.hidden`; `on = "undecodable"` adds it to `UnreadableSpans.undecodable`.
+    - The match: `found` gives `MatchFound(position_id, clause_ids=<the clause ids of values and judged, first-seen order, no repeats>)`; `nothing` gives `NothingFound(position_id, searches=())`; `unconfirmed` gives `MatchUnconfirmed(position_id, clauses_to_read=<clauses_to_read>)`; `failed` gives `CallFailed(code="model_reply_invalid")`.
+    - Each outside document name becomes `OutsideDocument(name=name, evidence=Span(start=0, end=0))`.
+    - `@dataclass(frozen=True, slots=True, kw_only=True) class Sample` with fields `playbook: Playbook, inputs: tuple[LabelInput, ...], unreadable: UnreadableSpans`, and `def parse_sample(data: Mapping[str, object]) -> Sample`, whose top-level keys are `schema_version` (int), `playbook` (table) and `input` (list of entries).
+  - **Files:** `src/clause_tracer/core/sample_input.py`, `src/clause_tracer/core/tests/test_sample_input.py`.
+  - **Tests first:** `test_found_value_builds_checked_value_and_evidence` (span `0..10`, sentence id `c1.s1`, `placed` true); `test_quote_none_has_no_evidence`; `test_unplaced_quote_has_placed_false`; `test_spans_count_across_entries` (the third value gets span `200..210`); `test_hidden_and_undecodable_spans_collected`; `test_match_kinds` (one entry of each of the four kinds gives the four types); `test_unknown_position_raises`; `test_judged_level`; `test_parse_sample_top_level`.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_sample_input.py` reports 16 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** S1, D4, T1, I3.
+  - **Depends on:** S1-M3-T3, S1-M2-T7.
+
+- [ ] **S1-M3-T5: The Spec 14.5 sample input file**
+  - **Build:** `src/clause_tracer/core/samples/spec-14-5.toml`, with `schema_version = 1`. These are inputs, not expected labels.
+    - `[playbook]`: `id = "starter-freelancer"`, `name = "Freelancer receiving a service agreement from the other side"`, `side = "service provider"`, `starter = true`, and one `[[playbook.positions]]` per row of Spec 7, in Spec 7 order, with `id` the row number (`"1"`, `"2"`, `"3"`, `"4"`, `"5"`, `"6"`, `"7a"`, `"7b"`, `"8"`, `"9"`, `"10"`) and `topic` the "Position" text of Spec 7 word for word. Yes/no positions use the topic as `question`. Number positions: 1 is days, lower is better, 15 and 30, missing `unsure`; 2 is percent, higher is better, 50 and 25, missing `walk_away`; 5 is rounds, lower is better, 2 and 3, missing `walk_away`; 9 is months, lower is better, 0 and 6, missing `preferred`. Yes/no positions: 3, 7b and 8 have yes `preferred`, no `acceptable`; 4, 6 and 7a have yes `preferred`, no `walk_away`. Position 10 is words, with the three level texts of Spec 7 word for word, missing `walk_away`. No `why_note` (Spec 7 does not give their text).
+    - One `[[input]]` per position, in the same order: 1 `found`, value `clause = "c1"`, `number = "60"`, `unit = "days"`; 2 `found`, value `c2`, `"25"`, `unit = "%"`; 3 `nothing`; 4 `found`, value `c4`, `answer = "no"`, `quote = "none"`, `reasons = ["quote_not_confirmed"]`; 5 `found`, value `c5`, `raw = "reasonable revisions"`, `vague = true`; 6 `found`, value `c6`, `answer = "yes"`; 7a `found`, value `c7`, `answer = "no"`; 7b `nothing`; 8 `nothing`; 9 `found`, values `c9a` with `"12"` `months`, and `c9b` with `number = "6"`, `range_high = "9"`, `unit = "months"`; 10 `found`, judged `c10` with `level = "preferred"`, and `outside_documents = ["Master Agreement"]`.
+    - Delete `src/clause_tracer/core/samples/.gitkeep`.
+  - **Files:** `src/clause_tracer/core/samples/spec-14-5.toml`, `src/clause_tracer/core/samples/.gitkeep` (deleted), `src/clause_tracer/core/tests/test_sample_input.py`.
+  - **Tests first:** `test_spec_14_5_sample_parses`: `parse_sample(tomllib.loads(<the file>))` gives 11 positions with the ids above in order, 11 inputs in the same order, and empty `UnreadableSpans`.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_sample_input.py` reports 17 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** S1 (a sample input), D1, AGENTS.md (sample names from Spec 14.5 only), [Spec 7 and 14.5](../spec.md#145-sample-data).
+  - **Depends on:** S1-M3-T4.
+
+- [ ] **S1-M3-T6: Label-rule table (Owner)**
+  - **Build:** Owner only. The rows of `label_rules.toml`. Columns: `id` (str), `rule` (one of `"rule1"`, `"rule2"`, `"rule3"`, `"rule4"`, `"rule5"`, `"rule6"`, `"rule7"`, `"rule9"`, `"rule10"`, `"edge"`; Rule 8 gives no label), `note` (str, optional), then one input in the sample format of S1-M3-T4 (`position` is a Spec 7 position id from the sample file; `match`; optional `values`, `judged`, `clauses_to_read`, `outside_documents`), then the expected answer: `level` (a `Level` value), `reasons` (a list of `ReasonCode` values; order does not matter), `written_by` (`"code"` or `"ai"`). Cases to cover, proposed, owner to check: Rule 1 at each limit and just past it, in both directions (positions 1 and 2), "none" as 0 (position 9), "unlimited" in both directions; Rule 2 yes, no, unclear, missing and conditional yes; Rule 3 quote not confirmed, number not in quote, and a confirmed quote that is not placed (label kept); Rule 4 a readable walk-away beside an unsure value, unsure beside acceptable, worst of preferred and acceptable, clauses that disagree; Rule 5 vague wording, another start point, unknown figures, business days; Rule 6 weeks, months and years each way, a range, a deposit amount with and without a total, an amount and a percentage that disagree; Rule 7 nothing found for each missing level, `MATCH_UNCONFIRMED`, and a failed call for a position whose missing level is preferred; Rule 9 hidden and undecodable text under a walk-away value; Rule 10 a walk-away that stays walk-away and an acceptable that becomes unsure; `edge` one row per item of question 16. The AI agent does not write or change it (T11). It may list, in chat, which Spec lines still have no row.
   - **Files:** `src/clause_tracer/core/tests/tables/label_rules.toml`.
   - **Tests first:** None. The owner's values are the expected answers.
-  - **Done when:** The owner has written the rows and said so. `scripts/check.sh` passes.
+  - **Done when:** The owner has written the rows and said so. `scripts/check.sh` exits 0.
   - **Rules:** T11, [Spec 5](../spec.md#5-labelling-rules), [testing strategy 4 and 14](../testing-strategy.md#14-example-tests).
-  - **Depends on:** S1-M3-T1, questions 6, 7, 8 and 9.
+  - **Depends on:** S1-M3-T2, S1-M3-T5, question 16.
 
-- [ ] **S1-M3-T4: Spec 14.5 label table (Owner)**
-  - **Build:** Owner only. One row per starter position in `spec_14_5.toml`: the expected level, the reason codes, and who wrote the label (code or AI). The AI agent does not write or change it (T11).
-  - **Files:** `src/clause_tracer/core/tests/tables/spec_14_5.toml`.
+- [ ] **S1-M3-T7: Unit table (Owner)**
+  - **Build:** Owner only. The rows of `units.toml`. Columns: `id` (str), `number` (a decimal string), `unit` (the unit as written, or absent for none), `target` (a `Unit` value), `expected` (a number as a string that `fractions.Fraction` reads, such as `"14"` or `"7/30"`, or the reason code value `"business_days"` or `"unit_unknown"`). Cases to cover, proposed, owner to check: every spelling in the list of S1-M3-T12 to each target it converts to; a week, a month and a year to days and to months; business days and working days; an unknown word; days to percent (no conversion); no unit (question 16a). The AI agent does not write or change it (T11).
+  - **Files:** `src/clause_tracer/core/tests/tables/units.toml`.
   - **Tests first:** None. The owner's values are the expected answers.
-  - **Done when:** The owner has written the 11 rows and said so. `scripts/check.sh` passes.
-  - **Rules:** T11, [Spec 14.5](../spec.md#145-sample-data), [system design 15.1](../system-design.md#151-stage-1-core) "Done when".
+  - **Done when:** The owner has written the rows and said so. `scripts/check.sh` exits 0.
+  - **Rules:** T11, [Spec 5](../spec.md#5-labelling-rules) Rule 6.
   - **Depends on:** S1-M3-T2.
 
-- [ ] **S1-M3-T5: Level order and Rule 4**
-  - **Build:** The order of levels (preferred, then acceptable, then walk-away) and a pure function that combines several values by Rule 4: a readable walk-away wins, then any unsure, then the worst level. It also adds the "clauses disagree" reason when the values differ.
-  - **Files:** `src/clause_tracer/core/labels.py`, `src/clause_tracer/core/tests/test_labels.py`, `src/clause_tracer/core/tests/conftest.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** The Rule 4 rows of the owner table. Hypothesis properties: the order of the values never changes the result; a set with one readable walk-away always gives walk-away (**promise test**, part of "every planted walk-away gets walk-away", Spec 11); an unsure result always carries at least one reason (glossary: unsure "always explains why"). Register a `nightly` Hypothesis profile with 2,000 examples in `conftest.py`.
-  - **Done when:** `scripts/check.sh` passes, and the owner table is unchanged in the commit.
-  - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rule 4, T1, T11, T13, I4, [testing strategy 5](../testing-strategy.md#5-the-offset-chain-seven-invariants).
-  - **Depends on:** S1-M3-T3.
-
-- [ ] **S1-M3-T6: Unit conversion (Rule 6)**
-  - **Build:** A pure function that converts a number from the unit as written into the playbook's `Unit`, or says why it cannot (business days, an unknown unit). Also the deposit rule: an amount becomes a percentage when the total is known, otherwise it is unsure.
-  - **Files:** `src/clause_tracer/core/units.py`, `src/clause_tracer/core/tests/test_units.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** The Rule 6 rows and the unit-spelling rows of the owner table. A property: converting there and back gives the same number for weeks, months and years.
-  - **Done when:** `scripts/check.sh` passes, and the owner table is unchanged in the commit.
-  - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rule 6, T1, T11.
-  - **Depends on:** S1-M3-T3.
-
-- [ ] **S1-M3-T7: Unreadable text under a quote (Rule 9)**
-  - **Build:** A pure check that says whether a value's quote overlaps hidden text or undecodable text in the `Document`. Such a value is unsure and does not count as readable for Rule 4 step 1.
-  - **Files:** `src/clause_tracer/core/labels.py`, `src/clause_tracer/core/tests/test_labels.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** The Rule 9 rows of the owner table. **Promise test** "values resting on hidden text are unsure" (Spec 11): a walk-away value on hidden text gives unsure, not walk-away. Edge cases: a quote that touches a hidden span only at its end offset (half-open, so no overlap); hidden text with no span.
-  - **Done when:** `scripts/check.sh` passes, and the owner table is unchanged in the commit.
-  - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rule 9, [ADR 0012](../adr/0012-missing-unsure-and-evidence-failures.md) and its amendment, T13, T11.
+- [ ] **S1-M3-T8: Spec 14.5 label table (Owner)**
+  - **Build:** Owner only. One row per starter position in `spec_14_5.toml`. Columns: `id` (str), `position` (a Spec 7 position id), `level`, `reasons` (a list of `ReasonCode` values), `written_by` (`"code"` or `"ai"`). The AI agent does not write or change it (T11).
+  - **Files:** `src/clause_tracer/core/tests/tables/spec_14_5.toml`.
+  - **Tests first:** None. The owner's values are the expected answers.
+  - **Done when:** The owner has written the 11 rows and said so. `scripts/check.sh` exits 0.
+  - **Rules:** T11, [Spec 14.5](../spec.md#145-sample-data), [system design 15.1](../system-design.md#151-stage-1-core) "Done when".
   - **Depends on:** S1-M3-T5.
 
-- [ ] **S1-M3-T8: Number labels**
-  - **Build:** `label_number`: from a number position and its checked values to one `ToolLabel` written by code. It applies Rule 1 limits, Rule 6 through S1-M3-T6, Rule 5 (vague wording, another start point, business days), Rule 3 (failed quote), the unplaceable-quote case (label kept), Rule 9, then Rule 4. Bundle inputs into one small shape if more than four are needed (I3).
-  - **Files:** `src/clause_tracer/core/labels.py`, `src/clause_tracer/core/tests/test_labels.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** The Rule 1, 3, 5 and 6 rows of the owner table, run through `label_number`.
-  - **Done when:** `scripts/check.sh` passes, and the owner table is unchanged in the commit.
-  - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rules 1, 3, 5, 6; I3, I4, T1, T11.
-  - **Depends on:** S1-M3-T6, S1-M3-T7.
+- [ ] **S1-M3-T9: Playbook-check table (Owner)**
+  - **Build:** Owner only. The rows of `playbook_checks.toml`. Columns: `id` (str), `positions` (a list of position tables in the format of S1-M3-T3), `problems` (a list of inline tables `{ position = "<id>", code = "<PlaybookProblemCode value>" }`, empty when the playbook passes). Cases to cover, proposed, owner to check: a negative limit; a percentage over 100; equal limits and reversed limits, in both directions; yes level not better than no level; a yes/no level of unsure; a yes/no missing level that is not the no level; an empty words level text (`"   "`); two positions with one id; a playbook with no problem. The AI agent does not write or change it (T11).
+  - **Files:** `src/clause_tracer/core/tests/tables/playbook_checks.toml`.
+  - **Tests first:** None. The owner's values are the expected answers.
+  - **Done when:** The owner has written the rows and said so. `scripts/check.sh` exits 0.
+  - **Rules:** T11, [Spec 4.1](../spec.md#41-playbooks).
+  - **Depends on:** S1-M3-T2.
 
-- [ ] **S1-M3-T9: Yes/no labels**
-  - **Build:** `label_yes_no`: yes gives the yes level; no, unclear and missing give the no level; a conditional yes gives unsure with the conditional-yes reason. Rules 3, 9 and 4 apply as for numbers. The label is written by code.
-  - **Files:** `src/clause_tracer/core/labels.py`, `src/clause_tracer/core/tests/test_labels.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** The Rule 2 rows of the owner table, and the Rule 3, 4 and 9 rows that use yes/no positions.
-  - **Done when:** `scripts/check.sh` passes, and the owner table is unchanged in the commit.
-  - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rule 2, T1, T11.
-  - **Depends on:** S1-M3-T7.
+- [ ] **S1-M3-T10: Level order, span overlap and reason order**
+  - **Build:** In `src/clause_tracer/core/levels.py`, export each:
+    - `def level_rank(level: Level) -> int`: `PREFERRED` 0, `ACCEPTABLE` 1, `WALK_AWAY` 2. `UNSURE` raises `ValueError("unsure has no rank")`.
+    - `def is_better(a: Level, b: Level) -> bool`: `level_rank(a) < level_rank(b)`.
+    - `def worst_level(levels: Iterable[Level]) -> Level`: the level with the highest rank; an empty input raises `ValueError`.
+    - `def spans_overlap(a: Span, b: Span) -> bool`: `a.start < b.end and b.start < a.end`.
+    - `def unreadable_spans(document: Document) -> UnreadableSpans`: `hidden` is every `HiddenText.span` that is not `None`, in order; `undecodable` is `document.undecodable`.
+    - `def sort_reasons(reasons: Iterable[ReasonCode]) -> tuple[ReasonCode, ...]`: no repeats, in `ReasonCode` member order.
+  - **Files:** `src/clause_tracer/core/levels.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_levels.py`, `src/clause_tracer/core/tests/strategies.py`, `src/clause_tracer/core/README.md` ("Functions").
+  - **Tests first:** in `test_levels.py`: `test_level_rank`; `test_unsure_has_no_rank`; `test_is_better` (preferred over acceptable, acceptable over walk-away, not the reverse, not equal); `test_worst_level` (`[PREFERRED, ACCEPTABLE]` gives `ACCEPTABLE`; empty raises); `test_spans_overlap_examples` (`0..5` and `5..9` false; `0..5` and `4..9` true; `3..3` and `0..9` false); `test_unreadable_spans_skips_hidden_without_span`; `test_sort_reasons` (`[RANGE, HIDDEN_TEXT, RANGE]` gives `(RANGE, HIDDEN_TEXT)`); the property `test_spans_overlap_is_symmetric`, over `spans()` pairs. In `strategies.py`, add `def spans() -> SearchStrategy[Span]`: `start` from `integers(0, 200)`, length from `integers(0, 50)`.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_levels.py` reports 8 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rule 4, T1, T6.
+  - **Depends on:** S1-M2-T7.
 
-- [ ] **S1-M3-T10: Words labels**
-  - **Build:** A function that combines the AI's judged levels for a words position by Rule 4, with Rule 9 applied. The label is written by AI, so it is drawn in pencil.
-  - **Files:** `src/clause_tracer/core/labels.py`, `src/clause_tracer/core/tests/test_labels.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** The words rows of the owner table. Every words label has `written_by` AI, and every number and yes/no label has `written_by` code.
-  - **Done when:** `scripts/check.sh` passes, and the owner table is unchanged in the commit.
-  - **Rules:** [Spec 5](../spec.md#5-labelling-rules) (who picks the label), [ADR 0002](../adr/0002-label-look-split-stamp.md), [ADR 0016](../adr/0016-legal-positions-without-a-lawyer.md), T11.
-  - **Depends on:** S1-M3-T7.
+- [ ] **S1-M3-T11: Playbook checks**
+  - **Build:** In `src/clause_tracer/core/playbook_checks.py`, export `def check_playbook(playbook: Playbook) -> tuple[PlaybookProblem, ...]`. Problems come in playbook order; within one position, in `PlaybookProblemCode` member order. For each position:
+    - `DUPLICATE_POSITION_ID` when an earlier position has the same id.
+    - `RULE_TYPE_MISMATCH` when the rule's class does not match the type (`NUMBER` with `NumberRule`, `YES_NO` with `YesNoRule`, `WORDS` with `WordsRule`). Then skip the other checks for that position.
+    - Number: `LIMIT_NEGATIVE` when either limit is below 0; `PERCENT_OVER_100` when the unit is `PERCENT` and either limit is above 100; `LIMITS_NOT_STRICTER` when, for `LOWER_IS_BETTER`, the preferred limit is not below the acceptable limit, or, for `HIGHER_IS_BETTER`, it is not above it.
+    - Yes/no: `YES_NO_LEVEL_UNSURE` when either level is `UNSURE` (then skip `YES_NOT_BETTER`); `YES_NOT_BETTER` when `not is_better(yes_level, no_level)`; `MISSING_LEVEL_NOT_NO_LEVEL` when `missing_level != no_level`.
+    - Words: `LEVEL_TEXT_EMPTY` when any of the three texts is empty after `strip()`.
+  - **Files:** `src/clause_tracer/core/playbook_checks.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_playbook_checks.py`, `src/clause_tracer/core/README.md` ("Functions").
+  - **Tests first:** in `test_playbook_checks.py`: `test_playbook_checks_table`, one case per row of `playbook_checks.toml` (load with `load_table`, case keys `{"id", "positions", "problems"}`, all required; build the positions with `parse_position`; build `Playbook(id=PlaybookId("test"), schema_version=1, name="Test", side="test", customer_id=None, positions=…, starter=False)`; compare `set(check_playbook(playbook))` with the set of expected `PlaybookProblem`s); `test_playbook_checks_table_has_rows`; `test_starter_playbook_passes` (the playbook of the Spec 14.5 sample gives `()`); `test_rule_type_mismatch` (a `NUMBER` position holding a `WordsRule` gives exactly one problem, `RULE_TYPE_MISMATCH`).
+  - **Done when:** every row passes, `scripts/check.sh` exits 0, and the owner table is unchanged in the commit.
+  - **Rules:** [Spec 4.1](../spec.md#41-playbooks), [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) 14 Nov amendment, T1, T11, I4.
+  - **Depends on:** S1-M3-T9, S1-M3-T10.
 
-- [ ] **S1-M3-T11: Missing, unconfirmed and failed matches (Rule 7)**
-  - **Build:** A function from a match result to a label: nothing found gives the missing level; an unconfirmed match gives unsure with `MATCH_UNCONFIRMED` and the clause to read; a failed call gives unsure with the "reply broken twice" reason and never the missing level.
-  - **Files:** `src/clause_tracer/core/labels.py`, `src/clause_tracer/core/tests/test_labels.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** The Rule 7 rows of the owner table. A property over every position and every `CallFailed`: the label is unsure, so it never takes a missing level of preferred, acceptable or walk-away (system design 8.2: a broken reply is never "nothing found").
-  - **Done when:** `scripts/check.sh` passes, and the owner table is unchanged in the commit.
-  - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rule 7, [ADR 0012](../adr/0012-missing-unsure-and-evidence-failures.md), I4, [system design 8.2](../system-design.md#82-calls-to-the-ai-service), T11.
-  - **Depends on:** S1-M3-T5, question 8.
+- [ ] **S1-M3-T12: Unit conversion (Rule 6)**
+  - **Build:** In `src/clause_tracer/core/units.py`, export `def convert_to_unit(number: Decimal, unit_as_written: str | None, target: Unit) -> Fraction | ReasonCode`.
+    - `None` means the number is already in the target unit: return `Fraction(number)` (question 16a).
+    - Otherwise normalise the spelling: lower case, strip spaces at both ends, collapse runs of spaces to one, drop one trailing `.`. Then look it up:
+      - `day`, `days`, `calendar day`, `calendar days`: days. `week`, `weeks`: weeks. `month`, `months`: months. `year`, `years`: years.
+      - `%`, `percent`, `per cent`: percent. `round`, `rounds`, `revision`, `revisions`, `round of revisions`, `rounds of revisions`: rounds.
+      - `business day`, `business days`, `working day`, `working days`: return `ReasonCode.BUSINESS_DAYS`.
+      - Anything else: return `ReasonCode.UNIT_UNKNOWN`.
+    - Factors, applied as `Fraction(number) * factor`: to `DAYS`, a day is 1, a week 7, a month 30, a year 365. To `MONTHS`, a month is 1, a year 12, a day `Fraction(1, 30)`, a week `Fraction(7, 30)`. To `PERCENT`, percent is 1. To `ROUNDS`, rounds is 1. Any other pair returns `ReasonCode.UNIT_UNKNOWN`.
+  - **Files:** `src/clause_tracer/core/units.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_units.py`, `src/clause_tracer/core/README.md` ("Functions").
+  - **Tests first:** in `test_units.py`: `test_units_table`, one case per row of `units.toml` (case keys `{"id", "number", "unit", "target", "expected"}`, required all but `unit`; `expected` is a `ReasonCode` value or else read with `as_fraction`; compare for equality); `test_units_table_has_rows`; the property `test_days_and_months_round_trip`: for any `Decimal` from `decimals(min_value=0, max_value=10_000, places=2)`, `convert_to_unit(n, "months", Unit.DAYS) == Fraction(n) * 30` and `convert_to_unit(n, "days", Unit.MONTHS) * 30 == Fraction(n)`.
+  - **Done when:** every row passes, `scripts/check.sh` exits 0, and the owner table is unchanged in the commit.
+  - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rule 6, T1, T6, T11.
+  - **Depends on:** S1-M3-T7, question 16.
 
-- [ ] **S1-M3-T12: Unloaded documents (Rule 10)**
-  - **Build:** An overlay that makes a label unsure when its evidence trail reaches a document that is not loaded, unless Rule 4 step 1 already made it walk-away. Its input is what question 9 settles.
-  - **Files:** `src/clause_tracer/core/labels.py`, `src/clause_tracer/core/tests/test_labels.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** The Rule 10 rows of the owner table: a walk-away stays walk-away; any other level becomes unsure with the unloaded-document reason.
-  - **Done when:** `scripts/check.sh` passes, and the owner table is unchanged in the commit.
-  - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rule 10, T11.
-  - **Depends on:** S1-M3-T5, question 9.
+- [ ] **S1-M3-T13: Number values (Rules 1, 3, 5, 6 and 9)**
+  - **Build:** In `src/clause_tracer/core/labels.py`, export:
+    - `def evidence_reasons(evidence: Evidence | None, unreadable: UnreadableSpans) -> tuple[ReasonCode, ...]`: `QUOTE_NOT_CONFIRMED` when `evidence` is `None` (question 16b); otherwise `HIDDEN_TEXT` when `evidence.quote` overlaps any hidden span, and `UNDECODABLE_TEXT` when it overlaps any undecodable span. Sorted with `sort_reasons`. `evidence.placed` never matters (Rule 3: an unplaced quote keeps its label).
+    - `def level_for_limits(rule: NumberRule, number: Fraction) -> Level`: for `LOWER_IS_BETTER`, `PREFERRED` when `number <= preferred_limit`, else `ACCEPTABLE` when `number <= acceptable_limit`, else `WALK_AWAY`; for `HIGHER_IS_BETTER` the same with `>=`.
+    - `def number_verdicts(rule: NumberRule, value: CheckedValue, unreadable: UnreadableSpans) -> tuple[ValueVerdict, ...]`, in this order:
+      1. `reasons` = `value.reasons` plus `evidence_reasons(value.evidence, unreadable)`. Add `VAGUE_WORDING` when `value.vague`.
+      2. Numbers. If `value.unlimited`, skip to step 4. If `rule.unit` is `PERCENT` and `value.amount` is not `None`: when `value.total` is `None` or not above 0, add `AMOUNT_WITHOUT_TOTAL`; otherwise the computed percentage is `Fraction(amount) / Fraction(total) * 100`. When `value.number` is also given, convert it as below; when its value rounded half up to a whole number (`math.floor(x + Fraction(1, 2))`) differs from the computed one rounded the same way, add `AMOUNT_PERCENT_DISAGREE` and keep both numbers; otherwise keep only the computed one (question 16e). Else, if `value.number` is not `None`: convert it with `convert_to_unit(value.number, value.unit_as_written, rule.unit)`; a `ReasonCode` result is added to `reasons`. If `value.range_high` is not `None`, convert it the same way, keep it as a second number, and add `RANGE`. Else (no number): add `NO_VALUE` when `reasons` holds nothing from `UNSURE_REASONS` yet (question 16c).
+      3. If `reasons` holds anything from `UNSURE_REASONS`: return one verdict with `level=UNSURE`, `readable_value=None`.
+      4. If `value.unlimited`: return one verdict with `level=WALK_AWAY`, `readable_value="unlimited"` (Rule 1: the worst value in either direction).
+      5. Otherwise one verdict per number, in order: `level=level_for_limits(rule, n)`, `readable_value=str(n)`.
+      Every verdict has `clause_id=value.clause_id`, `evidence=value.evidence`, `reasons=sort_reasons(reasons)`.
+  - **Files:** `src/clause_tracer/core/labels.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_labels.py`, `src/clause_tracer/core/README.md` ("Functions").
+  - **Tests first:** in `test_labels.py`, with `PAYMENT_DAYS = NumberRule(unit=DAYS, direction=LOWER_IS_BETTER, preferred_limit=Decimal(15), acceptable_limit=Decimal(30))` and a helper `def value(**changes: object) -> CheckedValue` that builds a confirmed 60-day value on clause `c1` with quote `Span(start=0, end=10)`:
+    - `test_hidden_quote_makes_value_unsure` (**promise test**, "values resting on hidden text are unsure", Spec 11): with hidden span `5..8`, one verdict, `UNSURE`, reasons `(HIDDEN_TEXT,)`, `readable_value is None`.
+    - `test_undecodable_quote_makes_value_unsure`.
+    - `test_quote_touching_hidden_at_its_end_is_readable`: hidden span `10..12` gives a verdict that is not `UNSURE`.
+    - `test_unplaced_quote_keeps_its_level`: `placed=False` gives the same level as `placed=True`.
+    - `test_missing_quote_is_unsure`: `evidence=None` gives `UNSURE` with `QUOTE_NOT_CONFIRMED`.
+    - `test_reason_on_value_makes_it_unsure`: `reasons=(OTHER_START_POINT,)` gives `UNSURE` (Rule 5, decided 14 Nov 2026).
+    - `test_range_gives_two_verdicts`: `number=6, range_high=9` gives two verdicts, both with `RANGE`.
+    - `test_unlimited_is_walk_away_both_ways`: for both directions, `unlimited=True` gives one `WALK_AWAY` verdict.
+    - `test_business_days_are_unsure`: `unit_as_written="business days"` gives `UNSURE` with `BUSINESS_DAYS`.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_labels.py` reports 9 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rules 1, 3, 5, 6, 9; I3, I4, T1, T13.
+  - **Depends on:** S1-M3-T10, S1-M3-T12, question 16.
 
-- [ ] **S1-M3-T13: The Spec 14.5 sample and "no position dropped"**
-  - **Build:** One entry function that labels every position of a playbook snapshot, by calling the functions above. It returns one `ToolLabel` per position, in playbook order.
-  - **Files:** `src/clause_tracer/core/labels.py`, `src/clause_tracer/core/tests/test_spec_14_5.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** The sample inputs of S1-M3-T2 give exactly the owner's `spec_14_5.toml` rows. A property: every position of any generated snapshot gets exactly one label (Rule 3: "A position is never dropped silently").
-  - **Done when:** `scripts/check.sh` passes, every Spec 14.5 row passes, and the owner tables are unchanged in the commit.
+- [ ] **S1-M3-T14: Yes/no and words values (Rules 2 and 9)**
+  - **Build:** In `src/clause_tracer/core/labels.py`, export:
+    - `def yes_no_verdict(rule: YesNoRule, value: CheckedValue, unreadable: UnreadableSpans) -> ValueVerdict`: `reasons` = `value.reasons` plus `evidence_reasons(...)`. When `value.answer` is `None`, add `NO_VALUE` if `reasons` holds nothing from `UNSURE_REASONS`. When it is `CONDITIONAL_YES`, add `CONDITIONAL_YES`. If `reasons` holds anything from `UNSURE_REASONS`: `level=UNSURE`, `readable_value=None`. Else `YES` gives `rule.yes_level`, and `NO`, `UNCLEAR` and `MISSING` give `rule.no_level`; `readable_value=value.answer.value`.
+    - `def words_verdict(judged: JudgedLevel, unreadable: UnreadableSpans) -> ValueVerdict`: `reasons = evidence_reasons(judged.evidence, unreadable)`; add `JUDGED_UNSURE` when `judged.level` is `UNSURE` (question 16d). If `reasons` holds anything from `UNSURE_REASONS`: `level=UNSURE`, `readable_value=None`. Else `level=judged.level`, `readable_value=judged.level.value`.
+    Both set `clause_id` and `evidence` from their input, and `reasons=sort_reasons(reasons)`.
+  - **Files:** `src/clause_tracer/core/labels.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_labels.py`, `src/clause_tracer/core/README.md` ("Functions").
+  - **Tests first:** with `PAID_IF_CANCELLED = YesNoRule(question="Paid if cancelled", yes_level=PREFERRED, no_level=WALK_AWAY)`: `test_yes_gives_yes_level`; `test_no_unclear_and_missing_give_no_level` (all three give `WALK_AWAY`); `test_conditional_yes_is_unsure` (reasons hold `CONDITIONAL_YES`); `test_hidden_yes_is_unsure`; `test_judged_level_is_kept`; `test_judged_unsure_has_a_reason`; `test_hidden_judged_level_is_unsure`.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_labels.py` reports 16 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rules 2 and 9, T1.
+  - **Depends on:** S1-M3-T13.
+
+- [ ] **S1-M3-T15: Combining values (Rule 4)**
+  - **Build:** In `src/clause_tracer/core/labels.py`, export `def combine_rule_4(verdicts: tuple[ValueVerdict, ...]) -> tuple[Level, tuple[ReasonCode, ...]]`:
+    - An empty tuple raises `ValueError("no values to combine")`.
+    - Level: `WALK_AWAY` if any verdict is `WALK_AWAY` (a verdict that is not `UNSURE` is readable); else `UNSURE` if any verdict is `UNSURE`; else `worst_level` of all.
+    - Disagreement (question 16f): for each clause id, take its verdicts whose `readable_value` is not `None`, and make the key `"|".join(sorted(set(<their readable values>)))`. Clauses with no readable verdict have no key. When there are two or more different keys, add `CLAUSES_DISAGREE`.
+    - Reasons: `sort_reasons` of every verdict's reasons, plus `CLAUSES_DISAGREE` when added (question 16g: reasons of every value are kept at every level).
+  - **Files:** `src/clause_tracer/core/labels.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_labels.py`, `src/clause_tracer/core/tests/strategies.py`, `src/clause_tracer/core/README.md` ("Functions").
+  - **Tests first:** in `strategies.py` add `def value_verdicts() -> SearchStrategy[ValueVerdict]`: `clause_id` from `sampled_from(["c1", "c2", "c3"])`; `level` from `sampled_from(Level)`; for `UNSURE`, `reasons` is a list of 1 to 3 codes from `sorted(UNSURE_REASONS)` and `readable_value` is `None`; otherwise `reasons` is a list of 0 to 2 codes from `[RANGE, CLAUSES_DISAGREE]` and `readable_value` from `sampled_from(["5", "10", "30"])`; `evidence` is `None`. In `test_labels.py`: the property `test_order_never_changes_the_result` (a list of 1 to 6 verdicts and any permutation of it give the same result); the property `test_readable_walk_away_wins` (**promise test**, part of "every planted walk-away gets walk-away", Spec 11: any list holding a `WALK_AWAY` verdict gives `WALK_AWAY`); the property `test_unsure_always_has_a_reason` (an `UNSURE` result has at least one code from `UNSURE_REASONS`); `test_empty_raises`; `test_clauses_that_disagree` (`c1` "12" and `c2` "6", "9" give `CLAUSES_DISAGREE`); `test_same_value_in_two_clauses_agrees` (`c1` "30" and `c2` "30"); `test_range_in_one_clause_agrees` (`c1` "6" and `c1` "9" only).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_labels.py` reports 23 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rule 4, T1, T6, T13, I4.
+  - **Depends on:** S1-M3-T14, question 16.
+
+- [ ] **S1-M3-T16: One label per position (Rules 7 and 10)**
+  - **Build:** In `src/clause_tracer/core/labels.py`, export `def label_position(item: LabelInput, unreadable: UnreadableSpans) -> ToolLabel`:
+    1. Raise `ValueError` when: the match is not a `CallFailed` and its `position_id` differs from `item.position.id`; any value or judged level has another `position_id`; the rule's class does not match the position type; a `WORDS` position has `values`; a `NUMBER` or `YES_NO` position has `judged`.
+    2. `CallFailed`: `level=UNSURE`, `reasons=(REPLY_BROKEN_TWICE,)`, `evidence=()`, `written_by=CODE`.
+    3. `NothingFound`: `level` is `rule.no_level` for `YES_NO` (Spec 4.1) and `position.missing_level` otherwise; `reasons=()`, `evidence=()`, `written_by=CODE`.
+    4. `MatchUnconfirmed`: `level=UNSURE`, `reasons=(MATCH_UNCONFIRMED,)`, `evidence=()`, `written_by=CODE`.
+    5. `MatchFound`: the verdicts are `number_verdicts` of each value (joined in order), `yes_no_verdict` of each value, or `words_verdict` of each judged level. No verdict: `level=UNSURE`, `reasons=(NO_VALUE,)`, `written_by=CODE`. Otherwise `level, reasons = combine_rule_4(verdicts)`; `written_by` is `AI` for `WORDS` and `CODE` otherwise (question 16i, ADR 0002). `evidence` is every verdict's evidence that is not `None`, in order, without repeats.
+    6. Rule 10: when `item.outside_documents` is not empty, the level becomes `UNSURE` and `UNLOADED_DOCUMENT` joins the reasons, unless step 5 gave `WALK_AWAY` (Rule 4 step 1). A walk-away keeps its reasons unchanged (question 16h).
+    `position_id=item.position.id`; reasons always pass through `sort_reasons`.
+  - **Files:** `src/clause_tracer/core/labels.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_labels.py`, `src/clause_tracer/core/tests/label_cases.py`, `src/clause_tracer/core/tests/strategies.py`, `src/clause_tracer/core/README.md` ("Functions").
+  - **Tests first:**
+    - In `label_cases.py`: `@dataclass(frozen=True, slots=True, kw_only=True) class LabelCase` with `id: str, rule: str, label_input: LabelInput, unreadable: UnreadableSpans, level: Level, reasons: frozenset[ReasonCode], written_by: WrittenBy`, and `def label_rule_cases() -> tuple[LabelCase, ...]`: loads `label_rules.toml` with `load_table` (case keys `id, rule, note, position, match, values, judged, clauses_to_read, outside_documents, level, reasons, written_by`; required `id, rule, position, match, level, reasons, written_by`), reads the starter playbook from `samples/spec-14-5.toml` with `parse_sample`, and builds each case's input with `parse_label_inputs([<the case's input keys>], playbook)`.
+    - In `strategies.py`: `def positions() -> SearchStrategy[Position]`: id `"p"` plus `integers(0, 99)`; type from `sampled_from(PositionType)`; a `NumberRule` with unit from `sampled_from(Unit)`, direction from `sampled_from(Direction)` and two limits from `decimals(0, 100, places=0)` ordered so the preferred limit is stricter; a `YesNoRule` with question `"q"`, yes and no levels from `[PREFERRED, ACCEPTABLE, WALK_AWAY]`; a `WordsRule` with texts `"a"`, `"b"`, `"c"`; `missing_level` from `sampled_from(Level)`; topic `"t"`; `why_note=None`.
+    - In `test_labels.py`: `test_label_rules_table`, one case per `label_rule_cases()` row (compare `level`, `frozenset(reasons)`, `written_by`); `test_every_rule_has_rows` (each of `rule1`, `rule2`, `rule3`, `rule4`, `rule5`, `rule6`, `rule7`, `rule9`, `rule10` has a row); the property `test_failed_call_never_gives_a_missing_level` (any `positions()` with `CallFailed` gives `UNSURE`: system design 8.2); `test_words_label_is_written_by_ai`; `test_missing_words_label_is_written_by_code`; `test_rule_10_keeps_a_walk_away`; `test_position_mismatch_raises`.
+  - **Done when:** every row of `label_rules.toml` passes, `scripts/check.sh` exits 0, and the owner table is unchanged in the commit.
+  - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rules 3, 4, 7 and 10, [ADR 0012](../adr/0012-missing-unsure-and-evidence-failures.md) and its 14 Nov amendment, [ADR 0002](../adr/0002-label-look-split-stamp.md), I4, [system design 8.2](../system-design.md#82-calls-to-the-ai-service), T11.
+  - **Depends on:** S1-M3-T6, S1-M3-T14, S1-M3-T15.
+
+- [ ] **S1-M3-T17: Every position of a playbook, and the Spec 14.5 sample**
+  - **Build:** In `src/clause_tracer/core/labels.py`, export `def label_all(playbook: Playbook, inputs: tuple[LabelInput, ...], unreadable: UnreadableSpans) -> tuple[ToolLabel, ...]`. It raises `ValueError` when a position has no input, when two inputs name one position, or when an input names a position not in the playbook. It returns `label_position` of each position's input, in playbook order.
+  - **Files:** `src/clause_tracer/core/labels.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_spec_14_5.py`, `src/clause_tracer/core/tests/test_labels.py`, `src/clause_tracer/core/README.md` ("Functions").
+  - **Tests first:** in `test_spec_14_5.py`: `test_spec_14_5_sample`, one case per row of `spec_14_5.toml` (case keys `id, position, level, reasons, written_by`, all required): the label of that position from `label_all` on the sample file matches `level`, `frozenset(reasons)` and `written_by`; `test_spec_14_5_table_covers_every_position` (the table's positions are exactly the 11 sample ids). In `test_labels.py`: the property `test_no_position_is_dropped` (Spec 5 Rule 3: for a list of 1 to 6 `positions()` with unique ids, each given a `NothingFound` input, `label_all` returns one label per position, with the ids in playbook order); `test_missing_input_raises`; `test_duplicate_input_raises`.
+  - **Done when:** every Spec 14.5 row passes, `scripts/check.sh` exits 0, and the owner tables are unchanged in the commit.
   - **Rules:** [Spec 5 and 14.5](../spec.md#145-sample-data), [system design 15.1](../system-design.md#151-stage-1-core) "Done when", T11, T13, B5.
-  - **Depends on:** S1-M3-T4, S1-M3-T8, S1-M3-T9, S1-M3-T10, S1-M3-T11, S1-M3-T12.
+  - **Depends on:** S1-M3-T8, S1-M3-T16.
 
 ### M4: Ports, the request hash, fakes and auto-delete
 
-Any later module can be tested against a fake of each port, with the replay fake failing on a request it does not know, and a fixed clock driving auto-delete.
+Any later module can be tested against a fake of each port. The replay fake fails on a request it does not know, the contract suites in `tests/contracts/` pass against each fake, and a fixed clock drives auto-delete.
 
 - [ ] **S1-M4-T1: The five ports**
-  - **Build:** `AiClient`, `PiiDetector`, `ReviewStore`, `SecretStore` and `Clock` as `typing.Protocol` classes, with the methods of system design 3.4. `ReviewStore` gets the methods question 5 settles. Each method has a short contract note: input, output, errors raised, side effects.
-  - **Files:** `src/clause_tracer/core/ports.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_ports.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** A tiny stub class for each port type-checks as that port under mypy strict, and a stub with a wrong method signature does not (check the failing case once by hand).
-  - **Done when:** `scripts/check.sh` passes, and the README lists each port with its methods.
-  - **Rules:** P4, T2, B3, I11, [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md), [ADR 0015](../adr/0015-provider-ready-seam.md), [system design 3.1](../system-design.md#31-the-engine).
-  - **Depends on:** S1-M1-T5, S1-M2-T3, S1-M2-T6, question 5.
+  - **Build:** In `src/clause_tracer/core/ports.py`, beside `CancelCheck`: `AiClient`, `PiiDetector`, `ReviewStore`, `SecretStore` and `Clock` as `typing.Protocol` classes, with exactly the method signatures of system design 3.4 ("Ports"), each method body `...`. Each method has a docstring of four lines: `Input: …`, `Output: …`, `Raises: …`, `Side effects: …`, filled from the "Notes" column of that table (write `None.` where a line does not apply). Export all five.
+  - **Files:** `src/clause_tracer/core/ports.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_ports.py`, `src/clause_tracer/core/README.md` ("Ports").
+  - **Tests first:** in `test_ports.py`: `test_ports_have_exactly_the_system_design_methods` (for each port, the set of names in its `__dict__` that do not start with `_` equals the method names of 3.4); `test_stubs_satisfy_the_ports`: one small stub class per port with the right methods, each assigned to a variable annotated with the port type (`client: AiClient = _StubAiClient()`), so mypy strict checks them. Check by hand once that a stub whose `complete` takes `str` fails mypy, and do not commit it.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_ports.py` reports 2 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** P4, T2, B3, I11, [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) 14 Nov amendment, [ADR 0015](../adr/0015-provider-ready-seam.md), [system design 3.1](../system-design.md#31-the-engine).
+  - **Depends on:** S1-M1-T8, S1-M2-T3, S1-M2-T6.
 
 - [ ] **S1-M4-T2: Pure hash of the exact request**
-  - **Build:** A pure function from an `AiRequest` to a SHA-256 hex string. It covers every field, including `inputs` and `json_schema`, through a fixed, documented encoding.
-  - **Files:** `src/clause_tracer/core/request_hash.py`, `src/clause_tracer/core/tests/test_request_hash.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** The same request gives the same hash, also in two subprocesses with different `PYTHONHASHSEED` values. Changing any single field changes the hash (one case per field). The key order of `json_schema` does not change the hash. A Hypothesis property: a rebuilt copy of a request has the same hash.
-  - **Done when:** `scripts/check.sh` passes, and the README states the encoding.
+  - **Build:** In `src/clause_tracer/core/request_hash.py`, export:
+    - `def to_plain(value: object) -> object`, checked in this order: `None`, `bool`, `int`, `float` stay as they are; an `Enum` member becomes its `value`; a `str` stays; a `Decimal` becomes `str(value)`; a `datetime` becomes `value.isoformat()`; `bytes` become `base64.b64encode(value).decode("ascii")`; a `tuple` or `list` becomes a list of `to_plain` of each item; a `Mapping` becomes a dict of `to_plain` of each value (a key that is not a `str` raises `TypeError`); a dataclass instance becomes `{"__type__": type(value).__qualname__, <field name>: to_plain(<field value>) for each field}`; anything else raises `TypeError(f"cannot hash {type(value).__name__}")`.
+    - `def request_sha256(request: AiRequest) -> str`: `hashlib.sha256(json.dumps(to_plain(request), sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False).encode("utf-8")).hexdigest()`.
+  - **Files:** `src/clause_tracer/core/request_hash.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_request_hash.py`, `src/clause_tracer/core/README.md` ("Functions", with the encoding written out).
+  - **Tests first:** in `test_request_hash.py`, using `make_request` from `shapes_for_tests.py`: `test_same_request_same_hash`; `test_hash_is_64_lowercase_hex`; `test_hash_ignores_hash_seed` (run `python -c` printing `request_sha256(make_request())` in two subprocesses with `PYTHONHASHSEED` `0` and `1`; both equal the in-process hash); `test_each_field_changes_the_hash`, one case per field with these changes: `step="echo2"`, `prompt_id="echo2"`, `prompt_version=2`, `inputs=EchoInputs(clause_id=ClauseId("4.2"), text="Pay in 31 days.")`, `messages=(PromptMessage(role="user", text="Quote it."),)`, `schema_id="echo-reply-2"`, `json_schema={"type": "array"}`, `model="test-model-2"`, `privacy_mode=PrivacyMode.OFF`, `max_tokens=201`; `test_json_schema_key_order_is_ignored` (`{"a": 1, "b": 2}` and `{"b": 2, "a": 1}`); `test_unknown_type_raises` (`to_plain({1, 2})` raises `TypeError`); the property `test_rebuilt_copy_has_the_same_hash` (for any `text()` used as the inputs' text, two requests built separately from it hash the same).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_request_hash.py` reports 16 passed, and `scripts/check.sh` exits 0.
   - **Rules:** T1, D8, [ADR 0013](../adr/0013-test-layers-and-release-gates.md) 13 Nov amendment, [system design 7](../system-design.md#7-caching-resume-and-cost).
   - **Depends on:** S1-M2-T6.
 
 - [ ] **S1-M4-T3: The replay fake**
-  - **Build:** An in-memory `AiClient` fake keyed by the request hash, in the place question 3 settles. It is given its recordings by the caller and never reads a file. It raises `UnrecordedRequest` on a miss, reports `unused_keys()`, and can be told to raise a model-service error for the next call (`fail_next`). Add a pytest fixture that hands out a replay fake and asserts `unused_keys() == []` at the end of the test.
-  - **Files:** `src/clause_tracer/core/fakes.py`, `src/clause_tracer/core/tests/test_replay_fake.py`, `src/clause_tracer/core/tests/conftest.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** A recorded request returns its exact `AiReply`. A request that differs by one character raises `UnrecordedRequest`, whose message names the step and the hash, not the prompt. A recording never asked for appears in `unused_keys()`, and the fixture fails the test. `fail_next(ModelTimeoutError)` raises that error once, then replies normally.
-  - **Done when:** `scripts/check.sh` passes, and the fake type-checks as an `AiClient`.
+  - **Build:** In `src/clause_tracer/core/fakes.py` (standard library and `core` only), export:
+    - `class UnrecordedRequest(AssertionError)`. It is a test failure, not a project error, so code under test that catches `ClauseTracerError` cannot swallow it.
+    - `class ReplayAiClient` with `def __init__(self, recordings: Mapping[str, AiReply]) -> None` (keys are `request_sha256` values; the client keeps a copy); `def complete(self, request: AiRequest) -> AiReply`; `def unused_keys(self) -> tuple[str, ...]` (sorted keys never asked for); `def fail_next(self, error_type: type[ModelServiceError]) -> None`. `complete` first checks a pending failure: if one is set, it clears it and raises `error_type({"step": request.step})`. Then it hashes the request; a miss raises `UnrecordedRequest(f"unrecorded request: step={request.step} sha256={key}")`; a hit marks the key used and returns the reply. A recording may be asked for more than once.
+    - `def assert_all_used(client: ReplayAiClient) -> None`: raises `AssertionError(f"unused recordings: {client.unused_keys()}")` when any key is unused.
+    In `src/clause_tracer/core/tests/conftest.py`, add the fixture `make_replay_client`: it yields a function `(recordings: Mapping[str, AiReply]) -> ReplayAiClient` and, after the test, calls `assert_all_used` on every client it made.
+  - **Files:** `src/clause_tracer/core/fakes.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/conftest.py`, `src/clause_tracer/core/tests/test_replay_fake.py`, `src/clause_tracer/core/tests/shapes_for_tests.py` (add `def make_reply(text: str = "{}") -> AiReply` with `raw_body=text.encode()`, `model_used="test-model"`, `provider_used="test-provider"`, `Usage(input_tokens=10, cached_input_tokens=0, output_tokens=5, cost_usd=None)`, `generation_id="gen-1"`), `src/clause_tracer/core/README.md` ("Fakes").
+  - **Tests first:** in `test_replay_fake.py`: `test_recorded_request_returns_its_reply`; `test_one_character_change_raises` (a request whose message text differs by one character raises `UnrecordedRequest`; the message contains `step=echo` and the hash, and not `Quote the clause`); `test_unused_recording_is_reported`; `test_assert_all_used_raises_on_unused`; `test_fail_next_raises_once` (`fail_next(ModelTimeoutError)`: the next call raises `ModelTimeoutError` with `context["step"] == "echo"`, the call after returns the reply); `test_fixture_client_works` (uses `make_replay_client` with one recording that the test asks for); `test_replay_fake_is_an_ai_client` (`client: AiClient = ReplayAiClient({})`, checked by mypy).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_replay_fake.py` reports 7 passed, and `scripts/check.sh` exits 0.
   - **Rules:** T3, T7, T12, T1, [ADR 0013](../adr/0013-test-layers-and-release-gates.md) action item 1 and amendments, [testing strategy 6.1](../testing-strategy.md#61-the-replay-fake).
-  - **Depends on:** S1-M4-T1, S1-M4-T2, question 3.
+  - **Depends on:** S1-M4-T1, S1-M4-T2.
 
-- [ ] **S1-M4-T4: Fake detector, secret store and clock**
-  - **Build:** A fake `PiiDetector` that returns the suggestions it was given for a text; an in-memory `SecretStore` keyed by provider id that can be switched to "unavailable"; and a fixed `Clock` that can be moved forward and back. Write the behaviour tests as functions that take the implementation as a fixture, so stage 6 can run them against the real adapters.
-  - **Files:** `src/clause_tracer/core/fakes.py`, `src/clause_tracer/core/tests/test_fakes.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** The detector returns the planted suggestions and nothing else. The secret store gets back what was put; deleting a missing secret succeeds (I8); when unavailable, every call raises `SecretStoreUnavailableError`. The clock returns exactly the time it was set to.
-  - **Done when:** `scripts/check.sh` passes, and each fake type-checks as its port.
+- [ ] **S1-M4-T4: Fake detector, secret store and clock, with the first contract suite**
+  - **Build:** In `src/clause_tracer/core/fakes.py`, export:
+    - `class FakePiiDetector` with `def __init__(self, planted: Mapping[str, tuple[PiiSuggestion, ...]]) -> None` and `def find(self, text: str) -> tuple[PiiSuggestion, ...]`, which returns `planted[text]`, or `()` for a text not planted.
+    - `class InMemorySecretStore` with `def __init__(self, *, available: bool = True) -> None`, `def set_available(self, available: bool) -> None`, and the three `SecretStore` methods. When not available, each of the three raises `SecretStoreUnavailableError({"provider_id": provider_id})`. `delete_secret` of a missing id does nothing (I8).
+    - `class FixedClock` with `def __init__(self, now: datetime) -> None`, `def now(self) -> datetime`, `def set(self, when: datetime) -> None` and `def advance(self, delta: timedelta) -> None` (a negative `delta` moves it back). A naive datetime raises `ValueError("datetime must be timezone-aware")`.
+    Create `tests/contracts/__init__.py` (empty) and `tests/contracts/test_secret_store_contract.py` with a fixture `secret_store` (`params=["in_memory"]`, returning `InMemorySecretStore()`) and a fixture `unavailable_secret_store` (`params=["in_memory"]`, returning `InMemorySecretStore(available=False)`), so stage 6 adds the real adapter as a new param.
+  - **Files:** `src/clause_tracer/core/fakes.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_fakes.py`, `tests/contracts/__init__.py`, `tests/contracts/test_secret_store_contract.py`, `tests/README.md` (add: "`contracts/`: one behaviour suite per port, run against each fake now and each real adapter from stage 6"), `src/clause_tracer/core/README.md` ("Fakes").
+  - **Tests first:** in `test_secret_store_contract.py`: `test_put_then_get`; `test_get_missing_is_none`; `test_put_twice_keeps_the_last`; `test_delete_missing_succeeds`; `test_delete_then_get_is_none`; `test_unavailable_store_raises` (each of the three methods raises `SecretStoreUnavailableError`). In `test_fakes.py`: `test_detector_returns_planted_suggestions`; `test_detector_returns_nothing_for_other_text`; `test_clock_returns_its_time`; `test_clock_moves_forward_and_back`; `test_clock_rejects_naive_datetime`; `test_fakes_satisfy_their_ports` (each assigned to a variable annotated with its port, checked by mypy).
+  - **Done when:** `.venv/bin/uv run pytest tests/contracts src/clause_tracer/core/tests/test_fakes.py` reports 12 passed, and `scripts/check.sh` exits 0.
   - **Rules:** T3, T2, I8, [ADR 0006](../adr/0006-encrypted-storage-and-secrets.md), [ADR 0015](../adr/0015-provider-ready-seam.md) (credentials under a provider id), [testing strategy 3](../testing-strategy.md#3-five-layers).
   - **Depends on:** S1-M4-T1.
 
 - [ ] **S1-M4-T5: Auto-delete table (Owner)**
-  - **Build:** Owner only. The rows of `auto_delete.toml`: last change, setting (7, 30 or 90 days), "now", and the expected due date, "due now" and "warning shown" answers. Cover the exact boundaries, "Keep it", the 3-day warning, lowering the setting (nothing sooner than 3 days later), a laptop off for months, and a clock that jumps backwards. The AI agent does not write or change it (T11).
+  - **Build:** Owner only. The rows of `auto_delete.toml`. Columns: `id` (str); `last_change`, `now` (TOML offset datetimes, written like `2026-11-01T09:00:00Z`); `days` (7, 30 or 90); `protected_until` (an offset datetime, optional: the end of the 3-day grace after the setting was lowered); and the expected answers `due_at` (offset datetime), `due` (bool), `warning` (bool). Cases to cover, proposed, owner to check: "now" exactly at the due date, and one second before it; each of 7, 30 and 90 days; "Keep it" (a later `last_change`); the warning at exactly 3 days before, and one second more than 3 days before; a lowered setting whose new date falls inside the grace; a laptop off for months; a clock that jumped backwards, so "now" is before `last_change` (Spec 9: not due). The AI agent does not write or change it (T11).
   - **Files:** `src/clause_tracer/core/tests/tables/auto_delete.toml`.
   - **Tests first:** None. The owner's values are the expected answers.
-  - **Done when:** The owner has written the rows and said so. `scripts/check.sh` passes.
+  - **Done when:** The owner has written the rows and said so. `scripts/check.sh` exits 0.
   - **Rules:** T11, [Spec 9](../spec.md#9-running-the-app) (auto-delete), [testing strategy 8](../testing-strategy.md#8-privacy-and-security-tests) (auto-delete row).
-  - **Depends on:** S1-M3-T1, question 14.
+  - **Depends on:** S1-M3-T2.
 
 - [ ] **S1-M4-T6: Auto-delete date rules**
-  - **Build:** Pure functions, given times as inputs and never reading a clock: a review's due date from its last change and the setting; whether it is due at "now"; whether it is in the 3-day warning window; the due date after the setting is lowered.
-  - **Files:** `src/clause_tracer/core/auto_delete.py`, `src/clause_tracer/core/tests/test_auto_delete.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** Every row of the owner table. **Promise test** "auto-delete runs on schedule" (Spec 11, unit part): a Hypothesis property that a review is due exactly when "now" reaches its due date, and that lowering the setting never makes a review due sooner than 3 days after the change.
-  - **Done when:** `scripts/check.sh` passes, and the owner table is unchanged in the commit.
+  - **Build:** In `src/clause_tracer/core/auto_delete.py`, export `WARNING_WINDOW = timedelta(days=3)`, `LOWERING_GRACE = timedelta(days=3)` and these pure functions. None reads a clock. Each raises `ValueError("datetime must be timezone-aware")` for a naive datetime and `ValueError("days must be 1 or more")` when `days < 1`.
+    - `def due_at(last_change: datetime, days: int, protected_until: datetime | None = None) -> datetime`: `last_change + timedelta(days=days)`, or `protected_until` when that is later.
+    - `def is_due(last_change: datetime, days: int, now: datetime, protected_until: datetime | None = None) -> bool`: `now >= due_at(...)`. A clock behind `last_change` is therefore never due (Spec 9, decided 14 Nov 2026).
+    - `def in_warning_window(last_change: datetime, days: int, now: datetime, protected_until: datetime | None = None) -> bool`: `due_at(...) - WARNING_WINDOW <= now < due_at(...)`.
+    - `def protected_until_after_lowering(lowered_at: datetime) -> datetime`: `lowered_at + LOWERING_GRACE`.
+  - **Files:** `src/clause_tracer/core/auto_delete.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_auto_delete.py`, `src/clause_tracer/core/README.md` ("Functions").
+  - **Tests first:** in `test_auto_delete.py`: `test_auto_delete_table`, one case per row (case keys `id, last_change, days, now, protected_until, due_at, due, warning`; all required but `protected_until`; compare `due_at`, `is_due` and `in_warning_window` with the row); `test_auto_delete_table_has_rows`; the property `test_due_exactly_when_now_reaches_the_due_date` (**promise test**, "auto-delete runs on schedule", Spec 11, unit part; aware datetimes from `datetimes(timezones=just(timezone.utc))`, days from `sampled_from([7, 30, 90])`); the property `test_never_due_before_the_rule_allows` (`is_due` is false whenever `now < last_change + timedelta(days=days)` or `now < protected_until`); `test_naive_datetime_raises`; `test_days_below_one_raises`.
+  - **Done when:** every row passes, `scripts/check.sh` exits 0, and the owner table is unchanged in the commit.
   - **Rules:** T1, T2, T13, T11, [Spec 9](../spec.md#9-running-the-app).
   - **Depends on:** S1-M4-T5.
 
-- [ ] **S1-M4-T7: In-memory review store**
-  - **Build:** An in-memory `ReviewStore` fake with the methods of S1-M4-T1. Its purge uses the date rules of S1-M4-T6 with the "now" it is given. Write its tests as behaviour tests that take the store as a fixture, for reuse in stage 6.
-  - **Files:** `src/clause_tracer/core/fakes.py`, `src/clause_tracer/core/tests/test_fakes.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** A saved `AiRecord` loads back equal. Records are append-only: saving the same record id twice is refused. Deleting a review twice succeeds (I8). Purge with a fixed "now" removes due reviews only, and returns the same type when nothing is due (I4).
-  - **Done when:** `scripts/check.sh` passes, and the fake type-checks as a `ReviewStore`.
-  - **Rules:** T3, I4, I8, D1, D8, [ADR 0006](../adr/0006-encrypted-storage-and-secrets.md).
-  - **Depends on:** S1-M4-T1, S1-M4-T6.
+- [ ] **S1-M4-T7: In-memory review store, with its contract suite**
+  - **Build:** In `src/clause_tracer/core/fakes.py`, export `class InMemoryReviewStore` with `def __init__(self) -> None` and the five `ReviewStore` methods of system design 3.4:
+    - `save_record` raises `DuplicateRecordError({"record_id": record.record_id})` when any review already holds that `record_id`.
+    - `load_records` returns the review's records in the order saved, or `()`.
+    - `list_reviews` returns the sorted ids of reviews that hold at least one record.
+    - `delete_review` removes the review and its records; a missing review does nothing (I8).
+    - `purge_expired(now, auto_delete_days)`: for each review, its last change is the latest `finished_at` of its records (the stage 1 stand-in, system design 3.4); it deletes each review for which `is_due(last_change, auto_delete_days, now)` is true, and returns their ids, sorted.
+    Create `tests/contracts/test_review_store_contract.py` with a fixture `review_store` (`params=["in_memory"]`, returning `InMemoryReviewStore()`). In `src/clause_tracer/core/tests/shapes_for_tests.py` add `def make_record(record_id: str, review_id: str, finished_at: datetime) -> AiRecord` (`schema_version=1`, step `"echo"`, attempt 1, the hash and request of `make_request()`, `reply=make_reply()`, `error_code=None`, `started_at=finished_at - timedelta(seconds=1)`).
+  - **Files:** `src/clause_tracer/core/fakes.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/shapes_for_tests.py`, `tests/contracts/test_review_store_contract.py`, `src/clause_tracer/core/README.md` ("Fakes").
+  - **Tests first:** in `test_review_store_contract.py`: `test_saved_record_loads_back_equal`; `test_records_load_in_save_order`; `test_duplicate_record_id_raises`; `test_unknown_review_has_no_records`; `test_list_reviews_is_sorted`; `test_delete_review_twice_succeeds`; `test_delete_removes_the_records`; `test_purge_removes_only_due_reviews` (two reviews, last changes 31 and 29 days before "now", setting 30: only the first goes); `test_purge_with_nothing_due_returns_empty`; `test_purge_with_clock_behind_removes_nothing` ("now" before every `finished_at`).
+  - **Done when:** `.venv/bin/uv run pytest tests/contracts/test_review_store_contract.py` reports 10 passed, `review: ReviewStore = InMemoryReviewStore()` type-checks, and `scripts/check.sh` exits 0.
+  - **Rules:** T3, I4, I8, D1, D8, [ADR 0006](../adr/0006-encrypted-storage-and-secrets.md), [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) 14 Nov amendment.
+  - **Depends on:** S1-M4-T3, S1-M4-T6.
 
 ### M5: Scans, the cost estimate and the last check before drawing
 
-The output scans catch every case in the owner's table, the cost estimate gives the owner's ranges, and the last check before drawing passes invariant 7.
+The output scans give the owner's findings for every case in the scan table, the cost estimate gives the owner's ranges, and the last check before drawing passes invariant 7.
 
 - [ ] **S1-M5-T1: Scan table (Owner)**
-  - **Build:** Owner only. In `scans.toml`: the word lists the scans use (law words, advice such as "safe to sign", injection tells such as "ignore" or "mark every", "call" and "visit"), and the cases with their expected result. Cases must include "Dear John", a web address, "safe to sign", an acceptable limit, a wrong label word, an invented number, an unknown placeholder and text over the length cap, plus innocent look-alikes that must pass. The AI agent does not write or change it (T11).
+  - **Build:** Owner only. `scans.toml` holds two sections and the cases.
+    - `[lists]`: `law_words`, `advice_phrases`, `injection_phrases`, `contact_words`, each a list of strings. Proposed starting values, owner to check: law words `"legal"`, `"illegal"`, `"lawful"`, `"unlawful"`, `"enforceable"`, `"unenforceable"`, `"the law"`; advice `"safe to sign"`, `"you should sign"`, `"do not sign"`, `"don't sign"`, `"we recommend"`; injection tells `"ignore"`, `"disregard"`, `"mark every"`, `"system prompt"`; contact words `"call"`, `"visit"`.
+    - `[caps]`: one integer per `TextSlot` value (`reason`, `other_level`, `missing_text`, `reading`, `question`, `message`, `rewrite`), the maximum length in characters. Proposed starting values, owner to check: reason 280, other_level 280, missing_text 280, reading 200, question 200, message 3000, rewrite 2000.
+    - `[[case]]` columns: `id`, `text`, `slot` (a `TextSlot` value), `label` (a `Level` value, optional), `allowed_numbers`, `acceptable_limits` (lists of decimal strings, default empty), `known_placeholders`, `defined_roles` (lists of strings, default empty), `personal_data` (a list of substrings of `text` that the fake detector reports as a person, default empty), and the expected `findings` (a list of `ScanFinding` values, empty when the text passes).
+    Cases to cover, proposed, owner to check: "Dear John" (with `John` as personal data); a web address, with and without `https://`; an email address; "safe to sign"; "call" and "visit"; each law word, and an innocent look-alike ("legally" if it is not listed, "the lawn"); an acceptable limit, also when the same number is allowed; a wrong label word; an invented number; a number inside a known placeholder (passes); an unknown placeholder; a defined role ("the Contractor") reported by the detector (passes); text one character over each cap, and text exactly at the cap; the items of question 17. The AI agent does not write or change it (T11).
   - **Files:** `src/clause_tracer/core/tests/tables/scans.toml`.
   - **Tests first:** None. The owner's values are the expected answers.
-  - **Done when:** The owner has written the lists and cases and said so. `scripts/check.sh` passes.
-  - **Rules:** T11, [Spec 6.2](../spec.md#62-rules-for-every-ai-step), [testing strategy 4](../testing-strategy.md#4-what-to-test-in-each-module) (`core` row).
-  - **Depends on:** S1-M3-T1, question 12.
+  - **Done when:** The owner has written the lists, caps and cases and said so. `scripts/check.sh` exits 0.
+  - **Rules:** T11, [Spec 6.2](../spec.md#62-rules-for-every-ai-step) (with the length caps), [testing strategy 4](../testing-strategy.md#4-what-to-test-in-each-module) (`core` row).
+  - **Depends on:** S1-M3-T2, question 17.
 
-- [ ] **S1-M5-T2: Word and pattern scans**
-  - **Build:** A pure scan of one AI text that returns a tuple of finding codes, empty when the text passes. This task covers law words, advice, injection tells, web addresses, "call" and "visit", a label word that differs from the code's label, and the length cap.
-  - **Files:** `src/clause_tracer/core/scans.py`, `src/clause_tracer/core/tests/test_scans.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** The matching rows of the owner table. **Promise test** "no AI text states what a law allows" (Spec 11): every law word in the owner's list fails, in any letter case.
-  - **Done when:** `scripts/check.sh` passes, and the owner table is unchanged in the commit.
+- [ ] **S1-M5-T2: The scan lists and caps in code**
+  - **Build:** In `src/clause_tracer/core/scan_rules.py`, export `LAW_WORDS`, `ADVICE_PHRASES`, `INJECTION_PHRASES`, `CONTACT_WORDS` (each `tuple[str, ...]`) and `LENGTH_CAPS: Mapping[TextSlot, int]` (a `MappingProxyType`), with the values copied from the owner's `scans.toml` in the same order. The owner owns the values; the code holds a copy.
+  - **Files:** `src/clause_tracer/core/scan_rules.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_scans.py`, `src/clause_tracer/core/README.md` ("Functions").
+  - **Tests first:** in `test_scans.py`: `test_scan_rules_match_owner_table` (load `scans.toml` with `sections=frozenset({"lists", "caps"})`; each list equals its tuple; the caps equal `LENGTH_CAPS`, with one entry per `TextSlot`).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_scans.py` reports 1 passed, `scripts/check.sh` exits 0, and the owner table is unchanged in the commit.
+  - **Rules:** T11, [system design 3.4](../system-design.md#34-core-shapes-for-stage-1) (decided 14 Nov 2026: the owner's table holds the values).
+  - **Depends on:** S1-M5-T1, S1-M1-T7.
+
+- [ ] **S1-M5-T3: Word and pattern scans**
+  - **Build:** In `src/clause_tracer/core/scans.py`, export:
+    - `WEB_ADDRESS_PATTERN = re.compile(r"\bhttps?://\S+|\bwww\.\S+|\b(?:[a-z0-9-]+\.)+(?:com|org|net|io|co|uk|eu|info|biz|dev|app|me|ai)\b", re.IGNORECASE)` and `EMAIL_PATTERN = re.compile(r"[^\s@]+@[^\s@]+\.[^\s@]+")`.
+    - `LABEL_WORDS: Mapping[Level, tuple[str, ...]]`: `PREFERRED` `("preferred",)`, `ACCEPTABLE` `("acceptable",)`, `WALK_AWAY` `("walk-away", "walk away")`, `UNSURE` `("unsure",)`.
+    - `def contains_phrase(text: str, phrase: str) -> bool`: first replace `‘` and `’` in `text` with `'`; then `re.search(r"(?<!\w)" + re.escape(phrase) + r"(?!\w)", text, re.IGNORECASE) is not None` (question 17a).
+    - `def scan_text(text: str, slot: TextSlot, label: Level | None) -> tuple[ScanFinding, ...]`: `TOO_LONG` when `len(text) > LENGTH_CAPS[slot]`; `LAW_WORD`, `ADVICE`, `INJECTION_TELL`, `CONTACT_WORD` when `contains_phrase` is true for any item of the matching list; `WEB_ADDRESS` when `WEB_ADDRESS_PATTERN` finds a match; `EMAIL_ADDRESS` when `EMAIL_PATTERN` finds a match; `WRONG_LABEL_WORD` when `label` is not `None` and any word of another level in `LABEL_WORDS` is present by `contains_phrase` (question 17d). Findings in `ScanFinding` member order, no repeats.
+  - **Files:** `src/clause_tracer/core/scans.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_scans.py`, `src/clause_tracer/core/README.md` ("Functions").
+  - **Tests first:** in `test_scans.py`, with `TEXT_FINDINGS = frozenset({TOO_LONG, LAW_WORD, ADVICE, INJECTION_TELL, CONTACT_WORD, WEB_ADDRESS, EMAIL_ADDRESS, WRONG_LABEL_WORD})`: `test_text_scans_table`, one case per row of `scans.toml` (case keys as in S1-M5-T1; required `id, text, slot, findings`): `set(scan_text(text, slot, label)) == set(findings) & TEXT_FINDINGS`; `test_scans_table_has_rows`; `test_every_law_word_fails_in_any_case` (**promise test**, "no AI text states what a law allows", Spec 11: each item of `LAW_WORDS`, in lower case, upper case and title case, inside `"This is {word} here."`, gives `LAW_WORD`); `test_curly_apostrophe_is_folded` (`"don’t sign"` matches `"don't sign"`).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_scans.py` passes, `scripts/check.sh` exits 0, and the owner table is unchanged in the commit.
   - **Rules:** T1, T13, T11, I4, [Spec 6.2](../spec.md#62-rules-for-every-ai-step), [system design 8.2](../system-design.md#82-calls-to-the-ai-service).
-  - **Depends on:** S1-M5-T1, question 10.
+  - **Depends on:** S1-M5-T2, question 17.
 
-- [ ] **S1-M5-T3: Value and name scans**
-  - **Build:** The rest of the scan, given the allowed numbers, the acceptable limits, the known placeholders and defined roles, and a `PiiDetector` passed in. It fails any number not allowed, any acceptable limit, any unknown placeholder, and any name, email, phone or address the detector finds that is not a known placeholder or role.
-  - **Files:** `src/clause_tracer/core/scans.py`, `src/clause_tracer/core/tests/test_scans.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** The matching rows of the owner table, with the fake detector. **Promise test** "no acceptable limit reaches the message step" (Spec 11, scan part): an acceptable limit fails in every written form the owner's table lists.
-  - **Done when:** `scripts/check.sh` passes, and the owner table is unchanged in the commit.
+- [ ] **S1-M5-T4: Value and name scans**
+  - **Build:** In `src/clause_tracer/core/scans.py`, export:
+    - `NUMBER_PATTERN = re.compile(r"\d+(?:,\d{3})*(?:\.\d+)?")` and `PLACEHOLDER_PATTERN = re.compile(re.escape(PLACEHOLDER_OPEN) + "[^" + re.escape(PLACEHOLDER_CLOSE) + "]*" + re.escape(PLACEHOLDER_CLOSE))`.
+    - `def scan_ai_text(text: str, slot: TextSlot, context: ScanContext, detector: PiiDetector) -> tuple[ScanFinding, ...]`. It starts from `scan_text(text, slot, context.label)` and adds:
+      - `UNKNOWN_PLACEHOLDER` for any `PLACEHOLDER_PATTERN` match not in `context.known_placeholders`.
+      - For each `NUMBER_PATTERN` match that does not lie inside a placeholder match: `n = Decimal(match.replace(",", ""))`. `ACCEPTABLE_LIMIT` when `n` equals any item of `context.acceptable_limits`, in every slot, even when `n` is also allowed (question 17c and 17f); otherwise `NUMBER_NOT_ALLOWED` when `n` equals no item of `context.allowed_numbers`. Numbers written in words are not checked in stage 1 (question 17b).
+      - `PERSONAL_DATA` for any suggestion from `detector.find(text)` whose span is not inside a placeholder match and whose text (`text[span.start:span.end]`), case-folded, is not a case-folded item of `context.defined_roles`.
+      Findings in `ScanFinding` member order, no repeats.
+  - **Files:** `src/clause_tracer/core/scans.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_scans.py`, `src/clause_tracer/core/README.md` ("Functions").
+  - **Tests first:** in `test_scans.py`: `test_full_scans_table`, one case per row of `scans.toml`: build `ScanContext` from the row, and a `FakePiiDetector` that maps the row's `text` to one `PiiSuggestion(span=Span(start=i, end=i + len(s)), kind=PlaceholderKind.PERSON, source=PiiSource.NER)` per `personal_data` substring `s`, where `i = text.index(s)`; `set(scan_ai_text(...)) == set(findings)`; `test_acceptable_limit_fails_in_every_form` (**promise test**, "no acceptable limit reaches the message step", Spec 11, scan part: with acceptable limit `30` and allowed numbers `30`, the texts `"30"`, `"30 days"` and `"30.00"` in slot `MESSAGE` each give `ACCEPTABLE_LIMIT`); `test_number_inside_known_placeholder_passes` (`"Ask ⟦Person 1⟧."` with that placeholder known gives no finding); `test_invented_name_fails` (`"Dear John,"` with `John` planted gives `PERSONAL_DATA`).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_scans.py` passes, `scripts/check.sh` exits 0, and the owner table is unchanged in the commit.
   - **Rules:** P4 (detector passed in), T2, T13, T11, [Spec 6.2](../spec.md#62-rules-for-every-ai-step).
-  - **Depends on:** S1-M5-T2, S1-M4-T4.
+  - **Depends on:** S1-M5-T3, S1-M4-T4.
 
-- [ ] **S1-M5-T4: Cost estimate table (Owner)**
-  - **Build:** Owner only. The rows of `cost_estimate.toml`: inputs in the form question 13 settles, and the expected low and high amounts. The AI agent does not write or change it (T11).
+- [ ] **S1-M5-T5: Cost estimate table (Owner)**
+  - **Build:** Owner only. The rows of `cost_estimate.toml`. Columns: `id`; `positions`, `words_positions`, `clauses`, `contract_tokens` (integers); `input_per_million`, `cached_input_per_million`, `output_per_million` (decimal strings, US dollars); the expected `calls` (integer), `low_usd` and `high_usd` (decimal strings with at most four decimal places), worked out by the formula of [system design 7](../system-design.md#7-caching-resume-and-cost). Cases to cover, proposed, owner to check: the starter playbook (11 positions, 1 words position) over 50 clauses with a 10,000-word contract (19,000 tokens), at a cheap and at a Sonnet-class price; a 50,000-word contract (95,000 tokens); one position over one clause; zero clauses; a case whose amounts round at the fourth decimal place. The AI agent does not write or change it (T11).
   - **Files:** `src/clause_tracer/core/tests/tables/cost_estimate.toml`.
   - **Tests first:** None. The owner's values are the expected answers.
-  - **Done when:** The owner has written the rows and said so. `scripts/check.sh` passes.
+  - **Done when:** The owner has written the rows and said so. `scripts/check.sh` exits 0.
   - **Rules:** T11, [Spec 9](../spec.md#9-running-the-app) (cost), [system design 7](../system-design.md#7-caching-resume-and-cost) (estimate).
-  - **Depends on:** S1-M3-T1, question 13.
+  - **Depends on:** S1-M3-T2.
 
-- [ ] **S1-M5-T5: Cost estimate**
-  - **Build:** A pure function that gives the pre-run estimate as a range in US dollars, from the inputs question 13 settles. Prices are passed in; nothing provider-specific enters `core`.
-  - **Files:** `src/clause_tracer/core/cost.py`, `src/clause_tracer/core/tests/test_cost.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** Every row of the owner table. A property: the low end is never above the high end, and neither is negative.
-  - **Done when:** `scripts/check.sh` passes, and the owner table is unchanged in the commit.
-  - **Rules:** T1, T11, [ADR 0015](../adr/0015-provider-ready-seam.md), [ADR 0010](../adr/0010-starting-models.md).
-  - **Depends on:** S1-M5-T4.
+- [ ] **S1-M5-T6: Cost estimate**
+  - **Build:** In `src/clause_tracer/core/cost.py`, export `TASK_TOKENS_PER_CALL = 1000`, `OUTPUT_TOKENS_PER_CALL = 400` and:
+    - `def estimate_calls(positions: int, words_positions: int, clauses: int) -> int`: the sum of the table in system design 7, with `math.ceil`.
+    - `def estimate_cost(inputs: CostInputs) -> CostRange`: `calls = estimate_calls(...)`. Per call, in `Decimal`: `low_call = (T * cached + TASK * input + OUTPUT * output) / 1_000_000` and `high_call = ((T + TASK) * input + OUTPUT * output) / 1_000_000`, where `T` is `contract_tokens`. `low_usd` and `high_usd` are `calls` times each, then `.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)`.
+    Both raise `ValueError` when a count is negative or `words_positions > positions`; `estimate_cost` also when a price is negative.
+  - **Files:** `src/clause_tracer/core/cost.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_cost.py`, `src/clause_tracer/core/README.md` ("Functions").
+  - **Tests first:** in `test_cost.py`: `test_cost_table`, one case per row (all columns required; compare `calls`, `low_usd`, `high_usd`); `test_cost_table_has_rows`; `test_starter_makes_35_calls` (`estimate_calls(11, 1, 50) == 35`, the figure in system design 7); the property `test_low_never_above_high` (counts from `integers(0, 200)` with `words_positions <= positions`, tokens from `integers(0, 200_000)`, prices from `decimals(0, 100, places=2)` with `cached <= input`: `0 <= low_usd <= high_usd`); `test_negative_count_raises`.
+  - **Done when:** every row passes, `scripts/check.sh` exits 0, and the owner table is unchanged in the commit.
+  - **Rules:** T1, T11, [ADR 0015](../adr/0015-provider-ready-seam.md), [ADR 0010](../adr/0010-starting-models.md), [Spec 9](../spec.md#9-running-the-app).
+  - **Depends on:** S1-M5-T5, S1-M2-T7.
 
-- [ ] **S1-M5-T6: Last check before drawing: the text**
-  - **Build:** The first half of the last check. Given the document, the clause, the evidence and the quote, it confirms that the folded quote appears exactly once inside the cited sentences, at the evidence's span. It is written fresh, not shared with `checking`'s quote check (a different code path). It returns a result, and fails closed.
-  - **Files:** `src/clause_tracer/core/draw_check.py`, `src/clause_tracer/core/tests/test_draw_check.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** Example cases: an exact quote passes; curly against straight quotes and runs of spaces pass (the fold of question 11); a quote found twice in the cited sentences fails; a quote outside the cited sentences fails; one changed character fails. **Promise test** "no made-up quote reaches the screen" (Spec 11, unit part).
-  - **Done when:** `scripts/check.sh` passes.
+- [ ] **S1-M5-T7: The quote-check fold**
+  - **Build:** In `src/clause_tracer/core/quote_fold.py`, export `def fold_for_quote_check(text: str) -> QuoteFold`, the fold of Spec 2. Walk the text once: `‘ ’ ‚ ‛` (`‘ ’ ‚ ‛`) become `'`; `“ ” „ ‟` (`“ ” „ ‟`) become `"`; a run of characters for which `str.isspace()` is true becomes one `" "`, mapped to the run's first character; every other character is kept. `to_original[i]` is the index in `text` of folded character `i`, and the last entry is `len(text)`.
+  - **Files:** `src/clause_tracer/core/quote_fold.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_quote_fold.py`, `src/clause_tracer/core/README.md` ("Functions").
+  - **Tests first:** in `test_quote_fold.py`: `test_curly_quotes_become_straight` (`"“a” ‘b’"` folds to `"\"a\" 'b'"`); `test_whitespace_runs_collapse` (`"a \n\t b"` folds to `"a b"` with `to_original == (0, 1, 5, 6)`); `test_empty_text` (`QuoteFold(text="", to_original=(0,))`); the property `test_map_shape` (for `text()`: `len(to_original) == len(text) + 1`, it is strictly increasing, and its last entry is the original length); the property `test_fold_is_idempotent` (folding the folded text gives the same text).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_quote_fold.py` reports 5 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** T1, T6, [Spec 2](../spec.md#2-glossary) (quote check), [ADR 0012](../adr/0012-missing-unsure-and-evidence-failures.md) 14 Nov amendment.
+  - **Depends on:** S1-M2-T7.
+
+- [ ] **S1-M5-T8: Last check before drawing: the text**
+  - **Build:** In `src/clause_tracer/core/draw_check.py`, export `def check_before_drawing(document: Document, clause: Clause, evidence: Evidence, quote_text: str) -> DrawAllowed | DrawRefused`. It stops at the first failure and returns `DrawRefused(failure=…)`:
+    1. `evidence.clause_id != clause.id`: `CLAUSE_MISMATCH`.
+    2. `evidence.sentence_ids` is empty, or holds an id that is not a sentence of `clause`: `SENTENCE_UNKNOWN`.
+    3. The region is `Span(start=<smallest start of the cited sentences>, end=<largest end>)`. `evidence.quote` not inside it: `SPAN_OUTSIDE_SENTENCES`.
+    4. `q = fold_for_quote_check(quote_text).text.strip(" ")`. Empty: `EMPTY_QUOTE`.
+    5. `f = fold_for_quote_check(document.text[region.start:region.end])`. Count every place `q` starts in `f.text` (overlapping places count). None: `QUOTE_NOT_FOUND`. More than one: `QUOTE_NOT_UNIQUE`.
+    6. With `i` the one place: `start = region.start + f.to_original[i]` and `end = region.start + f.to_original[i + len(q) - 1] + 1`. `Span(start=start, end=end) != evidence.quote`: `SPAN_MISMATCH`.
+    7. Otherwise `DrawAllowed(evidence=evidence)`. (S1-M5-T9 adds the page-box half before this step.)
+    It is written apart from the stage 8 quote check: it shares only the fold (system design 15.8).
+  - **Files:** `src/clause_tracer/core/draw_check.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_draw_check.py`, `src/clause_tracer/core/README.md` ("Functions").
+  - **Tests first:** in `test_draw_check.py`, with a helper that builds a `Document` without glyphs for the text `"1. Payment. The Client pays within 60 days. Late fees apply. The Client pays within 60 days."` and one clause `c1` over the whole text with four sentences (`c1.s1` to `c1.s4`, split after each `". "`): `test_exact_quote_passes` (`"Late fees apply."` citing `c1.s3`); `test_curly_quotes_and_spaces_pass` (a document sentence with `"fees"` in curly quotes and two spaces, quoted with straight quotes and one space); `test_quote_twice_in_cited_sentences_fails` (`"The Client pays within 60 days."` citing `c1.s2` to `c1.s4`: `QUOTE_NOT_UNIQUE`); `test_quote_outside_cited_sentences_fails` (`"Late fees apply."` citing `c1.s2`: `QUOTE_NOT_FOUND`, with the evidence span inside `c1.s2`); `test_one_changed_character_fails` (**promise test**, "no made-up quote reaches the screen", Spec 11, unit part: `"Late fees apply!"` is refused); `test_wrong_span_fails` (`SPAN_MISMATCH`); `test_unknown_sentence_fails`; `test_other_clause_fails`; `test_empty_quote_fails` (`"  "`); `test_offsets_count_code_points` (a text starting with `"\U0001F600 "` passes with the span counted in code points).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_draw_check.py` reports 10 passed, and `scripts/check.sh` exits 0.
   - **Rules:** T1, T13, I5, I4, [system design 4.2](../system-design.md#42-the-offset-chain), [Spec 2](../spec.md#2-glossary) (quote check).
-  - **Depends on:** S1-M2-T5, question 11.
+  - **Depends on:** S1-M5-T7, S1-M2-T5.
 
-- [ ] **S1-M5-T7: Last check before drawing: page boxes**
-  - **Build:** The second half: every character of the span that the app did not insert has a glyph whose box lies inside its page. Documents without glyphs follow question 11.
-  - **Files:** `src/clause_tracer/core/draw_check.py`, `src/clause_tracer/core/tests/test_draw_check.py`, `src/clause_tracer/core/README.md`.
-  - **Tests first:** A box inside its page passes. A box past the page edge fails. A character with no glyph that the app did not insert fails. Characters the app inserted (`None` in `char_map`) need no box. A ligature (one glyph, two letters) passes.
-  - **Done when:** `scripts/check.sh` passes.
-  - **Rules:** T1, I5, [ADR 0007](../adr/0007-document-reading-stack.md) (one coordinate system), [ADR 0012](../adr/0012-missing-unsure-and-evidence-failures.md) (unplaceable quote).
-  - **Depends on:** S1-M5-T6.
+- [ ] **S1-M5-T9: Last check before drawing: page boxes**
+  - **Build:** In `check_before_drawing`, between step 6 and step 7, and only when `document.glyphs` is not empty (decided 14 Nov 2026):
+    1. `len(document.char_map) != len(document.text)`: `CHAR_MAP_LENGTH`.
+    2. For each index `k` from `evidence.quote.start` to `evidence.quote.end - 1`: `g = document.char_map[k]`. `None` (a character the app inserted) needs no box. `g < 0` or `g >= len(document.glyphs)`: `GLYPH_MISSING`. With `glyph = document.glyphs[g]`: `glyph.page != glyph.box.page`: `PAGE_MISMATCH`; no page in `document.pages` has `number == glyph.page`: `PAGE_UNKNOWN`; unless `0 <= box.x0 <= box.x1 <= page.width` and `0 <= box.top <= box.bottom <= page.height`: `BOX_OUTSIDE_PAGE`.
+  - **Files:** `src/clause_tracer/core/draw_check.py`, `src/clause_tracer/core/tests/test_draw_check.py`, `src/clause_tracer/core/README.md` ("Functions").
+  - **Tests first:** in `test_draw_check.py`, with a helper that adds one glyph per character on page 1 (`Page(number=1, width=600.0, height=800.0)`, boxes `0, 0, 5, 10`): `test_box_inside_page_passes`; `test_box_past_page_edge_fails` (`x1 = 601`); `test_character_without_glyph_fails` (a `char_map` index past the glyphs: `GLYPH_MISSING`); `test_inserted_characters_need_no_box` (`None` in `char_map` inside the quote passes); `test_ligature_passes` (two characters pointing at one glyph); `test_unknown_page_fails`; `test_page_mismatch_fails`; `test_char_map_length_fails`; `test_document_without_glyphs_skips_boxes`.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_draw_check.py` reports 19 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** T1, I5, [ADR 0007](../adr/0007-document-reading-stack.md) (one coordinate system), [ADR 0012](../adr/0012-missing-unsure-and-evidence-failures.md) (unplaceable quote, and the 14 Nov amendment).
+  - **Depends on:** S1-M5-T8.
 
-- [ ] **S1-M5-T8: Invariant 7 with the hazard alphabet**
-  - **Build:** A Hypothesis strategy for "hazard" text (ligatures, soft hyphens, curly quotes, zero-width characters, bidi controls, `ß`, astral characters and the `⟦` escape), and a property test of invariant 7 on generated documents. Later stages reuse the strategy.
+- [ ] **S1-M5-T10: Invariant 7 with the hazard alphabet**
+  - **Build:** In `src/clause_tracer/core/tests/strategies.py`, add:
+    - `HAZARD_ALPHABET: tuple[str, ...]`: the characters of `"abcXYZ019"`, space, `"\n"`, `" "`, the ligatures `"ﬁ"` and `"ﬂ"`, the soft hyphen `"­"`, `"'"`, `'"'`, `"‘"`, `"’"`, `"“"`, `"”"`, the zero-width characters `"​"`, `"‌"`, `"‍"`, `"﻿"`, the bidi controls `"‪"` to `"‮"` and `"⁦"` to `"⁩"`, `"ß"`, the astral characters `"\U0001F600"` and `"\U0001D400"`, and `"⟦"`, `"⟧"`.
+    - `def hazard_text() -> SearchStrategy[str]`: `text(alphabet=sampled_from(HAZARD_ALPHABET), min_size=1, max_size=80)`.
+    - `def documents_with_quote() -> SearchStrategy[tuple[Document, Clause, Evidence, str]]`, a `@composite`: draw a hazard text, a `bool` for glyphs, and `0 <= start < end <= len(text)`. Move `start` forward and `end` back past characters for which `isspace()` is true; `assume(start < end)`. The quote is `text[start:end]`; `assume` that its folded form occurs exactly once in the folded text. The document has one clause `c1` over the whole text with one sentence `c1.s1` over the whole text; with glyphs, one glyph per character on page 1 (boxes `0, 0, 1, 1`), `char_map = tuple(range(len(text)))` and `pages = (Page(number=1, width=600.0, height=800.0),)`; without, all three empty. `evidence = Evidence(clause_id=ClauseId("c1"), sentence_ids=(SentenceId("c1.s1"),), quote=Span(start=start, end=end), placed=True)`.
   - **Files:** `src/clause_tracer/core/tests/strategies.py`, `src/clause_tracer/core/tests/test_draw_check.py`.
-  - **Tests first:** For any generated document and any span inside one sentence, the last check passes; changing one character of the quote makes it fail. Offsets count code points, not UTF-16 units. Every failure Hypothesis finds becomes a committed `@example`. **Promise test** "every evidence link scrolls to the right place" (Spec 11, unit part).
-  - **Done when:** `scripts/check.sh` passes, and the property runs with the `nightly` profile too (`--hypothesis-profile=nightly`) without failure.
+  - **Tests first:** in `test_draw_check.py`: the property `test_invariant_7_last_check_agrees` (for any `documents_with_quote()`, the result is `DrawAllowed`); the property `test_invariant_7_changed_character_fails` (pick an index of the quote whose character is not whitespace and not one of `' " ‘ ’ “ ”`, `assume` there is one; replace it with `"X"`, or `"Y"` when it already is `"X"`; the result is `DrawRefused`). **Promise test** "every evidence link scrolls to the right place" (Spec 11, unit part). Every failure Hypothesis finds becomes a committed `@example` on the property.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_draw_check.py` reports 21 passed, and `scripts/check.sh` exits 0.
   - **Rules:** T6, T13, [testing strategy 5](../testing-strategy.md#5-the-offset-chain-seven-invariants), [ADR 0013](../adr/0013-test-layers-and-release-gates.md).
-  - **Depends on:** S1-M5-T7.
+  - **Depends on:** S1-M5-T9.
 
 ### M6: Run alone and close the stage
 
 `python -m clause_tracer.core` prints the Spec 14.5 labels, the README records everything `core` offers, and the owner has the stage report.
 
 - [ ] **S1-M6-T1: Run `core` alone on the sample**
-  - **Build:** `python -m clause_tracer.core --input <file>` reads a sample (default: `samples/spec-14-5.toml`) and prints one line per position: topic, label, reason codes, and who wrote it. Only `__main__` reads a file; nothing else in `core` does.
+  - **Build:** Rewrite `src/clause_tracer/core/__main__.py`: `def main(argv: list[str] | None = None) -> int`. It parses `--input` with `argparse` (a `Path`, default `Path(__file__).parent / "samples" / "spec-14-5.toml"`), reads the file with `tomllib.load` in binary mode, and calls `parse_sample` and `label_all`. For each label it prints one line: position id, topic, level value, the reason values joined by `,` (or `-` when none), and the written-by value, separated by tabs. It returns 0. A file that cannot be opened prints `clause_tracer.core: cannot read <path>` to standard error and returns 3; a `tomllib.TOMLDecodeError` or `ValueError` prints `clause_tracer.core: <message>` to standard error and returns 3 (exit code 3 is "input file", system design 6.2). Only `__main__` reads a file; nothing else in `core` does.
   - **Files:** `src/clause_tracer/core/__main__.py`, `src/clause_tracer/core/tests/test_smoke.py`.
-  - **Tests first:** `main()` returns 0 on the sample and prints 11 lines that agree with the owner's `spec_14_5.toml`. A missing input file returns a non-zero exit code and writes to standard error.
-  - **Done when:** `.venv/bin/uv run python -m clause_tracer.core` prints the 11 labels, and `scripts/check.sh` passes.
+  - **Tests first:** in `test_smoke.py`: `test_main_returns_zero` (`main([]) == 0`); `test_main_prints_one_line_per_position` (11 lines, whose first and third columns match the position and `level` of each row of the owner's `spec_14_5.toml`); `test_missing_input_returns_3` (standard error names the path); `test_bad_input_returns_3` (a file in `tmp_path` holding `x = `).
+  - **Done when:** `.venv/bin/uv run python -m clause_tracer.core` prints 11 lines and exits 0, and `scripts/check.sh` exits 0.
   - **Rules:** S1, S2, I12, T1, [system design 6.2](../system-design.md#62-the-command-line).
-  - **Depends on:** S1-M3-T13.
+  - **Depends on:** S1-M3-T17.
 
 - [ ] **S1-M6-T2: Finish the module README and the module map**
-  - **Build:** Make `src/clause_tracer/core/README.md` complete: purpose, input and output shapes, the five ports with their methods, the fakes, every public function with its contract note, the errors, the owner tables and who edits them, and how to run it alone. Update the `core` row in `src/clause_tracer/README.md`, and the docstring in `core/__init__.py` ("labelling", British spelling).
-  - **Files:** `src/clause_tracer/core/README.md`, `src/clause_tracer/README.md`, `src/clause_tracer/core/__init__.py`.
-  - **Tests first:** None. Check: every name in `clause_tracer.core.__all__` appears in the README (a short test in `test_architecture.py` that reads the README text).
-  - **Done when:** `scripts/check.sh` passes, and the README has no "planned" sections left.
+  - **Build:** Make `src/clause_tracer/core/README.md` complete, with these headings in order: "Purpose", "Spec", "Ids and enums", "Errors", "Shapes", "Ports", "Fakes", "Functions" (each public function with its signature and one line on what it returns and raises), "Owner tables" (each file, its columns, its owner task, and "only the owner edits it"), "Depends on", "Run alone". Update the `core` row of `src/clause_tracer/README.md` to: "Pure rules and shapes: every shape, port, error and fake; label picking, playbook checks, output scans, the last check before drawing, auto-delete dates and the cost estimate (Spec 4.1, 5, 6.1 step 8, 6.2, 9)." Change the docstring of `core/__init__.py` to: `"""Pure rules and shapes: labelling, checks and fakes, with no files, network, clock or AI. Implements Spec section 5 (labelling rules); T1 of the Constitution."""`.
+  - **Files:** `src/clause_tracer/core/README.md`, `src/clause_tracer/README.md`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_architecture.py`.
+  - **Tests first:** `test_every_public_name_is_in_the_readme` in `test_architecture.py`: every name in `clause_tracer.core.__all__` appears in the README text inside backticks.
+  - **Done when:** the test passes, the README has no "planned" left (`grep -c planned src/clause_tracer/core/README.md` prints 0), and `scripts/check.sh` exits 0.
   - **Rules:** S3, I11, [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) action item 4, [WRITING_DOCS](../../WRITING_DOCS.md) sections 2 and 9.
-  - **Depends on:** S1-M6-T1, S1-M5-T8, S1-M4-T7, S1-M5-T5, S1-M5-T3.
+  - **Depends on:** S1-M6-T1, S1-M5-T10, S1-M5-T6, S1-M5-T4, S1-M4-T7, S1-M3-T11.
 
 - [ ] **S1-M6-T3: Stage report to the owner**
-  - **Build:** Run every check in section 7, set this plan to Done, and write the report described there.
-  - **Files:** `docs/plans/stage-01-core.md`.
-  - **Tests first:** None. Check: section 7 is fully ticked.
-  - **Done when:** The owner has the report.
+  - **Build:** Run every check in section 7. Write "Notes for the next stage" (section 9). Update the status lines the README names under "When the stage is done". Set this plan's status to Done, then send the owner the report that section 7 describes.
+  - **Files:** `docs/plans/stage-01-core.md`, `AGENTS.md` ("Where the project stands"), `README.md` (status line), `docs/testing-strategy.md` (section 13).
+  - **Tests first:** None. Check: every box in section 7 is ticked.
+  - **Done when:** the owner has the report and confirms the stage is Done.
   - **Rules:** [Plans README](README.md) ("When the stage is done").
   - **Depends on:** S1-M6-T2.
 
 ## 6. Open questions
 
-System design 15.1 says nothing in stage 1 is left open apart from the `TypeAdapter` check. Planning found the points below, which the docs do not settle.
+Planning found questions 1 to 15. The owner answered them on 14 Nov 2026; each answer is recorded in its home. Questions 16 and 17 are edge cases that Spec 5 and Spec 6.2 leave open. The plan builds the recommendation of each item; the owner accepts it with the plan, or changes it before the task that needs it.
 
 | # | Question | Needed by task | Recommendation (if any) | Owner's answer |
 | --- | --- | --- | --- | --- |
-| 1 | The TypeAdapter check must run "on the pinned version", but Pydantic is not in `pyproject.toml` and `core` never imports it. Add Pydantic as a runtime dependency now, or run the check with `uv run --with pydantic` and pin it in stage 6? | S1-M1-T2, the TypeAdapter check | Recommendation: add it now. ADR 0005 accepts it, Presidio brings it anyway, and the check then proves the version that ships. | |
-| 2 | Which test tooling arrives in stage 1? (a) Branch-coverage measurement for the 95% `core` target (no tool is installed). (b) The CI guard that fails a change editing both code and owner tables (ADR 0013 action item 2; no stage is named, and the way the owner approves is not designed). (c) The suite-wide socket block (`pytest-socket`). (d) A nightly job for the 2,000-example Hypothesis profile. A "yes" adds tasks to this plan through the change log. | S1-M1-T1, S1-M3-T1 | Recommendation: (a) and (b) in stage 1, because the owner tables first appear here; (c) and (d) later, since `core` makes no network calls. | |
-| 3 | Where do the fakes live? System design 3.4 says "`core`'s test support", but testing strategy 6.1 has each module's `__main__` hand sample replies to the replay fake, and `__main__` is shipped code. | S1-M4-T3 | Recommendation: `clause_tracer.core.fakes`, standard library only, exported from `core`. | |
-| 4 | What is the type of `AiRequest.inputs` in stage 1, before any step's input shape exists (they come with each step in stage 8)? Also, `AiRecord` has no `schema_version`, though 3.4 says stored records carry one. | S1-M2-T6 | Recommendation: a small marker base class or `Protocol` for step input shapes, with a test-only shape in stage 1. Add `schema_version` to `AiRecord` only if the owner wants it on the record rather than on the storage row. | |
-| 5 | Which `ReviewStore` methods does stage 1 draft? Derived records need the cache key, and user state needs shapes, and both come in stage 6. | S1-M4-T1, S1-M4-T7 | Recommendation: raw records (`AiRecord`), list reviews, delete a review, purge given "now" in stage 1; derived and user-state methods added in stage 6 as new methods (D5). | |
-| 6 | How do "unlimited" and "none" (Rule 1) reach `core`? `CheckedValue` has no field for "unlimited", and the number parser is built in stage 8. | S1-M2-T5, S1-M3-T3 | Recommendation: the stage 8 parser turns "none" into 0; add one optional field for "unlimited" to `CheckedValue` now (D5). | |
-| 7 | How does code know a start point is "other than the invoice date" (Rule 5)? `NumberRule` has no start-point field, and positions are the user's own. | S1-M3-T3, S1-M3-T8 | Recommendation: in stage 1, `core` turns an "other start point" reason already on the value into unsure. How the start point is compared is settled before stage 8. | |
-| 8 | Which match result carries `MATCH_UNCONFIRMED` and the clause to read? `MatchFound`, `NothingFound` and `CallFailed` have no field for it. | S1-M2-T5, S1-M3-T11 | Recommendation: a fourth result type, such as `MatchUnconfirmed(position_id, clause_ids)`. | |
-| 9 | What does the Rule 10 overlay take as input? Building a label's evidence trail (cross-references, terms, overrides) is not assigned to any module. | S1-M3-T3, S1-M3-T12 | Recommendation: in stage 1 it takes the outside documents the trail reaches; who builds the trail is settled before stage 8. | |
-| 10 | Stage 1 functions need shapes that 3.4 does not list: scan finding codes, the last check's result, the cost range, an input bundle for the label functions (I3), and any extra reason codes. May these be added in `core`, with 3.4 updated in the same commit? | S1-M2-T6, S1-M3-T8, S1-M5-T2 | Recommendation: yes; the owner approves the list once, at the end of M2. | |
-| 11 | The last check before drawing: (a) which fold does it use? Match-key folding is built in stage 2 and the quote check in stage 8. (b) Text, Markdown, pasted and Word documents have no glyphs, so the box half cannot apply as written. | S1-M5-T6, S1-M5-T7 | Recommendation: (a) the Spec 2 quote-check fold (curly quotes made straight, runs of spaces and line breaks collapsed), written fresh in `core`; (b) the box half runs only when the document has glyphs. | |
-| 12 | The scans' length cap: what is it, and is it one number or one per slot? | S1-M5-T1, S1-M5-T2 | None. | |
-| 13 | The cost estimate: what goes in (positions, clauses, contract tokens, prices per token, the cache-hit share?) and how is the range formed? Spec 9 and system design 7 give only the call count and "a range". | S1-M5-T4, S1-M5-T5 | Recommendation: prices passed in by the caller, call counts from the system design 7 estimate, and the range from "caching hits" to "caching misses". | |
-| 14 | Auto-delete: what happens when the clock jumps backwards, so a review's last change is later than "now"? Spec 9 does not say. | S1-M4-T5 | Recommendation: never delete earlier than the rule allows; treat the review as not due. | |
-| 15 | The Spec 4.1 playbook checks (limits, at most 100%, preferred stricter than acceptable, yes better than no) are not in 15.1. Do they belong in `core` now, as a pure function that stage 6 import and stage 12 editor share? | S1-M2-T4 | Recommendation: leave them to stage 6, where playbook files are read, unless the owner wants them now. | |
+| 1 | Add Pydantic as a runtime dependency now, or run the TypeAdapter check with `uv run --with pydantic`? | S1-M1-T2, the TypeAdapter check | Add it now. | Add it now, through `.venv/bin/uv add pydantic`, with `uv.lock` committed: [ADR 0005, amendment of 14 Nov 2026](../adr/0005-engine-runner-shapes-and-ports.md), [system design 3.4](../system-design.md#34-core-shapes-for-stage-1) "Check first" |
+| 2 | Which test tooling arrives in stage 1: (a) coverage, (b) the owner-table guard, (c) the socket block, (d) a nightly Hypothesis job? | S1-M1-T3, S1-M1-T4 | (a) and (b) now; (c) and (d) later. | (a) and (b) in stage 1; (c) in stage 6, (d) in stage 5: [ADR 0013, amendment of 14 Nov 2026](../adr/0013-test-layers-and-release-gates.md), [testing strategy 10, 11 and 13](../testing-strategy.md#10-keeping-agent-written-tests-honest) |
+| 3 | Where do the fakes live? | S1-M4-T3 | `clause_tracer.core.fakes`. | `clause_tracer.core.fakes`, standard library only, exported from `core`: [system design 3.4](../system-design.md#34-core-shapes-for-stage-1) "Fakes" |
+| 4 | The type of `AiRequest.inputs` in stage 1; and does `AiRecord` carry a `schema_version`? | S1-M2-T6 | A marker base class with a test-only shape; `schema_version` on the record if wanted. | `AiRecord.schema_version`; `inputs: StepInputs` (an empty base class), with a test-only subclass: [system design 3.4](../system-design.md#34-core-shapes-for-stage-1), [ADR 0005, amendment of 14 Nov 2026](../adr/0005-engine-runner-shapes-and-ports.md) |
+| 5 | Which `ReviewStore` methods does stage 1 draft? | S1-M4-T1, S1-M4-T7 | Raw records, list, delete, purge. | Those four kinds only; stage 6 adds the rest: [system design 3.4](../system-design.md#34-core-shapes-for-stage-1) "Ports" |
+| 6 | How do "unlimited" and "none" reach `core`? | S1-M2-T5, S1-M3-T6 | An optional field for "unlimited"; the parser turns "none" into 0. | `CheckedValue.unlimited: bool = False`; "none" becomes 0 in stage 8: [system design 3.4](../system-design.md#34-core-shapes-for-stage-1), [15.8](../system-design.md#158-stage-8-checking-and-the-message-templates) |
+| 7 | How does code know a start point is "other than the invoice date" (Rule 5)? | S1-M3-T6, S1-M3-T13 | Act on a reason already on the value; settle the comparison before stage 8. | As recommended; the comparison is "Not yet decided" in [system design 15.8](../system-design.md#158-stage-8-checking-and-the-message-templates); [ADR 0012, amendment of 14 Nov 2026](../adr/0012-missing-unsure-and-evidence-failures.md) |
+| 8 | Which match result carries `MATCH_UNCONFIRMED` and the clause to read? | S1-M2-T5, S1-M3-T16 | A fourth result type. | `MatchUnconfirmed(position_id, clauses_to_read)`: [ADR 0012, amendment of 14 Nov 2026](../adr/0012-missing-unsure-and-evidence-failures.md), [system design 3.4](../system-design.md#34-core-shapes-for-stage-1) |
+| 9 | What does the Rule 10 overlay take as input? | S1-M3-T6, S1-M3-T16 | The outside documents the trail reaches; who builds the trail is settled before stage 8. | As recommended (`LabelInput.outside_documents`); the trail's builder is "Not yet decided" in [system design 15.8](../system-design.md#158-stage-8-checking-and-the-message-templates) |
+| 10 | May stage 1 add the shapes 3.4 does not list? | S1-M2-T7 | Yes. | The planner defines them exactly, in [system design 3.4](../system-design.md#34-core-shapes-for-stage-1) ("Shapes for the stage 1 functions" and the enums); the owner approves them with this plan |
+| 11 | The last check before drawing: which fold, and what of documents without glyphs? | S1-M5-T7, S1-M5-T8, S1-M5-T9 | The Spec 2 fold in `core`; boxes only with glyphs. | As recommended: [ADR 0012, amendment of 14 Nov 2026](../adr/0012-missing-unsure-and-evidence-failures.md), [system design 3.4](../system-design.md#34-core-shapes-for-stage-1) (`Document`, `QuoteFold`) |
+| 12 | The scans' length cap: one number, or one per slot? | S1-M5-T1, S1-M5-T3 | None. | One cap per kind of AI text (`TextSlot`); the numbers live in the owner's scan table: [Spec 6.2](../spec.md#62-rules-for-every-ai-step) "Length caps", [system design 3.4](../system-design.md#34-core-shapes-for-stage-1) |
+| 13 | The cost estimate: what goes in, and how is the range formed? | S1-M5-T5, S1-M5-T6 | Prices passed in, calls from system design 7, cache hits to cache misses. | As recommended: [Spec 9](../spec.md#9-running-the-app) "Cost", [system design 7](../system-design.md#7-caching-resume-and-cost) (the formula) |
+| 14 | Auto-delete when the clock jumps backwards? | S1-M4-T5, S1-M4-T6 | Not due; never earlier than the rule allows. | As recommended: [Spec 9](../spec.md#9-running-the-app) "Auto-delete" |
+| 15 | Do the Spec 4.1 playbook checks belong in `core` now? | S1-M3-T9, S1-M3-T11 | Leave them to stage 6. | Build them in `core` in stage 1, shared by stages 6 and 12: [ADR 0005, amendment of 14 Nov 2026](../adr/0005-engine-runner-shapes-and-ports.md), [system design 15.1, 15.6 and 15.12](../system-design.md#151-stage-1-core) |
+| 16 | **Label edge cases that Spec 5 does not define.** (a) A value with no unit as written. (b) A value with no confirmed quote and no reason code. (c) A value with no number or no answer, and a found match with no value. (d) The judge answers "unsure" for a words position. (e) A deposit amount and a percentage in one clause: when do they "disagree", and what counts? A total of 0. (f) What "clauses give different values" means for Rule 4. (g) A walk-away label: are the reasons of its other values kept? (h) Rule 10 for a Missing label whose missing level is walk-away; and does a walk-away get the unloaded-document reason? (i) Who wrote a words label that the AI never judged? (j) The unit spellings Rule 6 accepts. (k) "Unlimited" when higher is better. | S1-M3-T6, S1-M3-T12 to S1-M3-T16 | (a) The number is in the playbook's unit. (b) Unsure, `QUOTE_NOT_CONFIRMED`. (c) Unsure, `NO_VALUE`. (d) Unsure, `JUDGED_UNSURE`. (e) Compare both rounded half up to a whole percent; when they differ, keep both values with `AMOUNT_PERCENT_DISAGREE`, and Rule 4 combines them; a total of 0 is `AMOUNT_WITHOUT_TOTAL`. (f) Compare readable values clause by clause (converted numbers, yes/no answers, words levels); unsure values are not compared; a range inside one clause is not a disagreement. (g) Yes, every value's reasons are kept. (h) The overlay applies to every label except a walk-away from Rule 4 step 1, so a Missing walk-away becomes unsure; a walk-away gets no extra reason. (i) Code; only a judged words label is written by AI (ADR 0002). (j) The list in S1-M3-T12. (k) Walk-away in both directions. | |
+| 17 | **Scan edge cases that Spec 6.2 does not define.** (a) How a listed word matches. (b) Numbers written in words ("thirty"). (c) A number that is both an acceptable limit and an allowed number (the contract itself says 30). (d) Label words used as ordinary English ("an acceptable rate"). (e) What counts as a web address. (f) Which kinds of AI text the acceptable-limit scan covers. | S1-M5-T1, S1-M5-T3, S1-M5-T4 | (a) Whole words or phrases, any letter case, curly apostrophes made straight. (b) Not checked in stage 1; digits only. (c) Flag it as an acceptable limit (fail closed, so the template is used). (d) Flag it: any label word other than the code's label fails. (e) `http://`, `https://`, `www.`, or a bare name ending in a listed domain (`WEB_ADDRESS_PATTERN` in S1-M5-T3). (f) Every kind. | |
 
 ## 7. Done when
 
 - [ ] Every task above is ticked.
-- [ ] `scripts/check.sh` passes with no errors: ruff, format, mypy strict, `lint-imports` and pytest.
+- [ ] `scripts/check.sh` exits 0: the owner-table guard, ruff, format, mypy strict, `lint-imports`, pytest under coverage, and the coverage floor.
+- [ ] Branch coverage of `src/clause_tracer/core/` is at least 95% (`coverage report --include='src/clause_tracer/core/*'`).
 - [ ] The five import contracts in `pyproject.toml` are unchanged and pass.
 - [ ] The architecture test passes: importing `core` loads only the standard library.
 - [ ] The architecture test passes: no `core` shape has a provider-specific field (ADR 0015 action item 2).
 - [ ] The label-rule tests cover every row of the Spec 14.5 sample, against the owner's table.
-- [ ] No commit changed code and an owner table together (T11).
-- [ ] Every promise the stage touches has its test (T13): every planted walk-away gets walk-away (rules part); no made-up quote reaches the screen (last check); every evidence link scrolls to the right place (invariant 7); values on hidden text are unsure; no acceptable limit reaches the message step (scan part); no AI text states what a law allows (scan part); auto-delete runs on schedule (date rules); every stored text keeps a written-by value (`Wording`).
-- [ ] `src/clause_tracer/core/README.md` records the shapes, ports, fakes and functions (S3, ADR 0005 action item 4), and `src/clause_tracer/README.md` matches it.
-- [ ] `.venv/bin/uv run python -m clause_tracer.core` runs alone on the sample (S1).
+- [ ] No commit changed code and an owner table together (T11): `.venv/bin/uv run python scripts/check_owner_tables.py --commits main` exits 0 on each milestone branch before its pull request.
+- [ ] Every promise the stage touches has its test (T13): every planted walk-away gets walk-away (`test_readable_walk_away_wins`); no made-up quote reaches the screen (`test_one_changed_character_fails` in `test_draw_check.py`); every evidence link scrolls to the right place (`test_invariant_7_*`); values on hidden text are unsure (`test_hidden_quote_makes_value_unsure`); no acceptable limit reaches the message step (`test_acceptable_limit_fails_in_every_form`); no AI text states what a law allows (`test_every_law_word_fails_in_any_case`); auto-delete runs on schedule (`test_due_exactly_when_now_reaches_the_due_date`); every stored text keeps a written-by value (`test_wording_needs_written_by`).
+- [ ] `src/clause_tracer/core/README.md` records the shapes, ports, fakes, functions and owner tables (S3, ADR 0005 action item 4), and `src/clause_tracer/README.md` matches it.
+- [ ] `.venv/bin/uv run python -m clause_tracer.core` runs alone on the sample (S1) and exits 0.
 - [ ] The TypeAdapter check result is in the change log.
 - [ ] The owner has been told what was built, and what stage 2 should know:
-  - the shapes `ingest` will fill (`Document`, `SourceFile`, `Clause`, `Sentence`, `MatchKey`, `InputWarning`, `Span`) and any change from 3.4;
-  - the answers to the open questions, and any shape added under question 10;
-  - the decision-record action items this stage closes, for the owner to tick: ADR 0005 items 2 and 4, ADR 0012 item 1, ADR 0013 item 1, ADR 0015 items 1 and 2;
+  - the shapes `ingest` will fill (`Document`, `SourceFile`, `Clause`, `Sentence`, `MatchKey`, `InputWarning`, `Span`), and that a document without glyphs has empty `glyphs`, `char_map` and `pages`;
+  - the answers to questions 16 and 17;
+  - the decision-record action items this stage closes, for the owner to tick: ADR 0005 items 2 and 4, ADR 0012 item 1, ADR 0013 items 1 and 2 (the guard part), ADR 0015 items 1 and 2;
   - a reminder about the ten test contracts;
   - that `cli` has no `README.md` or `samples/` yet, which the planned "every module has a README" architecture test will need.
 

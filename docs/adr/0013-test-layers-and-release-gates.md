@@ -79,7 +79,7 @@ The gate numbers are the project's own. No published release threshold exists, s
 - Revisit after the first paid run: case correlation, reasoning-token cost, cache hits and real per-case cost.
 
 ## Action Items
-1. [ ] Build the replay fake in `core` test support, with `UnrecordedRequest` and `unused_keys()`.
+1. [ ] Build the replay fake in `core` test support, with `UnrecordedRequest` and `unused_keys()`. (It lives in `clause_tracer.core.fakes`: [ADR 0005](0005-engine-runner-shapes-and-ports.md), amendment of 14 Nov 2026.)
 2. [ ] Add the `golden` marker, deselect it in `scripts/check.sh`, and add the CI check that guards the acceptance tables.
 3. [ ] Check the pytest-httpx licence and audit Inspect AI for network calls before any use.
 4. [ ] Re-query prices before the first paid run. Build the spend ledger first: a cap per run and a total cap of $10, so a run stops itself.
@@ -96,3 +96,10 @@ Cheap paid runs use **Claude Haiku 5.5** in private mode. DeepSeek V4.1 Flash co
 The replay fake is keyed by a hash of the exact request, as [the system design](../system-design.md) and [the testing strategy](../testing-strategy.md) say, because that matches the cache design. The key list in the Decision above is replaced by that rule.
 
 "Golden" meant two things. From now on, "the golden set" in ADRs 0010 to 0014 means the paid test set. The pytest marker is `paid`, not `golden`. "Golden files" means only the free saved-output tests of layer 2.
+
+## Amendment (14 Nov 2026): which test tools arrive in build stage 1
+
+The project owner decided on 14 Nov 2026, from the stage 1 task plan:
+
+- **In stage 1:** branch-coverage measurement for the `core` target of 95%, and the CI guard of action item 2 that fails a change editing both code and an owner table. [The testing strategy](../testing-strategy.md) section 10 says how the guard decides what is code, what is an owner table, and how the owner's own change passes.
+- **Later:** the suite-wide socket block arrives in build stage 6, with the first adapters. The nightly long Hypothesis run arrives in build stage 5, with nightly file fuzzing ([the testing strategy](../testing-strategy.md) section 13).

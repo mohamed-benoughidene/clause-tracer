@@ -105,3 +105,17 @@ A review of the docs found three points about `core` shapes that no record settl
 - **`checking` is handed a cancel check.** `core` defines a small `CancelCheck` callable. The runner passes it in, and `checking` asks it between per-clause calls. Reason: the other way moves the per-clause calls into the runner and splits the checking logic across two places.
 
 [The system design](../system-design.md) section 3.4 lists the shapes.
+
+## Amendment (14 Nov 2026): stage 1 shape points answered
+
+Writing the stage 1 task plan found points about `core` shapes and ports that no record settled. The project owner answered them on 14 Nov 2026.
+
+- **Pydantic is installed now**, as a runtime dependency, through `.venv/bin/uv add pydantic`, with `uv.lock` committed. Action item 2 (the `TypeAdapter` check) runs on that locked version. `core` still never imports Pydantic.
+- **The fakes live in `clause_tracer.core.fakes`.** They use only the standard library, are exported from `core`, and serve tests and every module's run-alone command.
+- **`AiRecord` carries its own `schema_version`.** `AiRequest.inputs` is typed as an empty base class, `StepInputs`, which every step's own input shape subclasses. Stage 1 has only a test-only subclass.
+- **`ReviewStore` in stage 1** saves and loads raw AI records, lists reviews, deletes a review, and purges expired reviews given "now". Stage 6 adds the rest as new methods.
+- **"Unlimited"** is one field on `CheckedValue`, `unlimited: bool = False`. The stage 8 number parser turns "none" into 0.
+- **The planner defines the extra shapes**, not the implementer: scan findings, the last check's result, the cost range, the input bundle of the label rules and the extra reason codes. They are exact in [the system design](../system-design.md) section 3.4, and the owner approves them with the plan.
+- **The playbook checks of Spec 4.1** are pure functions in `core`, built in stage 1 and shared by stage 6 (reading playbook files) and stage 12 (the editor).
+
+[The system design](../system-design.md) section 3.4 lists every shape, port and fake exactly.

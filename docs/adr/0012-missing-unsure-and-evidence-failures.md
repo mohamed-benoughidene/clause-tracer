@@ -91,3 +91,13 @@ The owner accepted two additions on 12 Nov 2026. They close action items 5 and 7
 2. **Tracked changes are listed.** The contract check lists every tracked change with its earlier and new wording and who made it. The user sees the earlier wording there, so no second review is needed. The accepted view is still the contract. Removed words are not part of it and are never sent to the AI.
 
 The spec (Rule 9 and section 9), the copy deck and the prototype were updated the same day.
+
+## Amendment (14 Nov 2026): the fourth match result, Rule 10's input, and the last check
+
+The project owner answered three points from the stage 1 task plan on 14 Nov 2026.
+
+1. **A fourth match result type.** "Match not confirmed" (decision 2 above) is its own result, `MatchUnconfirmed`, beside "found", "nothing found" and "call failed". It holds the position and the clauses to read.
+2. **Rule 10's input in stage 1.** The rule takes the documents not loaded that the label's evidence reaches. Which module builds the evidence trail is settled before build stage 8.
+3. **The last check before drawing.** The text half always runs, using the quote-check fold of Spec section 2, written in `core`. The page-box half runs only when the document has glyphs, so text, Markdown, pasted and Word documents skip it. A quote that cannot be placed still keeps its label (decision 3 above).
+
+Also decided for Rule 5: in stage 1, a value that already carries the "other start point" reason becomes unsure. How the start point is compared is settled before build stage 8. [The system design](../system-design.md) sections 3.4 and 15.8 hold the details.

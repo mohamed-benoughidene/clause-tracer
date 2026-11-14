@@ -40,6 +40,7 @@ Read [Constitution.md](Constitution.md) before you write, move or split any code
 - **Keep the import rules.** `core` imports nothing else. Pipeline modules import only `core`. Adapters are passed in, never imported. Only `cli` wires modules together. `lint-imports` enforces this. When a rule blocks you, put the shared shape in `core` or ask the user. Leave the contracts in `pyproject.toml` as they are.
 - **Test with fakes.** Unit tests use fake adapters and saved AI replies from `samples/` or `tests/fixtures/`. They run with no network, no API key and no cost.
 - **Leave expected answers to the user.** Don't change code and the expected values of its acceptance tests in one step (Constitution T11). Regenerate saved expected output only with the named command, and say so.
+- **Build from the plan, and do not design.** A task in an accepted plan gives the exact names, fields, signatures and tests ([docs/plans/README.md](docs/plans/README.md)). If a task seems to need a design choice, stop and ask the user. Don't choose.
 - Put complex conditions into well-named boolean variables.
 
 ## Before you change docs or the prototype

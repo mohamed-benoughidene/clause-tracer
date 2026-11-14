@@ -42,7 +42,7 @@ Every plan starts with a header table. It has five rows: Stage, Status, Branch, 
 
 **Task ids.** Each task has an id of the form `S1-M2-T3`: stage 1, milestone 2, task 3. Use the id in commit messages and questions.
 
-**A task says:** what to build, which files it touches, which tests are written first, when it is done, which rules shaped it (Constitution rule ids, decision records), and which tasks it depends on ("Depends on").
+**A task says:** what to build (the exact files, names, fields with their types, and function signatures), which tests are written first (each by name, with its input and expected result), when it is done (a command and its expected outcome), which rules shaped it (Constitution rule ids, decision records), and which tasks it depends on ("Depends on"). The implementer makes no design choice (see "Who writes and who implements").
 
 **Owner tasks.** A task marked "(Owner)" is done by the owner alone. The agent ticks it only after the owner says it is done.
 
@@ -69,6 +69,16 @@ The owner decides. The agent plans and builds. In each stage the owner:
 - confirms that the stage is Done.
 
 ## How to write a plan
+
+### Who writes and who implements
+
+The owner decided on 14 Nov 2026:
+
+- **A strong model writes the plan.** All design work happens here: names, fields, types, function signatures, errors and test cases.
+- **A cheaper model implements it.** It is weak at planning, so it follows the plan and makes no design choice.
+- **The owner decides** product questions, accepts the plan and owns the expected answers.
+
+So every task gives the exact file, the exact names, the fields with their types, the function signatures with their return types, the error raised and when, and each test by name with its input and expected result (or the owner table that holds the expected result). A task that still needs a design choice is not ready.
 
 ### Read before planning
 
@@ -97,13 +107,14 @@ List the ones that govern the stage under "Read first" in the plan, so the perso
 2. **Copy [TEMPLATE.md](TEMPLATE.md)** to `stage-NN-name.md` and fill in every part. Keep every part; write "None" where a part is empty.
 3. **Start from the stage outline** (system design section 15.N) and the testing strategy sections read above. The plan must cover everything they ask for, and nothing more.
 4. **Keep tasks small.** One task is one commit, and at most about half a day of work. If a task needs the word "and" twice, split it.
-5. **Give every task a test or a check.** A task with no way to fail is not a task.
-6. **Give every promise a test.** If the stage touches a promise made to users, a task must add the test that fails when the promise breaks (Constitution T13).
-7. **Order by dependency.** Shapes before the code that uses them. Fakes before the code that is tested with them.
-8. **Plan paid runs as owner gates.** Each paid run is a task of its own. It names the step of the spending plan (testing strategy section 7.5) and its planned spend, and depends on the spend-ledger task and on an owner task "Owner says go".
-9. **Link, do not repeat.** A decision is stated once, in its home. The plan points to it.
-10. **List what the docs do not settle** under "Open questions". Copy every "Not yet decided" point from section 15.N and every open item in Spec section 13 that the stage touches. Do not answer them. When the owner answers, record the decision in its home (the spec, the system design or an amendment to a decision record) in the same change, and put a link to it in the "Owner's answer" column.
-11. **Set the status to Draft** and bring the plan to the owner. Add it to the table in this README.
+5. **Leave no design choice.** Write every name, field, type, signature, error and test case into the task. Point to a row of the system design only when that row is exact, and then say "exactly as in section 3.4, no more fields". Do not write "as needed", "suitable", "such as", "or similar", "consider" or "decide" in a task. If a detail is a product choice the docs do not make, it is an open question, not a task detail.
+6. **Give every task a test or a check.** A task with no way to fail is not a task.
+7. **Give every promise a test.** If the stage touches a promise made to users, a task must add the test that fails when the promise breaks (Constitution T13).
+8. **Order by dependency.** Shapes before the code that uses them. Fakes before the code that is tested with them.
+9. **Plan paid runs as owner gates.** Each paid run is a task of its own. It names the step of the spending plan (testing strategy section 7.5) and its planned spend, and depends on the spend-ledger task and on an owner task "Owner says go".
+10. **Link, do not repeat.** A decision is stated once, in its home. The plan points to it.
+11. **List what the docs do not settle** under "Open questions". Copy every "Not yet decided" point from section 15.N and every open item in Spec section 13 that the stage touches. Do not answer them. When the owner answers, record the decision in its home (the spec, the system design or an amendment to a decision record) in the same change, and put a link to it in the "Owner's answer" column.
+12. **Set the status to Draft** and bring the plan to the owner. Add it to the table in this README.
 
 Write in British English, in short plain sentences, as [WRITING_DOCS.md](../../WRITING_DOCS.md) asks.
 
@@ -115,6 +126,7 @@ Check each line. Fix the plan until all are true.
 - [ ] Every testing strategy section named in the outline's "Tests" line maps to a task.
 - [ ] Every "Not yet decided" point is an open question.
 - [ ] Every expected-answer table is an owner task.
+- [ ] No task asks the implementer to choose a name, a field, a type, a signature or a test case.
 - [ ] Task ids are unique.
 - [ ] Every link resolves.
 
@@ -134,8 +146,9 @@ If two docs disagree, do not choose. List it as an open question.
 8. **Update the module's README** when a shape changes, in the same change (Constitution S3).
 9. **Leave expected answers to the owner.** Never write or edit the expected values of an acceptance table (testing strategy section 10). Write the loader and the test, then stop at the owner task. Regenerate golden files only with `--update-goldens`, in a commit of their own, and ask the owner to read the diff (Constitution T11).
 10. **Stop at an open question.** Ask the owner. Do not pick an answer.
-11. **Never start a paid AI run without asking**, and never without the spend cap in place (testing strategy section 7.5).
-12. **Keep tasks small.** If a task proves bigger than half a day, split it in the plan and note it in the change log.
+11. **Do not design.** If a task seems to need a design choice (a name, a field, a type, a signature, a test case, a file), stop and ask. Do not choose.
+12. **Never start a paid AI run without asking**, and never without the spend cap in place (testing strategy section 7.5).
+13. **Keep tasks small.** If a task proves bigger than half a day, split it in the plan and note it in the change log.
 
 ### Branches and pull requests
 

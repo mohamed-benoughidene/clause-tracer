@@ -126,7 +126,9 @@ This is the list of shapes and ports `core` defines in build stage 1 (section 15
 
 **Rules for every shape** ([ADR 0005](adr/0005-engine-runner-shapes-and-ports.md)):
 
-- Frozen, slotted standard-library dataclasses, with tuples instead of lists and no third-party imports (T1, B3).
+- Frozen, slotted standard-library dataclasses, with tuples instead of lists and no third-party imports (T1, B3). Every shape is written `@dataclass(frozen=True, slots=True, kw_only=True)`, so it is always built with keyword arguments (decided 14 Nov 2026).
+- Fields come in the order the tables below list them. A field has no default unless the table shows one.
+- Every enum is an `enum.StrEnum`. Each member's value is its name in lower case: `Level.WALK_AWAY == "walk_away"`.
 - Outside data is validated once, at the edge, with Pydantic `TypeAdapter` (D4, I9). AI reply schemas are Pydantic models in the module that owns the step, never in `core`.
 - Ids are opaque strings made at the edge. `core` never makes an id or reads the clock (T1).
 - Offsets are half-open, count code points, and point into `Document.text` (section 4.2).
@@ -134,27 +136,35 @@ This is the list of shapes and ports `core` defines in build stage 1 (section 15
 - Nothing provider-specific: no zero-retention flags, cost-field names or model lists ([ADR 0015](adr/0015-provider-ready-seam.md)).
 - Every piece of wording the app stores is a `Wording`, so it cannot be stored without its written-by value ([ADR 0016](adr/0016-legal-positions-without-a-lawyer.md), Spec 6.2). Contract quotes are spans into the contract, not wording.
 
-**Check first.** ADR 0005 action item 2 is still open: confirm that Pydantic `TypeAdapter` validates straight into frozen, slotted dataclasses on the pinned version. Do this at the start of stage 1, before the shapes are written. If it fails, bring it to the owner.
+**Check first.** ADR 0005 action item 2 is still open: confirm that Pydantic `TypeAdapter` validates straight into frozen, slotted dataclasses on the pinned version. Do this at the start of stage 1, before the shapes are written. If it fails, bring it to the owner. Pydantic is a runtime dependency from stage 1, locked in `uv.lock`, so the check runs on the version that ships; `core` still never imports it (decided 14 Nov 2026, [ADR 0005](adr/0005-engine-runner-shapes-and-ports.md) amendment).
 
 **Ids and enums**
+
+The values column gives the exact member names.
 
 | Shape | Values | Why |
 | --- | --- | --- |
 | `ReviewId`, `PlaybookId`, `CustomerId`, `PositionId`, `ClauseId`, `SentenceId`, `RecordId` | `NewType` over `str` | Opaque ids. Clause and sentence ids come from the clause number and span, so they survive a re-read (section 5.1) |
-| `Level` | preferred, acceptable, walk-away, unsure | The four labels, and the missing level (Spec 2) |
-| `PositionType` | number, yes/no, words | Decides whether code or AI picks the label (Spec 5) |
-| `Direction` | lower is better, higher is better | Number positions (Spec 4.1) |
-| `Unit` | days, percent, months, rounds | Playbook units (Spec 4.1). Units as written in the contract stay text until Rule 6 converts them |
-| `Answer` | yes, conditional yes, no, unclear, missing | Yes/no extraction (Spec 6.1 step 6b) |
-| `ReasonCode` | One code per cause, at least: quote not confirmed, number not in quote, vague wording, other start point, business days, conditional yes, range, clauses disagree, hidden text, undecodable text, unloaded document, reply broken twice, `MATCH_UNCONFIRMED` | Rules return codes, never prose. Templates turn codes into words ([ADR 0012](adr/0012-missing-unsure-and-evidence-failures.md), I7) |
-| `WrittenBy` | code, AI, user | ADR 0016 |
-| `ReviewStatus` | draft, running, interrupted, failed, ready to check, done | Spec 6.3 |
-| `PrivacyMode` | on, off | Neutral. The adapter maps it to the provider's settings (ADR 0015) |
-| `FileKind` | PDF, Word, text, Markdown, pasted | Spec 9 file types |
-| `PlaceholderKind` | person, company, address, email, phone, ID, bank | Spec 4.2 |
-| `SegmentKind` | copy, entity, escape | The placeholder map (section 4.2) |
-| `HiddenReason` | One value per hidden-text check, such as low contrast, tiny font, off the page, invisible text, hidden layer, Word hidden run, comment, zero-width or bidi character | Each finding names its cause |
-| `PiiSource` | party details, pattern, rule, NER, user | Overlaps resolve by source ([ADR 0008](adr/0008-personal-data-detection-bundle.md)) |
+| `Level` | `PREFERRED`, `ACCEPTABLE`, `WALK_AWAY`, `UNSURE` | The four labels, and the missing level (Spec 2) |
+| `PositionType` | `NUMBER`, `YES_NO`, `WORDS` | Decides whether code or AI picks the label (Spec 5) |
+| `Direction` | `LOWER_IS_BETTER`, `HIGHER_IS_BETTER` | Number positions (Spec 4.1) |
+| `Unit` | `DAYS`, `PERCENT`, `MONTHS`, `ROUNDS` | Playbook units (Spec 4.1). Units as written in the contract stay text until Rule 6 converts them |
+| `Answer` | `YES`, `CONDITIONAL_YES`, `NO`, `UNCLEAR`, `MISSING` | Yes/no extraction (Spec 6.1 step 6b) |
+| `ReasonCode` | `QUOTE_NOT_CONFIRMED`, `NUMBER_NOT_IN_QUOTE`, `VAGUE_WORDING`, `OTHER_START_POINT`, `UNKNOWN_FIGURES`, `BUSINESS_DAYS`, `UNIT_UNKNOWN`, `AMOUNT_WITHOUT_TOTAL`, `AMOUNT_PERCENT_DISAGREE`, `CONDITIONAL_YES`, `RANGE`, `CLAUSES_DISAGREE`, `HIDDEN_TEXT`, `UNDECODABLE_TEXT`, `UNLOADED_DOCUMENT`, `REPLY_BROKEN_TWICE`, `MATCH_UNCONFIRMED`, `NO_VALUE`, `JUDGED_UNSURE`, in this order | Rules return codes, never prose. Templates turn codes into words ([ADR 0012](adr/0012-missing-unsure-and-evidence-failures.md), I7). One code per cause in Spec 5. `NO_VALUE` and `JUDGED_UNSURE` cover inputs Spec 5 does not name (the stage 1 plan, section 6). Reason tuples are sorted in this order |
+| `UNSURE_REASONS` | A `frozenset[ReasonCode]` constant: every code except `RANGE`, `CLAUSES_DISAGREE` and `AMOUNT_PERCENT_DISAGREE` | A value that carries one of these is unsure. The three left out are notes shown beside a label |
+| `WrittenBy` | `CODE`, `AI`, `USER` | ADR 0016 |
+| `ReviewStatus` | `DRAFT`, `RUNNING`, `INTERRUPTED`, `FAILED`, `READY_TO_CHECK`, `DONE` | Spec 6.3 |
+| `PrivacyMode` | `ON`, `OFF` | Neutral. The adapter maps it to the provider's settings (ADR 0015) |
+| `FileKind` | `PDF`, `WORD`, `TEXT`, `MARKDOWN`, `PASTED` | Spec 9 file types |
+| `PlaceholderKind` | `PERSON`, `COMPANY`, `ADDRESS`, `EMAIL`, `PHONE`, `ID`, `BANK` | Spec 4.2 |
+| `SegmentKind` | `COPY`, `ENTITY`, `ESCAPE` | The placeholder map (section 4.2) |
+| `HiddenReason` | `LOW_CONTRAST`, `TINY_FONT`, `OFF_PAGE`, `INVISIBLE_TEXT`, `HIDDEN_LAYER`, `WORD_HIDDEN_RUN`, `COMMENT`, `ZERO_WIDTH`, `BIDI_CONTROL` | Each finding names its cause. Stage 5 adds a member for any new check (D5) |
+| `PiiSource` | `PARTY_DETAILS`, `PATTERN`, `RULE`, `NER`, `USER` | Overlaps resolve by source ([ADR 0008](adr/0008-personal-data-detection-bundle.md)) |
+| `TextSlot` | `REASON`, `OTHER_LEVEL`, `MISSING_TEXT`, `READING`, `QUESTION`, `MESSAGE`, `REWRITE` | Each kind of AI text has its own length cap (Spec 6.2). `OTHER_LEVEL` is "why it could be the other level"; `READING` is one of an unsure label's readings; `MESSAGE` is "Rewrite with AI"; `REWRITE` is a clause rewrite (step 12) |
+| `ScanFinding` | `TOO_LONG`, `LAW_WORD`, `ADVICE`, `INJECTION_TELL`, `CONTACT_WORD`, `WEB_ADDRESS`, `EMAIL_ADDRESS`, `WRONG_LABEL_WORD`, `ACCEPTABLE_LIMIT`, `NUMBER_NOT_ALLOWED`, `UNKNOWN_PLACEHOLDER`, `PERSONAL_DATA`, in this order | What an output scan found. An empty tuple means the text passed (section 8.2) |
+| `DrawFailure` | `CLAUSE_MISMATCH`, `SENTENCE_UNKNOWN`, `EMPTY_QUOTE`, `SPAN_OUTSIDE_SENTENCES`, `QUOTE_NOT_FOUND`, `QUOTE_NOT_UNIQUE`, `SPAN_MISMATCH`, `CHAR_MAP_LENGTH`, `GLYPH_MISSING`, `PAGE_UNKNOWN`, `PAGE_MISMATCH`, `BOX_OUTSIDE_PAGE` | Why the last check before drawing refused (section 4.2) |
+| `PlaybookProblemCode` | `DUPLICATE_POSITION_ID`, `RULE_TYPE_MISMATCH`, `LIMIT_NEGATIVE`, `PERCENT_OVER_100`, `LIMITS_NOT_STRICTER`, `YES_NO_LEVEL_UNSURE`, `YES_NOT_BETTER`, `MISSING_LEVEL_NOT_NO_LEVEL`, `LEVEL_TEXT_EMPTY` | The playbook checks of Spec 4.1, shared by stage 6 (reading files) and stage 12 (the editor) |
+| `PLACEHOLDER_OPEN`, `PLACEHOLDER_CLOSE` | `str` constants `"⟦"` and `"⟧"` | The placeholder marker of Spec 4.2, as the testing strategy writes it (`⟦Person 1⟧`). The scans and `privacy` use the same constants |
 
 **Shapes**
 
@@ -162,14 +172,14 @@ This is the list of shapes and ports `core` defines in build stage 1 (section 15
 | --- | --- | --- |
 | `Wording` | `text: str, written_by: WrittenBy` | Every stored label reason, Missing text, question, message, rewrite and note (ADR 0016) |
 | `Span` | `start: int, end: int` | A place in the canonical text |
-| `PageBox` | `page: int, x0, top, x1, bottom: float` | PDF points, top-left origin, one coordinate system ([ADR 0007](adr/0007-document-reading-stack.md)) |
-| `Page` | `number: int, width: float, height: float` | Lets the last check before drawing test that a box is inside its page |
-| `Glyph` | `page: int, box: PageBox` | One drawn character |
+| `PageBox` | `page: int, x0: float, top: float, x1: float, bottom: float` | PDF points, top-left origin, one coordinate system ([ADR 0007](adr/0007-document-reading-stack.md)) |
+| `Page` | `number: int, width: float, height: float` | Lets the last check before drawing test that a box is inside its page. Pages are numbered from 1 |
+| `Glyph` | `page: int, box: PageBox` | One drawn character. `page` is a `Page.number` and equals `box.page` |
 | `SourceFile` | `name: str, kind: FileKind, sha256: str, size: int` | Points at the raw bytes, which the store keeps unchanged (D1) |
 | `HiddenText` | `span: Span \| None, reason: HiddenReason, boxes: tuple[PageBox, ...]` | Flagged, never removed (D1). No span when the text is not in the canonical text, such as a hidden layer |
 | `TrackedChange` | `earlier: str, new: str, author: str, span: Span \| None` | Listed at the contract check. The accepted view is the contract (ADR 0012) |
 | `InputWarning` | `code: str, page: int \| None` | Undecodable pages, scanned pages in a mixed file, not English (Spec 9) |
-| `Document` | `schema_version: int, source: SourceFile, text: str, char_map: tuple[int \| None, ...], glyphs: tuple[Glyph, ...], pages: tuple[Page, ...], furniture: tuple[Span, ...], hidden: tuple[HiddenText, ...], undecodable: tuple[Span, ...], tracked_changes: tuple[TrackedChange, ...], warnings: tuple[InputWarning, ...]` | The one canonical text. `char_map` gives each character its glyph, or `None` for a character the app inserted. Word comments are hidden text (Spec 2), so they sit in `hidden` |
+| `Document` | `schema_version: int, source: SourceFile, text: str, char_map: tuple[int \| None, ...], glyphs: tuple[Glyph, ...], pages: tuple[Page, ...], furniture: tuple[Span, ...], hidden: tuple[HiddenText, ...], undecodable: tuple[Span, ...], tracked_changes: tuple[TrackedChange, ...], warnings: tuple[InputWarning, ...]` | The one canonical text. When the document has glyphs (a PDF), `char_map` has one entry per character of `text`: the index of its glyph in `glyphs`, or `None` for a character the app inserted. A document without glyphs (text, Markdown, pasted text, Word) has `glyphs == ()`, `char_map == ()` and `pages == ()` (decided 14 Nov 2026). Word comments are hidden text (Spec 2), so they sit in `hidden` |
 | `MatchKey` | `text: str, to_canonical: tuple[int, ...]` | Folded copy with its index map (section 4.2) |
 | `Sentence` | `id: SentenceId, span: Span` | Stable ids such as `4.2.s3`, which the AI points at |
 | `Clause` | `id: ClauseId, number: str \| None, heading: str \| None, level: int, parent_id: ClauseId \| None, span: Span, numbering_source: str, sentences: tuple[Sentence, ...]` | One clause, or one paragraph when the contract has no numbers (Spec 6.1 step 2) |
@@ -190,31 +200,54 @@ This is the list of shapes and ports `core` defines in build stage 1 (section 15
 | `Playbook` | `id: PlaybookId, schema_version: int, name: str, side: str, customer_id: CustomerId \| None, positions: tuple[Position, ...], starter: bool` | Starters are read-only |
 | `PlaybookSnapshot` | `playbook: Playbook, taken_at: datetime, unedited_starter: bool` | Taken at "Send for review". Drives "by the example playbook" |
 | `Evidence` | `clause_id: ClauseId, sentence_ids: tuple[SentenceId, ...], quote: Span, placed: bool` | A confirmed quote. `placed` is false when it could not be marked on the page; the label stays (ADR 0012) |
-| `CheckedValue` | `position_id, clause_id, evidence: Evidence \| None, raw_value: str \| None, number: Decimal \| None, range_high: Decimal \| None, unit_as_written: str \| None, start_point_as_written: str \| None, answer: Answer \| None, condition: Span \| None, vague: bool, amount: Decimal \| None, total: Decimal \| None, reasons: tuple[ReasonCode, ...]` | One value after the quote check: the input of `label_number` and `label_yes_no` (Spec 6.1 step 6b) |
-| `JudgedLevel` | `position_id, clause_id, evidence: Evidence \| None, level: Level` | One AI judgement for a words position (step 9) |
-| `MatchFound`, `NothingFound`, `CallFailed` | `position_id, clause_ids`; `position_id, searches: tuple[str, ...]`; `code: str` | Separate types, so a failed call can never pass as "nothing found" (I4). `searches` fills the "Where it was searched" panel (ADR 0012) |
-| `ToolLabel` | `position_id, level: Level, reasons: tuple[ReasonCode, ...], evidence: tuple[Evidence, ...], written_by: WrittenBy` | `written_by` is AI only for words positions, which are drawn in pencil ([ADR 0002](adr/0002-label-look-split-stamp.md)) |
+| `CheckedValue` | `position_id: PositionId, clause_id: ClauseId, evidence: Evidence \| None, raw_value: str \| None, number: Decimal \| None, range_high: Decimal \| None, unit_as_written: str \| None, start_point_as_written: str \| None, answer: Answer \| None, condition: Span \| None, vague: bool, amount: Decimal \| None, total: Decimal \| None, reasons: tuple[ReasonCode, ...], unlimited: bool = False` | One value after the quote check: the input of the number and yes/no label rules (Spec 6.1 step 6b). `unlimited` is true when the contract says the value has no limit, which Rule 1 makes the worst value. "None" reaches `core` as `number == 0`: the number parser of stage 8 turns it into 0 (decided 14 Nov 2026) |
+| `JudgedLevel` | `position_id: PositionId, clause_id: ClauseId, evidence: Evidence \| None, level: Level` | One AI judgement for a words position (step 9) |
+| `MatchFound`, `NothingFound`, `MatchUnconfirmed`, `CallFailed` | `position_id: PositionId, clause_ids: tuple[ClauseId, ...]`; `position_id: PositionId, searches: tuple[str, ...]`; `position_id: PositionId, clauses_to_read: tuple[ClauseId, ...]`; `code: str` | Four separate types, so a failed call can never pass as "nothing found" (I4). `searches` fills the "Where it was searched" panel. `MatchUnconfirmed` is the result when the searches disagree: the label is unsure with `MATCH_UNCONFIRMED`, and `clauses_to_read` names the clauses to read (ADR 0012; fourth type decided 14 Nov 2026). `MatchResult` is the type alias for the union of the four |
+| `ToolLabel` | `position_id: PositionId, level: Level, reasons: tuple[ReasonCode, ...], evidence: tuple[Evidence, ...], written_by: WrittenBy` | `written_by` is AI only for words positions, which are drawn in pencil ([ADR 0002](adr/0002-label-look-split-stamp.md)) |
 | `NotCoveredClause` | `clause_id: ClauseId, clause_type: str` | A type from the closed list, plus the clause's own first line ([ADR 0011](adr/0011-who-writes-the-words.md)). Replaces the sketch's `NotCoveredSummary` |
 | `PromptMessage` | `role: str, text: str` | One rendered prompt part |
-| `AiRequest` | `step, prompt_id: str, prompt_version: int, inputs, messages: tuple[PromptMessage, ...], schema_id: str, json_schema, model: str, privacy_mode: PrivacyMode, max_tokens: int` | The accepted form (section 6.3). It carries the structured inputs as well as the rendered prompt (ADR 0015) |
-| `Usage` | `input_tokens, cached_input_tokens, output_tokens: int, cost_usd: Decimal \| None` | Cached tokens are read on every call ([ADR 0010](adr/0010-starting-models.md)). `cost_usd` is one neutral amount, filled in by the adapter from the provider's reply, or `None` when the provider reports none. It feeds the running cost, the spend ledger and the cost per review (decided 13 Nov 2026, [ADR 0015](adr/0015-provider-ready-seam.md) amendment) |
+| `StepInputs` | No fields | The base class of every step's own input shape. Each step's input shape is a frozen, slotted, keyword-only dataclass that subclasses it. Stage 1 has only a test-only subclass; the real ones come with each step in stage 8 (decided 14 Nov 2026) |
+| `AiRequest` | `step: str, prompt_id: str, prompt_version: int, inputs: StepInputs, messages: tuple[PromptMessage, ...], schema_id: str, json_schema: Mapping[str, object], model: str, privacy_mode: PrivacyMode, max_tokens: int` | The accepted form (section 6.3). It carries the structured inputs as well as the rendered prompt (ADR 0015). Its `__post_init__` replaces `json_schema` with a `MappingProxyType` copy, so the top level cannot be changed |
+| `Usage` | `input_tokens: int, cached_input_tokens: int, output_tokens: int, cost_usd: Decimal \| None` | Cached tokens are read on every call ([ADR 0010](adr/0010-starting-models.md)). `cost_usd` is one neutral amount, filled in by the adapter from the provider's reply, or `None` when the provider reports none. It feeds the running cost, the spend ledger and the cost per review (decided 13 Nov 2026, [ADR 0015](adr/0015-provider-ready-seam.md) amendment) |
 | `AiReply` | `raw_body: bytes, text: str, model_used: str, provider_used: str, usage: Usage, generation_id: str` | The exact reply, saved before it is parsed (D8) |
-| `AiRecord` | `record_id, review_id, step: str, attempt: int, request_sha256: str, request: AiRequest, reply: AiReply \| None, error_code: str \| None, started_at, finished_at: datetime` | Raw and append-only, failed calls too (D1, D8). Its hash keys the cache and the replay fake |
+| `AiRecord` | `record_id: RecordId, schema_version: int, review_id: ReviewId, step: str, attempt: int, request_sha256: str, request: AiRequest, reply: AiReply \| None, error_code: str \| None, started_at: datetime, finished_at: datetime` | Raw and append-only, failed calls too (D1, D8). Its hash keys the cache and the replay fake. It carries its own `schema_version` (decided 14 Nov 2026). Every `datetime` in `core` is timezone-aware |
 | `Settings` | `default_model: str, step_models: tuple[tuple[str, str], ...], private_mode_default: bool, send_why_notes: bool, auto_delete_days: int, data_dir: str, log_level: str` | Loaded once at start-up and passed in (I13). Spec 14.3 |
 
-**Errors.** `ClauseTracerError(code, context)` and its tree (section 6.4). The list in [the report's errors section](../reports/Clause%20Tracer%20pipeline%20architecture.md#errors-carry-codes-and-only-the-edge-turns-them-into-words) is the starting list.
+**Shapes for the stage 1 functions** (defined 14 Nov 2026 for the stage 1 plan; the owner approves them with the plan):
+
+| Shape | Fields | Why |
+| --- | --- | --- |
+| `UnreadableSpans` | `hidden: tuple[Span, ...], undecodable: tuple[Span, ...]` | The Rule 9 input. `unreadable_spans(document)` builds it from every `HiddenText.span` that is not `None`, and from `Document.undecodable` |
+| `LabelInput` | `position: Position, match: MatchResult, values: tuple[CheckedValue, ...], judged: tuple[JudgedLevel, ...], outside_documents: tuple[OutsideDocument, ...]` | Everything the label rules need for one position, in one bundle (I3). `values` serve number and yes/no positions, `judged` serves words positions. `outside_documents` are the documents not loaded that the label's evidence reaches (Rule 10) |
+| `ValueVerdict` | `clause_id: ClauseId, level: Level, reasons: tuple[ReasonCode, ...], evidence: Evidence \| None, readable_value: str \| None` | One value after Rules 1 to 3, 5, 6 and 9, before Rule 4 combines them. `readable_value` is `None` exactly when `level` is `UNSURE`. Rule 4 compares it to find clauses that disagree |
+| `ScanContext` | `label: Level \| None, allowed_numbers: tuple[Decimal, ...], acceptable_limits: tuple[Decimal, ...], known_placeholders: tuple[str, ...], defined_roles: tuple[str, ...]` | What one output scan compares the AI text with. `label` is the code's label, or `None` for text with no label |
+| `QuoteFold` | `text: str, to_original: tuple[int, ...]` | The Spec 2 quote-check fold of a text, with its index map. `to_original` has one entry per folded character plus a last entry equal to the length of the original text |
+| `DrawAllowed`, `DrawRefused` | `evidence: Evidence`; `failure: DrawFailure` | The result of the last check before drawing. Two types, so a refusal cannot pass as an approval (I4) |
+| `CallPrices` | `input_per_million: Decimal, cached_input_per_million: Decimal, output_per_million: Decimal` | US dollars per million tokens. The caller passes them in, so no price list enters `core` (ADR 0015) |
+| `CostInputs` | `positions: int, words_positions: int, clauses: int, contract_tokens: int, prices: CallPrices` | The input of the pre-run estimate (section 7) |
+| `CostRange` | `calls: int, low_usd: Decimal, high_usd: Decimal` | The estimate: the number of AI calls, and the cost if the cache hits on every call (low) or never hits (high) |
+| `PlaybookProblem` | `position_id: PositionId \| None, code: PlaybookProblemCode` | One failed playbook check (Spec 4.1). `position_id` is `None` for a problem with the whole playbook |
+
+**Errors.** `ClauseTracerError(code, context)` and its tree (section 6.4). The list in [the report's errors section](../reports/Clause%20Tracer%20pipeline%20architecture.md#errors-carry-codes-and-only-the-edge-turns-them-into-words) is the starting list. Stage 1 builds it exactly so (14 Nov 2026):
+
+- `ClauseTracerError(Exception)` takes one argument, `context: Mapping[str, str | int] | None = None`, and keeps it as a read-only `MappingProxyType` in `self.context`. Each class has a class attribute `code: ClassVar[str]`. Context holds ids, step names and counts only, never contract text.
+- Four groups, each a direct subclass of `ClauseTracerError`: `InputError`, `ModelServiceError`, `LocalError`, and `ReviewCancelled` (the cancellation group is this one class). The base and the three group classes have `code = ""`.
+- Input errors, with their codes: `UnreadableFileError` `unreadable_file`, `ScannedPdfError` `scanned_pdf`, `OldWordFileError` `old_word_file`, `InputTooLargeError` `input_too_large`, `NotUtf8Error` `not_utf8`, `EncryptedPdfError` `encrypted_pdf`, `PlaybookFormatError` `playbook_format`.
+- Model-service errors: `NetworkUnavailableError` `network_unavailable`, `InvalidApiKeyError` `invalid_api_key`, `NoCreditError` `no_credit`, `NoPrivateModelError` `no_private_model`, `ModelTimeoutError` `model_timeout`, `ModelReplyInvalidError` `model_reply_invalid`.
+- Local errors: `SecretStoreUnavailableError` `secret_store_unavailable`, `StorageCorruptError` `storage_corrupt`, `SchemaTooNewError` `schema_too_new`, `ConfigError` `config`, `DuplicateRecordError` `duplicate_record`.
+- Cancellation: `ReviewCancelled` `review_cancelled`.
 
 **Ports** (section 3.1). The method lists are drafted against the fakes in stage 1. Each real adapter must later pass the same contract suite ([`testing-strategy.md`](testing-strategy.md) section 3).
 
 | Port | Methods | Notes |
 | --- | --- | --- |
-| `AiClient` | `complete(request: AiRequest) -> AiReply` | Raises model-service errors. Network retries live in the adapter; the one reask lives in the step (ADR 0005) |
-| `PiiDetector` | `find(text: str) -> tuple[PiiSuggestion, ...]` | Behind the code finders (ADR 0008) |
-| `ReviewStore` | Save and load raw records, derived records by cache key, and user state; list reviews; delete a review (idempotent, I8); purge expired reviews given `now` | Hides the encrypted store ([ADR 0006](adr/0006-encrypted-storage-and-secrets.md)) |
-| `SecretStore` | Get, put and delete a secret under a provider id | Raises `SecretStoreUnavailableError`. Never plain text (ADR 0006, ADR 0015) |
-| `Clock` | `now() -> datetime` | Auto-delete, timestamps and retry pauses stay testable (T2) |
+| `AiClient` | `complete(self, request: AiRequest) -> AiReply` | Raises model-service errors. Network retries live in the adapter; the one reask lives in the step (ADR 0005) |
+| `PiiDetector` | `find(self, text: str) -> tuple[PiiSuggestion, ...]` | Behind the code finders (ADR 0008) |
+| `ReviewStore` | `save_record(self, record: AiRecord) -> None`; `load_records(self, review_id: ReviewId) -> tuple[AiRecord, ...]`; `list_reviews(self) -> tuple[ReviewId, ...]`; `delete_review(self, review_id: ReviewId) -> None`; `purge_expired(self, now: datetime, auto_delete_days: int) -> tuple[ReviewId, ...]` | Hides the encrypted store ([ADR 0006](adr/0006-encrypted-storage-and-secrets.md)). Stage 1 has only these five methods (decided 14 Nov 2026). `save_record` raises `DuplicateRecordError` for a `record_id` already saved (append-only, D1). `load_records` returns records in the order saved, or `()`. `delete_review` is idempotent (I8). `purge_expired` deletes every review that is due under the auto-delete rules and returns their ids, sorted. Until stage 6 adds user state, a review's last change is the latest `finished_at` of its records. Stage 6 adds derived records by cache key and user state as new methods (D5) |
+| `SecretStore` | `get_secret(self, provider_id: str) -> str \| None`; `put_secret(self, provider_id: str, secret: str) -> None`; `delete_secret(self, provider_id: str) -> None` | Each raises `SecretStoreUnavailableError` when the store cannot be reached. `get_secret` returns `None` when nothing is stored. `delete_secret` is idempotent (I8). Never plain text (ADR 0006, ADR 0015) |
+| `Clock` | `now(self) -> datetime` | Returns a timezone-aware time. Auto-delete, timestamps and retry pauses stay testable (T2) |
 
-The replay fake lives in `core`'s test support: keyed by a hash of the exact request, it raises `UnrecordedRequest` on a miss and reports `unused_keys()` ([ADR 0013](adr/0013-test-layers-and-release-gates.md), T12).
+**Fakes.** The fakes live in `clause_tracer.core.fakes`, use only the standard library, and are exported from `core`. Tests use them, and so does every module's run-alone command (decided 14 Nov 2026). They are `ReplayAiClient`, `FakePiiDetector`, `InMemoryReviewStore`, `InMemorySecretStore` and `FixedClock`. The replay fake is keyed by a hash of the exact request, raises `UnrecordedRequest` on a miss and reports `unused_keys()` ([ADR 0013](adr/0013-test-layers-and-release-gates.md), T12). The behaviour suite each fake passes lives in `tests/contracts/`, so stage 6 and later stages run the same suite against the real adapters ([`testing-strategy.md`](testing-strategy.md) section 3).
 
 **Left to later stages.** These shapes are added to `core`, by new fields or new shapes (D5), in the stage that first needs them:
 
@@ -235,6 +268,23 @@ The replay fake lives in `core`'s test support: keyed by a hash of the exact req
 - **Each step has its own input shape.** `AiRequest.inputs` holds that step's own frozen dataclass, defined in `core` beside the step's other shapes. It is never a free-form dictionary. `json_schema` is a read-only mapping, built from the step's reply schema by the module that owns the step.
 - **Playbook text carries no written-by value.** Playbook names, topics and level text are always the user's own words or a starter's fixed text. `Wording` applies to review output, messages, rewrites and notes (ADR 0016, Spec 6.2).
 - **`checking` is handed a cancel check.** `core` defines a small `CancelCheck` shape: a callable that returns true once the user has cancelled. The runner passes it in, and `checking` asks it between per-clause calls and raises the cancellation error (section 6.4). The per-clause calls stay inside `checking`.
+
+**Decided for stage 1** (owner, 14 Nov 2026, [ADR 0005](adr/0005-engine-runner-shapes-and-ports.md) and [ADR 0012](adr/0012-missing-unsure-and-evidence-failures.md) amendments). These answer the questions in the stage 1 plan, section 6:
+
+- **Pydantic** is a runtime dependency from stage 1 (see "Check first").
+- **The fakes** live in `clause_tracer.core.fakes` (see "Fakes").
+- **`AiRecord` carries its own `schema_version`.** `AiRequest.inputs` is typed as the empty base class `StepInputs`.
+- **`ReviewStore`** has five methods in stage 1 (see "Ports").
+- **"Unlimited"** is the `CheckedValue.unlimited` field. "None" arrives as the number 0.
+- **"Other start point" (Rule 5).** In stage 1 the rule makes a value unsure when it already carries `OTHER_START_POINT`. How a start point is compared is not yet decided (section 15.8).
+- **A fourth match result**, `MatchUnconfirmed`, holds the position and the clauses to read.
+- **Rule 10.** In stage 1 the rule takes the documents not loaded that the label's evidence reaches (`LabelInput.outside_documents`). Which module builds the evidence trail is not yet decided (section 15.8).
+- **The extra shapes** of stage 1 are the table "Shapes for the stage 1 functions" and the enums `TextSlot`, `ScanFinding`, `DrawFailure`, `PlaybookProblemCode`, with the reason codes above.
+- **The last check before drawing.** The text half always runs, with the Spec 2 quote-check fold written in `core` (`QuoteFold`). The page-box half runs only when the document has glyphs.
+- **The output scans** have one length cap per `TextSlot` (Spec 6.2). The word lists and caps are owned by the project owner: their values come from the owner's scan table, and a test checks that the code holds the same values.
+- **The cost estimate** takes prices from the caller and the call count from section 7. Its range runs from "the cache hits on every call" to "the cache never hits" (Spec 9).
+- **Auto-delete and a clock that jumped backwards.** A review whose last change is later than "now" is not due. Auto-delete never removes a review earlier than the rule allows (Spec 9).
+- **The playbook checks** of Spec 4.1 are pure functions in `core`, built in stage 1 and shared by stage 6 and stage 12.
 
 ## 4. Data flow
 
@@ -381,6 +431,20 @@ One base `ClauseTracerError(code, context)` in `core`, with a small tree of expe
 
 **Estimate.** `[Assumption]` A review of 11 positions over about 50 clauses makes roughly 35 to 40 AI calls: one forward match per position, a few reverse-match batches, a handful of pair checks, one extraction per position, and the judge, explain and sort-not-covered calls. The pre-run estimate is shown as a range and is calibrated from the `usage.cost` of real runs.
 
+**How `core` computes the estimate** (decided 14 Nov 2026; every constant is `[Assumption]` until the first paid run). With P positions, W words positions, C clauses and T contract tokens, and `ceil` rounding up:
+
+| Part | Calls |
+| --- | --- |
+| Forward match | P |
+| Reverse-match batches | ceil(C / 25) |
+| Pair checks | ceil(P / 4) |
+| Extraction (number and yes/no positions) | P − W |
+| Judge (words positions) | W |
+| Explain | ceil(P / 2) |
+| Sort not-covered parts | ceil(C / 25) |
+
+This gives 35 calls for the starter playbook (P 11, W 1) over 50 clauses. Every call sends the contract block (T tokens), 1,000 more input tokens for the task, and gets 400 output tokens back. Prices are passed in by the caller, in US dollars per million tokens. The **low** end assumes the cache hits on every call: the contract block is priced at the cached input price. The **high** end assumes the cache never hits: the contract block is priced at the full input price. Task tokens and output tokens are priced the same at both ends. Both amounts are rounded half up to $0.0001.
+
 ## 8. Reliability and failure handling
 
 ### 8.1 Statuses
@@ -523,7 +587,7 @@ The owner accepted ADRs 0005 to 0015 on 12 Nov 2026, and ADR 0016 on 13 Nov 2026
 - How page pictures reach the window. The page policy has no `img-src data:`, pages cannot fetch files, and writing pictures to disk would break "everything saved is encrypted". Needed before build stage 12.
 - How CI drives the Windows window. ADR 0009 plans Playwright over the debugging port, which release builds turn off. A separate test build or another driver is needed.
 - The oldest supported Windows version. The oldest supported Linux is decided: Ubuntu 24.04 (13 Nov 2026, ADR 0009).
-- The smaller build questions marked "Not yet decided" in sections 3.4 and 15.
+- The smaller build questions marked "Not yet decided" in section 15, including the stage 1 label and scan edge cases (the stage 1 plan, section 6).
 
 ## 14. Changes this work made to earlier documents
 
@@ -561,13 +625,13 @@ The task plan of each stage is written in `docs/plans/` just before the stage is
 
 ### 15.1 Stage 1: `core`
 
-- **Builds.** The ids, enums, shapes and five ports of section 3.4; the error tree (section 6.4); the fakes, including the replay fake; the label rules 1 to 10 as pure functions, with `MATCH_UNCONFIRMED`, the unplaceable-quote case and undecodable text under Rule 9; unit conversion (Rule 6); the auto-delete date rules; the cost estimate; the output scans; the last check before drawing; a pure hash of the exact request.
+- **Builds.** The ids, enums, shapes and five ports of section 3.4; the error tree (section 6.4); the fakes in `clause_tracer.core.fakes`, including the replay fake, with their behaviour suites in `tests/contracts/`; the label rules 1 to 10 as pure functions, with `MATCH_UNCONFIRMED`, the unplaceable-quote case and undecodable text under Rule 9; unit conversion (Rule 6); the playbook checks of Spec 4.1; the auto-delete date rules; the cost estimate; the output scans; the last check before drawing; a pure hash of the exact request. Tooling: Hypothesis, Pydantic (runtime, for the `TypeAdapter` check), branch-coverage measurement, and the guard that fails a change editing both code and an owner table ([`testing-strategy.md`](testing-strategy.md) sections 10 and 11).
 - **Governed by.** [ADR 0004](adr/0004-code-layout.md), [ADR 0005](adr/0005-engine-runner-shapes-and-ports.md), [ADR 0012](adr/0012-missing-unsure-and-evidence-failures.md), [ADR 0013](adr/0013-test-layers-and-release-gates.md), [ADR 0015](adr/0015-provider-ready-seam.md), [ADR 0016](adr/0016-legal-positions-without-a-lawyer.md).
 - **Start with** ADR 0005 action item 2 (section 3.4).
-- **Done when** importing `core` loads only the standard library; the label-rule tables cover every row of the Spec 14.5 sample; no shape has a provider-specific field; and `src/clause_tracer/core/README.md` records the shapes and ports (ADR 0005 action item 4). The owner starts writing the ten test contracts now, because they take longest.
-- **Tests, in the testing strategy.** Section 4 (the `core` row), section 5 (invariant 7), section 6.1, sections 10 and 14.
-- **Decided 13 Nov 2026:** the points at the end of section 3.4.
-- **Not yet decided:** the points that writing the task plan found. They are listed, with the task that needs each, in [the stage 1 plan](plans/stage-01-core.md) section 6.
+- **Done when** importing `core` loads only the standard library; the label-rule tables cover every row of the Spec 14.5 sample; no shape has a provider-specific field; `src/clause_tracer/core/README.md` records the shapes and ports (ADR 0005 action item 4); branch coverage of `core` is at least 95%; and the owner-table guard runs in `scripts/check.sh` and CI. The owner starts writing the ten test contracts now, because they take longest.
+- **Tests, in the testing strategy.** Section 4 (the `core` row), section 5 (invariant 7), section 6.1, sections 10, 11 and 14.
+- **Decided 13 and 14 Nov 2026:** the points at the end of section 3.4. The owner answered the 15 questions of [the stage 1 plan](plans/stage-01-core.md) on 14 Nov 2026.
+- **Not yet decided:** the label and scan edge cases that the spec leaves open, listed with a recommendation in [the stage 1 plan](plans/stage-01-core.md) section 6.
 
 ### 15.2 Stage 2: `ingest` for text, Markdown and pasted text
 
@@ -608,7 +672,8 @@ The task plan of each stage is written in `docs/plans/` just before the stage is
   - **Auto-delete:** runs at start-up and while the engine runs. "Delete all reviews" also clears temporary files and logs (Spec 8.3).
   - **Runner:** the hand-written runner in `cli`, with `StepSpec`, cache keys, the call and parse split, statuses, cancel and events.
   - **Commands:** settings loaded once, exit codes, logs that carry no contract text, and the `review` and `resume` commands (section 6.2).
-  - **Playbooks:** reading the starter playbook and playbook files with a strict format and size limits, and exporting without the customer link or "why this matters" notes (Spec 4.1, 8.4).
+  - **Playbooks:** reading the starter playbook and playbook files with a strict format and size limits, checked with the playbook checks that stage 1 builds in `core`, and exporting without the customer link or "why this matters" notes (Spec 4.1, 8.4).
+  - **Store methods:** derived records by cache key and user state, added to `ReviewStore` as new methods (D5). A review's real last change then replaces the stage 1 stand-in (section 3.4, "Ports").
 - **Governed by.** [ADR 0006](adr/0006-encrypted-storage-and-secrets.md) and its amendments, ADR 0005, ADR 0015, ADR 0016.
 - **Changed from the report.** The storage choice is made: `sqlcipher3` in a hybrid design, not "after the A/B decision".
 - **Done when** a review of the sample runs through the steps built so far, is saved encrypted, can be interrupted and resumed with no step run twice, and is deleted on schedule by a fixed clock.
@@ -617,6 +682,7 @@ The task plan of each stage is written in `docs/plans/` just before the stage is
   - **The playbook file format**, and which module reads it. Spec 8.4 asks only for a strict format with size limits, and ADR 0004 names no module for it.
   - **How the command-line tool does the privacy check.** Spec 6.1 step 4 needs the user to confirm before anything is sent, and the `review` command in section 6.2 has no step for it. Settle this before stage 9 sends anything.
   - **Argon2id or scrypt** for the passphrase, if the pinned `cryptography` lacks Argon2id (ADR 0006 action item 2).
+  - **How a stored `AiRecord` is read back with its step's own input shape.** `AiRequest.inputs` is typed as the base class `StepInputs`, and Pydantic may not rebuild the subclass. The stage 1 `TypeAdapter` check records what happens.
 
 ### 15.7 Stage 7: the Presidio adapter
 
@@ -628,11 +694,15 @@ The task plan of each stage is written in `docs/plans/` just before the stage is
 
 ### 15.8 Stage 8: `checking` and the message templates
 
-- **Builds.** The quote check and number parser (pure). Then, over the replay fake: extraction with sentence-id forms; matching with the four searches, the pair check and `MATCH_UNCONFIRMED`; the "searched, nothing found" list; judging words positions; reasons in fenced slots; clause types from the closed list for not-covered clauses; code templates for leads, Missing text and unsure questions; the template fallback after a failed scan. Every piece of AI wording is stored as written by AI and shown with the fixed AI line. Prompts are versioned files, never edited once released. The code-built message from templates in `outputs`, moved here from stage 11 because it needs no AI.
+- **Builds.** The quote check and number parser (pure). The parser turns "none" into the number 0 and sets `CheckedValue.unlimited` for "unlimited" (Rule 1). Then, over the replay fake: extraction with sentence-id forms; matching with the four searches, the pair check and `MATCH_UNCONFIRMED`; the "searched, nothing found" list; judging words positions; reasons in fenced slots; clause types from the closed list for not-covered clauses; code templates for leads, Missing text and unsure questions; the template fallback after a failed scan. Every piece of AI wording is stored as written by AI and shown with the fixed AI line. Prompts are versioned files, never edited once released. The code-built message from templates in `outputs`, moved here from stage 11 because it needs no AI.
 - **Governed by.** [ADR 0011](adr/0011-who-writes-the-words.md), ADR 0012, ADR 0005, ADR 0013, ADR 0016.
 - **Changed from the report.** Not-covered clauses get a clause type, not an AI summary (ADR 0011).
 - **Done when** the end-to-end replay test on the sample gives the Spec 14.5 labels.
 - **Tests, in the testing strategy.** Section 4 (the `checking` and `outputs` rows), sections 6.2 and 6.3, section 3 (end-to-end replay).
+- **Not yet decided** (from the stage 1 answers, 14 Nov 2026):
+  - **How a start point is compared** for Rule 5 ("30 days after acceptance" against "from invoice date"). Stage 1 only acts on an `OTHER_START_POINT` reason already on the value.
+  - **Which module builds a label's evidence trail** (cross-references, defined terms, overrides), and so fills `LabelInput.outside_documents` for Rule 10.
+  - **Whether the quote check reuses `core`'s quote-check fold.** Section 4.2 asks the last check before drawing to be a different code path; sharing the fold would share one part of it.
 
 ### 15.9 Stage 9: the OpenRouter adapter and the first real run
 
@@ -687,4 +757,6 @@ The task plan of each stage is written in `docs/plans/` just before the stage is
 - **Done when** a full review runs from the installer on Linux and Windows (Spec 11). The release checks run as well: the app with and without a session bus, under Wayland and under X11, and the package installed on Ubuntu 24.04 and on the newest Ubuntu.
 - **Before the first public release:** the steps in Spec 10, including the reply from the AI Act Service Desk.
 - **Tests, in the testing strategy.** Section 9, section 8 (the app window, no telemetry, dependencies), section 12 (before a release).
+- **Playbook editor:** uses the playbook checks of `core` (stage 1) for its validation errors (Spec 4.1).
+- **Not yet decided:** which reviews count as "affected" when the auto-delete setting is lowered (Spec 9 shows their count before the user confirms). Stage 1 builds only the date rules.
 - **Decided 13 Nov 2026:** version 1 supports Ubuntu 24.04 and later, Linux Mint 22 and later, Debian 13, and Fedora through the plain archive. There is one Linux build ([ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md) amendment). The oldest supported Windows version is still open.

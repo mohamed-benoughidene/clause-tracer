@@ -3,6 +3,7 @@ Template note (delete this note in your copy).
 Copy this file to `stage-NN-name.md`. Keep every part, and write "None" where a part is empty.
 Read the README in this folder first: it says how a plan is read, written and implemented.
 Prompts in italics tell you what belongs in each part. Replace them with your own text.
+A strong model writes the plan and a cheaper model implements it: leave the implementer no design choice. Every name, field, type, signature, error and test case is written in the task.
 -->
 
 # Stage N plan: `module`
@@ -50,6 +51,8 @@ Prompts in italics tell you what belongs in each part. Replace them with your ow
 
 *Two to six milestones. Each one is a set of tasks that together give one result you can see or test. Keep each task to one commit, at most about half a day. Give every task a test or a check. Order by dependency: shapes before the code that uses them, fakes before the code tested with them. Task ids are `SN-M1-T1`: stage, milestone, task.*
 
+*Write each task so the implementer makes no design choice. **Build:** the exact file, class and function names, every field with its type, every signature with its return type, and the error raised and when. **Tests first:** each test by name, with its input and expected result, or the owner table that holds the expected result (its path, its columns and how the test reads it). For a property test, the property and the generator. **Done when:** a command and its expected outcome. Never write "as needed", "suitable", "such as", "or similar", "consider" or "decide".*
+
 ### M1: *name*
 
 *What you can see or test when this milestone is done.*
@@ -57,10 +60,10 @@ Prompts in italics tell you what belongs in each part. Replace them with your ow
 *The task below is an example of the right size. Replace it with your own first task.*
 
 - [ ] **S1-M1-T1: Add the `Span` shape (EXAMPLE, replace)**
-  - **Build:** Add a frozen dataclass `Span` with `start` and `end` offsets into the canonical text. The range is half-open: `start` is included and `end` is not. A span with `end < start` or a negative `start` raises `ValueError`.
-  - **Files:** `src/clause_tracer/core/span.py`, `src/clause_tracer/core/tests/test_span.py`, `src/clause_tracer/core/README.md` (add `Span` to the shapes).
-  - **Tests first:** `test_span_length_is_end_minus_start`; `test_empty_span_is_allowed`; `test_negative_start_raises`; `test_end_before_start_raises`; `test_span_is_frozen`. Each fails before the code exists.
-  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_span.py` passes, and `scripts/check.sh` passes.
+  - **Build:** In `src/clause_tracer/core/wording.py`, add `@dataclass(frozen=True, slots=True, kw_only=True) class Span` with exactly two fields, `start: int` and `end: int`, and no more. The range is half-open: `start` is included and `end` is not. Add `def __post_init__(self) -> None` that raises `ValueError("span start must be 0 or more")` when `start < 0`, and `ValueError("span end must not be before start")` when `end < start`. Add `Span` to `__all__` in `src/clause_tracer/core/__init__.py`.
+  - **Files:** `src/clause_tracer/core/wording.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_span.py`, `src/clause_tracer/core/README.md` (add `Span` to the shapes).
+  - **Tests first:** in `test_span.py`: `test_span_length_is_end_minus_start` (`Span(start=2, end=5)`: `end - start == 3`); `test_empty_span_is_allowed` (`Span(start=4, end=4)` builds); `test_negative_start_raises` (`Span(start=-1, end=2)` raises `ValueError`); `test_end_before_start_raises` (`Span(start=5, end=4)` raises `ValueError`); `test_span_is_frozen` (assigning `start` raises `dataclasses.FrozenInstanceError`). See each fail before the code exists.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_span.py` reports 5 passed, and `scripts/check.sh` exits 0.
   - **Rules:** Constitution S3 (shape written down in the module README), T1 (pure, no side effects), D4 (bad input is rejected at the door).
   - **Depends on:** None
 
@@ -69,10 +72,10 @@ Prompts in italics tell you what belongs in each part. Replace them with your ow
 *What you can see or test when this milestone is done.*
 
 - [ ] **SN-M2-T1: *short name***
-  - **Build:** *What to build, in one to three sentences.*
+  - **Build:** *The exact file, names, fields with types, signatures with return types, and errors. No choice left to the implementer.*
   - **Files:** *The files it creates or changes.*
-  - **Tests first:** *The tests written before the code, and what each must prove.*
-  - **Done when:** *The observable check.*
+  - **Tests first:** *Each test by name, with its input and expected result, or the owner table that holds it.*
+  - **Done when:** *A command and its expected outcome.*
   - **Rules:** *Constitution rule ids and decision records that shaped it.*
   - **Depends on:** *SN-M1-T1*
 
