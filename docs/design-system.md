@@ -505,7 +505,7 @@ The source line moved into "More" on 14 Nov 2026 (owner decision 4).
 | --- | --- | --- |
 | `--swap-bg/fg` are page-local | privacy-check | Move them to `:root` with the other mark tokens |
 | Hardcoded hex: `#55524C` (= `--grey-fg`), `#6B665D`, `#D8D0C0`, `#bbb` ×20 (contract table borders), `#555` | running, privacy-check, review, index | Map to tokens. Contract-page greys can become `--sheet-line` and `--sheet-faint`. |
-| `.key-form` uses a 10 px radius | index | `--r-lg` (two radii only) |
+| ✅ **Fixed 14 Nov 2026.** `.key-form` uses a 10 px radius | index | `--r-lg` (two radii only) |
 | There are no exact tokens for the logo's dark (`#1E1D1A`) and light (`#ECE8E1`), and the app's dark text is the cooler `#EEF0F2` | brand vs app | Leave the app tokens; use the logo SVGs as they are. Note it here so nobody "fixes" one into the other. |
 | There are no spacing or motion tokens | everywhere | Add them as proposed in 3.6 and 3.9 |
 | There are 12 font sizes (11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15, 17, 22, 30) | everywhere | Keep 11.5 (stamps), 12, 12.5, 14, 15, 17, 22 and 30. Fold 11, 13 and 13.5. |

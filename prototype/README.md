@@ -99,4 +99,5 @@ This prototype replaces the FigCraft one (`Prototyping/clause-tracer/build/`), w
    - Pins are `<span class="pin walk">4</span>`.
    - Red is only for walk-away.
 7. **Copy.** Use the words in [`docs/ux-copy.md`](../docs/ux-copy.md), in British English. If a page and the copy deck disagree, fix both. The voice is plain and neutral: the app never says "I" ("This one is a walk-away"). "I" and "my" belong only to the user's own words, such as position names and notes (Spec 14.4).
+   - Every on-screen string must match the deck. `python scripts/copy_lint.py` checks it, and `scripts/check.sh` runs it. A voice or look failure stops the check. Fix the page and the deck together, or add a reasoned line to `scripts/copy_lint_allow.txt`.
 8. **Link every control** to the page or dialog it goes to. Nothing should look clickable and do nothing.

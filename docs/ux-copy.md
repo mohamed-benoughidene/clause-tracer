@@ -36,6 +36,8 @@ Clause Tracer talks like a careful friend who has read the contract and points a
 
 These signs are checked on every new string, by the lint where a machine can, and by the checklist below where it cannot.
 
+`scripts/copy_lint.py` reads section 4 of this deck, the prototype pages and their CSS. It fails on: “client”, “open source”, “new tab”, an exclamation mark, a banned word, a term from the Not column of section 2, first person, “tap” or “press” before a control, US spelling, a toast over 5 words, an emoji, red outside walk-away, a gradient, blur or animation, and a corner radius outside the design system. It warns on soft words, a sentence over 25 words, a number repeated 3 times, a straight quote, and a prototype string with no matching deck string (or the reverse). Its allow-list is `scripts/copy_lint_allow.txt`; every line needs a reason.
+
 **Fixed copy**
 
 | Sign | Bad | Fixed |
@@ -249,7 +251,7 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | List heading | What gets replaced · 7 items |
 | List note | Shown on this screen only. Ticked rows are marked on the pages. Click a row to tick or untick it. |
 | Row | Person 1 · Karim Benali · 2 places |
-| Name variant | “Ms Jones” in 14.5 looks like Sarah Jones (Person 2). · [Same person] [Different person] · toasts: Both are Person 2 · “Ms Jones” is now Person 3 |
+| Name variant | “Ms Jones” in 14.5 looks like Sarah Jones (Person 2). · [Same person] [Different person] · toasts: Both are Person 2 · “Ms Jones” is Person 3 |
 | Kept note | Kept: amounts, dates, durations, roles like “the Developer”, and England and Wales in the governing-law clause. |
 | Private mode | Private mode for this review · Only providers that don't keep your contract. |
 | Private off warning | Private mode is off. The contract goes to AI models that may keep it. Names and addresses are still replaced. Turn it back on unless you're sure. |
@@ -280,7 +282,7 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | No private model | No private-mode model is available for step 3 right now. Wait and resume, or turn private mode off for this review. · [Turn private mode off…] |
 | Done | Your review is ready · Cost $0.39 · Took 4 min · [Open the review] · footer: Credit left: $2.71 (the cost is shown once, above) |
 | Cancel dialog | Cancel this review? · So far it has cost $0.05 of about $0.42. Finished steps are kept, so you won't pay for them again. · Keep running / Cancel review |
-| Private off dialog | Turn private mode off for this review? · The contract goes to AI models that may keep it. Names and addresses are still replaced. · Cancel / Turn off · toast: Private mode off for this review |
+| Private off dialog | Turn private mode off for this review? · The contract goes to AI models that may keep it. Names and addresses are still replaced. · Cancel / Turn off · toast: Private mode off |
 
 ### 4.7 Review (`review.html`)
 
@@ -316,7 +318,7 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | Not-covered tick | I've read the 35 not-covered parts |
 | Not-covered row | § 2.2 · **Length and renewal** · “This Agreement renews automatically for further 12-month periods…” (the clause type in bold, then the clause's own first line in quotes; no AI-written sentence) |
 | Not-covered clause types (draft list) | Parties · Background · Definitions · Length and renewal · Scope of work · Quality of work · Timing and deadlines · How the work is done · Changes to the deal · Fees · Invoices · Expenses · Tax · What the other side provides · Ownership and credit · Existing tools and materials · Confidentiality · Hiring each other's staff · Promises about the work · Limits on losses · Ending the contract · Handing things back · Data protection · Whole agreement · Which document wins · Passing the contract on · Notices · Disputes and law · Insurance · Something else. [Assumption] A first list of 30. Tune it on the test set. |
-| Searched, nothing found (Missing tab) | Searched, nothing found · [n] · Your playbook is happy when these are absent, so they need no action. Open one to check the search. |
+| Searched, nothing found (Missing tab) | Searched, nothing found · [n] · Your playbook is happy when these aren't in the contract, so they need no action. Open one to check the search. |
 | Status | Ready to check · Done |
 | Find | Find · Ctrl+F |
 
@@ -367,8 +369,8 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 
 | Dialog | Copy | Written by |
 | --- | --- | --- |
-| Change it | Change label · § [n] · [position] · Tool label · Your label · New label · Note · History: Tool label Walk-away · your label Unsure · Cancel / Save · toasts: Saved. Your label: Unsure · Back to the tool label, unchecked | code; the note: user |
-| Rewrite | Rewrite § [n] · [Write it yourself] [Ask AI] · The AI aims for the preferred level of every position this clause affects: [positions]. · Instruction (optional) · Before / After · Removed words are struck through. Added words are highlighted. · [the AI wording line] under the After text · Information only. Doesn't change the counter or the review status. · On the After card: [Edit] [Copy] · In the footer: [Regenerate] [Cancel] [Use as suggestion] · toasts: Copied · Regenerated · Saved as a suggestion. There is no “Add to message”: a suggestion goes into the message from Suggestions. | code; the After text: AI (or user, after Write it yourself or Edit) |
+| Change it | Change label · § [n] · [position] · Tool label · Your label · New label · Note · History: Tool label Walk-away · your label Unsure · Cancel / Save · toasts: Saved. Your label: Unsure · Back to tool label, unchecked | code; the note: user |
+| Rewrite | Rewrite § [n] · [Write it yourself] [Ask AI] · The AI aims for the preferred level of every position this clause affects: [positions]. · Instruction (optional) · Before / After · Removed words are struck through. Added words are highlighted. · [the AI wording line] under the After text · Information only. Doesn't change the counter or the review status. · On the After card: [Edit] [Copy] · In the footer: [Regenerate] [Cancel] [Use as suggestion] · toasts: Copied · Regenerated · Saved as a suggestion · (There is no “Add to message”: a suggestion goes into the message from Suggestions.) | code; the After text: AI (or user, after Write it yourself or Edit) |
 | Rewrite, new details | Before the re-check, known names and addresses are swapped for placeholders. No new personal details found. | code |
 | Rewrite failed | The new wording didn't pass the quote check, so it can't be labelled. You can still save it, as unsure. · [Save as unsure] · toast: Saved as an unsure suggestion | code |
 | Suggestions | Suggestions · [n] · One per clause. The original file is never changed. Suggestions go in the message you send. · Written with AI · label is information only · Written by you · label is information only · [Edit] [Remove] | code; each suggestion: AI or user, as its line says |
@@ -410,7 +412,7 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | Actions | Create blank · Copy a starter · Import · Search positions |
 | Filter | All customers · None · [customer] · toasts: Showing playbooks for every customer · Showing playbooks with no customer · Showing playbooks for [customer] |
 | Card | Side · Customer · Positions · Used by 4 reviews · edited 2 Nov · Not used by any review |
-| Card actions | Edit · Duplicate · Export · Delete · toasts: Copy made: [name] (copy) · Exported as [file].ctplaybook |
+| Card actions | Edit · Duplicate · Export · Delete · toasts: Copy made · Exported as [file].ctplaybook |
 | Starter card | Want a place to start? The freelancer starter has 11 example positions. Copy it, then make the limits yours. · Starter · Freelancer receiving a service agreement · read-only · [Preview starter] |
 | Import failed | That file isn't a Clause Tracer playbook, so it can't be imported. Playbook files end in .ctplaybook. · [Choose another file] |
 | Delete, used | Delete “[name]”? · 4 reviews use this playbook. Those reviews keep their own copy and won't change. You can't re-run them. This can't be undone. · Cancel / Delete playbook · toast: Playbook deleted |

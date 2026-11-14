@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# The one command agents run before finishing: lint, format, types, import rules, tests.
+# The one command agents run before finishing: lint, format, types, import rules, copy and look, tests.
 # Stops at the first failure. Uses the repo's own uv (.venv/bin/uv) first, then a uv on PATH (CI).
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -17,4 +17,5 @@ run ruff check
 run ruff format --check
 run mypy
 run lint-imports
+run python scripts/copy_lint.py
 run pytest -q
