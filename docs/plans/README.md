@@ -75,9 +75,31 @@ Only the owner moves a plan from Draft to Accepted.
 
 ## How to write a plan
 
+### Read before planning
+
+Read these before you write a single task. The plan is built from them, and it must not disagree with any of them.
+
+| Read | What it gives the plan |
+| --- | --- |
+| [System design](../system-design.md) section 15, the table of stages | The twelve stages and their order, so you know what came before this stage and what comes after |
+| System design section 15.N, for the stage you are planning | What the stage builds, which decision records govern it, and when it is done |
+| System design sections 15.N+1 onwards, skimmed | What later stages expect this stage to leave ready |
+| The other system design sections that section 15.N points to | The shapes, the data flow and the rules the stage must follow. For stage 1 this is section 3.4, the core shapes |
+| [Testing strategy](../testing-strategy.md): the test layers, and this stage's rows in the per-module and per-stage tables | Which tests the stage needs, and which rules cover expected answers and saved replies |
+| The decision records in [`../adr/`](../adr/) that section 15.N names, with every dated amendment | The decisions the stage rests on. An amendment can change the body above it |
+| [Spec](../spec.md): the sections the stage implements, and section 13 | What the app does, says and promises, and what is still open |
+| [Constitution](../../Constitution.md) | The binding rules for code. Tasks cite its rule ids |
+| [AGENTS.md](../../AGENTS.md) and [GIT_CONVENTIONS.md](../../GIT_CONVENTIONS.md) | The commands, the import rules, and how branches and commits are named |
+| The code as it stands: the module's folder and README, `pyproject.toml`, `scripts/check.sh` | The real starting point. A plan starts from what exists, not from what the docs expect |
+| The plan of the stage before, and what its builder reported at the end | What was learned that changes this stage |
+
+List the ones that govern the stage under "Read first" in the plan, so the person who implements it reads the same things.
+
+### Steps
+
 1. **Plan one stage.** Write the plan for the next stage only when the stage before it is done, or nearly done.
 2. **Copy [TEMPLATE.md](TEMPLATE.md)** to `stage-NN-name.md` and fill in every part. Keep every part; write "None" where a part is empty.
-3. **Start from the stage outline** in the system design section 15, and the stage's rows in the testing strategy. The plan must cover everything they ask for, and nothing more.
+3. **Start from the stage outline** (system design section 15.N) and the stage's rows in the testing strategy, as read above. The plan must cover everything they ask for, and nothing more.
 4. **Keep tasks small.** One task is one commit, and at most about half a day of work. If a task needs the word "and" twice, split it.
 5. **Give every task a test or a check.** A task with no way to fail is not a task.
 6. **Give every promise a test.** If the stage touches a promise made to users, a task must add the test that fails when the promise breaks (Constitution T13).
