@@ -36,6 +36,7 @@
   }
   function applyTextSize(pct) {
     document.body.style.zoom = pct === '100' ? '' : (+pct / 100);
+    document.documentElement.dataset.text = pct;   // lets styles.css re-flow the layout at 150% and 200%
     $$('[data-text-set]').forEach(b => b.setAttribute('aria-pressed', b.dataset.textSet === pct));
     $$('[data-text-label]').forEach(el => { el.textContent = pct + '%'; });
   }

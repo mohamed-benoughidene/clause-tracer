@@ -329,3 +329,30 @@ details.more[open] summary { margin-bottom: 6px; }
 
 /* review.html: the grey-parts tick at the top of Not covered (Spec 4.4). */
 .label-list li.grey-confirm { padding: 10px 8px; margin-bottom: 4px; background: var(--bg-tone); border-radius: 8px; border-bottom: 0; font-size: 13px; font-weight: 500; }
+
+/* ------------------------------------------------------------ text size 150% and 200% (owner decision 14 Nov 2026)
+   app.js zooms the body, so the window is no wider but the page has less room. Re-flow the way it does below 860 px,
+   and let rows wrap. Nothing here applies at 100% or 125%. A table may scroll inside its own box; the page may not. */
+html:is([data-text="150"], [data-text="200"]) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .sidebar { position: static; height: auto; }
+  .main { padding: 24px 16px; }
+  .grid-2, .party-grid, .levels, .editor, .work, .viewer-wrap, .playbook-grid { grid-template-columns: minmax(0, 1fr); }
+  .table { display: block; position: relative; max-width: 100%; overflow-x: auto; }   /* relative: keeps .visually-hidden cells inside the scroller */
+  .review { height: auto; }
+  .review-body { grid-template-columns: minmax(0, 1fr); }
+  .thumbs { display: none; }
+  .appbar { height: auto; min-height: 56px; flex-wrap: wrap; row-gap: 8px; padding-top: 8px; padding-bottom: 8px; }
+  .appbar .search-commands { width: auto !important; }
+  .steps, .page-head, .row, .summary, .viewer-bar, .split, .starter-card, .flow-foot { flex-wrap: wrap; }
+  .steps { row-gap: 4px; }
+  .editor { min-height: 0; }
+  .flow-main { padding: 16px; }
+  .margin { border-left: 0; border-top: 1px solid var(--line); }
+  .doc { padding: 16px; }
+  .side { border-left: 0; border-top: 1px solid var(--line); }
+  .pages .sheet, .doc .sheet { padding: 24px 20px; }
+  .glossary { grid-template-columns: minmax(0, 1fr); }
+  .glossary > dt { padding-bottom: 0; }
+  .glossary > dd { border-top: 0; padding-top: 4px; }
+}

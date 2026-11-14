@@ -230,6 +230,7 @@ For the real build:
 | ≤ 1100 px | Review: the thumbnails hide, and the panes stack |
 | ≤ 900 px | First launch: the picture moves above the form |
 | ≤ 860 px | The sidebar goes above the content; two-column grids and flow side panels stack; tables scroll sideways |
+| Text size 150% or 200% (`html[data-text]`, set by `app.js`) | Same as ≤ 860 px, and the app bar, steps and button rows wrap; the window width is unchanged, so the media queries don't fire |
 
 The design target is a laptop of about 1366 × 768 (Spec 14.4).
 
@@ -525,7 +526,7 @@ The source line moved into "More" on 14 Nov 2026 (owner decision 4).
 | ✅ **Fixed.** The rewrite diff showed deleted words in walk-away red, which is decoration | ADR 0003 | Struck through in `--text-2` |
 | 72 inline `style=` attributes in review.html (mostly `gap` and contract-table cells) | review.html | Fine for a prototype; don't carry them into the build |
 | Page-thumbnail label dots in the review use colour alone | Rule 5, Spec 14.4 (found 14 Nov 2026) | Add the label's icon or a count beside each dot |
-| At 200% text size, 11 of 15 pages scroll sideways in a 1366 px window (measured by script, not checked by eye) | Spec 14.4, section 7 "Text size" (found 14 Nov 2026) | Owner decided 14 Nov 2026: it must fit. Let rows wrap and tables stack |
+| ✅ **Fixed 14 Nov 2026.** At 200% text size, 11 of 15 pages scrolled sideways in a 1366 px window (measured by script) | Spec 14.4, section 7 "Text size" (found 14 Nov 2026) | Owner decided 14 Nov 2026: it must fit. At 150% and 200% `styles.css` stacks the sidebar and columns, lets rows wrap and scrolls tables inside their own box. No page or state scrolls sideways at 100%, 125%, 150% or 200% |
 | ✅ **Fixed 14 Nov 2026.** The detail panel's order differed: the prototype showed the stamp first, section 6 and Spec 14.1 say the quote first | Section 6, Spec 14.1 screen 8 (found 14 Nov 2026) | Quote first in every panel of the prototype, then the stamp. The source line moved into "More" the same day. |
 
 ### 8.4 Component completeness
