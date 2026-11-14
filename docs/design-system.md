@@ -379,7 +379,8 @@ There are two warning levels and three types of message.
 
 | Component | Class | Use |
 | --- | --- | --- |
-| Banner | `.banner` | Top of the review only: hidden text, unloaded document, playbook changed, unedited starter, and the practice review. It uses a banner colour, sits full width below the app bar, and holds an icon, the words and one small action. |
+| Banner | `.banner` | Top of the review only: hidden text, unloaded document, playbook changed, unedited starter, and the practice review. It uses a banner colour, sits full width below the app bar, and holds an icon, the words and one or two small actions. Once the user has read the hidden-text, unloaded-document or unedited-starter banner (by clicking its action: “Show me”, “What this means” then “Got it”, or “Got it”), it shrinks to a chip. The playbook-changed banner stays until the review is re-run, and the practice banner stays (decided 14 Nov 2026). |
+| Summary-bar chip | `.link` button in `.summary` | The shrunk banner: an icon and a short name of the warning (“1 piece of hidden text”, “Example playbook, unedited”). It reuses the look of the summary bar's “[n] document not loaded” button, so there is no new class. A click reopens the banner, or the dialog for the unloaded document. |
 | Notice | `.notice` | An inline tone strip with an icon and text. It is used for information such as the governing-law chip and auto-delete. |
 | Warning notice | `.notice.warn` | Unsure colours, for anything that blocks or needs a fix. *(Defined per page; see 8.1.)* |
 | Toast | `.toast` | An ink bar (8 px corners) at the bottom centre with short past-tense words: "Copied", "Saved", "Replaced. Check the marked words." It is triggered by `data-toast`. |
@@ -418,7 +419,8 @@ There are two warning levels and three types of message.
 | Evidence trail | `.trail` | A 12 px ring "knot" plus a step: the thread, shown as a list |
 | Decide buttons | `.decide` | Full-width option buttons, each with a `kbd` key hint |
 | Diff | `.diff` | `del` struck through in `--text-2` (never red, ADR 0003), `ins` on the preferred bg (rewrite, before and after) |
-| Fold | `details.more` | Folds the longer explanation |
+| Fold | `details.more` | Folds the source line, the level matched, the longer explanation and the evidence trail (decided 14 Nov 2026) |
+| AI wording line | `p.small.faint` | “Every quote and number was checked against the contract; the wording was written by AI.” Sits under every block of AI-written text in a panel or dialog, and under no code-written block. |
 | Contract link | `.contract-link` | A quiet underline that opens only after the link warning |
 
 ## 6. Patterns
@@ -429,14 +431,15 @@ There are two warning levels and three types of message.
 
 **Detail panel order** (Spec 14.1, screen 8):
 
-1. the quote, with the exact words highlighted;
+1. the quote, with the exact words highlighted, and "Show on the page" (scrolls the page, the panel stays open) and "Rewrite this clause";
 2. the stamp and `?`;
-3. why;
-4. "why it could be the other level";
-5. the level matched;
-6. the evidence trail;
-7. what to check;
-8. "Looks right", "Change it", note.
+3. the lead sentence (the why, in one or two sentences);
+4. "why it could be the other level", the readings and the question to ask (unsure and AI judgment only), with the AI wording line under any AI-written block;
+5. what to check;
+6. the decision buttons ("Looks right", "Change it", or the three answers), then the note;
+7. "More": the source line, the level matched, the longer explanation and the evidence trail.
+
+The source line moved into "More" on 14 Nov 2026 (owner decision 4).
 
 **Empty state.** Say what it is, why it's empty and how to start, with real words. For example: "Check a contract against your playbook. It takes about 3 minutes…". Use one primary button and links for the rest.
 
@@ -522,8 +525,8 @@ There are two warning levels and three types of message.
 | ✅ **Fixed.** The rewrite diff showed deleted words in walk-away red, which is decoration | ADR 0003 | Struck through in `--text-2` |
 | 72 inline `style=` attributes in review.html (mostly `gap` and contract-table cells) | review.html | Fine for a prototype; don't carry them into the build |
 | Page-thumbnail label dots in the review use colour alone | Rule 5, Spec 14.4 (found 14 Nov 2026) | Add the label's icon or a count beside each dot |
-| At 200% text size, 11 of 15 pages scroll sideways in a 1366 px window (measured by script, not checked by eye) | Spec 14.4, section 7 "Text size" (found 14 Nov 2026) | Owner to decide whether 200% must fit without sideways scrolling in version 1; then let rows wrap and tables stack |
-| The detail panel's order differs: the prototype shows the stamp first, section 6 and Spec 14.1 say the quote first | Section 6, Spec 14.1 screen 8 (found 14 Nov 2026) | Put the quote first in the prototype |
+| At 200% text size, 11 of 15 pages scroll sideways in a 1366 px window (measured by script, not checked by eye) | Spec 14.4, section 7 "Text size" (found 14 Nov 2026) | Owner decided 14 Nov 2026: it must fit. Let rows wrap and tables stack |
+| ✅ **Fixed 14 Nov 2026.** The detail panel's order differed: the prototype showed the stamp first, section 6 and Spec 14.1 say the quote first | Section 6, Spec 14.1 screen 8 (found 14 Nov 2026) | Quote first in every panel of the prototype, then the stamp. The source line moved into "More" the same day. |
 
 ### 8.4 Component completeness
 
@@ -543,7 +546,7 @@ There are two warning levels and three types of message.
 1. ~~Give each label its own icon, and settle "dashed means two things".~~ Fixed 7 Nov 2026.
 2. Move the shared warning, flow, clause and thumbnail CSS into `styles.css`, and the swap tokens into `:root`.
 3. Fix the control-border contrast, and finish the pencilled look (hatch and underline) and the pin tint.
-4. Fix the three gaps found on 14 Nov 2026 (thumbnail dots, 200% text, panel order).
+4. Fix the gaps found on 14 Nov 2026: thumbnail dots and 200% text (panel order is fixed).
 
 ## 9. Using the prototype
 
@@ -565,7 +568,7 @@ There is no build and no framework. `app.js` wires the shared behaviour through 
 | `data-state="a b"` / `data-state-hide="a"` | Shown or hidden when the URL has `?state=a` |
 | `#dialog-id` in the URL | Opens that dialog on load |
 
-`window.CT` exposes `toast()` and `applyTheme()`. `states.html` links every state in Spec 14.2 (40 links).
+`window.CT` exposes `toast()` and `applyTheme()`. `states.html` links every state in Spec 14.2.
 
 **Adding a component:**
 

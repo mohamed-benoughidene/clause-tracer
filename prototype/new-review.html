@@ -239,8 +239,8 @@
             <option selected>Freelancer service agreement</option>
             <option>Design retainer</option>
           </select>
-          <p class="hint" id="playbook-hint" data-state-hide="playbook-deleted copied-starter">Side: service provider · 11 positions · edited 2 Nov</p>
-          <p class="hint" data-state="copied-starter">Copied from the starter · side: service provider · 11 example positions. You haven't changed them yet. <a href="playbook-editor.html?state=copied">Make the limits yours</a></p>
+          <p class="hint" id="playbook-hint" data-state-hide="playbook-deleted copied-starter first-run">Side: service provider · 11 positions · edited 2 Nov</p>
+          <p class="hint" data-state="copied-starter first-run">Copied from the starter · side: service provider · 11 example positions. You haven't changed them yet. <a href="playbook-editor.html?state=copied">Make the limits yours</a></p>
         </div>
       </section>
     </div>
@@ -319,9 +319,15 @@
 <script src="app.js"></script>
 <script>
   // Back from Copy a starter: the new copy is added and picked.
-  if (document.body.querySelector('[data-state="copied-starter"].on')) {
+  // First run: the user has no playbook yet, so the picker holds only a copy of the starter, already picked.
+  if (document.body.querySelector('[data-state~="copied-starter"].on')) {
     const sel = document.getElementById('playbook');
     sel.add(new Option('Freelancer receiving a service agreement (copy)', '', true, true), 0);
+  }
+  if (document.body.querySelector('[data-state~="first-run"].on')) {
+    const sel = document.getElementById('playbook');
+    sel.innerHTML = '';
+    sel.add(new Option('Freelancer receiving a service agreement (copy)', '', true, true));
   }
 </script>
 <script>
