@@ -757,6 +757,7 @@ The owner answered the open items of 6.11 and decided eight more. The deck and t
 | — | Spec 4.7 point 5 said “matches your rules”. | “matches your playbook”. |
 | — | The unsure decision asked “What do you want to do?”, but the answers were “Yes, ask about it” and “No, change the label…”. | “Ask about it”, “Change the label…”, “Doesn't matter for this deal”. Walk-away keeps “Is this right?” with its yes and no answers. |
 
-**Open: owner to confirm**
+**Confirmed by the owner, 14 Nov 2026**
 
-- Position 5 (revision rounds) is a number position in Spec 7, so decision 1 would have code write its panel. But when the wording has no number, the two readings and the question can't come from a template (Spec 5, Rule 5), and the prototype shows them as AI-written, with the AI wording line. Either the readings and the question of a number position with vague wording are AI-written too, or code writes fixed ones. The prototype follows the first reading.
+- When a value on any position is unsure because its wording is vague, such as “reasonable revisions” on position 5, code writes the lead sentence and the AI writes only the two readings and the question to ask. Spec 6.1 step 10 is the home of this rule.
+

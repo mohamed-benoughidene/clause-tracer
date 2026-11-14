@@ -8,7 +8,8 @@ This repo is **Clause Tracer**: a local-first desktop app that checks a contract
 python3 -m venv .venv && .venv/bin/pip install --no-cache-dir uv   # first time only
 .venv/bin/uv sync                          # install or update every package from uv.lock
 .venv/bin/uv add <package>                 # add a dependency (updates pyproject.toml and uv.lock)
-scripts/check.sh                           # lint, format, types, import rules, tests
+scripts/check.sh                           # ruff, format, mypy (src and scripts), import rules, copy lint, tests
+.venv/bin/uv run python scripts/copy_lint.py   # copy and look lint (also run by scripts/check.sh)
 .venv/bin/uv run python -m clause_tracer.ingest   # run one module alone (any module name)
 ```
 
@@ -18,11 +19,12 @@ Run `scripts/check.sh` before you call a code change done. It must pass with no 
 
 ## Where the project stands
 
-The design is done. The code is an empty skeleton: every module exists, runs alone and passes its smoke test, but no feature is built yet. The repo holds:
+The design is done. The app code is an empty skeleton: every module exists, runs alone and passes its smoke test, but no app feature is built yet. The one working program is the repo's own copy lint in `scripts/`. The repo holds:
 
 - `src/clause_tracer/`: the Python package. [Its README](src/clause_tracer/README.md) maps the modules. [ADR 0004](docs/adr/0004-code-layout.md) explains the layout.
 - `tests/`: integration and end-to-end tests only. Unit tests live beside each module, in `src/clause_tracer/<module>/tests/`.
-- `docs/`: the spec and the design, copy and brand docs. [`docs/spec.md`](docs/spec.md) is the source of truth for what the app does.
+- `docs/`: the spec and the design, copy and brand docs. [`docs/spec.md`](docs/spec.md) is the source of truth for what the app does. `docs/plans/` holds the task plan of each build stage.
+- `scripts/`: the check script and the copy lint, with the lint's allow-list. [Its README](scripts/README.md) lists them.
 - `prototype/`: a clickable HTML prototype, with one page per screen.
 - `assets/`: the logo master files.
 - `reports/`: research reports on how to build the app. [The architecture report](reports/Clause%20Tracer%20pipeline%20architecture.md) is the research behind the build design; read it before planning a build stage. Its stage table and shapes sketch are historical: [docs/system-design.md](docs/system-design.md) sections 3.4 and 15 are current.
@@ -47,10 +49,13 @@ Read [Constitution.md](Constitution.md) before you write, move or split any code
 
 - **Docs:** when a change affects what the app does, says or promises, update the docs in the same change. [WRITING_DOCS.md](WRITING_DOCS.md) section 2 says which files to update, and section 9 is the checklist.
 - **Prototype:** follow the rules in [prototype/README.md](prototype/README.md). Start from `home.html`, use only the classes in `styles.css` and the data attributes in `app.js`, and add every new state to `states.html`. To preview it, run the `prototype` server in `.claude/launch.json` (http://localhost:8767).
-- **Words on screen:** take them from [docs/ux-copy.md](docs/ux-copy.md). If a page and the copy deck disagree, fix both.
+- **Words on screen:** take them from [docs/ux-copy.md](docs/ux-copy.md). The deck, the page and the spec must match: if they disagree, fix all of them. Run `scripts/copy_lint.py` and the two-minute check (ux-copy 1.1).
 
 ## Rules the files don't state
 
+- **Nothing machine-made.** No sparkles, gradients, emoji, spinners, praise or filler ([design-system 4.1](docs/design-system.md#41-never), [ux-copy 1.1](docs/ux-copy.md#11-signs-of-machine-made-text)).
+- **Code writes the app's words.** The AI writes only a label it judged and vague wording (Spec section 6).
+- **Never guess.** When code can't be sure, the label is unsure, the reason is named, and the user sees the clause (Spec section 5).
 - **Red means walk-away.** In the interface, oxblood `#A91207` belongs to the walk-away label and the logo (ADR 0003). Nav markers, progress bars, focus rings and decoration use ink or another accent. A walk-away is also marked by its ✕ icon and its word, so it still reads in greyscale.
 - **Dashed means pencilled.** Only labels the AI judged from the wording are dashed (ADR 0002).
 - **Write British English** in docs and in the app. The licence's name and the `LICENSE` file name keep their US spelling.

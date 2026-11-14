@@ -194,6 +194,7 @@ Proposed tokens for the real build: `--s-1: 4px` up to `--s-8: 48px`, mapped to 
 | `--r-lg` | 8 px | Cards, tables, notices, dialogs, menus, segmented tracks, toasts |
 | *(stamp)* | 3 px | Stamps and pins: deliberately square (ADR 0002) |
 | *(circle)* | 50% | Step numbers, toggle knobs, trail knots, the `?` button |
+| *(pill)* | 999 px | The toggle track only |
 
 **Borders.**
 
@@ -238,7 +239,7 @@ The design target is a laptop of about 1366 × 768 (Spec 14.4).
 
 **The drawn ink set** is in `prototype/icons.js`: a 16 px grid, stroked with `currentColor`, round caps and joins, and no fills or tiles. They are used as `<svg class="icon"><use href="#i-name"/></svg>`. `.icon` is 16 × 16, coloured `--text-2`, and inherits the colour inside buttons.
 
-There are 46 icons in the sprite:
+There are 47 icons in the sprite:
 
 `approx arrow-left arrow-right book check chev-down chev-left chev-right clock cloud-off copy doc dots download drag eye-off filter gear help info key link list lock mail merge minus paste pause pencil play plus refresh ring-dashed scissors search shield textsize thread trash undo unlock upload users wand warn x`
 
@@ -487,7 +488,7 @@ The source line moved into "More" on 14 Nov 2026 (owner decision 4).
 
 ## 8. Audit: where the prototype drifts
 
-**Summary.** 17 screens, about 60 shared classes and 46 icons. 14 issues found, 4 fixed (7 Nov 2026). The tokens are well used in shared CSS. Most drift sits in page-local `<style>` blocks and inline styles.
+**Summary.** 17 screens, about 60 shared classes and 47 icons. 25 issues found, 9 fixed (counted 14 Nov 2026; 14 found and 4 fixed on 7 Nov 2026). The tokens are well used in shared CSS. Most drift sits in page-local `<style>` blocks and inline styles.
 
 ### 8.1 Naming and duplication
 
@@ -547,7 +548,7 @@ The source line moved into "More" on 14 Nov 2026 (owner decision 4).
 1. ~~Give each label its own icon, and settle "dashed means two things".~~ Fixed 7 Nov 2026.
 2. Move the shared warning, flow, clause and thumbnail CSS into `styles.css`, and the swap tokens into `:root`.
 3. Fix the control-border contrast, and finish the pencilled look (hatch and underline) and the pin tint.
-4. Fix the gaps found on 14 Nov 2026: thumbnail dots and 200% text (panel order is fixed).
+4. Fix the thumbnail dots found on 14 Nov 2026. The panel order and the 200% text size are fixed.
 
 ## 9. Using the prototype
 

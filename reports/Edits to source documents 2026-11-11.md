@@ -4,6 +4,8 @@ This is the record of every change made to existing documents while the version 
 
 **Summary.** Seven existing files were edited and sixteen new files were added. No promise to users was changed, and no open decision was settled: every new decision record has the status *proposed*. The largest edits are seven factual corrections to the architecture report and three new rules in the Constitution. The evidence for each is in [the v1 design decisions report](Clause%20Tracer%20v1%20design%20decisions.md).
 
+This summary describes the state on 11 Nov 2026. Later the owner accepted ADRs 0005 to 0016 and settled many open decisions; sections 8 and 9 record what happened after 11 Nov.
+
 To see the exact text of any edit, compare the branch `docs/v1-design-and-testing` with `main`.
 
 ## 1. Corrections to the architecture report
@@ -147,4 +149,4 @@ A review of the design system, the copy deck and the prototype looked for fricti
 10. Text at 200% must fit a 1366 px window (testing strategy section 9).
 11. No praise, including in the practice review.
 
-The spec, the system design, the testing strategy, the copy deck, the design system, the prototype and the stage 1 plan were updated to match. Two details of the new scans are open as question 18 of the stage 1 plan.
+The spec, the system design, the testing strategy, the copy deck, the design system, the prototype and the stage 1 plan were updated to match. Two details of the new scans were open as question 18 of the stage 1 plan, and the owner decided them the same day (Spec 6.2). The lint script, `scripts/copy_lint.py`, was then built and wired into `scripts/check.sh`, and the layout at 150% and 200% text was fixed so that no page scrolls sideways in a 1366 px window.

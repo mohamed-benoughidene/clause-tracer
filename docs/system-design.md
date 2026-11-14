@@ -581,8 +581,9 @@ The owner accepted ADRs 0005 to 0015 on 12 Nov 2026, and ADR 0016 on 13 Nov 2026
 
 **Still open after this work.** These were not researched well enough to recommend, or need a measurement or a lawyer:
 
-- Final input limits and the real cost per review, from the first paid run (Spec 13). A small probe on 13 Nov 2026 supports the estimates (ADR 0010's last amendment).
-- Whether EU AI Act Article 50 puts a marking duty on this app. ADR 0016 (accepted 13 Nov 2026) takes a cautious working position: treat the project as a "provider", keep a written-by value on every text, mark AI text in PDF metadata, and accept the one known gap (a plain-text rewrite the user copies out can't carry a hidden mark). The docs must not say the rule does not apply.
+- Final input limits and the real cost per review, from the first paid run (Spec 13). A small probe on 13 Nov 2026 supports the estimates (ADR 0010's last amendment). Other values wait for that run too: the cost estimate's constants (section 7) and the length caps of AI text, which testing tunes (Spec 6.2).
+- Whether Jev beats an AI model on steps 6a and 9, and whether it can run under the same privacy rules. Version 1 isn't built on it (ADR 0010).
+- Whether EU AI Act Article 50 puts a marking duty on this app. ADR 0016 (accepted 13 Nov 2026) takes a cautious working position: treat the project as a "provider", keep a written-by value on every text, mark AI text in PDF metadata, and accept the one known gap (a plain-text rewrite the user copies out can't carry a hidden mark). The provider question was sent to the EU's AI Act Service Desk on 13 Nov 2026 and has no reply yet. The docs must not say the rule does not apply.
 - Real-world installer checks (13 Nov 2026, new ADR 0009 amendment). **Closed:** the real `apt`/`.deb` install on Ubuntu 22.04 and 24.04 (correct `Depends:` names for each, clean removal), the real `dnf`/tar.gz install on Fedora, and a real Windows installer (Inno Setup, silent install, run, silent uninstall, no admin rights needed). The Ubuntu window puzzle is closed: the window was slow to start, not missing, and the trial app now waits for its own start-up events (ADR 0009, 13 Nov 2026). Linux Mint 22 and 21.3 pass in containers. Ubuntu 26.04 passes too, and the trial app runs under a headless Wayland compositor on Ubuntu and Fedora (13 Nov 2026, same ADR amendment). **Still untried:** a real Ubuntu or Mint desktop session.
 - Whether to register a trade mark later. How FSL would be enforced: no court has ruled on it, and the free routes do little (ADR 0014 amendment). ADR 0016 (accepted 13 Nov 2026) sets the working position: a polite message, then a GitHub DMCA notice for a plain copy only, never for a "competing use" dispute. Then stop.
 - Presidio's speed on a real 60,000-character contract on an ordinary laptop.
@@ -590,6 +591,10 @@ The owner accepted ADRs 0005 to 0015 on 12 Nov 2026, and ADR 0016 on 13 Nov 2026
 - How page pictures reach the window. The page policy has no `img-src data:`, pages cannot fetch files, and writing pictures to disk would break "everything saved is encrypted". Needed before build stage 12.
 - How CI drives the Windows window. ADR 0009 plans Playwright over the debugging port, which release builds turn off. A separate test build or another driver is needed.
 - The oldest supported Windows version. The oldest supported Linux is decided: Ubuntu 24.04 (13 Nov 2026, ADR 0009).
+- The playbook file format, and which module reads it (section 15.6).
+- The uninstall flow: Spec 8.3 says uninstall offers to remove all data and keys, and the flow has no design yet (settled at the shell stage; testing strategy section 1).
+- The third-party licences page is not in the prototype yet ([ux-copy 4.18](ux-copy.md#418-third-party-licences-licenceshtml-not-built-yet)).
+- A compact navigation for large text sizes. At 150% and 200% the sidebar stacks above the content and fills the first screen on Home, so a compact navigation is still to design (found 14 Nov 2026, [design-system](design-system.md) 3.10).
 - The smaller build questions marked "Not yet decided" in section 15, for the stages after stage 1. The stage 1 label and scan edge cases were answered on 14 Nov 2026 (the stage 1 plan, section 6).
 
 ## 14. Changes this work made to earlier documents

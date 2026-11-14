@@ -13,5 +13,5 @@ Run `scripts/check.sh` before you finish a change: it runs every check below, in
 Rules for adding to it:
 
 - A script is pure functions plus a thin `main()` that reads files and prints (Constitution T1, T2), with a test in `tests/`.
-- No new dependency: use the standard library.
+- No new dependency: use the standard library. mypy checks `scripts/` in strict mode, like `src/`.
 - Wire a new check into `check.sh` as its own line.

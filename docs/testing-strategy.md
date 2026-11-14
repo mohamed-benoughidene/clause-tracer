@@ -289,7 +289,7 @@ These are the project's own targets, anchored on a common industry guide (60% ac
 
 | When | What |
 | --- | --- |
-| **Every pull request** (`scripts/check.sh`, Linux) | Lint, format, types, import rules, unit, golden-file, contract, integration and end-to-end replay tests, property tests on the `ci` profile, highlight pictures, fixture checks, architecture tests, dependency and licence checks, all with sockets blocked (from build stage 6). Also branch coverage per package and the owner-table guard (from stage 1). Also the copy lint for fixed copy: it fails on sure signs of machine-made text and warns on soft ones ([ux-copy 1.1](ux-copy.md#11-signs-of-machine-made-text), decided 14 Nov 2026; a separate task builds the script) |
+| **Every pull request** (`scripts/check.sh`, Linux) | Lint, format, types, import rules, unit, golden-file, contract, integration and end-to-end replay tests, property tests on the `ci` profile, highlight pictures, fixture checks, architecture tests, dependency and licence checks, all with sockets blocked (from build stage 6). Also branch coverage per package and the owner-table guard (from stage 1). Also the copy lint for fixed copy: it fails on sure signs of machine-made text and warns on soft ones ([ux-copy 1.1](ux-copy.md#11-signs-of-machine-made-text), decided 14 Nov 2026; the script is `scripts/copy_lint.py`, built 14 Nov 2026) |
 | **Every pull request, once files and paths are real** | The same suite on a Windows runner pinned to `windows-2025`, without the highlight pictures |
 | **Nightly** (from build stage 5) | Property tests at 2,000 examples; file fuzzing |
 | **Weekly** | Vulnerability check of the lockfile |

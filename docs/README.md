@@ -9,6 +9,7 @@ This folder holds the project's written documents: specs, design and copy guides
 | Understand what the app does and how it works | [`spec.md`](spec.md) |
 | See how the parts fit together before building one | [`system-design.md`](system-design.md) |
 | Know which tests to write, and what must pass before a release | [`testing-strategy.md`](testing-strategy.md) |
+| Build a stage of the app | The stage's plan in [`plans/`](plans/), after [`system-design.md`](system-design.md) and [`testing-strategy.md`](testing-strategy.md) |
 | Build or change a screen | [`design-system.md`](design-system.md), then the page in [`../prototype/`](../prototype/) |
 | Write or check the words on a screen | [`ux-copy.md`](ux-copy.md) |
 | Know why it looks the way it does | [`design-direction.md`](design-direction.md) and the [ADRs](adr/) |
@@ -48,7 +49,7 @@ ADRs 0005 to 0015 were all **accepted** by the project owner on 12 Nov 2026, and
 | [0008](adr/0008-personal-data-detection-bundle.md) | Ship Presidio with a pinned config and the medium spaCy model, behind code-first finders. |
 | [0009](adr/0009-desktop-shell-protocol-and-packaging.md) | Use pywebview as the shell, run the engine as a child process over stdio, and package with PyInstaller and Inno Setup. |
 | [0010](adr/0010-starting-models.md) | Start with Claude Sonnet 5.5 and two comparison models. Keep Jev as an experiment. |
-| [0011](adr/0011-who-writes-the-words.md) | Build the message from code templates, pick not-covered clause types from a closed list, and use one fixed line for AI wording. |
+| [0011](adr/0011-who-writes-the-words.md) | Build the message and a label's panel words from code templates, pick not-covered clause types from a closed list, and use one fixed line for AI wording. |
 | [0012](adr/0012-missing-unsure-and-evidence-failures.md) | Show a checkable "searched, nothing found" list, turn disagreeing searches into unsure, and keep the label when a quote can't be placed on the page. |
 | [0013](adr/0013-test-layers-and-release-gates.md) | Test in five layers, four of them free, with the project's own release gates and a paid-run budget. |
 | [0014](adr/0014-protection-and-release-integrity.md) | Use no obfuscation. Protect the project with signed and attested releases and honest wording. A trade mark is deferred. |
@@ -65,5 +66,5 @@ The spec, the design system, the copy deck and the prototype describe the same a
 - **Where each thing is decided:**
   - What the app does: `spec.md`.
   - How it looks: `prototype/styles.css`, as described in `design-system.md`.
-  - What it says: `ux-copy.md`.
+  - What it says: `ux-copy.md`. `scripts/copy_lint.py` checks the prototype against it, and `scripts/check.sh` runs it.
 - **The writing style:** British English, plain words and short sentences. The app never says "I". Say "source available", never "open source" (see [the licence](../LICENSE)).
