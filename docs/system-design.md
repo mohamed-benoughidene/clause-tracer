@@ -535,6 +535,8 @@ This section is the home of the build plan. Spec 9 sets its shape: a Python comm
 
 The stage numbers and the module of each stage match the report's, so "build stage 12" in [ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md) and the gap table in [`testing-strategy.md`](testing-strategy.md) section 13 still point at the right stage.
 
+The task plan of each stage is written in `docs/plans/` just before the stage is built. See [`plans/README.md`](plans/README.md).
+
 **Every stage:**
 
 - leaves `scripts/check.sh` passing;

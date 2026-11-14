@@ -25,6 +25,7 @@ Every fact has one home. Other files may repeat it, but the home wins. If they d
 | Terms for contributors and paying users | `CLA.md`, `COMMERCIAL_LICENSE.md` | `README.md` |
 | How to keep the docs up to date | This file | `AGENTS.md`, `docs/README.md` |
 | How commits and branches are named | `GIT_CONVENTIONS.md` | `AGENTS.md`, `README.md` |
+| The task plan of a build stage | `docs/plans/stage-NN-name.md` | `docs/plans/README.md`, `docs/system-design.md` section 15 |
 | What a folder holds | That folder's `README.md` | `docs/README.md` |
 
 ## 2. What to update when…
@@ -40,6 +41,7 @@ Find your change in the left column. Update every file in the right column in th
 | **Change the AI steps or models** | Spec section 6. If what is sent to the AI changes, treat it as a privacy change too (the row below). |
 | **Change how the parts fit together** (a process, a port, storage, the engine protocol, packaging) | `docs/system-design.md`, and an ADR if the choice is hard to undo. |
 | **Add or change a kind of test, a release gate or a coverage target** | `docs/testing-strategy.md`, and Spec 11 if an acceptance test changes. |
+| **Change the work of a build stage** (its tasks, order or checks) | That stage's plan in `docs/plans/`, and a dated line in its change log. |
 | **Make a decision someone may later ask "why?" about** | Write an ADR (section 6). |
 | **Change a token or a component** | `styles.css` first, then the matching part of `design-system.md`. If the change fixes an audit item, mark it ✅ in design-system section 8. |
 | **Change what data the app stores, sends or keeps** | Spec section 8, the SECURITY.md scope, the README privacy lines and badges, and the Help and Settings copy. See section 3. |

@@ -26,6 +26,7 @@ This folder holds the project's written documents: specs, design and copy guides
 | [`design-direction.md`](design-direction.md) | The agreed actions that stop the app from looking generic: paper and ink, pencilled versus inked labels, two radii, and one shadow. |
 | [`clause-tracer-brand-philosophy.md`](clause-tracer-brand-philosophy.md) | Why the app has this name, why a red thread and why a butterfly, and the rules for imagery. |
 | [`clause-tracer-logo-guide.pdf`](clause-tracer-logo-guide.pdf) | The logo guide: the parts of the mark, colours, construction, minimum sizes and what not to do. |
+| [`plans/`](plans/) | Task plans, one per build stage. Start with its README. |
 | [`adr/`](adr/) | Architecture decision records. Each one is a single decision, with its reasons. |
 
 ## Decisions (ADRs)
