@@ -37,7 +37,7 @@
 - Building match keys and the fold for them, and offset invariants 2 and 4: stage 2. The placeholder map and invariant 3: stage 4. Glyphs, page boxes and invariants 1, 5 (in `checking`) and 6: stages 5 and 8.
 - The nightly job with the 2,000-example Hypothesis profile: stage 5. The suite-wide socket block: stage 6 ([testing strategy 13](../testing-strategy.md#13-gaps-today-and-the-order-to-close-them)).
 - User state and `Customer`; storage rows, the key table and migrations; derived records and user state in `ReviewStore`; `StepSpec`, the cache key, runner events and the cancel token: stage 6 ([system design 3.4, "Left to later stages"](../system-design.md#34-core-shapes-for-stage-1)).
-- Mapping errors to review statuses and exit codes, loading and validating `Settings`, reading playbook files: stage 6.
+- Mapping errors to review statuses and exit codes (including the message for a rate limit), loading and validating `Settings`, reading playbook files: stage 6. Raising `RateLimitedError` from a real HTTP 429: stage 9.
 - The contract suites run against real adapters: stage 6 (store, secrets), 7 (Presidio), 9 (OpenRouter).
 - The number parser and the quote check; how a start point is compared; who builds the evidence trail; the "searched, nothing found" list; explanation parts; keywords on `Position`; the step input shapes of each AI step; the template fallback after a failed scan: stage 8 ([system design 15.8](../system-design.md#158-stage-8-checking-and-the-message-templates)).
 - AI reply schemas (Pydantic, in the owning module): stages 8, 9 and 11.
@@ -57,7 +57,7 @@
 
 ## 4. Checks before starting
 
-- [ ] **The plan is Accepted.** Questions 1 to 15 in section 6 are answered. Question 16 must be answered before S1-M3-T6, and question 17 before S1-M5-T1.
+- [ ] **The plan is Accepted.** Questions 1 to 17 in section 6 are answered (14 Nov 2026). No task waits on an open question.
 - [ ] **The skeleton passes.** Run `.venv/bin/uv sync`, then `scripts/check.sh`. It must exit 0 before any change. Confirm that `core` holds only the files listed in section 2.
 - [ ] **Pydantic `TypeAdapter` builds frozen, slotted, keyword-only dataclasses** ([ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) action item 2, [system design 3.4](../system-design.md#34-core-shapes-for-stage-1) "Check first"). Run it after S1-M1-T2 (Pydantic installed) and before S1-M1-T7 (the first enum). How:
   1. Write a throwaway test file in your scratch folder, outside the repo. Never commit it.
@@ -189,7 +189,7 @@ The stage's tools are locked, coverage and the owner-table guard run in `scripts
   - **Files:** `src/clause_tracer/core/ids.py`, `src/clause_tracer/core/enums.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_enums.py`, `src/clause_tracer/core/README.md` ("Ids and enums").
   - **Tests first:** in `test_enums.py`:
     - `test_enum_members_match_system_design`: a dict in the test maps each enum to the tuple of member names copied from system design 3.4; `tuple(m.name for m in enum) ==` that tuple for every enum.
-    - `test_unsure_reasons`: `UNSURE_REASONS` has 16 members and holds neither `RANGE`, `CLAUSES_DISAGREE` nor `AMOUNT_PERCENT_DISAGREE`.
+    - `test_unsure_reasons`: `ReasonCode` has 20 members, `UNSURE_REASONS` has 17 members, `UNLIMITED_UNCLEAR` is the last member of `ReasonCode` and is in `UNSURE_REASONS`, and `UNSURE_REASONS` holds neither `RANGE`, `CLAUSES_DISAGREE` nor `AMOUNT_PERCENT_DISAGREE`.
     - `test_ids_are_plain_str_at_run_time`: `type(PositionId("1")) is str`.
     - `test_placeholder_markers`: `PLACEHOLDER_OPEN == "⟦"` and `PLACEHOLDER_CLOSE == "⟧"`.
   - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_enums.py` reports 4 passed, `from clause_tracer.core import Level` works, and `scripts/check.sh` exits 0.
@@ -197,7 +197,7 @@ The stage's tools are locked, coverage and the owner-table guard run in `scripts
   - **Depends on:** S1-M1-T6, the TypeAdapter check.
 
 - [ ] **S1-M1-T8: The error tree**
-  - **Build:** In `src/clause_tracer/core/errors.py`, the classes of [system design 3.4, "Errors"](../system-design.md#34-core-shapes-for-stage-1), exactly: the base, the four groups and the 19 leaf classes with their codes. The base:
+  - **Build:** In `src/clause_tracer/core/errors.py`, the classes of [system design 3.4, "Errors"](../system-design.md#34-core-shapes-for-stage-1), exactly: the base, the four groups and the 20 leaf classes with their codes. The base:
     ```python
     class ClauseTracerError(Exception):
         code: ClassVar[str] = ""
@@ -206,16 +206,38 @@ The stage's tools are locked, coverage and the owner-table guard run in `scripts
             super().__init__(self.code)
             self.context: Mapping[str, str | int] = MappingProxyType(dict(context or {}))
     ```
-    Each leaf class sets only `code`. Export every class.
-  - **Files:** `src/clause_tracer/core/errors.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_errors.py`, `src/clause_tracer/core/README.md` ("Errors": a table of class, group, code).
-  - **Tests first:** in `test_errors.py`, with `LEAVES` a tuple of the 19 leaf classes written out in the test:
+    Each leaf class sets only `code`, except `RateLimitedError`, which also carries the wait the AI service asked for:
+    ```python
+    class RateLimitedError(ModelServiceError):
+        code: ClassVar[str] = "rate_limited"
+
+        def __init__(
+            self,
+            context: Mapping[str, str | int] | None = None,
+            *,
+            retry_after_seconds: int | None = None,
+        ) -> None:
+            if retry_after_seconds is not None and retry_after_seconds < 0:
+                raise ValueError("retry_after_seconds must be 0 or more")
+            merged: dict[str, str | int] = dict(context or {})
+            if retry_after_seconds is not None:
+                merged["retry_after_seconds"] = retry_after_seconds
+            super().__init__(merged)
+            self.retry_after_seconds: int | None = retry_after_seconds
+    ```
+    Export every class.
+  - **Files:** `src/clause_tracer/core/errors.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_errors.py`, `src/clause_tracer/core/README.md` ("Errors": a table of class, group, code, with a line on `retry_after_seconds`).
+  - **Tests first:** in `test_errors.py`, with `LEAVES` a tuple of the 20 leaf classes written out in the test:
     - `test_every_leaf_is_in_exactly_one_group`: for each leaf, exactly one of `InputError`, `ModelServiceError`, `LocalError`, `ReviewCancelled` is a superclass (a class counts as its own superclass).
-    - `test_codes_are_unique_lower_snake_case`: every leaf code matches `^[a-z][a-z0-9_]*$`, and the 19 codes are unique.
+    - `test_codes_are_unique_lower_snake_case`: every leaf code matches `^[a-z][a-z0-9_]*$`, and the 20 codes are unique.
     - `test_codes_match_system_design`: a dict in the test copies each class's code from system design 3.4; each class's `code` equals it.
     - `test_context_is_read_only`: `ModelTimeoutError({"step": "match"}).context["step"] = "x"` raises `TypeError`.
     - `test_context_defaults_to_empty`: `ConfigError().context == {}`.
     - `test_message_is_the_code`: `str(NoCreditError()) == "no_credit"`.
-  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_errors.py` reports 6 passed, and `scripts/check.sh` exits 0.
+    - `test_rate_limited_carries_the_wait_time`: `RateLimitedError({"step": "match"}, retry_after_seconds=30)` has `retry_after_seconds == 30`, `context["retry_after_seconds"] == 30` and `context["step"] == "match"`; with `retry_after_seconds=0` the wait is `0`, not `None`.
+    - `test_rate_limited_without_wait_time`: `RateLimitedError()` has `retry_after_seconds is None` and `context == {}`; `str(RateLimitedError()) == "rate_limited"`.
+    - `test_rate_limited_negative_wait_raises`: `RateLimitedError(retry_after_seconds=-1)` raises `ValueError` whose message is `retry_after_seconds must be 0 or more`.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_errors.py` reports 9 passed, and `scripts/check.sh` exits 0.
   - **Rules:** I5, I6, I7, [system design 6.4](../system-design.md#64-errors), [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md).
   - **Depends on:** S1-M1-T7.
 
@@ -352,12 +374,12 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Depends on:** S1-M3-T4.
 
 - [ ] **S1-M3-T6: Label-rule table (Owner)**
-  - **Build:** Owner only. The rows of `label_rules.toml`. Columns: `id` (str), `rule` (one of `"rule1"`, `"rule2"`, `"rule3"`, `"rule4"`, `"rule5"`, `"rule6"`, `"rule7"`, `"rule9"`, `"rule10"`, `"edge"`; Rule 8 gives no label), `note` (str, optional), then one input in the sample format of S1-M3-T4 (`position` is a Spec 7 position id from the sample file; `match`; optional `values`, `judged`, `clauses_to_read`, `outside_documents`), then the expected answer: `level` (a `Level` value), `reasons` (a list of `ReasonCode` values; order does not matter), `written_by` (`"code"` or `"ai"`). Cases to cover, proposed, owner to check: Rule 1 at each limit and just past it, in both directions (positions 1 and 2), "none" as 0 (position 9), "unlimited" in both directions; Rule 2 yes, no, unclear, missing and conditional yes; Rule 3 quote not confirmed, number not in quote, and a confirmed quote that is not placed (label kept); Rule 4 a readable walk-away beside an unsure value, unsure beside acceptable, worst of preferred and acceptable, clauses that disagree; Rule 5 vague wording, another start point, unknown figures, business days; Rule 6 weeks, months and years each way, a range, a deposit amount with and without a total, an amount and a percentage that disagree; Rule 7 nothing found for each missing level, `MATCH_UNCONFIRMED`, and a failed call for a position whose missing level is preferred; Rule 9 hidden and undecodable text under a walk-away value; Rule 10 a walk-away that stays walk-away and an acceptable that becomes unsure; `edge` one row per item of question 16. The AI agent does not write or change it (T11). It may list, in chat, which Spec lines still have no row.
+  - **Build:** Owner only. The rows of `label_rules.toml`. Columns: `id` (str), `rule` (one of `"rule1"`, `"rule2"`, `"rule3"`, `"rule4"`, `"rule5"`, `"rule6"`, `"rule7"`, `"rule9"`, `"rule10"`, `"edge"`; Rule 8 gives no label), `note` (str, optional), then one input in the sample format of S1-M3-T4 (`position` is a Spec 7 position id from the sample file; `match`; optional `values`, `judged`, `clauses_to_read`, `outside_documents`), then the expected answer: `level` (a `Level` value), `reasons` (a list of `ReasonCode` values; order does not matter), `written_by` (`"code"` or `"ai"`). Cases to cover, proposed, owner to check: Rule 1 at each limit and just past it, in both directions (positions 1 and 2), "none" as 0 (position 9), "unlimited" when lower is better (position 5: walk-away) and when higher is better (position 2: unsure, `unlimited_unclear`); Rule 2 yes, no, unclear, missing and conditional yes; Rule 3 quote not confirmed, number not in quote, and a confirmed quote that is not placed (label kept); Rule 4 a readable walk-away beside an unsure value, unsure beside acceptable, worst of preferred and acceptable, clauses that disagree; Rule 5 vague wording, another start point, unknown figures, business days; Rule 6 weeks, months and years each way, a range, a deposit amount with and without a total, an amount and a percentage that disagree; Rule 7 nothing found for each missing level, `MATCH_UNCONFIRMED`, and a failed call for a position whose missing level is preferred; Rule 9 hidden and undecodable text under a walk-away value; Rule 10 a walk-away that stays walk-away and an acceptable that becomes unsure; `edge` one row per item of question 16. The AI agent does not write or change it (T11). It may list, in chat, which Spec lines still have no row.
   - **Files:** `src/clause_tracer/core/tests/tables/label_rules.toml`.
   - **Tests first:** None. The owner's values are the expected answers.
   - **Done when:** The owner has written the rows and said so. `scripts/check.sh` exits 0.
   - **Rules:** T11, [Spec 5](../spec.md#5-labelling-rules), [testing strategy 4 and 14](../testing-strategy.md#14-example-tests).
-  - **Depends on:** S1-M3-T2, S1-M3-T5, question 16.
+  - **Depends on:** S1-M3-T2, S1-M3-T5.
 
 - [ ] **S1-M3-T7: Unit table (Owner)**
   - **Build:** Owner only. The rows of `units.toml`. Columns: `id` (str), `number` (a decimal string), `unit` (the unit as written, or absent for none), `target` (a `Unit` value), `expected` (a number as a string that `fractions.Fraction` reads, such as `"14"` or `"7/30"`, or the reason code value `"business_days"` or `"unit_unknown"`). Cases to cover, proposed, owner to check: every spelling in the list of S1-M3-T12 to each target it converts to; a week, a month and a year to days and to months; business days and working days; an unknown word; days to percent (no conversion); no unit (question 16a). The AI agent does not write or change it (T11).
@@ -423,7 +445,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Tests first:** in `test_units.py`: `test_units_table`, one case per row of `units.toml` (case keys `{"id", "number", "unit", "target", "expected"}`, required all but `unit`; `expected` is a `ReasonCode` value or else read with `as_fraction`; compare for equality); `test_units_table_has_rows`; the property `test_days_and_months_round_trip`: for any `Decimal` from `decimals(min_value=0, max_value=10_000, places=2)`, `convert_to_unit(n, "months", Unit.DAYS) == Fraction(n) * 30` and `convert_to_unit(n, "days", Unit.MONTHS) * 30 == Fraction(n)`.
   - **Done when:** every row passes, `scripts/check.sh` exits 0, and the owner table is unchanged in the commit.
   - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rule 6, T1, T6, T11.
-  - **Depends on:** S1-M3-T7, question 16.
+  - **Depends on:** S1-M3-T7.
 
 - [ ] **S1-M3-T13: Number values (Rules 1, 3, 5, 6 and 9)**
   - **Build:** In `src/clause_tracer/core/labels.py`, export:
@@ -431,13 +453,17 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
     - `def level_for_limits(rule: NumberRule, number: Fraction) -> Level`: for `LOWER_IS_BETTER`, `PREFERRED` when `number <= preferred_limit`, else `ACCEPTABLE` when `number <= acceptable_limit`, else `WALK_AWAY`; for `HIGHER_IS_BETTER` the same with `>=`.
     - `def number_verdicts(rule: NumberRule, value: CheckedValue, unreadable: UnreadableSpans) -> tuple[ValueVerdict, ...]`, in this order:
       1. `reasons` = `value.reasons` plus `evidence_reasons(value.evidence, unreadable)`. Add `VAGUE_WORDING` when `value.vague`.
-      2. Numbers. If `value.unlimited`, skip to step 4. If `rule.unit` is `PERCENT` and `value.amount` is not `None`: when `value.total` is `None` or not above 0, add `AMOUNT_WITHOUT_TOTAL`; otherwise the computed percentage is `Fraction(amount) / Fraction(total) * 100`. When `value.number` is also given, convert it as below; when its value rounded half up to a whole number (`math.floor(x + Fraction(1, 2))`) differs from the computed one rounded the same way, add `AMOUNT_PERCENT_DISAGREE` and keep both numbers; otherwise keep only the computed one (question 16e). Else, if `value.number` is not `None`: convert it with `convert_to_unit(value.number, value.unit_as_written, rule.unit)`; a `ReasonCode` result is added to `reasons`. If `value.range_high` is not `None`, convert it the same way, keep it as a second number, and add `RANGE`. Else (no number): add `NO_VALUE` when `reasons` holds nothing from `UNSURE_REASONS` yet (question 16c).
+      2. Numbers: take the first case that fits.
+         - `value.unlimited`: when `rule.direction` is `HIGHER_IS_BETTER`, add `UNLIMITED_UNCLEAR` (Rule 1, decided 14 Nov 2026). The value has no numbers.
+         - `rule.unit` is `PERCENT` and `value.amount` is not `None`: when `value.total` is `None` or not above 0, add `AMOUNT_WITHOUT_TOTAL`, and the value has no numbers. Otherwise the computed percentage is `Fraction(amount) / Fraction(total) * 100`. When `value.number` is `None`, the computed percentage is the one number. When `value.number` is given, convert it with `convert_to_unit(value.number, value.unit_as_written, rule.unit)`. A `ReasonCode` result is added to `reasons`, and the computed percentage is the one number. Otherwise, when the converted value and the computed percentage, each rounded half up to a whole number (`math.floor(x + Fraction(1, 2))`), differ, add `AMOUNT_PERCENT_DISAGREE`, and the numbers are the computed percentage then the converted value. When they match, the computed percentage is the one number (question 16e).
+         - `value.number` is not `None`: convert it with `convert_to_unit(value.number, value.unit_as_written, rule.unit)`; a `ReasonCode` result is added to `reasons` and the value has no numbers, otherwise it is the first number. If `value.range_high` is not `None`, convert it the same way, add it as a second number when it converted, and add `RANGE`.
+         - Otherwise: add `NO_VALUE` when `reasons` holds nothing from `UNSURE_REASONS` yet (question 16c).
       3. If `reasons` holds anything from `UNSURE_REASONS`: return one verdict with `level=UNSURE`, `readable_value=None`.
-      4. If `value.unlimited`: return one verdict with `level=WALK_AWAY`, `readable_value="unlimited"` (Rule 1: the worst value in either direction).
+      4. If `value.unlimited` (so `rule.direction` is `LOWER_IS_BETTER`, because step 3 caught the other direction): return one verdict with `level=WALK_AWAY`, `readable_value="unlimited"` (Rule 1: unlimited is the worst value when lower is better).
       5. Otherwise one verdict per number, in order: `level=level_for_limits(rule, n)`, `readable_value=str(n)`.
       Every verdict has `clause_id=value.clause_id`, `evidence=value.evidence`, `reasons=sort_reasons(reasons)`.
   - **Files:** `src/clause_tracer/core/labels.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_labels.py`, `src/clause_tracer/core/README.md` ("Functions").
-  - **Tests first:** in `test_labels.py`, with `PAYMENT_DAYS = NumberRule(unit=DAYS, direction=LOWER_IS_BETTER, preferred_limit=Decimal(15), acceptable_limit=Decimal(30))` and a helper `def value(**changes: object) -> CheckedValue` that builds a confirmed 60-day value on clause `c1` with quote `Span(start=0, end=10)`:
+  - **Tests first:** in `test_labels.py`, with `PAYMENT_DAYS = NumberRule(unit=DAYS, direction=LOWER_IS_BETTER, preferred_limit=Decimal(15), acceptable_limit=Decimal(30))`, `DEPOSIT_PERCENT = NumberRule(unit=PERCENT, direction=HIGHER_IS_BETTER, preferred_limit=Decimal(50), acceptable_limit=Decimal(25))` and a helper `def value(**changes: object) -> CheckedValue` that builds a confirmed 60-day value on clause `c1` with quote `Span(start=0, end=10)`:
     - `test_hidden_quote_makes_value_unsure` (**promise test**, "values resting on hidden text are unsure", Spec 11): with hidden span `5..8`, one verdict, `UNSURE`, reasons `(HIDDEN_TEXT,)`, `readable_value is None`.
     - `test_undecodable_quote_makes_value_unsure`.
     - `test_quote_touching_hidden_at_its_end_is_readable`: hidden span `10..12` gives a verdict that is not `UNSURE`.
@@ -445,11 +471,12 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
     - `test_missing_quote_is_unsure`: `evidence=None` gives `UNSURE` with `QUOTE_NOT_CONFIRMED`.
     - `test_reason_on_value_makes_it_unsure`: `reasons=(OTHER_START_POINT,)` gives `UNSURE` (Rule 5, decided 14 Nov 2026).
     - `test_range_gives_two_verdicts`: `number=6, range_high=9` gives two verdicts, both with `RANGE`.
-    - `test_unlimited_is_walk_away_both_ways`: for both directions, `unlimited=True` gives one `WALK_AWAY` verdict.
+    - `test_unlimited_is_walk_away_when_lower_is_better`: with `PAYMENT_DAYS`, `unlimited=True` gives one verdict, `WALK_AWAY`, `readable_value == "unlimited"`, `reasons == ()`.
+    - `test_unlimited_is_unsure_when_higher_is_better`: with `DEPOSIT_PERCENT`, `unlimited=True` gives one verdict, `UNSURE`, `readable_value is None`, `reasons == (UNLIMITED_UNCLEAR,)`.
     - `test_business_days_are_unsure`: `unit_as_written="business days"` gives `UNSURE` with `BUSINESS_DAYS`.
-  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_labels.py` reports 9 passed, and `scripts/check.sh` exits 0.
-  - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rules 1, 3, 5, 6, 9; I3, I4, T1, T13.
-  - **Depends on:** S1-M3-T10, S1-M3-T12, question 16.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_labels.py` reports 10 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** [Spec 5](../spec.md#5-labelling-rules) (the "never guess" principle, Rules 1, 3, 5, 6, 9); I3, I4, T1, T13.
+  - **Depends on:** S1-M3-T10, S1-M3-T12.
 
 - [ ] **S1-M3-T14: Yes/no and words values (Rules 2 and 9)**
   - **Build:** In `src/clause_tracer/core/labels.py`, export:
@@ -458,7 +485,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
     Both set `clause_id` and `evidence` from their input, and `reasons=sort_reasons(reasons)`.
   - **Files:** `src/clause_tracer/core/labels.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_labels.py`, `src/clause_tracer/core/README.md` ("Functions").
   - **Tests first:** with `PAID_IF_CANCELLED = YesNoRule(question="Paid if cancelled", yes_level=PREFERRED, no_level=WALK_AWAY)`: `test_yes_gives_yes_level`; `test_no_unclear_and_missing_give_no_level` (all three give `WALK_AWAY`); `test_conditional_yes_is_unsure` (reasons hold `CONDITIONAL_YES`); `test_hidden_yes_is_unsure`; `test_judged_level_is_kept`; `test_judged_unsure_has_a_reason`; `test_hidden_judged_level_is_unsure`.
-  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_labels.py` reports 16 passed, and `scripts/check.sh` exits 0.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_labels.py` reports 17 passed, and `scripts/check.sh` exits 0.
   - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rules 2 and 9, T1.
   - **Depends on:** S1-M3-T13.
 
@@ -470,9 +497,9 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
     - Reasons: `sort_reasons` of every verdict's reasons, plus `CLAUSES_DISAGREE` when added (question 16g: reasons of every value are kept at every level).
   - **Files:** `src/clause_tracer/core/labels.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_labels.py`, `src/clause_tracer/core/tests/strategies.py`, `src/clause_tracer/core/README.md` ("Functions").
   - **Tests first:** in `strategies.py` add `def value_verdicts() -> SearchStrategy[ValueVerdict]`: `clause_id` from `sampled_from(["c1", "c2", "c3"])`; `level` from `sampled_from(Level)`; for `UNSURE`, `reasons` is a list of 1 to 3 codes from `sorted(UNSURE_REASONS)` and `readable_value` is `None`; otherwise `reasons` is a list of 0 to 2 codes from `[RANGE, CLAUSES_DISAGREE]` and `readable_value` from `sampled_from(["5", "10", "30"])`; `evidence` is `None`. In `test_labels.py`: the property `test_order_never_changes_the_result` (a list of 1 to 6 verdicts and any permutation of it give the same result); the property `test_readable_walk_away_wins` (**promise test**, part of "every planted walk-away gets walk-away", Spec 11: any list holding a `WALK_AWAY` verdict gives `WALK_AWAY`); the property `test_unsure_always_has_a_reason` (an `UNSURE` result has at least one code from `UNSURE_REASONS`); `test_empty_raises`; `test_clauses_that_disagree` (`c1` "12" and `c2` "6", "9" give `CLAUSES_DISAGREE`); `test_same_value_in_two_clauses_agrees` (`c1` "30" and `c2` "30"); `test_range_in_one_clause_agrees` (`c1` "6" and `c1` "9" only).
-  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_labels.py` reports 23 passed, and `scripts/check.sh` exits 0.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_labels.py` reports 24 passed, and `scripts/check.sh` exits 0.
   - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rule 4, T1, T6, T13, I4.
-  - **Depends on:** S1-M3-T14, question 16.
+  - **Depends on:** S1-M3-T14.
 
 - [ ] **S1-M3-T16: One label per position (Rules 7 and 10)**
   - **Build:** In `src/clause_tracer/core/labels.py`, export `def label_position(item: LabelInput, unreadable: UnreadableSpans) -> ToolLabel`:
@@ -480,14 +507,15 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
     2. `CallFailed`: `level=UNSURE`, `reasons=(REPLY_BROKEN_TWICE,)`, `evidence=()`, `written_by=CODE`.
     3. `NothingFound`: `level` is `rule.no_level` for `YES_NO` (Spec 4.1) and `position.missing_level` otherwise; `reasons=()`, `evidence=()`, `written_by=CODE`.
     4. `MatchUnconfirmed`: `level=UNSURE`, `reasons=(MATCH_UNCONFIRMED,)`, `evidence=()`, `written_by=CODE`.
-    5. `MatchFound`: the verdicts are `number_verdicts` of each value (joined in order), `yes_no_verdict` of each value, or `words_verdict` of each judged level. No verdict: `level=UNSURE`, `reasons=(NO_VALUE,)`, `written_by=CODE`. Otherwise `level, reasons = combine_rule_4(verdicts)`; `written_by` is `AI` for `WORDS` and `CODE` otherwise (question 16i, ADR 0002). `evidence` is every verdict's evidence that is not `None`, in order, without repeats.
-    6. Rule 10: when `item.outside_documents` is not empty, the level becomes `UNSURE` and `UNLOADED_DOCUMENT` joins the reasons, unless step 5 gave `WALK_AWAY` (Rule 4 step 1). A walk-away keeps its reasons unchanged (question 16h).
+    5. `MatchFound`: the verdicts are `number_verdicts` of each value (joined in order), `yes_no_verdict` of each value, or `words_verdict` of each judged level. No verdict: `level=UNSURE`, `reasons=(NO_VALUE,)`, `written_by=CODE`. Otherwise `level, reasons = combine_rule_4(verdicts)`; `written_by` is set in step 7. `evidence` is every verdict's evidence that is not `None`, in order, without repeats.
+    6. Rule 10: when `item.outside_documents` is not empty, the level becomes `UNSURE` and `UNLOADED_DOCUMENT` joins the reasons, unless the level came from step 5 and is `WALK_AWAY` (Rule 4 step 1). That walk-away keeps its level and its reasons unchanged. A `NothingFound` label whose missing level is `WALK_AWAY` came from step 3, so it does become `UNSURE` (question 16h).
+    7. `written_by`: `AI` only when all three hold: the position type is `WORDS`, the match is a `MatchFound`, and the final level after step 6 is `PREFERRED`, `ACCEPTABLE` or `WALK_AWAY`. In every other case it is `CODE`. So a words label that a rule turned `UNSURE` (the AI answered unsure, a quote failed, hidden text, an unloaded document) is written by code, and only a level the AI actually judged is drawn in pencil (question 16i, ADR 0002).
     `position_id=item.position.id`; reasons always pass through `sort_reasons`.
   - **Files:** `src/clause_tracer/core/labels.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_labels.py`, `src/clause_tracer/core/tests/label_cases.py`, `src/clause_tracer/core/tests/strategies.py`, `src/clause_tracer/core/README.md` ("Functions").
   - **Tests first:**
     - In `label_cases.py`: `@dataclass(frozen=True, slots=True, kw_only=True) class LabelCase` with `id: str, rule: str, label_input: LabelInput, unreadable: UnreadableSpans, level: Level, reasons: frozenset[ReasonCode], written_by: WrittenBy`, and `def label_rule_cases() -> tuple[LabelCase, ...]`: loads `label_rules.toml` with `load_table` (case keys `id, rule, note, position, match, values, judged, clauses_to_read, outside_documents, level, reasons, written_by`; required `id, rule, position, match, level, reasons, written_by`), reads the starter playbook from `samples/spec-14-5.toml` with `parse_sample`, and builds each case's input with `parse_label_inputs([<the case's input keys>], playbook)`.
     - In `strategies.py`: `def positions() -> SearchStrategy[Position]`: id `"p"` plus `integers(0, 99)`; type from `sampled_from(PositionType)`; a `NumberRule` with unit from `sampled_from(Unit)`, direction from `sampled_from(Direction)` and two limits from `decimals(0, 100, places=0)` ordered so the preferred limit is stricter; a `YesNoRule` with question `"q"`, yes and no levels from `[PREFERRED, ACCEPTABLE, WALK_AWAY]`; a `WordsRule` with texts `"a"`, `"b"`, `"c"`; `missing_level` from `sampled_from(Level)`; topic `"t"`; `why_note=None`.
-    - In `test_labels.py`: `test_label_rules_table`, one case per `label_rule_cases()` row (compare `level`, `frozenset(reasons)`, `written_by`); `test_every_rule_has_rows` (each of `rule1`, `rule2`, `rule3`, `rule4`, `rule5`, `rule6`, `rule7`, `rule9`, `rule10` has a row); the property `test_failed_call_never_gives_a_missing_level` (any `positions()` with `CallFailed` gives `UNSURE`: system design 8.2); `test_words_label_is_written_by_ai`; `test_missing_words_label_is_written_by_code`; `test_rule_10_keeps_a_walk_away`; `test_position_mismatch_raises`.
+    - In `test_labels.py`: `test_label_rules_table`, one case per `label_rule_cases()` row (compare `level`, `frozenset(reasons)`, `written_by`); `test_every_rule_has_rows` (each of `rule1`, `rule2`, `rule3`, `rule4`, `rule5`, `rule6`, `rule7`, `rule9`, `rule10` has a row); the property `test_failed_call_never_gives_a_missing_level` (any `positions()` with `CallFailed` gives `UNSURE`: system design 8.2); `test_words_label_is_written_by_ai`; `test_missing_words_label_is_written_by_code`; `test_rule_10_keeps_a_walk_away` (a found walk-away value plus one outside document: level `WALK_AWAY`, no `UNLOADED_DOCUMENT`); `test_rule_10_makes_a_missing_walk_away_unsure`; `test_words_label_turned_unsure_is_written_by_code` (a `WORDS` position with one judged level and one outside document gives `UNSURE` with `written_by=CODE`); `test_judged_words_label_is_written_by_ai` (the same position with no outside document and a judged `ACCEPTABLE` gives `written_by=AI`) (`NothingFound` on a position whose missing level is `WALK_AWAY`, plus one outside document: level `UNSURE`, reasons `(UNLOADED_DOCUMENT,)`); `test_position_mismatch_raises`.
   - **Done when:** every row of `label_rules.toml` passes, `scripts/check.sh` exits 0, and the owner table is unchanged in the commit.
   - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rules 3, 4, 7 and 10, [ADR 0012](../adr/0012-missing-unsure-and-evidence-failures.md) and its 14 Nov amendment, [ADR 0002](../adr/0002-label-look-split-stamp.md), I4, [system design 8.2](../system-design.md#82-calls-to-the-ai-service), T11.
   - **Depends on:** S1-M3-T6, S1-M3-T14, S1-M3-T15.
@@ -594,7 +622,7 @@ The output scans give the owner's findings for every case in the scan table, the
   - **Tests first:** None. The owner's values are the expected answers.
   - **Done when:** The owner has written the lists, caps and cases and said so. `scripts/check.sh` exits 0.
   - **Rules:** T11, [Spec 6.2](../spec.md#62-rules-for-every-ai-step) (with the length caps), [testing strategy 4](../testing-strategy.md#4-what-to-test-in-each-module) (`core` row).
-  - **Depends on:** S1-M3-T2, question 17.
+  - **Depends on:** S1-M3-T2.
 
 - [ ] **S1-M5-T2: The scan lists and caps in code**
   - **Build:** In `src/clause_tracer/core/scan_rules.py`, export `LAW_WORDS`, `ADVICE_PHRASES`, `INJECTION_PHRASES`, `CONTACT_WORDS` (each `tuple[str, ...]`) and `LENGTH_CAPS: Mapping[TextSlot, int]` (a `MappingProxyType`), with the values copied from the owner's `scans.toml` in the same order. The owner owns the values; the code holds a copy.
@@ -614,18 +642,18 @@ The output scans give the owner's findings for every case in the scan table, the
   - **Tests first:** in `test_scans.py`, with `TEXT_FINDINGS = frozenset({TOO_LONG, LAW_WORD, ADVICE, INJECTION_TELL, CONTACT_WORD, WEB_ADDRESS, EMAIL_ADDRESS, WRONG_LABEL_WORD})`: `test_text_scans_table`, one case per row of `scans.toml` (case keys as in S1-M5-T1; required `id, text, slot, findings`): `set(scan_text(text, slot, label)) == set(findings) & TEXT_FINDINGS`; `test_scans_table_has_rows`; `test_every_law_word_fails_in_any_case` (**promise test**, "no AI text states what a law allows", Spec 11: each item of `LAW_WORDS`, in lower case, upper case and title case, inside `"This is {word} here."`, gives `LAW_WORD`); `test_curly_apostrophe_is_folded` (`"don’t sign"` matches `"don't sign"`).
   - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_scans.py` passes, `scripts/check.sh` exits 0, and the owner table is unchanged in the commit.
   - **Rules:** T1, T13, T11, I4, [Spec 6.2](../spec.md#62-rules-for-every-ai-step), [system design 8.2](../system-design.md#82-calls-to-the-ai-service).
-  - **Depends on:** S1-M5-T2, question 17.
+  - **Depends on:** S1-M5-T2.
 
 - [ ] **S1-M5-T4: Value and name scans**
   - **Build:** In `src/clause_tracer/core/scans.py`, export:
     - `NUMBER_PATTERN = re.compile(r"\d+(?:,\d{3})*(?:\.\d+)?")` and `PLACEHOLDER_PATTERN = re.compile(re.escape(PLACEHOLDER_OPEN) + "[^" + re.escape(PLACEHOLDER_CLOSE) + "]*" + re.escape(PLACEHOLDER_CLOSE))`.
     - `def scan_ai_text(text: str, slot: TextSlot, context: ScanContext, detector: PiiDetector) -> tuple[ScanFinding, ...]`. It starts from `scan_text(text, slot, context.label)` and adds:
       - `UNKNOWN_PLACEHOLDER` for any `PLACEHOLDER_PATTERN` match not in `context.known_placeholders`.
-      - For each `NUMBER_PATTERN` match that does not lie inside a placeholder match: `n = Decimal(match.replace(",", ""))`. `ACCEPTABLE_LIMIT` when `n` equals any item of `context.acceptable_limits`, in every slot, even when `n` is also allowed (question 17c and 17f); otherwise `NUMBER_NOT_ALLOWED` when `n` equals no item of `context.allowed_numbers`. Numbers written in words are not checked in stage 1 (question 17b).
+      - For each `NUMBER_PATTERN` match that does not lie inside a placeholder match: `n = Decimal(match.replace(",", ""))`. `ACCEPTABLE_LIMIT` when `n` equals any item of `context.acceptable_limits`, in every slot, even when `n` is also allowed (question 17c and 17f); otherwise `NUMBER_NOT_ALLOWED` when `n` equals no item of `context.allowed_numbers`. Numbers written in words are not checked in stage 1 (question 17b); the README entry for `scan_ai_text` says so.
       - `PERSONAL_DATA` for any suggestion from `detector.find(text)` whose span is not inside a placeholder match and whose text (`text[span.start:span.end]`), case-folded, is not a case-folded item of `context.defined_roles`.
       Findings in `ScanFinding` member order, no repeats.
   - **Files:** `src/clause_tracer/core/scans.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_scans.py`, `src/clause_tracer/core/README.md` ("Functions").
-  - **Tests first:** in `test_scans.py`: `test_full_scans_table`, one case per row of `scans.toml`: build `ScanContext` from the row, and a `FakePiiDetector` that maps the row's `text` to one `PiiSuggestion(span=Span(start=i, end=i + len(s)), kind=PlaceholderKind.PERSON, source=PiiSource.NER)` per `personal_data` substring `s`, where `i = text.index(s)`; `set(scan_ai_text(...)) == set(findings)`; `test_acceptable_limit_fails_in_every_form` (**promise test**, "no acceptable limit reaches the message step", Spec 11, scan part: with acceptable limit `30` and allowed numbers `30`, the texts `"30"`, `"30 days"` and `"30.00"` in slot `MESSAGE` each give `ACCEPTABLE_LIMIT`); `test_number_inside_known_placeholder_passes` (`"Ask ⟦Person 1⟧."` with that placeholder known gives no finding); `test_invented_name_fails` (`"Dear John,"` with `John` planted gives `PERSONAL_DATA`).
+  - **Tests first:** in `test_scans.py`: `test_full_scans_table`, one case per row of `scans.toml`: build `ScanContext` from the row, and a `FakePiiDetector` that maps the row's `text` to one `PiiSuggestion(span=Span(start=i, end=i + len(s)), kind=PlaceholderKind.PERSON, source=PiiSource.NER)` per `personal_data` substring `s`, where `i = text.index(s)`; `set(scan_ai_text(...)) == set(findings)`; `test_acceptable_limit_fails_in_every_form` (**promise test**, "no acceptable limit reaches the message step", Spec 11, scan part: with acceptable limit `30` and allowed numbers `30`, the texts `"30"`, `"30 days"` and `"30.00"` in slot `MESSAGE` each give `ACCEPTABLE_LIMIT`); `test_number_inside_known_placeholder_passes` (`"Ask ⟦Person 1⟧."` with that placeholder known gives no finding); `test_invented_name_fails` (`"Dear John,"` with `John` planted gives `PERSONAL_DATA`); `test_number_in_words_is_not_checked` (`"Pay within thirty days."` with no allowed numbers gives no finding: the stage 1 limit, question 17b).
   - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_scans.py` passes, `scripts/check.sh` exits 0, and the owner table is unchanged in the commit.
   - **Rules:** P4 (detector passed in), T2, T13, T11, [Spec 6.2](../spec.md#62-rules-for-every-ai-step).
   - **Depends on:** S1-M5-T3, S1-M4-T4.
@@ -724,7 +752,7 @@ The output scans give the owner's findings for every case in the scan table, the
 
 ## 6. Open questions
 
-Planning found questions 1 to 15. The owner answered them on 14 Nov 2026; each answer is recorded in its home. Questions 16 and 17 are edge cases that Spec 5 and Spec 6.2 leave open. The plan builds the recommendation of each item; the owner accepts it with the plan, or changes it before the task that needs it.
+Planning found questions 1 to 17. The owner answered all of them on 14 Nov 2026; each answer is recorded in its home. Questions 16 and 17 are the label and scan edge cases. They were answered under one principle, stated once in [Spec 5](../spec.md#5-labelling-rules): when code cannot be sure, the label is unsure, the reason is named, and the user is shown the clause. It never guesses in either direction. The same day the owner added the rate-limit case, which is in the error-tree task S1-M1-T8 and in [Spec 6.2 and 6.3](../spec.md#62-rules-for-every-ai-step). No question is open.
 
 | # | Question | Needed by task | Recommendation (if any) | Owner's answer |
 | --- | --- | --- | --- | --- |
@@ -743,8 +771,8 @@ Planning found questions 1 to 15. The owner answered them on 14 Nov 2026; each a
 | 13 | The cost estimate: what goes in, and how is the range formed? | S1-M5-T5, S1-M5-T6 | Prices passed in, calls from system design 7, cache hits to cache misses. | As recommended: [Spec 9](../spec.md#9-running-the-app) "Cost", [system design 7](../system-design.md#7-caching-resume-and-cost) (the formula) |
 | 14 | Auto-delete when the clock jumps backwards? | S1-M4-T5, S1-M4-T6 | Not due; never earlier than the rule allows. | As recommended: [Spec 9](../spec.md#9-running-the-app) "Auto-delete" |
 | 15 | Do the Spec 4.1 playbook checks belong in `core` now? | S1-M3-T9, S1-M3-T11 | Leave them to stage 6. | Build them in `core` in stage 1, shared by stages 6 and 12: [ADR 0005, amendment of 14 Nov 2026](../adr/0005-engine-runner-shapes-and-ports.md), [system design 15.1, 15.6 and 15.12](../system-design.md#151-stage-1-core) |
-| 16 | **Label edge cases that Spec 5 does not define.** (a) A value with no unit as written. (b) A value with no confirmed quote and no reason code. (c) A value with no number or no answer, and a found match with no value. (d) The judge answers "unsure" for a words position. (e) A deposit amount and a percentage in one clause: when do they "disagree", and what counts? A total of 0. (f) What "clauses give different values" means for Rule 4. (g) A walk-away label: are the reasons of its other values kept? (h) Rule 10 for a Missing label whose missing level is walk-away; and does a walk-away get the unloaded-document reason? (i) Who wrote a words label that the AI never judged? (j) The unit spellings Rule 6 accepts. (k) "Unlimited" when higher is better. | S1-M3-T6, S1-M3-T12 to S1-M3-T16 | (a) The number is in the playbook's unit. (b) Unsure, `QUOTE_NOT_CONFIRMED`. (c) Unsure, `NO_VALUE`. (d) Unsure, `JUDGED_UNSURE`. (e) Compare both rounded half up to a whole percent; when they differ, keep both values with `AMOUNT_PERCENT_DISAGREE`, and Rule 4 combines them; a total of 0 is `AMOUNT_WITHOUT_TOTAL`. (f) Compare readable values clause by clause (converted numbers, yes/no answers, words levels); unsure values are not compared; a range inside one clause is not a disagreement. (g) Yes, every value's reasons are kept. (h) The overlay applies to every label except a walk-away from Rule 4 step 1, so a Missing walk-away becomes unsure; a walk-away gets no extra reason. (i) Code; only a judged words label is written by AI (ADR 0002). (j) The list in S1-M3-T12. (k) Walk-away in both directions. | |
-| 17 | **Scan edge cases that Spec 6.2 does not define.** (a) How a listed word matches. (b) Numbers written in words ("thirty"). (c) A number that is both an acceptable limit and an allowed number (the contract itself says 30). (d) Label words used as ordinary English ("an acceptable rate"). (e) What counts as a web address. (f) Which kinds of AI text the acceptable-limit scan covers. | S1-M5-T1, S1-M5-T3, S1-M5-T4 | (a) Whole words or phrases, any letter case, curly apostrophes made straight. (b) Not checked in stage 1; digits only. (c) Flag it as an acceptable limit (fail closed, so the template is used). (d) Flag it: any label word other than the code's label fails. (e) `http://`, `https://`, `www.`, or a bare name ending in a listed domain (`WEB_ADDRESS_PATTERN` in S1-M5-T3). (f) Every kind. | |
+| 16 | **Label edge cases that Spec 5 does not define.** (a) A value with no unit as written. (b) A value with no confirmed quote and no reason code. (c) A value with no number or no answer, and a found match with no value. (d) The judge answers "unsure" for a words position. (e) A deposit amount and a percentage in one clause: when do they "disagree", and what counts? A total of 0. (f) What "clauses give different values" means for Rule 4. (g) A walk-away label: are the reasons of its other values kept? (h) Rule 10 for a Missing label whose missing level is walk-away; and does a walk-away get the unloaded-document reason? (i) Who wrote a words label that the AI never judged? (j) The unit spellings Rule 6 accepts. (k) "Unlimited" when higher is better. | S1-M3-T6, S1-M3-T12 to S1-M3-T16 | (a) The number is in the playbook's unit. (b) Unsure, `QUOTE_NOT_CONFIRMED`. (c) Unsure, `NO_VALUE`. (d) Unsure, `JUDGED_UNSURE`. (e) Compare both rounded half up to a whole percent; when they differ, keep both values with `AMOUNT_PERCENT_DISAGREE`, and Rule 4 combines them; a total of 0 is `AMOUNT_WITHOUT_TOTAL`. (f) Compare readable values clause by clause (converted numbers, yes/no answers, words levels); unsure values are not compared; a range inside one clause is not a disagreement. (g) Yes, every value's reasons are kept. (h) The overlay applies to every label except a walk-away from Rule 4 step 1, so a Missing walk-away becomes unsure; a walk-away gets no extra reason. (i) Code; only a judged words label is written by AI (ADR 0002). (j) The list in S1-M3-T12. (k) Walk-away in both directions. | Items (a) to (j) as recommended. (k) differs: unlimited is walk-away when lower is better and unsure with the new reason `UNLIMITED_UNCLEAR` when higher is better. [Spec 5](../spec.md#5-labelling-rules) (the principle and Rules 1, 3, 4, 6 and 10), [ADR 0012, amendment of 14 Nov 2026](../adr/0012-missing-unsure-and-evidence-failures.md), [system design 3.4](../system-design.md#34-core-shapes-for-stage-1) |
+| 17 | **Scan edge cases that Spec 6.2 does not define.** (a) How a listed word matches. (b) Numbers written in words ("thirty"). (c) A number that is both an acceptable limit and an allowed number (the contract itself says 30). (d) Label words used as ordinary English ("an acceptable rate"). (e) What counts as a web address. (f) Which kinds of AI text the acceptable-limit scan covers. | S1-M5-T1, S1-M5-T3, S1-M5-T4 | (a) Whole words or phrases, any letter case, curly apostrophes made straight. (b) Not checked in stage 1; digits only. (c) Flag it as an acceptable limit (fail closed, so the template is used). (d) Flag it: any label word other than the code's label fails. (e) `http://`, `https://`, `www.`, or a bare name ending in a listed domain (`WEB_ADDRESS_PATTERN` in S1-M5-T3). (f) Every kind. | All six as recommended. [Spec 6.2](../spec.md#62-rules-for-every-ai-step) ("How the scans match" and "Acceptable levels"), [ADR 0012, amendment of 14 Nov 2026](../adr/0012-missing-unsure-and-evidence-failures.md) |
 
 ## 7. Done when
 
@@ -762,7 +790,8 @@ Planning found questions 1 to 15. The owner answered them on 14 Nov 2026; each a
 - [ ] The TypeAdapter check result is in the change log.
 - [ ] The owner has been told what was built, and what stage 2 should know:
   - the shapes `ingest` will fill (`Document`, `SourceFile`, `Clause`, `Sentence`, `MatchKey`, `InputWarning`, `Span`), and that a document without glyphs has empty `glyphs`, `char_map` and `pages`;
-  - the answers to questions 16 and 17;
+  - the answers to questions 16 and 17, and the "never guess" principle behind them;
+  - that `RateLimitedError` exists: stage 6 maps it to Interrupted with its own message, and stage 9 raises it from an HTTP 429 after the retries;
   - the decision-record action items this stage closes, for the owner to tick: ADR 0005 items 2 and 4, ADR 0012 item 1, ADR 0013 items 1 and 2 (the guard part), ADR 0015 items 1 and 2;
   - a reminder about the ten test contracts;
   - that `cli` has no `README.md` or `samples/` yet, which the planned "every module has a README" architecture test will need.

@@ -212,6 +212,8 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | Wrong key | Interrupted at step 2 of 4 · Matching clauses · OpenRouter turned down your key. Check it in Settings, then resume. · [Open key settings] [Resume] · log: Stopped at step 2. OpenRouter turned down the key. |
 | No internet | The internet dropped at step 2. Resume picks up from here. · log: Stopped at step 2. The internet dropped. |
 | No credit | Your OpenRouter credit ran out at step 3. Add credit, then resume. Nothing done so far is lost. · [Add credit (opens in your browser)] |
+| Rate limit, with a wait time | Interrupted at step 2 of 4 · Matching clauses · The AI service is busy, or your key's limit is reached. It asked for a wait of 30 seconds. Resume picks up from the first unfinished step, and finished steps aren't paid for again. · [Resume] · log: Stopped at step 2. The AI service asked for a wait of 30 seconds. |
+| Rate limit, no wait time | The AI service is busy, or your key's limit is reached. It gave no wait time, so try again in a minute. Resume picks up from the first unfinished step, and finished steps aren't paid for again. · [Resume] · log: Stopped at step 2. The AI service is busy. |
 | No private model | No private-mode model is available for step 3 right now. Wait and resume, or turn private mode off for this review. · [Turn private mode off…] |
 | Done | Your review is ready · Cost $0.39 · Took 4 min · credit left: $2.71 · [Open the review] |
 | Cancel dialog | Cancel this review? · So far it has cost $0.05 of about $0.42. Finished steps are kept, so you won't pay for them again. · Keep running / Cancel review |
@@ -574,3 +576,9 @@ The copy deck and the prototype were brought into line with the three accepted d
 | --- | --- | --- |
 | 1 | "What gets sent" didn't say that known names are replaced in positions and rewrite instructions too (ADR 0008, 13 Nov 2026). | The Help text says so. |
 | 2 | About said "You have the latest version", and the prototype had an "update available" state. Both need the app to ask GitHub, which version 1 never does (Spec 8.1). | The button opens the release page in the browser and the About card shows the current version. Both strings and the two prototype states are removed. |
+
+### 6.10 Decisions of 14 Nov 2026
+
+| # | Problem | Fix |
+| --- | --- | --- |
+| 1 | A rate limit from the AI service had no message of its own. It was handled like any network error. | Review running has a rate-limit state, with and without a wait time (section 4.6, and `running.html?state=rate-limit`). The Interrupted review offers Resume. |

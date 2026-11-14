@@ -150,7 +150,7 @@ The values column gives the exact member names.
 | `Direction` | `LOWER_IS_BETTER`, `HIGHER_IS_BETTER` | Number positions (Spec 4.1) |
 | `Unit` | `DAYS`, `PERCENT`, `MONTHS`, `ROUNDS` | Playbook units (Spec 4.1). Units as written in the contract stay text until Rule 6 converts them |
 | `Answer` | `YES`, `CONDITIONAL_YES`, `NO`, `UNCLEAR`, `MISSING` | Yes/no extraction (Spec 6.1 step 6b) |
-| `ReasonCode` | `QUOTE_NOT_CONFIRMED`, `NUMBER_NOT_IN_QUOTE`, `VAGUE_WORDING`, `OTHER_START_POINT`, `UNKNOWN_FIGURES`, `BUSINESS_DAYS`, `UNIT_UNKNOWN`, `AMOUNT_WITHOUT_TOTAL`, `AMOUNT_PERCENT_DISAGREE`, `CONDITIONAL_YES`, `RANGE`, `CLAUSES_DISAGREE`, `HIDDEN_TEXT`, `UNDECODABLE_TEXT`, `UNLOADED_DOCUMENT`, `REPLY_BROKEN_TWICE`, `MATCH_UNCONFIRMED`, `NO_VALUE`, `JUDGED_UNSURE`, in this order | Rules return codes, never prose. Templates turn codes into words ([ADR 0012](adr/0012-missing-unsure-and-evidence-failures.md), I7). One code per cause in Spec 5. `NO_VALUE` and `JUDGED_UNSURE` cover inputs Spec 5 does not name (the stage 1 plan, section 6). Reason tuples are sorted in this order |
+| `ReasonCode` | `QUOTE_NOT_CONFIRMED`, `NUMBER_NOT_IN_QUOTE`, `VAGUE_WORDING`, `OTHER_START_POINT`, `UNKNOWN_FIGURES`, `BUSINESS_DAYS`, `UNIT_UNKNOWN`, `AMOUNT_WITHOUT_TOTAL`, `AMOUNT_PERCENT_DISAGREE`, `CONDITIONAL_YES`, `RANGE`, `CLAUSES_DISAGREE`, `HIDDEN_TEXT`, `UNDECODABLE_TEXT`, `UNLOADED_DOCUMENT`, `REPLY_BROKEN_TWICE`, `MATCH_UNCONFIRMED`, `NO_VALUE`, `JUDGED_UNSURE`, `UNLIMITED_UNCLEAR`, in this order | Rules return codes, never prose. Templates turn codes into words ([ADR 0012](adr/0012-missing-unsure-and-evidence-failures.md), I7). One code per cause in Spec 5. `NO_VALUE`, `JUDGED_UNSURE` and `UNLIMITED_UNCLEAR` cover inputs Spec 5 did not name at first (the stage 1 plan, section 6). `UNLIMITED_UNCLEAR` is "unlimited" on a position where higher is better (Rule 1). Reason tuples are sorted in this order |
 | `UNSURE_REASONS` | A `frozenset[ReasonCode]` constant: every code except `RANGE`, `CLAUSES_DISAGREE` and `AMOUNT_PERCENT_DISAGREE` | A value that carries one of these is unsure. The three left out are notes shown beside a label |
 | `WrittenBy` | `CODE`, `AI`, `USER` | ADR 0016 |
 | `ReviewStatus` | `DRAFT`, `RUNNING`, `INTERRUPTED`, `FAILED`, `READY_TO_CHECK`, `DONE` | Spec 6.3 |
@@ -233,7 +233,7 @@ The values column gives the exact member names.
 - `ClauseTracerError(Exception)` takes one argument, `context: Mapping[str, str | int] | None = None`, and keeps it as a read-only `MappingProxyType` in `self.context`. Each class has a class attribute `code: ClassVar[str]`. Context holds ids, step names and counts only, never contract text.
 - Four groups, each a direct subclass of `ClauseTracerError`: `InputError`, `ModelServiceError`, `LocalError`, and `ReviewCancelled` (the cancellation group is this one class). The base and the three group classes have `code = ""`.
 - Input errors, with their codes: `UnreadableFileError` `unreadable_file`, `ScannedPdfError` `scanned_pdf`, `OldWordFileError` `old_word_file`, `InputTooLargeError` `input_too_large`, `NotUtf8Error` `not_utf8`, `EncryptedPdfError` `encrypted_pdf`, `PlaybookFormatError` `playbook_format`.
-- Model-service errors: `NetworkUnavailableError` `network_unavailable`, `InvalidApiKeyError` `invalid_api_key`, `NoCreditError` `no_credit`, `NoPrivateModelError` `no_private_model`, `ModelTimeoutError` `model_timeout`, `ModelReplyInvalidError` `model_reply_invalid`.
+- Model-service errors: `NetworkUnavailableError` `network_unavailable`, `InvalidApiKeyError` `invalid_api_key`, `NoCreditError` `no_credit`, `RateLimitedError` `rate_limited`, `NoPrivateModelError` `no_private_model`, `ModelTimeoutError` `model_timeout`, `ModelReplyInvalidError` `model_reply_invalid`. `RateLimitedError` is the one leaf with an extra argument: `retry_after_seconds: int | None = None`, the wait the AI service asked for. It is kept as `self.retry_after_seconds` and, when given, as `context["retry_after_seconds"]`. A negative value raises `ValueError` (added 14 Nov 2026).
 - Local errors: `SecretStoreUnavailableError` `secret_store_unavailable`, `StorageCorruptError` `storage_corrupt`, `SchemaTooNewError` `schema_too_new`, `ConfigError` `config`, `DuplicateRecordError` `duplicate_record`.
 - Cancellation: `ReviewCancelled` `review_cancelled`.
 
@@ -275,7 +275,7 @@ The values column gives the exact member names.
 - **The fakes** live in `clause_tracer.core.fakes` (see "Fakes").
 - **`AiRecord` carries its own `schema_version`.** `AiRequest.inputs` is typed as the empty base class `StepInputs`.
 - **`ReviewStore`** has five methods in stage 1 (see "Ports").
-- **"Unlimited"** is the `CheckedValue.unlimited` field. "None" arrives as the number 0.
+- **"Unlimited"** is the `CheckedValue.unlimited` field. "None" arrives as the number 0. Unlimited is walk-away when lower is better and unsure with `UNLIMITED_UNCLEAR` when higher is better (decided 14 Nov 2026, Spec 5 Rule 1).
 - **"Other start point" (Rule 5).** In stage 1 the rule makes a value unsure when it already carries `OTHER_START_POINT`. How a start point is compared is not yet decided (section 15.8).
 - **A fourth match result**, `MatchUnconfirmed`, holds the position and the clauses to read.
 - **Rule 10.** In stage 1 the rule takes the documents not loaded that the label's evidence reaches (`LabelInput.outside_documents`). Which module builds the evidence trail is not yet decided (section 15.8).
@@ -285,6 +285,7 @@ The values column gives the exact member names.
 - **The cost estimate** takes prices from the caller and the call count from section 7. Its range runs from "the cache hits on every call" to "the cache never hits" (Spec 9).
 - **Auto-delete and a clock that jumped backwards.** A review whose last change is later than "now" is not due. Auto-delete never removes a review earlier than the rule allows (Spec 9).
 - **The playbook checks** of Spec 4.1 are pure functions in `core`, built in stage 1 and shared by stage 6 and stage 12.
+- **Label and scan edge cases, and the rate limit** (owner, 14 Nov 2026). The behaviour is in Spec 5 (the "never guess" principle and the rules), Spec 6.2 (scans and retries) and Spec 6.3. The shapes are the reason code `UNLIMITED_UNCLEAR` and the error `RateLimitedError`, both in the lists above ([ADR 0005](adr/0005-engine-runner-shapes-and-ports.md) and [ADR 0012](adr/0012-missing-unsure-and-evidence-failures.md) amendments).
 
 ## 4. Data flow
 
@@ -415,7 +416,7 @@ The OpenRouter adapter sends `messages` with a strict JSON schema, `require_para
 
 ### 6.4 Errors
 
-One base `ClauseTracerError(code, context)` in `core`, with a small tree of expected failures: input errors, model-service errors, local errors and cancellation (I5, I6). The runner maps model-service errors and cancellation to **Interrupted**, other project errors to **Failed** with their code, and anything else to Failed with code `internal` plus a local log entry. Only the edge turns a code into words, using [`ux-copy.md`](ux-copy.md) (I7).
+One base `ClauseTracerError(code, context)` in `core`, with a small tree of expected failures: input errors, model-service errors, local errors and cancellation (I5, I6). The runner maps model-service errors and cancellation to **Interrupted**, other project errors to **Failed** with their code, and anything else to Failed with code `internal` plus a local log entry. A rate limit (`RateLimitedError`) is a named case beside wrong key, no credit, no internet and no private-mode model: the review is Interrupted, and the message says the AI service is busy or the key's limit is reached and shows the wait time when there is one. Only the edge turns a code into words, using [`ux-copy.md`](ux-copy.md) (I7).
 
 ## 7. Caching, resume and cost
 
@@ -460,6 +461,7 @@ Review statuses and their moves are fixed by Spec 6.3. The runner writes the sta
 | Quote not found, or number not in its quote | One retry, then unsure: "Couldn't confirm the wording" (Rule 3) |
 | AI text fails a scan | One retry, then the slot falls back to its code template. The failed text is never shown |
 | No private-mode endpoint, wrong key, no credit | Named error, review Interrupted with a plain fix |
+| HTTP 429, a rate limit, after the 3 retries | `RateLimitedError`, carrying the wait in seconds from `Retry-After` when the service gave one. The review becomes Interrupted with its own message. Resume continues from the first unfinished step, and finished steps are not paid for again |
 
 A broken or timed-out reply is **never** treated as "nothing found". The two have separate result types (I4).
 
@@ -587,7 +589,7 @@ The owner accepted ADRs 0005 to 0015 on 12 Nov 2026, and ADR 0016 on 13 Nov 2026
 - How page pictures reach the window. The page policy has no `img-src data:`, pages cannot fetch files, and writing pictures to disk would break "everything saved is encrypted". Needed before build stage 12.
 - How CI drives the Windows window. ADR 0009 plans Playwright over the debugging port, which release builds turn off. A separate test build or another driver is needed.
 - The oldest supported Windows version. The oldest supported Linux is decided: Ubuntu 24.04 (13 Nov 2026, ADR 0009).
-- The smaller build questions marked "Not yet decided" in section 15, including the stage 1 label and scan edge cases (the stage 1 plan, section 6).
+- The smaller build questions marked "Not yet decided" in section 15, for the stages after stage 1. The stage 1 label and scan edge cases were answered on 14 Nov 2026 (the stage 1 plan, section 6).
 
 ## 14. Changes this work made to earlier documents
 
@@ -630,8 +632,8 @@ The task plan of each stage is written in `docs/plans/` just before the stage is
 - **Start with** ADR 0005 action item 2 (section 3.4).
 - **Done when** importing `core` loads only the standard library; the label-rule tables cover every row of the Spec 14.5 sample; no shape has a provider-specific field; `src/clause_tracer/core/README.md` records the shapes and ports (ADR 0005 action item 4); branch coverage of `core` is at least 95%; and the owner-table guard runs in `scripts/check.sh` and CI. The owner starts writing the ten test contracts now, because they take longest.
 - **Tests, in the testing strategy.** Section 4 (the `core` row), section 5 (invariant 7), section 6.1, sections 10, 11 and 14.
-- **Decided 13 and 14 Nov 2026:** the points at the end of section 3.4. The owner answered the 15 questions of [the stage 1 plan](plans/stage-01-core.md) on 14 Nov 2026.
-- **Not yet decided:** the label and scan edge cases that the spec leaves open, listed with a recommendation in [the stage 1 plan](plans/stage-01-core.md) section 6.
+- **Decided 13 and 14 Nov 2026:** the points at the end of section 3.4. The owner answered all 17 questions of [the stage 1 plan](plans/stage-01-core.md) on 14 Nov 2026, the label and scan edge cases under one principle (Spec 5).
+- **Not yet decided:** nothing is open for stage 1.
 
 ### 15.2 Stage 2: `ingest` for text, Markdown and pasted text
 

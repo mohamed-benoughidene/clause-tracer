@@ -56,8 +56,8 @@
   <header class="appbar">
     <a class="btn btn-ghost btn-sm" href="home.html"><svg class="icon"><use href="#i-arrow-left"/></svg>Home</a>
     <span class="h3">Brightline web build</span>
-    <span class="status small" data-state-hide="wrong-key no-credit no-internet no-private-model done"><svg class="icon"><use href="#i-clock"/></svg>Running</span>
-    <span class="status small warn-text" data-state="wrong-key no-credit no-internet no-private-model"><svg class="icon"><use href="#i-pause"/></svg>Interrupted</span>
+    <span class="status small" data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait"><svg class="icon"><use href="#i-clock"/></svg>Running</span>
+    <span class="status small warn-text" data-state="wrong-key no-credit no-internet no-private-model rate-limit rate-limit-no-wait"><svg class="icon"><use href="#i-pause"/></svg>Interrupted</span>
     <span class="status small" data-state="done"><svg class="icon" style="color:var(--pref)"><use href="#i-check"/></svg>Done</span>
     <span class="spacer"></span>
     <button class="search-commands" type="button" style="width:220px;margin:0"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
@@ -79,7 +79,7 @@
     <aside class="margin" aria-label="Review progress">
 
       <!-- Running (default view) -->
-      <div class="stage" data-state-hide="wrong-key no-credit no-internet no-private-model done">
+      <div class="stage" data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait">
         <h2 class="h3">Step 1 of 4 · Reading the pages</h2>
         <div class="bars" aria-hidden="true"><span class="on"></span><span></span><span></span><span></span></div>
         <p class="small muted" style="margin-top:10px">Spent so far $0.05 of about $0.42 · About 1 min left</p>
@@ -135,6 +135,38 @@
         </div>
       </div>
 
+      <!-- Interrupted: rate limit, with a wait time, at step 2 -->
+      <div class="stage" data-state="rate-limit">
+        <h2 class="h3">Interrupted at step 2 of 4 · Matching clauses</h2>
+        <div class="bars" aria-hidden="true"><span class="on"></span><span class="stop"></span><span></span><span></span></div>
+        <p class="small muted" style="margin-top:10px">Spent so far $0.03 of about $0.42 · Paused</p>
+        <div class="notice warn" role="note" style="margin-top:12px">
+          <svg class="icon"><use href="#i-clock"/></svg>
+          <div>
+            <p>The AI service is busy, or your key's limit is reached. It asked for a wait of 30 seconds. Resume picks up from the first unfinished step, and finished steps aren't paid for again.</p>
+            <div class="actions">
+              <a class="btn btn-primary btn-sm" href="running.html">Resume</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interrupted: rate limit, no wait time given, at step 2 -->
+      <div class="stage" data-state="rate-limit-no-wait">
+        <h2 class="h3">Interrupted at step 2 of 4 · Matching clauses</h2>
+        <div class="bars" aria-hidden="true"><span class="on"></span><span class="stop"></span><span></span><span></span></div>
+        <p class="small muted" style="margin-top:10px">Spent so far $0.03 of about $0.42 · Paused</p>
+        <div class="notice warn" role="note" style="margin-top:12px">
+          <svg class="icon"><use href="#i-clock"/></svg>
+          <div>
+            <p>The AI service is busy, or your key's limit is reached. It gave no wait time, so try again in a minute. Resume picks up from the first unfinished step, and finished steps aren't paid for again.</p>
+            <div class="actions">
+              <a class="btn btn-primary btn-sm" href="running.html">Resume</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Interrupted: no zero-retention model free, at step 3 -->
       <div class="stage" data-state="no-private-model">
         <h2 class="h3">Interrupted at step 3 of 4 · Judging the labels</h2>
@@ -165,7 +197,7 @@
           <button class="link" type="button" id="toggle-done" aria-controls="log" aria-expanded="true" data-state-hide="done">Hide finished lines</button>
         </div>
         <div id="log">
-          <ol class="log" data-state-hide="wrong-key no-credit no-internet no-private-model done">
+          <ol class="log" data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait">
             <li><time>0:04</time><span>Read 5 pages.</span></li>
             <li><time>0:09</time><span>Found 45 clauses.</span></li>
           </ol>
@@ -179,6 +211,18 @@
             <li><time>0:09</time><span>Found 45 clauses.</span></li>
             <li><time>0:21</time><span>Matched 12 of 45 clauses to positions.</span></li>
             <li class="stop"><time>0:24</time><span>Stopped at step 2. The internet dropped.</span></li>
+          </ol>
+          <ol class="log" data-state="rate-limit">
+            <li><time>0:04</time><span>Read 5 pages.</span></li>
+            <li><time>0:09</time><span>Found 45 clauses.</span></li>
+            <li><time>0:21</time><span>Matched 12 of 45 clauses to positions.</span></li>
+            <li class="stop"><time>0:24</time><span>Stopped at step 2. The AI service asked for a wait of 30 seconds.</span></li>
+          </ol>
+          <ol class="log" data-state="rate-limit-no-wait">
+            <li><time>0:04</time><span>Read 5 pages.</span></li>
+            <li><time>0:09</time><span>Found 45 clauses.</span></li>
+            <li><time>0:21</time><span>Matched 12 of 45 clauses to positions.</span></li>
+            <li class="stop"><time>0:24</time><span>Stopped at step 2. The AI service is busy.</span></li>
           </ol>
           <ol class="log" data-state="no-credit">
             <li><time>0:04</time><span>Read 5 pages.</span></li>
@@ -207,17 +251,17 @@
       <div class="margin-foot">
         <div class="actions" data-state-hide="done">
           <button class="btn" type="button" data-open="cancel-review">Cancel</button>
-          <button class="btn btn-ghost" type="button" data-toast="Running in the background" data-state-hide="wrong-key no-credit no-internet no-private-model done">Run in background</button>
+          <button class="btn btn-ghost" type="button" data-toast="Running in the background" data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait">Run in background</button>
         </div>
-        <p data-state-hide="wrong-key no-credit no-internet no-private-model"><a class="btn btn-primary" href="review.html">Open the review<svg class="icon"><use href="#i-arrow-right"/></svg></a></p>
-        <p class="small muted" data-state-hide="wrong-key no-credit no-internet no-private-model done">Closing the app pauses the review. Resume picks up from the last finished step.</p>
+        <p data-state-hide="wrong-key no-credit no-internet no-private-model rate-limit rate-limit-no-wait"><a class="btn btn-primary" href="review.html">Open the review<svg class="icon"><use href="#i-arrow-right"/></svg></a></p>
+        <p class="small muted" data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait">Closing the app pauses the review. Resume picks up from the last finished step.</p>
       </div>
     </aside>
   </div>
 
   <footer class="flow-foot">
-    <span class="small muted" data-state-hide="wrong-key no-credit no-internet no-private-model done">Credit left: $3.10 · about 3 minutes</span>
-    <span class="small muted" data-state="wrong-key no-internet no-private-model">Paused · credit left: $3.10</span>
+    <span class="small muted" data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait">Credit left: $3.10 · about 3 minutes</span>
+    <span class="small muted" data-state="wrong-key no-internet no-private-model rate-limit rate-limit-no-wait">Paused · credit left: $3.10</span>
     <span class="small muted" data-state="no-credit">Credit left: $0.00 · paused</span>
     <span class="small muted" data-state="done">Cost $0.39 · credit left: $2.71</span>
     <span class="spacer"></span>
@@ -235,7 +279,7 @@
   <form method="dialog">
     <div class="dialog-body">
       <h2 class="h2" id="cancel-title">Cancel this review?</h2>
-      <p class="muted">So far it has cost <span data-state-hide="wrong-key no-internet no-credit no-private-model">$0.05</span><span data-state="wrong-key">$0.02</span><span data-state="no-internet">$0.03</span><span data-state="no-credit">$0.30</span><span data-state="no-private-model">$0.12</span> of about $0.42. Finished steps are kept, so you won't pay for them again.</p>
+      <p class="muted">So far it has cost <span data-state-hide="wrong-key no-internet no-credit no-private-model rate-limit rate-limit-no-wait">$0.05</span><span data-state="wrong-key">$0.02</span><span data-state="no-internet rate-limit rate-limit-no-wait">$0.03</span><span data-state="no-credit">$0.30</span><span data-state="no-private-model">$0.12</span> of about $0.42. Finished steps are kept, so you won't pay for them again.</p>
     </div>
     <div class="dialog-foot">
       <button class="btn" value="cancel">Keep running</button>

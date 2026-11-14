@@ -173,6 +173,8 @@ The user makes a message, a report, or both. If positions are unchecked, a warni
 
 These rules decide every label. Code applies them the same way every time.
 
+**The principle: never guess.** When the checker (code) can't be sure, the label is unsure, the reason is named, and the user is shown the clause. It never guesses in either direction: not towards a kinder label and not towards a harsher one. Every rule below that ends in "unsure" follows from this (decided 14 Nov 2026).
+
 **Who picks the label**
 
 | Position type | Who picks | How |
@@ -181,11 +183,13 @@ These rules decide every label. Code applies them the same way every time.
 | Yes/no | Code | AI answers yes, conditional yes, no, unclear, or missing per clause, with its quote. Code applies the levels. |
 | Words | AI | AI picks a level per matching clause. Code applies Rule 4. The label gets the "AI judgment" tag. |
 
-**Rule 1: Limits, not ranges.** Number levels are limits. Example, lower is better: preferred at or under 15, acceptable at or under 30, anything above is walk-away. "None" counts as 0. "Unlimited" is the worst value for the direction.
+If the AI answers "unsure" for a words position, that value is unsure with the reason "the AI could not judge it". There is no second call. Only a label the AI actually judged is written by AI and drawn in pencil (ADR 0002). A label a rule produced on a words position, such as Missing, is written by code (decided 14 Nov 2026).
+
+**Rule 1: Limits, not ranges.** Number levels are limits. Example, lower is better: preferred at or under 15, acceptable at or under 30, anything above is walk-away. "None" counts as 0. A number with no unit as written is read in the playbook position's unit and labelled normally. "Unlimited" is walk-away when lower is better, because it is the worst value. When higher is better it is unsure with the reason "unlimited, and it is unclear whether that helps", because the word can be good or bad for the user (decided 14 Nov 2026).
 
 **Rule 2: "No" equals "missing."** For yes/no positions, a clear "no," an unclear answer, and silence get the same level. A clear "no" is a label on its clause, not a Missing list item. A conditional yes ("with prior written consent," "at the Client's discretion") is different: it gives unsure, with the condition quoted and a suggested question, such as "Can we agree consent won't be refused without a good reason?"
 
-**Rule 3: Failed quote, retry once.** If a quote isn't found in the text that was sent, or the extracted number isn't in its quote, the AI is asked again and told what failed. If it fails again, that value becomes unsure: "Couldn't confirm the wording. Check \[location\] yourself." Rule 4 then combines it with the position's other values. A position is never dropped silently. A quote that is confirmed in the text but can't be placed on the page is different: the label is kept, and the panel shows the quote's words with a note that they couldn't be marked on the page (ADR 0012).
+**Rule 3: Failed quote, retry once.** If a quote isn't found in the text that was sent, or the extracted number isn't in its quote, the AI is asked again and told what failed. If it fails again, that value becomes unsure: "Couldn't confirm the wording. Check \[location\] yourself." Rule 4 then combines it with the position's other values. A found clause with no confirmed quote and no other reason is unsure with the reason "quote not confirmed". A found clause with no value or no answer is unsure with the reason "no value found" (decided 14 Nov 2026). A position is never dropped silently. A quote that is confirmed in the text but can't be placed on the page is different: the label is kept, and the panel shows the quote's words with a note that they couldn't be marked on the page (ADR 0012).
 
 **Rule 4: Mixed values, in this order.**
 
@@ -195,9 +199,11 @@ These rules decide every label. Code applies them the same way every time.
 
 Whenever matching clauses give different values, every one appears in the evidence trail with "These clauses disagree. Ask which applies." This applies to every position type. An override clause never changes the label, but the note names it.
 
+"Different values" means readable values that differ after conversion, compared clause by clause: numbers, yes/no answers and judged levels. Unsure values are not compared. A range inside one clause is not a disagreement. A walk-away label keeps the reasons of every value, including the problems of other clauses (decided 14 Nov 2026).
+
 **Rule 5: Unreadable values are unsure.** Vague wording ("reasonable time"), a start point other than the invoice date for payment days ("30 days after acceptance"), a cap that depends on unknown figures, or business days against a calendar-day limit all give unsure. The why shows at least two possible readings and one suggested question.
 
-**Rule 6: Conversions.** One week is 7 days, one month 30 days, one year 12 months or 365 days, in either direction. Business days never convert. A range ("15 to 30 days") counts as two values, so Rule 4 applies, and the note says "This clause gives a range. The worse end was used." A deposit given as an amount becomes a percentage when the total is also found. Otherwise it's unsure. An amount and a percentage that disagree in one clause count as a conflict.
+**Rule 6: Conversions.** One week is 7 days, one month 30 days, one year 12 months or 365 days, in either direction. Business days never convert. A range ("15 to 30 days") counts as two values, so Rule 4 applies, and the note says "This clause gives a range. The worse end was used." A deposit given as an amount becomes a percentage when the total is also found. Otherwise it's unsure, with the reason "amount without a total". A total of 0 counts as no total. When one clause gives both an amount and a percentage, both are rounded half up to a whole percent and compared. If they differ, both values are kept with the reason "amount and percentage disagree", and Rule 4 combines them. A fixed list of spellings is accepted for each unit (days, weeks, months, years, per cent, rounds of revisions). A unit not on the list is unsure. Business days and working days are always unsure. The owner checks the list in the stage 1 unit table (decided 14 Nov 2026).
 
 **Rule 7: Missing.** A position with no matching text gets its missing level. It appears in the Missing list unless the missing level is preferred. A position whose missing level is preferred appears in a second, collapsed list in the Missing tab, "Searched, nothing found", where each row can be opened and checked, so a missed clause can't pass without a trace. If the searches disagree about whether a clause matches, the position is unsure, and the clause to read is named (ADR 0012).
 
@@ -205,7 +211,7 @@ Whenever matching clauses give different values, every one appears in the eviden
 
 **Rule 9: Hidden text.** A value whose quote includes hidden text becomes unsure, and doesn't count as readable for Rule 4 step 1. Text the app can't decode is treated the same way: a value whose quote includes it becomes unsure.
 
-**Rule 10: Unloaded documents.** A label whose evidence trail includes a reference to a document that isn't loaded becomes unsure, unless Rule 4 step 1 already made it walk-away.
+**Rule 10: Unloaded documents.** A label whose evidence trail includes a reference to a document that isn't loaded becomes unsure, unless Rule 4 step 1 already made it walk-away. A walk-away the app found in a clause stays walk-away and gets no extra reason. A Missing label whose missing level is walk-away becomes unsure (decided 14 Nov 2026).
 
 ## 6. Pipeline
 
@@ -234,12 +240,13 @@ A fixed sequence run by the app's code. The AI never decides what runs next and 
 ### 6.2 Rules for every AI step
 
 - **What the AI receives:** placeholder text, position topics, types and level text, and the rewrite instruction. Never playbook names, customers, the user's notes, or To and From names. "Why this matters" notes only if the user turns that on in Settings. **Known names replaced:** in all of this text, including position text and rewrite instructions, code replaces the confirmed personal items of this review and the typed party details with their placeholders before anything is sent, and puts them back in what comes back (decided 13 Nov 2026, ADR 0008).
-- **Acceptable levels:** steps 10 and 13 never receive acceptable limits. Code scans every message and unsure question for an acceptable limit and regenerates once if found.
+- **Acceptable levels:** steps 10 and 13 never receive acceptable limits. Code scans every kind of AI text for an acceptable limit and regenerates once if found. A number that is both an acceptable limit and an allowed number counts as an acceptable limit, so the template text is used (decided 14 Nov 2026).
 - **Law words:** AI text must never state what a law allows. Code scans for words like "legal," "illegal," "enforceable," "unenforceable" and "the law," and regenerates once if found.
+- **How the scans match** (decided 14 Nov 2026): a listed word or phrase matches as a whole word or phrase, in any letter case, with curly apostrophes made straight. A label word used as ordinary English ("an acceptable rate") fails the scan: any label word other than the code's own label is flagged. A web address is `http://`, `https://`, `www.`, or a bare name ending in a listed domain. Numbers are checked as digits only. Numbers written in words ("thirty") are not checked in build stage 1, so the number scan has that limit.
 - **Length caps:** each kind of AI text has its own maximum length: a label's reason, "why it could be the other level", Missing item text, each reading of an unsure label, the unsure question, the "Rewrite with AI" message, and a clause rewrite. Text over its cap fails the scan like any other scan failure. The project owner sets the caps, and testing tunes them (decided 14 Nov 2026).
 - **Requests:** each asks for zero retention when private mode is on, filled-form replies, and `require_parameters` (OpenRouter's setting that only uses providers supporting every requested feature).
 - **Models:** one model for every step by default, or one per step in Settings. Jev only for steps 6a and 9. Recommended models come from test-set scores. Each AI call records which model and privacy mode it used.
-- **Retries:** a broken, empty or unknown reply is retried once, then that value becomes unsure. A network error is retried 3 times, then the review becomes Interrupted.
+- **Retries:** a broken, empty or unknown reply is retried once, then that value becomes unsure. A network error is retried 3 times, then the review becomes Interrupted. So is a rate limit: when the AI service answers "too many requests", the app retries 3 times, waiting as long as the service asks. Then the review becomes Interrupted with its own message (see 6.3). A wait time the service gave is shown.
 - **Display:** a PDF contract's original pages are shown as pictures of the page: nothing in the file runs, and its links open only after the warning in 4.3. All text the app pulls out of the contract (quotes, summaries), and all playbook and AI text, is shown as plain text in the app and the report PDF, never as formatted text or links. Placeholders are restored by code only when they exactly match a known placeholder. An unknown placeholder counts as a broken reply. No confidence percentages or meters are shown anywhere, including Jev's probabilities.
 - **AI wording:** every piece of text the AI wrote carries one fixed line: "Every quote and number was checked against the contract; the wording was written by AI." Text that code built carries no such line (ADR 0011).
 - **Written-by metadata:** every stored piece of text — labels, reasons, messages, rewrites — keeps a written-by value: code, AI, or the user. A PDF export that includes AI-written text carries a machine-readable mark in the file's own metadata (ADR 0016).
@@ -252,9 +259,9 @@ A fixed sequence run by the app's code. The AI never decides what runs next and 
 | (new) | Draft | "Continue" on New review |
 | Draft | Running | "Send for review." The snapshot is taken now |
 | Running | Ready to check | Every step finished |
-| Running | Interrupted | Cancel, app closed, network failed after retries, key or credit problem, no private-mode model |
+| Running | Interrupted | Cancel, app closed, network failed after retries, rate limit after retries, key or credit problem, no private-mode model |
 | Running | Failed | A step's code failed in a way retrying won't fix |
-| Interrupted | Running | "Resume" continues from the first unfinished step. Finished steps aren't paid for again |
+| Interrupted | Running | "Resume" continues from the first unfinished step. Finished steps aren't paid for again. After a rate limit, the message says the AI service is busy or the key's limit is reached, shows the wait time if the service gave one, and offers "Resume" |
 | Failed | Running | "Retry," same as Resume |
 | Ready to check | Done | Every position checked and not-covered parts confirmed |
 | Done | Ready to check | Undo, or a position back to unchecked |
@@ -326,7 +333,7 @@ A fixed sequence run by the app's code. The AI never decides what runs next and 
 
 - **Form:** a desktop app with an installer. Built first as a Python command-line tool to test the review, then wrapped. The command-line tool follows the same storage and privacy rules.
 - **Systems:** Linux and Windows. Linux means Ubuntu 24.04 and later, Linux Mint 22 and later, Debian 13, and Fedora through the plain archive (decided 13 Nov 2026, ADR 0009). Ubuntu 22.04 and Linux Mint 21 are not supported. There is one Linux build. The Windows installer is built by GitHub Actions and tested in a Windows virtual machine. It's unsigned, so the download page explains the "Windows protected your PC" warning: click "More info," then "Run anyway." Mac comes later.
-- **API key:** first launch shows the key guide, including what a typical review costs and how to turn off Safety Retention. Clear messages for a wrong key, no credit, or no internet.
+- **API key:** first launch shows the key guide, including what a typical review costs and how to turn off Safety Retention. Clear messages for a wrong key, no credit, no internet, or a rate limit (the AI service is busy, or the key's limit is reached).
 - **Cost:** estimated before sending, shown while running, recorded per review. The estimate is a range: the low end assumes the AI service reuses the contract part of every request from its cache, and the high end assumes it never does (decided 14 Nov 2026). If the estimate is more than the remaining credit, a warning shows the exact amounts, with "Send anyway."
 - **Auto-delete:** 7, 30 or 90 days after a review's last change (default 30). A change is any edit, check, suggestion, output or rename. Opening isn't. "Keep it" restarts the clock. Reviews 3 or fewer days from deletion show a warning. Lowering the setting shows how many reviews it affects, asks to confirm, and deletes nothing sooner than 3 days later. Auto-delete never removes a review earlier than these rules allow. If the computer's clock has jumped backwards, so a review's last change looks later than now, the review is not due (decided 14 Nov 2026).
 - **File types:** PDF with real text, Word (.docx), text (.txt) and Markdown (.md). Text and Markdown files are read exactly like pasted text: Markdown symbols such as `#` and `**` are shown as plain characters, never as formatting. A Word file with tracked changes is read as if every change were accepted, with a notice saying how many changes it holds and who made them (ADR 0012). The contract check lists every change with its earlier and new wording and who made it. Removed words are never sent to the AI. An old Word file (.doc) is not read; the app says: "This is an old Word file. Open it in Word, save it as .docx, then load that."
@@ -426,6 +433,7 @@ Each item has a decision record (ADR). Ticked items were decided on 12 Nov 2026.
 - [x] "Check for updates" only opens the GitHub release page in the system browser. The app never contacts GitHub itself in version 1, so "You have the latest version" and "A new version is available" are gone. Asking GitHub or a backend may come in a later version (decided 13 Nov 2026, Spec 8.1).
 - [x] The oldest supported Linux: Ubuntu 24.04 and later, Linux Mint 22 and later, Debian 13, and Fedora through the plain archive. Ubuntu 22.04 and Mint 21 are not supported, so there is one Linux build, made on Ubuntu 24.04 (decided 13 Nov 2026, amendment to [ADR 0009](adr/0009-desktop-shell-protocol-and-packaging.md)). The oldest supported Windows version is still open.
 - [x] The 15 questions from the build stage 1 task plan: Pydantic now, which test tools come first, where the fakes live, the shapes `core` adds, the cost range, the scan length caps, auto-delete with a wrong clock, and the playbook checks in `core` (decided 14 Nov 2026). The answers are in sections 6.2 and 9, [`system-design.md`](system-design.md) sections 3.4, 7 and 15, and amendments to [ADR 0005](adr/0005-engine-runner-shapes-and-ports.md), [ADR 0012](adr/0012-missing-unsure-and-evidence-failures.md) and [ADR 0013](adr/0013-test-layers-and-release-gates.md).
+- [x] Label and scan edge cases of the build stage 1 task plan (questions 16 and 17), under one principle: when code can't be sure, the label is unsure, the reason is named and the user is shown the clause. "Unlimited" is walk-away when lower is better and unsure when higher is better. A rate limit is its own case: after 3 retries the review becomes Interrupted with a plain message, and Resume continues from the first unfinished step (decided 14 Nov 2026, sections 5, 6.2, 6.3, 9 and 14.2, amendments to [ADR 0005](adr/0005-engine-runner-shapes-and-ports.md) and [ADR 0012](adr/0012-missing-unsure-and-evidence-failures.md)).
 - [ ] Whether to register a trade mark on the name. Ruled out for now because of its cost.
 
 ## 14. Prototype handoff
@@ -484,7 +492,7 @@ The brief for whoever designs the prototype. Read sections 1 to 13 first, plus t
 | Contract check | A Word file's tracked changes, listed with the earlier wording. |
 | Privacy check | Private mode turned off warning. |
 | Privacy check | Estimated cost above remaining credit, exact amounts, "Send anyway." |
-| Review running | Wrong key, no credit, no internet, or no private-mode model, each turning the review Interrupted with a plain fix. |
+| Review running | Wrong key, no credit, no internet, a rate limit, or no private-mode model, each turning the review Interrupted with a plain fix. The rate limit shows the wait time when the AI service gave one. |
 | Review | Playbook changed banner, with Re-run. |
 | Review | More than half unsure: guidance message. |
 | Review | Unloaded document, hidden text, unedited starter, two governing-law clauses, no governing-law clause. |

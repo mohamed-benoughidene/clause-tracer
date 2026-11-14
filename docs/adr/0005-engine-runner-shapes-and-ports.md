@@ -117,5 +117,7 @@ Writing the stage 1 task plan found points about `core` shapes and ports that no
 - **"Unlimited"** is one field on `CheckedValue`, `unlimited: bool = False`. The stage 8 number parser turns "none" into 0.
 - **The planner defines the extra shapes**, not the implementer: scan findings, the last check's result, the cost range, the input bundle of the label rules and the extra reason codes. They are exact in [the system design](../system-design.md) section 3.4, and the owner approves them with the plan.
 - **The playbook checks of Spec 4.1** are pure functions in `core`, built in stage 1 and shared by stage 6 (reading playbook files) and stage 12 (the editor).
+- **A rate limit is its own error.** `RateLimitedError`, code `rate_limited`, is a model-service error beside `NoCreditError` and `InvalidApiKeyError`. It carries an optional wait in seconds, `retry_after_seconds`, taken from the service's `Retry-After`. The OpenRouter adapter raises it after 3 retries of an HTTP 429. Stage 6 maps it to Interrupted with its own message (Spec 6.2 and 6.3).
+- **A new reason code**, `UNLIMITED_UNCLEAR`, joins the label reasons: "unlimited" on a position where higher is better is unsure (see the amendment of 14 Nov 2026 in ADR 0012).
 
 [The system design](../system-design.md) section 3.4 lists every shape, port and fake exactly.
