@@ -566,7 +566,8 @@ The task plan of each stage is written in `docs/plans/` just before the stage is
 - **Start with** ADR 0005 action item 2 (section 3.4).
 - **Done when** importing `core` loads only the standard library; the label-rule tables cover every row of the Spec 14.5 sample; no shape has a provider-specific field; and `src/clause_tracer/core/README.md` records the shapes and ports (ADR 0005 action item 4). The owner starts writing the ten test contracts now, because they take longest.
 - **Tests, in the testing strategy.** Section 4 (the `core` row), section 5 (invariant 7), section 6.1, sections 10 and 14.
-- **Decided 13 Nov 2026:** the points at the end of section 3.4. Nothing in stage 1 is left open, apart from the `TypeAdapter` check named there.
+- **Decided 13 Nov 2026:** the points at the end of section 3.4.
+- **Not yet decided:** the points that writing the task plan found. They are listed, with the task that needs each, in [the stage 1 plan](plans/stage-01-core.md) section 6.
 
 ### 15.2 Stage 2: `ingest` for text, Markdown and pasted text
 
