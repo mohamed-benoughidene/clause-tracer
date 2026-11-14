@@ -95,7 +95,7 @@ Put in the old word or the promise, then check every hit. Search for the plural 
 To check that no link points to a missing file, from the repo root:
 
 ```bash
-find . -name '*.md' -not -path './.git/*' -not -path './.venv/*' -not -path './.cache/*' -not -name WRITING_DOCS.md | while read -r f; do d=$(dirname "$f"); grep -o '](\([^)#]*\))' "$f" | sed 's/](\(.*\))/\1/' | grep -v '^http' | while read -r l; do [ -e "$d/$l" ] || echo "$f: $l"; done; done
+find . -name '*.md' -not -path './.git/*' -not -path './.venv/*' -not -path './.cache/*' -not -name WRITING_DOCS.md | while read -r f; do d=$(dirname "$f"); grep -o '](\([^)#]*\))' "$f" | sed 's/](\(.*\))/\1/' | grep -v '^http' | sed 's/%20/ /g' | while read -r l; do [ -e "$d/$l" ] || echo "$f: $l"; done; done
 ```
 
 No output means every link works.
@@ -104,7 +104,7 @@ No output means every link works.
 
 These rules apply to every doc. The app's own words follow `ux-copy.md` too.
 
-- **British English.** "Colour", "licence" (the noun), "organise", "labelling". The licence's own name keeps its US spelling: the Functional Source **License**. So do file names that tools look for, such as `LICENSE`. Older text still has some US spellings (Spec section 5 is "Labeling rules"). Fix them when you're editing nearby.
+- **British English.** "Colour", "licence" (the noun), "organise", "labelling". The licence's own name keeps its US spelling: the Functional Source **License**. So do file names that tools look for, such as `LICENSE`. If you find a US spelling in older text, fix it when you're editing nearby.
 - **Lead with the point.** The first sentence says what the file or section is for, or what the reader must do.
 - **Short sentences.** Aim for 15 to 20 words. One idea per sentence.
 - **Plain words.** "Use", not "utilise". "Start", not "commence". Explain a technical term the first time you use it.
