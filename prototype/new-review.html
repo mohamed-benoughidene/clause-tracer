@@ -31,12 +31,36 @@
   .preview .link { text-align: left; }
   .party-pick { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: 12px; }
   .party-pick legend { padding: 0; margin-bottom: 14px; }
+  /* one block per party: the radio, its tag, then that party's own name and address */
+  .party-note { margin-bottom: 4px; }
+  .party-block { display: grid; gap: 12px; padding: 14px 0; border-top: 1px solid var(--line); }
   .party-option { align-items: flex-start; }
-  .party-option input { margin-top: 4px; }
-  .party-option span { display: grid; gap: 2px; }
-  .party-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+  .party-option input { margin-top: 3px; }
+  .party-who { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; min-width: 0; }
+  .party-tag { font: 500 12px/1.4 var(--sans); color: var(--text-2); background: var(--bg-sunken); border-radius: var(--r); padding: 1px 8px; white-space: nowrap; }
+  .party-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; padding-left: 24px; }
+  .party-pick .party-add { justify-self: start; }
   .dropzone { border: 1px dashed var(--line-strong); border-radius: var(--r-lg); padding: 28px 20px; display: grid;
     justify-items: center; gap: 8px; color: var(--text-2); text-align: center; }
+  .dropzone p { margin: 0; }
+  .dropzone strong { color: var(--text); }
+
+  /* the load dialog: drop zone, then reading, then loaded. Small, and one pane at a time. */
+  .load-dialog { max-width: min(480px, calc(100vw - 32px)); }
+  .load-dialog .dialog-body { gap: 16px; }
+  .load-dialog .dialog-foot { padding-top: 0; }
+  .load-row { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .load-row .file-name { min-width: 0; }
+  .load-row .file-name strong { overflow-wrap: anywhere; }
+  .file-badge { flex: none; display: inline-grid; place-items: center; min-width: 40px; height: 26px; padding: 0 6px; border: 1px solid var(--line-strong);
+    border-radius: 3px; background: var(--bg-surface); color: var(--text-2); font: 600 11px/1 var(--mono); letter-spacing: .04em; }
+  .load-bar { height: 4px; margin-top: 12px; background: var(--line); border-radius: 2px; overflow: hidden; }
+  .load-bar span { display: block; height: 100%; background: var(--text); border-radius: 2px; transition: width 400ms linear; }
+  .load-done-icon { flex: none; width: 20px; height: 20px; color: var(--pref); }
+  .load-preview { display: grid; gap: 4px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .load-preview p { margin: 0; }
+  .load-error .notice.warn { flex-wrap: nowrap; }
+  @media (prefers-reduced-motion: reduce) { .load-bar span { transition: none; } }
 
   /* warnings: unsure colours, never red (Spec 14.4) */
   .notice.warn { flex-wrap: wrap; align-items: flex-start; background: var(--unsure-bg); color: var(--unsure-fg); }
@@ -54,6 +78,8 @@
     .appbar .search-commands { width: 100%; margin: 0; }
     .party-grid { grid-template-columns: 1fr; }
   }
+  /* text at 150% and 200%: the grid is one column, so the fields line up under the radio's text */
+  html:is([data-text="150"], [data-text="200"]) .party-grid { padding-left: 0; }
 </style>
 </head>
 <body>
@@ -65,12 +91,12 @@
   <h1 class="h3">New review</h1>
   <span class="status small"><svg class="icon"><use href="#i-pencil"/></svg>Draft</span>
   <span class="spacer"></span>
-  <ol class="steps" aria-label="Steps">
-    <li aria-current="step"><span class="n">1</span>Contract</li>
-    <li><span class="n">2</span>Contract check</li>
-    <li><span class="n">3</span>Privacy check</li>
-    <li><span class="n">4</span>Review</li>
-  </ol>
+  <ol class="steps" aria-label="Steps" data-step="1">
+      <li aria-current="step"><span class="step"><span class="name">Contract</span><span class="dot" aria-hidden="true"></span></span></li>
+      <li><span class="step"><span class="name">Contract check</span><span class="dot" aria-hidden="true"></span></span></li>
+      <li><span class="step"><span class="name">Privacy check</span><span class="dot" aria-hidden="true"></span></span></li>
+      <li><span class="step"><span class="name">Review</span><span class="dot" aria-hidden="true"></span></span></li>
+    </ol>
   <button class="search-commands" type="button"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
 </header>
 
@@ -100,7 +126,7 @@
           <h2 class="h3" id="step-load"><span class="step-no">1</span>Load the contract</h2>
           <span class="spacer"></span>
           <div class="segmented" role="group" aria-label="How to add the contract">
-            <button type="button" aria-pressed="true" id="seg-upload">Upload</button>
+            <button type="button" aria-pressed="true" id="seg-upload">Load file</button>
             <button type="button" aria-pressed="false" id="seg-paste">Paste text</button>
           </div>
         </div>
@@ -109,10 +135,10 @@
           <svg class="icon"><use href="#i-warn"/></svg>
           <div class="notice-body">
             <p>This PDF is pictures of pages, so its text can't be read.</p>
-            <p class="small">Upload a Word version, or paste the text.</p>
+            <p class="small">Load a Word version, or paste the text.</p>
             <div class="notice-actions">
               <button class="btn btn-sm" type="button" data-show-paste><svg class="icon"><use href="#i-paste"/></svg>Paste text</button>
-              <button class="btn btn-sm" type="button" data-pick-file><svg class="icon"><use href="#i-upload"/></svg>Replace file</button>
+              <button class="btn btn-sm" type="button" data-pick-file><svg class="icon"><use href="#i-doc"/></svg>Replace file</button>
             </div>
           </div>
         </div>
@@ -132,7 +158,7 @@
           <div class="notice-body">
             <p>This file is 48 MB. The limit is 20 MB. Paste only the pages you want reviewed.</p>
             <div class="notice-actions">
-              <button class="btn btn-sm" type="button" data-pick-file><svg class="icon"><use href="#i-upload"/></svg>Choose another file</button>
+              <button class="btn btn-sm" type="button" data-pick-file><svg class="icon"><use href="#i-doc"/></svg>Choose another file</button>
             </div>
           </div>
         </div>
@@ -142,7 +168,7 @@
           <div class="notice-body">
             <p>This file has no text. Choose another file, or paste the text.</p>
             <div class="notice-actions">
-              <button class="btn btn-sm" type="button" data-pick-file><svg class="icon"><use href="#i-upload"/></svg>Choose another file</button>
+              <button class="btn btn-sm" type="button" data-pick-file><svg class="icon"><use href="#i-doc"/></svg>Choose another file</button>
             </div>
           </div>
         </div>
@@ -152,7 +178,7 @@
           <div class="notice-body">
             <p>This is an old Word file. Open it in Word, save it as .docx, then load that.</p>
             <div class="notice-actions">
-              <button class="btn btn-sm" type="button" data-pick-file><svg class="icon"><use href="#i-upload"/></svg>Choose another file</button>
+              <button class="btn btn-sm" type="button" data-pick-file><svg class="icon"><use href="#i-doc"/></svg>Choose another file</button>
             </div>
           </div>
         </div>
@@ -173,14 +199,21 @@
               <li>more labels may be wrong or unsure.</li>
             </ul>
             <div class="notice-actions">
-              <button class="btn btn-sm" type="button" data-pick-file><svg class="icon"><use href="#i-upload"/></svg>Choose another file</button>
+              <button class="btn btn-sm" type="button" data-pick-file><svg class="icon"><use href="#i-doc"/></svg>Choose another file</button>
             </div>
           </div>
         </div>
 
-        <div id="file-panel">
+        <div class="dropzone" data-state="no-file">
+          <svg class="icon"><use href="#i-doc"/></svg>
+          <p><strong>Drop the contract here</strong></p>
+          <button class="btn btn-sm" type="button" data-pick-file>Choose a file</button>
+          <p class="small faint">PDF, Word, text or Markdown · up to 20 MB · read on this computer</p>
+        </div>
+
+        <div id="file-panel" data-state-hide="no-file">
           <div class="file-row">
-            <svg class="icon"><use href="#i-doc"/></svg>
+            <span class="file-badge" data-file-badge>PDF</span>
             <div class="file-name">
               <strong data-state-hide="old-word">Brightline_Developer_Agreement.pdf</strong><strong data-state="old-word">Brightline_Developer_Agreement.doc</strong>
               <span class="small muted" data-state-hide="mixed scanned too-large empty not-english old-word">PDF · 5 pages · 929 words · real text</span>
@@ -246,42 +279,47 @@
     </div>
 
     <div class="stack">
-      <section class="card">
+      <section class="card" aria-labelledby="step-party">
         <fieldset class="party-pick">
-          <legend class="h3"><span class="step-no">3</span>Which party in this contract is the service provider?</legend>
-          <label class="check party-option">
-            <input type="radio" name="party" checked>
-            <span>Karim Benali (“the Developer”) <span class="small muted">Picked last time</span></span>
-          </label>
-          <label class="check party-option">
-            <input type="radio" name="party">
-            <span>Brightline Studio Ltd (“the Agency”)</span>
-          </label>
-          <button class="btn btn-ghost btn-sm" type="button" data-open="add-party" style="justify-self:start"><svg class="icon"><use href="#i-plus"/></svg>Add a missing party</button>
-        </fieldset>
-      </section>
+          <legend class="h3" id="step-party"><span class="step-no">3</span>Which party in this contract is the service provider?</legend>
+          <p class="note party-note">Filled in from the contract's opening lines. Every copy of them is replaced before anything is sent.</p>
 
-      <section class="card" aria-labelledby="party-details">
-        <h2 class="h3" id="party-details" style="margin-bottom:8px">Party details</h2>
-        <p class="note" style="margin-bottom:16px">Filled in from the contract's opening lines. Every copy of them is replaced before anything is sent.</p>
-        <div class="party-grid">
-          <div class="field">
-            <label for="your-name">Your party · name</label>
-            <input class="input" id="your-name" type="text" value="Karim Benali">
+          <div class="party-block" role="group" aria-labelledby="party-1-label">
+            <label class="check party-option">
+              <input type="radio" name="party" checked>
+              <span class="party-who"><span id="party-1-label">Karim Benali (“the Developer”)</span> <span class="party-tag" data-party-tag>Your party</span> <span class="small muted">Picked last time</span></span>
+            </label>
+            <div class="party-grid">
+              <div class="field">
+                <label for="your-name">Name</label>
+                <input class="input" id="your-name" type="text" value="Karim Benali">
+              </div>
+              <div class="field">
+                <label for="your-address">Address</label>
+                <input class="input" id="your-address" type="text" value="27 Rue Didouche Mourad, Algiers 16000">
+              </div>
+            </div>
           </div>
-          <div class="field">
-            <label for="your-address">Address</label>
-            <input class="input" id="your-address" type="text" value="27 Rue Didouche Mourad, Algiers 16000">
+
+          <div class="party-block" role="group" aria-labelledby="party-2-label">
+            <label class="check party-option">
+              <input type="radio" name="party">
+              <span class="party-who"><span id="party-2-label">Brightline Studio Ltd (“the Agency”)</span> <span class="party-tag" data-party-tag>Other side</span></span>
+            </label>
+            <div class="party-grid">
+              <div class="field">
+                <label for="other-name">Name</label>
+                <input class="input" id="other-name" type="text" value="Brightline Studio Ltd">
+              </div>
+              <div class="field">
+                <label for="other-address">Address</label>
+                <input class="input" id="other-address" type="text" value="14 Harbour Street, Leeds LS1 4AB">
+              </div>
+            </div>
           </div>
-          <div class="field">
-            <label for="other-name">Other side · name</label>
-            <input class="input" id="other-name" type="text" value="Brightline Studio Ltd">
-          </div>
-          <div class="field">
-            <label for="other-address">Address</label>
-            <input class="input" id="other-address" type="text" value="14 Harbour Street, Leeds LS1 4AB">
-          </div>
-        </div>
+
+          <button class="btn btn-ghost btn-sm party-add" type="button" data-open="add-party"><svg class="icon"><use href="#i-plus"/></svg>Add a missing party</button>
+        </fieldset>
       </section>
     </div>
 
@@ -291,11 +329,60 @@
 <footer class="flow-foot">
   <span class="row small muted"><svg class="icon"><use href="#i-check"/></svg>Saved as a draft</span>
   <span class="spacer"></span>
-  <a class="btn btn-primary" href="contract-check.html" data-state-hide="scanned too-large empty old-word playbook-deleted">Continue<svg class="icon"><use href="#i-arrow-right"/></svg></a>
-  <button class="btn btn-primary" type="button" disabled data-state="scanned too-large empty old-word playbook-deleted">Continue<svg class="icon"><use href="#i-arrow-right"/></svg></button>
+  <a class="btn btn-primary" href="contract-check.html" data-state-hide="scanned too-large empty old-word playbook-deleted no-file">Continue<svg class="icon"><use href="#i-arrow-right"/></svg></a>
+  <button class="btn btn-primary" type="button" disabled data-state="scanned too-large empty old-word playbook-deleted no-file">Continue<svg class="icon"><use href="#i-arrow-right"/></svg></button>
 </footer>
 
 
+
+<dialog id="load-file" class="load-dialog" aria-labelledby="load-title">
+  <div class="dialog-body">
+    <div class="row">
+      <h2 class="h2" id="load-title">Load the contract</h2>
+      <span class="spacer"></span>
+      <button class="icon-btn" type="button" data-close aria-label="Close"><svg class="icon"><use href="#i-x"/></svg></button>
+    </div>
+
+    <div class="dropzone" data-load-pane="empty">
+      <svg class="icon"><use href="#i-doc"/></svg>
+      <p><strong>Drop the contract here</strong></p>
+      <button class="btn btn-sm" type="button" data-pick-file>Choose a file</button>
+      <p class="small faint">PDF, Word, text or Markdown · up to 20 MB · read on this computer</p>
+    </div>
+
+    <div data-load-pane="reading" hidden>
+      <div class="load-row">
+        <span class="file-badge" data-load-badge>PDF</span>
+        <div class="file-name">
+          <strong data-load-name>Brightline_Developer_Agreement.pdf</strong>
+          <span class="small muted" id="load-line" aria-live="polite">Reading page 3 of 5</span>
+        </div>
+        <span class="spacer"></span>
+        <button class="btn btn-ghost btn-sm" type="button" data-load-cancel>Cancel</button>
+      </div>
+      <div class="load-bar" id="load-bar" role="progressbar" aria-label="Reading the contract" aria-valuemin="0" aria-valuemax="5" aria-valuenow="3"><span style="width:60%"></span></div>
+    </div>
+
+    <div data-load-pane="loaded" hidden>
+      <div class="load-row">
+        <svg class="icon load-done-icon"><use href="#i-check"/></svg>
+        <div class="file-name" role="status">
+          <strong data-load-name>Brightline_Developer_Agreement.pdf</strong>
+          <span class="small muted">Contract loaded · 5 pages · 45 clauses found</span>
+        </div>
+        <span class="spacer"></span>
+        <button class="btn btn-ghost btn-sm" type="button" data-pick-file>Replace</button>
+      </div>
+      <div class="load-preview">
+        <p class="small"><strong class="muted">First page · is this the right contract?</strong></p>
+        <p class="small muted">This Agreement is dated 5 November 2026. Parties: (1) Brightline Studio Ltd, a company registered in England and Wales …</p>
+      </div>
+    </div>
+
+    <div class="load-error" data-load-pane="error" hidden></div>
+  </div>
+  <div class="dialog-foot" id="load-foot" hidden><button class="btn btn-primary" type="button" data-close>Done</button></div>
+</dialog>
 
 <dialog id="add-party" aria-labelledby="add-title">
   <form method="dialog">
@@ -331,13 +418,21 @@
   }
 </script>
 <script>
-  // Page-only behaviour: Upload and Paste text switch the contract panel, and a deleted
-  // playbook leaves the picker empty and highlighted.
+  // Page-only behaviour: Load file and Paste text switch the contract panel. Loading a file opens a small dialog that
+  // plays drop zone, reading, loaded. The file is read on this computer; nothing is sent. A deleted playbook leaves
+  // the picker empty and highlighted.
   (function () {
     var upload = document.getElementById('seg-upload');
     var paste = document.getElementById('seg-paste');
     var filePanel = document.getElementById('file-panel');
     var pastePanel = document.getElementById('paste-panel');
+    var picker = document.getElementById('contract-file');
+    var card = picker.closest('.card');
+    var dlg = document.getElementById('load-file');
+    var foot = document.getElementById('load-foot');
+    var STATE = new URLSearchParams(location.search).get('state') || '';
+    var PAGES = 5, timer = null, done = null;
+    var FILE_STATES = ['scanned', 'mixed', 'too-large', 'empty', 'old-word', 'tracked-changes', 'not-english', 'no-file'];
 
     function show(mode) {
       var pasting = mode === 'paste';
@@ -346,33 +441,112 @@
       upload.setAttribute('aria-pressed', String(!pasting));
       paste.setAttribute('aria-pressed', String(pasting));
     }
-    upload.addEventListener('click', function () { show('upload'); });
-    paste.addEventListener('click', function () { show('paste'); });
-    document.querySelectorAll('[data-show-paste]').forEach(function (b) {
-      b.addEventListener('click', function () { show('paste'); });
-    });
 
-    // Upload, Replace and Choose another file open the system picker straight away.
-    // Dropping a file anywhere on the card does the same.
-    var picker = document.getElementById('contract-file');
-    var card = picker.closest('.card');
-    function useFile(f) {
-      if (!f) return;
-      show('upload');
-      document.querySelector('.file-name strong').textContent = f.name;
-      CT.toast('Loaded ' + f.name);
+    // ---- the dialog: one pane at a time
+    function pane(name) {
+      dlg.querySelectorAll('[data-load-pane]').forEach(function (p) { p.hidden = p.getAttribute('data-load-pane') !== name; });
+      foot.hidden = name !== 'loaded';
     }
-    document.querySelectorAll('[data-pick-file]').forEach(function (b) {
-      b.addEventListener('click', function () { picker.value = ''; picker.click(); });
+    function stop() { clearInterval(timer); clearTimeout(done); timer = done = null; }
+    function openLoad(name) { stop(); pane(name || 'empty'); if (!dlg.open) dlg.showModal(); }
+    function progress(page) {
+      document.getElementById('load-line').textContent = 'Reading page ' + page + ' of ' + PAGES;
+      var bar = document.getElementById('load-bar');
+      bar.setAttribute('aria-valuenow', page);
+      bar.firstElementChild.style.width = (page / PAGES * 100) + '%';
+    }
+    function setName(name) {
+      var ext = (name.split('.').pop() || '').toUpperCase();
+      dlg.querySelectorAll('[data-load-name]').forEach(function (el) { el.textContent = name; });
+      dlg.querySelector('[data-load-badge]').textContent = ext.length <= 4 ? ext : 'FILE';
+    }
+    function showError(kind, f) {
+      var src = document.querySelector('.notice[data-state="' + kind + '"]');
+      var box = dlg.querySelector('[data-load-pane="error"]');
+      box.innerHTML = '';
+      var note = src.cloneNode(true);
+      note.removeAttribute('data-state'); note.classList.remove('on');
+      if (kind === 'too-large') {
+        var p = note.querySelector('p');
+        p.textContent = p.textContent.replace('48 MB', Math.round(f.size / 1048576) + ' MB');
+      }
+      box.appendChild(note);
+      pane('error');
+    }
+    // the file is on this computer: read it page by page for about 2 seconds, then show it loaded
+    function start(f) {
+      var ext = (f.name.split('.').pop() || '').toLowerCase();
+      if (f.size > 20 * 1048576) return showError('too-large', f);
+      if (f.size === 0) return showError('empty', f);
+      if (ext === 'doc') return showError('old-word', f);
+      stop(); setName(f.name); progress(1); pane('reading');
+      var page = 1;
+      timer = setInterval(function () {
+        page += 1; progress(page);
+        if (page >= PAGES) { stop(); done = setTimeout(function () { finish(f); }, 400); }
+      }, 400);
+    }
+    // the loaded file replaces the one in the card, and any warning about the old file goes
+    function finish(f) {
+      pane('loaded');
+      if (FILE_STATES.indexOf(STATE) !== -1) {
+        document.querySelectorAll('[data-state].on').forEach(function (el) { el.classList.remove('on'); });
+        document.querySelectorAll('[data-state-hide]').forEach(function (el) {
+          if (el.getAttribute('data-state-hide').split(/\s+/).indexOf(STATE) !== -1) el.hidden = false;
+        });
+      }
+      show('upload');
+      filePanel.querySelectorAll('.file-name strong').forEach(function (el) { el.textContent = f.name; });
+      var ext = (f.name.split('.').pop() || '').toUpperCase();
+      filePanel.querySelector('[data-file-badge]').textContent = ext.length <= 4 ? ext : 'FILE';
+    }
+
+    dlg.addEventListener('close', function () { if (timer || done) { stop(); pane('empty'); } });
+    dlg.querySelector('[data-load-cancel]').addEventListener('click', function () { stop(); pane('empty'); });
+    picker.addEventListener('change', function () {
+      var f = picker.files[0];
+      if (!f) return;
+      if (!dlg.open) dlg.showModal();
+      start(f);
     });
-    upload.addEventListener('click', function () { if (upload.getAttribute('aria-pressed') === 'true') picker.click(); });
-    picker.addEventListener('change', function () { useFile(picker.files[0]); });
+    // Choose a file inside the dialog opens the system picker; the same buttons on the card open the dialog.
+    document.addEventListener('click', function (e) {
+      var pick = e.target.closest('[data-pick-file]');
+      if (pick) {
+        if (pick.closest('dialog')) { picker.value = ''; picker.click(); }
+        else openLoad('empty');
+      }
+      var wantsPaste = e.target.closest('[data-show-paste]');
+      if (wantsPaste) { if (dlg.open) dlg.close(); show('paste'); }
+    });
+    // a file dropped on the card, or on the dialog, is read straight away
     card.addEventListener('dragover', function (e) { e.preventDefault(); card.classList.add('is-drop'); });
     card.addEventListener('dragleave', function () { card.classList.remove('is-drop'); });
-    card.addEventListener('drop', function (e) { e.preventDefault(); card.classList.remove('is-drop'); useFile(e.dataTransfer.files[0]); });
+    card.addEventListener('drop', function (e) { e.preventDefault(); card.classList.remove('is-drop'); if (e.dataTransfer.files[0]) { openLoad('empty'); start(e.dataTransfer.files[0]); } });
+    dlg.addEventListener('dragover', function (e) { e.preventDefault(); });
+    dlg.addEventListener('drop', function (e) { e.preventDefault(); if (e.dataTransfer.files[0]) start(e.dataTransfer.files[0]); });
 
-    var states = (new URLSearchParams(location.search).get('state') || '').split(/\s+/);
-    if (states.indexOf('playbook-deleted') !== -1) {
+    upload.addEventListener('click', function () { if (upload.getAttribute('aria-pressed') === 'true' && !filePanel.hidden) openLoad('empty'); });
+    paste.addEventListener('click', function () { show('paste'); });
+    upload.addEventListener('click', function () { show('upload'); });
+
+    // ?state=reading holds the dialog at page 3 of 5. load-empty, load-done and load-too-large hold the other panes.
+    if (STATE === 'reading') { stop(); pane('reading'); progress(3); dlg.showModal(); }
+    if (STATE === 'load-empty') openLoad('empty');
+    if (STATE === 'load-done') openLoad('loaded');
+    if (STATE === 'load-too-large') { showError('too-large', { size: 48 * 1048576 }); dlg.showModal(); }
+
+    // ---- the party blocks: the picked party is "Your party", the others are "Other side"
+    var radios = document.querySelectorAll('.party-block input[type="radio"]');
+    function tag() {
+      radios.forEach(function (r) {
+        r.closest('.party-block').querySelector('[data-party-tag]').textContent = r.checked ? 'Your party' : 'Other side';
+      });
+    }
+    radios.forEach(function (r) { r.addEventListener('change', tag); });
+    tag();
+
+    if (STATE.split(/\s+/).indexOf('playbook-deleted') !== -1) {
       var select = document.getElementById('playbook');
       select.selectedIndex = -1;
       select.classList.add('is-flagged');

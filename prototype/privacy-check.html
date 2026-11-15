@@ -63,7 +63,7 @@
   .repl .val { overflow-wrap: anywhere; }
   .repl .count { color: var(--text-2); white-space: nowrap; }
   .repl.unlikely .count { color: var(--text-3); }
-  .toggle-row { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; align-items: center; padding: 14px; background: var(--bg-tone); border-radius: var(--r-lg); }
+  .toggle-row { display: grid; gap: 6px; justify-items: start; padding: 14px; background: var(--bg-tone); border-radius: var(--r-lg); }
   .toggle-row small { display: block; color: var(--text-2); }
   .side .foot-note { margin-top: auto; display: grid; gap: 6px; }
   .mini-note { font-size: 12.5px; color: var(--text-2); }
@@ -89,11 +89,11 @@
     <span class="h3">Brightline web build</span>
     <span class="status small"><svg class="icon"><use href="#i-pencil"/></svg>Draft</span>
     <span class="spacer"></span>
-    <ol class="steps" aria-label="Review steps">
-      <li><span class="n"><svg class="icon" style="width:11px;height:11px;color:inherit"><use href="#i-check"/></svg></span>Contract</li>
-      <li><span class="n"><svg class="icon" style="width:11px;height:11px;color:inherit"><use href="#i-check"/></svg></span>Contract check</li>
-      <li aria-current="step"><span class="n">3</span>Privacy check</li>
-      <li><span class="n">4</span>Review</li>
+    <ol class="steps" aria-label="Review steps" data-step="3">
+      <li class="is-done"><a class="step" href="new-review.html"><span class="name">Contract<span class="visually-hidden">, done</span></span><span class="dot" aria-hidden="true"><svg class="icon"><use href="#i-check"/></svg></span></a></li>
+      <li class="is-done"><a class="step" href="contract-check.html"><span class="name">Contract check<span class="visually-hidden">, done</span></span><span class="dot" aria-hidden="true"><svg class="icon"><use href="#i-check"/></svg></span></a></li>
+      <li aria-current="step"><span class="step"><span class="name">Privacy check</span><span class="dot" aria-hidden="true"></span></span></li>
+      <li><span class="step"><span class="name">Review</span><span class="dot" aria-hidden="true"></span></span></li>
     </ol>
     <span class="spacer"></span>
     <button class="search-commands" type="button" style="width:220px;margin:0"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
@@ -290,8 +290,11 @@
       <p><a class="link" href="new-review.html"><svg class="icon"><use href="#i-arrow-left"/></svg>Back to party details</a></p>
 
       <div class="toggle-row" style="margin-top:8px">
-        <input class="toggle" type="checkbox" id="private-mode" role="switch" checked aria-describedby="private-desc">
-        <label for="private-mode">Private mode for this review<small id="private-desc">Only providers that don't keep your contract.</small></label>
+        <button class="pm-switch" type="button" role="switch" aria-checked="true" data-private-switch id="private-mode" aria-describedby="private-desc">
+          <span class="pm-track" aria-hidden="true"><span class="pm-knob"></span></span>
+          <span class="pm-label">Private mode for this review</span>
+        </button>
+        <small id="private-desc">Only providers that don't keep your contract.</small>
       </div>
 
       <div class="notice" id="private-off-warning" role="alert" hidden>
@@ -323,6 +326,19 @@
 
 </div>
 
+<dialog id="private-off" aria-labelledby="private-title">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="h2" id="private-title">Turn private mode off for this review?</h2>
+      <p class="muted">The contract goes to AI models that may keep it. Names and addresses are still replaced.</p>
+    </div>
+    <div class="dialog-foot">
+      <button class="btn" value="cancel">Cancel</button>
+      <button class="btn btn-primary" value="ok">Turn off</button>
+    </div>
+  </form>
+</dialog>
+
 <script src="icons.js"></script>
 <script src="app.js"></script>
 <script>
@@ -341,15 +357,15 @@
       });
       box.dispatchEvent(new Event('change'));
     });
+    // The warning follows the switch, whoever flips it (app.js turns it off only after the confirmation dialog).
     var mode = document.getElementById('private-mode');
-    mode.addEventListener('change', function () {
-      document.getElementById('private-off-warning').hidden = mode.checked;
-    });
-    // ?state=private-off opens with the toggle already off, so the warning shows on load.
+    function warn() { document.getElementById('private-off-warning').hidden = mode.getAttribute('aria-checked') === 'true'; }
+    new MutationObserver(warn).observe(mode, { attributes: true, attributeFilter: ['aria-checked'] });
+    // ?state=private-off opens with the switch already off, so the warning shows on load.
     if ((new URLSearchParams(location.search).get('state') || '').split(/\s+/).indexOf('private-off') !== -1) {
-      mode.checked = false;
-      mode.dispatchEvent(new Event('change'));
+      mode.setAttribute('aria-checked', 'false');
     }
+    warn();
   })();
 </script>
 </body>

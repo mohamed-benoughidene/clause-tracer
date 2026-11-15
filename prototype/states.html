@@ -24,6 +24,7 @@
 <div class="app">
   <aside class="sidebar">
     <a class="logo" href="home.html"><img class="on-light" src="logo.svg" alt="Clause Tracer"><img class="on-dark" src="logo-dark.svg" alt="Clause Tracer"></a>
+    <a class="logo-symbol" href="home.html"><img class="on-light" src="symbol.svg" alt="Clause Tracer"><img class="on-dark" src="symbol-dark.svg" alt="Clause Tracer"></a>
     <a class="btn btn-primary btn-block" href="new-review.html"><svg class="icon"><use href="#i-plus"/></svg>New review</a>
     <button class="search-commands" type="button"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
     <nav class="nav" aria-label="Main">
@@ -59,7 +60,7 @@
           <li><a href="index.html">First launch → key → Reviews</a><span>Paste any key, Save key. It opens Reviews by itself.</span></li>
           <li><a href="review.html?sample">Practice review</a><span>Find the wrong label (§ 11.1), open it, fix it.</span></li>
           <li><a href="new-review.html">New review → checks → running → review</a><span>Continue, Looks right, Send for review, Open the review.</span></li>
-          <li><a href="review.html">Check every label</a><span>Press J, then 1, 2 or 3 on each walk-away and unsure. The counter fills.</span></li>
+          <li><a href="review.html">Check every label</a><span>Press J, then 1, 2 or 3 on each walk-away and unsure. The pie fills.</span></li>
           <li><a href="output.html">Write the message and save the report</a><span>Tick or untick asks, change the tone, Copy, Save PDF.</span></li>
           <li><a href="playbook-editor.html">Edit a playbook</a><span>From Playbooks → Edit. Back with changes asks first.</span></li>
         </ol>
@@ -82,6 +83,7 @@
           <li><a href="home.html">Default</a><span>Every status: Ready to check, Running, Draft, Interrupted, Failed, Done; auto-delete notice; “Deletes in 2 days” with Keep it / Delete now.</span></li>
           <li><a href="home.html?state=empty">No reviews yet</a></li>
           <li><a href="home.html?state=offline">Offline</a></li>
+          <li><a href="home.html?state=sidebar-collapsed">Menu folded</a><span>An icon rail with a tooltip on each item. Collapse menu or Ctrl+B folds it and the choice is kept. Every page with the menu does the same; a narrow window ignores it.</span></li>
           <li><a href="home.html#delete-review">Delete a review</a><span>Names it and says it can't be undone.</span></li>
         </ul>
       </section>
@@ -101,6 +103,11 @@
           <li><a href="new-review.html?state=tracked-changes">Word file with tracked changes</a><span>Read as if every change were accepted; Continue still works.</span></li>
           <li><a href="new-review.html?state=playbook-deleted">Draft whose playbook was deleted</a></li>
           <li><a href="new-review.html?state=first-run">First review: a copy of the starter is already picked</a><span>The user has no playbook yet; step 2 holds the copy and “Make the limits yours”.</span></li>
+          <li><a href="new-review.html?state=no-file">No file loaded yet</a><span>The drop zone shows, and Continue is off.</span></li>
+          <li><a href="new-review.html?state=reading">Load file: reading page 3 of 5</a><span>The dialog, with a determinate bar and Cancel.</span></li>
+          <li><a href="new-review.html?state=load-done">Load file: contract loaded</a><span>5 pages, 45 clauses found, with Replace and Done.</span></li>
+          <li><a href="new-review.html?state=load-empty">Load file: empty file</a><span>The error shows inside the dialog.</span></li>
+          <li><a href="new-review.html?state=load-too-large">Load file: too large</a><span>The error shows inside the dialog.</span></li>
         </ul>
       </section>
 
@@ -144,7 +151,8 @@
           <li><a href="review.html#warn-hidden">Read first: hidden text, opened in the column</a> · <a href="review.html?state=unedited-starter#warn-starter">unedited starter, opened</a></li>
           <li><a href="review.html?state=two-law">Two governing-law clauses</a></li>
           <li><a href="review.html?state=no-law">No governing-law clause</a></li>
-          <li><a href="review.html?state=mixed">Privacy badge “Mixed”</a></li>
+          <li><a href="review.html?state=mixed">Private mode: steps 1 and 2 on, 3 and 4 off</a><span>A banner names which steps ran in private mode.</span></li>
+          <li><a href="review.html?state=all-checked">Every position checked</a><span>The pie is a full disc with a check, and the counter says “Every position is checked”.</span></li>
           <li><a href="review.html#rerun">Re-run</a> · <a href="review.html#start-over">Start over</a> · <a href="review.html#doc-missing">Document not loaded</a></li>
           <li><a href="review.html#link-warn">Link in the contract</a><span>Clicking the link in 5.5 asks first, then opens it outside the app.</span></li>
         </ul>

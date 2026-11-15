@@ -8,20 +8,59 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<style>
+  /* review.html only (owner, 15 Nov 2026): a quieter column and a live progress pie. */
+
+  /* The pies (.pie) are shared and live in styles.css. This page starts still (.is-still), so the first paint shows the saved
+     state without moving. A pin that becomes checked fills in 300 ms too; reduced motion never moves. */
+  .review:not(.is-still) .pin { transition: background-color .3s ease-out, border-color .3s ease-out, color .3s ease-out; }
+  .review.is-still .pie * { transition: none !important; }
+  @media (prefers-reduced-motion: reduce) {
+    .review .pin, .group-head .q { transition: none !important; }
+  }
+  .appbar > .pie-lg { margin-right: -4px; }
+
+  /* Group heads: the stamp says the level once. The count is quiet; the ? shows on hover and on keyboard focus. */
+  .group-head h3 .count { font: 400 12.5px/1.4 var(--sans); color: var(--text-3); }
+  .group-head h3 .also { font: 400 12.5px/1.4 var(--sans); color: var(--text-3); }
+  .group-head .q { opacity: 0; transition: opacity .15s ease-out; }
+  .group-head:hover .q, .group-head .q:focus-visible { opacity: 1; }
+
+  /* Rows: no rule between them, space and a hover tone instead. A row is its pin, the position's name and the clause
+     number. A filled pin already says checked, so the tick shows only on rows without a pin (Missing). */
+  .side .label-list li { border-bottom: 0; padding: 6px 6px; border-radius: var(--r); }
+  .side .label-list li:hover { background: var(--bg-hover); }
+  .side .label-list li.grey-confirm:hover { background: var(--bg-tone); }
+  .side .label-list .what { flex: 1; min-width: 0; color: var(--text); font-size: 13px; }
+  .side .label-list .ref { flex: none; font: 400 11.5px/1.4 var(--mono); color: var(--text-3); }
+  .side .label-list li.is-checked .what { color: var(--text-3); }
+  .side .label-list li:has(.pin) > .tick { display: none; }
+  .side .label-list .tick .icon { color: var(--text-3); }
+  #tab-grey li .what { color: var(--text-2); }
+  .group + .group .group-head { padding-top: 18px; }
+  #tab-missing details.more { margin-top: 16px; }
+  #tab-missing details.more .label-list { margin-top: 6px; }
+
+  /* Detail: one tone card holds the evidence and the label. The cards after it lose their tone and sit on a hairline,
+     so the column has one box and one prompt ("What to check"), not four. */
+  .detail-body > .card { background: none; border-radius: 0; padding: 12px 2px 0 !important; border-top: 1px solid var(--line); }
+  .detail-body > .card + .card { margin-top: 0; }
+</style>
 </head>
 <body>
 <script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
-<div class="review">
+<div class="review is-still">
   <header class="appbar">
     <a class="icon-btn" href="home.html" aria-label="Back to reviews"><svg class="icon"><use href="#i-arrow-left"/></svg></a>
+    <svg class="pie pie-lg" id="title-pie" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle class="pie-ring" cx="10" cy="10" r="9"/><circle class="pie-fill" cx="10" cy="10" r="3.5" transform="rotate(-90 10 10)"/><circle class="pie-done" cx="10" cy="10" r="9.75"/><path class="pie-check" d="M6 10.4 8.6 12.9 14 7.4"/></svg>
     <div class="title"><strong>Brightline web build</strong><small>Freelancer service agreement · playbook as of 5 Nov, 10:31</small></div>
     <span class="spacer"></span>
-    <button class="btn btn-sm btn-ghost" type="button" data-menu="privacy-menu" aria-haspopup="true" aria-expanded="false"><svg class="icon"><use href="#i-shield"/></svg><span data-state-hide="mixed">Private mode: On</span><span data-state="mixed">Private mode: Mixed</span><svg class="icon"><use href="#i-chev-down"/></svg></button>
     <button class="icon-btn" type="button" aria-label="More actions" data-menu="review-more" aria-haspopup="true" aria-expanded="false"><svg class="icon"><use href="#i-dots"/></svg></button>
     <a class="btn btn-primary btn-sm" href="output.html">Output<svg class="icon"><use href="#i-arrow-right"/></svg></a>
   </header>
   <div class="review-banners">
     <div class="banner" data-state="sample"><svg class="icon"><use href="#i-book"/></svg><strong>Practice review</strong><span class="note-s">One label here is wrong on purpose. Find it, open it and fix it. Real reviews work the same way.</span><span class="spacer"></span><a class="btn btn-sm btn-primary" href="new-review.html">Start a real review</a></div>
+    <div class="banner" data-state="mixed"><svg class="icon"><use href="#i-shield"/></svg><span>Mixed: steps 1 and 2 ran in private mode, steps 3 and 4 didn't.</span></div>
     <div class="banner" data-state="playbook-changed"><svg class="icon"><use href="#i-refresh"/></svg><span>Your playbook changed after this review ran. The labels use the old limits.</span><span class="spacer"></span><button class="btn btn-sm" type="button" data-open="rerun">Re-run</button></div>
   </div>
   <div class="review-body">
@@ -126,10 +165,11 @@
     <aside class="side" id="side" aria-label="Checking">
       <div class="side-view" id="side-list">
         <div class="progress-block">
-          <div class="row progress-line"><p class="small"><span id="checked-count">2</span> of 11 positions checked</p><span class="spacer"></span><button class="btn btn-sm" type="button" id="next-unchecked" data-key="J">Next unchecked <kbd>J</kbd></button></div>
-          <div class="progress"><span id="checked-bar" style="width:18%"></span></div>
-          <p class="note-s" id="all-checked" hidden>Every position is checked. To finish, read the not-covered parts, then tick the box in Not covered.</p>
-          <p class="note-s" id="review-done" hidden>Done. Every position is checked and you've read the rest. You can write the message now.</p>
+          <div class="row progress-line">
+            <svg class="pie pie-sm" id="checked-pie" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle class="pie-ring" cx="10" cy="10" r="9"/><circle class="pie-fill" cx="10" cy="10" r="3.5" transform="rotate(-90 10 10)"/><circle class="pie-done" cx="10" cy="10" r="9.75"/><path class="pie-check" d="M6 10.4 8.6 12.9 14 7.4"/></svg>
+            <p class="small" id="checked-text" aria-live="polite">2 of 11 positions checked</p><span class="spacer"></span><button class="btn btn-sm" type="button" id="next-unchecked" data-key="J">Next unchecked <kbd>J</kbd></button></div>
+          <p class="note-s" id="all-checked" hidden>To finish, read the not-covered parts, then tick the box in Not covered.</p>
+          <p class="note-s" id="review-done" hidden>You can write the message now.</p>
         </div>
         <div class="card stack" data-state="unsure-heavy" style="padding:14px 16px"><p class="note-s">More than half of these labels are unsure. That usually means the wording is vague, or your playbook suits a different kind of contract. Read the unsure ones first: each says what it couldn't decide.</p></div>
         <div class="tabs" role="tablist" aria-label="Lists">
@@ -149,30 +189,30 @@
           <section class="group" id="group-walk" aria-labelledby="g-walk">
             <div class="group-head"><h3 id="g-walk"><span class="stamp walk"><span class="mark"><svg><use href="#i-x"/></svg></span><span class="word">Walk-away</span></span><span class="count" id="count-walk">3</span></h3><button class="q" type="button" aria-label="What Walk-away means" data-open="def-walk">?</button></div>
             <ul class="label-list">
-              <li data-pid="1"><a href="#detail-1" data-detail="detail-1"><span class="pin walk">4</span><span class="what">§ 5.4 · 1 Days until paid</span></a><span class="tick"></span></li>
-              <li data-pid="7a"><a href="#detail-7a" data-detail="detail-7a"><span class="pin walk">5</span><span class="what">§ 7.1 · 7a Ownership after payment</span></a><span class="tick"></span></li>
-              <li data-pid="9"><a href="#detail-9" data-detail="detail-9"><span class="pin walk">6</span><span class="what">§ 9.1 · 9 Non-compete</span></a><span class="tick"></span></li>
-              <li data-pid="9"><a href="#detail-9" data-detail="detail-9"><span class="pin walk">9</span><span class="what">§ 14.3 · 9 Non-compete</span></a><span class="tick"></span></li>
+              <li data-pid="1"><a href="#detail-1" data-detail="detail-1"><span class="pin walk">4</span><span class="what"><span class="visually-hidden">Position 1 · </span>Days until paid</span><span class="ref">§ 5.4</span></a><span class="tick"></span></li>
+              <li data-pid="7a"><a href="#detail-7a" data-detail="detail-7a"><span class="pin walk">5</span><span class="what"><span class="visually-hidden">Position 7a · </span>Ownership after payment</span><span class="ref">§ 7.1</span></a><span class="tick"></span></li>
+              <li data-pid="9"><a href="#detail-9" data-detail="detail-9"><span class="pin walk">6</span><span class="what"><span class="visually-hidden">Position 9 · </span>Non-compete</span><span class="ref">§ 9.1</span></a><span class="tick"></span></li>
+              <li data-pid="9"><a href="#detail-9" data-detail="detail-9"><span class="pin walk">9</span><span class="what"><span class="visually-hidden">Position 9 · </span>Non-compete</span><span class="ref">§ 14.3</span></a><span class="tick"></span></li>
             </ul>
           </section>
           <section class="group" id="group-unsure" aria-labelledby="g-unsure">
-            <div class="group-head"><h3 id="g-unsure"><span class="stamp unsure"><span class="mark"><svg><use href="#i-help"/></svg></span><span class="word">Unsure</span></span><span class="count" id="count-unsure">3</span><span class="small muted" id="pencil-unsure">· 1 pencilled in</span></h3><button class="q" type="button" aria-label="What Unsure means" data-open="def-unsure">?</button></div>
+            <div class="group-head"><h3 id="g-unsure"><span class="stamp unsure"><span class="mark"><svg><use href="#i-help"/></svg></span><span class="word">Unsure</span></span><span class="count" id="count-unsure">3</span><span class="visually-hidden" id="pencil-unsure">· 1 pencilled in</span></h3><button class="q" type="button" aria-label="What Unsure means" data-open="def-unsure">?</button></div>
             <ul class="label-list">
-              <li data-pid="5"><a href="#detail-5" data-detail="detail-5"><span class="pin unsure">1</span><span class="what">§ 3.2 · 5 Revision rounds</span></a><span class="tick"></span></li>
-              <li data-pid="10"><a href="#detail-10" data-detail="detail-10"><span class="pin unsure pencilled">7</span><span class="what">§ 11.1 · 10 Liability cap</span></a><span class="tick"></span></li>
-              <li data-pid="4"><a href="#detail-4" data-detail="detail-4"><span class="pin unsure">8</span><span class="what">§ 12.2 · 4 Paid if cancelled</span></a><span class="tick"></span></li>
+              <li data-pid="5"><a href="#detail-5" data-detail="detail-5"><span class="pin unsure">1</span><span class="what"><span class="visually-hidden">Position 5 · </span>Revision rounds</span><span class="ref">§ 3.2</span></a><span class="tick"></span></li>
+              <li data-pid="10"><a href="#detail-10" data-detail="detail-10"><span class="pin unsure pencilled">7</span><span class="what"><span class="visually-hidden">Position 10 · </span>Liability cap</span><span class="ref">§ 11.1</span></a><span class="tick"></span></li>
+              <li data-pid="4"><a href="#detail-4" data-detail="detail-4"><span class="pin unsure">8</span><span class="what"><span class="visually-hidden">Position 4 · </span>Paid if cancelled</span><span class="ref">§ 12.2</span></a><span class="tick"></span></li>
             </ul>
           </section>
           <section class="group" id="group-acceptable" aria-labelledby="g-acceptable">
-            <div class="group-head"><h3 id="g-acceptable"><span class="stamp acceptable"><span class="mark"><svg><use href="#i-approx"/></svg></span><span class="word">Acceptable</span></span><span class="count" id="count-acceptable">4</span><span class="small muted">· 3 in Missing</span></h3><button class="q" type="button" aria-label="What Acceptable means" data-open="def-acceptable">?</button></div>
+            <div class="group-head"><h3 id="g-acceptable"><span class="stamp acceptable"><span class="mark"><svg><use href="#i-approx"/></svg></span><span class="word">Acceptable</span></span><span class="count" id="count-acceptable">4</span><span class="also">· 3 in Missing</span></h3><button class="q" type="button" aria-label="What Acceptable means" data-open="def-acceptable">?</button></div>
             <ul class="label-list">
-              <li data-pid="2"><a href="#detail-2" data-detail="detail-2"><span class="pin acceptable">3</span><span class="what">§ 5.2 · 2 Upfront deposit</span></a><span class="tick"></span></li>
+              <li data-pid="2"><a href="#detail-2" data-detail="detail-2"><span class="pin acceptable">3</span><span class="what"><span class="visually-hidden">Position 2 · </span>Upfront deposit</span><span class="ref">§ 5.2</span></a><span class="tick"></span></li>
             </ul>
           </section>
           <section class="group" id="group-preferred" aria-labelledby="g-preferred">
-            <div class="group-head"><h3 id="g-preferred"><span class="stamp preferred"><span class="mark"><svg><use href="#i-check"/></svg></span><span class="word">Preferred</span></span><span class="count" id="count-preferred">1</span><span class="small muted" id="pencil-preferred" hidden>· 1 pencilled in</span></h3><button class="q" type="button" aria-label="What Preferred means" data-open="def-preferred">?</button></div>
+            <div class="group-head"><h3 id="g-preferred"><span class="stamp preferred"><span class="mark"><svg><use href="#i-check"/></svg></span><span class="word">Preferred</span></span><span class="count" id="count-preferred">1</span><span class="visually-hidden" id="pencil-preferred" hidden>· 1 pencilled in</span></h3><button class="q" type="button" aria-label="What Preferred means" data-open="def-preferred">?</button></div>
             <ul class="label-list">
-              <li data-pid="6"><a href="#detail-6" data-detail="detail-6"><span class="pin preferred">2</span><span class="what">§ 4.1 · 6 Extra work paid</span></a><span class="tick"></span></li>
+              <li data-pid="6"><a href="#detail-6" data-detail="detail-6"><span class="pin preferred">2</span><span class="what"><span class="visually-hidden">Position 6 · </span>Extra work paid</span><span class="ref">§ 4.1</span></a><span class="tick"></span></li>
             </ul>
           </section>
           <p class="law-line small faint" data-state-hide="two-law no-law"><svg class="icon"><use href="#i-info"/></svg><span>This contract follows England and Wales law. If there's a dispute, England and Wales law settles it.</span></p>
@@ -217,15 +257,20 @@
           <li><a href="#page-1"><span class="mono">§ S1</span><span class="what"><strong>Fees</strong> · “Milestone · Date · Fee” (table)</span></a></li>
           <li><a href="#c-S1.2"><span class="mono">§ S1.2</span><span class="what"><strong>What the other side provides</strong> · “Hosting, domain names and third-party licences are provided by…”</span></a></li>
         </ul>
-        <ul class="label-list" id="tab-missing" role="tabpanel" hidden>
-          <li data-pid="3"><a href="#detail-3" data-detail="detail-3"><span class="stamp acceptable"><span class="mark"><svg><use href="#i-approx"/></svg></span><span class="word">Acceptable</span></span><span class="what">3 · Late payment fee exists</span></a><span class="tick"></span></li>
-          <li data-pid="7b"><a href="#detail-7b" data-detail="detail-7b"><span class="stamp acceptable"><span class="mark"><svg><use href="#i-approx"/></svg></span><span class="word">Acceptable</span></span><span class="what">7b · If unpaid, I can reuse or resell the work</span></a><span class="tick"></span></li>
-          <li data-pid="8"><a href="#detail-8" data-detail="detail-8"><span class="stamp acceptable"><span class="mark"><svg><use href="#i-approx"/></svg></span><span class="word">Acceptable</span></span><span class="what">8 · I can show the work in my portfolio</span></a><span class="tick"></span></li>
-          <li data-state="nothing-found"><details class="more" style="width:100%"><summary>Searched, nothing found · 1</summary>
+        <div id="tab-missing" role="tabpanel" hidden>
+          <section class="group" aria-labelledby="g-missing">
+            <div class="group-head"><h3 id="g-missing"><span class="stamp acceptable"><span class="mark"><svg><use href="#i-approx"/></svg></span><span class="word">Acceptable</span></span><span class="count">3</span></h3><button class="q" type="button" aria-label="What Acceptable means" data-open="def-acceptable">?</button></div>
+            <ul class="label-list">
+              <li data-pid="3"><a href="#detail-3" data-detail="detail-3"><span class="what"><span class="visually-hidden">Position 3 · </span>Late payment fee exists</span></a><span class="tick"></span></li>
+              <li data-pid="7b"><a href="#detail-7b" data-detail="detail-7b"><span class="what"><span class="visually-hidden">Position 7b · </span>If unpaid, I can reuse or resell the work</span></a><span class="tick"></span></li>
+              <li data-pid="8"><a href="#detail-8" data-detail="detail-8"><span class="what"><span class="visually-hidden">Position 8 · </span>I can show the work in my portfolio</span></a><span class="tick"></span></li>
+            </ul>
+          </section>
+          <details class="more" data-state="nothing-found"><summary>Searched, nothing found · 1</summary>
             <p class="small muted">Your playbook is happy when these aren't in the contract, so they need no action. Open one to check the search.</p>
-            <a href="#detail-nf" data-detail="detail-nf"><span class="stamp preferred"><span class="mark"><svg><use href="#i-check"/></svg></span><span class="word">Preferred</span></span><span class="what">9 · Non-compete length</span></a>
-          </details></li>
-        </ul>
+            <ul class="label-list"><li><a href="#detail-nf" data-detail="detail-nf"><span class="stamp preferred"><span class="mark"><svg><use href="#i-check"/></svg></span><span class="word">Preferred</span></span><span class="what"><span class="visually-hidden">Position 9 · </span>Non-compete length</span></a></li></ul>
+          </details>
+        </div>
       </div>
 
       <section class="detail" id="warn-hidden" aria-labelledby="warn-hidden-t" hidden>
@@ -696,12 +741,6 @@
 <dialog id="def-acceptable" aria-label="Acceptable"><form method="dialog"><div class="dialog-body"><span class="stamp acceptable"><span class="mark"><svg><use href="#i-approx"/></svg></span><span class="word">Acceptable</span></span><p>Not as good as preferred, but inside the limit you set in your playbook.</p></div><div class="dialog-foot"><button class="btn" value="ok">Close</button></div></form></dialog>
 <dialog id="def-walk" aria-label="Walk-away"><form method="dialog"><div class="dialog-body"><span class="stamp walk"><span class="mark"><svg><use href="#i-x"/></svg></span><span class="word">Walk-away</span></span><p>Past the limit you set in your playbook. Ask for a change before you sign.</p></div><div class="dialog-foot"><button class="btn" value="ok">Close</button></div></form></dialog>
 <dialog id="def-unsure" aria-label="Unsure"><form method="dialog"><div class="dialog-body"><span class="stamp unsure"><span class="mark"><svg><use href="#i-help"/></svg></span><span class="word">Unsure</span></span><p>The wording is too unclear to label, or the quote couldn&#x27;t be confirmed. The app always says why. You decide.</p></div><div class="dialog-foot"><button class="btn" value="ok">Close</button></div></form></dialog>
-<div class="menu" id="privacy-menu" hidden>
-  <p class="small muted" style="padding:6px 10px" data-state-hide="mixed">Private mode: only providers that don't keep your contract see this review.</p>
-  <p class="small muted" style="padding:6px 10px" data-state="mixed">Mixed: steps 1 and 2 ran in private mode, steps 3 and 4 didn't.</p>
-  <button type="button" data-toast="Private mode stays on"><svg class="icon"><use href="#i-shield"/></svg>Keep private mode on</button>
-  <a href="settings.html"><svg class="icon"><use href="#i-gear"/></svg>Privacy settings</a>
-</div>
 <div class="menu" id="zoom-menu" hidden>
   <button type="button" data-zoom="0.75">75%</button>
   <button type="button" data-zoom="1">100%</button>
@@ -714,6 +753,7 @@
   <button type="button" data-open="models"><svg class="icon"><use href="#i-info"/></svg>Models and cost<span class="spacer"></span><span class="mono">$0.39</span></button>
   <button type="button" data-open="rerun"><svg class="icon"><use href="#i-refresh"/></svg>Re-run…</button>
   <button type="button" data-open="start-over"><svg class="icon"><use href="#i-undo"/></svg>Start over…</button>
+  <a href="settings.html"><svg class="icon"><use href="#i-gear"/></svg>Privacy settings</a>
 </div>
 
 <script src="icons.js"></script>
@@ -728,22 +768,27 @@
     const ORDER = ['1', '5', '7a', '9', '10', '4', '3', '7b', '8', '2', '6'];
     const decided = new Set(['6', '2']);
     const TICK = '<svg class="icon"><use href="#i-check"/></svg>';
+    const PIE = 21.99;     // the pie's circumference: 2 × π × 3.5, the radius of .pie-fill
     const P = new URLSearchParams(location.search);
     const STATE = P.get('state') || (P.has('sample') ? 'sample' : null);
     const SAMPLE = STATE === 'sample';
+    if (STATE === 'all-checked') ORDER.forEach(p => decided.add(p));   // ?state=all-checked: every position already checked
     const side = $('#side'), list = $('#side-list'), body = $('.review-body');
     let current = null;    // the label Change it saves to
     let view = null;       // the open detail or warning
     let opener = null;     // where the view was opened from, for focus on return
 
+    // The list's own marks (row pins, the counter words and the pie) change only while the list is in view, so a
+    // decision made in a detail shows its fill when the user comes back to the list (back() calls refresh again).
     function refresh() {
+      const listShown = !list.hidden;
       $$('.label-list li[data-pid]').forEach(li => {
         const isDecided = decided.has(li.dataset.pid);
         li.querySelector('.tick').innerHTML = isDecided ? TICK : '';
         li.classList.toggle('is-checked', isDecided);
         // inked pin: solid once decided; the row tells a screen reader checked or not checked
         const rowPin = li.querySelector('.pin');
-        if (rowPin) rowPin.classList.toggle('inked', isDecided);
+        if (rowPin && listShown) rowPin.classList.toggle('inked', isDecided);
         let say = li.querySelector('a > .visually-hidden');
         if (!say) { say = document.createElement('span'); say.className = 'visually-hidden'; li.querySelector('a').append(say); }
         say.textContent = isDecided ? ', checked' : ', not checked';
@@ -755,11 +800,26 @@
         pin.classList.toggle('inked', isDecided);
         pin.setAttribute('aria-label', pin.dataset.label + (isDecided ? ', checked' : ', not checked'));
       });
-      $('#checked-count').textContent = decided.size;
-      $('#checked-bar').style.width = Math.round(decided.size / ORDER.length * 100) + '%';
       const rulesDone = decided.size === ORDER.length;
       const greyRead = $('#grey-read').checked;
       const done = rulesDone && greyRead;
+      // the counter: words first (read out politely when they change), then the pie, which only mirrors them
+      const words = done ? 'Done. Every position is checked and you\'ve read the rest.'
+        : rulesDone ? 'Every position is checked' : decided.size + ' of ' + ORDER.length + ' positions checked';
+      const text = $('#checked-text');
+      const pie = $('#checked-pie');
+      const offset = (PIE * (1 - decided.size / ORDER.length)).toFixed(2);
+      if (listShown) {
+        if (text.textContent !== words) text.textContent = words;
+        $('.pie-fill', pie).style.strokeDashoffset = offset;
+        pie.classList.toggle('is-full', rulesDone);
+      }
+      // the pie beside the title is always in view, so it follows every decision at once
+      const bar = $('#title-pie');
+      $('.pie-fill', bar).style.strokeDashoffset = offset;
+      bar.classList.toggle('is-full', rulesDone);
+      // the window tab shows the same share (app.js keeps it in ct-progress)
+      if (!SAMPLE) document.dispatchEvent(new CustomEvent('ct-progress', { detail: { id: 'brightline', checked: decided.size, total: ORDER.length, still: $('.review').classList.contains('is-still') } }));
       $('#all-checked').hidden = !rulesDone || greyRead;
       $('#review-done').hidden = !done;
       $$('#next-unchecked, [data-next]').forEach(b => { b.hidden = rulesDone; });
@@ -803,6 +863,8 @@
       view.hidden = true;
       view = null;
       list.hidden = false;
+      void list.offsetWidth;   // let the old fill paint first, so the change to the new one moves
+      refresh();
       $$('[aria-current="true"]').forEach(el => el.removeAttribute('aria-current'));
       let target = $$('[data-detail="' + id + '"], [data-warn-open="' + id + '"]', list).find(isShown);
       if (!target && isShown(opener)) target = opener;
@@ -964,6 +1026,8 @@
 
     refresh();
     syncMenus();
+    // after the first paint, changes may move (the pie and the pins); the saved state itself never animates in
+    requestAnimationFrame(() => requestAnimationFrame(() => $('.review').classList.remove('is-still')));
     const h = location.hash.slice(1);
     if (h === 'next') openNext();
     else if (/^(detail|warn)-/.test(h)) showView(document.getElementById(h === 'detail-10' ? idFor('10') : h));
