@@ -213,8 +213,9 @@ textarea.input { height: auto; min-height: 76px; padding: 10px 12px; resize: ver
 .clause .num { white-space: nowrap; }
 .clause.walk .text { background: var(--walk-bg); }
 .clause.unsure .text { background: var(--unsure-bg); }
-.clause.acceptable .text { background: var(--acc-bg); }
-.clause.preferred .text { background: var(--pref-bg); }
+/* At rest only walk-away and unsure clauses are washed; preferred and acceptable show their pin, and their wash only when selected. */
+.clause.acceptable.focus .text { background: var(--acc-bg); }
+.clause.preferred.focus .text { background: var(--pref-bg); }
 .clause.pencilled .text { text-decoration: underline dashed var(--pencil); text-decoration-thickness: 1px; text-underline-offset: 3px; }
 .clause.focus .text { outline: 2px solid var(--text); outline-offset: 2px; }
 mark.hidden-text { background: var(--hidden-bg); color: var(--hidden-fg); outline: 1px dashed var(--hidden-fg); }
@@ -258,13 +259,11 @@ dialog.palette { margin-top: 10vh; }
 }
 
 /* ------------------------------------------------------------ review.html */
-.review { display: grid; grid-template-rows: auto auto auto 1fr; height: 100vh; }
-.summary { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 10px 16px; background: var(--bg-surface);
-  border-bottom: 1px solid var(--line); font-size: 12.5px; }
-.summary .count { font-weight: 600; font-size: 14px; }
+.review { display: grid; grid-template-rows: auto auto 1fr; height: 100vh; }
 .q { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--line-strong); background: none; font-size: 10px;
   color: var(--text-3); cursor: pointer; padding: 0; }
-.review-body { display: grid; grid-template-columns: 96px 1fr 400px; min-height: 0; }
+.review-body { display: grid; grid-template-columns: minmax(0, 1fr) 400px; min-height: 0; }
+.review-body.thumbs-on { grid-template-columns: 96px minmax(0, 1fr) 400px; }   /* the Pages toggle shows the thumbnails */
 .thumbs { overflow: auto; padding: 12px; display: grid; gap: 14px; align-content: start; background: var(--bg-surface);
   border-right: 1px solid var(--line); text-align: center; font-size: 11px; color: var(--text-3); }
 .thumbs a { display: grid; gap: 4px; text-decoration: none; color: inherit; }
@@ -300,7 +299,7 @@ dialog.palette { margin-top: 10vh; }
 .option { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: var(--r); background: var(--bg-tone); cursor: pointer; }
 .option:has(input:checked) { outline: 2px solid var(--text); }
 .diff del { color: var(--text-2); }   /* struck through; never red (ADR 0003) */ .diff ins { background: var(--pref-bg); text-decoration: none; }
-@media (max-width: 1100px) { .review-body { grid-template-columns: 1fr; } .thumbs { display: none; } .review { height: auto; } }
+@media (max-width: 1100px) { .review-body, .review-body.thumbs-on { grid-template-columns: minmax(0, 1fr); } .thumbs, .pages-toggle { display: none; } .review { height: auto; } }
 
 /* shared fix: the command search never wraps */
 .search-commands, .search-commands span, .search-commands kbd { white-space: nowrap; }
@@ -340,11 +339,12 @@ html:is([data-text="150"], [data-text="200"]) {
   .grid-2, .party-grid, .levels, .editor, .work, .viewer-wrap, .playbook-grid { grid-template-columns: minmax(0, 1fr); }
   .table { display: block; position: relative; max-width: 100%; overflow-x: auto; }   /* relative: keeps .visually-hidden cells inside the scroller */
   .review { height: auto; }
-  .review-body { grid-template-columns: minmax(0, 1fr); }
-  .thumbs { display: none; }
+  .review-body, .review-body.thumbs-on { grid-template-columns: minmax(0, 1fr); }
+  .thumbs, .pages-toggle { display: none; }
+  .group-head h3, .progress-line, .detail-head .row { flex-wrap: wrap; }
   .appbar { height: auto; min-height: 56px; flex-wrap: wrap; row-gap: 8px; padding-top: 8px; padding-bottom: 8px; }
   .appbar .search-commands { width: auto !important; }
-  .steps, .page-head, .row, .summary, .viewer-bar, .split, .starter-card, .flow-foot { flex-wrap: wrap; }
+  .steps, .page-head, .row, .viewer-bar, .split, .starter-card, .flow-foot { flex-wrap: wrap; }
   .steps { row-gap: 4px; }
   .editor { min-height: 0; }
   .flow-main { padding: 16px; }
@@ -356,3 +356,43 @@ html:is([data-text="150"], [data-text="200"]) {
   .glossary > dt { padding-bottom: 0; }
   .glossary > dd { border-top: 0; padding-top: 4px; }
 }
+
+/* ------------------------------------------------------------ review.html: the contract and one column (owner, 14 Nov 2026)
+   The right column shows one thing at a time: the label list, or one label's detail, or one warning. */
+.viewer-bar .file-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.viewer-bar .btn[aria-pressed="true"] { background: var(--bg-sunken); }
+/* minmax(0, 1fr): a long unwrapped row (the not-covered list) must truncate, not widen the column past its edge */
+.side-view, .detail, .detail-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; align-content: start; }
+.side { grid-template-columns: minmax(0, 1fr); }
+.progress-block { display: grid; gap: 8px; }
+.progress-line { gap: 8px; }
+.progress-block .progress { height: 3px; }
+.group-title { font: 600 12px/1.3 var(--sans); color: var(--text-2); padding: 4px 4px 2px; }
+.group-head { display: flex; align-items: center; gap: 8px; padding: 14px 4px 4px; }
+.group-head h3 { display: flex; align-items: center; gap: 8px; font: 600 14px/1.4 var(--sans); }
+.label-list li.is-checked .what { color: var(--text-3); }
+.label-list a[aria-current="true"] .what { color: var(--text); }
+.warn-row button { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; border: 0; padding: 0; background: none;
+  text-align: left; cursor: pointer; color: var(--text); }
+.warn-row button > .icon:first-child { color: var(--unsure); }
+.warn-row .what { flex: 1; color: var(--text); }
+.warn-row.is-read .what, .warn-row.is-read button > .icon:first-child { color: var(--text-3); }
+.law-line { display: flex; align-items: flex-start; gap: 8px; padding: 14px 4px 0; }
+.law-line .icon { margin-top: 1px; }
+.law-line.warn .icon { color: var(--unsure); }
+.detail-head { position: sticky; top: -16px; z-index: 1; display: grid; gap: 8px; margin: -16px -16px 0; padding: 12px 16px;
+  background: var(--bg-canvas); border-bottom: 1px solid var(--line); }
+.detail-card { display: grid; gap: 10px; padding: 16px; background: var(--bg-tone); border-radius: var(--r-lg); }
+.detail-card .notice { padding: 0; background: none; }
+.detail-links { gap: 16px; flex-wrap: wrap; }
+.note-link { justify-self: start; }
+
+/* review.html: inked pins. A pin is an outline while its label is unchecked and solid once the user has decided it, so
+   the page shows what is done. The fill is the label's fg shade, which keeps the number readable (4.5:1) in both themes. */
+.pin.pencilled { border-style: dashed; border-color: var(--pencil); }
+.pin.inked { color: var(--bg-surface); border-style: solid; }
+.pin.preferred.inked { background: var(--pref-fg); border-color: var(--pref-fg); }
+.pin.acceptable.inked { background: var(--acc-fg); border-color: var(--acc-fg); }
+.pin.walk.inked { background: var(--walk-fg); border-color: var(--walk-fg); }
+.pin.unsure.inked { background: var(--unsure-fg); border-color: var(--unsure-fg); }
+.pin.pencilled.inked { background: var(--pencil); border-color: var(--pencil); }

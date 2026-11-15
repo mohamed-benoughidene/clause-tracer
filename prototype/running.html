@@ -28,6 +28,10 @@
   .bars span.stop { background: var(--unsure); }
   .log { display: grid; gap: 10px; }
   .log li { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 10px; align-items: baseline; }
+  /* pencilled while running, inked when done (design direction, principle 8): finished lines are ink and upright, the
+     line of the step still running is graphite italic with a dashed underline, a stopped line keeps its Unsure colour */
+  .log li span { color: var(--text); }
+  .log li.running span { color: var(--pencil); font-style: italic; text-decoration: underline dashed var(--pencil) 1px; text-underline-offset: 3px; }
   .log li.stop span { color: var(--unsure-fg); font-weight: 500; }
   .log time { font: 500 12px/1.5 var(--mono); color: var(--text-3); }
   .log span { font: 15px/1.45 var(--serif); }
@@ -199,7 +203,7 @@
         <div id="log">
           <ol class="log" data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait">
             <li><time>0:04</time><span>Read 5 pages.</span></li>
-            <li><time>0:09</time><span>Found 45 clauses.</span></li>
+            <li class="running" aria-current="step"><time>0:09</time><span>Found 45 clauses.</span></li>
           </ol>
           <ol class="log" data-state="wrong-key">
             <li><time>0:04</time><span>Read 5 pages.</span></li>
