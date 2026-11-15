@@ -90,7 +90,7 @@ One catch: DeepSeek V4.1 Flash's zero-retention endpoints cost more than its lis
 
 ## Amendment (13 Nov 2026): first measurements from a small paid probe
 
-The owner supplied a short-lived key capped at $1. A probe made eight successful calls on an invented contract of 12,616 words (23,845 input tokens), with the planned request shape: zero-retention routing, a strict JSON form, and the contract marked for prompt caching. It spent **$0.07**. It tested one extraction form only, not the pipeline. The script and raw replies are on the local branch `spike/windows-checks`, under `spikes/paid-probe/`.
+The owner supplied a short-lived key capped at $1. A probe made eight successful calls on an invented contract of 12,616 words (23,845 input tokens), with the planned request shape: zero-retention routing, a strict JSON form, and the contract marked for prompt caching. It spent **$0.07**. It tested one extraction form only, not the pipeline. The script and raw replies are under the tag `spike-windows-checks`, under `spikes/paid-probe/`.
 
 | Measured | Claude Haiku 5.5 | Claude Sonnet 5.5 |
 | --- | --- | --- |

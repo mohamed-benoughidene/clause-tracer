@@ -108,7 +108,7 @@ Also checked that day:
 
 ## Amendment (13 Nov 2026): the trial builds ran on Linux and Windows
 
-Both trials are done. The scripts are on the branch `spike/windows-checks` (Windows, pushed, never to be merged) and the local branch `spike/local-archive` (Linux, with the full results file `spikes/linux/keep/RESULTS.md`).
+Both trials are done. The scripts are under the tags `spike-windows-checks` (Windows) and `spike-local-archive` (Linux, with the full results file `spikes/linux/keep/RESULTS.md`). The branches behind the tags were never merged.
 
 **Linux: a PyInstaller build does run against the system's WebKitGTK.** Tested on Debian 13 with pywebview 6.2.1, PyInstaller 6.22.3, PyGObject 3.50.0 and WebKitGTK 2.54.0. The app and both WebKit helper processes loaded the system's `libwebkit2gtk-4.1`, shown by the loader's own trace and by each process's memory map. It needs two things:
 
@@ -138,7 +138,7 @@ A trial `.deb` of 7 MB was built, unpacked and run. Its dependency line, with ea
 
 ## Amendment (13 Nov 2026): real installs on Ubuntu, Fedora and Windows, with one still-open puzzle
 
-The items left untested above were tried for real, on GitHub Actions runners, which have real root (unlike the developer's own machine). Scripts are on the local branches `spike/local-archive` (Linux) and `spike/windows-checks` (Windows, pushed, never to be merged).
+The items left untested above were tried for real, on GitHub Actions runners, which have real root (unlike the developer's own machine). Scripts are under the tags `spike-local-archive` (Linux) and `spike-windows-checks` (Windows). The branches behind them were never merged.
 
 **Ubuntu, real `apt`/`.deb` install: the install itself works.** `apt-get install -y ./clause-tracer-trial.deb` really resolved dependencies and installed, on both Ubuntu 22.04 and 24.04. The `Depends:` line from the first trial needed one change for 22.04: it predates the "t64" package-rename, so `libglib2.0-0t64` becomes `libglib2.0-0`, `libssl3t64` becomes `libssl3`, and the glibc floor drops from `2.38` to `2.35`. Everything else matched. The desktop file, a clean `apt-get remove`, and the file layout all checked out.
 
@@ -168,11 +168,11 @@ The window that "never starts" in the amendment above was not missing. It was la
 
 **Rule for the shell stage (build stage 12).** Before the first pywebview call, the shell must wait for the window's `shown` and `loaded` events, with its own generous timeout. A release check should run the installed app both with and without a session bus.
 
-The trial ran on the throwaway branch `spike/packaging-linux-trial`, which was never merged.
+The trial ran on a throwaway branch, kept as the tag `spike-packaging-linux-trial`. It was never merged.
 
 ## Amendment (13 Nov 2026): Ubuntu 26.04 and Wayland
 
-Two of the items left open above were tried on GitHub's runners and in containers, with the trial app. The trial ran on the throwaway branch `spike/packaging-linux-trial`, which was never merged.
+Two of the items left open above were tried on GitHub's runners and in containers, with the trial app. The trial ran on a throwaway branch, kept as the tag `spike-packaging-linux-trial`. It was never merged.
 
 **Ubuntu 26.04 passes.** GitHub has an `ubuntu-26.04` runner (26.04.1 LTS, glibc 2.43, Python 3.14). The `ubuntu-latest` label still resolves to 24.04.
 
