@@ -25,6 +25,9 @@ not-column | * | Hide finished lines | It hides lines of the reading log. The wo
 not-column | * | Check a contract against your own rules. | The word list keeps "rules" in the First launch heading.
 not-column | prototype/help.html | re:^A rule that the other side owns | Help's plain-English definition of "work made for hire" uses "rule" for a legal rule, not for a position.
 
+# ---- Spelling
+us-spelling | * | re:Remix Icon License | The licence's own name keeps its US spelling, as the Functional Source License does.
+
 # ---- "I", "my" and "me" belong to the user's own words (ux-copy section 1, "I and my only in the user's own words").
 first-person | * | re:Days until I'm paid|If unpaid, I can reuse or resell|I can show the work in my portfolio|My liability is capped|NDA I receive | Position names and a playbook name: the user writes these.
 first-person | * | re:Why this matters to me | The label of the user's own note field.
@@ -37,3 +40,4 @@ first-person | * | re:\bShow me\b | A button is the user's request to the app ("
 # ---- Look
 effect | prototype/styles.css | re:\.stamp\.pencilled \.mark | The pencil hatch is the one allowed pattern, and it means "pencilled" (design-system 4.1).
 red-outside-walk | prototype/review.html | re:^i \{ background: var\(--walk\) \}$ | Page thumbnails show one dot per clause in its label colour. The red dots are the walk-away clauses.
+red-outside-walk | prototype/index.html | re:^\.quoted \{ | First launch: the underline under "the exact words" is the logo's own oxblood line, a brand use (design-system 2, ADR 0003).
