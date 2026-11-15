@@ -10,24 +10,35 @@
 <link rel="stylesheet" href="styles.css">
 <style>
   /* settings page only */
-  .card > .h2 { margin-bottom: 12px; }
-  .setting { display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: start; }
-  .setting + .setting { margin-top: 14px; }
-  .setting .toggle { margin-top: 2px; }
-  .setting .small { margin-top: 2px; }
-  .split { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0;
+  .set-layout { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 32px; align-items: start; }
+  .set-nav { display: flex; flex-direction: column; gap: 2px; position: sticky; top: 16px; }
+  .set-nav a { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--r);
+    color: var(--text-2); text-decoration: none; font-weight: 500; transition: background .15s, color .15s; }
+  .set-nav a:hover { background: var(--bg-sunken); color: var(--text); }
+  .set-nav a[aria-current="page"] { background: var(--bg-sunken); color: var(--text); }
+  .set-panel { max-width: 640px; }
+  .set-panel[hidden] { display: none; }
+  .set-panel > .h2 { margin-bottom: 4px; }
+  .set-panel > .lede { margin-bottom: 16px; }
+  .set-group { background: var(--bg-tone); border-radius: var(--r-lg); padding: 0 20px; }
+  .set-group + .set-group, .set-group + .set-title { margin-top: 16px; }
+  .set-title { margin: 24px 0 8px; }
+  .srow { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 14px 0;
     border-top: 1px solid var(--line); }
-  .split:first-of-type { border-top: 0; }
-  .card .row + .divider { margin: 14px 0; }
-  .subhead { margin: 16px 0 8px; }
-  .models-note { margin-top: 12px; }
-  .model-field + .model-field { margin-top: 14px; }
-  details.models > summary { list-style: none; display: flex; align-items: center; gap: 10px; cursor: pointer; }
-  details.models > summary::-webkit-details-marker { display: none; }
-  details.models > summary .icon { transition: transform .15s; }
-  details.models[open] > summary .icon { transform: rotate(90deg); }
-  details.models > .models-body { margin-top: 14px; }
+  .srow:first-child { border-top: 0; }
+  .srow .text { min-width: 0; }
+  .srow .small { margin-top: 2px; }
+  .srow .ctl { flex: none; display: flex; align-items: center; gap: 6px; }
+  .srow.stack { flex-direction: column; align-items: stretch; gap: 12px; }
+  .srow.stack .field + .field { margin-top: 4px; }
   .mono-path { font: 500 12px/1.4 var(--mono); color: var(--text-2); }
+  .set-note { margin-top: 12px; }
+  .model-field + .model-field { margin-top: 14px; }
+  @media (max-width: 720px) {
+    .set-layout { grid-template-columns: 1fr; gap: 16px; }
+    .set-nav { position: static; flex-direction: row; flex-wrap: wrap; }
+    .srow { flex-wrap: wrap; }
+  }
 </style>
 </head>
 <body>
@@ -59,117 +70,86 @@
       </div>
     </header>
 
-    <div class="grid-2">
-      <div>
-        <section class="card" aria-labelledby="ai-key-title" id="ai-key">
-          <h2 class="h2" id="ai-key-title">OpenRouter key</h2>
-          <div class="row" style="justify-content:space-between; align-items:flex-start">
-            <p class="mono-path" style="max-width:260px">sk-or-v1-8f2c…a91e · saved in your password store</p>
-            <div class="row" style="gap:6px">
-              <button class="btn btn-sm" type="button" data-open="change-key">Change</button>
-              <button class="btn btn-ghost btn-sm" type="button" data-open="remove-key">Remove</button>
-            </div>
-          </div>
-          <p class="small" style="margin-top:10px"><a class="link" href="index.html">Open the key guide</a></p>
-        </section>
-
-        <section class="card" aria-labelledby="privacy-title" id="privacy">
-          <h2 class="h2" id="privacy-title">Privacy</h2>
-          <div class="setting">
-            <input class="toggle" type="checkbox" id="priv-mode" checked data-toast="Saved">
-            <div>
-              <label class="h3" for="priv-mode">Private mode for new reviews</label>
-              <p class="small muted">Only providers that don't keep your contract. Reviews you've already started keep their own setting.</p>
-            </div>
-          </div>
-          <div class="setting">
-            <input class="toggle" type="checkbox" id="send-notes" data-toast="Saved">
-            <div>
-              <label class="h3" for="send-notes">Send “why this matters” notes to the AI</label>
-              <p class="small muted">Gives better explanations. Known names are replaced, but the privacy check doesn't cover notes.</p>
-            </div>
-          </div>
-          <p class="small" style="margin-top:14px"><a class="link" href="help.html#sent">What gets sent</a></p>
-        </section>
-
-        <section class="card" aria-labelledby="notify-title" id="notifications">
-          <h2 class="h2" id="notify-title">Notifications</h2>
-          <div class="setting">
-            <input class="toggle" type="checkbox" id="notify-done" checked data-toast="Saved">
-            <div>
-              <label class="h3" for="notify-done">Notify when a review finishes</label>
-              <p class="small muted">Shows a notification when a review is done, even if you're in another window.</p>
-            </div>
-          </div>
-        </section>
-
-        <section class="card" aria-labelledby="data-title" id="data">
-          <h2 class="h2" id="data-title">Data</h2>
-          <p class="note-s muted" style="margin-bottom:6px">Nothing is removed without asking first.</p>
-          <div class="split">
-            <div>
-              <p class="h3">Everything</p>
-              <p class="small muted">Reviews, playbooks, customers, settings and the key, all from this computer.</p>
-            </div>
-            <button class="btn btn-sm" type="button" data-open="delete-all"><svg class="icon"><use href="#i-trash"/></svg>Delete everything</button>
-          </div>
-        </section>
-      </div>
+    <div class="set-layout">
+      <nav class="set-nav" aria-label="Settings">
+        <a href="#general"><svg class="icon"><use href="#i-gear"/></svg>General</a>
+        <a href="#ai"><svg class="icon"><use href="#i-key"/></svg>AI and key</a>
+        <a href="#privacy"><svg class="icon"><use href="#i-shield"/></svg>Privacy</a>
+        <a href="#storage"><svg class="icon"><use href="#i-trash"/></svg>Storage and data</a>
+        <a href="#about"><svg class="icon"><use href="#i-info"/></svg>About</a>
+      </nav>
 
       <div>
-        <section class="card" aria-labelledby="appearance-title" id="appearance">
-          <h2 class="h2" id="appearance-title">Appearance</h2>
-          <h3 class="h3 subhead">Colours</h3>
-          <div class="segmented" role="group" aria-label="Colours">
-            <button type="button" data-theme-set="system" data-toast="Saved" aria-pressed="true">Match system</button>
-            <button type="button" data-theme-set="light" data-toast="Saved" aria-pressed="false">Light</button>
-            <button type="button" data-theme-set="dark" data-toast="Saved" aria-pressed="false">Dark</button>
+        <section class="set-panel" id="general" aria-labelledby="general-title" hidden>
+          <h2 class="h2" id="general-title">General</h2>
+          <p class="small muted lede">How the app looks and when it speaks up.</p>
+          <div class="set-group" id="appearance">
+            <div class="srow">
+              <div class="text">
+                <p class="h3" id="colours-label">Colours</p>
+                <p class="small muted">Follows your computer's setting.</p>
+              </div>
+              <div class="ctl">
+                <div class="segmented" role="group" aria-labelledby="colours-label">
+                  <button type="button" data-theme-set="system" data-toast="Saved" aria-pressed="true">Match system</button>
+                  <button type="button" data-theme-set="light" data-toast="Saved" aria-pressed="false">Light</button>
+                  <button type="button" data-theme-set="dark" data-toast="Saved" aria-pressed="false">Dark</button>
+                </div>
+              </div>
+            </div>
+            <div class="srow">
+              <div class="text">
+                <p class="h3" id="text-size-label">Text size</p>
+                <p class="small muted" data-text-label>100%</p>
+              </div>
+              <div class="ctl">
+                <div class="segmented" role="group" aria-labelledby="text-size-label">
+                  <button type="button" aria-pressed="true" data-text-set="100" data-toast="Saved">100%</button>
+                  <button type="button" aria-pressed="false" data-text-set="125" data-toast="Saved">125%</button>
+                  <button type="button" aria-pressed="false" data-text-set="150" data-toast="Saved">150%</button>
+                  <button type="button" aria-pressed="false" data-text-set="200" data-toast="Saved">200%</button>
+                </div>
+              </div>
+            </div>
           </div>
-          <p class="small muted" style="margin-top:8px">Follows your computer's setting.</p>
-
-          <div class="row" style="margin-top:18px; gap:10px">
-            <h3 class="h3" id="text-size-label">Text size</h3>
-            <span class="small muted" data-text-label>100%</span>
-          </div>
-          <div class="segmented" role="group" aria-labelledby="text-size-label" style="margin-top:8px">
-            <button type="button" aria-pressed="true" data-text-set="100" data-toast="Saved">100%</button>
-            <button type="button" aria-pressed="false" data-text-set="125" data-toast="Saved">125%</button>
-            <button type="button" aria-pressed="false" data-text-set="150" data-toast="Saved">150%</button>
-            <button type="button" aria-pressed="false" data-text-set="200" data-toast="Saved">200%</button>
+          <div class="set-group" id="notifications">
+            <div class="srow">
+              <div class="text">
+                <label class="h3" for="notify-done">Notify when a review finishes</label>
+                <p class="small muted">Shows a notification when a review is done, even if you're in another window.</p>
+              </div>
+              <div class="ctl"><input class="toggle" type="checkbox" id="notify-done" checked data-toast="Saved"></div>
+            </div>
           </div>
         </section>
 
-        <section class="card" aria-labelledby="storage-title" id="storage">
-          <h2 class="h2" id="storage-title">Storage</h2>
-          <p class="small muted" id="storage-days-label">Delete reviews after no changes for</p>
-          <div class="segmented" id="storage-days" role="group" aria-labelledby="storage-days-label" style="margin-top:8px">
-            <button type="button" aria-pressed="false" data-open="lower-autodelete">7 days</button>
-            <button type="button" aria-pressed="true" data-toast="Saved">30 days</button>
-            <button type="button" aria-pressed="false" data-toast="Saved">90 days</button>
+        <section class="set-panel" id="ai" aria-labelledby="ai-title" hidden>
+          <h2 class="h2" id="ai-title">AI and key</h2>
+          <p class="small muted lede">The OpenRouter key, and which model does each step.</p>
+          <div class="set-group" id="ai-key">
+            <div class="srow">
+              <div class="text">
+                <p class="h3">OpenRouter key</p>
+                <p class="mono-path">sk-or-v1-8f2c…a91e · saved in your password store</p>
+                <p class="small"><a class="link" href="index.html">Open the key guide</a></p>
+              </div>
+              <div class="ctl">
+                <button class="btn btn-sm" type="button" data-open="change-key">Change</button>
+                <button class="btn btn-ghost btn-sm" type="button" data-open="remove-key">Remove</button>
+              </div>
+            </div>
           </div>
-          <p class="small muted" style="margin-top:10px">12 reviews on this computer</p>
-          <div class="divider"></div>
-          <div class="row" style="justify-content:space-between; flex-wrap:wrap; gap:12px">
-            <button class="btn btn-sm" type="button" data-open="delete-reviews"><svg class="icon"><use href="#i-trash"/></svg>Delete all reviews</button>
-            <span class="mono-path">~/.local/share/clause-tracer</span>
-          </div>
-        </section>
-
-        <section class="card" aria-labelledby="advanced-title" id="advanced">
-          <h2 class="h2" id="advanced-title">Advanced</h2>
-          <details class="models" id="models-details">
-            <summary>
-              <svg class="icon"><use href="#i-chev-right"/></svg>
-              <span class="h3">Model choice</span>
-              <span class="small muted">Which AI model does each step. The recommended one is already picked.</span>
-            </summary>
-            <div class="models-body">
-              <div class="segmented" role="group" aria-label="Model choice">
+          <h3 class="h3 set-title" id="advanced">Model choice</h3>
+          <div class="set-group" id="models-details">
+            <div class="srow stack">
+              <div class="text">
+                <p class="small muted">Which AI model does each step. The recommended one is already picked.</p>
+              </div>
+              <div class="segmented" role="group" aria-label="Model choice" style="align-self:flex-start">
                 <button type="button" data-models="one" aria-pressed="true">One for every step</button>
                 <button type="button" data-models="step" aria-pressed="false">One per step</button>
               </div>
-
-              <div id="models-one" class="models-note">
+              <div id="models-one" class="set-note">
                 <div class="field model-field">
                   <label for="model-one">Model</label>
                   <select class="input" id="model-one">
@@ -180,7 +160,7 @@
                 </div>
               </div>
 
-              <div id="models-step" class="models-note" hidden>
+              <div id="models-step" class="set-note" hidden>
                 <div class="field model-field">
                   <label for="model-match">Match</label>
                   <select class="input" id="model-match">
@@ -244,15 +224,83 @@
                 <p class="small muted" style="margin-top:14px">Jev is only offered for match and judge. In private mode, only models that don't keep your contract are offered.</p>
               </div>
             </div>
-          </details>
+          </div>
         </section>
 
-        <section class="card" aria-labelledby="about-title" id="about">
+        <section class="set-panel" id="privacy" aria-labelledby="privacy-title" hidden>
+          <h2 class="h2" id="privacy-title">Privacy</h2>
+          <p class="small muted lede">What may leave this computer.</p>
+          <div class="set-group">
+            <div class="srow">
+              <div class="text">
+                <label class="h3" for="priv-mode">Private mode for new reviews</label>
+                <p class="small muted">Only providers that don't keep your contract. Reviews you've already started keep their own setting.</p>
+              </div>
+              <div class="ctl"><input class="toggle" type="checkbox" id="priv-mode" checked data-toast="Saved"></div>
+            </div>
+            <div class="srow">
+              <div class="text">
+                <label class="h3" for="send-notes">Send “why this matters” notes to the AI</label>
+                <p class="small muted">Gives better explanations. Known names are replaced, but the privacy check doesn't cover notes.</p>
+              </div>
+              <div class="ctl"><input class="toggle" type="checkbox" id="send-notes" data-toast="Saved"></div>
+            </div>
+          </div>
+          <p class="small" style="margin-top:12px"><a class="link" href="help.html#sent">What gets sent</a></p>
+        </section>
+
+        <section class="set-panel" id="storage" aria-labelledby="storage-title" hidden>
+          <h2 class="h2" id="storage-title">Storage and data</h2>
+          <p class="small muted lede">12 reviews on this computer. Nothing is removed without asking first.</p>
+          <div class="set-group">
+            <div class="srow">
+              <div class="text">
+                <p class="h3" id="storage-days-label">Delete reviews after no changes for</p>
+              </div>
+              <div class="ctl">
+                <div class="segmented" id="storage-days" role="group" aria-labelledby="storage-days-label">
+                  <button type="button" aria-pressed="false" data-open="lower-autodelete">7 days</button>
+                  <button type="button" aria-pressed="true" data-toast="Saved">30 days</button>
+                  <button type="button" aria-pressed="false" data-toast="Saved">90 days</button>
+                </div>
+              </div>
+            </div>
+            <div class="srow">
+              <div class="text">
+                <p class="h3">Where files are kept</p>
+                <p class="mono-path">~/.local/share/clause-tracer</p>
+              </div>
+            </div>
+          </div>
+          <h3 class="h3 set-title" id="data">Delete</h3>
+          <div class="set-group">
+            <div class="srow">
+              <div class="text">
+                <p class="h3">All reviews</p>
+                <p class="small muted">Playbooks, customers and the key stay.</p>
+              </div>
+              <div class="ctl"><button class="btn btn-sm" type="button" data-open="delete-reviews"><svg class="icon"><use href="#i-trash"/></svg>Delete all reviews</button></div>
+            </div>
+            <div class="srow">
+              <div class="text">
+                <p class="h3">Everything</p>
+                <p class="small muted">Reviews, playbooks, customers, settings and the key, all from this computer.</p>
+              </div>
+              <div class="ctl"><button class="btn btn-sm" type="button" data-open="delete-all"><svg class="icon"><use href="#i-trash"/></svg>Delete everything</button></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="set-panel" id="about" aria-labelledby="about-title" hidden>
           <h2 class="h2" id="about-title">About</h2>
-          <p class="muted">Clause Tracer 1.0.0 · Functional Source License</p>
-          <p class="small muted">Not legal advice.</p>
-          <div class="row" style="margin-top:12px">
-            <a class="btn btn-sm" href="https://github.com" target="_blank" rel="noopener"><svg class="icon"><use href="#i-refresh"/></svg>Check for updates<span class="visually-hidden"> (opens the release page in your browser)</span></a>
+          <p class="small muted lede">Clause Tracer 1.0.0 · Functional Source License · Not legal advice.</p>
+          <div class="set-group">
+            <div class="srow">
+              <div class="text"><p class="h3">Updates</p></div>
+              <div class="ctl">
+                <a class="btn btn-sm" href="https://github.com" target="_blank" rel="noopener"><svg class="icon"><use href="#i-refresh"/></svg>Check for updates<span class="visually-hidden"> (opens the release page in your browser)</span></a>
+              </div>
+            </div>
           </div>
         </section>
       </div>
@@ -331,9 +379,25 @@
       sel.addEventListener('change', function () { window.CT.toast('Saved'); });
     });
 
-    // State model-cant: open Model choice, one model per step, with Extract set to a model that can't do it.
+    // One group at a time. Old anchors (#ai-key, #advanced, #appearance ...) open the group that holds them.
+    var PANELS = ['general', 'ai', 'privacy', 'storage', 'about'];
+    var ALIAS = { appearance: 'general', notifications: 'general', 'ai-key': 'ai', advanced: 'ai',
+      'models-details': 'ai', data: 'storage', 'lower-autodelete': 'storage' };
+    function showPanel() {
+      var id = location.hash.slice(1);
+      var panel = PANELS.indexOf(id) !== -1 ? id : (ALIAS[id] || 'general');
+      if (state.indexOf('model-cant') !== -1 && !id) panel = 'ai';
+      PANELS.forEach(function (p) { document.getElementById(p).hidden = p !== panel; });
+      document.querySelectorAll('.set-nav a').forEach(function (a) {
+        if (a.getAttribute('href') === '#' + panel) a.setAttribute('aria-current', 'page');
+        else a.removeAttribute('aria-current');
+      });
+    }
+    window.addEventListener('hashchange', showPanel);
+    showPanel();
+
+    // State model-cant: Model choice, one model per step, with Extract set to a model that can't do it.
     if (state.indexOf('model-cant') !== -1) {
-      document.getElementById('models-details').open = true;
       document.querySelector('[data-models="step"]').click();
       document.getElementById('model-extract').value = 'some';
       document.getElementById('model-explain').value = 'some';

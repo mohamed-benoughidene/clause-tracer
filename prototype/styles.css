@@ -414,7 +414,7 @@ html:is([data-text="150"], [data-text="200"]) {
 html.has-wintabs { --wintabs-h: 36px; }
 html.has-wintabs .flow { min-height: calc(100% - var(--wintabs-h)); }   /* the flow pages are min-height 100% of the body */
 .wintabs { position: sticky; top: 0; z-index: 30; display: flex; align-items: flex-end; gap: 2px; height: var(--wintabs-h);
-  padding: 4px 8px 0; background: var(--bg-sunken); border-bottom: 1px solid var(--line); }
+  padding: 4px 8px 0 16px; background: var(--bg-sunken); border-bottom: 1px solid var(--line); }   /* 16px: the home icon sits on the nav icons' centre line (x 32) */
 .wintabs > * { flex: none; }
 .wintab-home, .wintab-new { width: 32px; height: 28px; margin-bottom: 3px; display: inline-grid; place-items: center; border-radius: var(--r);
   color: var(--text-2); text-decoration: none; }
@@ -447,8 +447,9 @@ html:is([data-text="150"], [data-text="200"]) .sidebar-collapse { display: none;
   html[data-sidebar="collapsed"]:not([data-text="150"]):not([data-text="200"]) {
     .app { grid-template-columns: 56px minmax(0, 1fr); }
     .sidebar { padding: 18px 8px; }
+    .wintabs { padding-left: 12px; }   /* home keeps its size; its icon moves onto the rail's centre line (x 28) */
     .sidebar .logo { display: none; }
-    .sidebar .logo-symbol { display: block; padding: 0 0 16px; }
+    .sidebar .logo-symbol { display: block; padding: 0 0 16px; text-align: center; }
     .logo-symbol img { width: 28px; margin: 0 auto; }
     .sidebar .lbl, .sidebar .search-commands > span, .sidebar-collapse .lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     .sidebar .search-commands kbd { display: none; }
@@ -468,6 +469,7 @@ html:is([data-text="150"], [data-text="200"]) .sidebar-collapse { display: none;
 }
 @media (min-width: 861px) and (prefers-reduced-motion: no-preference) {
   html:not([data-text="150"]):not([data-text="200"]) .app { transition: grid-template-columns 150ms ease; }
+  html:not([data-text="150"]):not([data-text="200"]) .wintabs { transition: padding-left 150ms ease; }
 }
 
 /* ------------------------------------------------------------ Private mode switch (one shared component; see app.js)
