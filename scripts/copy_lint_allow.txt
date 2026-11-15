@@ -31,7 +31,7 @@ us-spelling | * | re:Remix Icon License | The licence's own name keeps its US sp
 # ---- "I", "my" and "me" belong to the user's own words (ux-copy section 1, "I and my only in the user's own words").
 first-person | * | re:Days until I'm paid|If unpaid, I can reuse or resell|I can show the work in my portfolio|My liability is capped|NDA I receive | Position names and a playbook name: the user writes these.
 first-person | * | re:Why this matters to me | The label of the user's own note field.
-first-person | * | re:I've read the 35 not-covered parts | The user states what they did (ux-copy 6.2).
+first-person | * | re:I've read the 37 not-covered parts | The user states what they did (ux-copy 6.2).
 first-person | * | re:Before I sign, could we look | The sample message: the user's own words, sent to the other side.
 first-person | prototype/starter-preview.html | re:Why this matters: | The starter's notes are written in the user's voice on purpose (ux-copy 4.10).
 first-person | prototype/playbook-editor.html | re:Long waits mean I borrow | The note on a position: the user's own words.

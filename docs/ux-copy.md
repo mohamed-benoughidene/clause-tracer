@@ -115,7 +115,7 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 
 **Spelling:** British English: colour, recognise, summarise, labelled, licence (noun). One exception: the **Functional Source License** is a proper name and keeps its own spelling. Say "source available", never "open source". Spec 14.4 notes that the app's copy is British.
 
-**Hyphens:** "not covered" as a phrase ("35 parts not covered"), "not-covered" before a noun ("the not-covered parts").
+**Hyphens:** "not covered" as a phrase ("37 parts not covered"), "not-covered" before a noun ("the not-covered parts").
 
 **Quotation marks:** double curly quotes for quoted words and names: “Master Agreement”, “reasonable”. Use an apostrophe only for contractions.
 
@@ -217,7 +217,7 @@ The card shows one view at a time: Welcome, then Key. “Check your own contract
 | Paste field | Contract text · Keep the clause numbers and headings. Paste only the pages you want reviewed. |
 | Review name | Review name · Pick a name you'll recognise later. |
 | Scanned (blocks) | This PDF is pictures of pages, so its text can't be read. Load a Word version, or paste the text. |
-| Mixed (blocks) | Pages 7 and 8 are pictures, not text. They're skipped unless you paste their text. |
+| Mixed (warns, owner 15 Nov 2026) | Pages 7 and 8 are pictures, not text. They're skipped unless you paste their text. |
 | Too large (blocks) | This file is 48 MB. The limit is 20 MB. Paste only the pages you want reviewed. |
 | Empty (blocks) | This file has no text. Choose another file, or paste the text. |
 | Old Word (blocks) | This is an old Word file. Open it in Word, save it as .docx, then load that. |
@@ -305,7 +305,7 @@ The card shows one view at a time: Welcome, then Key. “Check your own contract
 | Element | Copy |
 | --- | --- |
 | Title | [review name] · [playbook] · playbook as of 5 Nov, 10:31 |
-| Actions | Back to reviews (icon label) · More actions (icon label), a menu: Search commands · Ctrl+K · Suggestions · Models and cost · $0.39 · Re-run… · Start over… · then Output. Rewrite is in the detail, as “Rewrite this clause”. The bar has no status text: “Ready to check” and “Done” belong to Home (4.2). |
+| Actions | Back to reviews (icon label) · More actions (icon label), a menu: Search commands · Ctrl+K · Suggestions · Models and cost · $0.39 · Re-run… · Start over…. Output is a button beside the menu, not in it. Rewrite is in the detail, as “Rewrite this clause”. The bar has no status text: “Ready to check” and “Done” belong to Home (4.2). |
 | Practice banner | Practice review · One label here is wrong on purpose. Find it, open it and fix it. Real reviews work the same way. [Start a real review] |
 | Playbook changed | Your playbook changed after this review ran. The labels use the old limits. [Re-run] · The review never shows more than one banner: this one and the practice banner are the only two. |
 | Read first: unedited starter | Row: Example playbook, unedited. It opens in the column: Example playbook, unedited · This review uses the example playbook, unedited. Its limits are examples, not yours. · [Make the limits yours] [Got it] · [All labels] |
@@ -329,7 +329,7 @@ The card shows one view at a time: Welcome, then Key. “Check your own contract
 | Next | Next unchecked · J (in the counter line, and in the head of each detail) |
 | Unsure-heavy | More than half of these labels are unsure. That usually means the wording is vague, or your playbook suits a different kind of contract. Read the unsure ones first: each says what it couldn't decide. |
 | Tabs | Labels [n] · Not covered [n] · Missing [n] |
-| Not-covered tick | I've read the 35 not-covered parts |
+| Not-covered tick | I've read the 37 not-covered parts |
 | Not-covered row | § 2.2 · **Length and renewal** · “This Agreement renews automatically for further 12-month periods…” (the clause type in bold, then the clause's own first line in quotes; no AI-written sentence) |
 | Not-covered clause types (draft list) | Parties · Background · Definitions · Length and renewal · Scope of work · Quality of work · Timing and deadlines · How the work is done · Changes to the deal · Fees · Invoices · Expenses · Tax · What the other side provides · Ownership and credit · Existing tools and materials · Confidentiality · Hiring each other's staff · Promises about the work · Limits on losses · Ending the contract · Handing things back · Data protection · Whole agreement · Which document wins · Passing the contract on · Notices · Disputes and law · Insurance · Something else. [Assumption] A first list of 30. Tune it on the test set. |
 | Searched, nothing found (Missing tab) | Searched, nothing found · [n] · Your playbook is happy when these aren't in the contract, so they need no action. Open one to check the search. |
@@ -408,7 +408,8 @@ The card shows one view at a time: Welcome, then Key. “Check your own contract
 | Legal line | Not legal advice. Check every result yourself. | code |
 | Message fields | To · From · Tone: Friendly · Formal | code; the To, From and tone values: user (prefilled from the contract) |
 | Ask for | Ask for · One line for each issue. Tick a line to send it, untick it to leave it out. · unticked suffix: Left out | code |
-| Ask-for line | Payment (5.4): could invoices be paid within 15 days of the invoice date? · Deposit (5.2), where the playbook wants more: could the deposit on signing be 50% of the total? | code (templates and checked numbers, ADR 0011) |
+| Ask-for line | Payment (5.4): could invoices be paid within 15 days of the invoice date? · Deposit (5.2), where the playbook wants more: could the deposit on signing be 50% of the total? · Late payment (new clause): could we add a late fee of 2% of the unpaid amount for each month an invoice is late? | code (templates and checked numbers, ADR 0011) |
+| Greeting and sign-off (owner, 15 Nov 2026) | Friendly: “Hi [first name],” and “Thanks,” · Formal: “Dear [full name],” and “Kind regards,” · With no ticked lines the message is only the greeting, “Thanks for sending the [contract name].” and the sign-off. | code |
 | Nothing to ask | Nothing to ask for from your playbook. This only means the contract matches your playbook. It doesn't mean it's safe to sign. | code |
 | Message | Message · Contains your wording only, no placeholders. · Saved with the review. · [Rewrite with AI] [Regenerate] [Copy message] · toasts: Message regenerated · Copied | code, from the ticked lines; the user’s own edits: user |
 | Rewrite with AI | Rewrite with AI · The message was built from your ticked lines. The AI can reword it. The points, quotes and numbers stay the same. · Before / After · Removed words are struck through. Added words are highlighted. · [the AI wording line] · Only the message text is sent, with names swapped for placeholders. Your acceptable limits are never sent. · [Keep the current message] [Use the rewrite] · toast: Message rewritten | AI (the rewritten text); code (the rest) |
@@ -416,6 +417,8 @@ The card shows one view at a time: Welcome, then Key. “Check your own contract
 | Labels changed | Labels changed since this message · Regenerate to use the new labels. This replaces your current text. · [Keep this message] [Regenerate] · toasts: Message kept · Message regenerated | code |
 | Report options | Summary · Full contract · Include your notes | code |
 | Report preview | Review report · Asked for · Not checked: 9 positions aren't checked yet. They're marked here as unchecked. | code; notes the user wrote: user |
+| Report summary (Spec 4.7, owner 15 Nov 2026) | Review report · [review name] · Playbook “[name]”, as of [date, time] · Private mode: [On or Off, as the review ran] · Counts line: Walk-away 3 · Unsure 3 · Acceptable 4 · Preferred 1 · Each label: [position] · § [clause] · [label word] · “[quote]” · [the why, word for word as on the Review screen] · Missing · [n]: [position] · [what is missing and why it matters, as on the Review screen] · Not covered · [n] parts, one line per clause type | code |
+| Report footer (owner, 15 Nov 2026) | On the report and on the Both tab, under the page: Private mode: On (or Off, as the review ran) · Not legal advice. Check every result yourself. | code |
 | Both tab | Edit the text on the Message tab. · Summary of the six points asked for, with the review labels. Includes your notes only when you turn that on. · [Open the report] | code |
 | Save PDF | Save report as PDF · notice: This PDF isn't encrypted, and auto-delete won't remove it. It has your contract text and real names. · Cancel / Save PDF · footer: Saved with the review. · toast: Saved | code |
 
@@ -428,6 +431,7 @@ The card shows one view at a time: Welcome, then Key. “Check your own contract
 | Actions | Create blank · Copy a starter · Import · Search positions |
 | Filter | All customers · None · [customer] · toasts: Showing playbooks for every customer · Showing playbooks with no customer · Showing playbooks for [customer] |
 | Card | Side · Customer · Positions · Used by 4 reviews · edited 2 Nov · Not used by any review |
+| No match (owner 15 Nov 2026) | No playbooks match “[search text]”. |
 | Card actions | Edit · Duplicate · Export · Delete · toasts: Copy made · Exported as [file].ctplaybook |
 | Starter card | Want a place to start? The freelancer starter has 11 example positions. Copy it, then make the limits yours. · Starter · Freelancer receiving a service agreement · read-only · [Preview starter] |
 | Import failed | That file isn't a Clause Tracer playbook, so it can't be imported. Playbook files end in .ctplaybook. · [Choose another file] |
@@ -467,12 +471,12 @@ The eleven starter positions and their "why this matters" notes are in Spec 7; t
 | List | Positions · [n] · [Add] · Drag position [n] to reorder · Delete position [n] |
 | Starter copy note | Copied to your playbooks. These are example positions, so make the limits yours. Until you do, reviews say “by the example playbook”. |
 | Position form | Position [n] · Topic · Type: Number · Yes/no · Words |
-| Number | Unit (days, %, months, rounds) · Direction: Lower is better · Higher is better · At or under · [unit], 1–120 · Everything beyond Acceptable · Filled in from Acceptable |
+| Number | Unit (days, %, months, rounds) · Direction: Lower is better · Higher is better · At or under · [unit], 0–120 · Everything beyond Acceptable · Filled in from Acceptable |
 | Missing level | If the contract says nothing · The level used when no clause matches |
 | Yes/no | If the answer is yes · Must be better than the no level · If no, unclear or missing · Missing always counts as no, so there is no separate missing level · Reads as: Yes counts as Preferred · No, unclear or missing counts as Acceptable |
 | Words | Preferred reads as · Acceptable reads as · Walk-away reads as · placeholder: Describe this level in a sentence |
 | Why this matters | Why this matters to me (optional) · Never exported. Only sent to the AI if you turn that on in Settings. |
-| Validation (new) | Acceptable has to be [more than / less than] [value], the preferred limit. (“more than” when lower is better, “less than” when higher is better. [value] is the Preferred number.) · Enter a number from 1 to 120. · Give the position a topic. |
+| Validation (new) | Acceptable has to be [more than / less than] [value], the preferred limit. (“more than” when lower is better, “less than” when higher is better. [value] is the Preferred number.) · Enter a number from 0 to 120. · Give the position a topic. |
 | Blank playbook (new) | New playbook · Not saved yet · Name placeholder: For example, Design retainer · Side placeholder: For example, service provider · Topic placeholder: For example, Days until I'm paid, from invoice date · Untitled position · Note placeholder: Optional. A line to remind you why you set this limit. · Leave dialog text: If you leave now, you'll lose this new playbook. · After a starter copy: Saved · not changed yet |
 | Leave dialog | Leave without saving? · If you leave now, you'll lose your changes to “[name]”. · Stay / Leave without saving |
 | Delete position | Delete “[position]”? · It's removed from this playbook when you save. Once you save, it can't be undone. The other positions stay. · Cancel / Delete position · toast: Position deleted |
@@ -485,6 +489,7 @@ The eleven starter positions and their "why this matters" notes are in Spec 7; t
 | Intro | Link a playbook to a customer to keep their positions apart. |
 | Columns | Customer · Playbooks · Actions · 1 playbook / [n] playbooks |
 | Footnote | Deleting a customer unlinks its playbooks and keeps them. |
+| Empty (owner, 15 Nov 2026) | No customers yet. Add one, then link a playbook to it. · [Add customer] |
 | Add | Add customer · Customer name · e.g. Atlas Media · Cancel / Add customer · toast: Saved |
 | Rename | Rename “[name]” · Name · Cancel / Rename · toast: Saved |
 | Delete | Delete “[name]”? · Its 1 playbook stays / Its [n] playbooks stay, unlinked from this customer. This can't be undone. · No playbooks use this customer. This can't be undone. · Cancel / Delete customer · toast: Customer deleted |
@@ -503,7 +508,7 @@ The eleven starter positions and their "why this matters" notes are in Spec 7; t
 | Appearance | Colours: Match system · Light · Dark · Follows your computer's setting. · Text size: 100% · 125% · 150% · 200% |
 | Storage | Delete reviews after no changes for: 7 days · 30 days · 90 days · 12 reviews on this computer · [Delete all reviews] · path line: ~/.local/share/clause-tracer (where files are kept) |
 | Delete reviews | Delete all 12 reviews? · This removes every review on this computer, with its labels and notes. Your playbooks, customers and key stay. This can't be undone. · Cancel / Delete all reviews · toast: Reviews deleted |
-| Lower auto-delete | Lower auto-delete to 7 days? · 4 reviews haven't changed in 7 days. They'll be deleted on 9 Nov, in 3 days, unless you change them first. · Cancel / Lower to 7 days |
+| Lower auto-delete | Lower auto-delete to 7 days? · 4 reviews haven't changed in 7 days. They'll be deleted on 8 Nov, in 3 days, unless you change them first. · Cancel / Lower to 7 days |
 | Data | Nothing is removed without asking first. · Everything · Reviews, playbooks, customers, settings and the key, all from this computer. · [Delete everything] |
 | Delete everything | Delete everything? · Reviews, playbooks, customers, settings and the key are all removed from this computer. This can't be undone. · Cancel / Delete everything · toast: Everything deleted |
 | Advanced: models | Model choice · Which AI model does each step. The recommended one is already picked. · One for every step · One per step · Model: Claude Sonnet 5.5 (recommended) · Steps: Match · Extract · Judge words positions · Explain · Sort not-covered parts · Rewrite · Rewrite message · Jev is only offered for match and judge. In private mode, only models that don't keep your contract are offered. |
@@ -577,7 +582,7 @@ Found on 7 Nov 2026 by comparing every string in the prototype with the spec. **
 | # | Where | Now | Fix |
 | --- | --- | --- | --- |
 | 1 | Review counter, Help, Spec 4.4 and 14.1 | "2 of 11 rules checked", "parts no rule checked", but "Position 1", "9 positions aren't checked yet" | Pick one word. Recommended: keep **position** (the glossary term) everywhere: "2 of 11 positions checked · 35 parts not covered". "Rule" is plainer, but then it must replace "position" everywhere, including the editor. |
-| 2 | Review, running log, Settings, Spec | "Not covered", "grey parts", "uncovered parts", "parts no rule checked" | Use **not covered**: "Summarise not-covered parts", "I've read the 35 not-covered parts". |
+| 2 | Review, running log, Settings, Spec | "Not covered", "grey parts", "uncovered parts", "parts no rule checked" | Use **not covered**: "Summarise not-covered parts", "I've read the 37 not-covered parts". |
 | 3 | Settings heading, Spec 14.3 | "AI key" | **OpenRouter key**, as everywhere else. |
 | 4 | Running toast, Settings notifications | "You'll get a message when it's done", "Shows a message when a review is done" | **notification**. "Message" means only the message to the other side. |
 | 5 | Unloaded-document banner | "which the app hasn't seen" | "which isn't loaded", as in the panel and the dialog. |
@@ -600,7 +605,7 @@ The voice rule (Spec 14.4) keeps "I" and "my" for the user's own words. These co
 | Write it myself (Rewrite) | Write it yourself |
 | (my copy) in the playbook picker | Remove. The picker lists only the user's playbooks. |
 
-Decision: controls don't use "my". The not-covered tick, "I've read the 35 not-covered parts", stays in first person because the user is stating something they did.
+Decision: controls don't use "my". The not-covered tick, "I've read the 37 not-covered parts", stays in first person because the user is stating something they did.
 
 ### 6.3 Wrong or clashing numbers on the review screen
 
@@ -810,7 +815,7 @@ The owner accepted the new first launch. A thread was tried and removed the same
 | 3 | The key intro was joined to the headline's lede. | The lede is one sentence. The OpenRouter-key sentence moved to the Key view, with the cost: “It runs on your computer with your own OpenRouter key, the account that pays for the AI. A typical review costs about $0.30 to $0.60.” |
 | 4 | A pasted key often has spaces or a line break around it. | The field removes them and says “Spaces removed.” **New string.** |
 | 5 | Two primary buttons in one card would compete. | Each view has one primary button: “Open the free sample contract” in Welcome, “Save key” in Key. |
-| 6 | The reading log showed finished and running lines alike (design-system 8.3). | Finished lines are ink and upright. The line of the step still running is graphite italic with a dashed underline. No words changed. Stopped lines keep the Unsure colour. |
+| 6 | The reading log showed finished and running lines alike (design-system 8.3). | Finished lines are ink and upright. The line of the step still running is graphite italic, with no dash (owner, 15 Nov 2026: only pencilled labels are dashed). No words changed. Stopped lines keep the Unsure colour. |
 | 7 | The review had no sign on the page that a pin's label was done. | A pin is an outline until its label is decided, then filled. Its accessible name ends “, checked” or “, not checked”. The list row says the same to a screen reader, in hidden text. |
 
 ### 6.15 Window tabs, folding sidebar, switch, stepper, load dialog and pie, 15 Nov 2026
@@ -834,3 +839,21 @@ The owner asked for these, with pictures of other apps. The deck, the prototype,
 | 12 | The “Run in background” button is gone (owner, 15 Nov 2026). It only showed a toast: Home already leaves the screen and the review keeps running. | **Removed:** Run in background · Running in the background (toast). **Changed:** the note under Cancel now starts “You can leave this screen.” |
 
 Home's “Ready to check” gauge stays a solid disc. It does not show the share checked (design-system 5.8).
+
+### 6.16 Review of all 16 screens against the three docs, 15 Nov 2026
+
+One reviewer per screen compared the prototype with the spec, the design system and this deck. The owner decided the open points below. The decisions are already in the spec and the deck; this list is the record.
+
+| # | Disagreement | Decision (owner, 15 Nov 2026) |
+| --- | --- | --- |
+| 1 | A mixed file: the spec and 4.3 said it blocks Continue, but its notice says the pages are skipped unless the user pastes their text. | It warns, and Continue works. Spec 14.2 and 4.3 now say so. |
+| 2 | Delete buttons: design-system 4 said a destructive button is secondary, but every delete dialog uses the dark primary button. | The dialogs keep the dark primary button, never red. Design-system 4 now says so. |
+| 3 | The running log line had a dashed underline, but only pencilled labels are dashed. | The dash is gone. The running line is graphite italic (design-system 4). |
+| 4 | Number limits: 4.12 said 1–120, but starter position 9 has 0. | 0–120. Hint and error text changed. |
+| 5 | “Try again” on the error page opened a working review. | It stays on the error page. |
+| 6 | Strings the deck lacked: the Customers empty state, the report summary, the report footer, the greeting and sign-off, the late-payment ask line, and “No playbooks match”. | Drafted and added to 4.8, 4.9 and 4.13. |
+| 7 | Spec lines older than the deck: the review counter (thin bar, privacy badge, “35 parts not covered”), the Home line “11 of 11 positions checked”, the privacy legend and “Private mode default”. | The spec follows the deck. |
+| 8 | Not covered held 35 parts, but clauses 1.1 and 14.6 were listed nowhere. | Both are listed, so the count is 37 everywhere. |
+| 9 | Sample data disagreed: Customers counts against Playbooks, the dates on Home and Settings, and clause 14.5 did not hold the name “Ms Jones” that the privacy check asks about. | Customers counts follow Playbooks (1, 0, 0). “Today” in the prototype is 5 Nov 2026, so auto-delete dates follow it. Clause 14.5 now names Ms Jones. |
+| 10 | The first-launch headline was a fixed 32 px, but design-system 6 says fluid 32–42 px. | Fluid. |
+| 11 | The hidden-text chip: design-system 5 said “outlined in the contract”, but the deck says “Hidden text”. | “Hidden text”. |

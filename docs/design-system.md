@@ -318,7 +318,7 @@ The default is 36 px tall, with a 0 14 px padding, `--r`, a `--line-strong` bord
 | Busy | The label changes to the action's progress ("Checking key…") with an icon. There is no spinner. |
 
 - **Do:** name the outcome ("Send for review", "Copy to your playbooks").
-- **Don't:** make a red button. A destructive button is a secondary button with an exact label ("Delete everything"), and the confirm dialog names what will go.
+- **Don't:** make a red button. A destructive action is never red. The button that opens it is secondary, and the confirm button in its dialog is the one dark primary button with an exact label ("Delete everything"). The dialog names what will go and says when it can't be undone (owner, 15 Nov 2026).
 
 **Icon movements** (15 Nov 2026, owner). An action icon inside a button, link, nav item or menu item moves a little on hover and keyboard focus: an arrow or chevron nudges 2 px the way it points, a plus turns 90°, a gear turns 30°, download sinks 2 px, upload rises 2 px, copy lifts 1 px, search grows 6%, and a nav icon shifts 1 px. A press shrinks any of them to 94%. The movement is 150 ms, transform only, and it is off under reduced motion. It never touches stamps, pins or the logo, and nothing loops. The CSS finds the icon by its sprite name, so no page needs markup for it.
 
@@ -357,7 +357,7 @@ This is a typeset clause on the sheet. It is a grid of pin, number and text (`22
 
 ### 5.6 Hidden-text mark `mark.hidden-text`
 
-Highlighter yellow (`--hidden-bg`) with a 1 px dashed outline in `--hidden-fg`. It is never a label colour. In the contract check, hidden text also gets a chip with an eye-off icon and the words "outlined in the contract".
+Highlighter yellow (`--hidden-bg`) with a 1 px dashed outline in `--hidden-fg`. It is never a label colour. In the contract check, hidden text also gets a chip with an eye-off icon and the words "Hidden text".
 
 ### 5.7 Replacement mark `.swap` (privacy check)
 
@@ -414,7 +414,7 @@ There are two warning levels and three types of message.
 | Notice | `.notice` | An inline tone strip with an icon and text. It is used for information such as auto-delete. |
 | Warning notice | `.notice.warn` | Unsure colours, for anything that blocks or needs a fix. *(Defined per page; see 8.1.)* |
 | Toast | `.toast` | An ink bar (8 px corners) at the bottom centre with short past-tense words: "Copied", "Saved", "Replaced. Check the marked words." It is triggered by `data-toast`. |
-| Reading log | `.log` (running) | Mono timestamp plus a Serif 15 line. A finished line is `--text` and upright. The line of the step still running is `--pencil` italic with a 1 px dashed underline (`.running`, `aria-current="step"`). A stopped line keeps Unsure fg. Nothing animates. |
+| Reading log | `.log` (running) | Mono timestamp plus a Serif 15 line. A finished line is `--text` and upright. The line of the step still running is `--pencil` italic, with no dash, because only pencilled labels are dashed (`.running`, `aria-current="step"`; owner, 15 Nov 2026). A stopped line keeps Unsure fg. Nothing animates. |
 | Progress bar | `.load-bar` (Load file dialog) | 4 px tall, ink. The review uses the progress pie (5.14), and the running screen has a status pie (next row). |
 | Status pie | `.stage-head .pie` (running) | One ring, 28 px, with a wedge that grows as the review moves through its eight small steps (owner, 15 Nov 2026, after Linear’s status icon; a stage list was tried first and rejected). The step that is running counts as half done. It is ink while running, an Unsure ring and wedge when the review stops, and a full ink disc with a check when done. Beside it: the title (“Step 2 of 4 · Matching clauses”) and, under it, the name of the small step that is running. The wedge grows over 300 ms ease-out and jumps under reduced motion (same `.pie` as 5.14). |
 
@@ -442,7 +442,7 @@ There are two warning levels and three types of message.
 | Flow footer | `.flow-foot` | Sticky at the bottom with the primary action ("Looks right, continue", "Send for review") |
 | Page head | `.page-head` | The title and a muted line on the left, actions on the right |
 
-**Window tabs** (`.wintabs`, added 15 Nov 2026 at the owner's request). A 36 px strip at the top of every page except First launch and the prototype map, on `--bg-sunken`. `app.js` adds it, so a page carries no markup for it. It holds a Home icon button, one tab per open review, and a “+” that opens New review. A tab is the review's progress pie (14 px; a document icon for a new review that has no positions yet), the review's name (ellipsis after 200 px) and a close button (`Close tab, [name]` as its label). The current review tab is raised: `--bg-surface`, joined to the page below it. Home is not a document, so when current it is a pressed button with its own outline, which keeps it clear of the sidebar or the icon rail below it. Home is current on the sidebar pages. A closed tab that was open sends the user Home. The strip is sticky, and its height is the variable `--wintabs-h`, which the sidebar and the full-height screens subtract from their own height. The tabs are prototype data in the `ct-tabs` store key. Several reviews open at once is a decision the build plan does not yet cover (Spec 13).
+**Window tabs** (`.wintabs`, added 15 Nov 2026 at the owner's request). A 36 px strip at the top of every page except First launch and the prototype map, on `--bg-sunken`. `app.js` adds it, so a page carries no markup for it. It holds a Home icon button, one tab per open review, and a “+” that opens New review. A tab is the review's progress pie (14 px; a document icon for a new review that has no positions yet), the review's name (ellipsis after 200 px) and a close button (`Close tab, [name]` as its label). The current review tab is raised: `--bg-surface`, joined to the page below it. Home is not a document, so when current it is a pressed button with its own outline, which keeps it clear of the sidebar or the icon rail below it. Home is current on the sidebar pages. A closed tab that was open sends the user Home. The strip is sticky, and its height is the variable `--wintabs-h`, which the sidebar and the full-height screens subtract from their own height. On the empty Home and on the error page the strip shows Home only, because no review is open there. The tabs are prototype data in the `ct-tabs` store key. Several reviews open at once is a decision the build plan does not yet cover (Spec 13).
 
 **Window tabs and the sidebar line.** The home button keeps its size in both states. Its left padding moves with the sidebar (16 px open, 12 px folded, eased over 150 ms) so its icon sits on the same centre line as the icons below it. The folded rail's logo is centred the same way (15 Nov 2026).
 
@@ -468,7 +468,7 @@ There are two warning levels and three types of message.
 | Label list | `.label-list` | Quiet rows, with no rule between them and a hover tone: a pin, the position's title that truncates, and the clause number (“§ 5.4”, mono, at the right). A row has no stamp, because its group heading has it, and the position number is only in its accessible name (“Position 5 · Revision rounds”). A decided row's pin is filled and its title faint; the tick shows only on rows without a pin (Missing). The column truncates a long row with an ellipsis and never widens, so the tabs stay in view. |
 | Governing-law line | `.law-line` | A small faint line at the bottom of the Labels list: an icon and one sentence. The two-law and no-law versions use the Unsure icon colour. |
 | Detail | `.detail`, `.detail-head`, `.detail-card` | One label's detail, in the right column in place of the list. The tone sits on the evidence card and on “What to check” only, so a detail is not tinted twice. The head (`.detail-head`) is sticky: “All labels” (Escape does the same), “Next unchecked” and J, then the title. `.detail-card` is a tone card (`--bg-tone`, `--r-lg`, padding 16) holding the quote, its two links, the stamp and the lead sentence. |
-| Not-covered tick | `.label-list li.grey-confirm` | The tone row at the top of Not covered: "I've read the 35 not-covered parts" |
+| Not-covered tick | `.label-list li.grey-confirm` | The tone row at the top of Not covered: "I've read the 37 not-covered parts" |
 | Evidence trail | `.trail` | A 12 px ring "knot" plus a step: the thread, shown as a list |
 | Decide buttons | `.decide` | Full-width option buttons, each with a `kbd` key hint |
 | Diff | `.diff` | `del` struck through in `--text-2` (never red, ADR 0003), `ins` on the preferred bg (rewrite, before and after) |
@@ -551,7 +551,7 @@ The source line moved into "More" on 14 Nov 2026 (owner decision 4). The detail 
 
 | Issue | Where | Fix |
 | --- | --- | --- |
-| `.notice.warn` is defined three times, identically | new-review, running, privacy-check | Move it to `styles.css` |
+| ✅ **Fixed 15 Nov 2026.** `.notice.warn` is defined three times, identically | new-review, running, privacy-check | Moved to `styles.css`; the page copies are gone |
 | The flow layout (`.flow`, `.work`, `.side`/`.margin`) is redefined on each page | contract-check, running, privacy-check | One `.flow` / `.flow-work` / `.flow-margin` in `styles.css` |
 | `.cl` (privacy, running) duplicates `.clause` (review) | 3 pages | One clause component with a dense modifier |
 | `.thumbs` is redefined in privacy-check with a different thumbnail (`.thumb-img` vs `.t` vs `.thumb`) | review, privacy, new-review | One thumbnail component |
@@ -580,7 +580,7 @@ The source line moved into "More" on 14 Nov 2026 (owner decision 4). The detail 
 | Input and button borders are 1.6:1 against surface, below the 3:1 needed for a control's edge (WCAG 1.4.11) | Spec 14.4 (AA) | Darken `--line-strong` to about `#8C9097` light / `#6A6E75` dark, or check that the fill difference carries the edge |
 | ✅ **Fixed.** Icon stroke is 1.6 px, but the direction said 1.75 px | Design direction, principle 9 | 1.6 accepted; the direction now says 1.6 |
 | ✅ **Fixed.** The direction said "Inter" in action 7, but principle 4 later dropped Inter for Plex | design-direction.md | Action 7 now points to Plex |
-| ✅ **Fixed 15 Nov 2026.** The reading log isn't pencilled while running and inked when done | Design direction, principle 8 | Finished lines are `--text`, the running line is `--pencil` italic with a dashed underline |
+| ✅ **Fixed 15 Nov 2026.** The reading log isn't pencilled while running and inked when done | Design direction, principle 8 | Finished lines are `--text`, the running line is `--pencil` italic (the dashed underline was dropped on 15 Nov 2026) |
 | ✅ **Fixed.** The rewrite diff showed deleted words in walk-away red, which is decoration | ADR 0003 | Struck through in `--text-2` |
 | 106 inline `style=` attributes in review.html (mostly `gap` and contract-table cells; counted 14 Nov 2026) | review.html | Fine for a prototype; don't carry them into the build |
 | Page-thumbnail label dots in the review use colour alone. The thumbnails are now hidden by default, behind the Pages toggle, but this is not fixed. | Rule 5, Spec 14.4 (found 14 Nov 2026) | Add the label's icon or a count beside each dot |
