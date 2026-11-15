@@ -188,7 +188,7 @@
           <div class="field">
             <label for="n-pref" class="lvl-label">At or under</label>
             <input class="input" id="n-pref" inputmode="numeric" value="15">
-            <span class="hint" id="n-pref-hint">days, 0–120</span>
+            <span class="hint" id="n-pref-hint">days, 0 or more</span>
             <span class="field-error" id="n-pref-error" hidden><svg class="icon"><use href="#i-warn"/></svg><span></span></span>
           </div>
         </div>
@@ -350,7 +350,8 @@
     var higher = false;
     accept.value = invalidState ? '10' : '30';
 
-    function isNumber(v) { return /^\d+$/.test(v) && +v >= 0 && +v <= 120; }
+    function isPct() { return unit.value === '%'; }
+    function isNumber(v) { return /^\d+$/.test(v) && (!isPct() || +v <= 100); }
     function show(input, err, text) {
       err.hidden = !text;
       if (text) {
@@ -365,9 +366,9 @@
     function update() {
       var p = pref.value.trim(), a = accept.value.trim();
       document.querySelectorAll('.lvl-label').forEach(function (l) { l.textContent = higher ? 'At or over' : 'At or under'; });
-      q('n-pref-hint').textContent = unit.value + ', 0\u2013120';
+      q('n-pref-hint').textContent = unit.value + (isPct() ? ', 0 to 100' : ', 0 or more');
       walk.value = a ? (higher ? '< ' : '> ') + a : '';
-      var rangeText = 'Enter a number from 0 to 120.';
+      var rangeText = isPct() ? 'Enter a number from 0 to 100.' : 'Enter a number of 0 or more.';
       show(pref, prefErr, p && !isNumber(p) ? rangeText : '');
       var acceptText = '';
       if (a && !isNumber(a)) acceptText = rangeText;

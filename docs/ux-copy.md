@@ -472,12 +472,12 @@ The eleven starter positions and their "why this matters" notes are in Spec 7; t
 | List | Positions · [n] · [Add] · Drag position [n] to reorder · Delete position [n] |
 | Starter copy note | Copied to your playbooks. These are example positions, so make the limits yours. Until you do, reviews say “by the example playbook”. |
 | Position form | Position [n] · Topic · Type: Number · Yes/no · Words |
-| Number | Unit (days, %, months, rounds) · Direction: Lower is better · Higher is better · At or under · [unit], 0–120 · Everything beyond Acceptable · Filled in from Acceptable |
+| Number | Unit (days, %, months, rounds) · Direction: Lower is better · Higher is better · At or under · [unit], 0 or more (percentages 0 to 100) · Everything beyond Acceptable · Filled in from Acceptable |
 | Missing level | If the contract says nothing · The level used when no clause matches |
 | Yes/no | If the answer is yes · Must be better than the no level · If no, unclear or missing · Missing always counts as no, so there is no separate missing level · Reads as: Yes counts as Preferred · No, unclear or missing counts as Acceptable |
 | Words | Preferred reads as · Acceptable reads as · Walk-away reads as · placeholder: Describe this level in a sentence |
 | Why this matters | Why this matters to me (optional) · Never exported. Only sent to the AI if you turn that on in Settings. |
-| Validation (new) | Acceptable has to be [more than / less than] [value], the preferred limit. (“more than” when lower is better, “less than” when higher is better. [value] is the Preferred number.) · Enter a number from 0 to 120. · Give the position a topic. |
+| Validation (new) | Acceptable has to be [more than / less than] [value], the preferred limit. (“more than” when lower is better, “less than” when higher is better. [value] is the Preferred number.) · Enter a number of 0 or more. (percentages: Enter a number from 0 to 100.) · Give the position a topic. |
 | Blank playbook (new) | New playbook · Not saved yet · Name placeholder: For example, Design retainer · Side placeholder: For example, service provider · Topic placeholder: For example, Days until I'm paid, from invoice date · Untitled position · Note placeholder: Optional. A line to remind you why you set this limit. · Leave dialog text: If you leave now, you'll lose this new playbook. · After a starter copy: Saved · not changed yet |
 | Leave dialog | Leave without saving? · If you leave now, you'll lose your changes to “[name]”. · Stay / Leave without saving |
 | Delete position | Delete “[position]”? · It's removed from this playbook when you save. Once you save, it can't be undone. The other positions stay. · Cancel / Delete position · toast: Position deleted |
@@ -850,7 +850,7 @@ One reviewer per screen compared the prototype with the spec, the design system 
 | 1 | A mixed file: the spec and 4.3 said it blocks Continue, but its notice says the pages are skipped unless the user pastes their text. | It warns, and Continue works. Spec 14.2 and 4.3 now say so. |
 | 2 | Delete buttons: design-system 4 said a destructive button is secondary, but every delete dialog uses the dark primary button. | The dialogs keep the dark primary button, never red. Design-system 4 now says so. |
 | 3 | The running log line had a dashed underline, but only pencilled labels are dashed. | The dash is gone. The running line is graphite italic (design-system 4). |
-| 4 | Number limits: 4.12 said 1–120, but starter position 9 has 0. | 0–120. Hint and error text changed. |
+| 4 | Number limits: 4.12 said 1–120, but starter position 9 has 0. | 0–120. Hint and error text changed. Reversed 15 Nov 2026: the screen follows Spec 4.1, so 0 or more, and percentages 0 to 100. |
 | 5 | “Try again” on the error page opened a working review. | It stays on the error page. |
 | 6 | Strings the deck lacked: the Customers empty state, the report summary, the report footer, the greeting and sign-off, the late-payment ask line, and “No playbooks match”. | Drafted and added to 4.8, 4.9 and 4.13. |
 | 7 | Spec lines older than the deck: the review counter (thin bar, privacy badge, “35 parts not covered”), the Home line “11 of 11 positions checked”, the privacy legend and “Private mode default”. | The spec follows the deck. |

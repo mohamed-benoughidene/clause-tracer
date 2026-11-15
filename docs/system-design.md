@@ -687,6 +687,7 @@ The task plan of each stage is written in `docs/plans/` just before the stage is
 - **Done when** a review of the sample runs through the steps built so far, is saved encrypted, can be interrupted and resumed with no step run twice, and is deleted on schedule by a fixed clock.
 - **Tests, in the testing strategy.** Section 4 (the `adapters` and `cli` rows), section 3 (the contract suite against each fake and real adapter), section 8 (encryption at rest, deleting a review, auto-delete, storage settings, leaks in logs).
 - **Not yet decided:**
+  - **Several reviews open at once.** The prototype's window tabs assume it (Spec 13). Say whether one engine runs one review or several, and what the runner, the store and the cancel token do when two reviews run.
   - **The playbook file format**, and which module reads it. Spec 8.4 asks only for a strict format with size limits, and ADR 0004 names no module for it.
   - **How the command-line tool does the privacy check.** Spec 6.1 step 4 needs the user to confirm before anything is sent, and the `review` command in section 6.2 has no step for it. Settle this before stage 9 sends anything.
   - **Argon2id or scrypt** for the passphrase, if the pinned `cryptography` lacks Argon2id (ADR 0006 action item 2).

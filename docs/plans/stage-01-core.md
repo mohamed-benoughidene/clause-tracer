@@ -40,7 +40,7 @@
 - Mapping errors to review statuses and exit codes (including the message for a rate limit), loading and validating `Settings`, reading playbook files: stage 6. Raising `RateLimitedError` from a real HTTP 429: stage 9.
 - The contract suites run against real adapters: stage 6 (store, secrets), 7 (Presidio), 9 (OpenRouter).
 - The number parser and the quote check; how a start point is compared; who builds the evidence trail; the "searched, nothing found" list; explanation parts; keywords on `Position`; the step input shapes of each AI step; the code templates for a label's panel words; the template fallback after a failed scan; the prompt rules for AI text: stage 8 ([system design 15.8](../system-design.md#158-stage-8-checking-and-the-message-templates)).
-- The lint script for fixed copy: a separate task, outside this plan ([testing strategy 12](../testing-strategy.md#12-when-each-test-runs)).
+- The lint script for fixed copy: already built (`scripts/copy_lint.py`, run by `scripts/check.sh`); this plan leaves it as it is ([testing strategy 12](../testing-strategy.md#12-when-each-test-runs)).
 - AI reply schemas (Pydantic, in the owning module): stages 8, 9 and 11.
 - The spend ledger: stage 9. The `paid` marker and the report script: stage 10.
 - `Suggestion` and the report's contents: stage 11. Engine protocol shapes, theme and text size, and the count of reviews affected when auto-delete is lowered: stage 12.
@@ -67,6 +67,7 @@
   3. Run `.venv/bin/uv run pytest <that file>`. Assert, for `TypeAdapter(...).validate_python(...)` and `validate_json(...)`: the result is an instance of the dataclass itself (not a Pydantic copy); assigning a field raises `FrozenInstanceError`; the instance has no `__dict__`; a JSON list becomes a tuple; a wrong type raises `ValidationError`; the union field becomes the right one of the three dataclasses for each input; `__post_init__` ran (the mapping is a `MappingProxyType`). Note what type comes back for the base-class field given a subclass, and for a JSON-loaded `Decimal` and `datetime`.
   4. Pass: write the Pydantic and Python versions and the result, including the base-class note, in this plan's change log, and tell the owner. Ticking the ADR's action item is the owner's call. The base-class note feeds the stage 6 question in [system design 15.6](../system-design.md#156-stage-6-the-encrypted-store-secrets-the-runner-and-the-first-commands).
   5. Fail, or any other surprise: **stop**. Bring it to the owner before any shape is written. A base-class field that comes back as the base class is not a failure: write it down.
+- [ ] **The docs are on `main`.** The `docs/` branch that holds this plan, the spec and the system design has been merged by its own pull request ([the README](README.md), "Branches and pull requests"). Milestone 1 is cut from that `main`.
 - [ ] **Remind the owner** to start writing the ten test contracts now, because they take longest ([system design 15.1](../system-design.md#151-stage-1-core)).
 
 ## 5. Milestones and tasks
@@ -384,7 +385,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Depends on:** S1-M3-T2, S1-M3-T5.
 
 - [ ] **S1-M3-T7: Unit table (Owner)**
-  - **Build:** Owner only. The rows of `units.toml`. Columns: `id` (str), `number` (a decimal string), `unit` (the unit as written, or absent for none), `target` (a `Unit` value), `expected` (a number as a string that `fractions.Fraction` reads, such as `"14"` or `"7/30"`, or the reason code value `"business_days"` or `"unit_unknown"`). Cases to cover, proposed, owner to check: every spelling in the list of S1-M3-T12 to each target it converts to; a week, a month and a year to days and to months; business days and working days; an unknown word; days to percent (no conversion); no unit (question 16a). The AI agent does not write or change it (T11).
+  - **Build:** Owner only. The rows of `units.toml`. Columns: `id` (str), `number` (a decimal string), `unit` (the unit as written, or absent for none), `target` (a `Unit` value), `expected` (a number as a string that `fractions.Fraction` reads, for example `"14"` or `"7/30"`, or the reason code value `"business_days"` or `"unit_unknown"`). Cases to cover, proposed, owner to check: every spelling in the list of S1-M3-T12 to each target it converts to; a week, a month and a year to days and to months; business days and working days; an unknown word; days to percent (no conversion); no unit (question 16a). The AI agent does not write or change it (T11).
   - **Files:** `src/clause_tracer/core/tests/tables/units.toml`.
   - **Tests first:** None. The owner's values are the expected answers.
   - **Done when:** The owner has written the rows and said so. `scripts/check.sh` exits 0.
@@ -830,7 +831,7 @@ The output scans give the owner's findings for every case in the scan table, the
 
 ## 6. Open questions
 
-Planning found questions 1 to 17. The owner answered all of them on 14 Nov 2026; each answer is recorded in its home. Questions 16 and 17 are the label and scan edge cases. They were answered under one principle, stated once in [Spec 5](../spec.md#5-labelling-rules): when code cannot be sure, the label is unsure, the reason is named, and the user is shown the clause. It never guesses in either direction. The same day the owner added the rate-limit case, which is in the error-tree task S1-M1-T8 and in [Spec 6.2 and 6.3](../spec.md#62-rules-for-every-ai-step). Later that day the owner decided who writes a label's panel words and added five style scans ([Spec 6.1 step 10 and 6.2](../spec.md#62-rules-for-every-ai-step)). Planning those scans found question 18, which is open. Tasks S1-M5-T1 and S1-M5-T5 follow its recommendation; if the owner answers otherwise, those two tasks change before the plan is accepted.
+Planning found questions 1 to 17. The owner answered all of them on 14 Nov 2026; each answer is recorded in its home. Questions 16 and 17 are the label and scan edge cases. They were answered under one principle, stated once in [Spec 5](../spec.md#5-labelling-rules): when code cannot be sure, the label is unsure, the reason is named, and the user is shown the clause. It never guesses in either direction. The same day the owner added the rate-limit case, which is in the error-tree task S1-M1-T8 and in [Spec 6.2 and 6.3](../spec.md#62-rules-for-every-ai-step). Later that day the owner decided who writes a label's panel words and added five style scans ([Spec 6.1 step 10 and 6.2](../spec.md#62-rules-for-every-ai-step)). Planning those scans found question 18, which the owner answered the same day, as recommended; tasks S1-M5-T1 and S1-M5-T5 follow that answer.
 
 | # | Question | Needed by task | Recommendation (if any) | Owner's answer |
 | --- | --- | --- | --- | --- |
@@ -856,7 +857,7 @@ Planning found questions 1 to 17. The owner answered all of them on 14 Nov 2026;
 ## 7. Done when
 
 - [ ] Every task above is ticked.
-- [ ] `scripts/check.sh` exits 0: the owner-table guard, ruff, format, mypy strict, `lint-imports`, pytest under coverage, and the coverage floor.
+- [ ] `scripts/check.sh` exits 0: the owner-table guard, ruff, format, mypy strict, `lint-imports`, the copy lint, pytest under coverage, and the coverage floor.
 - [ ] Branch coverage of `src/clause_tracer/core/` is at least 95% (`coverage report --include='src/clause_tracer/core/*'`).
 - [ ] The five import contracts in `pyproject.toml` are unchanged and pass.
 - [ ] The architecture test passes: importing `core` loads only the standard library.
