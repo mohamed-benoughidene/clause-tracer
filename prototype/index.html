@@ -62,6 +62,22 @@
   .key-line.error { color: var(--text); }
   .key-line.error .icon { color: var(--unsure); }
   .field:has(.key-error.on) .input { outline: 2px solid var(--unsure); outline-offset: 2px; }
+  /* Onboarding motion (owner, 15 Nov 2026). Each part is a transition of 150-300 ms on opacity and transform only,
+     and none of it runs under reduced motion or on a ?state= page. */
+  @media (prefers-reduced-motion: no-preference) {
+    /* the welcome arrives in beats: logo, headline, line, buttons */
+    html.beats #view-welcome :is(.launch-logo, #launch-title, .lede, .first-action, #to-key) { transition: opacity 300ms ease-out, transform 300ms ease-out; }
+    html.beats #view-welcome :is(.launch-logo, #launch-title, .lede, .first-action, #to-key):not(.in) { opacity: 0; transform: translateY(8px); }
+    /* the two views slide: the old one leaves, the new one comes in from the side it is on */
+    .view-welcome, .view-key { transition: opacity 150ms ease-out, transform 150ms ease-out; }
+    .view-welcome.v-out, .view-key.v-out { opacity: 0; transform: translateX(calc(var(--dx, 1) * -16px)); }
+    .view-welcome.v-pre, .view-key.v-pre { opacity: 0; transform: translateX(calc(var(--dx, 1) * 16px)); }
+    /* the key check resolves: the line rises in and the check grows into place */
+    .key-line.ok { transition: opacity 250ms ease-out, transform 250ms ease-out; }
+    .key-line.ok .icon { transition: transform 250ms ease-out; }
+    .key-line.ok.live:not(.is-in) { opacity: 0; transform: translateY(4px); }
+    .key-line.ok.live:not(.is-in) .icon { transform: scale(.5); }
+  }
   /* Narrow window, and text size 150% and 200%: the picture is a band, the card sits under it. */
   @media (max-width: 900px) {
     .launch { height: auto; overflow: visible; }
@@ -72,6 +88,8 @@
   html:is([data-text="150"], [data-text="200"]) .launch-art { position: relative; inset: auto; height: 220px; }
   html:is([data-text="150"], [data-text="200"]) .launch-card { position: static; transform: none; width: auto; max-width: none; max-height: none; overflow: visible; box-shadow: none; border-radius: 0; padding: 24px 16px 28px; }
 </style>
+<script>/* beats: the welcome arrives in steps, unless motion is reduced or a ?state= page is open */
+if (!matchMedia('(prefers-reduced-motion: reduce)').matches && location.search.indexOf('state=') === -1) document.documentElement.classList.add('beats');</script>
 </head>
 <body>
 <script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
@@ -163,11 +181,26 @@
     var vKey = document.getElementById('view-key');
 
     // Two views in one card; one shows at a time, and focus moves to the new heading.
+    // The old view leaves and the new one comes in from the side it is on (Welcome is on the left, the key on the right).
+    var motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;
     function view(name, moveFocus) {
       var toKey = name === 'key';
-      vWelcome.hidden = toKey;
-      vKey.hidden = !toKey;
-      if (moveFocus) (toKey ? document.getElementById('key-title') : document.getElementById('launch-title')).focus();
+      var from = toKey ? vWelcome : vKey, to = toKey ? vKey : vWelcome;
+      function show() {
+        from.hidden = true; from.classList.remove('v-out');
+        to.hidden = false;
+        if (moveFocus) (toKey ? document.getElementById('key-title') : document.getElementById('launch-title')).focus();
+      }
+      if (!moveFocus || !motion || from.hidden) { from.hidden = true; to.hidden = false; return; }
+      var dx = toKey ? 1 : -1;
+      from.style.setProperty('--dx', dx); to.style.setProperty('--dx', dx);
+      from.classList.add('v-out');
+      setTimeout(function () {
+        show();
+        to.classList.add('v-pre');
+        void to.offsetWidth;
+        to.classList.remove('v-pre');
+      }, 150);
     }
     document.getElementById('to-key').addEventListener('click', function () { view('key', true); });
     document.getElementById('to-welcome').addEventListener('click', function () { view('welcome', true); });
@@ -176,6 +209,15 @@
       if (cleaned !== key.value) { key.value = cleaned; status.textContent = 'Spaces removed.'; }
       else { status.textContent = ''; }
     });
+
+    // The welcome in beats: logo, then headline, then the line, then the buttons, 140 ms apart.
+    if (document.documentElement.classList.contains('beats')) {
+      [['.launch-logo'], ['#launch-title'], ['.lede'], ['.first-action', '#to-key']].forEach(function (group, i) {
+        setTimeout(function () {
+          group.forEach(function (sel) { document.querySelector('#view-welcome ' + sel).classList.add('in'); });
+        }, 120 + i * 140);
+      });
+    }
 
     if (state === 'key' || state === 'checking' || state === 'key-ok' || state === 'key-error') view('key', false);
 
@@ -206,7 +248,10 @@
       // The key works: say so, then open Reviews without another click.
       setTimeout(function () {
         busy.classList.remove('on'); save.hidden = true;
-        document.querySelector('[data-state="key-ok"]').classList.add('on');
+        var ok = document.querySelector('[data-state="key-ok"]');
+        ok.classList.add('on', 'live');
+        void ok.offsetWidth;
+        setTimeout(function () { ok.classList.add('is-in'); }, 30);
         setTimeout(function () { location.href = 'home.html'; }, 1200);
       }, 1000);
     });
