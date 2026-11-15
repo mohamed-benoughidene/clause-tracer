@@ -400,7 +400,43 @@
       });
     });
 
-    // Clicking a position makes it the current one: title and Topic follow. Other fields stay as they are.
+    // Spec 7 starter positions, one small object per position (keyed by the number in the list).
+    var N = 'number', Y = 'yesno', W = 'words';
+    var DATA = {
+      '1':  { t: N, unit: 'days',   dir: 'lower',  pref: '15', acc: '30', miss: 'Unsure',     why: 'Rent is due on the 1st. Long waits mean I borrow.' },
+      '2':  { t: N, unit: '%',      dir: 'higher', pref: '50', acc: '25', miss: 'Walk-away',  why: "A deposit shows they're committed, and I'm not working for free if they vanish." },
+      '3':  { t: Y, yes: 'Preferred', no: 'Acceptable', why: 'Without a fee, paying me late costs them nothing.' },
+      '4':  { t: Y, yes: 'Preferred', no: 'Walk-away',  why: "If they cancel halfway, I've still spent the hours." },
+      '5':  { t: N, unit: 'rounds', dir: 'lower',  pref: '2',  acc: '3',  miss: 'Walk-away',  why: 'Endless rounds can double the work for the same price.' },
+      '6':  { t: Y, yes: 'Preferred', no: 'Walk-away',  why: 'New requests should be new work, not free work.' },
+      '7a': { t: Y, yes: 'Preferred', no: 'Walk-away',  why: "Until I'm paid, the work should still be mine." },
+      '7b': { t: Y, yes: 'Preferred', no: 'Acceptable', why: "If they don't pay, I can still get something for the work." },
+      '8':  { t: Y, yes: 'Preferred', no: 'Acceptable', why: 'My portfolio is how I get the next job.' },
+      '9':  { t: N, unit: 'months', dir: 'lower',  pref: '0',  acc: '6',  miss: 'Preferred',  why: 'A long non-compete can stop me working in my own field.' },
+      '10': { t: W, pref: 'At most the fees paid', acc: 'Above the fees, up to 2x fees', walk: 'Above 2x fees, a fixed sum, or uncapped', miss: 'Walk-away', why: "One mistake shouldn't cost me more than the job paid." }
+    };
+    function setValue(id, v, type) { var el = q(id); el.value = v; el.dispatchEvent(new Event(type || 'input', { bubbles: true })); }
+    function loadPosition(no, topic) {
+      var d = DATA[no];
+      if (!d) return;
+      document.querySelector('[data-type="' + d.t + '"]').click();
+      if (d.t === N) {
+        document.querySelector('[data-dir="' + d.dir + '"]').click();
+        setValue('pos-unit', d.unit, 'change');
+        q('n-pref').value = d.pref;
+        setValue('n-accept', d.acc);
+        setValue('n-missing', d.miss, 'change');
+      } else if (d.t === Y) {
+        setValue('yn-yes', d.yes, 'change');
+        setValue('yn-no', d.no, 'change');
+      } else {
+        q('w-pref').value = d.pref; q('w-accept').value = d.acc; q('w-walk').value = d.walk;
+        setValue('w-missing', d.miss, 'change');
+      }
+      q('pos-why').value = d.why;
+    }
+
+    // Clicking a position makes it the current one and loads its data.
     var list = document.querySelector('.pos-list');
     list.addEventListener('click', function (e) {
       var link = e.target.closest('a');
@@ -408,8 +444,10 @@
       e.preventDefault();
       list.querySelectorAll('li').forEach(function (x) { x.removeAttribute('aria-current'); });
       link.closest('li').setAttribute('aria-current', 'true');
-      q('pos-title').textContent = 'Position ' + link.querySelector('.pos-no').textContent;
-      q('pos-topic').value = link.lastChild.textContent.trim();
+      var no = link.querySelector('.pos-no').textContent, topic = link.lastChild.textContent.trim();
+      q('pos-title').textContent = 'Position ' + no;
+      q('pos-topic').value = topic;
+      if (DATA[no] && topic !== 'Untitled position') loadPosition(no, topic);
     });
   })();
 </script>

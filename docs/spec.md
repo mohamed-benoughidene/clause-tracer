@@ -435,6 +435,8 @@ Each item has a decision record (ADR). Ticked items were decided on 12 Nov 2026.
 - [ ] The reply from the EU's AI Act Service Desk, to the provider question sent on 13 Nov 2026. The working position of [ADR 0016](adr/0016-legal-positions-without-a-lawyer.md) stands until it arrives (section 10).
 - [ ] Presidio's speed on a real 60,000-character contract on an ordinary laptop.
 - [ ] The playbook file format, how page pictures reach the app window, how CI drives the Windows window, the uninstall flow and what the running screen's first stage shows ([`system-design.md`](system-design.md) section 13).
+- [ ] The release page address for the "Check for updates" link in Settings. The prototype points to github.com for now. Set it when the first version is released.
+- [ ] Move the repo to a GitHub organisation before the landing page goes live. The Error screen, the README and `SECURITY.md` show the address `github.com/<owner's account>/clause-tracer`, which carries the owner's account name. Then update those links and the git remote, and check which lines in `LICENSE`, `CLA.md` and `COMMERCIAL_LICENSE.md` are a copyright owner and which are links (owner, 15 Nov 2026: left as it is for now).
 - [ ] The third-party licences page, which the prototype doesn't have yet ([ux-copy 4.18](ux-copy.md#418-third-party-licences-licenceshtml-not-built-yet)).
 - [ ] A compact navigation for text at 150% and 200%: there the sidebar stacks above the content and fills the first screen on Home ([design-system](design-system.md) 3.10).
 - [ ] Review screen layout, settled with a rough prototype. Later: add at least one outside tester, who must also catch a planted wrong label.

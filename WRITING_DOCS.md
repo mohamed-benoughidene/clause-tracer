@@ -56,7 +56,7 @@ Find your change in the left column. Update every file in the right column in th
 | **Delete or move a file** | Search for its name and fix every link. |
 | **Change the logo or brand colours** | The files in `assets/` and their copies in `prototype/`, `assets/README.md`, design-system section 2, and the logo guide. |
 | **Change the licence** | `LICENSE` (the official text only), `README.md`, `COMMERCIAL_LICENSE.md`, `CLA.md`, the Help and Settings pages, ux-copy, and Spec sections 10 and 13. |
-| **Release a version** | Release notes, the README status note and badge, and "Supported versions" in `SECURITY.md`. |
+| **Release a version** | Release notes, the README status note and badge, "Supported versions" in `SECURITY.md`, and the "Check for updates" link in Settings (it points to github.com until the first release). |
 | **Start a new version** (v2) | See section 8. |
 
 ## 3. Promises that live in many places

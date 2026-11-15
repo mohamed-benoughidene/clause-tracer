@@ -1090,11 +1090,24 @@
 
     // Rewrite: the Before text is the clause on the page. The After wording exists in the deck only for 5.4 and for the new late-fee clause.
     const RW54 = { before: $('#rw-before').innerHTML, after: $('#rw-after').innerHTML, bs: $('#rw-before-stamp').innerHTML, as: $('#rw-after-stamp').innerHTML, instr: $('#rw-instr').value };
+    // Sample After text: one sentence for each clause, aimed at the starter playbook's preferred level (Spec 7); numbers come from that playbook.
+    const RW = {
+      '3.2': ["The Developer will make <del>reasonable revisions</del> to the Deliverables at the Agency's request.", "The Developer will make <ins>up to 2 rounds of revisions</ins> to the Deliverables at the Agency's request."],
+      '5.2': ['The Agency will pay <del>25%</del> of the total Charges on signing this Agreement.', 'The Agency will pay <ins>50%</ins> of the total Charges on signing this Agreement.'],
+      '4.1': ['Work outside Schedule 1 must be agreed in writing and will be paid at the hourly rate of £45.', 'Work outside Schedule 1 must be agreed in writing <ins>first</ins> and will be paid <ins>extra</ins> at the hourly rate of £45.'],
+      '7.1': ['All work created under this Agreement is a work made for hire and <del>belongs to the Agency from the moment it is created</del>.', 'All work created under this Agreement is a work made for hire and <ins>belongs to the Agency once it has paid for the work in full</ins>.'],
+      '9.1': ['<del>For 12 months after this Agreement ends, the Developer will not provide</del> similar services to any customer of the Agency.', '<ins>After this Agreement ends, the Developer may provide</ins> similar services to any customer of the Agency.'],
+      '11.1': ["The Developer's total liability is capped at the fees paid under this Agreement<del>, except as set out in the Master Agreement</del>.", "The Developer's total liability is capped at the fees paid under this Agreement."],
+      '12.2': ['If the Agency ends this Agreement, <del>no payment is due for work in progress</del>.', 'If the Agency ends this Agreement, <ins>it will pay for the work done so far</ins>.'],
+      'new-3': ['', 'If an invoice is paid late, the Agency will pay a late fee of 2% of the unpaid amount for each month it is late.'],
+      'new-7b': ['', 'If the Agency does not pay in full, the Developer may reuse and resell the work.'],
+      'new-8': ['', 'The Developer may show the Deliverables in a portfolio.']
+    };
     const NEW3 = 'If an invoice is paid late, the Agency will pay a late fee of 2% of the unpaid amount for each month it is late.';
     const CLAUSE_POS = { '5.4': '1 Days until paid', '3.2': '5 Revision rounds', '7.1': '7a Ownership after payment', '9.1': '9 Non-compete', '11.1': '10 Liability cap', '12.2': '4 Paid if cancelled', '5.2': '2 Upfront deposit', '4.1': '6 Extra work paid', 'new-3': '3 Late payment fee exists', 'new-7b': '7b If unpaid, I can reuse or resell the work', 'new-8': '8 I can show the work in my portfolio' };
     function fillRewrite(c) {
       const isNew = c.indexOf('new-') === 0;
-      $('#rewrite-t').textContent = isNew ? 'New clause · after § 5.4' : 'Rewrite § ' + c;
+      $('#rewrite-t').textContent = isNew ? (c === 'new-3' ? 'New clause · after § 5.4' : 'New clause') : 'Rewrite § ' + c;
       $('#rw-positions').textContent = CLAUSE_POS[c] || '';
       $$('#rewrite .quote').forEach(q => { q.contentEditable = 'false'; });
       if (c === '5.4') {
@@ -1106,16 +1119,16 @@
       if (isNew) {
         $('#rw-before').textContent = '';
         $('#rw-before-stamp').innerHTML = '';
-        $('#rw-after').textContent = c === 'new-3' ? NEW3 : '';
-        $('#rw-after-stamp').innerHTML = c === 'new-3' ? stamp('preferred') : '';
+        $('#rw-after').textContent = RW[c][1];
+        $('#rw-after-stamp').innerHTML = stamp('preferred');
       } else {
         const el = document.getElementById('c-' + c);
         const pin = el && el.querySelector('.pin');
         const kind = pin && ['walk', 'unsure', 'acceptable', 'preferred'].find(k => pin.classList.contains(k));
         $('#rw-before').textContent = el ? el.querySelector('.text').textContent.trim() : '';
         $('#rw-before-stamp').innerHTML = kind ? stamp(kind, pin.classList.contains('pencilled')) : '';
-        $('#rw-after').textContent = '';
-        $('#rw-after-stamp').innerHTML = '';
+        if (RW[c]) { $('#rw-before').innerHTML = RW[c][0]; $('#rw-after').innerHTML = RW[c][1]; }
+        $('#rw-after-stamp').innerHTML = stamp('preferred');
       }
     }
     document.addEventListener('click', e => { const b = e.target.closest('[data-open="rewrite"]'); if (b && b.dataset.clause) fillRewrite(b.dataset.clause); });

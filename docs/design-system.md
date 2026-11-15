@@ -251,7 +251,7 @@ For the real build, use 150 ms ease-out for state changes, and respect `prefers-
 | --- | --- |
 | ≤ 1100 px | Review: the Pages toggle and the thumbnails hide, and the contract and the column stack |
 | ≤ 900 px | First launch: the picture is a 220 px band above a full-width card, with no shadow and square corners |
-| ≤ 860 px | The sidebar goes above the content, and Collapse menu is hidden; two-column grids and flow side panels stack; tables scroll sideways |
+| ≤ 860 px | The sidebar goes above the content, and Collapse menu is hidden; two-column grids and flow side panels stack; tables scroll sideways inside their own box; the app bar, the stepper, the page head and the flow footer wrap, and the stepper takes its own row |
 | Text size 150% or 200% (`html[data-text]`, set by `app.js`) | Same as ≤ 860 px (the sidebar is never folded), and the app bar and button rows wrap. First launch is laid out as at ≤ 900 px. In the review the Pages toggle and the thumbnails hide, the contract and the column stack, and the group headings, the progress line and the detail head wrap. The window width is unchanged, so the media queries don't fire |
 
 The design target is a laptop of about 1366 × 768 (Spec 14.4).
@@ -412,7 +412,7 @@ There are two warning levels and three types of message.
 | Banner | `.banner` | Top of the review only, and never more than one at a time: the practice review and the playbook-changed warning. It uses a banner colour, sits full width below the app bar, and holds an icon, the words and one or two small actions. The practice banner stays. The playbook-changed banner stays until the review is re-run. The hidden-text, unloaded-document and unedited-starter warnings are not banners: they are “Read first” rows (next row). |
 | Read-first row | `.warn-row` | A row at the top of the Labels list, under a “Read first” heading. It holds an Unsure-colour icon, a short name (“1 piece of hidden text”, “Master Agreement not loaded”, “Example playbook, unedited”), a tick slot and a chevron. A click opens the hidden-text or starter warning in the column, with its full text, its actions and “All labels”, or opens the unloaded-document dialog. The row counts as read after its action (“Show me”, “Got it”): it turns faint and gets a tick, and it still opens. *Replaces the owner decision of 14 Nov 2026 that a read banner shrinks to a chip in the summary bar. Replaced 14 Nov 2026, the same day, when the summary bar went.* |
 | Notice | `.notice` | An inline tone strip with an icon and text. It is used for information such as auto-delete. |
-| Warning notice | `.notice.warn` | Unsure colours, for anything that blocks or needs a fix. *(Defined per page; see 8.1.)* |
+| Warning notice | `.notice.warn` | Unsure colours, for anything that blocks or needs a fix. One definition in `styles.css` (15 Nov 2026); the icon is aligned to the first line, and the text can hold two paragraphs. |
 | Toast | `.toast` | An ink bar (8 px corners) at the bottom centre with short past-tense words: "Copied", "Saved", "Replaced. Check the marked words." It is triggered by `data-toast`. |
 | Reading log | `.log` (running) | Mono timestamp plus a Serif 15 line. A finished line is `--text` and upright. The line of the step still running is `--pencil` italic, with no dash, because only pencilled labels are dashed (`.running`, `aria-current="step"`; owner, 15 Nov 2026). A stopped line keeps Unsure fg. Nothing animates. |
 | Progress bar | `.load-bar` (Load file dialog) | 4 px tall, ink. The review uses the progress pie (5.14), and the running screen has a status pie (next row). |
@@ -598,7 +598,7 @@ The source line moved into "More" on 14 Nov 2026 (owner decision 4). The detail 
 | Stamp | ✅ | ✅ | ✅ | 8 |
 | Pin | ✅ | ⚠️ tint missing | ✅ | 8 |
 | Inputs | ⚠️ no error token, borders low | ✅ | ✅ | 7 |
-| Notice / banner | ✅ | ⚠️ warn not shared | ✅ | 8 |
+| Notice / banner | ✅ | ✅ | ✅ | 10 |
 | Gauge | ✅ | ✅ | ⚠️ page-local CSS | 8 |
 | Dialog / panel / palette | ✅ | ✅ | ✅ | 10 |
 | Flow layout | ✅ | ⚠️ 3 copies | ✅ | 7 |

@@ -226,6 +226,8 @@
     }
 
     if (state === 'key' || state === 'checking' || state === 'key-ok' || state === 'key-error') view('key', false);
+    // #guide opens the folded key guide (the links from Settings and Help use it)
+    if (location.hash === '#guide') { const guide = document.querySelector('.key-how'); if (guide) guide.open = true; }
 
     show.addEventListener('click', function () {
       var hidden = key.type === 'password';
