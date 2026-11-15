@@ -153,7 +153,7 @@ The stage's tools are locked, coverage and the owner-table guard run in `scripts
     - `def commit_message(repo: Path, sha: str) -> str`: from `git log -1 --format=%B <sha>`.
     - `def main(argv: list[str] | None = None) -> int`: parses `--commits BASE` with `argparse`. With no argument it checks `working_tree_paths(Path.cwd())` as one change, and an approval line does not apply. With `--commits BASE` it checks each commit of `commits_since` on its own and skips a commit whose message `is_approved`. For each failing change it prints `owner-table guard: <change> edits code and an owner table: <table paths>` to standard error, where `<change>` is `working tree` or the short commit hash. It returns 1 if any change fails, else 0. End the file with `if __name__ == "__main__": raise SystemExit(main())`.
     - In `scripts/check.sh`, add `run python scripts/check_owner_tables.py` as the first `run` line, before `run ruff check`.
-    - In `.github/workflows/check.yml`, set `fetch-depth: 0` on `actions/checkout@v4`, and add a last step:
+    - In `.github/workflows/check.yml`, set `fetch-depth: 0` on `actions/checkout@v7`, and add a last step:
       ```yaml
       - if: github.event_name == 'pull_request'
         run: uv run python scripts/check_owner_tables.py --commits origin/${{ github.base_ref }}
