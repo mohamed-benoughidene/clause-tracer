@@ -549,11 +549,13 @@ The brief for whoever designs the prototype. Read sections 1 to 13 first, plus t
 
 ### 14.3 Settings
 
+The screen shows one group at a time, picked from a list on the left (owner, 15 Nov 2026): General (Appearance, Notifications), AI and key (OpenRouter key, Models), Privacy, Storage and data (Storage, Data) and About. The table below lists what each holds.
+
 | Group | Contents |
 | --- | --- |
 | OpenRouter key | Change key, remove key, link to the key guide. |
 | Privacy | Private mode default for new reviews (on). "Send “why this matters” notes to the AI, for better explanations" (off), with a warning that notes aren't privacy-checked. Link to "What gets sent." |
-| Models | Collapsed by default. One model for every step (default), picked from one list, or one per step. Per step lists: match, extract, judge words positions, explain, sort not-covered parts, rewrite, rewrite message. Recommended tested model shown. Warning on untested choices. Jev only for match and judge. In private mode, only zero-retention models offered. |
+| Models | One model for every step (default), picked from one list, or one per step. Per step lists: match, extract, judge words positions, explain, sort not-covered parts, rewrite, rewrite message. Recommended tested model shown. Warning on untested choices. Jev only for match and judge. In private mode, only zero-retention models offered. |
 | Storage | Auto-delete after 7, 30 or 90 days (default 30). Delete all reviews. Where files are kept. |
 | Notifications | "Notify when a review finishes" (on): a system notification when a review running in the background is done. |
 | Data | "Delete everything": every review, playbook, customer, setting and the key, after a confirmation that names them and says it can't be undone. |
