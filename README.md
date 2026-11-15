@@ -64,7 +64,7 @@ The [HTML prototype](prototype/) shows every screen and state in version 1. It n
 ```bash
 git clone https://github.com/mohamed-benoughidene/clause-tracer.git
 cd clause-tracer
-python3 -m http.server 8767 --bind 127.0.0.1 --directory prototype
+python3 prototype/serve.py
 ```
 
 Then open http://localhost:8767. Start at First launch, or go to `states.html` for a map of every flow. Open `review.html?sample` for a practice review with one wrong label planted for you to catch.

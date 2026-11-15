@@ -4,7 +4,9 @@
     {
       "name": "prototype",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8767", "--bind", "127.0.0.1", "--directory", "prototype"],
+      "runtimeArgs": [
+        "prototype/serve.py"
+      ],
       "port": 8767
     }
   ]
