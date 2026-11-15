@@ -34,15 +34,28 @@
   .mono-path { font: 500 12px/1.4 var(--mono); color: var(--text-2); }
   .set-note { margin-top: 12px; }
   .model-field + .model-field { margin-top: 14px; }
+  .model-switch { align-self: flex-start; }
+  .model-warn { margin-top: 6px; color: var(--unsure-fg); }
+  .model-warn .icon { color: inherit; }
+  .model-field:has(.model-warn) + .model-field { margin-top: 20px; }
+  .model-foot { margin-top: 14px; }
+  .set-link { margin-top: 12px; }
   @media (max-width: 720px) {
     .set-layout { grid-template-columns: 1fr; gap: 16px; }
     .set-nav { position: static; flex-direction: row; flex-wrap: wrap; }
     .srow { flex-wrap: wrap; }
   }
+  /* 150% and 200% zoom the body but the window stays 1366 px wide, so the media query above does not fire. */
+  html:is([data-text="150"], [data-text="200"]) .set-layout { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  html:is([data-text="150"], [data-text="200"]) .set-nav { position: static; flex-direction: row; flex-wrap: wrap; }
+  html:is([data-text="150"], [data-text="200"]) .srow { flex-wrap: wrap; }
+  html:is([data-text="150"], [data-text="200"]) .srow .ctl { flex-wrap: wrap; }
+  html:is([data-text="150"], [data-text="200"]) .segmented { flex-wrap: wrap; }
+  html:is([data-text="150"], [data-text="200"]) .mono-path { overflow-wrap: anywhere; }
 </style>
 </head>
 <body>
-<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8767/index.html</b> instead.</p>");</script>
 <div class="app">
   <aside class="sidebar">
     <a class="logo" href="home.html"><img class="on-light" src="logo.svg" alt="Clause Tracer"><img class="on-dark" src="logo-dark.svg" alt="Clause Tracer"></a>
@@ -100,8 +113,7 @@
             <div class="srow">
               <div class="text">
                 <p class="h3" id="text-size-label">Text size</p>
-                <p class="small muted" data-text-label>100%</p>
-              </div>
+                              </div>
               <div class="ctl">
                 <div class="segmented" role="group" aria-labelledby="text-size-label">
                   <button type="button" aria-pressed="true" data-text-set="100" data-toast="Saved">100%</button>
@@ -131,7 +143,7 @@
               <div class="text">
                 <p class="h3">OpenRouter key</p>
                 <p class="mono-path">sk-or-v1-8f2c…a91e · saved in your password store</p>
-                <p class="small"><a class="link" href="index.html">Open the key guide</a></p>
+                <p class="small"><a class="link" href="index.html?state=key">Open the key guide</a></p>
               </div>
               <div class="ctl">
                 <button class="btn btn-sm" type="button" data-open="change-key">Change</button>
@@ -145,7 +157,7 @@
               <div class="text">
                 <p class="small muted">Which AI model does each step. The recommended one is already picked.</p>
               </div>
-              <div class="segmented" role="group" aria-label="Model choice" style="align-self:flex-start">
+              <div class="segmented model-switch" role="group" aria-label="Model choice">
                 <button type="button" data-models="one" aria-pressed="true">One for every step</button>
                 <button type="button" data-models="step" aria-pressed="false">One per step</button>
               </div>
@@ -177,7 +189,7 @@
                     <option value="haiku">Claude Haiku 5.5</option>
                     <option value="some">Some-model-7b</option>
                   </select>
-                  <p class="small" data-state="model-cant" style="color:var(--unsure-fg)"><svg class="icon" style="color:inherit"><use href="#i-warn"/></svg>This model can't do this step. Pick another model.</p>
+                  <p class="small model-warn" data-state="model-cant"><svg class="icon"><use href="#i-warn"/></svg>This model can't do this step. Pick another model.</p>
                 </div>
                 <div class="field model-field">
                   <label for="model-judge">Judge words positions</label>
@@ -195,7 +207,7 @@
                     <option value="haiku">Claude Haiku 5.5</option>
                     <option value="some">Some-model-7b</option>
                   </select>
-                  <p class="small" data-state="model-cant" style="color:var(--unsure-fg)"><svg class="icon" style="color:inherit"><use href="#i-warn"/></svg>This model isn't tested with Clause Tracer yet. Results may be less reliable.</p>
+                  <p class="small model-warn" data-state="model-cant"><svg class="icon"><use href="#i-warn"/></svg>This model isn't tested with Clause Tracer yet. Results may be less reliable.</p>
                 </div>
                 <div class="field model-field">
                   <label for="model-summarise">Sort not-covered parts</label>
@@ -221,7 +233,7 @@
                     <option value="some">Some-model-7b</option>
                   </select>
                 </div>
-                <p class="small muted" style="margin-top:14px">Jev is only offered for match and judge. In private mode, only models that don't keep your contract are offered.</p>
+                <p class="small muted model-foot">Jev is only offered for match and judge. In private mode, only models that don't keep your contract are offered.</p>
               </div>
             </div>
           </div>
@@ -236,7 +248,7 @@
                 <label class="h3" for="priv-mode">Private mode for new reviews</label>
                 <p class="small muted">Only providers that don't keep your contract. Reviews you've already started keep their own setting.</p>
               </div>
-              <div class="ctl"><input class="toggle" type="checkbox" id="priv-mode" checked data-toast="Saved"></div>
+              <div class="ctl"><input class="toggle" type="checkbox" id="priv-mode" checked data-private-switch></div>
             </div>
             <div class="srow">
               <div class="text">
@@ -246,7 +258,7 @@
               <div class="ctl"><input class="toggle" type="checkbox" id="send-notes" data-toast="Saved"></div>
             </div>
           </div>
-          <p class="small" style="margin-top:12px"><a class="link" href="help.html#sent">What gets sent</a></p>
+          <p class="small set-link"><a class="link" href="help.html#sent">What gets sent</a></p>
         </section>
 
         <section class="set-panel" id="storage" aria-labelledby="storage-title" hidden>
@@ -356,7 +368,7 @@
   <form method="dialog">
     <div class="dialog-body">
       <h2 class="h2" id="lower-autodelete-title">Lower auto-delete to 7 days?</h2>
-      <p class="muted">4 reviews haven't changed in 7 days. They'll be deleted on 9 Nov, in 3 days, unless you change them first.</p>
+      <p class="muted">4 reviews haven't changed in 7 days. They'll be deleted on 8 Nov, in 3 days, unless you change them first.</p>
     </div>
     <div class="dialog-foot"><button class="btn" value="cancel">Cancel</button><button class="btn btn-primary" value="ok" data-toast="Saved">Lower to 7 days</button></div>
   </form>
@@ -402,6 +414,10 @@
       document.getElementById('model-extract').value = 'some';
       document.getElementById('model-explain').value = 'some';
     }
+
+    // Privacy: the switch is the default for new reviews; app.js keeps it and the sidebar footer in step (ct-private).
+    var priv = document.getElementById('priv-mode');
+    priv.checked = window.CT.isPrivate();
 
     // Storage: choosing 7 days opens the confirmation. Cancel (or Esc) puts 30 days back.
     var dialog = document.getElementById('lower-autodelete');

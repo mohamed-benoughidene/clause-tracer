@@ -10,9 +10,11 @@
 <link rel="stylesheet" href="styles.css">
 <style>
   /* playbook editor */
-  .editor { display: grid; grid-template-columns: 340px 1fr; min-height: calc(100vh - var(--wintabs-h) - 56px); }
+  .editor { display: grid; grid-template-columns: minmax(380px, 32%) minmax(0, 1fr); min-height: calc(100vh - var(--wintabs-h) - 56px); }
   .editor-list { background: var(--bg-tone); padding: 20px 16px; display: grid; align-content: start; gap: 14px; }
   .editor-form { padding: 24px 32px 48px; display: grid; gap: 18px; align-content: start; min-width: 0; }
+  .editor-list .grid-2 { grid-template-columns: 3fr 2fr; }
+  .form-section { display: grid; gap: 18px; }
   .pos-head { justify-content: space-between; }
   .pos-list { display: grid; gap: 2px; }
   .pos-list li { display: flex; align-items: center; gap: 2px; border-radius: var(--r); }
@@ -25,7 +27,7 @@
   .levels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
   .stack { display: grid; gap: 12px; }
   .levels > .card, .stack > .card { margin-top: 0; display: grid; gap: 12px; align-content: start; }
-  .form-section[hidden], .field[hidden] { display: none; }
+  .form-section[hidden], .field[hidden], .field-error[hidden] { display: none; }
   .field-error { display: flex; gap: 6px; align-items: flex-start; font-size: 12.5px; color: var(--unsure-fg); }
   .field-error .icon { color: currentColor; margin-top: 2px; }
   .input[aria-invalid="true"] { border-color: var(--unsure); }
@@ -33,17 +35,18 @@
   @media (max-width: 860px) {
     .editor { grid-template-columns: 1fr; }
     .levels { grid-template-columns: 1fr; }
+    .editor-list .grid-2 { grid-template-columns: 1fr 1fr; }
   }
 </style>
 </head>
 <body>
-<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8767/index.html</b> instead.</p>");</script>
 <header class="appbar">
   <button class="btn btn-ghost btn-sm" type="button" data-open="leave-dialog"><svg class="icon"><use href="#i-arrow-left"/></svg>Playbooks</button>
   <span class="visually-hidden">Editing</span>
   <div class="title"><strong id="pb-title">Freelancer service agreement</strong><small id="pb-sub">Unsaved changes</small></div>
   <span class="spacer"></span>
-  <button class="search-commands" type="button" style="width:240px;margin:0"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
+  <button class="search-commands" type="button"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
   <button class="btn btn-primary" type="button" data-toast="Saved">Save</button>
 </header>
 
@@ -133,7 +136,7 @@
   </aside>
 
   <section class="editor-form" aria-labelledby="pos-title">
-    <div class="notice" role="status" data-state="copied" style="margin-bottom:16px">
+    <div class="notice" role="status" data-state="copied">
       <svg class="icon"><use href="#i-check"/></svg>
       <div class="notice-body">
         <p>Copied to your playbooks. These are example positions, so make the limits yours. Until you do, reviews say “by the example playbook”.</p>
@@ -172,8 +175,8 @@
       <div class="field" data-only="number">
         <span class="label" id="dir-label">Direction</span>
         <div class="segmented" role="group" aria-labelledby="dir-label">
-          <button type="button" aria-pressed="true">Lower is better</button>
-          <button type="button" aria-pressed="false">Higher is better</button>
+          <button type="button" aria-pressed="true" data-dir="lower">Lower is better</button>
+          <button type="button" aria-pressed="false" data-dir="higher">Higher is better</button>
         </div>
       </div>
     </div>
@@ -183,18 +186,19 @@
         <div class="card">
           <span class="stamp preferred"><span class="mark"><svg><use href="#i-check"/></svg></span><span class="word">Preferred</span></span>
           <div class="field">
-            <label for="n-pref">At or under</label>
+            <label for="n-pref" class="lvl-label">At or under</label>
             <input class="input" id="n-pref" inputmode="numeric" value="15">
-            <span class="hint">days, 1–120</span>
+            <span class="hint" id="n-pref-hint">days, 0–120</span>
+            <span class="field-error" id="n-pref-error" hidden><svg class="icon"><use href="#i-warn"/></svg><span></span></span>
           </div>
         </div>
 
         <div class="card">
           <span class="stamp acceptable"><span class="mark"><svg><use href="#i-approx"/></svg></span><span class="word">Acceptable</span></span>
           <div class="field">
-            <label for="n-accept">At or under</label>
-            <input class="input" id="n-accept" inputmode="numeric" value="30" aria-describedby="n-accept-error">
-            <span class="field-error" id="n-accept-error" data-state="invalid"><svg class="icon"><use href="#i-warn"/></svg>Acceptable has to be more than 15, the preferred limit.</span>
+            <label for="n-accept" class="lvl-label">At or under</label>
+            <input class="input" id="n-accept" inputmode="numeric" value="30">
+            <span class="field-error" id="n-accept-error" role="alert" hidden><svg class="icon"><use href="#i-warn"/></svg><span></span></span>
           </div>
         </div>
 
@@ -240,7 +244,7 @@
             <span class="hint">Missing always counts as no, so there is no separate missing level</span>
           </div>
         </div>
-        <p class="small muted yn-preview">Reads as: Yes counts as <strong>Preferred</strong> · No, unclear or missing counts as <strong>Acceptable</strong></p>
+        <p class="small muted yn-preview" id="yn-preview">Reads as: Yes counts as <strong>Preferred</strong> · No, unclear or missing counts as <strong>Acceptable</strong></p>
       </div>
     </section>
 
@@ -337,24 +341,75 @@
   })();
 </script>
 <script>
-  // State invalid: Acceptable is 10, which is not more than Preferred (15), so the error shows.
-  // By default Acceptable is 30.
+  // The live form: direction, unit, Acceptable, the walk-away value, the yes/no line and validation.
   (function () {
-    var invalid = (new URLSearchParams(location.search).get('state') || '').split(/\s+/).indexOf('invalid') !== -1;
-    var accept = document.getElementById('n-accept');
-    var walk = document.getElementById('n-walk');
-    accept.value = invalid ? '10' : '30';
-    accept.setAttribute('aria-invalid', String(invalid));
-    walk.value = '> ' + accept.value;
+    var q = function (id) { return document.getElementById(id); };
+    var pref = q('n-pref'), accept = q('n-accept'), walk = q('n-walk'), unit = q('pos-unit');
+    var prefErr = q('n-pref-error'), acceptErr = q('n-accept-error');
+    var invalidState = (new URLSearchParams(location.search).get('state') || '').split(/\s+/).indexOf('invalid') !== -1;
+    var higher = false;
+    accept.value = invalidState ? '10' : '30';
+
+    function isNumber(v) { return /^\d+$/.test(v) && +v >= 0 && +v <= 120; }
+    function show(input, err, text) {
+      err.hidden = !text;
+      if (text) {
+        err.lastElementChild.textContent = text;
+        input.setAttribute('aria-invalid', 'true');
+        input.setAttribute('aria-describedby', err.id);
+      } else {
+        input.removeAttribute('aria-invalid');
+        input.removeAttribute('aria-describedby');
+      }
+    }
+    function update() {
+      var p = pref.value.trim(), a = accept.value.trim();
+      document.querySelectorAll('.lvl-label').forEach(function (l) { l.textContent = higher ? 'At or over' : 'At or under'; });
+      q('n-pref-hint').textContent = unit.value + ', 0\u2013120';
+      walk.value = a ? (higher ? '< ' : '> ') + a : '';
+      var rangeText = 'Enter a number from 0 to 120.';
+      show(pref, prefErr, p && !isNumber(p) ? rangeText : '');
+      var acceptText = '';
+      if (a && !isNumber(a)) acceptText = rangeText;
+      else if (a && isNumber(p) && (higher ? +a >= +p : +a <= +p)) {
+        acceptText = 'Acceptable has to be ' + (higher ? 'less than ' : 'more than ') + p + ', the preferred limit.';
+      }
+      show(accept, acceptErr, acceptText);
+    }
+    document.querySelectorAll('[data-dir]').forEach(function (b) {
+      b.addEventListener('click', function () { higher = b.dataset.dir === 'higher'; update(); });
+    });
+    [pref, accept].forEach(function (i) { i.addEventListener('input', update); });
+    unit.addEventListener('change', update);
+    update();
+
+    // Yes/no: the "Reads as" line follows the two selects.
+    var yes = q('yn-yes'), no = q('yn-no'), reads = q('yn-preview');
+    function readsAs() {
+      reads.innerHTML = 'Reads as: Yes counts as <strong>' + yes.value + '</strong> \u00b7 No, unclear or missing counts as <strong>' + no.value + '</strong>';
+    }
+    yes.addEventListener('change', readsAs); no.addEventListener('change', readsAs);
 
     // The delete dialog names the position it will delete.
-    var nameEl = document.getElementById('delete-position-name');
+    var nameEl = q('delete-position-name');
     document.querySelectorAll('[data-open="delete-position"]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var li = btn.closest('li');
         nameEl.textContent = li ? li.querySelector('a').lastChild.textContent.trim()
-                                : document.getElementById('pos-topic').value;
+                                : q('pos-topic').value;
       });
+    });
+
+    // Clicking a position makes it the current one: title and Topic follow. Other fields stay as they are.
+    var list = document.querySelector('.pos-list');
+    list.addEventListener('click', function (e) {
+      var link = e.target.closest('a');
+      if (!link) return;
+      e.preventDefault();
+      list.querySelectorAll('li').forEach(function (x) { x.removeAttribute('aria-current'); });
+      link.closest('li').setAttribute('aria-current', 'true');
+      q('pos-title').textContent = 'Position ' + link.querySelector('.pos-no').textContent;
+      q('pos-topic').value = link.lastChild.textContent.trim();
     });
   })();
 </script>
@@ -375,6 +430,7 @@
     var topic = document.getElementById('pos-topic');
     topic.value = ''; topic.placeholder = "For example, Days until I'm paid, from invoice date";
     ['n-pref', 'n-accept', 'n-walk', 'pos-why'].forEach(function (id) { document.getElementById(id).value = ''; });
+    document.getElementById('n-accept').dispatchEvent(new Event('input'));
     document.getElementById('pos-why').placeholder = 'Optional. A line to remind you why you set this limit.';
     document.getElementById('pos-title').textContent = 'Position 1';
     name.focus();
@@ -398,6 +454,7 @@
       var topic = document.getElementById('pos-topic');
       topic.value = ''; topic.placeholder = "For example, Days until I'm paid, from invoice date";
       ['n-pref', 'n-accept', 'n-walk', 'pos-why'].forEach(function (id) { document.getElementById(id).value = ''; });
+    document.getElementById('n-accept').dispatchEvent(new Event('input'));
       topic.focus();
     });
   })();

@@ -38,7 +38,7 @@
   .party-option input { margin-top: 3px; }
   .party-who { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; min-width: 0; }
   .party-tag { font: 500 12px/1.4 var(--sans); color: var(--text-2); background: var(--bg-sunken); border-radius: var(--r); padding: 1px 8px; white-space: nowrap; }
-  .party-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; padding-left: 24px; }
+  .party-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 12px 14px; padding-left: 24px; }
   .party-pick .party-add { justify-self: start; }
   .dropzone { border: 1px dashed var(--line-strong); border-radius: var(--r-lg); padding: 28px 20px; display: grid;
     justify-items: center; gap: 8px; color: var(--text-2); text-align: center; }
@@ -63,14 +63,16 @@
   @media (prefers-reduced-motion: reduce) { .load-bar span { transition: none; } }
 
   /* warnings: unsure colours, never red (Spec 14.4) */
-  .notice.warn { flex-wrap: wrap; align-items: flex-start; background: var(--unsure-bg); color: var(--unsure-fg); }
-  .notice.warn .icon { color: var(--unsure); margin-top: 2px; }
   .notice-body { display: grid; gap: 8px; min-width: 0; }
   .notice-body p + p { margin-top: 0; }
   .notice-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-  .notices { margin-bottom: 0; }
+  .notices { margin-bottom: 16px; }
+  .card .notice { margin-bottom: 16px; }
+  .notice-body.is-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
+  .notice-body.is-row p { flex: 1 1 280px; margin: 0; }
+  .notice-list { margin: 6px 0 0; padding-left: 18px; list-style: disc; }
   .input.is-flagged { border-color: var(--unsure); box-shadow: 0 0 0 1px var(--unsure); }
-  .paste-panel { display: grid; gap: 8px; padding-top: 16px; }
+  .paste-panel { display: grid; gap: 8px; padding-top: 0; }
 
   @media (max-width: 860px) {
     .flow-main { padding: 16px; }
@@ -83,7 +85,7 @@
 </style>
 </head>
 <body>
-<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8767/index.html</b> instead.</p>");</script>
 
 <header class="appbar">
   <a class="btn btn-ghost btn-sm" href="home.html"><svg class="icon"><use href="#i-arrow-left"/></svg>Home</a>
@@ -104,7 +106,7 @@
   <div class="stack notices" data-state="no-key offline">
     <div class="notice warn" role="note" data-state="no-key">
       <svg class="icon"><use href="#i-key"/></svg>
-      <div class="notice-body">
+      <div class="notice-body is-row">
         <p>Add your OpenRouter key to run a review. What you've done here is kept.</p>
         <div class="notice-actions"><a class="btn btn-sm" href="index.html">Add key</a></div>
       </div>
@@ -194,7 +196,7 @@
           <svg class="icon"><use href="#i-warn"/></svg>
           <div class="notice-body">
             <p>This contract doesn't look like it's in English. Clause Tracer is built and tested for English contracts only, so:</p>
-            <ul class="small" style="margin:6px 0 0;padding-left:18px">
+            <ul class="small notice-list">
               <li>fewer names and addresses are found for you. Check the privacy step carefully.</li>
               <li>more labels may be wrong or unsure.</li>
             </ul>
@@ -331,6 +333,8 @@
   <span class="spacer"></span>
   <a class="btn btn-primary" href="contract-check.html" data-state-hide="scanned too-large empty old-word playbook-deleted no-file">Continue<svg class="icon"><use href="#i-arrow-right"/></svg></a>
   <button class="btn btn-primary" type="button" disabled data-state="scanned too-large empty old-word playbook-deleted no-file">Continue<svg class="icon"><use href="#i-arrow-right"/></svg></button>
+  <a class="btn btn-primary" href="contract-check.html" data-paste-cont="on" hidden>Continue<svg class="icon"><use href="#i-arrow-right"/></svg></a>
+  <button class="btn btn-primary" type="button" disabled data-paste-cont="off" hidden>Continue<svg class="icon"><use href="#i-arrow-right"/></svg></button>
 </footer>
 
 
@@ -434,12 +438,26 @@
     var PAGES = 5, timer = null, done = null;
     var FILE_STATES = ['scanned', 'mixed', 'too-large', 'empty', 'old-word', 'tracked-changes', 'not-english', 'no-file'];
 
+    // Paste text mode: Continue stays off until the textarea holds text; the file-state buttons step aside.
+    var pasteBox = document.getElementById('paste-inline');
+    var footBtns = document.querySelectorAll('.flow-foot .btn-primary:not([data-paste-cont])');
+    var contOn = document.querySelector('[data-paste-cont="on"]');
+    var contOff = document.querySelector('[data-paste-cont="off"]');
+    function syncContinue() {
+      var pasting = !pastePanel.hidden;
+      var hasText = pasteBox.value.trim() !== '';
+      footBtns.forEach(function (b) { b.style.display = pasting ? 'none' : ''; });
+      contOn.hidden = !(pasting && hasText);
+      contOff.hidden = !(pasting && !hasText);
+    }
+    pasteBox.addEventListener('input', syncContinue);
     function show(mode) {
       var pasting = mode === 'paste';
       filePanel.hidden = pasting;
       pastePanel.hidden = !pasting;
       upload.setAttribute('aria-pressed', String(!pasting));
       paste.setAttribute('aria-pressed', String(pasting));
+      syncContinue();
     }
 
     // ---- the dialog: one pane at a time

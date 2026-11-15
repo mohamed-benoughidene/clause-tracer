@@ -45,10 +45,18 @@
      so the column has one box and one prompt ("What to check"), not four. */
   .detail-body > .card { background: none; border-radius: 0; padding: 12px 2px 0 !important; border-top: 1px solid var(--line); }
   .detail-body > .card + .card { margin-top: 0; }
+
+  /* Viewer bar and the contract's table (moved from inline styles). */
+  .viewer-bar .find-box { width: 180px; }
+  .viewer-bar .find-box .input { height: 30px; }
+  .viewer-bar .page-counter { white-space: nowrap; }
+  .contract-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 8px 0; }
+  .contract-table th, .contract-table td { border: 1px solid #bbb; padding: 4px 6px; text-align: left; }
+  #rewrite .quote[data-blank]:empty { min-height: 3.2em; }
 </style>
 </head>
 <body>
-<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8767/index.html</b> instead.</p>");</script>
 <div class="review is-still">
   <header class="appbar">
     <a class="icon-btn" href="home.html" aria-label="Back to reviews"><svg class="icon"><use href="#i-arrow-left"/></svg></a>
@@ -73,8 +81,8 @@
     </nav>
     <section class="viewer" aria-label="Contract">
       <div class="viewer-bar"><button class="btn btn-sm btn-ghost pages-toggle" type="button" id="pages-toggle" aria-pressed="false" aria-controls="thumbs"><svg class="icon"><use href="#i-doc"/></svg>Pages</button><span class="file-name">Brightline_Developer_Agreement.pdf</span><span class="spacer"></span>
-        <div class="search" style="width:180px"><svg class="icon"><use href="#i-search"/></svg><input class="input" style="height:30px" type="search" placeholder="Find  Ctrl+F" aria-label="Find in contract"></div>
-        <span class="mono">1 / 5</span><button class="btn btn-sm" type="button" data-menu="zoom-menu" id="zoom-btn" aria-haspopup="true" aria-expanded="false">100% ▾</button></div>
+        <div class="search find-box"><svg class="icon"><use href="#i-search"/></svg><input class="input" type="search" placeholder="Find · Ctrl+F" aria-label="Find in contract"></div>
+        <span class="mono page-counter" id="page-counter">1 / 5</span><button class="btn btn-sm" type="button" data-menu="zoom-menu" id="zoom-btn" aria-haspopup="true" aria-expanded="false">100% ▾</button></div>
       <article class="sheet" id="page-1" aria-label="Page 1">
         <div class="running-head"><span>Brightline Studio Ltd</span><span>Developer Agreement v3 · Confidential</span></div>
         <h2>Development Services Agreement</h2>
@@ -150,7 +158,7 @@
         <div class="clause" id="c-14.2"><span></span><span class="num">14.2</span><span class="text">If this Agreement and Schedule 1 conflict, this Agreement prevails.</span></div>
         <div class="clause walk" id="c-14.3"><span><button class="pin walk" type="button" aria-label="Label 9: Walk-away" data-detail="detail-9">9</button></span><span class="num">14.3</span><span class="text">The Developer will not work for a direct competitor of the Agency for 6 to 9 months after this Agreement ends.</span></div>
         <div class="clause" id="c-14.4"><span></span><span class="num">14.4</span><span class="text">Neither party may transfer this Agreement to anyone else without the other&#x27;s written consent.</span></div>
-        <div class="clause" id="c-14.5"><span></span><span class="num">14.5</span><span class="text">Notices must be in writing and sent by email to the addresses each party gives the other.</span></div>
+        <div class="clause" id="c-14.5"><span></span><span class="num">14.5</span><span class="text">Notices must be in writing and sent by email to the addresses each party gives the other, with a copy to Ms Jones at the Developer's address.</span></div>
         <div class="clause" id="c-14.6"><span></span><span class="num">14.6</span><span class="text">This Agreement is governed by the laws of England and Wales.</span></div>
         <div class="grid-2" style="margin-top:24px"><p style="border-top:1px solid #555;padding-top:6px">Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director</p><p style="border-top:1px solid #555;padding-top:6px">Signed by Karim Benali</p></div>
       </article>
@@ -158,7 +166,7 @@
         <div class="running-head"><span>Brightline Studio Ltd</span><span>Developer Agreement v3 · Confidential</span></div>
         <h3>Schedule 1 · Services and Charges</h3>
         <div class="clause" id="c-S1.1"><span></span><span class="num">S1.1</span><span class="text">The Developer will build the front end and content management integration for the Agency&#x27;s customer website, from the approved designs.</span></div>
-        <table style="width:100%;border-collapse:collapse;font-size:13px;margin:8px 0"><tr><th style="border:1px solid #bbb;padding:4px 6px;text-align:left">Milestone</th><th style="border:1px solid #bbb;padding:4px 6px;text-align:left">Work</th><th style="border:1px solid #bbb;padding:4px 6px;text-align:left">Target</th><th style="border:1px solid #bbb;padding:4px 6px;text-align:left">Charges</th></tr><tr><td style="border:1px solid #bbb;padding:4px 6px">1 Discovery</td><td style="border:1px solid #bbb;padding:4px 6px">Review designs, plan the build</td><td style="border:1px solid #bbb;padding:4px 6px">Week 2</td><td style="border:1px solid #bbb;padding:4px 6px">£1,600</td></tr><tr><td style="border:1px solid #bbb;padding:4px 6px">2 Build</td><td style="border:1px solid #bbb;padding:4px 6px">Templates and components</td><td style="border:1px solid #bbb;padding:4px 6px">Week 6</td><td style="border:1px solid #bbb;padding:4px 6px">£3,200</td></tr><tr><td style="border:1px solid #bbb;padding:4px 6px">3 Integration</td><td style="border:1px solid #bbb;padding:4px 6px">Content management and forms</td><td style="border:1px solid #bbb;padding:4px 6px">Week 9</td><td style="border:1px solid #bbb;padding:4px 6px">£3,200</td></tr><tr><td style="border:1px solid #bbb;padding:4px 6px">4 Launch</td><td style="border:1px solid #bbb;padding:4px 6px">Testing, fixes and go-live</td><td style="border:1px solid #bbb;padding:4px 6px">Week 11</td><td style="border:1px solid #bbb;padding:4px 6px">£1,600</td></tr><tr><td style="border:1px solid #bbb;padding:4px 6px"></td><td style="border:1px solid #bbb;padding:4px 6px">Total</td><td style="border:1px solid #bbb;padding:4px 6px"></td><td style="border:1px solid #bbb;padding:4px 6px">£9,600</td></tr></table>
+        <table class="contract-table"><tr><th>Milestone</th><th>Work</th><th>Target</th><th>Charges</th></tr><tr><td>1 Discovery</td><td>Review designs, plan the build</td><td>Week 2</td><td>£1,600</td></tr><tr><td>2 Build</td><td>Templates and components</td><td>Week 6</td><td>£3,200</td></tr><tr><td>3 Integration</td><td>Content management and forms</td><td>Week 9</td><td>£3,200</td></tr><tr><td>4 Launch</td><td>Testing, fixes and go-live</td><td>Week 11</td><td>£1,600</td></tr><tr><td></td><td>Total</td><td></td><td>£9,600</td></tr></table>
         <div class="clause" id="c-S1.2"><span></span><span class="num">S1.2</span><span class="text">Hosting, domain names and third-party licences are provided by the Agency and are not part of the Services.</span></div>
       </article>
     </section>
@@ -174,7 +182,7 @@
         <div class="card stack" data-state="unsure-heavy" style="padding:14px 16px"><p class="note-s">More than half of these labels are unsure. That usually means the wording is vague, or your playbook suits a different kind of contract. Read the unsure ones first: each says what it couldn't decide.</p></div>
         <div class="tabs" role="tablist" aria-label="Lists">
           <button role="tab" aria-selected="true" aria-controls="tab-labels">Labels 9</button>
-          <button role="tab" aria-selected="false" aria-controls="tab-grey">Not covered 35</button>
+          <button role="tab" aria-selected="false" aria-controls="tab-grey">Not covered 37</button>
           <button role="tab" aria-selected="false" aria-controls="tab-missing">Missing 3</button>
         </div>
         <div id="tab-labels" role="tabpanel">
@@ -220,11 +228,12 @@
           <p class="law-line small muted warn" data-state="no-law"><svg class="icon"><use href="#i-warn"/></svg><span>This contract doesn't say which place's law applies. If there's a dispute, the two sides could argue over it. Ask for a governing-law clause.</span></p>
         </div>
         <ul class="label-list" id="tab-grey" role="tabpanel" hidden>
-          <li class="grey-confirm"><label class="check"><input type="checkbox" id="grey-read"><span>I've read the 35 not-covered parts</span></label></li>
+          <li class="grey-confirm"><label class="check"><input type="checkbox" id="grey-read"><span>I've read the 37 not-covered parts</span></label></li>
           <li><a href="#c-(1)"><span class="mono">§ (1)</span><span class="what"><strong>Parties</strong> · “Brightline Studio Ltd, a company registered in England and…”</span></a></li>
           <li><a href="#c-(2)"><span class="mono">§ (2)</span><span class="what"><strong>Parties</strong> · “Karim Benali of 27 Rue Didouche Mourad, Algiers 16000, Algeria…”</span></a></li>
           <li><a href="#c-(A)"><span class="mono">§ (A)</span><span class="what"><strong>Background</strong> · “The Agency designs and builds websites for its own customers…”</span></a></li>
           <li><a href="#c-(B)"><span class="mono">§ (B)</span><span class="what"><strong>Background</strong> · “The Developer is an independent contractor and agrees to…”</span></a></li>
+          <li><a href="#c-1.1"><span class="mono">§ 1.1</span><span class="what"><strong>Definitions</strong> · “In this Agreement the following words have these meanings:”</span></a></li>
           <li><a href="#c-1.2"><span class="mono">§ 1.2</span><span class="what"><strong>Definitions</strong> · “Headings do not affect the meaning of this Agreement. Words in…”</span></a></li>
           <li><a href="#c-2.1"><span class="mono">§ 2.1</span><span class="what"><strong>Length and renewal</strong> · “This Agreement starts on the date at the top and continues…”</span></a></li>
           <li><a href="#c-2.2"><span class="mono">§ 2.2</span><span class="what"><strong>Length and renewal</strong> · “This Agreement renews automatically for further 12-month…”</span></a></li>
@@ -253,8 +262,9 @@
           <li><a href="#c-14.2"><span class="mono">§ 14.2</span><span class="what"><strong>Which document wins</strong> · “If this Agreement and Schedule 1 conflict, this Agreement…”</span></a></li>
           <li><a href="#c-14.4"><span class="mono">§ 14.4</span><span class="what"><strong>Passing the contract on</strong> · “Neither party may transfer this Agreement to anyone else…”</span></a></li>
           <li><a href="#c-14.5"><span class="mono">§ 14.5</span><span class="what"><strong>Notices</strong> · “Notices must be in writing and sent by email to the addresses…”</span></a></li>
+          <li><a href="#c-14.6"><span class="mono">§ 14.6</span><span class="what"><strong>Disputes and law</strong> · “This Agreement is governed by the laws of England and Wales.”</span></a></li>
           <li><a href="#c-S1.1"><span class="mono">§ S1.1</span><span class="what"><strong>Scope of work</strong> · “The Developer will build the front end and content management…”</span></a></li>
-          <li><a href="#page-1"><span class="mono">§ S1</span><span class="what"><strong>Fees</strong> · “Milestone · Date · Fee” (table)</span></a></li>
+          <li><a href="#page-5"><span class="mono">§ S1</span><span class="what"><strong>Fees</strong> · “Milestone · Work · Target · Charges” (table)</span></a></li>
           <li><a href="#c-S1.2"><span class="mono">§ S1.2</span><span class="what"><strong>What the other side provides</strong> · “Hosting, domain names and third-party licences are provided by…”</span></a></li>
         </ul>
         <div id="tab-missing" role="tabpanel" hidden>
@@ -337,7 +347,7 @@
             <h3 class="h3">Evidence trail</h3>
             <ol class="trail">
               <li><span class="knot"></span><a href="#c-3.2" style="text-decoration:none"><span class="mono">§ 3.2</span> <span class="small faint">· This label</span><br><span class="small muted">…make reasonable revisions to the Deliverables…</span></a></li>
-              <li><span class="knot"></span><a href="#page-1" style="text-decoration:none"><span class="mono">§ 2</span> <span class="small faint">· Defined term</span><br><span class="small muted">“Deliverables” means everything the Developer hands over…</span></a></li>
+              <li><span class="knot"></span><a href="#c-1.1" style="text-decoration:none"><span class="mono">§ 1.1</span> <span class="small faint">· Defined term</span><br><span class="small muted">“Deliverables” means everything the Developer hands over…</span></a></li>
             </ol>
           </details>
         </div>
@@ -471,7 +481,7 @@
           <p class="note">The contract doesn&#x27;t mention this. Nothing charges the Agency for paying late, and your playbook says that&#x27;s acceptable. A late payer loses nothing by waiting.</p>
           </div>
           <div class="notice"><svg class="icon"><use href="#i-search"/></svg><span>What to check: Search the contract for “late” or “interest”. Is there really no late fee?</span></div>
-          <div class="row"><button class="btn btn-primary" type="button" data-decide="3"><svg class="icon"><use href="#i-check"/></svg>Looks right</button><button class="btn" type="button" data-open="change" data-change="3"><svg class="icon"><use href="#i-pencil"/></svg>Change it</button><button class="btn btn-ghost" type="button" data-open="rewrite"><svg class="icon"><use href="#i-plus"/></svg>Add this clause</button></div>
+          <div class="row"><button class="btn btn-primary" type="button" data-decide="3"><svg class="icon"><use href="#i-check"/></svg>Looks right</button><button class="btn" type="button" data-open="change" data-change="3"><svg class="icon"><use href="#i-pencil"/></svg>Change it</button><button class="btn btn-ghost" type="button" data-open="rewrite" data-clause="new-3"><svg class="icon"><use href="#i-plus"/></svg>Add this clause</button></div>
           <details class="more"><summary>More</summary>
             <p class="small">Acceptable by your playbook: there&#x27;s no late fee, and you set missing to acceptable.</p>
             <p>Nothing in the contract charges the Agency for paying late. Without a fee, a late payer loses nothing by waiting.</p>
@@ -486,7 +496,7 @@
           <p class="note">The contract doesn&#x27;t mention this. If they never pay, you may have no right to the work you made. Your playbook says that&#x27;s acceptable.</p>
           </div>
           <div class="notice"><svg class="icon"><use href="#i-search"/></svg><span>What to check: Search the contract for “reuse” or “resell”. Is there really nothing?</span></div>
-          <div class="row"><button class="btn btn-primary" type="button" data-decide="7b"><svg class="icon"><use href="#i-check"/></svg>Looks right</button><button class="btn" type="button" data-open="change" data-change="7b"><svg class="icon"><use href="#i-pencil"/></svg>Change it</button><button class="btn btn-ghost" type="button" data-open="rewrite"><svg class="icon"><use href="#i-plus"/></svg>Add this clause</button></div>
+          <div class="row"><button class="btn btn-primary" type="button" data-decide="7b"><svg class="icon"><use href="#i-check"/></svg>Looks right</button><button class="btn" type="button" data-open="change" data-change="7b"><svg class="icon"><use href="#i-pencil"/></svg>Change it</button><button class="btn btn-ghost" type="button" data-open="rewrite" data-clause="new-7b"><svg class="icon"><use href="#i-plus"/></svg>Add this clause</button></div>
           <details class="more"><summary>More</summary>
             <p class="small">Acceptable by your playbook: there&#x27;s no such right, and you set missing to acceptable.</p>
             <p>Nothing says you can reuse or resell the work if you aren&#x27;t paid. If they never pay, you may have no right to the work you made.</p>
@@ -501,7 +511,7 @@
           <p class="note">The contract doesn&#x27;t mention this. Your playbook says that&#x27;s acceptable, but you may need to ask before showing the work.</p>
           </div>
           <div class="notice"><svg class="icon"><use href="#i-search"/></svg><span>What to check: Search the contract for “portfolio” or “publicity”. Is there really nothing?</span></div>
-          <div class="row"><button class="btn btn-primary" type="button" data-decide="8"><svg class="icon"><use href="#i-check"/></svg>Looks right</button><button class="btn" type="button" data-open="change" data-change="8"><svg class="icon"><use href="#i-pencil"/></svg>Change it</button><button class="btn btn-ghost" type="button" data-open="rewrite"><svg class="icon"><use href="#i-plus"/></svg>Add this clause</button></div>
+          <div class="row"><button class="btn btn-primary" type="button" data-decide="8"><svg class="icon"><use href="#i-check"/></svg>Looks right</button><button class="btn" type="button" data-open="change" data-change="8"><svg class="icon"><use href="#i-pencil"/></svg>Change it</button><button class="btn btn-ghost" type="button" data-open="rewrite" data-clause="new-8"><svg class="icon"><use href="#i-plus"/></svg>Add this clause</button></div>
           <details class="more"><summary>More</summary>
             <p class="small">Acceptable by your playbook: nothing says you can, and you set missing to acceptable.</p>
             <p>Nothing says you can show this work in your portfolio. You may need to ask before showing it to future customers.</p>
@@ -564,7 +574,7 @@
           <p class="notice"><svg class="icon"><use href="#i-warn"/></svg>A search can miss a clause. This doesn&#x27;t prove the contract has no non-compete.</p>
           <div class="notice"><svg class="icon"><use href="#i-search"/></svg><span>What to check: Does any clause limit who you can work for after this job?</span></div>
           <h3 class="h3">Nothing found. Is it really not there?</h3>
-          <div class="row"><button class="btn btn-primary" type="button" data-back data-toast="Checked">Looks right</button><button class="btn" type="button" data-open="change">Change it</button></div>
+          <div class="row"><button class="btn btn-primary" type="button" data-back data-toast="Checked">Looks right</button><button class="btn" type="button" data-open="change" data-change="nf">Change it</button></div>
           <button class="link note-link" type="button" data-note="note-detail-nf">Add a note</button><div class="field" hidden><label for="note-detail-nf">Note</label><input class="input" id="note-detail-nf" placeholder="Add a note (optional)"></div>
           <details class="more"><summary>More</summary>
             <p class="small">Preferred by your playbook: nothing was found, and you set missing to preferred.</p>
@@ -590,7 +600,7 @@
           <h3 class="h3">Read 9.2 on the page. What do you want to do?</h3>
           <div class="decide">
             <button type="button" data-back data-toast="Checked"><kbd>1</kbd><span><strong>Ask about it</strong><br><span class="small muted">Kept. Goes into the message.</span></span></button>
-            <button type="button" data-open="change"><kbd>2</kbd><span><strong>Change the label…</strong><br><span class="small muted">Opens Change it.</span></span></button>
+            <button type="button" data-open="change" data-change="unconfirmed"><kbd>2</kbd><span><strong>Change the label…</strong><br><span class="small muted">Opens Change it.</span></span></button>
             <button type="button" data-back data-toast="Checked"><kbd>3</kbd><span><strong>Doesn't matter for this deal</strong><br><span class="small muted">Kept. Left out of the message.</span></span></button>
           </div>
           <button class="link note-link" type="button" data-note="note-detail-unconfirmed">Add a note</button><div class="field" hidden><label for="note-detail-unconfirmed">Note</label><input class="input" id="note-detail-unconfirmed" placeholder="Add a note (optional)"></div>
@@ -618,7 +628,7 @@
           <h3 class="h3">Read 5.4 on the page. Is this right?</h3>
           <div class="decide">
             <button type="button" data-back data-toast="Checked"><kbd>1</kbd><span><strong>Yes, it's a walk-away</strong><br><span class="small muted">Kept. Goes into the message.</span></span></button>
-            <button type="button" data-open="change"><kbd>2</kbd><span><strong>No, change the label…</strong><br><span class="small muted">Opens Change it.</span></span></button>
+            <button type="button" data-open="change" data-change="unplaced"><kbd>2</kbd><span><strong>No, change the label…</strong><br><span class="small muted">Opens Change it.</span></span></button>
             <button type="button" data-back data-toast="Checked"><kbd>3</kbd><span><strong>Doesn't matter for this deal</strong><br><span class="small muted">Kept. Left out of the message.</span></span></button>
           </div>
           <button class="link note-link" type="button" data-note="note-detail-unplaced">Add a note</button><div class="field" hidden><label for="note-detail-unplaced">Note</label><input class="input" id="note-detail-unplaced" placeholder="Add a note (optional)"></div>
@@ -665,7 +675,7 @@
           <div class="card" style="padding:12px 14px"><p class="h3">Why it could be preferred</p><p class="small">If the Agency agrees in advance, you have what your playbook wants.</p></div>
           <div class="card" style="padding:12px 14px"><p class="small"><strong>Question to ask:</strong> “Can we agree consent won't be refused without a good reason?”</p></div>
           <div class="notice"><svg class="icon"><use href="#i-search"/></svg><span>What to check: Does the quote let you show the work, and what condition comes with it?</span></div>
-          <div class="row"><button class="btn btn-primary" type="button" data-back data-toast="Checked">Looks right</button><button class="btn" type="button" data-open="change">Change it</button></div>
+          <div class="row"><button class="btn btn-primary" type="button" data-back data-toast="Checked">Looks right</button><button class="btn" type="button" data-open="change" data-change="cond">Change it</button></div>
           <details class="more"><summary>More</summary>
             <p class="small">Unsure: yes, but only with a condition.</p>
           </details>
@@ -679,18 +689,18 @@
   <form method="dialog">
     <div class="dialog-body">
       <h2 class="h2" id="change-t">Change label</h2>
-      <p class="small faint">§ 5.4 · Days until I'm paid, from invoice date</p>
-      <div class="card row" style="padding:12px 14px"><div class="stack" style="gap:4px"><span class="small faint">Tool label</span><span class="stamp walk"><span class="mark"><svg><use href="#i-x"/></svg></span><span class="word">Walk-away</span></span></div><svg class="icon"><use href="#i-arrow-right"/></svg><div class="stack" style="gap:4px"><span class="small faint">Your label</span><span class="stamp unsure"><span class="mark"><svg><use href="#i-help"/></svg></span><span class="word">Unsure</span></span></div></div>
-      <p class="small"><strong>History</strong> <span class="muted">Tool label Walk-away · your label Unsure</span></p>
+      <p class="small faint" id="change-clause">§ 5.4 · Days until I'm paid, from invoice date</p>
+      <div class="card row" style="padding:12px 14px"><div class="stack" style="gap:4px"><span class="small faint">Tool label</span><span id="change-tool"></span></div><svg class="icon"><use href="#i-arrow-right"/></svg><div class="stack" style="gap:4px"><span class="small faint">Your label</span><span id="change-yours"></span></div></div>
+      <p class="small" id="change-history" hidden><strong>History</strong> <span class="muted" id="change-history-text"></span></p>
       <fieldset class="stack" style="border:0;padding:0;margin:0;gap:8px"><legend class="visually-hidden">New label</legend>
         <label class="option"><input type="radio" name="level" value="preferred"><span class="stamp preferred"><span class="mark"><svg><use href="#i-check"/></svg></span><span class="word">Preferred</span></span></label>
         <label class="option"><input type="radio" name="level" value="acceptable"><span class="stamp acceptable"><span class="mark"><svg><use href="#i-approx"/></svg></span><span class="word">Acceptable</span></span></label>
         <label class="option"><input type="radio" name="level" value="walk"><span class="stamp walk"><span class="mark"><svg><use href="#i-x"/></svg></span><span class="word">Walk-away</span></span></label>
-        <label class="option"><input type="radio" name="level" value="unsure" checked><span class="stamp unsure"><span class="mark"><svg><use href="#i-help"/></svg></span><span class="word">Unsure</span></span></label>
+        <label class="option"><input type="radio" name="level" value="unsure"><span class="stamp unsure"><span class="mark"><svg><use href="#i-help"/></svg></span><span class="word">Unsure</span></span></label>
       </fieldset>
-      <div class="field"><label for="change-note">Note</label><textarea class="input" id="change-note">The payment terms may start from acceptance, not invoice. Ask.</textarea></div>
+      <div class="field"><label for="change-note">Note</label><textarea class="input" id="change-note"></textarea></div>
     </div>
-    <div class="dialog-foot"><button class="link" value="undo" style="margin-right:auto" data-toast="Back to tool label, unchecked"><svg class="icon"><use href="#i-undo"/></svg> Undo: back to the tool label, unchecked</button><button class="btn" value="cancel">Cancel</button><button class="btn btn-primary" value="save" data-toast="Saved. Your label: Unsure" id="change-save">Save</button></div>
+    <div class="dialog-foot"><button class="link" id="change-undo" value="undo" hidden style="margin-right:auto" data-toast="Back to tool label, unchecked"><svg class="icon"><use href="#i-undo"/></svg> Undo: back to the tool label, unchecked</button><button class="btn" value="cancel">Cancel</button><button class="btn btn-primary" value="save" data-toast="Saved. Your label: Unsure" id="change-save">Save</button></div>
   </form>
 </dialog>
 
@@ -699,14 +709,14 @@
     <div class="dialog-body">
       <h2 class="h2" id="rewrite-t">Rewrite § 5.4</h2>
       <div class="row"><div class="segmented"><button type="button" aria-pressed="false">Write it yourself</button><button type="button" aria-pressed="true">Ask AI</button></div>
-        <span class="small muted">The AI aims for the preferred level of every position this clause affects: 1 Days until paid.</span></div>
+        <span class="small muted">The AI aims for the preferred level of every position this clause affects: <span id="rw-positions">1 Days until paid</span>.</span></div>
       <div class="field"><label for="rw-instr">Instruction (optional)</label><input class="input" id="rw-instr" value="Ask for 15 days, and keep it polite"></div>
       <div class="grid-2">
-        <div class="card stack"><div class="row"><span class="h3">Before</span><span class="spacer"></span><span class="stamp walk"><span class="mark"><svg><use href="#i-x"/></svg></span><span class="word">Walk-away</span></span></div>
-          <p class="quote diff">Invoices will be paid within <del>60</del> days of the invoice date.</p>
+        <div class="card stack"><div class="row"><span class="h3">Before</span><span class="spacer"></span><span id="rw-before-stamp"><span class="stamp walk"><span class="mark"><svg><use href="#i-x"/></svg></span><span class="word">Walk-away</span></span></span></div>
+          <p class="quote diff" id="rw-before" data-blank>Invoices will be paid within <del>60</del> days of the invoice date.</p>
           <p class="small faint">Removed words are struck through. Added words are highlighted.</p></div>
-        <div class="card stack"><div class="row"><span class="h3">After</span><span class="spacer"></span><span class="stamp preferred"><span class="mark"><svg><use href="#i-check"/></svg></span><span class="word">Preferred</span></span></div>
-          <p class="quote diff">Invoices will be paid within <ins>15</ins> days of the invoice date.</p>
+        <div class="card stack"><div class="row"><span class="h3">After</span><span class="spacer"></span><span id="rw-after-stamp"><span class="stamp preferred"><span class="mark"><svg><use href="#i-check"/></svg></span><span class="word">Preferred</span></span></span></div>
+          <p class="quote diff" id="rw-after" data-blank>Invoices will be paid within <ins>15</ins> days of the invoice date.</p>
           <p class="small faint">Every quote and number was checked against the contract; the wording was written by AI.</p>
           <p class="small faint">Information only. Doesn't change the counter or the review status.</p>
           <div class="row"><button class="btn btn-sm" type="button" onclick="var q=this.closest('.card').querySelector('.quote');q.contentEditable=true;q.focus();"><svg class="icon"><use href="#i-pencil"/></svg>Edit</button><button class="btn btn-sm" type="button" data-toast="Copied"><svg class="icon"><use href="#i-copy"/></svg>Copy</button></div></div>
@@ -724,10 +734,10 @@
     <p class="small muted">One per clause. The original file is never changed. Suggestions go in the message you send.</p>
     <div class="card stack"><div class="row"><span class="mono">§ 5.4 · rewrite</span><span class="spacer"></span><span class="stamp preferred"><span class="mark"><svg><use href="#i-check"/></svg></span><span class="word">Preferred</span></span></div>
       <p class="quote">Invoices will be paid within 15 days of the invoice date.</p>
-      <div class="row"><span class="small faint">Written with AI · label is information only</span><span class="spacer"></span><button class="btn btn-sm" type="button" data-open="rewrite"><svg class="icon"><use href="#i-pencil"/></svg>Edit</button><button class="btn btn-sm" type="button" data-open="remove-sug"><svg class="icon"><use href="#i-trash"/></svg>Remove</button></div></div>
+      <div class="row"><span class="small faint">Written with AI · label is information only</span><span class="spacer"></span><button class="btn btn-sm" type="button" data-open="rewrite" data-clause="5.4"><svg class="icon"><use href="#i-pencil"/></svg>Edit</button><button class="btn btn-sm" type="button" data-open="remove-sug"><svg class="icon"><use href="#i-trash"/></svg>Remove</button></div></div>
     <div class="card stack"><div class="row"><span class="mono">New clause · after § 5.4</span><span class="spacer"></span><span class="stamp preferred"><span class="mark"><svg><use href="#i-check"/></svg></span><span class="word">Preferred</span></span></div>
       <p class="quote">If an invoice is paid late, the Agency will pay a late fee of 2% of the unpaid amount for each month it is late.</p>
-      <div class="row"><span class="small faint">Written by you · label is information only</span><span class="spacer"></span><button class="btn btn-sm" type="button" data-open="rewrite"><svg class="icon"><use href="#i-pencil"/></svg>Edit</button><button class="btn btn-sm" type="button" data-open="remove-sug"><svg class="icon"><use href="#i-trash"/></svg>Remove</button></div></div>
+      <div class="row"><span class="small faint">Written by you · label is information only</span><span class="spacer"></span><button class="btn btn-sm" type="button" data-open="rewrite" data-clause="new-3"><svg class="icon"><use href="#i-pencil"/></svg>Edit</button><button class="btn btn-sm" type="button" data-open="remove-sug"><svg class="icon"><use href="#i-trash"/></svg>Remove</button></div></div>
   </div>
 </dialog>
 
@@ -736,7 +746,7 @@
 <dialog id="start-over" aria-labelledby="start-over-t"><form method="dialog"><div class="dialog-body"><h2 class="h2" id="start-over-t">Start over with this contract?</h2><p class="muted">Makes a new review from the same file. This review stays in your list, so nothing is lost.</p></div><div class="dialog-foot"><button class="btn" value="cancel">Cancel</button><a class="btn btn-primary" href="new-review.html">Start over</a></div></form></dialog>
 <dialog id="remove-sug" aria-labelledby="remove-sug-t"><form method="dialog"><div class="dialog-body"><h2 class="h2" id="remove-sug-t">Remove this suggestion?</h2><p class="muted">It won't go in the message. The clause in the contract is unchanged.</p></div><div class="dialog-foot"><button class="btn" value="cancel">Cancel</button><button class="btn btn-primary" value="ok" data-toast="Suggestion removed">Remove</button></div></form></dialog>
 <dialog id="doc-missing" aria-labelledby="doc-missing-t"><form method="dialog"><div class="dialog-body"><h2 class="h2" id="doc-missing-t">“Master Agreement” isn't loaded</h2><p class="muted">This contract refers to it, and it can change any result here, such as the liability cap. Ask the other side for it and read it before you sign.</p></div><div class="dialog-foot"><button class="btn btn-primary" value="ok" data-read="doc">Got it</button></div></form></dialog>
-<dialog id="models" aria-labelledby="models-t"><form method="dialog"><div class="dialog-body"><h2 class="h2" id="models-t">Models and cost</h2><table class="table"><tr><th>Step</th><th>Model</th></tr><tr><td>Match</td><td>Jev (under test)</td></tr><tr><td>Extract</td><td>Claude Sonnet 5.5</td></tr><tr><td>Judge words positions</td><td>Claude Sonnet 5.5</td></tr><tr><td>Explain</td><td>Some-model-7b</td></tr></table><p class="small muted">This review cost $0.39 so far.</p></div><div class="dialog-foot"><a class="btn" href="settings.html">Change in Settings</a><button class="btn btn-primary" value="ok">Close</button></div></form></dialog>
+<dialog id="models" aria-labelledby="models-t"><form method="dialog"><div class="dialog-body"><h2 class="h2" id="models-t">Models and cost</h2><table class="table"><tr><th>Step</th><th>Model</th></tr><tr><td>Match</td><td>Jev (under test)</td></tr><tr><td>Extract</td><td>Claude Sonnet 5.5</td></tr><tr><td>Judge words positions</td><td>Claude Sonnet 5.5</td></tr><tr><td>Explain</td><td>Claude Sonnet 5.5</td></tr></table><p class="small muted">This review cost $0.39 so far.</p></div><div class="dialog-foot"><a class="btn" href="settings.html">Change in Settings</a><button class="btn btn-primary" value="ok">Close</button></div></form></dialog>
 <dialog id="def-preferred" aria-label="Preferred"><form method="dialog"><div class="dialog-body"><span class="stamp preferred"><span class="mark"><svg><use href="#i-check"/></svg></span><span class="word">Preferred</span></span><p>The clause gives you at least what your playbook says you want.</p></div><div class="dialog-foot"><button class="btn" value="ok">Close</button></div></form></dialog>
 <dialog id="def-acceptable" aria-label="Acceptable"><form method="dialog"><div class="dialog-body"><span class="stamp acceptable"><span class="mark"><svg><use href="#i-approx"/></svg></span><span class="word">Acceptable</span></span><p>Not as good as preferred, but inside the limit you set in your playbook.</p></div><div class="dialog-foot"><button class="btn" value="ok">Close</button></div></form></dialog>
 <dialog id="def-walk" aria-label="Walk-away"><form method="dialog"><div class="dialog-body"><span class="stamp walk"><span class="mark"><svg><use href="#i-x"/></svg></span><span class="word">Walk-away</span></span><p>Past the limit you set in your playbook. Ask for a change before you sign.</p></div><div class="dialog-foot"><button class="btn" value="ok">Close</button></div></form></dialog>
@@ -753,7 +763,6 @@
   <button type="button" data-open="models"><svg class="icon"><use href="#i-info"/></svg>Models and cost<span class="spacer"></span><span class="mono">$0.39</span></button>
   <button type="button" data-open="rerun"><svg class="icon"><use href="#i-refresh"/></svg>Re-run…</button>
   <button type="button" data-open="start-over"><svg class="icon"><use href="#i-undo"/></svg>Start over…</button>
-  <a href="settings.html"><svg class="icon"><use href="#i-gear"/></svg>Privacy settings</a>
 </div>
 
 <script src="icons.js"></script>
@@ -902,7 +911,7 @@
       if (dec) { decided.add(dec.dataset.decide); refresh(); openNext(); return; }
       if (t.closest('#next-unchecked, [data-next]')) { openNext(t.closest('button')); return; }
       const ch = t.closest('[data-change]');
-      if (ch) current = ch.dataset.change;
+      if (ch) current = (POS[ch.dataset.change] && POS[ch.dataset.change].pid) || ch.dataset.change;
       if (t.closest('#change-save')) { decided.add(current || '1'); refresh(); }
       if (t.closest('#fix-planted')) { decided.add('10'); setPlanted('walk'); refresh(); CT.toast('Changed to Walk-away.'); }
 
@@ -1024,6 +1033,110 @@
       setPlanted('preferred');
     }
 
+
+    // ---- Change it and Rewrite: both dialogs fill from the detail that opened them ----
+    const KINDS = { preferred: ['check', 'Preferred'], acceptable: ['approx', 'Acceptable'], walk: ['x', 'Walk-away'], unsure: ['help', 'Unsure'] };
+    const stamp = (k, pencilled) => '<span class="stamp ' + k + (pencilled ? ' pencilled' : '') + '"><span class="mark"><svg><use href="#i-' + KINDS[k][0] + '"/></svg></span><span class="word">' + KINDS[k][1] + '</span></span>';
+    // pid: the position it saves to; ctx: which detail opened it
+    const POS = {
+      '1': { at: '§ 5.4 · ', name: "Days until I'm paid, from invoice date", tool: 'walk' },
+      '5': { at: '§ 3.2 · ', name: 'Revision rounds included', tool: 'unsure' },
+      '7a': { at: '§ 7.1 · ', name: 'Ownership passes only after full payment', tool: 'walk' },
+      '9': { at: '§ 9.1 · ', name: 'Non-compete length', tool: 'walk' },
+      '10': { at: '§ 11.1 · ', name: 'My liability is capped', tool: 'unsure', pencilled: true },
+      '4': { at: '§ 12.2 · ', name: 'Paid for work done if the other side cancels', tool: 'unsure' },
+      '3': { at: '', name: 'Late payment fee exists', tool: 'acceptable' },
+      '7b': { at: '', name: 'If unpaid, I can reuse or resell the work', tool: 'acceptable' },
+      '8': { at: '', name: 'I can show the work in my portfolio', tool: 'acceptable' },
+      '2': { at: '§ 5.2 · ', name: 'Upfront deposit', tool: 'acceptable' },
+      '6': { at: '§ 4.1 · ', name: 'Extra work is paid extra', tool: 'preferred' },
+      nf: { pid: '9', at: '', name: 'Non-compete length', tool: 'preferred' },
+      unconfirmed: { pid: '9', at: '§ 9.2 · ', name: 'Non-compete length', tool: 'unsure' },
+      unplaced: { pid: '1', at: '§ 5.4 · ', name: "Days until I'm paid, from invoice date", tool: 'walk' },
+      cond: { pid: '8', at: '§ 7.4 · ', name: 'I can show the work in my portfolio', tool: 'unsure' }
+    };
+    const changed = {};    // pid: { level, note } once the user changed a label
+    let ctx = '1';
+    const noteInput = id => document.getElementById('note-' + id) || document.getElementById('note-detail-' + id);
+    function fillChange(id) {
+      const pos = POS[id] || POS['1'];
+      ctx = POS[id] ? id : '1';
+      const pid = pos.pid || ctx;
+      const c = changed[pid];
+      const yours = c ? c.level : pos.tool;
+      $('#change-clause').textContent = pos.at + pos.name;
+      $('#change-tool').innerHTML = stamp(pos.tool, pos.pencilled);
+      $('#change-yours').innerHTML = stamp(yours);
+      $('#change-history').hidden = !c;
+      $('#change-undo').hidden = !c;
+      $('#change-history-text').textContent = 'Tool label ' + KINDS[pos.tool][1] + ' · your label ' + KINDS[yours][1];
+      $$('#change input[name="level"]').forEach(r => { r.checked = r.value === yours; });
+      const inp = noteInput(ctx);
+      $('#change-note').value = c && c.note != null ? c.note : (inp ? inp.value : '');
+      $('#change-save').dataset.toast = 'Saved. Your label: ' + KINDS[yours][1];
+    }
+    $$('#change input[name="level"]').forEach(r => r.addEventListener('change', () => { $('#change-save').dataset.toast = 'Saved. Your label: ' + KINDS[r.value][1]; }));
+    $('#change-save').addEventListener('click', () => {
+      const pos = POS[ctx], pid = pos.pid || ctx;
+      const level = ($('#change input[name="level"]:checked') || {}).value || pos.tool;
+      if (level !== pos.tool) changed[pid] = { level, note: $('#change-note').value }; else delete changed[pid];
+      const inp = noteInput(ctx);
+      if (inp && $('#change-note').value) { inp.value = $('#change-note').value; inp.closest('.field').hidden = false; const l = inp.closest('.field').previousElementSibling; if (l && l.dataset.note) l.hidden = true; }
+    });
+    $('#change-undo').addEventListener('click', () => { const pos = POS[ctx], pid = pos.pid || ctx; delete changed[pid]; decided.delete(pid); refresh(); });
+    document.addEventListener('click', e => { const ch = e.target.closest('[data-open="change"]'); if (ch) fillChange(ch.dataset.change); });
+    if (location.hash === '#change') { changed['1'] = { level: 'unsure', note: 'The payment terms may start from acceptance, not invoice. Ask.' }; }
+    fillChange('1');
+
+    // Rewrite: the Before text is the clause on the page. The After wording exists in the deck only for 5.4 and for the new late-fee clause.
+    const RW54 = { before: $('#rw-before').innerHTML, after: $('#rw-after').innerHTML, bs: $('#rw-before-stamp').innerHTML, as: $('#rw-after-stamp').innerHTML, instr: $('#rw-instr').value };
+    const NEW3 = 'If an invoice is paid late, the Agency will pay a late fee of 2% of the unpaid amount for each month it is late.';
+    const CLAUSE_POS = { '5.4': '1 Days until paid', '3.2': '5 Revision rounds', '7.1': '7a Ownership after payment', '9.1': '9 Non-compete', '11.1': '10 Liability cap', '12.2': '4 Paid if cancelled', '5.2': '2 Upfront deposit', '4.1': '6 Extra work paid', 'new-3': '3 Late payment fee exists', 'new-7b': '7b If unpaid, I can reuse or resell the work', 'new-8': '8 I can show the work in my portfolio' };
+    function fillRewrite(c) {
+      const isNew = c.indexOf('new-') === 0;
+      $('#rewrite-t').textContent = isNew ? 'New clause · after § 5.4' : 'Rewrite § ' + c;
+      $('#rw-positions').textContent = CLAUSE_POS[c] || '';
+      $$('#rewrite .quote').forEach(q => { q.contentEditable = 'false'; });
+      if (c === '5.4') {
+        $('#rw-before').innerHTML = RW54.before; $('#rw-after').innerHTML = RW54.after;
+        $('#rw-before-stamp').innerHTML = RW54.bs; $('#rw-after-stamp').innerHTML = RW54.as;
+        $('#rw-instr').value = RW54.instr; return;
+      }
+      $('#rw-instr').value = '';
+      if (isNew) {
+        $('#rw-before').textContent = '';
+        $('#rw-before-stamp').innerHTML = '';
+        $('#rw-after').textContent = c === 'new-3' ? NEW3 : '';
+        $('#rw-after-stamp').innerHTML = c === 'new-3' ? stamp('preferred') : '';
+      } else {
+        const el = document.getElementById('c-' + c);
+        const pin = el && el.querySelector('.pin');
+        const kind = pin && ['walk', 'unsure', 'acceptable', 'preferred'].find(k => pin.classList.contains(k));
+        $('#rw-before').textContent = el ? el.querySelector('.text').textContent.trim() : '';
+        $('#rw-before-stamp').innerHTML = kind ? stamp(kind, pin.classList.contains('pencilled')) : '';
+        $('#rw-after').textContent = '';
+        $('#rw-after-stamp').innerHTML = '';
+      }
+    }
+    document.addEventListener('click', e => { const b = e.target.closest('[data-open="rewrite"]'); if (b && b.dataset.clause) fillRewrite(b.dataset.clause); });
+
+    // the viewer bar's page counter follows the scroll; the Find hint drops out on a narrow bar
+    const counter = $('#page-counter'), sheets = $$('.sheet');
+    function updatePage() {
+      const top = Math.max(0, $('.viewer-bar').getBoundingClientRect().bottom);
+      const probe = top + (innerHeight - top) * 0.4;
+      let n = 1;
+      sheets.forEach((sh, i) => { if (sh.getBoundingClientRect().top <= probe) n = i + 1; });
+      counter.textContent = n + ' / ' + sheets.length;
+    }
+    document.addEventListener('scroll', updatePage, true);
+    addEventListener('scroll', updatePage, { passive: true });
+    addEventListener('resize', updatePage);
+    updatePage();
+    const narrow = matchMedia('(max-width: 600px)');
+    const setHint = () => { find.placeholder = narrow.matches ? 'Find' : 'Find · Ctrl+F'; };
+    narrow.addEventListener('change', setHint); setHint();
+
     refresh();
     syncMenus();
     // after the first paint, changes may move (the pie and the pins); the saved state itself never animates in
@@ -1035,12 +1148,6 @@
   })();
 </script>
 
-<script>
-  // "Rewrite this clause" in a detail: the Rewrite dialog names that clause.
-  document.addEventListener('click', function (e) {
-    var b = e.target.closest && e.target.closest('[data-clause]');
-    if (b) document.getElementById('rewrite-t').textContent = 'Rewrite § ' + b.dataset.clause;
-  }, true);
-</script>
+
 </body>
 </html>

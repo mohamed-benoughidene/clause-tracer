@@ -18,7 +18,7 @@
 </style>
 </head>
 <body>
-<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8767/index.html</b> instead.</p>");</script>
 <div class="app">
   <aside class="sidebar">
     <a class="logo" href="home.html"><img class="on-light" src="logo.svg" alt="Clause Tracer"><img class="on-dark" src="logo-dark.svg" alt="Clause Tracer"></a>
@@ -72,19 +72,19 @@
         <tr>
           <td class="num">1</td>
           <td class="position">Days until I'm paid, from invoice date<span class="why">Why this matters: Rent is due on the 1st. Long waits mean I borrow.</span></td>
-          <td>Number · days ↓</td>
-          <td>≤ 15</td>
-          <td>≤ 30</td>
-          <td>> 30</td>
+          <td>Number (days), lower is better</td>
+          <td>At or under 15</td>
+          <td>At or under 30</td>
+          <td>Above 30</td>
           <td>Unsure</td>
         </tr>
         <tr>
           <td class="num">2</td>
           <td class="position">Upfront deposit<span class="why">Why this matters: A deposit shows they're committed, and I'm not working for free if they vanish.</span></td>
-          <td>Number · % ↑</td>
-          <td>≥ 50</td>
-          <td>≥ 25</td>
-          <td>&lt; 25</td>
+          <td>Number (%), higher is better</td>
+          <td>At or over 50</td>
+          <td>At or over 25</td>
+          <td>Below 25</td>
           <td>Walk-away</td>
         </tr>
         <tr>
@@ -92,7 +92,7 @@
           <td class="position">Late payment fee exists<span class="why">Why this matters: Without a fee, paying me late costs them nothing.</span></td>
           <td>Yes/no</td>
           <td>Yes</td>
-          <td>No / unclear</td>
+          <td>No, unclear or missing</td>
           <td>—</td>
           <td>Acceptable</td>
         </tr>
@@ -102,16 +102,16 @@
           <td>Yes/no</td>
           <td>Yes</td>
           <td>—</td>
-          <td>No / unclear</td>
+          <td>No, unclear or missing</td>
           <td>Walk-away</td>
         </tr>
         <tr>
           <td class="num">5</td>
           <td class="position">Revision rounds included<span class="why">Why this matters: Endless rounds can double the work for the same price.</span></td>
-          <td>Number · rounds ↓</td>
-          <td>≤ 2</td>
-          <td>≤ 3</td>
-          <td>> 3, unlimited</td>
+          <td>Number (rounds), lower is better</td>
+          <td>At or under 2</td>
+          <td>At or under 3</td>
+          <td>Above 3, or unlimited</td>
           <td>Walk-away</td>
         </tr>
         <tr>
@@ -120,7 +120,7 @@
           <td>Yes/no</td>
           <td>Yes</td>
           <td>—</td>
-          <td>No / unclear</td>
+          <td>No, unclear or missing</td>
           <td>Walk-away</td>
         </tr>
         <tr>
@@ -129,7 +129,7 @@
           <td>Yes/no</td>
           <td>Yes</td>
           <td>—</td>
-          <td>No / unclear</td>
+          <td>No, unclear or missing</td>
           <td>Walk-away</td>
         </tr>
         <tr>
@@ -137,7 +137,7 @@
           <td class="position">If unpaid, I can reuse or resell the work<span class="why">Why this matters: If they don't pay, I can still get something for the work.</span></td>
           <td>Yes/no</td>
           <td>Yes</td>
-          <td>No / unclear</td>
+          <td>No, unclear or missing</td>
           <td>—</td>
           <td>Acceptable</td>
         </tr>
@@ -146,26 +146,26 @@
           <td class="position">I can show the work in my portfolio<span class="why">Why this matters: My portfolio is how I get the next job.</span></td>
           <td>Yes/no</td>
           <td>Yes</td>
-          <td>No / unclear</td>
+          <td>No, unclear or missing</td>
           <td>—</td>
           <td>Acceptable</td>
         </tr>
         <tr>
           <td class="num">9</td>
           <td class="position">Non-compete length<span class="why">Why this matters: A long non-compete can stop me working in my own field.</span></td>
-          <td>Number · months ↓</td>
+          <td>Number (months), lower is better</td>
           <td>0 (none)</td>
-          <td>≤ 6</td>
-          <td>> 6</td>
+          <td>At or under 6</td>
+          <td>Above 6</td>
           <td>Preferred</td>
         </tr>
         <tr>
           <td class="num">10</td>
           <td class="position">My liability is capped<span class="why">Why this matters: One mistake shouldn't cost me more than the job paid.</span></td>
           <td>Words</td>
-          <td>At most fees paid</td>
-          <td>Above fees, up to 2× fees</td>
-          <td>Above 2×, a fixed sum, uncapped</td>
+          <td>At most the fees paid</td>
+          <td>Above the fees, up to 2x fees</td>
+          <td>Above 2x fees, a fixed sum, or uncapped</td>
           <td>Walk-away</td>
         </tr>
       </tbody>

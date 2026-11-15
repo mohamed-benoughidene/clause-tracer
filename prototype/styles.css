@@ -120,7 +120,7 @@ kbd { color: var(--text-3); }
 .appbar > * { flex-shrink: 0; }
 .appbar .title { flex-shrink: 1; }
 .appbar .status, .appbar .btn { white-space: nowrap; }
-.appbar .search-commands { width: 190px !important; margin: 0; }
+.appbar .search-commands { width: 232px !important; margin: 0; }
 .appbar .title small { color: var(--text-3); font-size: 12px; }
 .spacer { flex: 1; }
 .flow-foot { display: flex; align-items: center; gap: 12px; padding: 12px 24px; background: var(--bg-surface);
@@ -182,6 +182,11 @@ textarea.input { height: auto; min-height: 76px; padding: 10px 12px; resize: ver
 .notice { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--r-lg);
   background: var(--bg-tone); font-size: 12.5px; }
 .notice .spacer { flex: 1; }
+/* warning notice: Unsure colours, for anything that blocks or needs a fix (design-system 5.x). One definition for every page. */
+.notice.warn { align-items: flex-start; background: var(--unsure-bg); color: var(--unsure-fg); }
+.notice.warn .icon { color: var(--unsure); margin-top: 2px; flex-shrink: 0; }
+.notice.warn > :not(.icon):not(.btn):not(.spacer) { flex: 1 1 0; min-width: 0; }
+.notice.warn p + p { margin-top: 6px; }
 .banner { display: flex; align-items: center; gap: 10px; padding: 8px 16px; background: var(--banner-bg);
   border-bottom: 1px solid var(--banner-line); font-size: 12.5px; }
 
@@ -268,7 +273,15 @@ dialog.palette { margin-top: 10vh; }
   .sidebar { position: static; height: auto; }
   .main { padding: 24px 16px; }
   .grid-2 { grid-template-columns: 1fr; }
-  .table { display: block; overflow-x: auto; }
+  .table { display: block; position: relative; max-width: 100%; overflow-x: auto; }   /* relative: keeps .visually-hidden cells inside the scroller */
+  .appbar { height: auto; min-height: 56px; flex-wrap: wrap; row-gap: 8px; padding-top: 8px; padding-bottom: 8px; }
+  .appbar .search-commands { width: auto !important; flex: 1 1 160px; min-width: 0; }
+  .appbar ol.steps { order: 9; flex: 1 1 100%; }
+  .appbar ol.steps li { width: auto; flex: 1 1 0; min-width: 0; }
+  .page-head { flex-wrap: wrap; }
+  .page-head > * { min-width: 0; }
+  .flow-foot { flex-wrap: wrap; row-gap: 8px; padding: 12px 16px; }
+  .flow-foot .btn { white-space: nowrap; }
 }
 
 /* ------------------------------------------------------------ review.html */

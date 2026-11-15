@@ -20,7 +20,7 @@
 </style>
 </head>
 <body>
-<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8767/index.html</b> instead.</p>");</script>
 <div class="app">
   <aside class="sidebar">
     <a class="logo" href="home.html"><img class="on-light" src="logo.svg" alt="Clause Tracer"><img class="on-dark" src="logo-dark.svg" alt="Clause Tracer"></a>
@@ -117,6 +117,7 @@
           <li><a href="contract-check.html">Contract check</a><span>Hidden text found and marked; merge and split.</span></li>
           <li><a href="contract-check.html?state=unreadable-text">Text that couldn't be read</a><span>A warning names the pages; Continue still works.</span></li>
           <li><a href="contract-check.html?state=tracked-changes">Tracked changes listed</a><span>Every change, with the earlier wording.</span></li>
+          <li><a href="contract-check.html?state=paragraph-split">Split by paragraph</a><span>A note says the contract had no section numbers.</span></li>
           <li><a href="privacy-check.html">Privacy check</a></li>
           <li><a href="privacy-check.html?state=name-variants">Name variant: same or different person</a></li>
           <li><a href="privacy-check.html?state=private-off">Private mode turned off</a></li>
@@ -202,6 +203,7 @@
         <ul>
           <li><a href="playbooks.html">Playbooks</a></li>
           <li><a href="playbooks.html?state=import-failed">Import failed: not a playbook file</a></li>
+          <li><a href="playbooks.html?state=imported">Playbooks after an import</a></li>
           <li><a href="starter-preview.html">Starter preview</a> · <a href="starter-preview.html?from=new-review">from New review</a></li>
           <li><a href="playbook-editor.html?state=copied">Starter just copied</a> · <a href="new-review.html?state=copied-starter">Copy picked in New review</a></li>
           <li><a href="import-preview.html">Import preview</a></li>
@@ -214,6 +216,7 @@
         <h2 class="h2">17–20 Customers, Settings, Help, Error</h2>
         <ul>
           <li><a href="customers.html">Customers</a></li>
+          <li><a href="customers.html?state=empty">No customers yet</a></li>
           <li><a href="settings.html">Settings</a></li>
           <li><a href="settings.html?state=model-cant">A model can't do a step; untested warning</a></li>
           <li><a href="settings.html#lower-autodelete">Lowering auto-delete: confirm</a></li>

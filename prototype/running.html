@@ -32,9 +32,9 @@
   .log { display: grid; gap: 10px; }
   .log li { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 10px; align-items: baseline; }
   /* pencilled while running, inked when done (design direction, principle 8): finished lines are ink and upright, the
-     line of the step still running is graphite italic with a dashed underline, a stopped line keeps its Unsure colour */
+     line of the step still running is graphite italic with no dash, a stopped line keeps its Unsure colour */
   .log li span { color: var(--text); }
-  .log li.running span { color: var(--pencil); font-style: italic; text-decoration: underline dashed var(--pencil) 1px; text-underline-offset: 3px; }
+  .log li.running span { color: var(--pencil); font-style: italic; }
   .log li.stop span { color: var(--unsure-fg); font-weight: 500; }
   .log time { font: 500 12px/1.5 var(--mono); color: var(--text-3); }
   .log span { font: 15px/1.45 var(--serif); }
@@ -44,9 +44,6 @@
   .stage { display: grid; gap: 4px; }
   .cost { font-size: 12.5px; color: var(--text-2); }
   /* warnings: unsure colours, never red (Spec 14.4) */
-  .notice.warn { align-items: flex-start; flex-wrap: wrap; background: var(--unsure-bg); color: var(--unsure-fg); }
-  .notice.warn .icon { color: var(--unsure); margin-top: 2px; }
-  .notice.warn p + p { margin-top: 6px; }
   .notice .actions { margin-top: 10px; }
   @media (max-width: 860px) {
     .work { grid-template-columns: 1fr; }
@@ -57,7 +54,7 @@
 </style>
 </head>
 <body>
-<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8767/index.html</b> instead.</p>");</script>
 <div class="flow">
 
   <header class="appbar">
@@ -91,8 +88,8 @@
     <aside class="margin" aria-label="Review progress">
 
       <!-- Running (default view) -->
-      <div class="stage" id="live-stage" aria-live="polite" data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait">
-        <div class="stage-head"><svg class="pie pie-stage" id="live-pie" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle class="pie-ring" cx="10" cy="10" r="9"/><circle class="pie-fill" cx="10" cy="10" r="3.5" transform="rotate(-90 10 10)" style="stroke-dashoffset:20.62"/><circle class="pie-done" cx="10" cy="10" r="9.75"/><path class="pie-check" d="M6 10.4 8.6 12.9 14 7.4"/></svg><div><h2 class="h3" id="live-step">Step 1 of 4 · Reading the pages</h2><p class="small muted" id="live-sub">Linking references and defined terms</p></div></div>
+      <div class="stage" id="live-stage"data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait">
+        <div class="stage-head"><svg class="pie pie-stage" id="live-pie" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle class="pie-ring" cx="10" cy="10" r="9"/><circle class="pie-fill" cx="10" cy="10" r="3.5" transform="rotate(-90 10 10)" style="stroke-dashoffset:20.62"/><circle class="pie-done" cx="10" cy="10" r="9.75"/><path class="pie-check" d="M6 10.4 8.6 12.9 14 7.4"/></svg><div><h2 class="h3" id="live-step" aria-live="polite">Step 1 of 4 · Reading the pages</h2><p class="small muted" id="live-sub">Linking references and defined terms</p></div></div>
         <p class="small muted" id="live-cost" style="margin-top:10px">Spent so far $0.05 of about $0.42 · About 4 min left</p>
       </div>
 
@@ -175,7 +172,7 @@
 
       <!-- Interrupted: no zero-retention model free, at step 3 -->
       <div class="stage" data-state="no-private-model">
-        <div class="stage-head"><svg class="pie pie-stage is-stop" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle class="pie-ring" cx="10" cy="10" r="9"/><circle class="pie-fill" cx="10" cy="10" r="3.5" transform="rotate(-90 10 10)" style="stroke-dashoffset:8.25"/><circle class="pie-done" cx="10" cy="10" r="9.75"/><path class="pie-check" d="M6 10.4 8.6 12.9 14 7.4"/></svg><div><h2 class="h3">Interrupted at step 3 of 4 · Judging the labels</h2><p class="small muted">Judging the wording</p></div></div>
+        <div class="stage-head"><svg class="pie pie-stage is-stop" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle class="pie-ring" cx="10" cy="10" r="9"/><circle class="pie-fill" cx="10" cy="10" r="3.5" transform="rotate(-90 10 10)" style="stroke-dashoffset:10.99"/><circle class="pie-done" cx="10" cy="10" r="9.75"/><path class="pie-check" d="M6 10.4 8.6 12.9 14 7.4"/></svg><div><h2 class="h3">Interrupted at step 3 of 4 · Judging the labels</h2><p class="small muted">Judging the wording</p></div></div>
         <p class="small muted" style="margin-top:10px">Spent so far $0.12 of about $0.42 · Paused</p>
         <div class="notice warn" role="note" style="margin-top:12px">
           <svg class="icon"><use href="#i-shield"/></svg>
@@ -278,7 +275,7 @@
   <form method="dialog">
     <div class="dialog-body">
       <h2 class="h2" id="cancel-title">Cancel this review?</h2>
-      <p class="muted">So far it has cost <span data-state-hide="wrong-key no-internet no-credit no-private-model rate-limit rate-limit-no-wait">$0.05</span><span data-state="wrong-key">$0.02</span><span data-state="no-internet rate-limit rate-limit-no-wait">$0.03</span><span data-state="no-credit">$0.30</span><span data-state="no-private-model">$0.12</span> of about $0.42. Finished steps are kept, so you won't pay for them again.</p>
+      <p class="muted">So far it has cost <span id="cancel-cost" data-state-hide="wrong-key no-internet no-credit no-private-model rate-limit rate-limit-no-wait">$0.05</span><span data-state="wrong-key">$0.02</span><span data-state="no-internet rate-limit rate-limit-no-wait">$0.03</span><span data-state="no-credit">$0.30</span><span data-state="no-private-model">$0.12</span> of about $0.42. Finished steps are kept, so you won't pay for them again.</p>
     </div>
     <div class="dialog-foot">
       <button class="btn" value="cancel">Keep running</button>
@@ -336,7 +333,7 @@
   (function () {
     if (new URLSearchParams(location.search).has('state')) return;
     var step = document.getElementById('live-step'), pie = document.querySelector('#live-pie .pie-fill'), sub = document.getElementById('live-sub');
-    var cost = document.getElementById('live-cost'), log = document.getElementById('live-log');
+    var cost = document.getElementById('live-cost'), cancelCost = document.getElementById('cancel-cost'), log = document.getElementById('live-log');
     var STAGES = ['Reading the pages', 'Matching clauses', 'Judging the labels', 'Writing the notes'];
     var SUBS = [['Linking references and defined terms'], ['Matching clauses to positions', 'Pulling out the quotes and values', 'Checking each quote against the contract'], ['Picking labels from the numbers', 'Judging the wording'], ['Writing the explanations', 'Sorting the not-covered parts']];
     var BEFORE = [0, 1, 4, 6];   // small steps finished before each stage; the pie counts 8 in all
@@ -352,6 +349,7 @@
       step.textContent = 'Step ' + f[0] + ' of 4 \u00b7 ' + STAGES[f[0] - 1];
       sub.textContent = SUBS[f[0] - 1][f[6]];
       pie.style.strokeDashoffset = (21.99 * (1 - (BEFORE[f[0] - 1] + f[6] + 0.5) / 8)).toFixed(2);   // the step that is running counts as half done
+      cancelCost.textContent = f[4];   // the Cancel dialog quotes the live cost
       cost.textContent = 'Spent so far ' + f[4] + ' of about $0.42 \u00b7 ' + f[5];
       var last = log.lastElementChild;
       if (f[3]) { last.firstElementChild.textContent = f[1]; last.lastElementChild.textContent = f[2]; return; }

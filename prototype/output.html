@@ -16,23 +16,31 @@
   .ask-line input { width: 16px; height: 16px; accent-color: var(--text); margin: 0; flex: none; }
   .ask-line .item { flex: 1; }
   .ask-line .left-out { display: none; font-size: 12.5px; color: var(--text-3); white-space: nowrap; }
-  .ask-line input:not(:checked) ~ .item { text-decoration: line-through; color: var(--text-3); }
+  .ask-line input:not(:checked) ~ .item { text-decoration: line-through; color: var(--text-2); }
   .ask-line input:not(:checked) ~ .left-out { display: inline; }
-  .ask-line input:not(:checked) { opacity: .6; }
+  .ask-line input:not(:checked) { opacity: .75; }
   .output-body { display: grid; gap: 16px; }
+  @media (max-width: 860px) { .appbar .tabs { flex-basis: 100%; } .flow-foot { flex-wrap: wrap; } }
+  .report-sheet { padding: 40px 48px; }
+  @media (max-width: 860px) { .report-sheet { padding: 24px 16px; } }
+  .report-sheet .meta-line { text-align: center; font-size: 13px; margin: 2px 0; }
+  .report-sheet .rl { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 14px; }
+  .report-sheet .rl p { margin: 2px 0 0; }
+  .report-sheet .rl .why { font-size: 13px; }
+  .report-foot { text-align: center; font-size: 12px; color: var(--text-3); margin-top: 20px; }
   .output-body textarea { min-height: 240px; background: var(--bg-paper); font: 14.5px/1.65 var(--contract); }
 </style>
 </head>
 <body>
-<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8767/index.html</b> instead.</p>");</script>
 <div>
   <header class="appbar">
     <a class="btn btn-ghost btn-sm" href="review.html"><svg class="icon"><use href="#i-arrow-left"/></svg>Back to review</a>
     <span aria-hidden="true" style="width:1px;height:24px;background:var(--line)"></span>
     <div class="title"><strong>Output · Brightline web build</strong></div>
     <span class="spacer"></span>
-    <button class="search-commands" type="button" style="width:240px;margin:0"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
-    <div class="tabs" role="tablist" aria-label="Output type" style="width:260px">
+    <button class="search-commands" type="button" style="flex:0 1 auto;min-width:0;margin:0"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
+    <div class="tabs" role="tablist" aria-label="Output type">
       <button type="button" role="tab" id="tab-message" aria-controls="panel-message" aria-selected="true">Message</button>
       <button type="button" role="tab" id="tab-report" aria-controls="panel-report" aria-selected="false">Report</button>
       <button type="button" role="tab" id="tab-both" aria-controls="panel-both" aria-selected="false">Both</button>
@@ -48,6 +56,8 @@
       <a class="link" href="review.html">Go back and check</a>
     </div>
 
+    <p class="small muted" style="margin:0 0 16px"><svg class="icon"><use href="#i-info"/></svg> Not legal advice. Check every result yourself.</p>
+
     <section id="panel-message" role="tabpanel" aria-labelledby="tab-message" class="output-body">
       <div class="grid-2">
         <div class="field">
@@ -60,8 +70,7 @@
         </div>
       </div>
 
-      <div class="row" style="justify-content:space-between;align-items:flex-end">
-        <p class="small muted"><svg class="icon"><use href="#i-info"/></svg> Not legal advice. Check every result yourself.</p>
+      <div class="row" style="justify-content:flex-end;align-items:flex-end">
         <div class="field" style="gap:6px">
           <span class="label" id="tone-label">Tone</span>
           <div class="segmented" role="group" aria-labelledby="tone-label">
@@ -95,7 +104,7 @@
         <span><strong>Labels changed since this message.</strong> Regenerate to use the new labels. This replaces your current text.</span>
         <span class="spacer"></span>
         <button class="btn btn-sm" type="button" data-toast="Message kept">Keep this message</button>
-        <button class="btn btn-sm" type="button" data-toast="Message regenerated"><svg class="icon"><use href="#i-refresh"/></svg>Regenerate</button>
+        <button class="btn btn-sm" type="button" data-regenerate data-toast="Message regenerated"><svg class="icon"><use href="#i-refresh"/></svg>Regenerate</button>
       </div>
 
       <div class="field">
@@ -120,16 +129,19 @@ Karim Benali</textarea>
     <section id="panel-report" role="tabpanel" aria-labelledby="tab-report" class="output-body" hidden>
       <div class="row">
         <div class="segmented" role="group" aria-label="Report length">
-          <button type="button" aria-pressed="true">Summary</button>
-          <button type="button" aria-pressed="false">Full contract</button>
+          <button type="button" aria-pressed="true" data-report="summary">Summary</button>
+          <button type="button" aria-pressed="false" data-report="full">Full contract</button>
         </div>
         <span class="spacer"></span>
-        <label class="check"><input type="checkbox">Include your notes</label>
+        <label class="check"><input type="checkbox" id="include-notes">Include your notes</label>
       </div>
 
-      <article class="sheet" style="margin:0;max-width:none;padding:40px 48px" aria-label="Report preview">
+      <article class="sheet report-sheet" style="margin:0;max-width:none" aria-label="Report preview">
         <h2>Review report</h2>
-        <p style="text-align:center;font-size:13px">Brightline web build</p>
+        <p class="meta-line">Brightline web build</p>
+        <p class="meta-line">Playbook “Freelancer service agreement”, as of 5 Nov, 10:31</p>
+        <p class="meta-line" data-private-text>Private mode: On</p>
+        <p class="meta-line"><strong>Walk-away 3 · Unsure 3 · Acceptable 4 · Preferred 1</strong></p>
         <h3>Asked for</h3>
         <ol style="padding-left:20px">
           <li>Payment (5.4): invoices paid within 15 days of the invoice date.</li>
@@ -139,8 +151,34 @@ Karim Benali</textarea>
           <li>Revisions (3.2): 2 rounds included, extra rounds at the hourly rate.</li>
           <li>Liability (11.1): the Master Agreement.</li>
         </ol>
+        <ul class="rl" aria-label="Labels">
+          <li><strong>Days until paid · § 5.4 · Walk-away</strong><p>“Invoices will be paid within 60 days of the invoice date.”</p><p class="why">This one is a walk-away. You'd wait 60 days to be paid; your limit is 30.</p></li>
+          <li><strong>Ownership after payment · § 7.1 · Walk-away</strong><p>“All work created under this Agreement is a work made for hire and belongs to the Agency from the moment it is created.”</p><p class="why">This one is a walk-away. The Agency would own your work the moment it exists, even if it never pays you.</p></li>
+          <li><strong>Non-compete · § 9.1 and 14.3 · Walk-away</strong><p>“For 12 months after this Agreement ends, the Developer will not provide similar services to any customer of the Agency.” “The Developer will not work for a direct competitor of the Agency for 6 to 9 months after this Agreement ends.”</p><p class="why">This one is a walk-away. One clause says 12 months and another says 6 to 9, and your limit is 6. Ask which one applies.</p></li>
+          <li><strong>Revision rounds · § 3.2 · Unsure</strong><p>“The Developer will make reasonable revisions to the Deliverables at the Agency's request.”</p><p class="why">This one is unsure. “Reasonable” has no number, so it can't be checked against your limit.</p></li>
+          <li><strong>Liability cap · § 11.1 · Unsure</strong><p>“The Developer's total liability is capped at the fees paid under this Agreement, except as set out in the Master Agreement.”</p><p class="why">Pencilled in: judged from the wording, not a number.</p></li>
+          <li><strong>Paid if cancelled · § 12.2 · Unsure</strong><p>“If the Agency ends this Agreement, no payment is due for work in progress.”</p><p class="why">This one is unsure. The quote found doesn't match the contract word for word, so it isn't used.</p></li>
+          <li><strong>Upfront deposit · § 5.2 · Acceptable</strong><p>“The Agency will pay 25% of the total Charges on signing this Agreement.”</p><p class="why">This one is acceptable by your playbook. You get a quarter of the fee when you sign. It isn't what you'd prefer, but it's inside your limit.</p></li>
+          <li><strong>Extra work paid · § 4.1 · Preferred</strong><p>“Work outside Schedule 1 must be agreed in writing and will be paid at the hourly rate of £45.”</p><p class="why">This one meets your preferred level. Extra work has to be agreed first, and you're paid by the hour for it.</p></li>
+        </ul>
+        <h3>Missing · 3</h3>
+        <ul class="rl">
+          <li><strong>Late payment fee exists:</strong> The contract doesn't mention this. Nothing charges the Agency for paying late, and your playbook says that's acceptable. A late payer loses nothing by waiting.</li>
+          <li><strong>If unpaid, I can reuse or resell the work:</strong> The contract doesn't mention this. If they never pay, you may have no right to the work you made. Your playbook says that's acceptable.</li>
+          <li><strong>I can show the work in my portfolio:</strong> The contract doesn't mention this. Your playbook says that's acceptable, but you may need to ask before showing the work.</li>
+        </ul>
+        <h3>Not covered · 37 parts</h3>
+        <div id="report-notes" hidden>
+          <p class="small"><strong>Why this matters:</strong> Rent is due on the 1st. Long waits mean I borrow.</p>
+        </div>
         <h3 data-state-hide="all-checked">Not checked</h3>
         <p data-state-hide="all-checked">9 positions aren't checked yet. They're marked here as unchecked.</p>
+        <div id="report-full" hidden>
+          <h3>Full contract</h3>
+          <p><strong>5.4</strong> Invoices will be paid within 60 days of the invoice date.</p>
+          <p><strong>11.1</strong> The Developer's total liability is capped at the fees paid under this Agreement, except as set out in the Master Agreement.</p>
+        </div>
+        <p class="report-foot"><span data-private-text>Private mode: On</span> · Not legal advice. Check every result yourself.</p>
       </article>
 
       <footer class="flow-foot" style="position:static;padding:12px 0;background:none;border:0">
@@ -155,6 +193,8 @@ Karim Benali</textarea>
         <div class="card">
           <h2 class="h3" style="margin-bottom:8px">Message</h2>
           <output for="message-text" class="small" id="both-message" style="display:block;white-space:pre-line">Hi Sarah,
+
+Thanks for sending the development agreement. Before I sign, could we look at a few points?
 
 Payment (5.4): could invoices be paid within 15 days of the invoice date?
 Ending early (12.2): if the project stops, could work already done be paid for?
@@ -172,15 +212,16 @@ Karim Benali</output>
           <p class="small muted">Summary of the six points asked for, with the review labels. Includes your notes only when you turn that on.</p>
           <div class="row" style="margin-top:16px">
             <button class="btn btn-primary" type="button" data-open="save-pdf"><svg class="icon"><use href="#i-download"/></svg>Save PDF</button>
-            <a class="link" href="#" data-tab="report">Open the report</a>
+            <button class="link" type="button" data-tab="report">Open the report</button>
           </div>
         </div>
       </div>
+      <p class="report-foot" style="margin-top:0"><span data-private-text>Private mode: On</span> · Not legal advice. Check every result yourself.</p>
       <footer class="flow-foot" style="position:static;padding:12px 0;background:none;border:0">
         <span class="small muted">Saved with the review.</span>
         <span class="spacer"></span>
         <button class="btn" type="button" data-open="rewrite-ai"><svg class="icon"><use href="#i-pencil"/></svg>Rewrite with AI</button>
-        <button class="btn" type="button" data-open="labels-changed"><svg class="icon"><use href="#i-refresh"/></svg>Regenerate</button>
+        <button class="btn" type="button" data-regenerate data-toast="Message regenerated"><svg class="icon"><use href="#i-refresh"/></svg>Regenerate</button>
         <button class="btn btn-primary" type="button" data-toast="Copied"><svg class="icon"><use href="#i-copy"/></svg>Copy message</button>
       </footer>
     </section>
@@ -189,7 +230,7 @@ Karim Benali</output>
       <span class="small muted">Saved with the review.</span>
       <span class="spacer"></span>
       <button class="btn" type="button" data-open="rewrite-ai"><svg class="icon"><use href="#i-pencil"/></svg>Rewrite with AI</button>
-        <button class="btn" type="button" data-open="labels-changed"><svg class="icon"><use href="#i-refresh"/></svg>Regenerate</button>
+      <button class="btn" type="button" data-regenerate data-toast="Message regenerated"><svg class="icon"><use href="#i-refresh"/></svg>Regenerate</button>
       <button class="btn btn-primary" type="button" data-toast="Copied"><svg class="icon"><use href="#i-copy"/></svg>Copy message</button>
     </footer>
   </main>
@@ -238,7 +279,7 @@ Karim Benali</output>
     </div>
     <div class="dialog-foot">
       <button class="btn" value="cancel">Keep this message</button>
-      <button class="btn btn-primary" value="ok" data-toast="Message regenerated">Regenerate</button>
+      <button class="btn btn-primary" value="ok" data-regenerate-confirm data-toast="Message regenerated">Regenerate</button>
     </div>
   </form>
 </dialog>
@@ -276,12 +317,12 @@ Karim Benali</output>
 
     function rebuild() {
       var body;
-      if (nothing) {
-        body = greeting() + '\n\nThanks for sending the development agreement. I\'ve read it and have no changes to ask for.\n\n' +
-          signoff() + '\n' + from.value;
+      var lines = [];
+      if (!nothing) list.querySelectorAll('input[type=checkbox]').forEach(function (cb) { if (cb.checked) lines.push(cb.value); });
+      if (lines.length === 0) {
+        // Deck 4.8: with no ticked lines the message is the greeting, one thank-you and the sign-off.
+        body = greeting() + '\n\nThanks for sending the development agreement.\n\n' + signoff() + '\n' + from.value;
       } else {
-        var lines = [];
-        list.querySelectorAll('input[type=checkbox]').forEach(function (cb) { if (cb.checked) lines.push(cb.value); });
         body = greeting() + '\n\nThanks for sending the development agreement. Before I sign, could we look at a few points?\n\n' +
           lines.join('\n') + '\n\n' + signoff() + '\n' + from.value;
       }
@@ -303,6 +344,23 @@ Karim Benali</output>
     list.addEventListener('change', rebuild);
     from.addEventListener('input', rebuild);
     if (nothing) { rebuild(); } else { show(); }
+
+    // Regenerate: in the normal state it rebuilds the text and the shared toast confirms.
+    // Only the labels-changed state asks first, in its dialog.
+    var labelsChanged = (new URLSearchParams(location.search).get('state') || '').split(/\s+/).indexOf('labels-changed') !== -1;
+    document.querySelectorAll('[data-regenerate]').forEach(function (b) {
+      if (labelsChanged) { b.removeAttribute('data-toast'); b.setAttribute('data-open', 'labels-changed'); }
+      else { b.addEventListener('click', rebuild); }
+    });
+    document.querySelector('[data-regenerate-confirm]').addEventListener('click', rebuild);
+
+    // Report options change the preview.
+    var reportFull = document.getElementById('report-full');
+    var reportNotes = document.getElementById('report-notes');
+    document.querySelectorAll('[data-report]').forEach(function (b) {
+      b.addEventListener('click', function () { reportFull.hidden = b.dataset.report !== 'full'; });
+    });
+    document.getElementById('include-notes').addEventListener('change', function (e) { reportNotes.hidden = !e.target.checked; });
 
     // Report and Message tabs share the Both panel and the footer; the footer repeats per panel.
     document.querySelectorAll('[role="tab"]').forEach(function (tab) {

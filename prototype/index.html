@@ -16,13 +16,13 @@
   .launch-art > img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
   :root[data-theme="dark"] .launch-art > img { filter: brightness(.82); }
   .launch-card { position: absolute; left: 56px; top: 50%; transform: translateY(-50%); width: 440px; max-width: calc(100% - 32px);
-    max-height: calc(100vh - 64px); overflow: auto; padding: 40px; background: var(--bg-paper); border-radius: var(--r-lg);
+    min-height: min(var(--card-h, 600px), calc(100vh - 64px)); max-height: calc(100vh - 64px); overflow: auto; padding: 40px; background: var(--bg-paper); border-radius: var(--r-lg);
     box-shadow: 0 1px 2px rgba(27,26,23,.08), 0 6px 18px rgba(27,26,23,.10); }
   .launch-logo { display: inline-block; margin-bottom: 28px; }
   .launch-logo { --logo-w: 190px; }
   .launch-logo img { width: 190px; }
-  .launch-card .display { font-size: 32px; line-height: 1.1; letter-spacing: -0.02em; margin: 0 0 12px; }
-  .launch-card h2.h1 { margin: 14px 0 8px; }
+  .launch-card .display { font-size: clamp(32px, 2.2vw + 14px, 42px); line-height: 1.1; letter-spacing: -0.02em; margin: 0 0 12px; }
+  .launch-card h1.h1 { margin: 14px 0 8px; }
   .launch-card [tabindex="-1"]:focus { outline: none; }
   .lede { margin: 0 0 22px; font-size: 14.5px; line-height: 1.55; color: var(--text-2); }
   .launch-card .btn-block { width: 100%; }
@@ -88,11 +88,9 @@
   html:is([data-text="150"], [data-text="200"]) .launch-art { position: relative; inset: auto; height: 220px; }
   html:is([data-text="150"], [data-text="200"]) .launch-card { position: static; transform: none; width: auto; max-width: none; max-height: none; overflow: visible; box-shadow: none; border-radius: 0; padding: 24px 16px 28px; }
 </style>
-<script>/* beats: the welcome arrives in steps, unless motion is reduced or a ?state= page is open */
-if (!matchMedia('(prefers-reduced-motion: reduce)').matches && location.search.indexOf('state=') === -1) document.documentElement.classList.add('beats');</script>
 </head>
 <body>
-<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8767/index.html</b> instead.</p>");</script>
 <main>
   <div class="launch">
     <figure class="launch-art">
@@ -102,7 +100,7 @@ if (!matchMedia('(prefers-reduced-motion: reduce)').matches && location.search.i
     <div class="launch-card">
       <section class="view-welcome" id="view-welcome" aria-labelledby="launch-title">
         <div class="running-head"><span>Clause Tracer</span><span>Runs on this computer</span></div>
-        <a class="logo launch-logo" href="index.html"><img class="on-light" src="logo.svg" alt="Clause Tracer"><img class="on-dark" src="logo-dark.svg" alt="Clause Tracer"></a>
+        <span class="logo launch-logo"><img class="on-light" src="logo.svg" alt="Clause Tracer"><img class="on-dark" src="logo-dark.svg" alt="Clause Tracer"></span>
         <h1 class="display" id="launch-title" tabindex="-1">Check a contract against your own rules.</h1>
         <p class="lede">Every label shows <span class="quoted">the exact words</span> it rests on, so you can check it yourself.</p>
         <div class="first-action">
@@ -115,7 +113,7 @@ if (!matchMedia('(prefers-reduced-motion: reduce)').matches && location.search.i
       <section class="view-key" id="view-key" aria-labelledby="key-title" hidden>
         <div class="running-head"><span>Clause Tracer</span><span>Runs on this computer</span></div>
         <button class="link back" id="to-welcome" type="button" aria-controls="view-welcome"><svg class="icon"><use href="#i-arrow-left"/></svg>Back</button>
-        <h2 class="h1" id="key-title" tabindex="-1">Add your OpenRouter key</h2>
+        <h1 class="h1" id="key-title" tabindex="-1">Add your OpenRouter key</h1>
         <p class="small muted">It runs on your computer with your own OpenRouter key, the account that pays for the AI. A typical review costs about $0.30 to $0.60.</p>
         <div class="field">
           <label for="key">OpenRouter key</label>
@@ -208,15 +206,23 @@ if (!matchMedia('(prefers-reduced-motion: reduce)').matches && location.search.i
       var cleaned = key.value.trim();
       if (cleaned !== key.value) { key.value = cleaned; status.textContent = 'Spaces removed.'; }
       else { status.textContent = ''; }
+      document.getElementById('key-error').classList.remove('on'); key.removeAttribute('aria-invalid');
     });
 
     // The welcome in beats: logo, then headline, then the line, then the buttons, 140 ms apart.
-    if (document.documentElement.classList.contains('beats')) {
+    // The hidden start state is set here, not in plain CSS, so the card is never empty if this script does not run.
+    if (motion && location.search.indexOf('state=') === -1) {
+      document.documentElement.classList.add('beats');
+      void vWelcome.offsetWidth;
       [['.launch-logo'], ['#launch-title'], ['.lede'], ['.first-action', '#to-key']].forEach(function (group, i) {
         setTimeout(function () {
           group.forEach(function (sel) { document.querySelector('#view-welcome ' + sel).classList.add('in'); });
         }, 120 + i * 140);
       });
+      // Fallback: if a timer is held back (slow load, background tab), show every part after 1.5 s.
+      setTimeout(function () {
+        vWelcome.querySelectorAll('.launch-logo, #launch-title, .lede, .first-action, #to-key').forEach(function (el) { el.classList.add('in'); });
+      }, 1500);
     }
 
     if (state === 'key' || state === 'checking' || state === 'key-ok' || state === 'key-error') view('key', false);
@@ -241,6 +247,13 @@ if (!matchMedia('(prefers-reduced-motion: reduce)').matches && location.search.i
         key.focus();
         return;
       }
+      // A key that does not start with sk-or- stands in for a refused key in this prototype.
+      var errorLine = document.getElementById('key-error');
+      if (key.value.trim().indexOf('sk-or-') !== 0 || key.value.trim() === 'sk-or-abc') {
+        errorLine.classList.add('on'); key.setAttribute('aria-invalid', 'true'); key.focus();
+        return;
+      }
+      errorLine.classList.remove('on'); key.removeAttribute('aria-invalid');
       save.disabled = true;
       idle.hidden = true;
       busy.classList.add('on');

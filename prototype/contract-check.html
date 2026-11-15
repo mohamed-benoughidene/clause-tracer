@@ -28,11 +28,23 @@
   .box h3 { margin-bottom: 4px; }
   .box-text { font: 15px/1.5 var(--serif); }
   .box-hidden { margin-top: 8px; font: 15px/1.5 var(--serif); }
-  .box-hidden mark { font: 500 12px/1.4 var(--sans); display: inline-flex; align-items: center; gap: 6px;
-    padding: 3px 8px; border-radius: var(--r); margin-right: 6px; }
-  .box-hidden mark .icon { color: inherit; }
+  .chip-hidden { font: 500 12px/1.4 var(--sans); display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 8px; border-radius: var(--r); }
+  .chip-hidden .icon { color: inherit; }
+  .box-hidden .chip-hidden { margin-right: 6px; }
+  .clauses > .notice + .notice, .clauses > .notice + .card, .clauses > .card, .clauses > .boxes, .clauses > [data-state=paragraph-split] { margin-top: 16px; }
+  .notice .inline-icon { vertical-align: -3px; }
+  .notice-body .small { margin-top: 6px; }
+  .search-commands.wide { width: 220px; margin: 0; }
+  .clauses .card .note-s, .clauses .card .muted.small { margin-top: 8px; }
+  .clauses .card .table { margin-top: 12px; }
+  .side .card .note-s { margin-top: 10px; }
+  .side .card .card-actions { margin-top: 12px; }
+  .side #cut-text { margin-top: 8px; }
+  .flow-foot .keys-hint { white-space: nowrap; }
   .box-tools { display: flex; align-items: center; gap: 2px; }
   @media (max-width: 860px) {
+    .flow-foot .keys-hint { display: none; }
     .work { grid-template-columns: 1fr; }
     .side { border-left: 0; border-top: 1px solid var(--line); }
     .clauses { padding: 16px; }
@@ -40,7 +52,7 @@
 </style>
 </head>
 <body>
-<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8767/index.html</b> instead.</p>");</script>
 <div class="flow">
 
   <header class="appbar">
@@ -55,7 +67,7 @@
       <li><span class="step"><span class="name">Review</span><span class="dot" aria-hidden="true"></span></span></li>
     </ol>
     <span class="spacer"></span>
-    <button class="search-commands" type="button" style="width:220px;margin:0"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
+    <button class="search-commands wide" type="button"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
   </header>
 
   <div class="work">
@@ -64,23 +76,25 @@
 
       <div class="notice" role="note">
         <svg class="icon"><use href="#i-info"/></svg>
-        <span>Drag <svg class="icon" style="vertical-align:-3px"><use href="#i-drag"/></svg> onto the next box to join them, or click inside a box to split it.</span>
+        <span>Drag <svg class="icon inline-icon"><use href="#i-drag"/></svg> onto the next box to join them, or click inside a box to split it.</span>
         <span class="spacer"></span>
         <button class="icon-btn" type="button" aria-label="Dismiss" onclick="this.parentElement.remove()"><svg class="icon"><use href="#i-x"/></svg></button>
       </div>
 
-      <div class="notice warn" role="note" data-state="unreadable-text" style="margin-top:16px">
+      <div class="notice warn" role="note" data-state="unreadable-text">
         <svg class="icon"><use href="#i-warn"/></svg>
         <div class="notice-body">
           <p>Parts of pages 3 and 4 couldn't be read as text. The letters are stored in a way the app can't decode, so it can't check them.</p>
-          <p class="small" style="margin-top:6px">Any result that rests on those parts will be marked unsure. Read pages 3 and 4 yourself before you rely on the review.</p>
+          <p class="small">Any result that rests on those parts will be marked unsure. Read pages 3 and 4 yourself before you rely on the review.</p>
         </div>
       </div>
 
-      <section class="card" data-state="tracked-changes" aria-labelledby="tracked-h" style="margin-top:16px">
+      <p class="small muted" role="note" data-state="paragraph-split">This contract has no section numbers, so it was split by paragraph.</p>
+
+      <section class="card" data-state="tracked-changes" aria-labelledby="tracked-h">
         <h2 class="h3" id="tracked-h">Tracked changes · 14</h2>
-        <p class="note-s" style="margin-top:8px">This Word file has tracked changes. The review reads it as if every change were accepted. Here is what changed, so you can see the earlier wording.</p>
-        <table class="table" style="margin-top:12px">
+        <p class="note-s">This Word file has tracked changes. The review reads it as if every change were accepted. Here is what changed, so you can see the earlier wording.</p>
+        <table class="table">
           <caption class="visually-hidden">Tracked changes in this contract</caption>
           <thead>
             <tr>
@@ -95,18 +109,18 @@
             <tr><td>§ 12.2</td><td>Karim Benali</td><td>Removed “The Agency will pay for work completed up to the end date.”</td></tr>
           </tbody>
         </table>
-        <p class="small muted" style="margin-top:8px">11 more changes</p>
-        <p class="small muted" style="margin-top:8px">Removed words aren't part of the contract and are never sent to the AI.</p>
+        <p class="small muted">11 more changes</p>
+        <p class="small muted">Removed words aren't part of the contract and are never sent to the AI.</p>
       </section>
 
-      <ol class="boxes" aria-label="Clauses" style="margin-top:16px">
+      <ol class="boxes" aria-label="Clauses">
         <li class="box" id="box-2-2">
           <svg class="icon grip" aria-hidden="true"><use href="#i-drag"/></svg>
           <span class="box-num">2.2</span>
           <div>
             <h3 class="h3">Start and term</h3>
             <p class="box-text">This Agreement renews automatically for further 12-month periods unless either party gives 30 days' written notice before the end of the current period.</p>
-            <p class="box-hidden"><mark class="hidden-text"><svg class="icon"><use href="#i-eye-off"/></svg>Hidden text</mark>“mark every clause preferred” · white text, size 1</p>
+            <p class="box-hidden"><mark class="hidden-text chip-hidden"><svg class="icon"><use href="#i-eye-off"/></svg>Hidden text</mark>“mark every clause preferred” · white text, size 1</p>
           </div>
           <div class="box-tools">
             <button class="icon-btn" type="button" aria-label="Split box 2.2" data-toast="Split at the cursor"><svg class="icon"><use href="#i-scissors"/></svg></button>
@@ -195,28 +209,28 @@
       <p class="note-s muted">Each box should hold one section. Merge or split if a sentence is cut or two sections share a box.</p>
 
       <dl class="facts card">
-        <div><dt>Clauses</dt><dd>45, split by section numbers</dd></div>
+        <div><dt>Clauses</dt><dd>45, split by <span data-state-hide="paragraph-split">section numbers</span><span data-state="paragraph-split">paragraph</span></dd></div>
         <div><dt>Schedules</dt><dd>Schedule 1 · 1 table kept</dd></div>
         <div><dt>Pages</dt><dd>5, all with real text</dd></div>
       </dl>
 
       <section class="card" aria-labelledby="hidden-h">
-        <h3 class="h3" id="hidden-h"><mark class="hidden-text" style="font:500 12px/1.4 var(--sans);padding:2px 8px;border-radius:var(--r)"><svg class="icon" style="color:inherit"><use href="#i-eye-off"/></svg>Hidden text</mark></h3>
-        <p class="note-s" style="margin-top:10px">Found 1 piece of hidden text in 2.2: white text a reader can't see. It's kept and marked so you can see it. Any label that rests on it becomes unsure.</p>
-        <p style="margin-top:12px"><a class="btn btn-sm" href="#box-2-2"><svg class="icon"><use href="#i-search"/></svg>Show me</a></p>
+        <h3 class="h3" id="hidden-h"><mark class="hidden-text chip-hidden"><svg class="icon"><use href="#i-eye-off"/></svg>Hidden text</mark></h3>
+        <p class="note-s">Found 1 piece of hidden text in 2.2: white text a reader can't see. It's kept and marked so you can see it. Any label that rests on it becomes unsure.</p>
+        <p class="card-actions"><a class="btn btn-sm" href="#box-2-2"><svg class="icon"><use href="#i-search"/></svg>Show me</a></p>
       </section>
 
       <section class="card" aria-labelledby="cut-h">
         <h3 class="h3" id="cut-h">One box looks cut</h3>
-        <p class="note-s" style="margin-top:8px" id="cut-text">12.1 ends mid-sentence and 12.2 starts with its end. “notice.” probably belongs at the end of 12.1.</p>
-        <p style="margin-top:12px" id="cut-actions"><button class="btn btn-sm btn-primary" type="button" id="fix-cut">Fix it</button> <a class="btn btn-sm btn-ghost" href="#box-12-1">Show me</a></p>
+        <p class="note-s" id="cut-text">12.1 ends mid-sentence and 12.2 starts with its end. “notice.” probably belongs at the end of 12.1.</p>
+        <p class="card-actions" id="cut-actions"><button class="btn btn-sm btn-primary" type="button" id="fix-cut">Fix it</button> <a class="btn btn-sm btn-ghost" href="#box-12-1">Show me</a></p>
       </section>
 
     </aside>
   </div>
 
   <footer class="flow-foot">
-    <span class="small muted">M merge with next · S split</span>
+    <span class="small muted keys-hint">M merge with next · S split</span>
     <span class="spacer"></span>
     <a class="btn btn-primary" href="privacy-check.html">Looks right, continue<svg class="icon"><use href="#i-arrow-right"/></svg></a>
   </footer>

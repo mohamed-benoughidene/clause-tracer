@@ -10,16 +10,32 @@
 <link rel="stylesheet" href="styles.css">
 <style>
   /* Error only: a centred card with no sidebar. */
-  .topbar { position: absolute; top: 16px; right: 24px; }
-  .topbar .search-commands { width: 194px; margin: 0; white-space: nowrap; }
+  .topbar { position: absolute; top: calc(var(--wintabs-h) + 16px); right: 24px; }
+  .topbar .search-commands { width: 232px; margin: 0; white-space: nowrap; }
   .solo { min-height: calc(100vh - var(--wintabs-h)); display: grid; place-items: center; padding: 72px 16px 32px; }
   .error-card { width: min(540px, 100%); padding: 32px 36px; }
-  .error-log { display: grid; gap: 10px; }
-  .error-log li { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 8px; align-items: baseline; }
+  .error-head { display: flex; align-items: center; gap: 10px; }
+  .error-head h1 { margin: 0; }
+  .error-head .icon { color: var(--unsure); flex-shrink: 0; }
+  /* the reading log, as on running.html: a mono timestamp and an upright serif line; a stopped line keeps its Unsure colour */
+  .log { display: grid; gap: 10px; margin-top: 14px; }
+  .log li { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 10px; align-items: baseline; }
+  .log li.stop span { color: var(--unsure-fg); font-weight: 500; }
+  .log time { font: 500 12px/1.5 var(--mono); color: var(--text-3); }
+  .log span { font: 15px/1.45 var(--serif); }
+  .error-card .reassure { margin-top: 18px; }
+  .error-card .details-h { margin-top: 20px; }
+  .error-card .code { margin-top: 4px; }
+  .error-card .details-note { margin-top: 4px; }
+  .error-card .row { margin-top: 20px; flex-wrap: wrap; }
+  @media (max-width: 480px) {
+    .error-card { padding: 24px 20px; }
+    .error-card .row .link { flex-basis: 100%; }
+  }
 </style>
 </head>
 <body>
-<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8767/index.html</b> instead.</p>");</script>
 
 <header class="topbar">
   <button class="search-commands" type="button"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
@@ -27,21 +43,24 @@
 
 <main class="solo">
   <section class="card error-card" aria-labelledby="error-title">
-    <h1 class="h2" id="error-title">The review couldn't be opened</h1>
+    <div class="error-head">
+      <svg class="icon" aria-hidden="true"><use href="#i-warn"/></svg>
+      <h1 class="h2" id="error-title">The review couldn't be opened</h1>
+    </div>
 
-    <ol class="error-log" style="margin-top:14px">
-      <li><span class="small faint">0:00</span><span class="note">Tried to open your review.</span></li>
+    <ol class="log">
+      <li class="stop"><time>0:00</time><span>Tried to open your review.</span></li>
     </ol>
 
-    <p class="note" style="margin-top:18px">Your files are safe. Copy the details and report the problem on GitHub, at <span class="mono">github.com/mohamed-benoughidene/clause-tracer/issues</span>.</p>
+    <p class="note reassure">Your files are safe. Copy the details and report the problem on GitHub, at <span class="mono">github.com/mohamed-benoughidene/clause-tracer/issues</span>.</p>
 
-    <p class="small" style="margin-top:20px"><strong>Details</strong></p>
-    <p class="mono" style="margin-top:4px">ERR-STEP6B-412</p>
-    <p class="small muted" style="margin-top:4px">The details hold only the app version, the step and this code. No contract text.</p>
+    <p class="small details-h"><strong>Details</strong></p>
+    <p class="mono code">ERR-STEP6B-412</p>
+    <p class="small muted details-note">The details hold only the app version, the step and this code. No contract text.</p>
 
-    <div class="row" style="margin-top:20px">
+    <div class="row">
       <button class="btn btn-primary" type="button" data-toast="Copied"><svg class="icon"><use href="#i-copy"/></svg>Copy the details</button>
-      <a class="btn" href="review.html">Try again</a>
+      <a class="btn" href="error.html">Try again</a>
       <a class="link" href="home.html">Back to reviews</a>
     </div>
   </section>

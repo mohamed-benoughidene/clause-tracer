@@ -129,6 +129,8 @@
   // ---------------------------------------------------------- keys
   document.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); palette.open ? palette.close() : palette.showModal(); return; }
+    // Ctrl+/ opens the full shortcut list (ux-copy 4.15): the dialog is on the Help page
+    if ((e.ctrlKey || e.metaKey) && e.key === '/') { const all = document.getElementById('all-shortcuts'); if (all) { e.preventDefault(); all.open ? all.close() : all.showModal(); } return; }
     if (e.key === 'Escape') $$('.menu:not([hidden])').forEach(m => { m.hidden = true; });
     if ((e.target.closest && e.target.closest('input, textarea, select, [contenteditable]')) || e.ctrlKey || e.metaKey || e.altKey) return;
     const open = $$('dialog[open]').pop();
@@ -244,6 +246,8 @@
       return DEFAULT_TABS.slice();
     };
     let tabs = readTabs();
+    // No review is open on the empty Home and on the page that says a review couldn't be opened: the strip shows Home only.
+    if ((PAGE === 'home.html' && STATE === 'empty') || PAGE === 'error.html') tabs = [];
     let cur = null;
     if (PAGE === 'new-review.html') cur = { id: 'new', title: 'New review', href: 'new-review.html' };
     else if (REVIEW_PAGES.includes(PAGE)) cur = DEFAULT_TABS[0];
