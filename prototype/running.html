@@ -83,10 +83,10 @@
     <aside class="margin" aria-label="Review progress">
 
       <!-- Running (default view) -->
-      <div class="stage" data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait">
-        <h2 class="h3">Step 1 of 4 · Reading the pages</h2>
-        <div class="bars" aria-hidden="true"><span class="on"></span><span></span><span></span><span></span></div>
-        <p class="small muted" style="margin-top:10px">Spent so far $0.05 of about $0.42 · About 1 min left</p>
+      <div class="stage" id="live-stage" aria-live="polite" data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait">
+        <h2 class="h3" id="live-step">Step 1 of 4 · Reading the pages</h2>
+        <div class="bars" id="live-bars" aria-hidden="true"><span class="on"></span><span></span><span></span><span></span></div>
+        <p class="small muted" id="live-cost" style="margin-top:10px">Spent so far $0.05 of about $0.42 · About 4 min left</p>
       </div>
 
       <!-- Interrupted: wrong key, at step 2 -->
@@ -201,7 +201,7 @@
           <button class="link" type="button" id="toggle-done" aria-controls="log" aria-expanded="true" data-state-hide="done">Hide finished lines</button>
         </div>
         <div id="log">
-          <ol class="log" data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait">
+          <ol class="log" id="live-log" data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait">
             <li><time>0:04</time><span>Read 5 pages.</span></li>
             <li class="running" aria-current="step"><time>0:09</time><span>Found 45 clauses.</span></li>
           </ol>
@@ -257,7 +257,7 @@
           <button class="btn" type="button" data-open="cancel-review">Cancel</button>
           <button class="btn btn-ghost" type="button" data-toast="Running in the background" data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait">Run in background</button>
         </div>
-        <p data-state-hide="wrong-key no-credit no-internet no-private-model rate-limit rate-limit-no-wait"><a class="btn btn-primary" href="review.html">Open the review<svg class="icon"><use href="#i-arrow-right"/></svg></a></p>
+        <p data-state="done"><a class="btn btn-primary" href="review.html">Open the review<svg class="icon"><use href="#i-arrow-right"/></svg></a></p>
         <p class="small muted" data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait">Closing the app pauses the review. Resume picks up from the first unfinished step.</p>
       </div>
     </aside>
@@ -317,6 +317,43 @@
       btn.textContent = hiding ? 'Show finished lines' : 'Hide finished lines';
       btn.setAttribute('aria-expanded', String(!hiding));
     });
+  })();
+
+  // Page-only behaviour: with no ?state, the page plays one review through its four steps, so the progress can be seen.
+  // Each frame is a moment of the same sample review; the words are the deck's (ux-copy 4.6). Any ?state holds the page still.
+  (function () {
+    if (new URLSearchParams(location.search).has('state')) return;
+    var step = document.getElementById('live-step'), bars = document.getElementById('live-bars').children;
+    var cost = document.getElementById('live-cost'), log = document.getElementById('live-log');
+    var STAGES = ['Reading the pages', 'Matching clauses', 'Judging the labels', 'Writing the notes'];
+    // [step, time, log line, replaces the running line?, spent, time left]
+    var FRAMES = [
+      [2, '0:21', 'Matched 12 of 45 clauses to positions.', false, '$0.08', 'About 3 min left'],
+      [2, '0:31', 'Matched all 45 clauses to 11 positions.', true, '$0.12', 'About 3 min left'],
+      [3, '1:40', 'Judged 6 of 11 positions.', false, '$0.21', 'About 2 min left'],
+      [3, '2:40', 'Judged the labels for 11 positions.', true, '$0.30', 'About 1 min left'],
+      [4, '3:52', 'Wrote the explanations and sorted the not-covered parts.', false, '$0.39', 'Under a minute left']
+    ];
+    function show(f) {
+      step.textContent = 'Step ' + f[0] + ' of 4 \u00b7 ' + STAGES[f[0] - 1];
+      for (var i = 0; i < bars.length; i++) bars[i].classList.toggle('on', i < f[0]);
+      cost.textContent = 'Spent so far ' + f[4] + ' of about $0.42 \u00b7 ' + f[5];
+      var last = log.lastElementChild;
+      if (f[3]) { last.firstElementChild.textContent = f[1]; last.lastElementChild.textContent = f[2]; return; }
+      last.classList.remove('running'); last.removeAttribute('aria-current');   // the finished line is inked
+      var li = document.createElement('li'), t = document.createElement('time'), s = document.createElement('span');
+      li.className = 'running'; li.setAttribute('aria-current', 'step');
+      t.textContent = f[1]; s.textContent = f[2]; li.append(t, s); log.append(li);
+    }
+    function finish() {   // the same switch app.js makes for ?state=done
+      document.querySelectorAll('[data-state]').forEach(function (el) { el.classList.toggle('on', el.getAttribute('data-state').split(' ').indexOf('done') > -1); });
+      document.querySelectorAll('[data-state-hide]').forEach(function (el) { if (el.getAttribute('data-state-hide').split(' ').indexOf('done') > -1) el.hidden = true; });
+    }
+    var n = 0;
+    var timer = setInterval(function () {
+      if (n < FRAMES.length) { show(FRAMES[n++]); return; }
+      clearInterval(timer); finish();
+    }, 2200);
   })();
 </script>
 </body>

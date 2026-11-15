@@ -278,7 +278,8 @@ The card shows one view at a time: Welcome, then Key. “Check your own contract
 | Element | Copy |
 | --- | --- |
 | Stages | 1 Reading the pages · 2 Matching clauses · 3 Judging the labels · 4 Writing the notes |
-| Progress | Step 1 of 4 · Reading the pages · Spent so far $0.05 of about $0.42 · About 1 min left · footer: Credit left: $3.10 |
+| Progress | Step 1 of 4 · Reading the pages · Spent so far $0.05 of about $0.42 · About 4 min left · footer: Credit left: $3.10 |
+| Progress, later steps | Step [n] of 4 · [stage] · Spent so far [amount] of about $0.42 · About [n] min left · last minute: Under a minute left. The prototype plays one review through the four steps and then shows Done; `?state=step-1` holds it still. |
 | Log lines | Read 5 pages. · Found 45 clauses. · Matched all 45 clauses to 11 positions. · Judged the labels for 11 positions. · Wrote the explanations and sorted the not-covered parts. · Finished. |
 | Privacy badge | Private mode is on. Providers don't keep your contract if you've turned off Safety Retention in OpenRouter, except for legally required safety screening. · menu: Turn private mode off… · Change models in Settings |
 | Reading log | Reading log · Hide finished lines · Show finished lines · other stop lines: Matched 12 of 45 clauses to positions. · Judged 6 of 11 positions. · Stopped at step 3. Credit ran out. · Stopped at step 3. No private-mode model was available. |
