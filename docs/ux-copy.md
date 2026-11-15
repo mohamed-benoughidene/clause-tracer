@@ -203,10 +203,12 @@ The card shows one view at a time: Welcome, then Key. “Check your own contract
 | Element | Copy |
 | --- | --- |
 | Heading | New review |
-| Steps | 1 Contract · 2 Contract check · 3 Privacy check · 4 Review |
+| Steps | Contract · Contract check · Privacy check · Review (names only, over a line with a dot for each; no numbers). A finished step's name carries “, done” in hidden text. The same row is on Contract check, Privacy check and Running. |
 | No key | Add your OpenRouter key to run a review. What you've done here is kept. [Add key] |
 | Offline | You're offline. You can prepare this draft, but sending it for review needs the internet. |
-| Section 1 | Load the contract · [Upload] [Paste text] |
+| Section 1 | Load the contract · [Load file] [Paste text] |
+| Load file dialog | Load the contract · Drop the contract here · [Choose a file] · PDF, Word, text or Markdown · up to 20 MB · read on this computer · Reading page 3 of 5 · [Cancel] · Contract loaded · 5 pages · 45 clauses found · [Replace] · First page · is this the right contract? · [Done] · [Close] (icon label). A file that can't be read shows its own message (Empty, Too large, Scanned and Old Word below) inside the dialog. |
+| No file loaded (`?state=no-file`) | Drop the contract here · [Choose a file] · PDF, Word, text or Markdown · up to 20 MB · read on this computer. Continue is off. |
 | File card | [file name] · PDF · 5 pages · 929 words · real text · [Replace] |
 | Preview | First page · is this the right contract? |
 | Preview hint | Wrong file? Click Replace, or drop another file on this card. |
@@ -214,7 +216,7 @@ The card shows one view at a time: Welcome, then Key. “Check your own contract
 | Buttons on a blocking or warning notice | Paste text · Replace file · Paste their text · Choose another file |
 | Paste field | Contract text · Keep the clause numbers and headings. Paste only the pages you want reviewed. |
 | Review name | Review name · Pick a name you'll recognise later. |
-| Scanned (blocks) | This PDF is pictures of pages, so its text can't be read. Upload a Word version, or paste the text. |
+| Scanned (blocks) | This PDF is pictures of pages, so its text can't be read. Load a Word version, or paste the text. |
 | Mixed (blocks) | Pages 7 and 8 are pictures, not text. They're skipped unless you paste their text. |
 | Too large (blocks) | This file is 48 MB. The limit is 20 MB. Paste only the pages you want reviewed. |
 | Empty (blocks) | This file has no text. Choose another file, or paste the text. |
@@ -226,9 +228,9 @@ The card shows one view at a time: Welcome, then Key. “Check your own contract
 | Unedited starter | Copied from the starter · side: service provider · 11 example positions. You haven't changed them yet. [Make the limits yours] |
 | First review (`?state=first-run`) | The user has no playbook yet, so the picker holds one copy of the starter, already picked, with the line above: “Copied from the starter · …” and [Make the limits yours]. [Copy a starter] stays, so the user can copy or pick another. No other words are new. |
 | Playbook deleted | The playbook this draft used is gone. Pick another one. |
-| Section 3 | Which party in this contract is the [side]? · Picked last time · [Add a missing party] |
+| Section 3 | Which party in this contract is the [side]? · One card, one block for each party: a radio, the party as the contract names it, a tag, Name, Address · Picked last time · [Add a missing party] |
 | Party details | Filled in from the contract's opening lines. Every copy of them is replaced before anything is sent. |
-| Party fields | Your party · name · Address · Other side · name · Address |
+| Party fields | Tag: Your party · Other side · fields: Name · Address (each block has both) |
 | Add party dialog | Add a party · Use the name exactly as the contract writes it. · Party name · Address · Cancel / Add party · toast: Party added |
 | Footer | Saved as a draft · [Continue] |
 
@@ -255,6 +257,7 @@ The card shows one view at a time: Welcome, then Key. “Check your own contract
 | Element | Copy |
 | --- | --- |
 | Heading | Privacy check |
+| Steps | The stepper of 4.3. Hidden text on finished steps: Contract, done · Contract check, done |
 | Find to replace | Type words to find and replace · [Replace this] · toast: Replaced. Check the marked words. |
 | Legend | Will be replaced |
 | Select hint | Drag across any words on the pages to replace them, like selecting text anywhere else. Details like “the only bakery in town” can identify someone too. |
@@ -264,7 +267,7 @@ The card shows one view at a time: Welcome, then Key. “Check your own contract
 | Row | Person 1 · Karim Benali · 2 places |
 | Name variant | “Ms Jones” in 14.5 looks like Sarah Jones (Person 2). · [Same person] [Different person] · toasts: Both are Person 2 · “Ms Jones” is Person 3 |
 | Kept note | Kept: amounts, dates, durations, roles like “the Developer”, and England and Wales in the governing-law clause. |
-| Private mode | Private mode for this review · Only providers that don't keep your contract. |
+| Private mode | The switch, labelled Private mode for this review · Only providers that don't keep your contract. · the knob shows a bar when on and a ring when off · toasts: Private mode on · Private mode off |
 | Private off warning | Private mode is off. The contract goes to AI models that may keep it. Names and addresses are still replaced. Turn it back on unless you're sure. |
 | Summary | 929 words go to OpenRouter, with 7 details replaced: 2 people, 1 company, 2 addresses, 1 email and 1 ID number. |
 | Caution | The check can miss things. Look over the marked words. |
@@ -277,14 +280,13 @@ The card shows one view at a time: Welcome, then Key. “Check your own contract
 
 | Element | Copy |
 | --- | --- |
-| Stages | 1 Reading the pages · 2 Matching clauses · 3 Judging the labels · 4 Writing the notes |
+| Stages | 1 Reading the pages · 2 Matching clauses · 3 Judging the labels · 4 Writing the notes. A status pie beside the title fills as the review runs. Under the title, the small step that is running: Reading the pages: Linking references and defined terms · Matching clauses: Matching clauses to positions, Pulling out the quotes and values, Checking each quote against the contract · Judging the labels: Picking labels from the numbers, Judging the wording · Writing the notes: Writing the explanations, Sorting the not-covered parts. (The stepper in the bar shows Contract, Contract check and Privacy check done, and Review current.) |
 | Progress | Step 1 of 4 · Reading the pages · Spent so far $0.05 of about $0.42 · About 4 min left · footer: Credit left: $3.10 |
 | Progress, later steps | Step [n] of 4 · [stage] · Spent so far [amount] of about $0.42 · About [n] min left · last minute: Under a minute left. The prototype plays one review through the four steps and then shows Done; `?state=step-1` holds it still. |
 | Log lines | Read 5 pages. · Found 45 clauses. · Matched all 45 clauses to 11 positions. · Judged the labels for 11 positions. · Wrote the explanations and sorted the not-covered parts. · Finished. |
-| Privacy badge | Private mode is on. Providers don't keep your contract if you've turned off Safety Retention in OpenRouter, except for legally required safety screening. · menu: Turn private mode off… · Change models in Settings |
+| Private mode (footer) | There is no switch on this screen (owner, 15 Nov 2026). Footer, on: Private mode is on. Providers don't keep your contract if you've turned off Safety Retention in OpenRouter, except for legally required safety screening. Footer, off: Private mode is off. The contract goes to AI models that may keep it. · [Turn private mode off…] in the No private model state · Change models in Settings |
 | Reading log | Reading log · Hide finished lines · Show finished lines · other stop lines: Matched 12 of 45 clauses to positions. · Judged 6 of 11 positions. · Stopped at step 3. Credit ran out. · Stopped at step 3. No private-mode model was available. |
-| Background | [Run in background] · toast: Running in the background |
-| Close note | Closing the app pauses the review. Resume picks up from the first unfinished step. |
+| Leave note | You can leave this screen. Closing the app pauses the review, and Resume picks up from the first unfinished step. There is no “Run in background” button: Home and the window tabs already leave the screen. |
 | Wrong key | Interrupted at step 2 of 4 · Matching clauses · OpenRouter turned down your key. Check it in Settings, then resume. · [Open key settings] [Resume] · log: Stopped at step 2. OpenRouter turned down the key. |
 | Interrupted progress | Interrupted at step [n] of 4 · [stage] · Spent so far $0.02 of about $0.42 · Paused · footer: Paused · credit left: $3.10 (no credit: Credit left: $0.00 · paused) |
 | No internet | The internet dropped at step 2. Resume picks up from the first unfinished step. · log: Stopped at step 2. The internet dropped. |
@@ -294,7 +296,7 @@ The card shows one view at a time: Welcome, then Key. “Check your own contract
 | No private model | No private-mode model is available for step 3 right now. Wait and resume, or turn private mode off for this review. · [Turn private mode off…] |
 | Done | Your review is ready · Cost $0.39 · Took 4 min · [Open the review] · footer: Credit left: $2.71 (the cost is shown once, above) |
 | Cancel dialog | Cancel this review? · So far it has cost $0.05 of about $0.42. Finished steps are kept, so you won't pay for them again. · Keep running / Cancel review |
-| Private off dialog | Turn private mode off for this review? · The contract goes to AI models that may keep it. Names and addresses are still replaced. · Cancel / Turn off · toast: Private mode off |
+| Private off dialog | Turn private mode off for this review? · The contract goes to AI models that may keep it. Names and addresses are still replaced. · Cancel / Turn off. Turning private mode on again is one click and asks nothing. One toast follows the switch: Private mode on · Private mode off. The dialog is on the Privacy check, and on the running screen after “Turn private mode off…”. |
 
 ### 4.7 Review (`review.html`)
 
@@ -303,7 +305,7 @@ The card shows one view at a time: Welcome, then Key. “Check your own contract
 | Element | Copy |
 | --- | --- |
 | Title | [review name] · [playbook] · playbook as of 5 Nov, 10:31 |
-| Actions | Back to reviews (icon label) · Private mode: On (menu) · More actions (icon label), a menu: Search commands · Ctrl+K · Suggestions · Models and cost · $0.39 · Re-run… · Start over… · then Output. Rewrite is in the detail, as “Rewrite this clause”. The bar has no status text: “Ready to check” and “Done” belong to Home (4.2). |
+| Actions | Back to reviews (icon label) · More actions (icon label), a menu: Search commands · Ctrl+K · Suggestions · Models and cost · $0.39 · Re-run… · Start over… · then Output. Rewrite is in the detail, as “Rewrite this clause”. The bar has no status text: “Ready to check” and “Done” belong to Home (4.2). |
 | Practice banner | Practice review · One label here is wrong on purpose. Find it, open it and fix it. Real reviews work the same way. [Start a real review] |
 | Playbook changed | Your playbook changed after this review ran. The labels use the old limits. [Re-run] · The review never shows more than one banner: this one and the practice banner are the only two. |
 | Read first: unedited starter | Row: Example playbook, unedited. It opens in the column: Example playbook, unedited · This review uses the example playbook, unedited. Its limits are examples, not yours. · [Make the limits yours] [Got it] · [All labels] |
@@ -313,18 +315,18 @@ The card shows one view at a time: Welcome, then Key. “Check your own contract
 | Law line, one | This contract follows England and Wales law. If there's a dispute, England and Wales law settles it. (A small faint line at the end of the Labels list.) |
 | Law line, two | This contract names two places' law: England and Wales in 14.6, and Algeria in Schedule 2. Ask which one applies before you sign. |
 | Law line, none | This contract doesn't say which place's law applies. If there's a dispute, the two sides could argue over it. Ask for a governing-law clause. |
-| Privacy badge | Private mode: only providers that don't keep your contract see this review. · Mixed: steps 1 and 2 ran in private mode, steps 3 and 4 didn't. · toast: Private mode stays on |
+| Private mode | The review has no switch (owner, 15 Nov 2026); the switch is only on the privacy check (see 4.6 for the dialog and toasts). When steps ran with different settings (`?state=mixed`), a banner says: Mixed: steps 1 and 2 ran in private mode, steps 3 and 4 didn't. |
 
 **Labels list and checking card**
 
 | Element | Copy |
 | --- | --- |
-| Group headings (count positions) | Walk-away [n] · Unsure [n] · [n] pencilled in (next to Unsure) · Acceptable [n] · [n] in Missing (next to Acceptable) · Preferred [n]. Each heading is the stamp, the count and a `?`, in that order. A row has a pin, “§ 5.4 · 1 Days until paid” and a tick, with no stamp. The count of parts not covered is in the Not covered tab. |
+| Group headings (count positions) | Walk-away [n] · Unsure [n] · [n] pencilled in (next to Unsure) · Acceptable [n] · [n] in Missing (next to Acceptable) · Preferred [n]. Each heading is the stamp, the count (faint) and a `?` that shows on hover and focus. “· 1 pencilled in” is hidden text for screen readers. A row is a pin, the position's title and “§ 5.4” at the right, with no stamp, no line between rows and no tick. A row's accessible name starts with the position: “Position 5 · Revision rounds”. The Missing tab has one heading (Acceptable · 3), not a stamp on every row. The count of parts not covered is in the Not covered tab. |
 | Label definitions (?) | Preferred: The clause gives you at least what your playbook says you want. · Acceptable: Not as good as preferred, but inside the limit you set in your playbook. · Walk-away: Past the limit you set in your playbook. Ask for a change before you sign. · Unsure: The wording is too unclear to label, or the quote couldn't be confirmed. The app always says why. You decide. · Help uses the same four definitions. |
-| Counter | 2 of 11 positions checked |
-| Positions done | Every position is checked. To finish, read the not-covered parts, then tick the box in Not covered. · toast, when the last detail is decided: Every position is checked |
-| Done | Done. Every position is checked and you've read the rest. You can write the message now. |
-| Next | Next unchecked · J (in the progress line, and in the head of each detail) |
+| Counter | A small pie, then: 2 of 11 positions checked. The same pie, larger, is before the review's title in the bar, and a small one is in the review's window tab. The pie has no words; the counter text is read out. |
+| Positions done | Every position is checked (the pie is a full disc with a check) · To finish, read the not-covered parts, then tick the box in Not covered. · toast, when the last detail is decided: Every position is checked. `?state=all-checked` shows this. |
+| Done | Done. Every position is checked and you've read the rest. (counter) · You can write the message now. (note under it) |
+| Next | Next unchecked · J (in the counter line, and in the head of each detail) |
 | Unsure-heavy | More than half of these labels are unsure. That usually means the wording is vague, or your playbook suits a different kind of contract. Read the unsure ones first: each says what it couldn't decide. |
 | Tabs | Labels [n] · Not covered [n] · Missing [n] |
 | Not-covered tick | I've read the 35 not-covered parts |
@@ -536,8 +538,9 @@ The eleven starter positions and their "why this matters" notes are in Spec 7; t
 | Element | Copy |
 | --- | --- |
 | Command palette | Search commands · Ctrl+K |
-| Sidebar | New review · Reviews · Playbooks · Customers · Settings · Help · OpenRouter key saved · Private mode: On · Credit left: $3.10 |
-| Toasts | Saved · Copied |
+| Sidebar | New review · Reviews · Playbooks · Customers · Settings · Help · OpenRouter key saved · Private mode: On · Credit left: $3.10 · Collapse menu (Expand menu when folded; Ctrl+B does the same). Folded, each item shows its words as a tooltip, and the logo is the symbol alone, “Clause Tracer”. |
+| Window tabs | Home (icon label) · the review's name on its tab · Close tab, [review name] (icon label) · New review (icon label, the “+”) · the strip is labelled Open reviews |
+| Toasts | Saved · Copied · Private mode on · Private mode off |
 | Close buttons | Close (icon label) |
 | Back | Back to reviews |
 | Legal line on every message and report page | Not legal advice. Check every result yourself. |
@@ -808,3 +811,25 @@ The owner accepted the new first launch. A thread was tried and removed the same
 | 5 | Two primary buttons in one card would compete. | Each view has one primary button: “Open the free sample contract” in Welcome, “Save key” in Key. |
 | 6 | The reading log showed finished and running lines alike (design-system 8.3). | Finished lines are ink and upright. The line of the step still running is graphite italic with a dashed underline. No words changed. Stopped lines keep the Unsure colour. |
 | 7 | The review had no sign on the page that a pin's label was done. | A pin is an outline until its label is decided, then filled. Its accessible name ends “, checked” or “, not checked”. The list row says the same to a screen reader, in hidden text. |
+
+### 6.15 Window tabs, folding sidebar, switch, stepper, load dialog and pie, 15 Nov 2026
+
+The owner asked for these, with pictures of other apps. The deck, the prototype, the spec and the design system were changed together. Words that were new, changed or removed:
+
+| # | Change | Words |
+| --- | --- | --- |
+| 1 | Window tabs on every page except First launch and the prototype map. | **New:** Home · New review · Close tab, [name] · Open reviews. |
+| 2 | The sidebar folds to an icon rail. | **New:** Collapse menu · Expand menu. |
+| 3 | The Private mode dropdown (the “badge”) became a switch. Off asks once, on is one click. | **New:** Private mode · Private mode on · Private mode off (toasts). **Removed:** “Private mode: On” as the badge, “Turn private mode off…” as a menu item, and the toast “Private mode stays on”. |
+| 4 | The four steps lost their numbers and became a stepper that moves. | **Removed:** “1”, “2”, “3” and “4” before the step names. Names kept: Contract, Contract check, Privacy check, Review. |
+| 5 | “Upload” became “Load file”, and it opens a dialog. | **New:** Load file · Drop the contract here · Choose a file · Reading page 3 of 5 · Contract loaded · 5 pages · 45 clauses found · Done. **Changed:** “Upload a Word version” is now “Load a Word version”. |
+| 6 | The two party cards became one. | **New:** the tags “Your party” and “Other side” sit by each party. Name and Address are in each block. |
+| 7 | The review's 3 px bar became a pie, now also beside the title and in the tab. The rows lost their tick, and the group counts went faint. | **Changed:** “Every position is checked” and “Done. Every position is checked and you've read the rest.” are the counter. “To finish, read the not-covered parts, then tick the box in Not covered.” and “You can write the message now.” are the shorter notes. **Removed:** the 3 px bar (6.13, row 3). |
+| 8 | The mixed state is a banner, not a badge value. | “Mixed: steps 1 and 2 ran in private mode, steps 3 and 4 didn't.” |
+| 9 | The running footer follows the switch. | Off: “Private mode is off. The contract goes to AI models that may keep it.” |
+| 10 | The review screen lost the Private mode switch (owner, 15 Nov 2026: “no point” in showing it there). The running footer now starts in step with the saved choice. | **Removed from the review:** the switch and its dialog. |
+| 13 | The running screen lost the switch too (owner, 15 Nov 2026): the AI steps are already going, and private mode is chosen on the privacy check. The footer says it in words. | **Removed:** the switch in the bar. **Kept:** “Turn private mode off…” in the no-private-model stop, with its dialog and toast. |
+| 11 | The running screen's four-part bar became a status pie beside the title, with the running small step under it (owner, 15 Nov 2026, after Linear's status icon). A list of the four stages was tried and rejected the same day. | **Changed:** the bar is gone. **New:** the eight small-step names in 4.6 (pipeline steps 5 to 11, Spec 6.1). |
+| 12 | The “Run in background” button is gone (owner, 15 Nov 2026). It only showed a toast: Home already leaves the screen and the review keeps running. | **Removed:** Run in background · Running in the background (toast). **Changed:** the note under Cancel now starts “You can leave this screen.” |
+
+Home's “Ready to check” gauge stays a solid disc. It does not show the share checked (design-system 5.8).

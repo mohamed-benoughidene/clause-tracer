@@ -33,7 +33,7 @@ These are the rules everything else follows. The Source column names the decisio
 | 7 | **Two radii, one shadow.** The radii are 4 px and 8 px. Only the contract sheet casts a shadow in the page, and the first-launch card, which is a sheet of paper and uses the same shadow. Floating layers (dialogs, menus) are the exception. | Principle 6 |
 | 8 | **Group by space, then tone, then border.** A group sits on a slightly darker warm tone, with no border. | Principle 7 |
 | 9 | **Two voices.** IBM Plex Sans is used for the interface. IBM Plex Serif is used for headings, the friend's notes (in italic) and quotes from the contract. Typeset contract pages use Liberation Serif, the look of the document itself. | Principle 4 |
-| 10 | **Real content in every state.** Empty, error and loading states use real words and real numbers. There are no spinners and no fake delays; the reading log shows the actual work. | Principle 8 |
+| 10 | **Real content in every state.** Empty, error and loading states use real words and real numbers. There are no spinners and no fake delays; the reading log shows the actual work. In the prototype the Load file bar and the running play-through only stand in for real progress. | Principle 8 |
 | 11 | **Nothing machine-made.** Every element carries meaning. No effect is used for its own sake, and nothing borrows the look of other AI tools. Section 4.1 lists what is never used. | Owner, 14 Nov 2026; `ux-copy.md` section 1.1 |
 | 12 | **One thing at a time.** The review shows the contract and one column. The column shows the list or one label's detail, never both, and nothing covers the contract. | Owner, 14 Nov 2026 |
 
@@ -220,13 +220,26 @@ Everything else is flat. Depth inside a page comes from tone (`--bg-tone`, `--bg
 
 ### 3.9 Motion
 
-There is almost no motion, and this is the complete list. There are no spinners, because progress is shown by the reading log and the step gauges.
+Motion is small, short and tied to a change the user caused. This is the complete list. There are no spinners, nothing loops, nothing moves for decoration, and the reading log, not an animation, shows that work is going on. Every row stops under `prefers-reduced-motion: reduce`, and the finished look shows at once. Updated 15 Nov 2026 (owner).
 
 | Motion | Time | Reduced motion |
 | --- | --- | --- |
-| The toggle knob | 150 ms (`left`) | Not yet handled (8.3) |
+| The Private mode switch: the knob slides and the track changes colour | 150 ms ease | Stops |
+| The sidebar folds to the icon rail (the width of the first column) | 150 ms ease | Stops |
+| Icon movements on action icons (5.13): the arrow nudges, the plus turns, a press shrinks the icon | 150 ms ease, transform only | Stops |
+| The logo: the butterfly folds its wings once when the logo is pointed at or reached with the keyboard (owner, 15 Nov 2026). The name stays still, and the logo files are unchanged | 110 ms ease-in, then 180 ms ease-out, transform only | No movement |
+| The progress pie fills as positions are checked (the column, the title and the window tab, all at once) | 300 ms ease-out, no bounce | Jumps |
+| A pin becomes filled when its label is decided | 300 ms ease-out | Stops |
+| The full disc and its check appear when every position is checked | 150 ms ease-out, after the fill | Stops |
+| The `?` on a group heading fades in on hover and keyboard focus | 150 ms ease-out | Stops |
+| The flow stepper, on every load of a step page: the line into the current step draws from the left, then the ring appears. On step 1, which has no line, the ring and its inner dot grow in from the centre | 400 ms ease-out, then 150 ms. Step 1: 300 ms | Stops, and the finished look shows at once |
+| The flow stepper, when the user presses the step's forward button: this dot becomes done (a check) and the next line starts to draw, then the page changes | 200 ms before the page changes | Stops, and there is no delay |
+| The bar in the Load file dialog while a file is read | 400 ms linear, per page | Stops |
+| The knob of the `.toggle` in Settings | 150 ms (`left`) | Not yet handled (8.3) |
 | The chevron of the Settings model folds | 150 ms | Not yet handled (8.3) |
 | The arrow of the first-launch primary button moves 2 px on hover and focus | 150 ms ease-out | No movement |
+
+**Never animated:** stamps and pins on the page (a pin only changes colour once), the reading log, and anything that repeats. The movements show a change that happened. They never invite a click.
 
 For the real build, use 150 ms ease-out for state changes, and respect `prefers-reduced-motion` for every row.
 
@@ -236,8 +249,8 @@ For the real build, use 150 ms ease-out for state changes, and respect `prefers-
 | --- | --- |
 | ≤ 1100 px | Review: the Pages toggle and the thumbnails hide, and the contract and the column stack |
 | ≤ 900 px | First launch: the picture is a 220 px band above a full-width card, with no shadow and square corners |
-| ≤ 860 px | The sidebar goes above the content; two-column grids and flow side panels stack; tables scroll sideways |
-| Text size 150% or 200% (`html[data-text]`, set by `app.js`) | Same as ≤ 860 px, and the app bar, steps and button rows wrap. First launch is laid out as at ≤ 900 px. In the review the Pages toggle and the thumbnails hide, the contract and the column stack, and the group headings, the progress line and the detail head wrap. The window width is unchanged, so the media queries don't fire |
+| ≤ 860 px | The sidebar goes above the content, and Collapse menu is hidden; two-column grids and flow side panels stack; tables scroll sideways |
+| Text size 150% or 200% (`html[data-text]`, set by `app.js`) | Same as ≤ 860 px (the sidebar is never folded), and the app bar and button rows wrap. First launch is laid out as at ≤ 900 px. In the review the Pages toggle and the thumbnails hide, the contract and the column stack, and the group headings, the progress line and the detail head wrap. The window width is unchanged, so the media queries don't fire |
 
 The design target is a laptop of about 1366 × 768 (Spec 14.4).
 
@@ -247,9 +260,9 @@ The design target is a laptop of about 1366 × 768 (Spec 14.4).
 
 Four icons are still hand-drawn, on the old 16 px stroked grid, because Remix has no match: `approx` (≈), `ring-dashed` and `thread`, and `help`, whose Remix version is too small at 12 px inside the Unsure stamp.
 
-There are 46 icons in the sprite, 42 from Remix and the 4 above:
+There are 49 icons in the sprite, 45 from Remix and the 4 above. Three Remix icons were added on 15 Nov 2026: `home` (the Home window tab), `sidebar-fold` and `sidebar-unfold` (the Collapse menu and Expand menu button).
 
-`approx arrow-left arrow-right book check chev-down chev-left chev-right clock cloud-off copy doc dots download drag eye-off filter gear help info key link list lock mail merge minus paste pause pencil play plus refresh ring-dashed scissors search shield textsize thread trash undo unlock upload users warn x`
+`approx arrow-left arrow-right book check chev-down chev-left chev-right clock cloud-off copy doc dots download drag eye-off filter gear help home info key link list lock mail merge minus paste pause pencil play plus refresh ring-dashed scissors search shield sidebar-fold sidebar-unfold textsize thread trash undo unlock upload users warn x`
 
 **Licence.** The Remix icons are under the Remix Icon License v1.0 (January 2026), not the repository's licence. The text is in `prototype/LICENSE-remixicon.txt`. A plain reading, not legal advice: it allows the icons inside a product that is sold, as functional parts, and forbids selling or redistributing them as an icon pack, or using one as a logo. [ADR 0007](adr/0007-document-reading-stack.md) records it, and the third-party licences page lists it ([ux-copy 4.18](ux-copy.md#418-third-party-licences-licenceshtml-not-built-yet)).
 
@@ -271,6 +284,7 @@ These make an app look machine-made, or look like every other AI tool. None is u
 | Illustration beyond the First launch picture | Real content |
 | Skeleton loaders, shimmer and spinners | The reading log and the step gauges |
 | Typing or streaming effects on text | The finished text, shown at once |
+| Motion that loops, or moves for decoration | The short movements listed in 3.9, each tied to a change the user caused |
 | Pill badges for status | The gauge (5.8) and the square stamp (5.2) |
 | The names "assistant", "copilot" or "agent" for the AI | "the AI", or the plain action ("Ask AI") |
 | A third corner radius, or a second in-page shadow | `--r` and `--r-lg`; the sheet shadow only |
@@ -303,6 +317,8 @@ The default is 36 px tall, with a 0 14 px padding, `--r`, a `--line-strong` bord
 
 - **Do:** name the outcome ("Send for review", "Copy to your playbooks").
 - **Don't:** make a red button. A destructive button is a secondary button with an exact label ("Delete everything"), and the confirm dialog names what will go.
+
+**Icon movements** (15 Nov 2026, owner). An action icon inside a button, link, nav item or menu item moves a little on hover and keyboard focus: an arrow or chevron nudges 2 px the way it points, a plus turns 90°, a gear turns 30°, download sinks 2 px, upload rises 2 px, copy lifts 1 px, search grows 6%, and a nav icon shifts 1 px. A press shrinks any of them to 94%. The movement is 150 ms, transform only, and it is off under reduced motion. It never touches stamps, pins or the logo, and nothing loops. The CSS finds the icon by its sprite name, so no page needs markup for it.
 
 ### 5.2 Label stamp `.stamp`
 
@@ -397,7 +413,8 @@ There are two warning levels and three types of message.
 | Warning notice | `.notice.warn` | Unsure colours, for anything that blocks or needs a fix. *(Defined per page; see 8.1.)* |
 | Toast | `.toast` | An ink bar (8 px corners) at the bottom centre with short past-tense words: "Copied", "Saved", "Replaced. Check the marked words." It is triggered by `data-toast`. |
 | Reading log | `.log` (running) | Mono timestamp plus a Serif 15 line. A finished line is `--text` and upright. The line of the step still running is `--pencil` italic with a 1 px dashed underline (`.running`, `aria-current="step"`). A stopped line keeps Unsure fg. Nothing animates. |
-| Progress bars | `.bars` (running), `.progress` (review) | 3–4 px tall: ink when done, Unsure when stopped. The review's bar is 3 px, under one line of text. |
+| Progress bar | `.load-bar` (Load file dialog) | 4 px tall, ink. The review uses the progress pie (5.14), and the running screen has a status pie (next row). |
+| Status pie | `.stage-head .pie` (running) | One ring, 28 px, with a wedge that grows as the review moves through its eight small steps (owner, 15 Nov 2026, after Linear’s status icon; a stage list was tried first and rejected). The step that is running counts as half done. It is ink while running, an Unsure ring and wedge when the review stops, and a full ink disc with a check when done. Beside it: the title (“Step 2 of 4 · Matching clauses”) and, under it, the name of the small step that is running. The wedge grows over 300 ms ease-out and jumps under reduced motion (same `.pie` as 5.14). |
 
 ### 5.12 Overlays
 
@@ -406,6 +423,7 @@ There are two warning levels and three types of message.
 | Dialog | `dialog` | A surface background, `--r-lg`, the dialog shadow, at most 560 px wide. It has a `.dialog-body` (24 px, gap 14) and a `.dialog-foot` (right-aligned, gap 8). |
 | Wide dialog | `dialog.wide` | At most 860 px (rewrite, before and after) |
 | Side panel | `dialog.panel` | Full height on the right, at most 480 px wide, square corners. Used for Suggestions. The label detail is not an overlay: it sits in the review's right column (5.14). |
+| Load dialog | `dialog.load-dialog` | See “Load dialog” under 5.13. |
 | Command palette | `dialog.palette` | 10vh from the top; a 48 px input, grouped results, and a shortcut on every row |
 | Menu | `.menu` | A popover of at least 200 px, `--r-lg`, the menu shadow, 8 × 10 items |
 
@@ -413,12 +431,25 @@ There are two warning levels and three types of message.
 
 | Component | Class | Notes |
 | --- | --- | --- |
-| Sidebar | `.sidebar` | 232 px, sticky, on surface; ends in `.sidebar-foot` (privacy mode, credit) |
+| Sidebar | `.sidebar` | 232 px, sticky, on surface; ends in `.sidebar-foot` (Private mode, credit) and the Collapse menu button. See “Folding sidebar” below. |
 | Nav item | `.nav a` | A 16 px icon and the label. When current: sunken, 500, and a 3 px ink marker on the right. **The marker is never red.** |
-| App bar | `.appbar` | 56 px, for flow screens: back, the title with a small subtitle, steps, search, actions. In the review: back, the title and subtitle, a spacer, Private mode, a “…” More actions menu (`.menu`) and Output. |
-| Steps | `.steps` | Numbered 18 px rings joined by 22 px hairlines. The current step is an ink disc with white text. |
+| App bar | `.appbar` | 56 px, for flow screens: back, the title with a small subtitle, steps, search, actions. In the review: back, the title and subtitle, a spacer, a “…” More actions menu (`.menu`) and Output. |
+| Flow stepper | `ol.steps` | See “Flow stepper” below. |
+| Window tabs | `.wintabs` | See “Window tabs” below. |
+| Private mode switch | `.pm-switch` | See “Private mode switch” below. |
 | Flow footer | `.flow-foot` | Sticky at the bottom with the primary action ("Looks right, continue", "Send for review") |
 | Page head | `.page-head` | The title and a muted line on the left, actions on the right |
+
+**Window tabs** (`.wintabs`, added 15 Nov 2026 at the owner's request). A 36 px strip at the top of every page except First launch and the prototype map, on `--bg-sunken`. `app.js` adds it, so a page carries no markup for it. It holds a Home icon button, one tab per open review, and a “+” that opens New review. A tab is the review's progress pie (14 px; a document icon for a new review that has no positions yet), the review's name (ellipsis after 200 px) and a close button (`Close tab, [name]` as its label). The current review tab is raised: `--bg-surface`, joined to the page below it. Home is not a document, so when current it is a pressed button with its own outline, which keeps it clear of the sidebar or the icon rail below it. Home is current on the sidebar pages. A closed tab that was open sends the user Home. The strip is sticky, and its height is the variable `--wintabs-h`, which the sidebar and the full-height screens subtract from their own height. The tabs are prototype data in the `ct-tabs` store key. Several reviews open at once is a decision the build plan does not yet cover (Spec 13).
+
+**Folding sidebar.** The Collapse menu button ends the sidebar. It folds the sidebar to a 56 px icon rail and shows “Expand menu”. Ctrl+B does the same, and the choice is kept (`ct-sidebar`). In the rail the labels are hidden but stay the accessible names, the logo becomes the symbol alone (`symbol.svg`, 28 px, a link Home), and each item shows its words as a small ink tooltip on hover and on keyboard focus. The width changes in 150 ms. A window of 860 px or less, and 150% or 200% text, ignore the fold and hide the button, because the sidebar is already above the content or the labels would not fit.
+
+**Private mode switch** (`.pm-switch`, `role="switch"`, replaces the dropdown badge; 15 Nov 2026). A 32 px button with a 36 × 20 px track, a 16 px knob and the label “Private mode” (“Private mode for this review” in the Privacy check). **On** is the Preferred green (`--pref`) with an “I” on the knob. **Off** is neutral (`--line-strong`) with an “O”. It is never red: off is not a walk-away, and the oxblood stays with the walk-away label and the logo (ADR 0003). The “I” and “O” and `aria-checked` carry the state, so it reads without colour. Turning it on is one click. Turning it off opens a dialog once (“Turn private mode off for this review?”, Cancel and Turn off). One toast says “Private mode on” or “Private mode off”. The choice is kept (`ct-private`) and the switch is used on the Privacy check only. The Running screen says private mode in words in its footer, and keeps one button, “Turn private mode off…”, for the stop where no private-mode model is free (owner, 15 Nov 2026). It is not on the Review screen (owner, 15 Nov 2026): by then the AI calls are done, so a switch there would change nothing the user can see.
+
+**Flow stepper** (`ol.steps`, `data-step="n"`; 15 Nov 2026). The four steps (Contract, Contract check, Privacy check, Review) are names in a row, 112 px each, over a 2 px line with one dot per step. A finished step is an ink dot with a check and is a link back to that step (except on Running, where nothing can be reopened). The current step is a dot with an ink ring and has `aria-current="step"`. A later step is a hollow grey dot. The line into a step is ink once that step is finished or current, and `--line-strong` before. Ink only, never red, and no number. A finished step's name carries a hidden “, done” for screen readers. Motion is in 3.9: it plays on every step page, and the forward button plays a short leave before the page changes.
+
+**Load dialog** (`dialog.load-dialog`, New review; 15 Nov 2026). Opened by “Load file”, a small dialog (at most 480 px) that holds one pane at a time: a drop zone with “Choose a file”; “Reading page n of 5” with a file badge, a 4 px determinate bar (`role="progressbar"`) and Cancel; “Contract loaded” with a green tick, “Replace”, the first-page preview and “Done”. An error shows inside the dialog as a warning notice. The bar is determinate because the page count is known, so it is not a spinner. The file is read on this computer and the dialog says so.
+
 
 ### 5.14 Review-specific
 
@@ -426,11 +457,11 @@ There are two warning levels and three types of message.
 | --- | --- | --- |
 | Pages toggle | `.pages-toggle` | A ghost button at the left of the viewer bar, with `aria-pressed`. It shows or hides the thumbnails. It is hidden at ≤ 1100 px and at 150% and 200% text. |
 | Thumbnails | `.thumbs` | A 96 px column of page thumbnails, with label dots. Hidden until the Pages toggle is pressed. The dots still use colour alone (8.3). |
-| Progress block | `.progress-block` | One line, “2 of 11 positions checked”, with “Next unchecked” and J on the right, and a 3 px ink bar under it |
-| Group heading | `.group-head` | The stamp, the count of positions and the `?`. The Labels list is grouped by level: Walk-away, Unsure, Acceptable, Preferred. “· 1 pencilled in” sits next to Unsure and “· 3 in Missing” next to Acceptable. |
-| Label list | `.label-list` | 40 px rows: a pin, a mono §, and a description that truncates. A row has no stamp, because its group heading has it. A checked row is faint, with a tick. The column truncates a long row with an ellipsis and never widens, so the tabs stay in view. |
+| Progress block | `.progress-block` | One line: an 18 px **progress pie** (`.pie`, ink: a ring, and a disc that grows from the centre with the share of positions checked), the words “2 of 11 positions checked”, and “Next unchecked” with J on the right. When every position is checked the pie is a full disc with a check, and the words are “Every position is checked”. The pie only repeats the words, so it is `aria-hidden`. There is no 3 px bar any more (15 Nov 2026). The same pie, 24 px, sits before the review's title in the app bar, and 14 px in that review's window tab. All three follow a decision at once, also while a label's detail is open, and the wedge grows in 300 ms. The Home status gauge for “Ready to check” stays a solid disc (5.8): it is a status, and a share there would turn it into a second progress mark. |
+| Group heading | `.group-head` | The stamp, the count of positions (faint) and the `?`, which shows on hover and keyboard focus only. The Labels list is grouped by level: Walk-away, Unsure, Acceptable, Preferred. “· 3 in Missing” sits next to Acceptable. “· 1 pencilled in” is hidden text for screen readers: the dashed pin already shows it. The Missing tab has one heading (Acceptable), not a stamp on every row. |
+| Label list | `.label-list` | Quiet rows, with no rule between them and a hover tone: a pin, the position's title that truncates, and the clause number (“§ 5.4”, mono, at the right). A row has no stamp, because its group heading has it, and the position number is only in its accessible name (“Position 5 · Revision rounds”). A decided row's pin is filled and its title faint; the tick shows only on rows without a pin (Missing). The column truncates a long row with an ellipsis and never widens, so the tabs stay in view. |
 | Governing-law line | `.law-line` | A small faint line at the bottom of the Labels list: an icon and one sentence. The two-law and no-law versions use the Unsure icon colour. |
-| Detail | `.detail`, `.detail-head`, `.detail-card` | One label's detail, in the right column in place of the list. The head (`.detail-head`) is sticky: “All labels” (Escape does the same), “Next unchecked” and J, then the title. `.detail-card` is a tone card (`--bg-tone`, `--r-lg`, padding 16) holding the quote, its two links, the stamp and the lead sentence. |
+| Detail | `.detail`, `.detail-head`, `.detail-card` | One label's detail, in the right column in place of the list. The tone sits on the evidence card and on “What to check” only, so a detail is not tinted twice. The head (`.detail-head`) is sticky: “All labels” (Escape does the same), “Next unchecked” and J, then the title. `.detail-card` is a tone card (`--bg-tone`, `--r-lg`, padding 16) holding the quote, its two links, the stamp and the lead sentence. |
 | Not-covered tick | `.label-list li.grey-confirm` | The tone row at the top of Not covered: "I've read the 35 not-covered parts" |
 | Evidence trail | `.trail` | A 12 px ring "knot" plus a step: the thread, shown as a list |
 | Decide buttons | `.decide` | Full-width option buttons, each with a `kbd` key hint |
@@ -441,7 +472,7 @@ There are two warning levels and three types of message.
 
 ## 6. Patterns
 
-**Flow screen.** New review, Contract check, Privacy check and Running use the same layout: an app bar with steps, then the work area on the left (`minmax(0,1fr)`), then a side margin of 340–400 px on surface with a left hairline, then a sticky flow footer.
+**Flow screen.** New review, Contract check, Privacy check and Running use the same layout: an app bar with the flow stepper, then the work area on the left (`minmax(0,1fr)`), then a side margin of 340–400 px on surface with a left hairline, then a sticky flow footer.
 
 **The margin.** The signature layout pattern is the margin beside the page (design direction, principle 3). The friend's notes, the reading log, the replacement list and the review's list and detail all sit in a right-hand surface column next to the paper. New screens should use it rather than inventing a new one.
 
@@ -494,7 +525,8 @@ The source line moved into "More" on 14 Nov 2026 (owner decision 4). The detail 
 - In the review, opening a detail moves focus to its title. Escape, or "All labels", returns to the list and puts focus back on the row it came from. Keys 1, 2 and 3 answer the open detail, and J opens the next unchecked label.
 - Tabs use `role="tablist"` with `aria-controls`.
 - Segmented buttons use `aria-pressed`.
-- Nav uses `aria-current="page"`.
+- Nav uses `aria-current="page"`. The window tab of the page the user is on does too.
+- The Private mode switch is a `role="switch"` with `aria-checked`. The Collapse menu button has `aria-expanded`.
 
 **Screen readers.**
 
@@ -507,7 +539,7 @@ The source line moved into "More" on 14 Nov 2026 (owner decision 4). The detail 
 
 ## 8. Audit: where the prototype drifts
 
-**Summary.** 17 screens, about 60 shared classes and 46 icons. 28 issues found, 11 fixed (counted 14 Nov 2026; 14 found and 4 fixed on 7 Nov 2026). The tokens are well used in shared CSS. Most drift sits in page-local `<style>` blocks and inline styles.
+**Summary.** 17 screens, about 60 shared classes and 49 icons. 28 issues found, 11 fixed (counted 14 Nov 2026; 14 found and 4 fixed on 7 Nov 2026). The tokens are well used in shared CSS. Most drift sits in page-local `<style>` blocks and inline styles.
 
 ### 8.1 Naming and duplication
 
@@ -550,7 +582,7 @@ The source line moved into "More" on 14 Nov 2026 (owner decision 4). The detail 
 | ✅ **Fixed 14 Nov 2026.** The detail panel's order differed: the prototype showed the stamp first, section 6 and Spec 14.1 say the quote first | Section 6, Spec 14.1 screen 8 (found 14 Nov 2026) | Quote first in every panel of the prototype, then the stamp. The source line moved into "More" the same day. |
 | ✅ **Fixed 14 Nov 2026.** The review's right column showed a summary bar, a stack of banners, a list and a detail dialog at once. The owner called it overwhelming. | Principle 12 (owner, 14 Nov 2026) | The contract and one column. The column shows the list or one label's detail. The summary bar and the read-banner chips are gone, the three read warnings are “Read first” rows, and the thumbnails are hidden by default. |
 | The toggle knob and the Settings fold chevron move for 150 ms and don't check `prefers-reduced-motion` | Section 3.9 (found 15 Nov 2026) | Wrap both transitions in `@media (prefers-reduced-motion: no-preference)` |
-| Four icons are hand-drawn strokes on a 16 px grid (`approx`, `ring-dashed`, `thread`, `help`) among 42 filled Remix icons on a 24 px grid, so their weight differs | Section 4 (found 14 Nov 2026) | Redraw them as filled 24 px paths, or find Remix matches that stay readable at 12 px in a stamp |
+| Four icons are hand-drawn strokes on a 16 px grid (`approx`, `ring-dashed`, `thread`, `help`) among 45 filled Remix icons on a 24 px grid, so their weight differs | Section 4 (found 14 Nov 2026) | Redraw them as filled 24 px paths, or find Remix matches that stay readable at 12 px in a stamp |
 
 ### 8.4 Component completeness
 
@@ -577,7 +609,7 @@ The source line moved into "More" on 14 Nov 2026 (owner decision 4). The detail 
 Serve it with the "prototype" launch config, or with:
 
 ```bash
-python3 -m http.server 8767 --bind 127.0.0.1 --directory prototype
+python3 prototype/serve.py
 ```
 
 There is no build and no framework. `app.js` wires the shared behaviour through attributes:
