@@ -25,7 +25,7 @@
 </style>
 </head>
 <body>
-<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8767/index.html</b> instead.</p>");</script>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <symbol id="g-draft" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.6 2.2"/></symbol>
   <symbol id="g-running" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.75A6.25 6.25 0 0 1 8 14.25Z" fill="currentColor"/></symbol>
@@ -38,6 +38,7 @@
 <div class="app">
   <aside class="sidebar">
     <a class="logo" href="home.html"><img class="on-light" src="logo.svg" alt="Clause Tracer"><img class="on-dark" src="logo-dark.svg" alt="Clause Tracer"></a>
+    <a class="logo-symbol" href="home.html"><img class="on-light" src="symbol.svg" alt="Clause Tracer"><img class="on-dark" src="symbol-dark.svg" alt="Clause Tracer"></a>
     <a class="btn btn-primary btn-block" href="new-review.html"><svg class="icon"><use href="#i-plus"/></svg>New review</a>
     <button class="search-commands" type="button"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
     <nav class="nav" aria-label="Main">
@@ -83,7 +84,7 @@
 
     <table class="table reviews" data-state-hide="empty">
       <thead>
-        <tr><th scope="col">Name ⇅</th><th scope="col">Date ↓</th><th scope="col">Status ⇅</th><th scope="col">Next step</th><th scope="col">Auto-delete</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr>
+        <tr><th scope="col" aria-sort="none"><button class="link" type="button">Name <svg class="icon" style="opacity:.45" aria-hidden="true"><use href="#i-chev-down"/></svg></button></th><th scope="col" aria-sort="descending"><button class="link" type="button">Date <svg class="icon" aria-hidden="true"><use href="#i-chev-down"/></svg></button></th><th scope="col" aria-sort="none"><button class="link" type="button">Status <svg class="icon" style="opacity:.45" aria-hidden="true"><use href="#i-chev-down"/></svg></button></th><th scope="col">Next step</th><th scope="col">Auto-delete</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr>
       </thead>
       <tbody>
         <tr class="is-ready">
@@ -95,10 +96,10 @@
           <td><button class="icon-btn" type="button" aria-label="More for Brightline web build" data-menu="row-menu"><svg class="icon"><use href="#i-dots"/></svg></button></td>
         </tr>
         <tr class="is-running">
-          <td class="name">Osprey booking app<small>Freelancer service agreement</small></td>
+          <td class="name">Osprey booking app<small data-state-hide="offline">Freelancer service agreement</small><small data-state="offline">Freelancer service agreement · Stopped at: matching clauses</small></td>
           <td>Edited just now</td>
-          <td><span class="status"><svg class="gauge" aria-hidden="true"><use href="#g-running"/></svg>Running</span></td>
-          <td><a class="link" href="running.html">Step 2 of 4 · about 40 s</a></td>
+          <td><span class="status" data-state-hide="offline"><svg class="gauge" aria-hidden="true"><use href="#g-running"/></svg>Running</span><span class="status" data-state="offline"><svg class="gauge" aria-hidden="true"><use href="#g-interrupted"/></svg>Interrupted</span></td>
+          <td><a class="link" href="running.html" data-state-hide="offline">Step 2 of 4 · about 40 s</a><span class="small muted" data-state="offline">Needs internet</span></td>
           <td>In 30 days</td>
           <td><button class="icon-btn" type="button" aria-label="More for Osprey booking app" data-menu="row-menu"><svg class="icon"><use href="#i-dots"/></svg></button></td>
         </tr>
@@ -123,7 +124,7 @@
           <td>3 Nov 2026</td>
           <td><span class="status"><svg class="gauge" aria-hidden="true"><use href="#g-failed"/></svg>Failed</span></td>
           <td><a class="link" href="running.html" data-state-hide="offline">Retry</a><span class="small muted" data-state="offline">Needs internet</span></td>
-          <td>In 27 days</td>
+          <td>In 28 days</td>
           <td><button class="icon-btn" type="button" aria-label="More for Harbour Café menu site" data-menu="row-menu"><svg class="icon"><use href="#i-dots"/></svg></button></td>
         </tr>
         <tr>
@@ -131,9 +132,9 @@
           <td>8 Oct 2026</td>
           <td><span class="status status-done"><svg class="gauge gauge-done" aria-hidden="true"><use href="#g-done"/></svg>Done</span></td>
           <td><a class="link" href="output.html">Open message</a></td>
-          <td><span class="warn-text"><svg class="icon" style="color:inherit"><use href="#i-clock"/></svg> Deletes in 2 days</span><br>
-            <button class="link" type="button" data-toast="Kept for another 30 days">Keep it</button>&nbsp;&nbsp;
-            <button class="link" type="button" data-open="delete-review">Delete now</button></td>
+          <td><div class="row" style="gap:12px"><span class="warn-text"><svg class="icon" style="color:inherit"><use href="#i-clock"/></svg> Deletes in 2 days</span>
+            <button class="link" type="button" data-toast="Kept for another 30 days">Keep it</button>
+            <button class="link" type="button" data-open="delete-review">Delete now</button></div></td>
           <td><button class="icon-btn" type="button" aria-label="More for Atlas Media retainer" data-menu="row-menu"><svg class="icon"><use href="#i-dots"/></svg></button></td>
         </tr>
       </tbody>
@@ -183,6 +184,11 @@
   // The menus and the Delete and Rename dialogs are shared, so fill them with the row they were opened from.
   (function () {
     var current = null;
+    // Offline, the running review is stopped (Spec 6.3), so the delete dialog must not say it is running.
+    if (new URLSearchParams(location.search).get('state') === 'offline') {
+      var osprey = document.querySelector('tr.is-running');
+      if (osprey) osprey.classList.remove('is-running');
+    }
     var renameInput = document.getElementById('rename-input');
     var deleteTitle = document.getElementById('delete-title');
     var deleteRunning = document.getElementById('delete-running');

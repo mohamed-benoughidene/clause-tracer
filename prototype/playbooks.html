@@ -14,6 +14,14 @@
   .playbook-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
   .playbook-grid > .card { margin-top: 0; display: flex; flex-direction: column; }
   .playbook-name { display: flex; align-items: center; gap: 8px; }
+  .playbook-name h2 { margin: 0; min-width: 0; }
+  .playbook-delete { margin-left: auto; flex: none; }
+  #no-match { margin: 0; color: var(--text-2); }
+  .page-head > .row { flex-wrap: wrap; }
+  .is-filtered { display: none !important; }
+  .import-failed { margin-bottom: 20px; background: var(--unsure-bg); color: var(--unsure-fg); }
+  .page-head p { max-width: 60ch; }
+  .menu button[aria-checked="true"] { font-weight: 600; background: var(--bg-sunken); }
   .facts { display: grid; gap: 6px; font-size: 13px; margin: 14px 0 12px; }
   .facts div { display: grid; grid-template-columns: 84px 1fr; gap: 8px; }
   .facts dt { color: var(--text-2); }
@@ -26,10 +34,11 @@
 </style>
 </head>
 <body>
-<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8767/index.html</b> instead.</p>");</script>
 <div class="app">
   <aside class="sidebar">
     <a class="logo" href="home.html"><img class="on-light" src="logo.svg" alt="Clause Tracer"><img class="on-dark" src="logo-dark.svg" alt="Clause Tracer"></a>
+    <a class="logo-symbol" href="home.html"><img class="on-light" src="symbol.svg" alt="Clause Tracer"><img class="on-dark" src="symbol-dark.svg" alt="Clause Tracer"></a>
     <a class="btn btn-primary btn-block" href="new-review.html"><svg class="icon"><use href="#i-plus"/></svg>New review</a>
     <button class="search-commands" type="button"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
     <nav class="nav" aria-label="Main">
@@ -60,7 +69,7 @@
       </div>
     </header>
 
-    <div class="notice" role="alert" data-state="import-failed" style="margin-bottom:20px;background:var(--unsure-bg);color:var(--unsure-fg)">
+    <div class="notice import-failed" role="alert" data-state="import-failed">
       <svg class="icon"><use href="#i-warn"/></svg>
       <span>That file isn't a Clause Tracer playbook, so it can't be imported. Playbook files end in .ctplaybook.</span>
       <span class="spacer"></span>
@@ -68,13 +77,13 @@
     </div>
 
     <div class="row filter-row">
-      <div class="search" style="width:320px"><svg class="icon"><use href="#i-search"/></svg><input class="input" type="search" placeholder="Search positions" aria-label="Search positions"></div>
-      <button class="btn" type="button" data-menu="customer-menu"><svg class="icon"><use href="#i-users"/></svg>Customer: All<svg class="icon"><use href="#i-chev-down"/></svg></button>
+      <div class="search" style="width:min(320px,100%)"><svg class="icon"><use href="#i-search"/></svg><input class="input" type="search" id="playbook-search" placeholder="Search positions" aria-label="Search positions"></div>
+      <button class="btn" type="button" data-menu="customer-menu" aria-haspopup="menu" aria-expanded="false" id="customer-btn"><svg class="icon"><use href="#i-users"/></svg><span id="customer-label">Customer: All</span><svg class="icon"><use href="#i-chev-down"/></svg></button>
     </div>
 
     <section class="playbook-grid" aria-label="Your playbooks">
-      <article class="card">
-        <h2 class="h3 playbook-name"><svg class="icon"><use href="#i-book"/></svg>Freelancer service agreement</h2>
+      <article class="card" data-name="Freelancer service agreement" data-customer="none">
+        <div class="playbook-name"><svg class="icon"><use href="#i-book"/></svg><h2 class="h3">Freelancer service agreement</h2><button class="icon-btn playbook-delete" type="button" aria-label="Delete Freelancer service agreement" data-open="delete-freelancer"><svg class="icon"><use href="#i-trash"/></svg></button></div>
         <dl class="facts">
           <div><dt>Side</dt><dd>service provider</dd></div>
           <div><dt>Customer</dt><dd>None</dd></div>
@@ -83,15 +92,13 @@
         <p class="small muted">Used by 4 reviews · edited 2 Nov</p>
         <div class="row playbook-actions">
           <a class="btn btn-sm" href="playbook-editor.html"><svg class="icon"><use href="#i-pencil"/></svg>Edit</a>
-          <button class="btn btn-sm btn-ghost" type="button" data-toast="Copy made: Freelancer service agreement (copy)"><svg class="icon"><use href="#i-copy"/></svg>Duplicate</button>
+          <button class="btn btn-sm btn-ghost" type="button" data-toast="Copy made"><svg class="icon"><use href="#i-copy"/></svg>Duplicate</button>
           <button class="btn btn-sm btn-ghost" type="button" data-toast="Exported as freelancer-service-agreement.ctplaybook"><svg class="icon"><use href="#i-download"/></svg>Export</button>
-          <span class="spacer"></span>
-          <button class="icon-btn" type="button" aria-label="Delete Freelancer service agreement" data-open="delete-freelancer"><svg class="icon"><use href="#i-trash"/></svg></button>
         </div>
       </article>
 
-      <article class="card">
-        <h2 class="h3 playbook-name"><svg class="icon"><use href="#i-book"/></svg>Design retainer</h2>
+      <article class="card" data-name="Design retainer" data-customer="Atlas Media">
+        <div class="playbook-name"><svg class="icon"><use href="#i-book"/></svg><h2 class="h3">Design retainer</h2><button class="icon-btn playbook-delete" type="button" aria-label="Delete Design retainer" data-open="delete-design"><svg class="icon"><use href="#i-trash"/></svg></button></div>
         <dl class="facts">
           <div><dt>Side</dt><dd>service provider</dd></div>
           <div><dt>Customer</dt><dd>Atlas Media</dd></div>
@@ -100,15 +107,13 @@
         <p class="small muted">Used by 2 reviews · edited 14 Oct</p>
         <div class="row playbook-actions">
           <a class="btn btn-sm" href="playbook-editor.html"><svg class="icon"><use href="#i-pencil"/></svg>Edit</a>
-          <button class="btn btn-sm btn-ghost" type="button" data-toast="Copy made: Design retainer (copy)"><svg class="icon"><use href="#i-copy"/></svg>Duplicate</button>
+          <button class="btn btn-sm btn-ghost" type="button" data-toast="Copy made"><svg class="icon"><use href="#i-copy"/></svg>Duplicate</button>
           <button class="btn btn-sm btn-ghost" type="button" data-toast="Exported as design-retainer.ctplaybook"><svg class="icon"><use href="#i-download"/></svg>Export</button>
-          <span class="spacer"></span>
-          <button class="icon-btn" type="button" aria-label="Delete Design retainer" data-open="delete-design"><svg class="icon"><use href="#i-trash"/></svg></button>
         </div>
       </article>
 
-      <article class="card">
-        <h2 class="h3 playbook-name"><svg class="icon"><use href="#i-book"/></svg>NDA I receive</h2>
+      <article class="card" data-name="NDA I receive" data-customer="none">
+        <div class="playbook-name"><svg class="icon"><use href="#i-book"/></svg><h2 class="h3">NDA I receive</h2><button class="icon-btn playbook-delete" type="button" aria-label="Delete NDA I receive" data-open="delete-nda"><svg class="icon"><use href="#i-trash"/></svg></button></div>
         <dl class="facts">
           <div><dt>Side</dt><dd>receiving party</dd></div>
           <div><dt>Customer</dt><dd>None</dd></div>
@@ -117,13 +122,28 @@
         <p class="small muted">Not used by any review · edited 1 Oct</p>
         <div class="row playbook-actions">
           <a class="btn btn-sm" href="playbook-editor.html"><svg class="icon"><use href="#i-pencil"/></svg>Edit</a>
-          <button class="btn btn-sm btn-ghost" type="button" data-toast="Copy made: NDA I receive (copy)"><svg class="icon"><use href="#i-copy"/></svg>Duplicate</button>
+          <button class="btn btn-sm btn-ghost" type="button" data-toast="Copy made"><svg class="icon"><use href="#i-copy"/></svg>Duplicate</button>
           <button class="btn btn-sm btn-ghost" type="button" data-toast="Exported as nda-i-receive.ctplaybook"><svg class="icon"><use href="#i-download"/></svg>Export</button>
-          <span class="spacer"></span>
-          <button class="icon-btn" type="button" aria-label="Delete NDA I receive" data-open="delete-nda"><svg class="icon"><use href="#i-trash"/></svg></button>
+        </div>
+      </article>
+
+      <article class="card" data-state="imported" data-name="Freelancer service agreement (imported)" data-customer="none">
+        <div class="playbook-name"><svg class="icon"><use href="#i-book"/></svg><h2 class="h3">Freelancer service agreement (imported)</h2><button class="icon-btn playbook-delete" type="button" aria-label="Delete Freelancer service agreement (imported)" data-open="delete-imported"><svg class="icon"><use href="#i-trash"/></svg></button></div>
+        <dl class="facts">
+          <div><dt>Side</dt><dd>service provider</dd></div>
+          <div><dt>Customer</dt><dd>None</dd></div>
+          <div><dt>Positions</dt><dd>7 positions</dd></div>
+        </dl>
+        <p class="small muted">Not used by any review</p>
+        <div class="row playbook-actions">
+          <a class="btn btn-sm" href="playbook-editor.html"><svg class="icon"><use href="#i-pencil"/></svg>Edit</a>
+          <button class="btn btn-sm btn-ghost" type="button" data-toast="Copy made"><svg class="icon"><use href="#i-copy"/></svg>Duplicate</button>
+          <button class="btn btn-sm btn-ghost" type="button" data-toast="Exported as freelancer-service-agreement-imported.ctplaybook"><svg class="icon"><use href="#i-download"/></svg>Export</button>
         </div>
       </article>
     </section>
+
+    <p class="small" id="no-match" role="status" hidden></p>
 
     <section class="card starter-card">
       <div>
@@ -135,17 +155,17 @@
   </main>
 </div>
 
-<div class="menu" id="customer-menu" hidden>
-  <button type="button" data-toast="Showing playbooks for every customer">All customers</button>
-  <button type="button" data-toast="Showing playbooks with no customer">None</button>
-  <button type="button" data-toast="Showing playbooks for Atlas Media">Atlas Media</button>
+<div class="menu" id="customer-menu" role="menu" hidden>
+  <button type="button" role="menuitemradio" aria-checked="true" data-filter="all" data-toast="Showing playbooks for every customer">All customers</button>
+  <button type="button" role="menuitemradio" aria-checked="false" data-filter="none" data-toast="Showing playbooks with no customer">None</button>
+  <button type="button" role="menuitemradio" aria-checked="false" data-filter="Atlas Media" data-toast="Showing playbooks for Atlas Media">Atlas Media</button>
 </div>
 
 <dialog id="delete-freelancer" aria-labelledby="delete-freelancer-title">
   <form method="dialog">
     <div class="dialog-body">
       <h2 class="h2" id="delete-freelancer-title">Delete “Freelancer service agreement”?</h2>
-      <p class="muted">4 reviews use this playbook. Those reviews keep their own copy and won't change. You just can't re-run them. This can't be undone.</p>
+      <p class="muted">4 reviews use this playbook. Those reviews keep their own copy and won't change. You can't re-run them. This can't be undone.</p>
     </div>
     <div class="dialog-foot"><button class="btn" value="cancel">Cancel</button><button class="btn btn-primary" value="ok" data-toast="Playbook deleted">Delete playbook</button></div>
   </form>
@@ -155,7 +175,7 @@
   <form method="dialog">
     <div class="dialog-body">
       <h2 class="h2" id="delete-design-title">Delete “Design retainer”?</h2>
-      <p class="muted">2 reviews use this playbook. Those reviews keep their own copy and won't change. You just can't re-run them. This can't be undone.</p>
+      <p class="muted">2 reviews use this playbook. Those reviews keep their own copy and won't change. You can't re-run them. This can't be undone.</p>
     </div>
     <div class="dialog-foot"><button class="btn" value="cancel">Cancel</button><button class="btn btn-primary" value="ok" data-toast="Playbook deleted">Delete playbook</button></div>
   </form>
@@ -171,9 +191,56 @@
   </form>
 </dialog>
 
+<dialog id="delete-imported" aria-labelledby="delete-imported-title">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="h2" id="delete-imported-title">Delete “Freelancer service agreement (imported)”?</h2>
+      <p class="muted">No reviews use this playbook. This can't be undone.</p>
+    </div>
+    <div class="dialog-foot"><button class="btn" value="cancel">Cancel</button><button class="btn btn-primary" value="ok" data-toast="Playbook deleted">Delete playbook</button></div>
+  </form>
+</dialog>
+
 <script src="icons.js"></script>
 <script src="app.js"></script>
 <script>
+
+  // Search and the customer filter (prototype only): hide cards that don't match.
+  const cards = () => [...document.querySelectorAll('.playbook-grid > .card')];
+  const searchBox = document.getElementById('playbook-search');
+  const menu = document.getElementById('customer-menu');
+  const menuBtn = document.getElementById('customer-btn');
+  let customer = 'all';
+  function applyFilter() {
+    const q = searchBox.value.trim().toLowerCase();
+    cards().forEach(c => {
+      const nameOk = !q || c.dataset.name.toLowerCase().includes(q);
+      const custOk = customer === 'all' || c.dataset.customer === customer;
+      c.classList.toggle('is-filtered', !(nameOk && custOk));
+    });
+    const none = cards().every(c => c.classList.contains('is-filtered'));
+    const note = document.getElementById('no-match');
+    note.hidden = !(none && q);
+    note.textContent = 'No playbooks match \u201c' + searchBox.value.trim() + '\u201d.';
+  }
+  searchBox.addEventListener('input', applyFilter);
+  menu.addEventListener('click', e => {
+    const b = e.target.closest('[data-filter]');
+    if (!b) return;
+    customer = b.dataset.filter;
+    menu.querySelectorAll('[data-filter]').forEach(x => x.setAttribute('aria-checked', x === b));
+    document.getElementById('customer-label').textContent = 'Customer: ' + (customer === 'all' ? 'All' : customer === 'none' ? 'None' : customer);
+    applyFilter();
+  });
+  new MutationObserver(() => menuBtn.setAttribute('aria-expanded', String(!menu.hidden))).observe(menu, { attributes: true, attributeFilter: ['hidden'] });
+  // Delete: the confirm button removes the card (the toast comes from data-toast on the same click).
+  document.querySelectorAll('dialog[id^="delete-"] button[value="ok"]').forEach(ok => ok.addEventListener('click', () => {
+    const d = ok.closest('dialog');
+    const btn = document.querySelector('[data-open="' + d.id + '"]');
+    const card = btn && btn.closest('.card');
+    if (card) card.remove();
+  }));
+
   // Import (Spec 14.1, 13 and 15): choose a file, then preview it. A file that isn't a playbook shows "Import failed".
   const picker = document.getElementById('playbook-file');
   document.querySelectorAll('[data-pick-playbook]').forEach(b => b.addEventListener('click', () => { picker.value = ''; picker.click(); }));

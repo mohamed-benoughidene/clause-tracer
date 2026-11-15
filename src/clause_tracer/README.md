@@ -8,7 +8,7 @@ Each module has one purpose, a README with its input and output shapes, its own 
 | `ingest` | Read the file, split into clauses (6.1 steps 1-2). |
 | `privacy` | Find personal data, make placeholders (steps 3-4). |
 | `links` | Cross-references, defined terms, override clauses (step 5). |
-| `checking` | Match, extract, quote check, judge, explain, summarise (steps 6a–7 and 9–11). Calls `core` to pick labels (step 8). |
+| `checking` | Match, extract, quote check, judge, explain, sort not-covered parts (steps 6a–7 and 9–11). Calls `core` to pick labels (step 8). |
 | `writing` | Rewrite a clause (step 12). |
 | `outputs` | The message and the report (steps 13-14). |
 | `adapters` | The edge: `openrouter`, `presidio`, `storage`, `keyring`. |

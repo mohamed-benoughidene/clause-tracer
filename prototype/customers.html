@@ -8,12 +8,20 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<style>
+  /* customers */
+  .customers-table td.name, .customers-table td.count { white-space: nowrap; }
+  .table-note { margin-top: 16px; }
+  .empty-block { display: grid; gap: 12px; justify-items: start; max-width: 560px; padding: 32px; }
+  .empty-block p { color: var(--text); }
+</style>
 </head>
 <body>
-<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8767/index.html</b> instead.</p>");</script>
 <div class="app">
   <aside class="sidebar">
     <a class="logo" href="home.html"><img class="on-light" src="logo.svg" alt="Clause Tracer"><img class="on-dark" src="logo-dark.svg" alt="Clause Tracer"></a>
+    <a class="logo-symbol" href="home.html"><img class="on-light" src="symbol.svg" alt="Clause Tracer"><img class="on-dark" src="symbol-dark.svg" alt="Clause Tracer"></a>
     <a class="btn btn-primary btn-block" href="new-review.html"><svg class="icon"><use href="#i-plus"/></svg>New review</a>
     <button class="search-commands" type="button"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
     <nav class="nav" aria-label="Main">
@@ -36,17 +44,17 @@
         <h1 class="h1">Customers</h1>
         <p>Link a playbook to a customer to keep their positions apart.</p>
       </div>
-      <button class="btn btn-primary" type="button" data-open="add-customer"><svg class="icon"><use href="#i-plus"/></svg>Add customer</button>
+      <button class="btn btn-primary" type="button" data-open="add-customer" data-state-hide="empty"><svg class="icon"><use href="#i-plus"/></svg>Add customer</button>
     </header>
 
-    <table class="table">
+    <table class="table customers-table" data-state-hide="empty">
       <thead>
-        <tr><th scope="col"><span class="visually-hidden">Customer</span></th><th scope="col"><span class="visually-hidden">Playbooks</span></th><th scope="col"><span class="visually-hidden">Actions</span></th></tr>
+        <tr><th scope="col">Customer</th><th scope="col">Playbooks</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr>
       </thead>
       <tbody>
         <tr>
           <td class="name"><svg class="icon"><use href="#i-users"/></svg> Atlas Media</td>
-          <td>1 playbook</td>
+          <td class="count">1 playbook</td>
           <td>
             <button class="btn btn-ghost btn-sm" type="button" data-open="rename-atlas"><svg class="icon"><use href="#i-pencil"/></svg>Rename</button>
             <button class="btn btn-ghost btn-sm" type="button" data-open="delete-atlas"><svg class="icon"><use href="#i-trash"/></svg>Delete</button>
@@ -54,7 +62,7 @@
         </tr>
         <tr>
           <td class="name"><svg class="icon"><use href="#i-users"/></svg> Northwind Logistics</td>
-          <td>2 playbooks</td>
+          <td class="count">0 playbooks</td>
           <td>
             <button class="btn btn-ghost btn-sm" type="button" data-open="rename-northwind"><svg class="icon"><use href="#i-pencil"/></svg>Rename</button>
             <button class="btn btn-ghost btn-sm" type="button" data-open="delete-northwind"><svg class="icon"><use href="#i-trash"/></svg>Delete</button>
@@ -62,7 +70,7 @@
         </tr>
         <tr>
           <td class="name"><svg class="icon"><use href="#i-users"/></svg> Harbour Café</td>
-          <td>0 playbooks</td>
+          <td class="count">0 playbooks</td>
           <td>
             <button class="btn btn-ghost btn-sm" type="button" data-open="rename-harbour"><svg class="icon"><use href="#i-pencil"/></svg>Rename</button>
             <button class="btn btn-ghost btn-sm" type="button" data-open="delete-harbour"><svg class="icon"><use href="#i-trash"/></svg>Delete</button>
@@ -70,7 +78,12 @@
         </tr>
       </tbody>
     </table>
-    <p class="small muted" style="margin-top:16px">Deleting a customer unlinks its playbooks and keeps them.</p>
+    <p class="small muted table-note" data-state-hide="empty">Deleting a customer unlinks its playbooks and keeps them.</p>
+
+    <section class="card empty-block" aria-label="No customers yet" data-state="empty">
+      <p>No customers yet. Add one, then link a playbook to it.</p>
+      <button class="btn btn-primary" type="button" data-open="add-customer"><svg class="icon"><use href="#i-plus"/></svg>Add customer</button>
+    </section>
   </main>
 </div>
 
@@ -118,7 +131,7 @@
   <form method="dialog">
     <div class="dialog-body">
       <h2 class="h2" id="delete-northwind-title">Delete “Northwind Logistics”?</h2>
-      <p class="muted">Its 2 playbooks stay, unlinked from this customer. This can't be undone.</p>
+      <p class="muted">No playbooks use this customer. This can't be undone.</p>
     </div>
     <div class="dialog-foot"><button class="btn" value="cancel">Cancel</button><button class="btn btn-primary" value="ok" data-toast="Customer deleted">Delete customer</button></div>
   </form>

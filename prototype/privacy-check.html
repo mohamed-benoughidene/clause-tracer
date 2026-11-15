@@ -18,6 +18,9 @@
   .hints { display: flex; gap: 12px; align-items: stretch; padding: 12px 16px; flex-wrap: wrap; }
   .hints .notice { flex: 1 1 320px; background: var(--bg-tone); }
   .hints .find { flex: 1 1 300px; display: flex; gap: 8px; align-items: center; }
+  .viewer-bar .search { flex: 0 1 200px; min-width: 120px; }
+  .viewer-bar { flex-wrap: wrap; }
+  .viewer-bar .small { white-space: nowrap; }
   .viewbar { display: flex; align-items: center; gap: 12px; padding: 4px 16px 12px; flex-wrap: wrap; font-size: 12.5px; }
   .swatch { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); }
   .swatch::before { content: ""; width: 14px; height: 10px; border-radius: 2px; background: var(--swap-bg); }
@@ -63,7 +66,7 @@
   .repl .val { overflow-wrap: anywhere; }
   .repl .count { color: var(--text-2); white-space: nowrap; }
   .repl.unlikely .count { color: var(--text-3); }
-  .toggle-row { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; align-items: center; padding: 14px; background: var(--bg-tone); border-radius: var(--r-lg); }
+  .toggle-row { display: grid; gap: 6px; justify-items: start; padding: 14px; background: var(--bg-tone); border-radius: var(--r-lg); }
   .toggle-row small { display: block; color: var(--text-2); }
   .side .foot-note { margin-top: auto; display: grid; gap: 6px; }
   .mini-note { font-size: 12.5px; color: var(--text-2); }
@@ -81,7 +84,7 @@
 </style>
 </head>
 <body>
-<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8767/index.html</b> instead.</p>");</script>
 <div class="flow">
 
   <header class="appbar">
@@ -89,11 +92,11 @@
     <span class="h3">Brightline web build</span>
     <span class="status small"><svg class="icon"><use href="#i-pencil"/></svg>Draft</span>
     <span class="spacer"></span>
-    <ol class="steps" aria-label="Review steps">
-      <li><span class="n"><svg class="icon" style="width:11px;height:11px;color:inherit"><use href="#i-check"/></svg></span>Contract</li>
-      <li><span class="n"><svg class="icon" style="width:11px;height:11px;color:inherit"><use href="#i-check"/></svg></span>Contract check</li>
-      <li aria-current="step"><span class="n">3</span>Privacy check</li>
-      <li><span class="n">4</span>Review</li>
+    <ol class="steps" aria-label="Review steps" data-step="3">
+      <li class="is-done"><a class="step" href="new-review.html"><span class="name">Contract<span class="visually-hidden">, done</span></span><span class="dot" aria-hidden="true"><svg class="icon"><use href="#i-check"/></svg></span></a></li>
+      <li class="is-done"><a class="step" href="contract-check.html"><span class="name">Contract check<span class="visually-hidden">, done</span></span><span class="dot" aria-hidden="true"><svg class="icon"><use href="#i-check"/></svg></span></a></li>
+      <li aria-current="step"><span class="step"><span class="name">Privacy check</span><span class="dot" aria-hidden="true"></span></span></li>
+      <li><span class="step"><span class="name">Review</span><span class="dot" aria-hidden="true"></span></span></li>
     </ol>
     <span class="spacer"></span>
     <button class="search-commands" type="button" style="width:220px;margin:0"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
@@ -137,7 +140,7 @@
           <div class="viewer-bar">
             <span>Brightline_Developer_Agreement.pdf</span>
             <span class="spacer"></span>
-            <div class="search" style="width:200px"><svg class="icon"><use href="#i-search"/></svg><input class="input" type="search" placeholder="Find" aria-label="Find in document" style="height:30px"></div>
+            <div class="search"><svg class="icon"><use href="#i-search"/></svg><input class="input" type="search" placeholder="Find" aria-label="Find in document" style="height:30px"></div>
             <span class="small muted">1 / 5</span>
             <button class="btn btn-sm" type="button" data-menu="zoom-menu">100% <svg class="icon"><use href="#i-chev-down"/></svg></button>
           </div>
@@ -226,7 +229,7 @@
               <p class="cl"><span class="num">14.2</span><span>If this Agreement and Schedule 1 conflict, this Agreement prevails.</span></p>
               <p class="cl"><span class="num">14.3</span><span>The Developer will not work for a direct competitor of the Agency for 6 to 9 months after this Agreement ends.</span></p>
               <p class="cl"><span class="num">14.4</span><span>Neither party may transfer this Agreement to anyone else without the other's written consent.</span></p>
-              <p class="cl"><span class="num">14.5</span><span>Notices must be in writing and sent by email to the addresses each party gives the other.</span></p>
+              <p class="cl"><span class="num">14.5</span><span>Notices must be in writing and sent by email to the addresses each party gives the other, with a copy to <span class="swap" data-ph="Person 2"><span class="real">Ms Jones</span><span class="ai">Person 2</span></span> at the Developer's address.</span></p>
               <p class="cl"><span class="num">14.6</span><span>This Agreement is governed by the laws of England and Wales.</span></p>
               <p style="margin-top:20px">Signed for and on behalf of <span class="swap" data-ph="Company 1"><span class="real">Brightline Studio Ltd</span><span class="ai">Company 1</span></span> by <span class="swap" data-ph="Person 2"><span class="real">Sarah Jones</span><span class="ai">Person 2</span></span>, Director</p>
               <p style="margin-top:10px">Signed by <span class="swap" data-ph="Person 1"><span class="real">Karim Benali</span><span class="ai">Person 1</span></span></p>
@@ -270,6 +273,14 @@
         <h2 class="h2" id="replace-h">What gets replaced</h2>
         <span class="small muted">7 items</span>
       </div>
+      <div class="notice warn" role="alert" data-state="over-credit">
+        <svg class="icon"><use href="#i-warn"/></svg>
+        <div>
+            <p>This review costs about $0.42. You have $0.30 left.</p>
+            <p class="small">If the credit runs out, the review stops. You can resume it once you add credit.</p>
+            <p class="small"><a class="link" href="https://openrouter.ai" target="_blank" rel="noopener">Add credit<span class="visually-hidden"> (opens in your browser)</span></a></p>
+          </div>
+        </div>
       <p class="small muted">Shown on this screen only. Ticked rows are marked on the pages. Click a row to tick or untick it.</p>
 
       <ul class="repl-list" aria-label="Replacements" id="repl-list">
@@ -277,52 +288,58 @@
         <li class="repl"><label><input type="checkbox" checked data-ph="Address 1"><span class="ph">Address 1</span><span class="val">14 Harbour Street, Leeds LS1 4AB</span><span class="count">1 place</span></label></li>
         <li class="repl"><label><input type="checkbox" checked data-ph="Person 1"><span class="ph">Person 1</span><span class="val">Karim Benali</span><span class="count">2 places</span></label></li>
         <li class="repl"><label><input type="checkbox" checked data-ph="Address 2"><span class="ph">Address 2</span><span class="val">27 Rue Didouche Mourad, Algiers 16000, Algeria</span><span class="count">1 place</span></label></li>
-        <li class="repl"><label><input type="checkbox" checked data-ph="Person 2"><span class="ph">Person 2</span><span class="val">Sarah Jones (signature block)</span><span class="count">1 place</span></label></li>
+        <li class="repl"><label><input type="checkbox" checked data-ph="Person 2"><span class="ph">Person 2</span><span class="val">Sarah Jones</span><span class="count">2 places</span></label></li>
         <li class="repl"><label><input type="checkbox" checked data-ph="Email 1"><span class="ph">Email 1</span><span class="val">accounts@brightline.example</span><span class="count">1 place</span></label></li>
         <li class="repl unlikely"><label><input type="checkbox" checked data-ph="ID 1"><span class="ph">ID 1</span><span class="val">company number 09876543</span><span class="count">1 place</span></label></li>
         <li class="repl" data-state="name-variants"><div class="variant">
           <p class="small"><strong>“Ms Jones”</strong> in 14.5 looks like Sarah Jones (Person 2).</p>
-          <div class="segmented" role="group" aria-label="Is “Ms Jones” the same person as Sarah Jones?"><button type="button" aria-pressed="true" data-toast="Both are Person 2">Same person</button><button type="button" aria-pressed="false" data-toast="“Ms Jones” is now Person 3">Different person</button></div>
+          <div class="segmented" role="group" aria-label="Is “Ms Jones” the same person as Sarah Jones?"><button type="button" aria-pressed="true" data-toast="Both are Person 2">Same person</button><button type="button" aria-pressed="false" data-toast="“Ms Jones” is Person 3">Different person</button></div>
         </div></li>
       </ul>
 
       <p class="small muted">Kept: amounts, dates, durations, roles like “the Developer”, and England and Wales in the governing-law clause.</p>
-      <p><a class="link" href="new-review.html"><svg class="icon"><use href="#i-arrow-left"/></svg>Back to party details</a></p>
-
       <div class="toggle-row" style="margin-top:8px">
-        <input class="toggle" type="checkbox" id="private-mode" role="switch" checked aria-describedby="private-desc">
-        <label for="private-mode">Private mode for this review<small id="private-desc">Only providers that don't keep your contract.</small></label>
+        <button class="pm-switch" type="button" role="switch" aria-checked="true" data-private-switch id="private-mode" aria-describedby="private-desc">
+          <span class="pm-track" aria-hidden="true"><span class="pm-knob"></span></span>
+          <span class="pm-label">Private mode for this review</span>
+        </button>
+        <small id="private-desc">Only providers that don't keep your contract.</small>
       </div>
 
       <div class="notice" id="private-off-warning" role="alert" hidden>
         <svg class="icon"><use href="#i-warn"/></svg>
-        <span>Private mode is off. The contract goes to AI models that may keep it. Turn it back on unless you're sure.</span>
+        <span>Private mode is off. The contract goes to AI models that may keep it. Names and addresses are still replaced. Turn it back on unless you're sure.</span>
       </div>
 
       <div class="foot-note">
-        <div class="notice warn" role="alert" data-state="over-credit">
-          <svg class="icon"><use href="#i-warn"/></svg>
-          <div>
-            <p>This review costs about $0.42. You have $0.30 left.</p>
-            <p class="small">If the credit runs out, the review stops. You can resume it once you add credit.</p>
-            <p class="small"><a class="link" href="https://openrouter.ai" target="_blank" rel="noopener">Add credit<span class="visually-hidden"> (opens in your browser)</span></a></p>
-          </div>
-        </div>
         <p class="note">929 words go to OpenRouter, with 7 details replaced: 2 people, 1 company, 2 addresses, 1 email and 1 ID number.</p>
-        <p class="mini-note">The check can miss things. Please look over the marked words.</p>
+        <p class="mini-note">The check can miss things. Look over the marked words.</p>
       </div>
     </aside>
   </div>
 
   <footer class="flow-foot">
+    <a class="btn" href="new-review.html"><svg class="icon"><use href="#i-arrow-left"/></svg>Back to party details</a>
     <span class="small muted" data-state-hide="over-credit">About $0.42 and 3 minutes · credit left: $3.10</span>
-    <span class="small muted" data-state="over-credit">Credit left: $0.30 · estimated cost $0.42</span>
     <span class="spacer"></span>
     <a class="btn btn-primary" href="running.html" data-state-hide="over-credit">Send for review<svg class="icon"><use href="#i-arrow-right"/></svg></a>
     <a class="btn btn-primary" href="running.html" data-state="over-credit">Send anyway<svg class="icon"><use href="#i-arrow-right"/></svg></a>
   </footer>
 
 </div>
+
+<dialog id="private-off" aria-labelledby="private-title">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="h2" id="private-title">Turn private mode off for this review?</h2>
+      <p class="muted">The contract goes to AI models that may keep it. Names and addresses are still replaced.</p>
+    </div>
+    <div class="dialog-foot">
+      <button class="btn" value="cancel">Cancel</button>
+      <button class="btn btn-primary" value="ok">Turn off</button>
+    </div>
+  </form>
+</dialog>
 
 <script src="icons.js"></script>
 <script src="app.js"></script>
@@ -342,15 +359,15 @@
       });
       box.dispatchEvent(new Event('change'));
     });
+    // The warning follows the switch, whoever flips it (app.js turns it off only after the confirmation dialog).
     var mode = document.getElementById('private-mode');
-    mode.addEventListener('change', function () {
-      document.getElementById('private-off-warning').hidden = mode.checked;
-    });
-    // ?state=private-off opens with the toggle already off, so the warning shows on load.
+    function warn() { document.getElementById('private-off-warning').hidden = mode.getAttribute('aria-checked') === 'true'; }
+    new MutationObserver(warn).observe(mode, { attributes: true, attributeFilter: ['aria-checked'] });
+    // ?state=private-off opens with the switch already off, so the warning shows on load.
     if ((new URLSearchParams(location.search).get('state') || '').split(/\s+/).indexOf('private-off') !== -1) {
-      mode.checked = false;
-      mode.dispatchEvent(new Event('change'));
+      mode.setAttribute('aria-checked', 'false');
     }
+    warn();
   })();
 </script>
 </body>

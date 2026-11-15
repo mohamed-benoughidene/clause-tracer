@@ -1,0 +1,102 @@
+# ADR-0014: Protect the project with signed releases and honest wording, not obfuscation
+
+**Status:** Accepted (12 Nov 2026)
+**Date:** 2026-11-11
+**Deciders:** Project owner
+
+## Context
+The project is source available under FSL-1.1-ALv2. Anyone can read the code, and each version becomes Apache 2.0 two years after release ([Spec 10](../spec.md)). Spec 8.3 encrypts stored data with a key in the system's password store. Spec 8.4 says each release publishes checksums. Spec 9 ships an unsigned Windows installer first. Runtime dependencies must be MIT, BSD or Apache.
+
+The owner asked how to protect the code, the builds, local data and any hidden parts. [The v1 design decisions report](../../reports/Clause%20Tracer%20v1%20design%20decisions.md) found that nothing technical stops a copy, because the source is public. Obfuscating a binary protects nothing against a copycat, who takes the repository. It only adds antivirus flags and contradicts the "read the source" promise. Nothing in this ADR is legal advice.
+
+## Decision
+The project owner accepted the following on 12 Nov 2026, with the trade mark deferred.
+
+- **No obfuscation** of any kind.
+- **Copycats.** Keep FSL-1.1-ALv2. Enforce by polite email, then a DMCA notice for copied code, then a lawyer. **No trade mark for now:** the owner ruled it out on 12 Nov 2026 because of its cost. In its place, at no cost: use the name and logo the same way everywhere, and keep dated public proof of first use (signed Git tags, release dates, the repository history). This is weaker than a registered mark. How far an unregistered name is protected differs by country and needs a lawyer to say. Revisit registration before wide promotion, or if a copy appears under the same name.
+- **Tampered builds.** A GPG-signed `SHA256SUMS`, GitHub artifact attestations, and reproducible Linux builds with fixed `PYTHONHASHSEED` and `SOURCE_DATE_EPOCH`. Windows OV signing when affordable ([ADR 0009](0009-desktop-shell-protocol-and-packaging.md)). A notify-only, opt-in update check against GitHub Releases.
+- **Local data.** The planned design ([ADR 0006](0006-encrypted-storage-and-secrets.md)), a data directory with mode 0700, and an opt-in Argon2id passphrase. Publish the honest claim. Never promise memory wiping.
+- **Hidden parts.** Ship nothing that must stay secret. Prompts stay public. The golden test set stays in a private repository used only in CI.
+
+The honest wording for local data: contracts and the API key are encrypted at rest. They are protected from other people who use the computer and from someone who takes the disk. They are not protected from malware running under the user's own account.
+
+## Options Considered
+
+### Option A: Signed and attested releases, honest wording, trade mark deferred (chosen)
+| Dimension | Assessment |
+|-----------|------------|
+| Complexity | Low to Med: release-workflow steps and paperwork |
+| Cost | Nothing now. Later, if the trade mark is taken up: EUIPO 850 euros for one class ([EUIPO](https://www.euipo.europa.eu/en/trade-marks/before-applying/fees-payable-direct-to-the-euipo)) or USPTO $350 per class ([USPTO](https://www.uspto.gov/trademarks/trademark-fee-information)); an individual OV certificate at about $99 a year, the route the research suggests for a developer outside the US and Canada |
+| Scalability | The name outlasts each version's two-year conversion to Apache 2.0 |
+| Team familiarity | High for the workflow; legal steps need an attorney |
+
+**Pros:** users can verify a download. The wording matches what tests can prove.
+**Cons:** costs money and legal time. Does not stop a copy that uses another name.
+
+### Option B: Binary obfuscation (PyArmor or Nuitka Commercial)
+| Dimension | Assessment |
+|-----------|------------|
+| Complexity | Med to High |
+| Cost | Adds antivirus flags; measured rates not researched |
+| Scalability | Single user, not a scale question |
+| Team familiarity | Low |
+
+**Pros:** none against a copycat, who has the source.
+**Cons:** public static unpackers exist for PyArmor up to 9.3 on Python 3.7 to 3.13 ([Pyarmor-Static-Unpack-1shot](https://github.com/Lil-House/Pyarmor-Static-Unpack-1shot)). Python bytecode decompiles at a 75% perfect rate. Both tools put proprietary runtime code into the app, against the licence rule.
+
+### Option C: Runtime self-integrity checks
+| Dimension | Assessment |
+|-----------|------------|
+| Complexity | Med |
+| Cost | Effort only |
+| Scalability | Single user, not a scale question |
+| Team familiarity | Med |
+
+**Pros:** catches casual tampering.
+**Cons:** a patched binary can patch out the check.
+
+### Option D: Chrome-style app-bound encryption
+| Dimension | Assessment |
+|-----------|------------|
+| Complexity | High: a privileged Windows service |
+| Cost | High effort |
+| Scalability | Single user, not a scale question |
+| Team familiarity | Low |
+
+**Pros:** raises the bar against same-user malware.
+**Cons:** infostealers bypassed even Chrome's within months ([Elastic](https://www.elastic.co/security-labs/threat-command/katz-and-mouse-game)).
+
+## Trade-off Analysis
+The licence text, fees, attestation and reproducibility facts are verified. The enforcement ladder and the release chain are judgement. No FSL-specific enforcement story was found. The most public dispute, HashiCorp and OpenTofu in April 2024, ended in letters, not a ruling. Windows reproducibility is not guaranteed, so the claim is "Linux reproducible; Windows attested". The SLSA level was not confirmed, so do not quote one.
+
+Prompts can never be secret: they leave the machine in plaintext on every call. OWASP says a system prompt "should not be considered a secret" ([OWASP LLM07](https://genai.owasp.org/llmrisk/llm072025-system-prompt-leakage/)). With no server, any licence check runs in the app and can be patched out, so any paid add-on is protected by licence, not obfuscation. gnome-keyring says it cannot keep secrets from other programs in the same session. A Python process cannot reliably wipe memory, because strings are immutable and libraries copy them.
+
+Gaps carried over: UK and Madrid fees and app-store takedown routes were not verified. Smart App Control, Nuitka, Inno Setup and AppImage signing were not researched. No Microsoft primary document on DPAPI or Credential Manager was fetched. KWallet, Windows 11 Administrator protection and AppArmor were not researched. Cython difficulty and antivirus rates per tool were not researched.
+
+## Consequences
+- Easier: every release can be checked by anyone, and the promises match what tests prove.
+- Easier: no secret parts means no secret-keeping work.
+- Harder: legal steps and fees fall on the owner, and the golden set needs a private repository and CI access.
+- Revisit when a copy appears, when the budget allows OV signing, or when a later version plans a hosted service ([ADR 0015](0015-provider-ready-seam.md)).
+
+## Action Items
+1. [ ] When money allows, take legal advice on: whether to register a trade mark, and its classes and market; FSL with any proprietary part, and its effect on the Apache 2.0 conversion; EU AI Act Article 50 (applies since 2 Aug 2026; do not state in the docs that it does not apply). What is known about Article 50 is thin: the Commission's final guidelines were not opened and are known only through search summaries and law-firm alerts; how they treat tools that use the user's own key, and AI rewrites of the user's own wording, was not found; later amendments were not checked; and a date of 2 Dec 2026 is reported for machine-readable marking by systems already on the market. The private message a user sends probably falls outside the deployer duty, but whether this app has a provider's marking duty is unresolved.
+2. [ ] Add signed `SHA256SUMS`, `actions/attest` and a CycloneDX SBOM to the release workflow.
+3. [ ] Make the Linux build reproducible and test it by building twice.
+4. [ ] Create the private golden-set repository and give CI read access only.
+5. [x] Update Spec 8.3 and 8.4 with the honest wording and the release chain, and `docs/ux-copy.md` with matching lines (done 12 Nov 2026).
+
+## Amendment (12 Nov 2026): what the primary legal texts say
+
+The licence text, GitHub's takedown policy and the Article 50 documents were read on 12 Nov 2026. This is what they say, not legal advice.
+
+- **Enforcing the licence.** No court ruling on FSL, BSL or the Elastic Licence was found, and no FSL enforcement case. The FSL template has no governing-law, termination or remedies clause. A takedown notice to GitHub is free, needs a sworn statement, covers only copies on GitHub, and names each fork. If the other side sends a counter-notice, the content returns in 10 to 14 days unless a court action is filed. A knowingly false notice carries liability.
+- **Free steps, and what each does not do.** Keep the licence file and copyright line in the repo (it stops no one). Keep dated commits and signed tags, and capture any copy (it supports a notice, and does not prove a competing use). Use a takedown notice only for a clear copy.
+- **Article 50.** It has applied since 2 Aug 2026, reaches developers outside the EU whose app is used there, and has no exemption for open or source-available software. Two dates were found for the Commission's guidelines (20 Jul 2026 and 5 Nov 2026), so confirm which version is current. Whether this app's developer is a "provider" when the user brings their own key is not addressed. [ADR 0011](0011-who-writes-the-words.md) has the points on rewrites.
+- **Third-party licences.** The app needs a third-party licences page and the installer a licences folder, covering pikepdf ([ADR 0007](0007-document-reading-stack.md)), PyGObject on Linux ([ADR 0009](0009-desktop-shell-protocol-and-packaging.md)) and SQLCipher ([ADR 0006](0006-encrypted-storage-and-secrets.md)).
+
+The research notes hold precise questions for a lawyer on each point. They are kept locally, not in the repo.
+
+## Amendment (13 Nov 2026): the licence-enforcement working position is accepted
+
+[ADR 0016](0016-legal-positions-without-a-lawyer.md) was accepted on 13 Nov 2026. It sets the working position on enforcing this project's own licence: a polite message, then a GitHub DMCA notice for a plain copy only, never for a "competing use" dispute, then stop. No court has ruled on the FSL, and a lawsuit is out of reach for one person.

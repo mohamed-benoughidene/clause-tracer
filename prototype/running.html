@@ -22,12 +22,19 @@
   .margin { background: var(--bg-surface); border-left: 1px solid var(--line); padding: 24px; display: flex; flex-direction: column;
     gap: 16px; min-height: 0; }
   .margin h2 { font: 600 14px/1.4 var(--sans); }
-  .bars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 8px; }
-  .bars span { height: 3px; border-radius: 2px; background: var(--line-strong); }
-  .bars span.on { background: var(--text); }
-  .bars span.stop { background: var(--unsure); }
+  /* the status pie (owner, 15 Nov 2026, after Linear's status icon): one ring whose wedge grows with the review, and the step that is running under the title */
+  .stage-head { display: flex; align-items: center; gap: 12px; }
+  .stage-head .pie { width: 28px; height: 28px; }
+  .stage-head h2 { margin: 0; }
+  .stage-head p { margin: 2px 0 0; }
+  .pie.is-stop circle { stroke: var(--unsure); }
+  .pie.is-stop .pie-done { fill: var(--unsure); }
   .log { display: grid; gap: 10px; }
   .log li { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 10px; align-items: baseline; }
+  /* pencilled while running, inked when done (design direction, principle 8): finished lines are ink and upright, the
+     line of the step still running is graphite italic with no dash, a stopped line keeps its Unsure colour */
+  .log li span { color: var(--text); }
+  .log li.running span { color: var(--pencil); font-style: italic; }
   .log li.stop span { color: var(--unsure-fg); font-weight: 500; }
   .log time { font: 500 12px/1.5 var(--mono); color: var(--text-3); }
   .log span { font: 15px/1.45 var(--serif); }
@@ -37,9 +44,6 @@
   .stage { display: grid; gap: 4px; }
   .cost { font-size: 12.5px; color: var(--text-2); }
   /* warnings: unsure colours, never red (Spec 14.4) */
-  .notice.warn { align-items: flex-start; flex-wrap: wrap; background: var(--unsure-bg); color: var(--unsure-fg); }
-  .notice.warn .icon { color: var(--unsure); margin-top: 2px; }
-  .notice.warn p + p { margin-top: 6px; }
   .notice .actions { margin-top: 10px; }
   @media (max-width: 860px) {
     .work { grid-template-columns: 1fr; }
@@ -50,18 +54,23 @@
 </style>
 </head>
 <body>
-<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8767/index.html</b> instead.</p>");</script>
 <div class="flow">
 
   <header class="appbar">
     <a class="btn btn-ghost btn-sm" href="home.html"><svg class="icon"><use href="#i-arrow-left"/></svg>Home</a>
     <span class="h3">Brightline web build</span>
-    <span class="status small" data-state-hide="wrong-key no-credit no-internet no-private-model done"><svg class="icon"><use href="#i-clock"/></svg>Running</span>
-    <span class="status small warn-text" data-state="wrong-key no-credit no-internet no-private-model"><svg class="icon"><use href="#i-pause"/></svg>Interrupted</span>
+    <span class="status small" data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait"><svg class="icon"><use href="#i-clock"/></svg>Running</span>
+    <span class="status small warn-text" data-state="wrong-key no-credit no-internet no-private-model rate-limit rate-limit-no-wait"><svg class="icon"><use href="#i-pause"/></svg>Interrupted</span>
     <span class="status small" data-state="done"><svg class="icon" style="color:var(--pref)"><use href="#i-check"/></svg>Done</span>
     <span class="spacer"></span>
+    <ol class="steps" aria-label="Review steps" data-step="4">
+      <li class="is-done"><span class="step"><span class="name">Contract<span class="visually-hidden">, done</span></span><span class="dot" aria-hidden="true"><svg class="icon"><use href="#i-check"/></svg></span></span></li>
+      <li class="is-done"><span class="step"><span class="name">Contract check<span class="visually-hidden">, done</span></span><span class="dot" aria-hidden="true"><svg class="icon"><use href="#i-check"/></svg></span></span></li>
+      <li class="is-done"><span class="step"><span class="name">Privacy check<span class="visually-hidden">, done</span></span><span class="dot" aria-hidden="true"><svg class="icon"><use href="#i-check"/></svg></span></span></li>
+      <li aria-current="step"><span class="step"><span class="name">Review</span><span class="dot" aria-hidden="true"></span></span></li>
+    </ol>
     <button class="search-commands" type="button" style="width:220px;margin:0"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
-    <button class="btn btn-sm" type="button" data-menu="privacy-menu" aria-haspopup="menu"><svg class="icon" style="color:var(--pref)"><use href="#i-shield"/></svg>Private mode: On<svg class="icon"><use href="#i-chev-down"/></svg></button>
   </header>
 
   <div class="work">
@@ -79,16 +88,14 @@
     <aside class="margin" aria-label="Review progress">
 
       <!-- Running (default view) -->
-      <div class="stage" data-state-hide="wrong-key no-credit no-internet no-private-model done">
-        <h2 class="h3">Step 1 of 4 · Reading the pages</h2>
-        <div class="bars" aria-hidden="true"><span class="on"></span><span></span><span></span><span></span></div>
-        <p class="small muted" style="margin-top:10px">Spent so far $0.05 of about $0.42 · About 1 min left</p>
+      <div class="stage" id="live-stage"data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait">
+        <div class="stage-head"><svg class="pie pie-stage" id="live-pie" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle class="pie-ring" cx="10" cy="10" r="9"/><circle class="pie-fill" cx="10" cy="10" r="3.5" transform="rotate(-90 10 10)" style="stroke-dashoffset:20.62"/><circle class="pie-done" cx="10" cy="10" r="9.75"/><path class="pie-check" d="M6 10.4 8.6 12.9 14 7.4"/></svg><div><h2 class="h3" id="live-step" aria-live="polite">Step 1 of 4 · Reading the pages</h2><p class="small muted" id="live-sub">Linking references and defined terms</p></div></div>
+        <p class="small muted" id="live-cost" style="margin-top:10px">Spent so far $0.05 of about $0.42 · About 4 min left</p>
       </div>
 
       <!-- Interrupted: wrong key, at step 2 -->
       <div class="stage" data-state="wrong-key">
-        <h2 class="h3">Interrupted at step 2 of 4 · Matching clauses</h2>
-        <div class="bars" aria-hidden="true"><span class="on"></span><span class="stop"></span><span></span><span></span></div>
+        <div class="stage-head"><svg class="pie pie-stage is-stop" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle class="pie-ring" cx="10" cy="10" r="9"/><circle class="pie-fill" cx="10" cy="10" r="3.5" transform="rotate(-90 10 10)" style="stroke-dashoffset:19.24"/><circle class="pie-done" cx="10" cy="10" r="9.75"/><path class="pie-check" d="M6 10.4 8.6 12.9 14 7.4"/></svg><div><h2 class="h3">Interrupted at step 2 of 4 · Matching clauses</h2><p class="small muted">Matching clauses to positions</p></div></div>
         <p class="small muted" style="margin-top:10px">Spent so far $0.02 of about $0.42 · Paused</p>
         <div class="notice warn" role="note" style="margin-top:12px">
           <svg class="icon"><use href="#i-warn"/></svg>
@@ -104,13 +111,12 @@
 
       <!-- Interrupted: internet dropped, at step 2 -->
       <div class="stage" data-state="no-internet">
-        <h2 class="h3">Interrupted at step 2 of 4 · Matching clauses</h2>
-        <div class="bars" aria-hidden="true"><span class="on"></span><span class="stop"></span><span></span><span></span></div>
+        <div class="stage-head"><svg class="pie pie-stage is-stop" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle class="pie-ring" cx="10" cy="10" r="9"/><circle class="pie-fill" cx="10" cy="10" r="3.5" transform="rotate(-90 10 10)" style="stroke-dashoffset:19.24"/><circle class="pie-done" cx="10" cy="10" r="9.75"/><path class="pie-check" d="M6 10.4 8.6 12.9 14 7.4"/></svg><div><h2 class="h3">Interrupted at step 2 of 4 · Matching clauses</h2><p class="small muted">Matching clauses to positions</p></div></div>
         <p class="small muted" style="margin-top:10px">Spent so far $0.03 of about $0.42 · Paused</p>
         <div class="notice warn" role="note" style="margin-top:12px">
           <svg class="icon"><use href="#i-cloud-off"/></svg>
           <div>
-            <p>The internet dropped at step 2. Resume picks up from here.</p>
+            <p>The internet dropped at step 2. Resume picks up from the first unfinished step.</p>
             <div class="actions">
               <a class="btn btn-primary btn-sm" href="running.html">Resume</a>
             </div>
@@ -120,8 +126,7 @@
 
       <!-- Interrupted: credit ran out, at step 3 -->
       <div class="stage" data-state="no-credit">
-        <h2 class="h3">Interrupted at step 3 of 4 · Judging the labels</h2>
-        <div class="bars" aria-hidden="true"><span class="on"></span><span class="on"></span><span class="stop"></span><span></span></div>
+        <div class="stage-head"><svg class="pie pie-stage is-stop" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle class="pie-ring" cx="10" cy="10" r="9"/><circle class="pie-fill" cx="10" cy="10" r="3.5" transform="rotate(-90 10 10)" style="stroke-dashoffset:8.25"/><circle class="pie-done" cx="10" cy="10" r="9.75"/><path class="pie-check" d="M6 10.4 8.6 12.9 14 7.4"/></svg><div><h2 class="h3">Interrupted at step 3 of 4 · Judging the labels</h2><p class="small muted">Judging the wording</p></div></div>
         <p class="small muted" style="margin-top:10px">Spent so far $0.30 of about $0.42 · Paused</p>
         <div class="notice warn" role="note" style="margin-top:12px">
           <svg class="icon"><use href="#i-warn"/></svg>
@@ -135,10 +140,39 @@
         </div>
       </div>
 
+      <!-- Interrupted: rate limit, with a wait time, at step 2 -->
+      <div class="stage" data-state="rate-limit">
+        <div class="stage-head"><svg class="pie pie-stage is-stop" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle class="pie-ring" cx="10" cy="10" r="9"/><circle class="pie-fill" cx="10" cy="10" r="3.5" transform="rotate(-90 10 10)" style="stroke-dashoffset:19.24"/><circle class="pie-done" cx="10" cy="10" r="9.75"/><path class="pie-check" d="M6 10.4 8.6 12.9 14 7.4"/></svg><div><h2 class="h3">Interrupted at step 2 of 4 · Matching clauses</h2><p class="small muted">Matching clauses to positions</p></div></div>
+        <p class="small muted" style="margin-top:10px">Spent so far $0.03 of about $0.42 · Paused</p>
+        <div class="notice warn" role="note" style="margin-top:12px">
+          <svg class="icon"><use href="#i-clock"/></svg>
+          <div>
+            <p>The AI service is busy, or your key's limit is reached. It asked for a wait of 30 seconds. Resume picks up from the first unfinished step, and finished steps aren't paid for again.</p>
+            <div class="actions">
+              <a class="btn btn-primary btn-sm" href="running.html">Resume</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interrupted: rate limit, no wait time given, at step 2 -->
+      <div class="stage" data-state="rate-limit-no-wait">
+        <div class="stage-head"><svg class="pie pie-stage is-stop" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle class="pie-ring" cx="10" cy="10" r="9"/><circle class="pie-fill" cx="10" cy="10" r="3.5" transform="rotate(-90 10 10)" style="stroke-dashoffset:19.24"/><circle class="pie-done" cx="10" cy="10" r="9.75"/><path class="pie-check" d="M6 10.4 8.6 12.9 14 7.4"/></svg><div><h2 class="h3">Interrupted at step 2 of 4 · Matching clauses</h2><p class="small muted">Matching clauses to positions</p></div></div>
+        <p class="small muted" style="margin-top:10px">Spent so far $0.03 of about $0.42 · Paused</p>
+        <div class="notice warn" role="note" style="margin-top:12px">
+          <svg class="icon"><use href="#i-clock"/></svg>
+          <div>
+            <p>The AI service is busy, or your key's limit is reached. It gave no wait time, so try again in a minute. Resume picks up from the first unfinished step, and finished steps aren't paid for again.</p>
+            <div class="actions">
+              <a class="btn btn-primary btn-sm" href="running.html">Resume</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Interrupted: no zero-retention model free, at step 3 -->
       <div class="stage" data-state="no-private-model">
-        <h2 class="h3">Interrupted at step 3 of 4 · Judging the labels</h2>
-        <div class="bars" aria-hidden="true"><span class="on"></span><span class="on"></span><span class="stop"></span><span></span></div>
+        <div class="stage-head"><svg class="pie pie-stage is-stop" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle class="pie-ring" cx="10" cy="10" r="9"/><circle class="pie-fill" cx="10" cy="10" r="3.5" transform="rotate(-90 10 10)" style="stroke-dashoffset:10.99"/><circle class="pie-done" cx="10" cy="10" r="9.75"/><path class="pie-check" d="M6 10.4 8.6 12.9 14 7.4"/></svg><div><h2 class="h3">Interrupted at step 3 of 4 · Judging the labels</h2><p class="small muted">Judging the wording</p></div></div>
         <p class="small muted" style="margin-top:10px">Spent so far $0.12 of about $0.42 · Paused</p>
         <div class="notice warn" role="note" style="margin-top:12px">
           <svg class="icon"><use href="#i-shield"/></svg>
@@ -154,8 +188,7 @@
 
       <!-- Done -->
       <div class="stage" data-state="done">
-        <h2 class="h3">Your review is ready</h2>
-        <div class="bars" aria-hidden="true"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span></div>
+        <div class="stage-head"><svg class="pie pie-stage is-full" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle class="pie-ring" cx="10" cy="10" r="9"/><circle class="pie-fill" cx="10" cy="10" r="3.5" transform="rotate(-90 10 10)" style="stroke-dashoffset:0.0"/><circle class="pie-done" cx="10" cy="10" r="9.75"/><path class="pie-check" d="M6 10.4 8.6 12.9 14 7.4"/></svg><div><h2 class="h3">Your review is ready</h2></div></div>
         <p class="small muted" style="margin-top:10px">Cost $0.39 · Took 4 min</p>
       </div>
 
@@ -165,9 +198,9 @@
           <button class="link" type="button" id="toggle-done" aria-controls="log" aria-expanded="true" data-state-hide="done">Hide finished lines</button>
         </div>
         <div id="log">
-          <ol class="log" data-state-hide="wrong-key no-credit no-internet no-private-model done">
+          <ol class="log" id="live-log" data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait">
             <li><time>0:04</time><span>Read 5 pages.</span></li>
-            <li><time>0:09</time><span>Found 45 clauses.</span></li>
+            <li class="running" aria-current="step"><time>0:09</time><span>Found 45 clauses.</span></li>
           </ol>
           <ol class="log" data-state="wrong-key">
             <li><time>0:04</time><span>Read 5 pages.</span></li>
@@ -179,6 +212,18 @@
             <li><time>0:09</time><span>Found 45 clauses.</span></li>
             <li><time>0:21</time><span>Matched 12 of 45 clauses to positions.</span></li>
             <li class="stop"><time>0:24</time><span>Stopped at step 2. The internet dropped.</span></li>
+          </ol>
+          <ol class="log" data-state="rate-limit">
+            <li><time>0:04</time><span>Read 5 pages.</span></li>
+            <li><time>0:09</time><span>Found 45 clauses.</span></li>
+            <li><time>0:21</time><span>Matched 12 of 45 clauses to positions.</span></li>
+            <li class="stop"><time>0:24</time><span>Stopped at step 2. The AI service asked for a wait of 30 seconds.</span></li>
+          </ol>
+          <ol class="log" data-state="rate-limit-no-wait">
+            <li><time>0:04</time><span>Read 5 pages.</span></li>
+            <li><time>0:09</time><span>Found 45 clauses.</span></li>
+            <li><time>0:21</time><span>Matched 12 of 45 clauses to positions.</span></li>
+            <li class="stop"><time>0:24</time><span>Stopped at step 2. The AI service is busy.</span></li>
           </ol>
           <ol class="log" data-state="no-credit">
             <li><time>0:04</time><span>Read 5 pages.</span></li>
@@ -198,7 +243,7 @@
             <li><time>0:09</time><span>Found 45 clauses.</span></li>
             <li><time>0:31</time><span>Matched all 45 clauses to 11 positions.</span></li>
             <li><time>2:40</time><span>Judged the labels for 11 positions.</span></li>
-            <li><time>3:52</time><span>Wrote the explanations and the summary of not-covered parts.</span></li>
+            <li><time>3:52</time><span>Wrote the explanations and sorted the not-covered parts.</span></li>
             <li><time>4:05</time><span>Finished.</span></li>
           </ol>
         </div>
@@ -207,35 +252,30 @@
       <div class="margin-foot">
         <div class="actions" data-state-hide="done">
           <button class="btn" type="button" data-open="cancel-review">Cancel</button>
-          <button class="btn btn-ghost" type="button" data-toast="Running in the background" data-state-hide="wrong-key no-credit no-internet no-private-model done">Run in background</button>
         </div>
-        <p data-state-hide="wrong-key no-credit no-internet no-private-model"><a class="btn btn-primary" href="review.html">Open the review<svg class="icon"><use href="#i-arrow-right"/></svg></a></p>
-        <p class="small muted" data-state-hide="wrong-key no-credit no-internet no-private-model done">Closing the app pauses the review. Resume picks up from the last finished step.</p>
+        <p data-state="done"><a class="btn btn-primary" href="review.html">Open the review<svg class="icon"><use href="#i-arrow-right"/></svg></a></p>
+        <p class="small muted" data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait">You can leave this screen. Closing the app pauses the review, and Resume picks up from the first unfinished step.</p>
       </div>
     </aside>
   </div>
 
   <footer class="flow-foot">
-    <span class="small muted" data-state-hide="wrong-key no-credit no-internet no-private-model done">Credit left: $3.10 · about 3 minutes</span>
-    <span class="small muted" data-state="wrong-key no-internet no-private-model">Paused · credit left: $3.10</span>
+    <span class="small muted" data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait">Credit left: $3.10</span>
+    <span class="small muted" data-state="wrong-key no-internet no-private-model rate-limit rate-limit-no-wait">Paused · credit left: $3.10</span>
     <span class="small muted" data-state="no-credit">Credit left: $0.00 · paused</span>
-    <span class="small muted" data-state="done">Cost $0.39 · credit left: $2.71</span>
+    <span class="small muted" data-state="done">Credit left: $2.71</span>
     <span class="spacer"></span>
-    <span class="small muted">Private mode is on. Providers don't keep your contract if you've turned off Safety Retention in OpenRouter, except for legally required safety screening.</span>
+    <span class="small muted" id="private-note" aria-live="polite"><span data-private-on>Private mode is on. Providers don't keep your contract if you've turned off Safety Retention in OpenRouter, except for legally required safety screening.</span><span data-private-off hidden>Private mode is off. The contract goes to AI models that may keep it.</span></span>
+    <a class="link" href="settings.html#advanced">Change models in Settings</a>
   </footer>
 
-</div>
-
-<div class="menu" id="privacy-menu" hidden role="menu">
-  <button type="button" role="menuitem" data-open="private-off"><svg class="icon"><use href="#i-shield"/></svg>Turn private mode off…</button>
-  <a href="settings.html#advanced" role="menuitem"><svg class="icon"><use href="#i-gear"/></svg>Change models in Settings</a>
 </div>
 
 <dialog id="cancel-review" aria-labelledby="cancel-title">
   <form method="dialog">
     <div class="dialog-body">
       <h2 class="h2" id="cancel-title">Cancel this review?</h2>
-      <p class="muted">So far it has cost <span data-state-hide="wrong-key no-internet no-credit no-private-model">$0.05</span><span data-state="wrong-key">$0.02</span><span data-state="no-internet">$0.03</span><span data-state="no-credit">$0.30</span><span data-state="no-private-model">$0.12</span> of about $0.42. Finished steps are kept, so you won't pay for them again.</p>
+      <p class="muted">So far it has cost <span id="cancel-cost" data-state-hide="wrong-key no-internet no-credit no-private-model rate-limit rate-limit-no-wait">$0.05</span><span data-state="wrong-key">$0.02</span><span data-state="no-internet rate-limit rate-limit-no-wait">$0.03</span><span data-state="no-credit">$0.30</span><span data-state="no-private-model">$0.12</span> of about $0.42. Finished steps are kept, so you won't pay for them again.</p>
     </div>
     <div class="dialog-foot">
       <button class="btn" value="cancel">Keep running</button>
@@ -248,11 +288,11 @@
   <form method="dialog">
     <div class="dialog-body">
       <h2 class="h2" id="private-title">Turn private mode off for this review?</h2>
-      <p class="muted">The contract goes to the AI models as it is, names and addresses included. The models may keep it.</p>
+      <p class="muted">The contract goes to AI models that may keep it. Names and addresses are still replaced.</p>
     </div>
     <div class="dialog-foot">
       <button class="btn" value="cancel">Cancel</button>
-      <button class="btn btn-primary" value="ok" data-toast="Private mode off for this review">Turn off</button>
+      <button class="btn btn-primary" value="ok">Turn off</button>
     </div>
   </form>
 </dialog>
@@ -260,6 +300,23 @@
 <script src="icons.js"></script>
 <script src="app.js"></script>
 <script>
+  // Page-only behaviour: private mode is shown as words here, not as a switch (owner, 15 Nov 2026). It is chosen on the privacy
+  // check. The one way to change it while a review runs is "Turn private mode off…" in the "no private-mode model" stop.
+  (function () {
+    function sync() {
+      var on = window.CT.isPrivate();
+      document.querySelector('[data-private-on]').hidden = !on;
+      document.querySelector('[data-private-off]').hidden = on;
+    }
+    sync();   // app.js has the saved choice, so the sentence starts in step with it
+    var ask = document.getElementById('private-off');
+    ask.addEventListener('click', function (ev) {
+      if (!ev.target.closest('button[value="ok"]')) return;
+      window.CT.setPrivate(false);   // same toast as everywhere: "Private mode off"
+      sync();
+    });
+  })();
+
   // Page-only behaviour: hide or show the finished reading-log lines.
   (function () {
     var log = document.getElementById('log');
@@ -269,6 +326,47 @@
       btn.textContent = hiding ? 'Show finished lines' : 'Hide finished lines';
       btn.setAttribute('aria-expanded', String(!hiding));
     });
+  })();
+
+  // Page-only behaviour: with no ?state, the page plays one review through its four steps, so the progress can be seen.
+  // Each frame is a moment of the same sample review; the words are the deck's (ux-copy 4.6). Any ?state holds the page still.
+  (function () {
+    if (new URLSearchParams(location.search).has('state')) return;
+    var step = document.getElementById('live-step'), pie = document.querySelector('#live-pie .pie-fill'), sub = document.getElementById('live-sub');
+    var cost = document.getElementById('live-cost'), cancelCost = document.getElementById('cancel-cost'), log = document.getElementById('live-log');
+    var STAGES = ['Reading the pages', 'Matching clauses', 'Judging the labels', 'Writing the notes'];
+    var SUBS = [['Linking references and defined terms'], ['Matching clauses to positions', 'Pulling out the quotes and values', 'Checking each quote against the contract'], ['Picking labels from the numbers', 'Judging the wording'], ['Writing the explanations', 'Sorting the not-covered parts']];
+    var BEFORE = [0, 1, 4, 6];   // small steps finished before each stage; the pie counts 8 in all
+    // [step, time, log line, replaces the running line?, spent, time left, small step inside the stage]
+    var FRAMES = [
+      [2, '0:21', 'Matched 12 of 45 clauses to positions.', false, '$0.08', 'About 3 min left', 0],
+      [2, '0:31', 'Matched all 45 clauses to 11 positions.', true, '$0.12', 'About 3 min left', 2],
+      [3, '1:40', 'Judged 6 of 11 positions.', false, '$0.21', 'About 2 min left', 1],
+      [3, '2:40', 'Judged the labels for 11 positions.', true, '$0.30', 'About 1 min left', 1],
+      [4, '3:52', 'Wrote the explanations and sorted the not-covered parts.', false, '$0.39', 'Under a minute left', 1]
+    ];
+    function show(f) {
+      step.textContent = 'Step ' + f[0] + ' of 4 \u00b7 ' + STAGES[f[0] - 1];
+      sub.textContent = SUBS[f[0] - 1][f[6]];
+      pie.style.strokeDashoffset = (21.99 * (1 - (BEFORE[f[0] - 1] + f[6] + 0.5) / 8)).toFixed(2);   // the step that is running counts as half done
+      cancelCost.textContent = f[4];   // the Cancel dialog quotes the live cost
+      cost.textContent = 'Spent so far ' + f[4] + ' of about $0.42 \u00b7 ' + f[5];
+      var last = log.lastElementChild;
+      if (f[3]) { last.firstElementChild.textContent = f[1]; last.lastElementChild.textContent = f[2]; return; }
+      last.classList.remove('running'); last.removeAttribute('aria-current');   // the finished line is inked
+      var li = document.createElement('li'), t = document.createElement('time'), s = document.createElement('span');
+      li.className = 'running'; li.setAttribute('aria-current', 'step');
+      t.textContent = f[1]; s.textContent = f[2]; li.append(t, s); log.append(li);
+    }
+    function finish() {   // the same switch app.js makes for ?state=done
+      document.querySelectorAll('[data-state]').forEach(function (el) { el.classList.toggle('on', el.getAttribute('data-state').split(' ').indexOf('done') > -1); });
+      document.querySelectorAll('[data-state-hide]').forEach(function (el) { if (el.getAttribute('data-state-hide').split(' ').indexOf('done') > -1) el.hidden = true; });
+    }
+    var n = 0;
+    var timer = setInterval(function () {
+      if (n < FRAMES.length) { show(FRAMES[n++]); return; }
+      clearInterval(timer); finish();
+    }, 2200);
   })();
 </script>
 </body>

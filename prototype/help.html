@@ -21,6 +21,8 @@
   .glossary dt.term { font: 600 13px/1.4 var(--sans); }
   .glossary dd.def { font-size: 13px; }
   .subhead { margin: 18px 0 4px; }
+  .shortcuts thead { height: 0; }
+  .shortcuts th { padding: 0; }
   .shortcuts td { padding: 10px 20px; }
   .shortcuts td:first-child { white-space: nowrap; }
   .shortcuts td:last-child { color: var(--text); font-size: 13px; }
@@ -31,10 +33,11 @@
 </style>
 </head>
 <body>
-<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8767/index.html</b> instead.</p>");</script>
 <div class="app">
   <aside class="sidebar">
     <a class="logo" href="home.html"><img class="on-light" src="logo.svg" alt="Clause Tracer"><img class="on-dark" src="logo-dark.svg" alt="Clause Tracer"></a>
+    <a class="logo-symbol" href="home.html"><img class="on-light" src="symbol.svg" alt="Clause Tracer"><img class="on-dark" src="symbol-dark.svg" alt="Clause Tracer"></a>
     <a class="btn btn-primary btn-block" href="new-review.html"><svg class="icon"><use href="#i-plus"/></svg>New review</a>
     <button class="search-commands" type="button"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
     <nav class="nav" aria-label="Main">
@@ -72,13 +75,12 @@
           <div class="row" style="margin-top:16px; flex-wrap:wrap">
             <a class="btn" href="new-review.html"><svg class="icon"><use href="#i-plus"/></svg>Start a review</a>
             <a class="btn" href="review.html?sample"><svg class="icon"><use href="#i-doc"/></svg>Try a sample contract</a>
-            <button class="btn btn-ghost" type="button" data-toast="Tips will show again"><svg class="icon"><use href="#i-refresh"/></svg>Replay tips</button>
           </div>
         </section>
 
         <section class="card" aria-labelledby="words-title" id="words">
           <h2 class="h2" id="words-title">Words used in this app</h2>
-          <p class="note-s muted" style="margin-top:2px">There are four labels, plus grey for parts no position covers. Each is shown as a stamp.</p>
+          <p class="small muted" style="margin-top:2px">There are four labels, plus grey for parts no position covers. Each is shown as a stamp.</p>
           <dl class="glossary" style="margin-top:12px">
             <dt><span class="stamp preferred"><span class="mark"><svg><use href="#i-check"/></svg></span><span class="word">Preferred</span></span></dt>
             <dd>The clause gives you at least what your playbook says you want.</dd>
@@ -123,15 +125,22 @@
           <h2 class="h2" id="key-title">Get an OpenRouter key</h2>
           <p class="muted">Create an account, add credit, turn off Safety Retention, create a key.</p>
           <div class="row" style="margin-top:14px; flex-wrap:wrap">
-            <a class="btn" href="index.html"><svg class="icon"><use href="#i-key"/></svg>Open the key guide</a>
+            <a class="btn" href="index.html?state=key#guide"><svg class="icon"><use href="#i-key"/></svg>Open the key guide</a>
             <a class="btn" href="settings.html#ai-key"><svg class="icon"><use href="#i-gear"/></svg>Key settings</a>
           </div>
         </section>
 
         <section class="card" aria-labelledby="sent-title" id="sent">
           <h2 class="h2" id="sent-title">What gets sent</h2>
-          <p class="muted">Only your positions and the contract go to OpenRouter, with names swapped for placeholders like “Person 1”. Never playbook names, customers, your notes, or To and From names. No telemetry.</p>
+          <p class="muted">Only your positions and the contract go to OpenRouter, with names swapped for placeholders like “Person 1”. That includes a name typed into a position or a rewrite instruction. Never playbook names, customers, your notes, or To and From names. No telemetry.</p>
           <p class="small" style="margin-top:12px"><a class="link" href="settings.html#privacy">Change what gets sent in Settings</a></p>
+        </section>
+
+        <section class="card" aria-labelledby="protected-title" id="protected">
+          <h2 class="h2" id="protected-title">What's protected</h2>
+          <p class="muted">Your reviews, playbooks and key are encrypted on this computer. That protects them from other people who use the computer, and from someone who takes the disk.</p>
+          <p class="muted" style="margin-top:8px">It doesn't protect them from harmful software running in your own account. Keep your system up to date, and keep its disk encryption on.</p>
+          <p class="muted" style="margin-top:8px">Deleting a review destroys its key, so it can't be read again. A backup of this computer made earlier may still hold it.</p>
         </section>
 
         <section class="card" aria-labelledby="shortcuts-title" id="shortcuts">
@@ -194,6 +203,10 @@
           <tr><td><span class="keys"><kbd>]</kbd><span class="sep">/</span><kbd>[</kbd></span></td><td>Next / previous label</td></tr>
           <tr><td><span class="keys"><kbd>1</kbd><span class="sep">/</span><kbd>2</kbd><span class="sep">/</span><kbd>3</kbd></span></td><td>Decide on a walk-away or unsure label</td></tr>
           <tr><td><span class="keys"><kbd>Ctrl</kbd><span class="sep">+</span><kbd>F</kbd></span></td><td>Find in contract</td></tr>
+          <tr><td><kbd>M</kbd></td><td>Merge a box with the next one (Contract check)</td></tr>
+          <tr><td><kbd>S</kbd></td><td>Split a box (Contract check)</td></tr>
+          <tr><td><kbd>Esc</kbd></td><td>Close a dialog or menu</td></tr>
+          <tr><td><span class="keys"><kbd>Ctrl</kbd><span class="sep">+</span><kbd>/</kbd></span></td><td>Open this list</td></tr>
         </tbody>
       </table>
     </div>

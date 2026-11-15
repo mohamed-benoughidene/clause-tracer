@@ -25,6 +25,7 @@
   --mono: 'IBM Plex Mono', ui-monospace, monospace;
   --contract: 'Liberation Serif', 'Times New Roman', Times, serif;
   --r: 4px; --r-lg: 8px;
+  --wintabs-h: 0px;   /* the window tab strip: 36px where app.js adds it */
   color-scheme: light;
 }
 :root[data-theme="dark"] {
@@ -73,14 +74,33 @@ button, input, select, textarea { font: inherit; color: inherit; }
 kbd { color: var(--text-3); }
 
 /* ------------------------------------------------------------ app layout */
-.app { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
+.app { display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: calc(100vh - var(--wintabs-h)); }
 .sidebar { background: var(--bg-surface); border-right: 1px solid var(--line); padding: 18px 14px;
-  display: flex; flex-direction: column; gap: 4px; position: sticky; top: 0; height: 100vh; }
+  display: flex; flex-direction: column; gap: 4px; position: sticky; top: var(--wintabs-h); height: calc(100vh - var(--wintabs-h)); z-index: 10; }
 .sidebar .logo { display: block; padding: 4px 6px 20px; }
 .logo img { width: 140px; height: auto; display: block; }
+/* the logo's one movement: the butterfly folds its wings once when the logo is pointed at or focused (app.js cuts the
+   picture into .logo-fly and .logo-name, and adds .is-flick for 120 ms). Transform only, and never under reduced motion. */
+.logo { --logo-w: 140px; }
+.logo .logo-pair { display: flex; width: var(--logo-w); }
+.logo .logo-pair img { width: var(--logo-w); max-width: none; }
+.logo-fly, .logo-name { overflow: hidden; flex: none; }
+.logo-fly { width: calc(var(--logo-w) * var(--fly)); }
+.logo-name { width: calc(var(--logo-w) * (1 - var(--fly))); }
+.logo-name img { margin-left: calc(var(--logo-w) * var(--fly) * -1); }
+.logo-fly, .logo-symbol img { transition: transform 180ms ease-out; }
+.is-flick .logo-fly, .is-flick.logo-symbol img { transform: scaleX(.6); transition: transform 110ms ease-in; }
+@media (prefers-reduced-motion: reduce) { .logo-fly, .logo-symbol img { transition: none; } }
 .logo .on-dark { display: none; }
 :root[data-theme="dark"] .logo .on-light { display: none; }
 :root[data-theme="dark"] .logo .on-dark { display: block; }
+:root[data-theme="dark"] .logo .logo-pair.on-dark { display: flex; }
+/* the symbol alone: shown only in the folded sidebar rail (see the sidebar block below) */
+.logo-symbol { display: none; }
+.logo-symbol img { height: auto; }
+.logo-symbol .on-dark { display: none; }
+:root[data-theme="dark"] .logo-symbol .on-light { display: none; }
+:root[data-theme="dark"] .logo-symbol .on-dark { display: block; }
 .nav a { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--r);
   text-decoration: none; color: var(--text); }
 .nav a:hover { background: var(--bg-hover); }
@@ -100,16 +120,9 @@ kbd { color: var(--text-3); }
 .appbar > * { flex-shrink: 0; }
 .appbar .title { flex-shrink: 1; }
 .appbar .status, .appbar .btn { white-space: nowrap; }
-.appbar .search-commands { width: 190px !important; margin: 0; }
+.appbar .search-commands { width: 232px !important; margin: 0; }
 .appbar .title small { color: var(--text-3); font-size: 12px; }
 .spacer { flex: 1; }
-.steps { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-3); }
-.steps li { display: flex; align-items: center; gap: 6px; }
-.steps li + li::before { content: ""; width: 22px; height: 1px; background: var(--line-strong); margin-right: 2px; }
-.steps .n { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--line-strong);
-  display: inline-grid; place-items: center; font-size: 11px; }
-.steps [aria-current] { color: var(--text); font-weight: 500; }
-.steps [aria-current] .n { background: var(--text); color: var(--text-inverse); border-color: var(--text); }
 .flow-foot { display: flex; align-items: center; gap: 12px; padding: 12px 24px; background: var(--bg-surface);
   border-top: 1px solid var(--line); position: sticky; bottom: 0; }
 
@@ -147,7 +160,7 @@ textarea.input { height: auto; min-height: 76px; padding: 10px 12px; resize: ver
 
 .check { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
 .check input { width: 16px; height: 16px; accent-color: var(--text); margin: 0; }
-.toggle { appearance: none; width: 34px; height: 20px; border-radius: 10px; background: var(--line-strong);
+.toggle { appearance: none; width: 34px; height: 20px; border-radius: 999px; background: var(--line-strong);
   position: relative; cursor: pointer; flex: none; margin: 0; }
 .toggle::after { content: ""; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%;
   background: var(--bg-surface); transition: left .15s; }
@@ -169,6 +182,11 @@ textarea.input { height: auto; min-height: 76px; padding: 10px 12px; resize: ver
 .notice { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--r-lg);
   background: var(--bg-tone); font-size: 12.5px; }
 .notice .spacer { flex: 1; }
+/* warning notice: Unsure colours, for anything that blocks or needs a fix (design-system 5.x). One definition for every page. */
+.notice.warn { align-items: flex-start; background: var(--unsure-bg); color: var(--unsure-fg); }
+.notice.warn .icon { color: var(--unsure); margin-top: 2px; flex-shrink: 0; }
+.notice.warn > :not(.icon):not(.btn):not(.spacer) { flex: 1 1 0; min-width: 0; }
+.notice.warn p + p { margin-top: 6px; }
 .banner { display: flex; align-items: center; gap: 10px; padding: 8px 16px; background: var(--banner-bg);
   border-bottom: 1px solid var(--banner-line); font-size: 12.5px; }
 
@@ -213,8 +231,9 @@ textarea.input { height: auto; min-height: 76px; padding: 10px 12px; resize: ver
 .clause .num { white-space: nowrap; }
 .clause.walk .text { background: var(--walk-bg); }
 .clause.unsure .text { background: var(--unsure-bg); }
-.clause.acceptable .text { background: var(--acc-bg); }
-.clause.preferred .text { background: var(--pref-bg); }
+/* At rest only walk-away and unsure clauses are washed; preferred and acceptable show their pin, and their wash only when selected. */
+.clause.acceptable.focus .text { background: var(--acc-bg); }
+.clause.preferred.focus .text { background: var(--pref-bg); }
 .clause.pencilled .text { text-decoration: underline dashed var(--pencil); text-decoration-thickness: 1px; text-underline-offset: 3px; }
 .clause.focus .text { outline: 2px solid var(--text); outline-offset: 2px; }
 mark.hidden-text { background: var(--hidden-bg); color: var(--hidden-fg); outline: 1px dashed var(--hidden-fg); }
@@ -254,17 +273,23 @@ dialog.palette { margin-top: 10vh; }
   .sidebar { position: static; height: auto; }
   .main { padding: 24px 16px; }
   .grid-2 { grid-template-columns: 1fr; }
-  .table { display: block; overflow-x: auto; }
+  .table { display: block; position: relative; max-width: 100%; overflow-x: auto; }   /* relative: keeps .visually-hidden cells inside the scroller */
+  .appbar { height: auto; min-height: 56px; flex-wrap: wrap; row-gap: 8px; padding-top: 8px; padding-bottom: 8px; }
+  .appbar .search-commands { width: auto !important; flex: 1 1 160px; min-width: 0; }
+  .appbar ol.steps { order: 9; flex: 1 1 100%; }
+  .appbar ol.steps li { width: auto; flex: 1 1 0; min-width: 0; }
+  .page-head { flex-wrap: wrap; }
+  .page-head > * { min-width: 0; }
+  .flow-foot { flex-wrap: wrap; row-gap: 8px; padding: 12px 16px; }
+  .flow-foot .btn { white-space: nowrap; }
 }
 
 /* ------------------------------------------------------------ review.html */
-.review { display: grid; grid-template-rows: auto auto auto 1fr; height: 100vh; }
-.summary { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 10px 16px; background: var(--bg-surface);
-  border-bottom: 1px solid var(--line); font-size: 12.5px; }
-.summary .count { font-weight: 600; font-size: 14px; }
+.review { display: grid; grid-template-rows: auto auto 1fr; height: calc(100vh - var(--wintabs-h)); }
 .q { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--line-strong); background: none; font-size: 10px;
   color: var(--text-3); cursor: pointer; padding: 0; }
-.review-body { display: grid; grid-template-columns: 96px 1fr 400px; min-height: 0; }
+.review-body { display: grid; grid-template-columns: minmax(0, 1fr) 400px; min-height: 0; }
+.review-body.thumbs-on { grid-template-columns: 96px minmax(0, 1fr) 400px; }   /* the Pages toggle shows the thumbnails */
 .thumbs { overflow: auto; padding: 12px; display: grid; gap: 14px; align-content: start; background: var(--bg-surface);
   border-right: 1px solid var(--line); text-align: center; font-size: 11px; color: var(--text-3); }
 .thumbs a { display: grid; gap: 4px; text-decoration: none; color: inherit; }
@@ -300,7 +325,7 @@ dialog.palette { margin-top: 10vh; }
 .option { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: var(--r); background: var(--bg-tone); cursor: pointer; }
 .option:has(input:checked) { outline: 2px solid var(--text); }
 .diff del { color: var(--text-2); }   /* struck through; never red (ADR 0003) */ .diff ins { background: var(--pref-bg); text-decoration: none; }
-@media (max-width: 1100px) { .review-body { grid-template-columns: 1fr; } .thumbs { display: none; } .review { height: auto; } }
+@media (max-width: 1100px) { .review-body, .review-body.thumbs-on { grid-template-columns: minmax(0, 1fr); } .thumbs, .pages-toggle { display: none; } .review { height: auto; } }
 
 /* shared fix: the command search never wraps */
 .search-commands, .search-commands span, .search-commands kbd { white-space: nowrap; }
@@ -329,3 +354,246 @@ details.more[open] summary { margin-bottom: 6px; }
 
 /* review.html: the grey-parts tick at the top of Not covered (Spec 4.4). */
 .label-list li.grey-confirm { padding: 10px 8px; margin-bottom: 4px; background: var(--bg-tone); border-radius: 8px; border-bottom: 0; font-size: 13px; font-weight: 500; }
+
+/* ------------------------------------------------------------ text size 150% and 200% (owner decision 14 Nov 2026)
+   app.js zooms the body, so the window is no wider but the page has less room. Re-flow the way it does below 860 px,
+   and let rows wrap. Nothing here applies at 100% or 125%. A table may scroll inside its own box; the page may not. */
+html:is([data-text="150"], [data-text="200"]) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .sidebar { position: static; height: auto; }
+  .main { padding: 24px 16px; }
+  .grid-2, .party-grid, .levels, .editor, .work, .viewer-wrap, .playbook-grid { grid-template-columns: minmax(0, 1fr); }
+  .table { display: block; position: relative; max-width: 100%; overflow-x: auto; }   /* relative: keeps .visually-hidden cells inside the scroller */
+  .review { height: auto; }
+  .review-body, .review-body.thumbs-on { grid-template-columns: minmax(0, 1fr); }
+  .thumbs, .pages-toggle { display: none; }
+  .group-head h3, .progress-line, .detail-head .row { flex-wrap: wrap; }
+  .appbar { height: auto; min-height: 56px; flex-wrap: wrap; row-gap: 8px; padding-top: 8px; padding-bottom: 8px; }
+  .appbar .search-commands { width: auto !important; }
+  .page-head, .row, .viewer-bar, .split, .starter-card, .flow-foot { flex-wrap: wrap; }
+  .editor { min-height: 0; }
+  .flow-main { padding: 16px; }
+  .margin { border-left: 0; border-top: 1px solid var(--line); }
+  .doc { padding: 16px; }
+  .side { border-left: 0; border-top: 1px solid var(--line); }
+  .pages .sheet, .doc .sheet { padding: 24px 20px; }
+  .glossary { grid-template-columns: minmax(0, 1fr); }
+  .glossary > dt { padding-bottom: 0; }
+  .glossary > dd { border-top: 0; padding-top: 4px; }
+}
+
+/* ------------------------------------------------------------ review.html: the contract and one column (owner, 14 Nov 2026)
+   The right column shows one thing at a time: the label list, or one label's detail, or one warning. */
+.viewer-bar .file-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.viewer-bar .btn[aria-pressed="true"] { background: var(--bg-sunken); }
+/* minmax(0, 1fr): a long unwrapped row (the not-covered list) must truncate, not widen the column past its edge */
+.side-view, .detail, .detail-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; align-content: start; }
+.side { grid-template-columns: minmax(0, 1fr); }
+.progress-block { display: grid; gap: 8px; }
+.progress-line { gap: 8px; }
+.progress-block .progress { height: 3px; }
+.group-title { font: 600 12px/1.3 var(--sans); color: var(--text-2); padding: 4px 4px 2px; }
+.group-head { display: flex; align-items: center; gap: 8px; padding: 14px 4px 4px; }
+.group-head h3 { display: flex; align-items: center; gap: 8px; font: 600 14px/1.4 var(--sans); }
+.label-list li.is-checked .what { color: var(--text-3); }
+.label-list a[aria-current="true"] .what { color: var(--text); }
+.warn-row button { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; border: 0; padding: 0; background: none;
+  text-align: left; cursor: pointer; color: var(--text); }
+.warn-row button > .icon:first-child { color: var(--unsure); }
+.warn-row .what { flex: 1; color: var(--text); }
+.warn-row.is-read .what, .warn-row.is-read button > .icon:first-child { color: var(--text-3); }
+.law-line { display: flex; align-items: flex-start; gap: 8px; padding: 14px 4px 0; }
+.law-line .icon { margin-top: 1px; }
+.law-line.warn .icon { color: var(--unsure); }
+.detail-head { position: sticky; top: -16px; z-index: 1; display: grid; gap: 8px; margin: -16px -16px 0; padding: 12px 16px;
+  background: var(--bg-canvas); border-bottom: 1px solid var(--line); }
+.detail-card { display: grid; gap: 10px; padding: 16px; background: var(--bg-tone); border-radius: var(--r-lg); }
+.detail-card .notice { padding: 0; background: none; }
+.detail-links { gap: 16px; flex-wrap: wrap; }
+.note-link { justify-self: start; }
+
+/* review.html: inked pins. A pin is an outline while its label is unchecked and solid once the user has decided it, so
+   the page shows what is done. The fill is the label's fg shade, which keeps the number readable (4.5:1) in both themes. */
+.pin.pencilled { border-style: dashed; border-color: var(--pencil); }
+.pin.inked { color: var(--bg-surface); border-style: solid; }
+.pin.preferred.inked { background: var(--pref-fg); border-color: var(--pref-fg); }
+.pin.acceptable.inked { background: var(--acc-fg); border-color: var(--acc-fg); }
+.pin.walk.inked { background: var(--walk-fg); border-color: var(--walk-fg); }
+.pin.unsure.inked { background: var(--unsure-fg); border-color: var(--unsure-fg); }
+.pin.pencilled.inked { background: var(--pencil); border-color: var(--pencil); }
+
+/* ------------------------------------------------------------ window tabs (app.js adds the strip; none on First launch or the map)
+   Quiet: the current tab is the page's own surface, the others sit in the strip. No colour accents. */
+html.has-wintabs { --wintabs-h: 36px; }
+html.has-wintabs .flow { min-height: calc(100% - var(--wintabs-h)); }   /* the flow pages are min-height 100% of the body */
+.wintabs { position: sticky; top: 0; z-index: 30; display: flex; align-items: flex-end; gap: 2px; height: var(--wintabs-h);
+  padding: 4px 8px 0 16px; background: var(--bg-sunken); border-bottom: 1px solid var(--line); }   /* 16px: the home icon sits on the nav icons' centre line (x 32) */
+.wintabs > * { flex: none; }
+.wintab-home, .wintab-new { width: 32px; height: 28px; margin-bottom: 3px; display: inline-grid; place-items: center; border-radius: var(--r);
+  color: var(--text-2); text-decoration: none; }
+.wintab-home { height: 32px; margin-bottom: 0; border-radius: var(--r) var(--r) 0 0; }
+.wintab-home:hover, .wintab-new:hover { background: var(--bg-hover); }
+/* Home is a place, not a document tab: when current it is a pressed button with its own outline, so it never joins the sidebar below it */
+.wintab-home[aria-current="page"] { background: var(--bg-surface); color: var(--text); height: 28px; margin-bottom: 3px; border: 1px solid var(--line-strong); border-radius: var(--r); }
+.wintab-home[aria-current="page"] .icon { color: var(--text); }
+.wintab { display: flex; align-items: center; gap: 2px; min-width: 0; max-width: 200px; height: 32px; padding: 0 4px 0 10px;
+  border-radius: var(--r) var(--r) 0 0; color: var(--text-2); font-size: 12.5px; flex: 0 1 auto !important; }
+.wintab:hover { background: var(--bg-hover); }
+.wintab.is-current { background: var(--bg-surface); color: var(--text); margin-bottom: -1px; height: 33px; }
+.wintab-link { display: flex; align-items: center; gap: 6px; min-width: 0; flex: 1; height: 100%; color: inherit; text-decoration: none; }
+.wintab-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wintab.is-current .icon { color: var(--text); }
+.wintab-close { width: 20px; height: 20px; flex: none; display: inline-grid; place-items: center; border: 0; border-radius: var(--r);
+  background: transparent; color: var(--text-2); cursor: pointer; padding: 0; }
+.wintab-close:hover { background: var(--bg-sunken); }
+.wintab-close .icon { width: 12px; height: 12px; color: currentColor; }
+
+/* ------------------------------------------------------------ the sidebar folds to an icon rail (Collapse menu, Ctrl+B)
+   app.js wraps the sidebar's words in .lbl and keeps the choice in ct-sidebar. A narrow window, or 150% and 200% text, ignores it. */
+.sidebar-collapse { display: flex; align-items: center; gap: 10px; width: 100%; height: 36px; margin-top: 4px; padding: 0 10px;
+  border: 0; border-radius: var(--r); background: transparent; color: var(--text-2); font: 500 13px/1 var(--sans); cursor: pointer; text-align: left; }
+.sidebar-collapse:hover { background: var(--bg-hover); color: var(--text); }
+.sidebar-collapse .icon { color: currentColor; }
+@media (max-width: 860px) { .sidebar-collapse { display: none; } }
+html:is([data-text="150"], [data-text="200"]) .sidebar-collapse { display: none; }
+@media (min-width: 861px) {
+  html[data-sidebar="collapsed"]:not([data-text="150"]):not([data-text="200"]) {
+    .app { grid-template-columns: 56px minmax(0, 1fr); }
+    .sidebar { padding: 18px 8px; }
+    .wintabs { padding-left: 12px; }   /* home keeps its size; its icon moves onto the rail's centre line (x 28) */
+    .sidebar .logo { display: none; }
+    .sidebar .logo-symbol { display: block; padding: 0 0 16px; text-align: center; }
+    .logo-symbol img { width: 28px; margin: 0 auto; }
+    .sidebar .lbl, .sidebar .search-commands > span, .sidebar-collapse .lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .sidebar .search-commands kbd { display: none; }
+    .sidebar > .btn-block { padding: 0; }
+    .sidebar .search-commands { justify-content: center; padding: 0; }
+    .nav a { justify-content: center; padding: 8px 0; }
+    .sidebar-foot { padding: 10px 0; background: transparent; }
+    .sidebar-foot p { justify-content: center; }
+    .sidebar-collapse { justify-content: center; padding: 0; }
+    /* a small tooltip beside the rail; the words are also the control's accessible name */
+    .sidebar [data-tip] { position: relative; }
+    .sidebar [data-tip]::after { content: attr(data-tip); position: absolute; left: calc(100% + 12px); top: 50%; transform: translateY(-50%);
+      padding: 4px 8px; border-radius: var(--r); background: var(--action); color: var(--text-inverse); font: 500 12px/1.3 var(--sans);
+      white-space: nowrap; pointer-events: none; opacity: 0; z-index: 40; }
+    .sidebar [data-tip]:is(:hover, :focus-visible)::after { opacity: 1; }
+  }
+}
+@media (min-width: 861px) and (prefers-reduced-motion: no-preference) {
+  html:not([data-text="150"]):not([data-text="200"]) .app { transition: grid-template-columns 150ms ease; }
+  html:not([data-text="150"]):not([data-text="200"]) .wintabs { transition: padding-left 150ms ease; }
+}
+
+/* ------------------------------------------------------------ Private mode switch (one shared component; see app.js)
+   On is the Preferred green, off is neutral. Never red: oxblood belongs to walk-away and the logo (ADR 0003).
+   The state is also the I or O in the knob and aria-checked, so it never rests on colour alone. */
+.pm-switch { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 10px 0 8px; border: 1px solid var(--line-strong);
+  border-radius: var(--r); background: var(--bg-surface); color: var(--text); font: 500 12.5px/1 var(--sans); white-space: nowrap; cursor: pointer; }
+.pm-switch:hover { background: var(--bg-hover); }
+.pm-track { position: relative; flex: none; width: 36px; height: 20px; border-radius: 999px; background: var(--line-strong); }
+.pm-switch[aria-checked="true"] .pm-track { background: var(--pref); }
+.pm-knob { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--bg-surface);
+  display: grid; place-items: center; color: var(--text-2); }
+.pm-switch[aria-checked="true"] .pm-knob { transform: translateX(16px); color: var(--pref-fg); }
+.pm-knob::before { content: ""; box-sizing: border-box; width: 8px; height: 8px; border: 2px solid currentColor; border-radius: 50%; }   /* O: off */
+.pm-switch[aria-checked="true"] .pm-knob::before { width: 2px; height: 8px; border: 0; border-radius: var(--r); background: currentColor; }   /* I: on */
+@media (prefers-reduced-motion: no-preference) {
+  .pm-knob { transition: transform 150ms ease; }
+  .pm-track { transition: background-color 150ms ease; }
+}
+
+/* ------------------------------------------------------------ small movements on action icons
+   Only icons inside a button, link, nav item or menu item; never the label stamps or pins. Transforms only, 150 ms, nothing loops.
+   The icon is found by its sprite name, so no markup carries a hook. Off when the user asks for less motion. */
+@media (prefers-reduced-motion: no-preference) {
+  :is(.btn, .icon-btn, .link, .nav a, .menu a, .menu button, .search-commands, .decide button, .sidebar-collapse, .wintabs a, .wintab-close) .icon {
+    transition: transform 150ms ease; }
+  :is(.btn, .icon-btn, .link, .menu a, .menu button, .decide button, .wintabs a, .sidebar-collapse):is(:hover, :focus-visible) .icon:has(use[href="#i-arrow-right"]),
+  :is(.btn, .icon-btn, .link, .menu a, .menu button, .decide button):is(:hover, :focus-visible) .icon:has(use[href="#i-chev-right"]) { transform: translateX(2px); }
+  :is(.btn, .icon-btn, .link, .menu a, .menu button, .decide button):is(:hover, :focus-visible) .icon:has(use[href="#i-arrow-left"]),
+  :is(.btn, .icon-btn, .link, .menu a, .menu button, .decide button):is(:hover, :focus-visible) .icon:has(use[href="#i-chev-left"]) { transform: translateX(-2px); }
+  :is(.btn, .icon-btn, .link, .menu a, .menu button, .decide button):is(:hover, :focus-visible) .icon:has(use[href="#i-chev-down"]) { transform: translateY(1px); }
+  :is(.btn, .icon-btn, .link, .menu a, .menu button, .decide button, .wintabs a):is(:hover, :focus-visible) .icon:has(use[href="#i-plus"]) { transform: rotate(90deg); }
+  :is(.nav a, .btn, .icon-btn, .menu a, .menu button):is(:hover, :focus-visible) .icon:has(use[href="#i-gear"]) { transform: rotate(30deg); }
+  :is(.btn, .icon-btn, .link, .menu a, .menu button):is(:hover, :focus-visible) .icon:has(use[href="#i-download"]) { transform: translateY(2px); }
+  :is(.btn, .icon-btn, .link, .menu a, .menu button):is(:hover, :focus-visible) .icon:has(use[href="#i-upload"]) { transform: translateY(-2px); }
+  :is(.btn, .icon-btn, .link, .menu a, .menu button):is(:hover, :focus-visible) .icon:has(use[href="#i-copy"]) { transform: translateY(-1px); }
+  :is(.btn, .icon-btn, .search-commands, .menu a, .menu button):is(:hover, :focus-visible) .icon:has(use[href="#i-search"]) { transform: scale(1.06); }
+  .nav a:is(:hover, :focus-visible) .icon { transform: translateX(1px); }
+  /* press: after the rules above, same weight, so it wins */
+  :is(.btn, .icon-btn, .link, .nav a, .menu a, .menu button, .search-commands, .decide button, .sidebar-collapse, .wintabs a, .wintab-close):active .icon,
+  :is(.btn, .icon-btn, .link, .nav a, .menu a, .menu button, .search-commands, .decide button, .sidebar-collapse, .wintabs a, .wintab-close):active .icon:has(use[href]) { transform: scale(.94); }
+}
+
+/* ---- Flow stepper: Contract, Contract check, Privacy check, Review ---------------------------------------------------
+   Shared by new-review, contract-check, privacy-check and running. Names in a row over a thin line with one dot per
+   step. A finished step is an ink dot with a check, the current step is a ringed dot, a later step is a hollow grey dot.
+   The line into a step is ink once that step is finished or current. Ink and --line-strong only: never red, no gradient.
+   Motion (design-system 3.9): on every load app.js adds .is-arriving for one frame, which gives the current step its
+   "before" look. Removing it lets the transitions run: the line into the step draws from the left in 400 ms, then the
+   ring appears in 150 ms (step 1: the ring grows in over 300 ms). Pressing the forward button adds .is-leaving for
+   200 ms. prefers-reduced-motion gets the finished look at once. */
+
+ol.steps { display: flex; align-items: flex-start; gap: 0; margin: 0; font-size: 12px; line-height: 16px; color: var(--text-3); }
+ol.steps li { position: relative; display: block; width: 112px; text-align: center; }
+ol.steps .step { display: grid; justify-items: center; gap: 6px; color: inherit; text-decoration: none; }
+ol.steps a.step:hover .name { text-decoration: underline; text-underline-offset: 3px; }
+ol.steps li.is-done, ol.steps li[aria-current] { color: var(--text); }
+ol.steps [aria-current] { font-weight: 500; }
+
+/* the line into a step: a grey track, and an ink fill that grows over it */
+ol.steps li + li::before, ol.steps li + li::after { content: ""; position: absolute; top: 28px; left: -50%; width: 100%; height: 2px; margin: 0; }
+ol.steps li + li::before { background: var(--line-strong); }
+ol.steps li + li::after { background: var(--text); transform: scaleX(0); transform-origin: left center; transition: transform 400ms ease-out; }
+ol.steps li.is-done::after, ol.steps li[aria-current]::after { transform: scaleX(1); }
+
+/* the dot */
+ol.steps .dot { position: relative; z-index: 1; display: grid; place-items: center; width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid var(--line-strong); background: var(--bg-surface); transition: border-color 150ms ease-out 400ms; }
+ol.steps .dot .icon { display: none; width: 8px; height: 8px; color: var(--text-inverse); vertical-align: 0; }
+ol.steps li.is-done .dot { background: var(--text); border-color: var(--text); transition: none; }
+ol.steps li.is-done .dot .icon { display: block; }
+ol.steps li[aria-current] .dot { border-color: var(--text); }
+ol.steps li[aria-current] .dot::after { content: ""; width: 4px; height: 4px; border-radius: 50%; background: var(--text); transform: scale(1); transition: opacity 150ms ease-out 400ms; }
+/* step 1 has no line into it: its ring and inner dot grow in from the centre, 300 ms */
+ol.steps li:first-child[aria-current] .dot { transition: border-color 300ms ease-out; }
+ol.steps li:first-child[aria-current] .dot::after { transition: opacity 300ms ease-out, transform 300ms ease-out; }
+
+/* arriving from the previous step: the "before" look of the current step */
+ol.steps.is-arriving li[aria-current]::after { transform: scaleX(0); transition: none; }
+ol.steps.is-arriving li[aria-current] .dot { border-color: var(--line-strong); transition: none; }
+ol.steps.is-arriving li[aria-current] .dot::after { opacity: 0; transform: scale(0); transition: none; }
+
+/* leaving: pressing the step's forward button marks this dot done and starts the next line, about 200 ms before the page changes */
+ol.steps.is-leaving li[aria-current] .dot { background: var(--text); border-color: var(--text); transition: background-color 150ms ease-out, border-color 150ms ease-out; }
+ol.steps.is-leaving li[aria-current] .dot .icon { display: block; }
+ol.steps.is-leaving li[aria-current] .dot::after { opacity: 0; }
+ol.steps.is-leaving li[aria-current] + li::after { transform: scaleX(1); }
+
+@media (prefers-reduced-motion: reduce) {
+  ol.steps li::after, ol.steps .dot, ol.steps .dot::after { transition: none !important; }
+}
+
+/* text at 150% and 200%: the app bar wraps, so let the stepper take its own row if it must */
+html:is([data-text="150"], [data-text="200"]) ol.steps { flex-wrap: nowrap; }
+
+/* ---- Progress pie (.pie): the share of positions checked, in ink ------------------------------------------------------
+   Used in the review column (18 px), beside the review's title (24 px) and in that review's window tab (14 px). A ring and a disc
+   that grows from the centre; full, it is a solid disc with a check. Never red or green. app.js and review.html set
+   .pie-fill's stroke-dashoffset; the wedge grows in 300 ms ease-out, with no bounce. Reduced motion: it jumps. */
+.pie { flex: none; width: 18px; height: 18px; overflow: visible; }
+.pie-lg { width: 24px; height: 24px; }
+.pie-tab { width: 14px; height: 14px; }
+.pie circle { fill: none; stroke: var(--text); }
+.pie .pie-ring { stroke-width: 1.5; }
+.pie .pie-fill { stroke-width: 7; stroke-dasharray: 21.99 21.99; stroke-dashoffset: 21.99; }
+.pie .pie-done { fill: var(--text); stroke: none; opacity: 0; }
+.pie .pie-check { fill: none; stroke: var(--bg-canvas); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+.pie.is-full .pie-done, .pie.is-full .pie-check { opacity: 1; }
+.wintab-link .pie { margin: 1px; }
+.pie.is-still * { transition: none !important; }
+@media (prefers-reduced-motion: no-preference) {
+  .pie .pie-fill { transition: stroke-dashoffset .3s ease-out; }
+  .pie .pie-done, .pie .pie-check { transition: opacity .15s ease-out .3s; }
+}

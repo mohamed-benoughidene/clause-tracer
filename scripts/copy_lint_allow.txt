@@ -1,0 +1,43 @@
+# Allow-list for scripts/copy_lint.py. Keep it short: fix a real violation instead of allowing it.
+#
+# One entry per line, fields separated by " | " (a space, a bar, a space):
+#   code | file or * | exact text, or re:regex | reason
+# A regex may hold a bare | (as in a|b) when it has no space on both sides.
+#
+#   code    the finding code the entry silences (client, first-person, not-column, effect, ...)
+#   file    a repo path such as prototype/review.html, a glob such as prototype/*, or *
+#   text    plain text matches the offending word or the whole string, ignoring case and curly
+#           quotes. A pattern that starts with re: is a regular expression: it must match the
+#           offending word completely, or be found anywhere in the whole string (or, for CSS,
+#           in "selector { property: value }").
+#   reason  required. An entry with no reason fails the lint. An entry that matches nothing warns.
+
+# ---- Not column of the word list (ux-copy section 2). A single common word cannot be told from
+# ---- the word list's sense by a script, so each exclusion is listed here with its reason.
+not-column | * | you | "you" addresses the user. The word list's "you / them" is about naming the contract's parties.
+not-column | * | them | "them" refers to the other side, or to the positions, in ordinary sentences. The word list means naming the parties.
+not-column | * | change | "change" is the verb, or the Change it button. The word list means calling a suggestion a change.
+not-column | * | message | "Message" is the message to the other side, which the word list reserves that word for.
+not-column | * | edit | "Edit" is the verb on a button. The word list means calling a suggestion an edit.
+not-column | * | result | "result" is the plain noun in the legal line and in "any result that rests on those parts". It is not a label's name.
+not-column | * | job | "job" is the user's piece of work ("after this job"), not another name for a review.
+not-column | * | Hide finished lines | It hides lines of the reading log. The word list's "hide" is about personal details, which the app replaces.
+not-column | * | Check a contract against your own rules. | The word list keeps "rules" in the First launch heading.
+not-column | prototype/help.html | re:^A rule that the other side owns | Help's plain-English definition of "work made for hire" uses "rule" for a legal rule, not for a position.
+
+# ---- Spelling
+us-spelling | * | re:Remix Icon License | The licence's own name keeps its US spelling, as the Functional Source License does.
+
+# ---- "I", "my" and "me" belong to the user's own words (ux-copy section 1, "I and my only in the user's own words").
+first-person | * | re:Days until I'm paid|If unpaid, I can reuse or resell|I can show the work in my portfolio|My liability is capped|NDA I receive | Position names and a playbook name: the user writes these.
+first-person | * | re:Why this matters to me | The label of the user's own note field.
+first-person | * | re:I've read the 37 not-covered parts | The user states what they did (ux-copy 6.2).
+first-person | * | re:Before I sign, could we look | The sample message: the user's own words, sent to the other side.
+first-person | prototype/starter-preview.html | re:Why this matters: | The starter's notes are written in the user's voice on purpose (ux-copy 4.10).
+first-person | prototype/playbook-editor.html | re:Long waits mean I borrow | The note on a position: the user's own words.
+first-person | * | re:\bShow me\b | A button is the user's request to the app ("Show me"). The app is not speaking as I.
+
+# ---- Look
+effect | prototype/styles.css | re:\.stamp\.pencilled \.mark | The pencil hatch is the one allowed pattern, and it means "pencilled" (design-system 4.1).
+red-outside-walk | prototype/review.html | re:^i \{ background: var\(--walk\) \}$ | Page thumbnails show one dot per clause in its label colour. The red dots are the walk-away clauses.
+red-outside-walk | prototype/index.html | re:^\.quoted \{ | First launch: the underline under "the exact words" is the logo's own oxblood line, a brand use (design-system 2, ADR 0003).

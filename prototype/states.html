@@ -20,10 +20,11 @@
 </style>
 </head>
 <body>
-<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8767/index.html</b> instead.</p>");</script>
 <div class="app">
   <aside class="sidebar">
     <a class="logo" href="home.html"><img class="on-light" src="logo.svg" alt="Clause Tracer"><img class="on-dark" src="logo-dark.svg" alt="Clause Tracer"></a>
+    <a class="logo-symbol" href="home.html"><img class="on-light" src="symbol.svg" alt="Clause Tracer"><img class="on-dark" src="symbol-dark.svg" alt="Clause Tracer"></a>
     <a class="btn btn-primary btn-block" href="new-review.html"><svg class="icon"><use href="#i-plus"/></svg>New review</a>
     <button class="search-commands" type="button"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
     <nav class="nav" aria-label="Main">
@@ -59,7 +60,7 @@
           <li><a href="index.html">First launch → key → Reviews</a><span>Paste any key, Save key. It opens Reviews by itself.</span></li>
           <li><a href="review.html?sample">Practice review</a><span>Find the wrong label (§ 11.1), open it, fix it.</span></li>
           <li><a href="new-review.html">New review → checks → running → review</a><span>Continue, Looks right, Send for review, Open the review.</span></li>
-          <li><a href="review.html">Check every label</a><span>Press J, then 1, 2 or 3 on each walk-away and unsure. The counter fills.</span></li>
+          <li><a href="review.html">Check every label</a><span>Press J, then 1, 2 or 3 on each walk-away and unsure. The pie fills.</span></li>
           <li><a href="output.html">Write the message and save the report</a><span>Tick or untick asks, change the tone, Copy, Save PDF.</span></li>
           <li><a href="playbook-editor.html">Edit a playbook</a><span>From Playbooks → Edit. Back with changes asks first.</span></li>
         </ol>
@@ -68,7 +69,8 @@
       <section class="card">
         <h2 class="h2">1 First launch</h2>
         <ul>
-          <li><a href="index.html">Default</a><span>Not legal advice, key guide, Save key, Skip for now, the sample contract.</span></li>
+          <li><a href="index.html">Default</a><span>Welcome: the sample contract, Check your own contract, Not legal advice.</span></li>
+          <li><a href="index.html?state=key">Key view</a><span>“Check your own contract” opens it. “Back” returns to Welcome.</span></li>
           <li><a href="index.html?state=checking">Checking key</a></li>
           <li><a href="index.html?state=key-ok">Key works</a></li>
           <li><a href="index.html?state=key-error">Key error</a><span>Plain fix, no red.</span></li>
@@ -81,6 +83,7 @@
           <li><a href="home.html">Default</a><span>Every status: Ready to check, Running, Draft, Interrupted, Failed, Done; auto-delete notice; “Deletes in 2 days” with Keep it / Delete now.</span></li>
           <li><a href="home.html?state=empty">No reviews yet</a></li>
           <li><a href="home.html?state=offline">Offline</a></li>
+          <li><a href="home.html?state=sidebar-collapsed">Menu folded</a><span>An icon rail with a tooltip on each item. Collapse menu or Ctrl+B folds it and the choice is kept. Every page with the menu does the same; a narrow window ignores it.</span></li>
           <li><a href="home.html#delete-review">Delete a review</a><span>Names it and says it can't be undone.</span></li>
         </ul>
       </section>
@@ -97,7 +100,14 @@
           <li><a href="new-review.html?state=empty">Empty file</a></li>
           <li><a href="new-review.html?state=not-english">Not English</a><span>A warning names the risks; Continue still works.</span></li>
           <li><a href="new-review.html?state=old-word">Old Word file (.doc)</a></li>
+          <li><a href="new-review.html?state=tracked-changes">Word file with tracked changes</a><span>Read as if every change were accepted; Continue still works.</span></li>
           <li><a href="new-review.html?state=playbook-deleted">Draft whose playbook was deleted</a></li>
+          <li><a href="new-review.html?state=first-run">First review: a copy of the starter is already picked</a><span>The user has no playbook yet; step 2 holds the copy and “Make the limits yours”.</span></li>
+          <li><a href="new-review.html?state=no-file">No file loaded yet</a><span>The drop zone shows, and Continue is off.</span></li>
+          <li><a href="new-review.html?state=reading">Load file: reading page 3 of 5</a><span>The dialog, with a determinate bar and Cancel.</span></li>
+          <li><a href="new-review.html?state=load-done">Load file: contract loaded</a><span>5 pages, 45 clauses found, with Replace and Done.</span></li>
+          <li><a href="new-review.html?state=load-empty">Load file: empty file</a><span>The error shows inside the dialog.</span></li>
+          <li><a href="new-review.html?state=load-too-large">Load file: too large</a><span>The error shows inside the dialog.</span></li>
         </ul>
       </section>
 
@@ -105,6 +115,9 @@
         <h2 class="h2">4 Contract check · 5 Privacy check</h2>
         <ul>
           <li><a href="contract-check.html">Contract check</a><span>Hidden text found and marked; merge and split.</span></li>
+          <li><a href="contract-check.html?state=unreadable-text">Text that couldn't be read</a><span>A warning names the pages; Continue still works.</span></li>
+          <li><a href="contract-check.html?state=tracked-changes">Tracked changes listed</a><span>Every change, with the earlier wording.</span></li>
+          <li><a href="contract-check.html?state=paragraph-split">Split by paragraph</a><span>A note says the contract had no section numbers.</span></li>
           <li><a href="privacy-check.html">Privacy check</a></li>
           <li><a href="privacy-check.html?state=name-variants">Name variant: same or different person</a></li>
           <li><a href="privacy-check.html?state=private-off">Private mode turned off</a></li>
@@ -115,11 +128,14 @@
       <section class="card">
         <h2 class="h2">6 Review running</h2>
         <ul>
-          <li><a href="running.html">Running</a><span>Reading log, cost, time left, Cancel shows the cost so far.</span></li>
+          <li><a href="running.html">Running</a><span>Plays one review through its four steps, then shows Done. Reading log, cost, time left, Cancel shows the cost so far.</span></li>
+          <li><a href="running.html?state=step-1">Running, held at step 1</a><span>The same screen, still.</span></li>
           <li><a href="running.html?state=wrong-key">Interrupted: wrong key</a></li>
           <li><a href="running.html?state=no-credit">Interrupted: no credit</a></li>
           <li><a href="running.html?state=no-internet">Interrupted: no internet</a></li>
           <li><a href="running.html?state=no-private-model">Interrupted: no private-mode model</a></li>
+          <li><a href="running.html?state=rate-limit">Interrupted: rate limit, with a wait time</a></li>
+          <li><a href="running.html?state=rate-limit-no-wait">Interrupted: rate limit, no wait time given</a></li>
           <li><a href="running.html?state=done">Done</a></li>
         </ul>
       </section>
@@ -127,27 +143,35 @@
       <section class="card">
         <h2 class="h2">7 Review</h2>
         <ul>
-          <li><a href="review.html">Default</a><span>Hidden text and unloaded-document banners, governing law, counter, Next unchecked (J).</span></li>
+          <li><a href="review.html">Default</a><span>The contract and one column: counter, Next unchecked (J), Read first (hidden text, unloaded document), labels grouped by level, governing law at the end.</span></li>
           <li><a href="review.html?state=playbook-changed">Playbook changed: Re-run</a></li>
           <li><a href="review.html?state=unsure-heavy">More than half unsure: guidance</a></li>
           <li><a href="review.html?state=unedited-starter">Unedited starter playbook</a></li>
+          <li><a href="review.html?state=banners-read">Warnings read: hidden text, unloaded document</a><span>Each row in Read first is faint, with a tick. Click “Show me” or “Got it” in the default review to see it happen.</span></li>
+          <li><a href="review.html?state=unedited-starter-read">Warning read: unedited starter</a><span>The row “Example playbook, unedited” is faint, with a tick, and still opens the warning.</span></li>
+          <li><a href="review.html#warn-hidden">Read first: hidden text, opened in the column</a> · <a href="review.html?state=unedited-starter#warn-starter">unedited starter, opened</a></li>
           <li><a href="review.html?state=two-law">Two governing-law clauses</a></li>
           <li><a href="review.html?state=no-law">No governing-law clause</a></li>
-          <li><a href="review.html?state=mixed">Privacy badge “Mixed”</a></li>
+          <li><a href="review.html?state=mixed">Private mode: steps 1 and 2 on, 3 and 4 off</a><span>A banner names which steps ran in private mode.</span></li>
+          <li><a href="review.html?state=all-checked">Every position checked</a><span>The pie is a full disc with a check, and the counter says “Every position is checked”.</span></li>
           <li><a href="review.html#rerun">Re-run</a> · <a href="review.html#start-over">Start over</a> · <a href="review.html#doc-missing">Document not loaded</a></li>
           <li><a href="review.html#link-warn">Link in the contract</a><span>Clicking the link in 5.5 asks first, then opens it outside the app.</span></li>
         </ul>
       </section>
 
       <section class="card">
-        <h2 class="h2">8 Detail panel · 9 Change it</h2>
+        <h2 class="h2">8 Detail, in the column · 9 Change it</h2>
         <ul>
           <li><a href="review.html#detail-1">Walk-away with evidence trail</a></li>
           <li><a href="review.html#detail-4">Unsure: the quote couldn't be confirmed</a></li>
+          <li><a href="review.html#detail-unconfirmed">Unsure: the searches disagreed, with a clause to read</a></li>
+          <li><a href="review.html#detail-unplaced">Quote confirmed but not marked on the page</a><span>The label is kept and the words are shown.</span></li>
+          <li><a href="review.html?state=nothing-found">“Searched, nothing found” list</a><span>In the Missing tab. Position 9 is the example.</span></li>
+          <li><a href="review.html?state=nothing-found#detail-nf">Searched, nothing found: where it was searched</a></li>
           <li><a href="review.html#detail-9">Conflict: clauses disagree, all shown; range note</a></li>
           <li><a href="review.html#detail-cond">Conditional yes, with the condition quoted</a></li>
-          <li><a href="review.html#detail-10">AI judgment tag, unloaded document</a></li>
-          <li><a href="review.html#detail-5">Unsure: vague wording, readings and a question</a></li>
+          <li><a href="review.html#detail-10">AI judgment tag, unloaded document</a><span>Words position: the reason, the other-level sentence and the question are written by AI, with the AI wording line.</span></li>
+          <li><a href="review.html#detail-5">Unsure: vague wording, readings and a question</a><span>The readings and the question are written by AI and carry the AI wording line.</span></li>
           <li><a href="review.html#detail-3">Missing item, “Add this clause”</a></li>
           <li><a href="review.html#change">Change it</a><span>Tool label beside yours, history, undo.</span></li>
         </ul>
@@ -169,6 +193,7 @@
           <li><a href="output.html?state=all-checked">Everything checked</a></li>
           <li><a href="output.html?state=nothing-to-ask">Nothing to ask for</a></li>
           <li><a href="output.html?state=labels-changed">Labels changed since the message</a></li>
+          <li><a href="output.html#rewrite-ai">Rewrite with AI, before and after</a></li>
           <li><a href="output.html#save-pdf">Save PDF</a></li>
         </ul>
       </section>
@@ -178,6 +203,7 @@
         <ul>
           <li><a href="playbooks.html">Playbooks</a></li>
           <li><a href="playbooks.html?state=import-failed">Import failed: not a playbook file</a></li>
+          <li><a href="playbooks.html?state=imported">Playbooks after an import</a></li>
           <li><a href="starter-preview.html">Starter preview</a> · <a href="starter-preview.html?from=new-review">from New review</a></li>
           <li><a href="playbook-editor.html?state=copied">Starter just copied</a> · <a href="new-review.html?state=copied-starter">Copy picked in New review</a></li>
           <li><a href="import-preview.html">Import preview</a></li>
@@ -190,9 +216,9 @@
         <h2 class="h2">17–20 Customers, Settings, Help, Error</h2>
         <ul>
           <li><a href="customers.html">Customers</a></li>
+          <li><a href="customers.html?state=empty">No customers yet</a></li>
           <li><a href="settings.html">Settings</a></li>
           <li><a href="settings.html?state=model-cant">A model can't do a step; untested warning</a></li>
-          <li><a href="settings.html?state=update-available">Update available</a> · <a href="settings.html?state=up-to-date">Up to date</a></li>
           <li><a href="settings.html#lower-autodelete">Lowering auto-delete: confirm</a></li>
           <li><a href="help.html">Help</a></li>
           <li><a href="error.html">Error</a></li>

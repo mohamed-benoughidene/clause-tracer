@@ -10,17 +10,20 @@
 <link rel="stylesheet" href="styles.css">
 <style>
   /* import preview */
-  .import-note { display: grid; gap: 4px; margin-bottom: 20px; }
+  .import-warning { margin-top: 8px; font-size: 15px; font-weight: 600; color: var(--text); }
+  .import-dupe { margin: 0 0 20px; font-size: 14px; line-height: 1.5; color: var(--text); }
   .import-actions { justify-content: flex-end; margin-top: 20px; }
   .table td.num { width: 44px; color: var(--text-3); }
   .table td.position { color: var(--text); font-size: 14px; }
+  @media (max-width: 860px) { .table td.position { min-width: 180px; } }
 </style>
 </head>
 <body>
-<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8767/index.html</b> instead.</p>");</script>
 <div class="app">
   <aside class="sidebar">
     <a class="logo" href="home.html"><img class="on-light" src="logo.svg" alt="Clause Tracer"><img class="on-dark" src="logo-dark.svg" alt="Clause Tracer"></a>
+    <a class="logo-symbol" href="home.html"><img class="on-light" src="symbol.svg" alt="Clause Tracer"><img class="on-dark" src="symbol-dark.svg" alt="Clause Tracer"></a>
     <a class="btn btn-primary btn-block" href="new-review.html"><svg class="icon"><use href="#i-plus"/></svg>New review</a>
     <button class="search-commands" type="button"><svg class="icon"><use href="#i-search"/></svg><span>Search commands</span><kbd>Ctrl+K</kbd></button>
     <nav class="nav" aria-label="Main">
@@ -41,15 +44,12 @@
     <header class="page-head">
       <div>
         <h1 class="h1">Import “<span id="file-name">web_dev_terms.ctplaybook</span>”?</h1>
+        <p class="import-warning">This file came from someone else. Read every position before you import it.</p>
         <p>Freelancer service agreement · side: service provider · 7 positions</p>
-        <p>This file came from someone else. Read every position before you import it.</p>
       </div>
     </header>
 
-    <section class="card import-note">
-      <p class="note">You already have “Freelancer service agreement”, so this one is saved as “Freelancer service agreement (imported)”.</p>
-      
-    </section>
+    <p class="import-dupe">You already have “Freelancer service agreement”, so this one is saved as “Freelancer service agreement (imported)”.</p>
 
     <table class="table">
       <caption class="visually-hidden">Positions in web_dev_terms.ctplaybook</caption>
@@ -120,7 +120,7 @@
           <td>Walk-away</td>
         </tr>
         <tr>
-          <td class="num">7a</td>
+          <td class="num">7</td>
           <td class="position">Ownership passes only after full payment</td>
           <td>Yes/no</td>
           <td>Yes</td>
@@ -146,7 +146,7 @@
   if (chosen) document.getElementById('file-name').textContent = chosen;
   // Import: the toast shows for a moment, then the list of playbooks opens.
   document.getElementById('import-button').addEventListener('click', function () {
-    setTimeout(function () { location.href = 'playbooks.html'; }, 600);
+    setTimeout(function () { location.href = 'playbooks.html?state=imported'; }, 600);
   });
 </script>
 </body>

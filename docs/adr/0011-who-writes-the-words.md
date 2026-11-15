@@ -1,0 +1,113 @@
+# ADR-0011: Code writes the message and the not-covered headings; AI wording is opt-in and labelled
+
+**Status:** Accepted (12 Nov 2026)
+**Date:** 2026-11-11
+**Deciders:** Project owner
+
+## Context
+[Spec 4.7](../spec.md) item 3 says "The AI writes the message", with `[TO]` and `[FROM]` markers that code fills in. Spec 6.1 step 11 has the AI write one plain sentence for each not-covered clause, and step 13 writes the message. Spec 8.4 treats the contract as untrusted: it may hold hidden instructions.
+
+The [pipeline seams report](../../reports/Clause%20Tracer%20pipeline%20seams.md) listed these as owner decisions 5 and 6, plus the "Written with AI" mark. [The v1 design decisions report](../../reports/Clause%20Tracer%20v1%20design%20decisions.md) gave a recommendation for each. Its evidence here is thin: most items were seen only in search summaries, and no study tests any of these screens. Where evidence was thin, the tie-break favours the best experience for non-technical freelancers. [ADR 0002](0002-label-look-split-stamp.md) reserves dashed lines for pencilled labels.
+
+## Decision
+The project owner accepted three changes on 12 Nov 2026. The spec, the copy deck and the prototype were updated the same day.
+
+1. **The message.** Code builds it from templates by default, one paragraph per ticked item, per kind and tone. An opt-in "Rewrite with AI" button shows the AI's version as a diff the user reads. Code re-checks every quote, number and name in it.
+2. **Not-covered clauses.** The model picks a clause type from a closed list of 20 to 30 plain-English types `[Assumption]`, plus "Something else". The project owns the list. Code shows the heading, and the app shows the first line of the clause.
+3. **The disclosure line.** One fixed line that says what was checked: "Every quote and number was checked against the contract; the wording was written by AI." It stays distinct from the dashed pencilled style.
+
+## Options Considered
+
+### Option A: Templates by default, opt-in rewrite, closed type list, fixed line (chosen)
+| Dimension | Assessment |
+|-----------|------------|
+| Complexity | Med: template sets per item kind and tone, a diff view, a type list |
+| Cost | No AI call for the default message: free, offline, the same every time |
+| Scalability | Single user, not a scale question |
+| Team familiarity | High: templates are plain Python and copy-deck text |
+
+**Pros:** planted contract text reaches the message only as a quote code inserts. A wrong heading is probably less harmful than a wrong sentence (judgement). The fixed line tells the reader what to check.
+**Cons:** templates may read stiffly; the cost in tone is unmeasured. The type list needs upkeep.
+
+### Option B: AI writes connecting words around code facts
+| Dimension | Assessment |
+|-----------|------------|
+| Complexity | Med: slot forms and scans |
+| Cost | One AI call per message |
+| Scalability | Single user, not a scale question |
+| Team familiarity | Med |
+
+**Pros:** warmer tone, with facts locked by code.
+**Cons:** its benefit over the opt-in rewrite is unmeasured.
+
+### Option C: AI-written message and summaries, with scans (the Spec before this decision)
+| Dimension | Assessment |
+|-----------|------------|
+| Complexity | Med |
+| Cost | One AI call per message and per not-covered clause |
+| Scalability | Single user, not a scale question |
+| Team familiarity | Med |
+
+**Pros:** closest to the Spec as it was. More helpful for unusual clauses.
+**Cons:** keeps the most risk, and no evidence shows it is needed. A free AI sentence adds an injection route.
+
+### Option D: A bare "AI wrote this" label
+| Dimension | Assessment |
+|-----------|------------|
+| Complexity | Low |
+| Cost | None |
+| Scalability | Single user, not a scale question |
+| Team familiarity | High |
+
+**Pros:** simple.
+**Cons:** tells the reader nothing to check. One study, seen only as a search summary, found labels can lower trust in accurate text.
+
+## Trade-off Analysis
+All three recommendations are judgement. Template systems made fewer semantic errors in a 2024 study ([INLG 2024](https://aclanthology.org/2024.inlg-main.47.pdf), search summary only). OWASP says no known fool-proof injection defence exists ([OWASP LLM01](https://genai.owasp.org/llmrisk/llm01-prompt-injection/), search summary only). Zero-shot models trailed fine-tuned ones on LEDGAR themes by up to 19.2 micro-F1 points, but in 2023 models ([NLLP 2023](https://aclanthology.org/2023.nllp-1.22.pdf), search summary only). Reliance interventions cut overreliance but generally did not improve appropriate reliance ([arXiv 2412.15584](https://arxiv.org/abs/2412.15584)).
+
+Gaps carried over: no study compares templated and AI-written outbound messages, and there is no data on user preference. No 2026 accuracy figure exists for clause-type picking. CUAD's 41 types describe what to extract, not a covering list, and no shared freelancer taxonomy was found. No study tests a fixed label on text in a decision tool. The EU AI Act Article 50 position is open and needs legal advice ([ADR 0014](0014-protection-and-release-integrity.md)). What is known about Article 50 is thin: the Commission's final guidelines were not opened and are known only through search summaries and law-firm alerts; how they treat tools that use the user's own key, and AI rewrites of the user's own wording, was not found; later amendments were not checked; and a date of 2 Dec 2026 is reported for machine-readable marking by systems already on the market. Meanwhile, the fixed line and a plain metadata note on exported AI text are the report's interim answer.
+
+## Consequences
+- Easier: the default message cannot be steered by planted text, works offline and costs nothing.
+- Easier: users get one consistent AI mark that says what was checked.
+- Harder: someone must write and review the templates and the type list, and keep both in the copy deck.
+- Revisit if users find the template message too stiff, or if the golden set shows clause-type picking is often wrong. Measure type accuracy on the golden set.
+
+## Action Items
+1. [ ] Draft the closed clause-type list (20 to 30 types plus "Something else") and measure it on the golden set.
+2. [ ] Write the message templates per item kind and tone, and the re-check for the rewrite diff.
+3. [ ] ~~Take legal advice on Article 50 before stating anything about it in the docs.~~ Superseded by [ADR 0016](0016-legal-positions-without-a-lawyer.md): no lawyer is available, so the working position and the AI Act Service Desk question replace it.
+4. [x] Change Spec 4.7 item 3 and Spec 6.1 steps 11 and 13 (done 12 Nov 2026).
+5. [x] Update `docs/ux-copy.md` and add the new states to the prototype's `states.html` (done 12 Nov 2026; `ux-copy.md` section 6.8 records it).
+
+## Amendment (12 Nov 2026): what the Article 50 texts say about rewrites
+
+The Commission's guidelines on Article 50 and the Code of Practice were read on 12 Nov 2026. This is what the documents say, not legal advice.
+
+- Text shown only to the user who asked for it, and private messages between people, are given as examples outside the duty on published text.
+- "Paraphrasing or rewriting text that changes style, structure and meaning" is listed as needing a machine-readable mark. Grammar fixes and minor polishing are listed as exempt. Very short text is excepted from watermarking.
+- A visible label is described for the duty to tell people they are dealing with AI. Neither document says a visible label satisfies the marking duty.
+- Nothing addresses tools that call a model through the user's own key, so whether this app's developer is a "provider" is open.
+
+This supports the main decision here: the app's default message is built by code and is not AI text. It leaves the optional "Rewrite with AI" for the message as the one feature the guidelines point at directly. Whether version 1 ships it is with the owner.
+
+## Amendment (12 Nov 2026): the rewrite stays, and Article 50 is parked
+
+The owner decided on 12 Nov 2026 to keep "Rewrite with AI" for the message in version 1, optional and labelled, and to set the EU AI Act question aside for now. The question is flagged in [Spec 10](../spec.md) and Spec 13 so it can be worked on later. The risk is known and accepted for now: the Commission's guidelines list rewriting text as needing a machine-readable mark, which this app does not add. Nothing in the app or the docs may say Article 50 doesn't apply.
+
+## Amendment (13 Nov 2026): the EU AI Act working position is accepted
+
+[ADR 0016](0016-legal-positions-without-a-lawyer.md) was accepted on 13 Nov 2026. It sets the working position on the open EU AI Act question this record raised: treat the project as a "provider", keep a written-by value on every stored text, and mark AI-written text in PDF export metadata (Spec 4.7, 6.2). The one accepted gap is a plain-text AI rewrite the user copies out, which can't carry a hidden mark.
+
+## Amendment (14 Nov 2026): code writes a label's words, with two AI cases
+
+The spec and the system design disagreed. Spec 6.1 step 10 had the AI write the "why" of every label, while system design 15.8 had code templates write the leads, Missing text and questions. The project owner settled it on 14 Nov 2026.
+
+1. **Number and yes/no positions.** Code builds every sentence of the panel from templates and checked values: the lead, the source line, "why it could be the other level", "What to check", the question to ask and Missing text. No AI call is made for these words, except case (b) below.
+2. **The AI writes text in exactly two cases.** (a) A words position where the AI judged the level (the pencilled label): the reason, the two readings and the question to ask. (b) A value of any position type that is unsure because its wording is vague (reason code `VAGUE_WORDING`, such as "reasonable revisions"): the two readings and the question to ask only. Code still writes its lead ("“Reasonable” has no number, so it can't be checked against your limit.") and everything else.
+3. **How AI text is handled.** It passes the scans, is stored as written by AI and shows the AI wording line. If a scan still fails after one regeneration, the code template is used: for case (b) that means no readings and a template question.
+4. **Every other sentence is code's.** Every other unsure reason and every Missing label gets words from code only. A label a rule made unsure stays written by code (Spec 5), even when its readings are AI text: only those text blocks are written by AI.
+
+The same day the owner added five style scans on AI text (first-person words, filler, evaluating words, a reason with no anchor, added sentences), recorded in [ADR 0012](0012-missing-unsure-and-evidence-failures.md)'s amendment of 14 Nov 2026 and in Spec 6.2.
+
+This extends the main decision above: templates by default now cover a label's panel as well as the message. Outside the two AI cases, planted contract text reaches a label's words only as quotes and values that code inserts. The estimate of AI calls per review falls from about 35 to 40 to about 30 to 35, plus one per vague value `[Assumption]`, because only words positions and vague values get an explain call ([system design](../system-design.md) section 7). Spec 4.4, 6.1 step 10 and 6.2, and system design sections 3.4, 7 and 15.8, hold the details.

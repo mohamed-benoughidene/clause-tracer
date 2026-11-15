@@ -9,24 +9,43 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <style>
-  /* First launch only: an open book. Text on the left page, the painting on the right, edge to edge. No sidebar, no floating card. */
+  /* First launch only: the picture is the screen, and the controls are a sheet of paper lying on it. */
   body { background: var(--bg-paper); }
-  .launch { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
-  .launch-form { display: flex; flex-direction: column; padding: 32px clamp(32px, 5vw, 72px) 28px; }
-  .launch-body { margin: auto 0; padding: 48px 0 32px; max-width: 470px; }
-  .launch-form .display { font-size: clamp(32px, 2.9vw, 42px); line-height: 1.04; letter-spacing: -0.02em; margin-bottom: 26px; }
-  .launch-form .display em { display: block; font-style: italic; font-weight: 400; color: var(--text-2); }
-  .launch-foot { margin: 0; font-size: 12.5px; color: var(--text-2); }
-  .lede { margin: 0 0 28px; max-width: 400px; font-size: 14.5px; line-height: 1.55; color: var(--text-2); }
+  .launch { position: relative; height: 100vh; min-height: 0; overflow: hidden; }
+  .launch-art { position: absolute; inset: 0; margin: 0; }
+  .launch-art > img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+  :root[data-theme="dark"] .launch-art > img { filter: brightness(.82); }
+  .launch-card { position: absolute; left: 56px; top: 50%; transform: translateY(-50%); width: 440px; max-width: calc(100% - 32px);
+    min-height: min(var(--card-h, 600px), calc(100vh - 64px)); max-height: calc(100vh - 64px); overflow: auto; padding: 40px; background: var(--bg-paper); border-radius: var(--r-lg);
+    box-shadow: 0 1px 2px rgba(27,26,23,.08), 0 6px 18px rgba(27,26,23,.10); }
+  .launch-logo { display: inline-block; margin-bottom: 28px; }
+  .launch-logo { --logo-w: 190px; }
+  .launch-logo img { width: 190px; }
+  .launch-card .display { font-size: clamp(32px, 2.2vw + 14px, 42px); line-height: 1.1; letter-spacing: -0.02em; margin: 0 0 12px; }
+  .launch-card h1.h1 { margin: 14px 0 8px; }
+  .launch-card [tabindex="-1"]:focus { outline: none; }
+  .lede { margin: 0 0 22px; font-size: 14.5px; line-height: 1.55; color: var(--text-2); }
+  .launch-card .btn-block { width: 100%; }
+  .first-action { display: grid; gap: 8px; margin-bottom: 12px; }
+  .first-action .btn .icon { transition: transform 150ms ease-out; }
+  .first-action .btn:hover .icon, .first-action .btn:focus-visible .icon { transform: translateX(2px); }
+  @media (prefers-reduced-motion: reduce) { .first-action .btn .icon { transition: none; } .first-action .btn:hover .icon, .first-action .btn:focus-visible .icon { transform: none; } }
+  .running-head { display: flex; justify-content: space-between; gap: 12px; margin: 0 0 24px; padding-bottom: 6px; border-bottom: 1px solid var(--line-strong);
+    font: 11px/1.4 var(--contract); letter-spacing: .04em; text-transform: uppercase; color: var(--text-2); }
+  /* The words a label rests on, marked the way the app marks quoted evidence. */
+  .quoted { font-weight: 600; text-decoration: underline 1.5px var(--red); text-underline-offset: 3px; }
+  .launch-foot { display: block; margin: 24px 0 0 !important; padding-top: 14px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--text-2); }
+  .back { display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; padding: 0; cursor: pointer; }
+  .back .icon { color: currentColor; }
+  .view-key > p { margin: 0 0 16px; }
+  .launch-card label { display: block; margin-bottom: 8px; font-weight: 500; }
   .key-input { position: relative; }
   .key-input .input { padding-right: 84px; }
   .key-input .btn { position: absolute; right: 6px; top: 5px; height: 28px; padding: 0 8px; font-size: 12.5px; }
   .key-actions { flex-wrap: wrap; margin-top: 12px; }
-  .key-actions .btn-primary { min-width: 120px; justify-content: center; }
+  .key-actions #save-key { min-width: 110px; }
   /* How to get a key: folded, so a returning user isn't made to read it. */
-  .key-form { padding: 20px; border-radius: 10px; background: var(--bg-tone); }
-  .key-form label { display: block; margin-bottom: 8px; font-weight: 500; }
-  .more { display: grid; gap: 10px; justify-items: start; margin-top: 20px; }
+  .more { margin-top: 18px; }
   .key-how { margin: 0; }
   .key-how summary { cursor: pointer; font-weight: 500; list-style: none; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-strong); }
   .key-how summary::-webkit-details-marker { display: none; }
@@ -34,8 +53,6 @@
   .key-steps li { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 6px; align-items: start; }
   .key-n { font: 600 15px/1.35 var(--serif); color: var(--text-2); }
   .key-steps .btn { height: 26px; padding: 0 8px; font-size: 12px; }
-  .sample p { margin: 4px 0 0; max-width: 400px; }
-  .sample-link { font-weight: 500; color: var(--text); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-strong); justify-self: start; }
   /* Key check (states: checking, key-ok, key-error). Red is for walk-away only, so the error uses the unsure colour. */
   .save-busy { display: inline-flex; align-items: center; gap: 8px; }
   .save-busy .icon { color: currentColor; }
@@ -45,52 +62,78 @@
   .key-line.error { color: var(--text); }
   .key-line.error .icon { color: var(--unsure); }
   .field:has(.key-error.on) .input { outline: 2px solid var(--unsure); outline-offset: 2px; }
-  /* The hero: a page of etched butterflies, one of them red (brand file, section 5). */
-  .launch-art { position: relative; margin: 0; min-height: 100vh; overflow: hidden; background: var(--bg-tone); border-left: 1px solid var(--line); }
-  .launch-art > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; }
-  .launch-logo img { width: clamp(200px, 17vw, 240px); }
-  @media (max-width: 900px) {
-    .launch { grid-template-columns: 1fr; }
-    .launch-art { order: -1; min-height: 240px; border-left: 0; border-bottom: 1px solid var(--line); }
-    .launch-form { padding: 20px 16px 24px; }
-    .launch-body { padding: 28px 0; }
-    .launch-form .display { font-size: 30px; }
+  /* Onboarding motion (owner, 15 Nov 2026). Each part is a transition of 150-300 ms on opacity and transform only,
+     and none of it runs under reduced motion or on a ?state= page. */
+  @media (prefers-reduced-motion: no-preference) {
+    /* the welcome arrives in beats: logo, headline, line, buttons */
+    html.beats #view-welcome :is(.launch-logo, #launch-title, .lede, .first-action, #to-key) { transition: opacity 300ms ease-out, transform 300ms ease-out; }
+    html.beats #view-welcome :is(.launch-logo, #launch-title, .lede, .first-action, #to-key):not(.in) { opacity: 0; transform: translateY(8px); }
+    /* the two views slide: the old one leaves, the new one comes in from the side it is on */
+    .view-welcome, .view-key { transition: opacity 150ms ease-out, transform 150ms ease-out; }
+    .view-welcome.v-out, .view-key.v-out { opacity: 0; transform: translateX(calc(var(--dx, 1) * -16px)); }
+    .view-welcome.v-pre, .view-key.v-pre { opacity: 0; transform: translateX(calc(var(--dx, 1) * 16px)); }
+    /* the key check resolves: the line rises in and the check grows into place */
+    .key-line.ok { transition: opacity 250ms ease-out, transform 250ms ease-out; }
+    .key-line.ok .icon { transition: transform 250ms ease-out; }
+    .key-line.ok.live:not(.is-in) { opacity: 0; transform: translateY(4px); }
+    .key-line.ok.live:not(.is-in) .icon { transform: scale(.5); }
   }
+  /* Narrow window, and text size 150% and 200%: the picture is a band, the card sits under it. */
+  @media (max-width: 900px) {
+    .launch { height: auto; overflow: visible; }
+    .launch-art { position: relative; inset: auto; height: 220px; }
+    .launch-card { position: static; transform: none; width: auto; max-width: none; max-height: none; overflow: visible; box-shadow: none; border-radius: 0; padding: 24px 16px 28px; }
+  }
+  html:is([data-text="150"], [data-text="200"]) .launch { height: auto; overflow: visible; }
+  html:is([data-text="150"], [data-text="200"]) .launch-art { position: relative; inset: auto; height: 220px; }
+  html:is([data-text="150"], [data-text="200"]) .launch-card { position: static; transform: none; width: auto; max-width: none; max-height: none; overflow: visible; box-shadow: none; border-radius: 0; padding: 24px 16px 28px; }
 </style>
 </head>
 <body>
-<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8766/index.html</b> instead.</p>");</script>
+<script>/* ct-snapshot: a static preview (data: URL) runs no shared scripts and keeps no settings */ if (location.protocol === "data:") document.write("<p style=\"margin:0;padding:10px 16px;background:#FFF8DB;border-bottom:1px solid #E8CF6B;font:13px system-ui\">This is a static preview, so buttons, settings and dark mode won't work. Open <b>http://localhost:8767/index.html</b> instead.</p>");</script>
 <main>
   <div class="launch">
-    <section class="launch-form" aria-labelledby="launch-title">
-      <a class="logo launch-logo" href="index.html"><img class="on-light" src="logo.svg" alt="Clause Tracer"><img class="on-dark" src="logo-dark.svg" alt="Clause Tracer"></a>
-      <div class="launch-body">
-      <h1 class="display" id="launch-title">Check a contract <em>against your own rules.</em></h1>
+    <figure class="launch-art">
+      <img src="hero-butterflies.webp" width="1536" height="1024" alt="A page of black-and-white etched butterflies on aged paper. In the middle, one butterfly is red, with four eyespots: three black and one red.">
+    </figure>
 
-      <p class="lede">Every label shows the exact words it rests on, so you can check it yourself. It runs on your computer with your own OpenRouter key, the account that pays for the AI.</p>
+    <div class="launch-card">
+      <section class="view-welcome" id="view-welcome" aria-labelledby="launch-title">
+        <div class="running-head"><span>Clause Tracer</span><span>Runs on this computer</span></div>
+        <span class="logo launch-logo"><img class="on-light" src="logo.svg" alt="Clause Tracer"><img class="on-dark" src="logo-dark.svg" alt="Clause Tracer"></span>
+        <h1 class="display" id="launch-title" tabindex="-1">Check a contract against your own rules.</h1>
+        <p class="lede">Every label shows <span class="quoted">the exact words</span> it rests on, so you can check it yourself.</p>
+        <div class="first-action">
+          <a class="btn btn-primary btn-block" href="review.html?sample">Open the free sample contract<svg class="icon"><use href="#i-arrow-right"/></svg></a>
+        </div>
+        <button class="btn btn-block" id="to-key" type="button" aria-controls="view-key">Check your own contract</button>
+        <p class="note launch-foot">Not legal advice. Check every result yourself.</p>
+      </section>
 
-      <div class="key-form">
-          <div class="field">
-            <label for="key">OpenRouter key</label>
-            <div class="key-input">
-              <input class="input" id="key" type="password" placeholder="sk-or-…" autocomplete="off" spellcheck="false" aria-describedby="key-error">
-              <button class="btn btn-ghost btn-sm" id="show-key" type="button" aria-controls="key" aria-pressed="false"><svg class="icon"><use href="#i-eye-off"/></svg><span class="show-label">Show</span></button>
-            </div>
-            <p class="key-line ok" data-state="key-ok" role="status"><svg class="icon"><use href="#i-check"/></svg><span>Key works. Credit left: $3.10. Opening your reviews…</span></p>
-            <p class="key-line error key-error" id="key-error" data-state="key-error" role="alert"><svg class="icon"><use href="#i-help"/></svg><span>OpenRouter didn't accept this key. Check you copied all of it, starting with sk-or-.</span></p>
+      <section class="view-key" id="view-key" aria-labelledby="key-title" hidden>
+        <div class="running-head"><span>Clause Tracer</span><span>Runs on this computer</span></div>
+        <button class="link back" id="to-welcome" type="button" aria-controls="view-welcome"><svg class="icon"><use href="#i-arrow-left"/></svg>Back</button>
+        <h1 class="h1" id="key-title" tabindex="-1">Add your OpenRouter key</h1>
+        <p class="small muted">It runs on your computer with your own OpenRouter key, the account that pays for the AI. A typical review costs about $0.30 to $0.60.</p>
+        <div class="field">
+          <label for="key">OpenRouter key</label>
+          <div class="key-input">
+            <input class="input" id="key" type="password" placeholder="sk-or-…" autocomplete="off" spellcheck="false" aria-describedby="key-error">
+            <button class="btn btn-ghost btn-sm" id="show-key" type="button" aria-controls="key" aria-pressed="false"><svg class="icon"><use href="#i-eye-off"/></svg><span class="show-label">Show</span></button>
           </div>
-          <div class="row key-actions">
-            <button class="btn btn-primary" id="save-key" type="button" data-state-hide="key-ok">
-              <span class="save-idle" data-state-hide="checking">Save key</span>
-              <span class="save-busy" data-state="checking"><svg class="icon"><use href="#i-clock"/></svg>Checking key…</span>
-            </button>
-            <a class="btn btn-ghost" href="home.html" data-state-hide="key-ok">Skip for now</a>
-            <span class="small muted" id="key-status" role="status"></span>
-          </div>
-      </div>
-
-      <div class="more">
-        <details class="key-how">
+          <p class="key-line ok" data-state="key-ok" role="status"><svg class="icon"><use href="#i-check"/></svg><span>Key works. Credit left: $3.10. Opening your reviews…</span></p>
+          <p class="key-line error key-error" id="key-error" data-state="key-error" role="alert"><svg class="icon"><use href="#i-help"/></svg><span>OpenRouter didn't accept this key. Check you copied all of it, starting with sk-or-.</span></p>
+        </div>
+        <div class="row key-actions">
+          <button class="btn btn-primary" id="save-key" type="button" data-state-hide="key-ok">
+            <span class="save-idle" data-state-hide="checking">Save key</span>
+            <span class="save-busy" data-state="checking"><svg class="icon"><use href="#i-clock"/></svg>Checking key…</span>
+          </button>
+          <a class="btn btn-ghost" href="home.html" data-state-hide="key-ok">Skip for now</a>
+          <span class="small muted" id="key-status" role="status"></span>
+        </div>
+        <div class="more">
+          <details class="key-how">
           <summary>No key yet? Get one in 4 steps</summary>
           <ol class="key-steps">
             <li>
@@ -106,7 +149,7 @@
             <li>
               <span class="key-n">3</span>
               <div><p class="h3">Turn off Safety Retention</p><p class="small muted">In OpenRouter: Settings › Privacy. Then providers don't keep your contract, except for legally required safety screening.</p></div>
-              <span></span>
+              <a class="btn" href="https://openrouter.ai/settings/privacy" target="_blank" rel="noopener">Open privacy settings<span class="visually-hidden"> (opens in your browser)</span></a>
             </li>
             <li>
               <span class="key-n">4</span>
@@ -115,20 +158,10 @@
             </li>
           </ol>
         </details>
-        <div class="sample">
-          <a class="sample-link" href="review.html?sample">Or try a sample contract first, free</a>
-          <p class="small muted">One label in it is wrong on purpose. Find it, and see why real reviews need checking too.</p>
         </div>
-      </div>
-      </div>
-
-      <p class="note launch-foot">Not legal advice. Check every result yourself.</p>
-
-    </section>
-
-    <figure class="launch-art">
-      <img src="hero-butterflies.webp" width="1536" height="1024" alt="A page of black-and-white etched butterflies on aged paper. In the middle, one butterfly is red, with four eyespots: three black and one red.">
-    </figure>
+        <p class="note launch-foot">Not legal advice. Check every result yourself.</p>
+      </section>
+    </div>
   </div>
 </main>
 <script src="icons.js"></script>
@@ -142,6 +175,59 @@
     var idle = save.querySelector('.save-idle');
     var busy = save.querySelector('.save-busy');
     var state = new URLSearchParams(location.search).get('state');
+    var vWelcome = document.getElementById('view-welcome');
+    var vKey = document.getElementById('view-key');
+
+    // Two views in one card; one shows at a time, and focus moves to the new heading.
+    // The old view leaves and the new one comes in from the side it is on (Welcome is on the left, the key on the right).
+    var motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function view(name, moveFocus) {
+      var toKey = name === 'key';
+      var from = toKey ? vWelcome : vKey, to = toKey ? vKey : vWelcome;
+      function show() {
+        from.hidden = true; from.classList.remove('v-out');
+        to.hidden = false;
+        if (moveFocus) (toKey ? document.getElementById('key-title') : document.getElementById('launch-title')).focus();
+      }
+      if (!moveFocus || !motion || from.hidden) { from.hidden = true; to.hidden = false; return; }
+      var dx = toKey ? 1 : -1;
+      from.style.setProperty('--dx', dx); to.style.setProperty('--dx', dx);
+      from.classList.add('v-out');
+      setTimeout(function () {
+        show();
+        to.classList.add('v-pre');
+        void to.offsetWidth;
+        to.classList.remove('v-pre');
+      }, 150);
+    }
+    document.getElementById('to-key').addEventListener('click', function () { view('key', true); });
+    document.getElementById('to-welcome').addEventListener('click', function () { view('welcome', true); });
+    key.addEventListener('input', function () {
+      var cleaned = key.value.trim();
+      if (cleaned !== key.value) { key.value = cleaned; status.textContent = 'Spaces removed.'; }
+      else { status.textContent = ''; }
+      document.getElementById('key-error').classList.remove('on'); key.removeAttribute('aria-invalid');
+    });
+
+    // The welcome in beats: logo, then headline, then the line, then the buttons, 140 ms apart.
+    // The hidden start state is set here, not in plain CSS, so the card is never empty if this script does not run.
+    if (motion && location.search.indexOf('state=') === -1) {
+      document.documentElement.classList.add('beats');
+      void vWelcome.offsetWidth;
+      [['.launch-logo'], ['#launch-title'], ['.lede'], ['.first-action', '#to-key']].forEach(function (group, i) {
+        setTimeout(function () {
+          group.forEach(function (sel) { document.querySelector('#view-welcome ' + sel).classList.add('in'); });
+        }, 120 + i * 140);
+      });
+      // Fallback: if a timer is held back (slow load, background tab), show every part after 1.5 s.
+      setTimeout(function () {
+        vWelcome.querySelectorAll('.launch-logo, #launch-title, .lede, .first-action, #to-key').forEach(function (el) { el.classList.add('in'); });
+      }, 1500);
+    }
+
+    if (state === 'key' || state === 'checking' || state === 'key-ok' || state === 'key-error') view('key', false);
+    // #guide opens the folded key guide (the links from Settings and Help use it)
+    if (location.hash === '#guide') { const guide = document.querySelector('.key-how'); if (guide) guide.open = true; }
 
     show.addEventListener('click', function () {
       var hidden = key.type === 'password';
@@ -163,6 +249,13 @@
         key.focus();
         return;
       }
+      // A key that does not start with sk-or- stands in for a refused key in this prototype.
+      var errorLine = document.getElementById('key-error');
+      if (key.value.trim().indexOf('sk-or-') !== 0 || key.value.trim() === 'sk-or-abc') {
+        errorLine.classList.add('on'); key.setAttribute('aria-invalid', 'true'); key.focus();
+        return;
+      }
+      errorLine.classList.remove('on'); key.removeAttribute('aria-invalid');
       save.disabled = true;
       idle.hidden = true;
       busy.classList.add('on');
@@ -170,7 +263,10 @@
       // The key works: say so, then open Reviews without another click.
       setTimeout(function () {
         busy.classList.remove('on'); save.hidden = true;
-        document.querySelector('[data-state="key-ok"]').classList.add('on');
+        var ok = document.querySelector('[data-state="key-ok"]');
+        ok.classList.add('on', 'live');
+        void ok.offsetWidth;
+        setTimeout(function () { ok.classList.add('is-in'); }, 30);
         setTimeout(function () { location.href = 'home.html'; }, 1200);
       }, 1000);
     });
