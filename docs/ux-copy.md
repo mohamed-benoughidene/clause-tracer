@@ -119,7 +119,7 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 
 **Quotation marks:** double curly quotes for quoted words and names: “Master Agreement”, “reasonable”. Use an apostrophe only for contractions.
 
-**Capitals:** sentence case for headings and buttons. Capitalise a label when it's named as a label: on stamps, in the summary bar, and in "should be Walk-away, not Preferred". Use lower case when it describes something: "This one is a walk-away."
+**Capitals:** sentence case for headings and buttons. Capitalise a label when it's named as a label: on stamps, in the group headings of the Labels list, and in "should be Walk-away, not Preferred". Use lower case when it describes something: "This one is a walk-away."
 
 **Numbers:** digits always ("3 days", "2 rounds"). Money is "$0.42", "about $0.39". Clauses are "§ 5.4" in lists and panels, and "5.4" in sentences.
 
@@ -133,12 +133,12 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | Confirmation body | What happens, what stays, "This can't be undone." last | "Those reviews keep their own copy and won't change. You can't re-run them. This can't be undone." |
 | Confirmation buttons | Cancel, then the action's own words | "Cancel" / "Delete playbook"; "Keep running" / "Cancel review" |
 | Error | What happened + what to do. Mention what's kept. Every error has a fix. | "This PDF is pictures of pages, so its text can't be read. Upload a Word version, or paste the text." |
-| Banner (top) | What's true + why it matters + one action. Once read, it shrinks to a chip in the summary bar (4.7), except the playbook-changed and practice banners. | "Your playbook changed after this review ran. The labels use the old limits. [Re-run]" |
-| Chip (small) | One fact, one sentence | "This contract follows England and Wales law." |
+| Banner (top) | What's true + why it matters + one action. Only two banners remain: the practice review and the changed playbook. Never more than one at a time. The other warnings are Read first rows (4.7). | "Your playbook changed after this review ran. The labels use the old limits. [Re-run]" |
+| Small line | One fact, one sentence, as a quiet line (the law line in the review) | "This contract follows England and Wales law." |
 | Empty state | What's missing + what it does + how to start. Don't repeat the button. | "No reviews yet. Check a contract against your playbook. It takes about 3 minutes and costs about $0.39." |
 | Toast | Past tense or a fact, 1 to 5 words. Longer news goes in a notice. | "Saved", "Copied", "Review deleted", "Key works. Saved." |
 | Panel lead | The label in one sentence, then the plain why. Name the level, never "good" or "bad". | "This one is a walk-away. You'd wait 60 days to be paid; your limit is 30." |
-| Source line | `[Label] by your playbook: [fact], your limit is [value].` Code writes it, and it sits inside “More” in the detail panel | "Acceptable by your playbook: the deposit is 25%, a level you accept." |
+| Source line | `[Label] by your playbook: [fact], your limit is [value].` Code writes it, and it sits inside “More” in the detail | "Acceptable by your playbook: the deposit is 25%, a level you accept." |
 | What to check | A yes/no question about the quote | "What to check: Does the quote give a number of revision rounds?" |
 | Question to ask | A polite question the user can send | "Can we agree consent won't be refused without a good reason?" |
 | Link out | "(opens in your browser)" for screen readers on every link that leaves the app. It's a desktop app, so there are no tabs. | "Add credit (opens in your browser)" |
@@ -147,24 +147,35 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 
 ### 4.1 First launch (`index.html`)
 
+The card shows one view at a time: Welcome, then Key. “Check your own contract” opens Key, and “Back” returns. `?state=key` opens Key, and so do the checking, key-ok and key-error states.
+
 | Element | Copy |
 | --- | --- |
-| Heading | Check a contract against your own rules. |
-| Intro | Every label shows the exact words it rests on, so you can check it yourself. It runs on your computer with your own OpenRouter key, the account that pays for the AI. |
-| Key field | OpenRouter key · placeholder `sk-or-…` |
-| Buttons | Save key · Skip for now |
+| Running head (both views) | Clause Tracer · Runs on this computer (shown in capitals) |
+| Heading (Welcome) | Check a contract against your own rules. |
+| Line under it | Every label shows the exact words it rests on, so you can check it yourself. (“the exact words” is underlined) |
+| Primary button (Welcome) | Open the free sample contract |
+| Secondary button (Welcome) | Check your own contract |
+| Back (Key) | Back |
+| Heading (Key) | Add your OpenRouter key |
+| Intro (Key) | It runs on your computer with your own OpenRouter key, the account that pays for the AI. A typical review costs about $0.30 to $0.60. |
+| Key field | OpenRouter key · placeholder `sk-or-…` · Show (a button that reveals the key; its label changes while the key is shown) |
+| Spaces trimmed | Spaces removed. (said when a pasted key had spaces or line breaks around it) |
+| Empty key | Paste your key first. It starts with sk-or-. |
+| Buttons (Key) | Save key (the primary button of this view) · Skip for now |
 | Checking state (new) | Checking key… |
+| Key works | Key works. Credit left: $3.10. Opening your reviews… |
+| Key error | OpenRouter didn't accept this key. Check you copied all of it, starting with sk-or-. |
 | Key guide summary | No key yet? Get one in 4 steps |
 | Step 1 | Create an OpenRouter account · openrouter.ai · free to sign up · [Open site (opens in your browser)] |
 | Step 2 | Add credit · A typical review costs about $0.30 to $0.60. |
-| Maintainer note (not on screen) | The "$0.30 to $0.60" figure is an estimate, not a measurement (ADR 0010, action 6). Replace it with the measured cost after the first paid run (Spec 13). |
+| Maintainer note (not on screen) | The "$0.30 to $0.60" figure is an estimate, not a measurement (ADR 0010, action 6). Replace it with the measured cost after the first paid run (Spec 13). It is in the Key intro and in step 2. |
 | Step 3 | Turn off Safety Retention · In OpenRouter: Settings › Privacy. Then providers don't keep your contract, except for legally required safety screening. · [Open privacy settings (opens in your browser)] to `https://openrouter.ai/settings/privacy` |
 | Maintainer note (not on screen) | The privacy settings address is an assumption. Check it against OpenRouter before release (Spec 13). |
 | Step 4 | Create a key and paste it above · It starts with sk-or-. |
-| Sample link | Or try a sample contract first, free |
-| Sample note | One label in it is wrong on purpose. Find it, and see why real reviews need checking too. |
-| Legal line | Not legal advice. Check every result yourself. |
+| Legal line (both views) | Not legal advice. Check every result yourself. |
 | Hero alt text | A page of black-and-white etched butterflies on aged paper. In the middle, one butterfly is red, with four eyespots: three black and one red. |
+| Logo alt text | Clause Tracer |
 
 ### 4.2 Home: Reviews (`home.html`)
 
@@ -291,45 +302,47 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | Element | Copy |
 | --- | --- |
 | Title | [review name] · [playbook] · playbook as of 5 Nov, 10:31 |
-| Actions | Private mode: On (menu) · [cost button: $0.39] · Suggestions · More actions (Re-run… · Start over…) · Output. Rewrite is in the detail panel, as “Rewrite this clause”. |
+| Actions | Back to reviews (icon label) · Private mode: On (menu) · More actions (icon label), a menu: Search commands · Ctrl+K · Suggestions · Models and cost · $0.39 · Re-run… · Start over… · then Output. Rewrite is in the detail, as “Rewrite this clause”. The bar has no status text: “Ready to check” and “Done” belong to Home (4.2). |
 | Practice banner | Practice review · One label here is wrong on purpose. Find it, open it and fix it. Real reviews work the same way. [Start a real review] |
-| Playbook changed | Your playbook changed after this review ran. The labels use the old limits. [Re-run] |
-| Unedited starter | This review uses the example playbook, unedited. Its limits are examples, not yours. [Make the limits yours] [Got it] |
-| Hidden text | This contract contains hidden text (outlined in the contract). It may be trying to fool this review. [Show me] |
-| Unloaded document | This contract depends on the “Master Agreement”, which isn't loaded. It can change any result here. Ask for it and read it before you sign. [What this means] |
-| Chips for read banners (new) | After the user clicks a banner's action, the banner shrinks to a chip in the summary bar: hidden text, “Show me” → **1 piece of hidden text** · unloaded document, “Got it” in the dialog → **[n] document not loaded** (always in the summary bar) · unedited starter, “Got it” → **Example playbook, unedited**. A click on the chip reopens the banner (hidden text, unedited starter) or its dialog (unloaded document). “Make the limits yours” leaves the screen, so it doesn't count as a read. The playbook-changed banner stays until the review is re-run, and “Re-run” is not a read action. The practice banner stays. |
-| Law chip, one | This contract follows England and Wales law. If there's a dispute, England and Wales law settles it. |
-| Law chip, two | This contract names two places' law: England and Wales in 14.6, and Algeria in Schedule 2. Ask which one applies before you sign. |
-| Law chip, none | This contract doesn't say which place's law applies. If there's a dispute, the two sides could argue over it. Ask for a governing-law clause. |
+| Playbook changed | Your playbook changed after this review ran. The labels use the old limits. [Re-run] · The review never shows more than one banner: this one and the practice banner are the only two. |
+| Read first: unedited starter | Row: Example playbook, unedited. It opens in the column: Example playbook, unedited · This review uses the example playbook, unedited. Its limits are examples, not yours. · [Make the limits yours] [Got it] · [All labels] |
+| Read first: hidden text | Row: 1 piece of hidden text. It opens in the column: 1 piece of hidden text · This contract contains hidden text (outlined in the contract). It may be trying to fool this review. · [Show me] · [All labels] |
+| Read first: unloaded document | Row: Master Agreement not loaded. A click opens the dialog “Master Agreement” isn't loaded (see Dialogs), and its “Got it” counts as read. |
+| Read first (replaces the chips) | Heading: Read first. One row for each of the three warnings that can change every result: hidden text, an unloaded document, an unedited starter playbook. A row has an icon, the short name, a tick slot and a chevron. After its action (“Show me”, “Got it”) the row turns faint and gets a tick, and it still opens. “Make the limits yours” leaves the screen, so it doesn't count as a read. “Re-run” is not a read action. |
+| Law line, one | This contract follows England and Wales law. If there's a dispute, England and Wales law settles it. (A small faint line at the end of the Labels list.) |
+| Law line, two | This contract names two places' law: England and Wales in 14.6, and Algeria in Schedule 2. Ask which one applies before you sign. |
+| Law line, none | This contract doesn't say which place's law applies. If there's a dispute, the two sides could argue over it. Ask for a governing-law clause. |
 | Privacy badge | Private mode: only providers that don't keep your contract see this review. · Mixed: steps 1 and 2 ran in private mode, steps 3 and 4 didn't. · toast: Private mode stays on |
 
-**Summary bar and checking card**
+**Labels list and checking card**
 
 | Element | Copy |
 | --- | --- |
-| Summary bar (counts positions) | Preferred [n] · Acceptable [n] · Walk-away [n] · Unsure [n] · [n] pencilled in · [n] document not loaded · Not covered [n] parts. After a banner is read, a chip is added: 1 piece of hidden text · Example playbook, unedited |
+| Group headings (count positions) | Walk-away [n] · Unsure [n] · [n] pencilled in (next to Unsure) · Acceptable [n] · [n] in Missing (next to Acceptable) · Preferred [n]. Each heading is the stamp, the count and a `?`, in that order. A row has a pin, “§ 5.4 · 1 Days until paid” and a tick, with no stamp. The count of parts not covered is in the Not covered tab. |
 | Label definitions (?) | Preferred: The clause gives you at least what your playbook says you want. · Acceptable: Not as good as preferred, but inside the limit you set in your playbook. · Walk-away: Past the limit you set in your playbook. Ask for a change before you sign. · Unsure: The wording is too unclear to label, or the quote couldn't be confirmed. The app always says why. You decide. · Help uses the same four definitions. |
-| Counter | 2 of 11 positions checked · 35 parts not covered |
-| Positions done | Every position is checked. To finish, read the not-covered parts, then tick the box in Not covered. |
+| Counter | 2 of 11 positions checked |
+| Positions done | Every position is checked. To finish, read the not-covered parts, then tick the box in Not covered. · toast, when the last detail is decided: Every position is checked |
 | Done | Done. Every position is checked and you've read the rest. You can write the message now. |
-| Next | Next unchecked · J |
+| Next | Next unchecked · J (in the progress line, and in the head of each detail) |
 | Unsure-heavy | More than half of these labels are unsure. That usually means the wording is vague, or your playbook suits a different kind of contract. Read the unsure ones first: each says what it couldn't decide. |
 | Tabs | Labels [n] · Not covered [n] · Missing [n] |
 | Not-covered tick | I've read the 35 not-covered parts |
 | Not-covered row | § 2.2 · **Length and renewal** · “This Agreement renews automatically for further 12-month periods…” (the clause type in bold, then the clause's own first line in quotes; no AI-written sentence) |
 | Not-covered clause types (draft list) | Parties · Background · Definitions · Length and renewal · Scope of work · Quality of work · Timing and deadlines · How the work is done · Changes to the deal · Fees · Invoices · Expenses · Tax · What the other side provides · Ownership and credit · Existing tools and materials · Confidentiality · Hiring each other's staff · Promises about the work · Limits on losses · Ending the contract · Handing things back · Data protection · Whole agreement · Which document wins · Passing the contract on · Notices · Disputes and law · Insurance · Something else. [Assumption] A first list of 30. Tune it on the test set. |
 | Searched, nothing found (Missing tab) | Searched, nothing found · [n] · Your playbook is happy when these aren't in the contract, so they need no action. Open one to check the search. |
-| Status | Ready to check · Done |
+| Pin names | Read aloud as “Label 4: Walk-away, not checked” and, once decided, “Label 4: Walk-away, checked”. The list row says “, not checked” or “, checked” in hidden text. The pin on the page and the pin in the list fill in once the label is decided. |
+| Pages | Pages (the button at the left of the viewer bar, which shows or hides the thumbnails; also the label of the list of thumbnails) |
 | Find | Find · Ctrl+F |
 
-**Detail panel** (one per position; the sample's wording shown)
+**Detail** (one per position, shown in the right column in place of the list; the sample's wording shown)
 
 *Who writes the words.* For number and yes/no labels, code builds every sentence from templates and checked numbers. For words labels, which the AI judged and which are pencilled, the AI writes the reason, the two readings and the question to ask. That text passes the scans and carries the AI wording line. An AI sentence may not name a label other than the one code names in its heading, and may not state an acceptable limit. “Written by” is one of code, AI or user (ADR 0011, ADR 0016).
 
-*Order.* The quote comes first, then the stamp, the lead sentence, the other-level and question blocks, “What to check”, and the decision. The source line, the level matched and the evidence trail sit inside “More”.
+*Order.* The head comes first: “All labels”, “Next unchecked” with J, and the title. Then the quote, the stamp and the lead sentence, which sit together in one card. After the card come the other-level and question blocks, “What to check”, and the decision. The source line, the level matched and the evidence trail sit inside “More”.
 
 | Element | Copy | Written by |
 | --- | --- | --- |
+| Head | All labels (Escape does the same) · Next unchecked · J · the title below | code |
 | Title | Position [n] · [position name] | code |
 | Quote | § 5.4 · Charges and payment, then the clause's words with the exact words marked | code (the contract's own words) |
 | Lead, walk-away | This one is a walk-away. You'd wait 60 days to be paid; your limit is 30. | code |
@@ -358,11 +371,11 @@ Use the left column everywhere: screens, buttons, toasts, Help and the spec. Ter
 | Trail heading (inside More) | Evidence trail | code |
 | What to check | What to check: Does the quote say you're paid within 60 days of the invoice date? | code |
 | What to check, pencilled | One question, then the line from Spec 4.4: What to check: Does the quote cap your liability at the fees, with nothing that overrides it? · If you're not sure, choose Change it, then Unsure. | code |
-| Decision (walk-away) | Read 5.4 on the page. Is this right? · 1 Yes, it's a walk-away · Kept. Goes into the message. · 2 No, change the label… · Opens Change it. · 3 Doesn't matter for this deal · Kept. Left out of the message. | code |
+| Decision (walk-away) | Read 5.4 on the page. Is this right? · 1 Yes, it's a walk-away · Kept. Goes into the message. · 2 No, change the label… · Opens Change it. · 3 Doesn't matter for this deal · Kept. Left out of the message. · Keys 1, 2 and 3 act on the open detail only. Deciding ticks the row and opens the next unchecked label. | code |
 | Decision (unsure) | Read 3.2 on the page. What do you want to do? · 1 Ask about it · Kept. Goes into the message. · 2 Change the label… · Opens Change it. · 3 Doesn't matter for this deal · Kept. Left out of the message. (The answers are actions, not yes or no, because the question isn't yes or no.) | code |
 | Decision (others) | [Looks right] [Change it] · toast: Checked | code |
-| Panel links | Show on the page: scrolls the page to the clause beside the open panel, and the panel stays open · Rewrite this clause · Add this clause (Missing items) | code |
-| Note | Note · Add a note (optional) | user |
+| Detail links | Show on the page: scrolls the contract to the clause, and the column stays as it is · Rewrite this clause · Add this clause (Missing items) | code |
+| Note | Add a note (a link that reveals the field) · Note (field label) · Add a note (optional) (placeholder) | user |
 | More | More: the source line, the level matched, the longer explanation, then the evidence trail | code |
 
 **Dialogs**
@@ -537,6 +550,7 @@ The prototype has no page for this yet. It is reached from Help, and Spec 14.1 r
 | Heading | Third-party licences |
 | Intro | Clause Tracer is built on other people's libraries. Each one is listed here with its version and licence. |
 | Fixed sentence (ADR 0016) | Clause Tracer's licence does not limit your rights to pikepdf's source code under the MPL-2.0. · [Source for this exact version (opens in your browser)] |
+| Icons (added 14 Nov 2026) | Remix Icon 4.9.1 · This app uses icons from Remix Icon (https://remixicon.com), licensed under the Remix Icon License v1.0. · The full licence text, from `prototype/LICENSE-remixicon.txt`. The licence asks for no notice when icons sit inside an app. The line and the text are given anyway, as the other entries do. |
 | Way out | Back to Help |
 
 ## 5. Localisation notes
@@ -745,7 +759,7 @@ The owner answered the open items of 6.11 and decided eight more. The deck and t
 | 1 | The sample AI sentence under “Why it could be preferred” ended “this is your preferred level”. The scans forbid an AI sentence that names a label other than code's own, or states an acceptable limit. | “If the Master Agreement doesn't change the cap, the fees-paid cap in 11.1 stands.” The level is named only by the code-written heading. The Reason and the question on that panel are marked AI. |
 | 1 | The prototype panel showed the stamp first. Spec 14.1 and design-system section 6 say the quote first. | Quote first in every detail panel, then the stamp. The gap is marked fixed in design-system 8.3. |
 | 4 | The formal source line took the room of the quote and the question in the panel. | The panel shows the quote, the stamp, the lead sentence, “What to check” and the decision buttons. The source line moves inside “More”, with the level matched and the evidence trail. |
-| 5 | Warnings that the user had already read kept their full-width banner. | After the user clicks a banner's action (“Show me”, “Got it”), the hidden-text, unloaded-document and unedited-starter banners shrink to a chip in the summary bar that names the warning and reopens the banner or its dialog. The unloaded-document banner gets “What this means”, which opens its dialog, and the unedited-starter banner gets “Got it”. The playbook-changed banner stays until the review is re-run (“Re-run” is not a read action). The practice banner stays. Chip words: 1 piece of hidden text · Example playbook, unedited · [n] document not loaded. |
+| 5 | Warnings that the user had already read kept their full-width banner. | After the user clicks a banner's action (“Show me”, “Got it”), the hidden-text, unloaded-document and unedited-starter banners shrink to a chip in the summary bar that names the warning and reopens the banner or its dialog. The unloaded-document banner gets “What this means”, which opens its dialog, and the unedited-starter banner gets “Got it”. The playbook-changed banner stays until the review is re-run (“Re-run” is not a read action). The practice banner stays. Chip words: 1 piece of hidden text · Example playbook, unedited · [n] document not loaded. *Replaced 14 Nov 2026: see 6.13. The chips are now “Read first” rows, because the summary bar is gone.* |
 | 6 | A first review sent the user to an empty picker, then to the starter preview. | On the first review, when the user has no playbook, step 2 already has a copy of the starter selected, with “Copied from the starter…” and “Make the limits yours”. The user can still pick or copy another (`new-review.html?state=first-run`). |
 | 7 | “Show on the page” closed the panel, so the user lost the panel while looking at the clause. | It scrolls the page to the clause beside the open panel and leaves the panel open. |
 | 8 | “Test this rule on the open contract” and “Replay tips” matched no feature (6.11, open items). | Both removed, with nothing else that only they used. Neither was in the deck. |
@@ -761,3 +775,35 @@ The owner answered the open items of 6.11 and decided eight more. The deck and t
 
 - When a value on any position is unsure because its wording is vague, such as “reasonable revisions” on position 5, code writes the lead sentence and the AI writes only the two readings and the question to ask. Spec 6.1 step 10 is the home of this rule.
 
+### 6.13 Review screen rebuilt, 14 Nov 2026
+
+The owner called the review screen overwhelming and set one rule: the contract and one column, showing the list or one label's detail, never both, and nothing covering the contract (design-system principle 12). The prototype, section 4.7, Spec 14.1 and 14.2 and the design system were changed together.
+
+| # | Problem | Fix |
+| --- | --- | --- |
+| 1 | The summary bar, up to five banners or chips, a counter, three tabs and a detail dialog competed for the same screen. | The summary bar is removed. The Labels list is grouped by level (Walk-away, Unsure, Acceptable, Preferred). Each group heading is the stamp, the count and the `?`. “· 1 pencilled in” sits next to Unsure and “· 3 in Missing” next to Acceptable. A row has a pin, “§” and a description, with no stamp. |
+| 2 | Three read warnings took the top of the screen, and once read they shrank to chips in the summary bar. | **Replaces owner decision 5 of 6.12 (chips in the summary bar).** Only two banners remain, the practice review and the changed playbook, and never more than one. Hidden text, an unloaded document and an unedited starter are “Read first” rows at the top of the Labels list: short name, tick slot, chevron. Hidden text and the starter open in the column with their full text, their actions and “All labels”. The unloaded document opens its dialog. A row counts as read after “Show me” or “Got it”: it turns faint with a tick, and it still opens. Strings: Read first · 1 piece of hidden text · Master Agreement not loaded · Example playbook, unedited. |
+| 3 | The counter said “· 35 parts not covered”, which the Not covered tab already says. | The counter is one line: “2 of 11 positions checked”, with “Next unchecked” and J, and a 3 px bar. |
+| 4 | The detail was a dialog that covered the contract. | It is a column view, “Detail”, in place of the list. The contract stays visible, scrolls to the clause and outlines it. The head has “All labels” (Escape does the same), “Next unchecked” with J, and the title. The quote, its two links, the stamp and the lead sentence sit in one card. Keys 1, 2 and 3 act on the open detail only. Deciding ticks the row and opens the next unchecked label. When none is left, a toast says “Every position is checked” and the list returns. |
+| 5 | An empty note field showed on every detail. | “Add a note” is a link that reveals the field. |
+| 6 | The “Ready to check” and “Done” text in the bar repeated Home's status. | Removed from the review. The bar holds back, the title, Private mode, a “…” More actions menu and Output. The menu has Search commands (Ctrl+K), Suggestions, Models and cost ($0.39), Re-run… and Start over…. |
+| 7 | The page thumbnails took a column all the time. | They are hidden until the “Pages” button, at the left of the viewer bar, is pressed. The button and the thumbnails hide at 1100 px and below, and at 150% and 200% text. The thumbnail dots still use colour alone (design-system 8.3, open). |
+| 8 | Every clause carried a wash, so the page was loud. | At rest only walk-away and unsure clauses are washed. Preferred and acceptable show their pin, and get their wash when selected. |
+| 9 | The governing-law sentence was a tone strip (`.notice`) above the labels, so it competed with the warnings. | It is a small faint line (`.law-line`) at the bottom of the Labels list. The words are unchanged. |
+| — | The 1.6 px drawn icons were replaced by Remix Icon. | See design-system section 4 and ADR 0007's amendment of 14 Nov 2026. No icon name changed, except that `wand` is gone, because nothing used it and 4.1 forbids it. |
+
+Strings removed from the review: “1 document not loaded” (in the summary bar), “35 parts” and the counter's “· 35 parts not covered”, “Ready to check”, “Summary”, the unloaded-document banner sentence and its “What this means” button. The dialog keeps its own text (4.7, Dialogs).
+
+### 6.14 First launch rebuilt, 15 Nov 2026
+
+The owner accepted the new first launch. A thread was tried and removed the same day (owner, 15 Nov 2026). The deck, the prototype, the spec and the design system were changed together.
+
+| # | Problem | Fix |
+| --- | --- | --- |
+| 1 | First launch was a form beside a picture, with a second headline half, a sample link and a sample note. | The picture fills the window. One paper card lies on it, with a contract-style running head (“Clause Tracer”, “Runs on this computer”) and two views: Welcome and Key (section 4.1). The headline is one sentence with no italic half. |
+| 2 | The sample was a small link under the key form, and its note repeated what the practice banner says. | “Open the free sample contract” is the primary button of Welcome. “Check your own contract” opens Key. **Removed strings:** the italic headline half, “Or try a sample contract first, free”, and “One label in it is wrong on purpose. Find it, and see why real reviews need checking too.” on this page. The practice banner on the review still says it. |
+| 3 | The key intro was joined to the headline's lede. | The lede is one sentence. The OpenRouter-key sentence moved to the Key view, with the cost: “It runs on your computer with your own OpenRouter key, the account that pays for the AI. A typical review costs about $0.30 to $0.60.” |
+| 4 | A pasted key often has spaces or a line break around it. | The field removes them and says “Spaces removed.” **New string.** |
+| 5 | Two primary buttons in one card would compete. | Each view has one primary button: “Open the free sample contract” in Welcome, “Save key” in Key. |
+| 6 | The reading log showed finished and running lines alike (design-system 8.3). | Finished lines are ink and upright. The line of the step still running is graphite italic with a dashed underline. No words changed. Stopped lines keep the Unsure colour. |
+| 7 | The review had no sign on the page that a pin's label was done. | A pin is an outline until its label is decided, then filled. Its accessible name ends “, checked” or “, not checked”. The list row says the same to a screen reader, in hidden text. |

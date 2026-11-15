@@ -186,7 +186,7 @@ The values column gives the exact member names.
 | `CrossReference` | `source: Span, target: ClauseId \| None` | An unresolved target is kept, with no target |
 | `DefinedTerm` | `term: str, definition: Span, uses: tuple[Span, ...]` | Evidence trail, and the privacy allow-list (section 4.1) |
 | `Override` | `clause_id: ClauseId, target: ClauseId \| None, overrides_target: bool, evidence: Span` | Direction matters. No target means it joins every trail (Spec 4.5) |
-| `OutsideDocument` | `name: str, evidence: Span` | Feeds the unloaded-document banner and Rule 10 |
+| `OutsideDocument` | `name: str, evidence: Span` | Feeds the unloaded-document Read first row and Rule 10 |
 | `LinkMap` | `references: tuple[CrossReference, ...], terms: tuple[DefinedTerm, ...], overrides: tuple[Override, ...], outside_documents: tuple[OutsideDocument, ...], undefined_terms: tuple[Span, ...]` | What `links` returns. `cli` passes `terms` into `privacy` |
 | `Party` | `name: str, address: str \| None, yours: bool` | Typed party details: raw data, and the first privacy finder |
 | `PiiSuggestion` | `span: Span, kind: PlaceholderKind, source: PiiSource` | What the `PiiDetector` port and the code finders return |

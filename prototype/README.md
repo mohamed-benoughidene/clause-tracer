@@ -30,7 +30,8 @@ This prototype replaces the FigCraft one (`Prototyping/clause-tracer/build/`), w
 | --- | --- |
 | `styles.css` | Design tokens (light and dark) and every shared component. The source of truth for how the app looks. |
 | `app.js` | The shared behaviour: dialogs, menus, tabs, keys, toasts, theme, text size and the command palette (Ctrl+K). |
-| `icons.js` | The icon sprite. Use `<svg class="icon"><use href="#i-NAME"/></svg>`. |
+| `icons.js` | The icon sprite: 42 [Remix Icon](https://remixicon.com) 4.9.1 line icons and four hand-drawn ones (`approx`, `ring-dashed`, `thread`, `help`). Use `<svg class="icon"><use href="#i-NAME"/></svg>`. Take a new icon from Remix Icon, in its line style, and keep the four exceptions as they are ([design-system section 4](../docs/design-system.md#4-icons)). |
+| `LICENSE-remixicon.txt` | The Remix Icon License v1.0. It covers the Remix paths in `icons.js`. The rest of the repository is under `LICENSE`. |
 | `logo.svg`, `logo-dark.svg` | The logo for light and dark. Copies of the files in `assets/`. |
 | `hero-butterflies.webp` | The First launch picture. The full-size original is in `assets/`. |
 | `home.html` | **The reference page.** Copy its head, sidebar and script tags. |
@@ -39,13 +40,13 @@ This prototype replaces the FigCraft one (`Prototyping/clause-tracer/build/`), w
 
 | Page | Spec screen |
 | --- | --- |
-| `index.html` | 1 First launch |
+| `index.html` | 1 First launch: the picture, one paper card with two views (Welcome and Key, `?state=key`) |
 | `home.html` | 2 Home |
 | `new-review.html` | 3 New review |
 | `contract-check.html` | 4 Contract check |
 | `privacy-check.html` | 5 Privacy check |
 | `running.html` | 6 Review running |
-| `review.html` | 7 Review, with 8 Detail panel, 9 Change it, 10 Rewrite and 11 Suggestions as dialogs |
+| `review.html` | 7 Review: the contract and one column. 8 Detail replaces the list in that column. 9 Change it and 10 Rewrite are dialogs, and 11 Suggestions is a side panel |
 | `output.html` | 12 Output |
 | `playbooks.html` | 13 Playbooks |
 | `starter-preview.html` | 14 Starter preview |

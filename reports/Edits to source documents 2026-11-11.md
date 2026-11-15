@@ -141,7 +141,7 @@ A review of the design system, the copy deck and the prototype looked for fricti
 2. Five new scans on AI text, built in stage 1 (Spec 6.2, [ADR 0012](../docs/adr/0012-missing-unsure-and-evidence-failures.md) amendment, the stage 1 plan).
 3. A lint for fixed copy in the project check (testing strategy section 12).
 4. The source line moves under "More".
-5. Read banners shrink to chips.
+5. Read banners shrink to chips. *Replaced 14 Nov 2026: the summary bar went, and the read warnings became “Read first” rows ([`ux-copy.md`](../docs/ux-copy.md) section 6.13).*
 6. A first review preselects a copy of the starter.
 7. "Show on the page" keeps the panel open.
 8. Two stray controls are removed: "Test this rule" and "Replay tips".

@@ -45,7 +45,7 @@ ADRs 0005 to 0015 were all **accepted** by the project owner on 12 Nov 2026, and
 | --- | --- |
 | [0005](adr/0005-engine-runner-shapes-and-ports.md) | Keep a hand-written step runner, frozen dataclasses in `core`, `Protocol` ports and a small HTTP retry loop. No framework. |
 | [0006](adr/0006-encrypted-storage-and-secrets.md) | Store data in one encrypted SQLite file plus a key per review, so deleting a review destroys its key. |
-| [0007](adr/0007-document-reading-stack.md) | Read PDFs with one engine (`pypdfium2`), Word files with a hardened XML parser, and parse untrusted files in a limited child process. |
+| [0007](adr/0007-document-reading-stack.md) | Read PDFs with one engine (`pypdfium2`), Word files with a hardened XML parser, and parse untrusted files in a limited child process. A 14 Nov 2026 amendment records the Remix Icon licence. |
 | [0008](adr/0008-personal-data-detection-bundle.md) | Ship Presidio with a pinned config and the medium spaCy model, behind code-first finders. |
 | [0009](adr/0009-desktop-shell-protocol-and-packaging.md) | Use pywebview as the shell, run the engine as a child process over stdio, and package with PyInstaller and Inno Setup. |
 | [0010](adr/0010-starting-models.md) | Start with Claude Sonnet 5.5 and two comparison models. Keep Jev as an experiment. |

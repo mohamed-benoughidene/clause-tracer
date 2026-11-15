@@ -25,3 +25,9 @@ This reverses the earlier rule that the red thread and the walk-away label must 
 ## Amendment (2026-11-06): no thread lines on the review screen
 
 The prototype drew the red thread as lines on the review screen: one down the page margin between walk-away clauses, and one from the open clause to its note. On review, the lines read as unexplained connectors and confused the reader, so both are removed. Walk-aways are still marked by their red pins, stamps and highlights, and red still means only "a line you won't cross". The thread stays in the logo and the brand story, and as the labelled evidence trail inside a clause's note.
+
+## Amendment (2026-11-15): a thread was tried and removed
+
+A thread was tried on 15 Nov 2026, on first launch and in the review, and the owner removed it the same day. So the removal of 6 Nov 2026 stands: there are no thread lines on the review screen.
+
+One red remains outside the walk-away label and the logo: on first launch, the underline under "the exact words". It is the logo's own oxblood line, a brand use. Red still means walk-away on every label, pin, stamp and wash.

@@ -26,15 +26,16 @@ These are the rules everything else follows. The Source column names the decisio
 | --- | --- | --- |
 | 1 | **The careful friend.** The contract fills the screen, and the app speaks through notes in the margin, in plain words. It feels calm and personal, not like a dashboard. | Design direction, principle 1 |
 | 2 | **Paper and ink.** The app chrome is cool grey. Warm paper appears only on the contract sheet. Text and the primary button are ink. | Principle 5 |
-| 3 | **Red means one thing.** Oxblood `#A91207` means walk-away: "a line you won't cross". The logo's thread also uses it. Nothing else uses red, not even errors or warnings. | ADR 0003 |
+| 3 | **Red means one thing.** Oxblood `#A91207` means walk-away: "a line you won't cross". The logo's line also uses it. One brand use remains: on first launch the words “the exact words” carry an oxblood underline, the logo's line. Nothing else uses red, not even errors or warnings. | ADR 0003 and its amendment of 15 Nov 2026 |
 | 4 | **Labels are stamps.** Labels have square corners, a solid colour block with an icon, and the word in small capitals. They never look like the rounded tags or the status gauges. | ADR 0002 |
 | 5 | **Never colour alone.** Every label has a colour, an icon and a word, and every view must pass a greyscale check. | Spec 14.4 |
 | 6 | **Inked or pencilled.** A label from a clear rule match is inked (solid). A label the app judged from the wording is pencilled (dashed). | Design direction, action 2 |
-| 7 | **Two radii, one shadow.** The radii are 4 px and 8 px. Only the contract sheet casts a shadow in the page. Floating layers (dialogs, menus) are the exception. | Principle 6 |
+| 7 | **Two radii, one shadow.** The radii are 4 px and 8 px. Only the contract sheet casts a shadow in the page, and the first-launch card, which is a sheet of paper and uses the same shadow. Floating layers (dialogs, menus) are the exception. | Principle 6 |
 | 8 | **Group by space, then tone, then border.** A group sits on a slightly darker warm tone, with no border. | Principle 7 |
 | 9 | **Two voices.** IBM Plex Sans is used for the interface. IBM Plex Serif is used for headings, the friend's notes (in italic) and quotes from the contract. Typeset contract pages use Liberation Serif, the look of the document itself. | Principle 4 |
 | 10 | **Real content in every state.** Empty, error and loading states use real words and real numbers. There are no spinners and no fake delays; the reading log shows the actual work. | Principle 8 |
 | 11 | **Nothing machine-made.** Every element carries meaning. No effect is used for its own sake, and nothing borrows the look of other AI tools. Section 4.1 lists what is never used. | Owner, 14 Nov 2026; `ux-copy.md` section 1.1 |
+| 12 | **One thing at a time.** The review shows the contract and one column. The column shows the list or one label's detail, never both, and nothing covers the contract. | Owner, 14 Nov 2026 |
 
 ## 2. Brand and logo
 
@@ -61,7 +62,7 @@ The full reference is `docs/clause-tracer-logo-guide.pdf` and `docs/clause-trace
 
 **In the prototype.**
 
-- The sidebar shows the logo at 140 px wide. First launch shows it at `clamp(200px, 17vw, 240px)`.
+- The sidebar shows the logo at 140 px wide. First launch shows it at 190 px, on the paper card.
 - `.logo .on-light` and `.logo .on-dark` swap between `logo.svg` and `logo-dark.svg` when the theme changes.
 - The master files are in `assets/`.
 
@@ -73,7 +74,9 @@ The full reference is `docs/clause-tracer-logo-guide.pdf` and `docs/clause-trace
 - redraw the line or add a fifth eyespot;
 - repeat the mark as a pattern.
 
-**Imagery.** The only picture is the First launch hero (`prototype/hero-butterflies.webp`). It looks hand-made, has one red thing in it and no text.
+**Imagery.** The only picture is the First launch hero (`prototype/hero-butterflies.webp`). It fills the whole first-launch window, and one paper card lies on it (section 6, “First launch”). It looks hand-made, has one red thing in it and no text. Dark mode dims it with `brightness(.82)`.
+
+**The underline as the logo's line.** The logo is one unbroken oxblood line. On first launch the words “the exact words” are underlined in that oxblood (`.quoted`). This is a brand use of the logo's line, so it may be red (principle 3, ADR 0003). It is the only red outside the walk-away label and the logo.
 
 ## 3. Tokens
 
@@ -209,7 +212,7 @@ There are three levels, and only one of them is in-page.
 
 | Level | Shadow | Use |
 | --- | --- | --- |
-| Sheet | `0 1px 2px rgba(27,26,23,.08), 0 6px 18px rgba(27,26,23,.10)` | The contract page: the lifted page |
+| Sheet | `0 1px 2px rgba(27,26,23,.08), 0 6px 18px rgba(27,26,23,.10)` | The contract page, and the first-launch card: the lifted page |
 | Menu | `0 8px 28px rgba(27,26,23,.2)` | Popover menus |
 | Dialog | `0 12px 40px rgba(27,26,23,.25)` over `--bg-scrim` | Dialogs, side panels, the command palette |
 
@@ -217,31 +220,38 @@ Everything else is flat. Depth inside a page comes from tone (`--bg-tone`, `--bg
 
 ### 3.9 Motion
 
-There is almost no motion: only the toggle knob (`left .15s`). There are no spinners, because progress is shown by the reading log and the step gauges.
+There is almost no motion, and this is the complete list. There are no spinners, because progress is shown by the reading log and the step gauges.
 
-For the real build:
+| Motion | Time | Reduced motion |
+| --- | --- | --- |
+| The toggle knob | 150 ms (`left`) | Not yet handled (8.3) |
+| The chevron of the Settings model folds | 150 ms | Not yet handled (8.3) |
+| The arrow of the first-launch primary button moves 2 px on hover and focus | 150 ms ease-out | No movement |
 
-- use 150 ms ease-out for state changes and 200 ms for panels sliding in;
-- respect `prefers-reduced-motion`.
+For the real build, use 150 ms ease-out for state changes, and respect `prefers-reduced-motion` for every row.
 
 ### 3.10 Breakpoints
 
 | Width | Change |
 | --- | --- |
-| ≤ 1100 px | Review: the thumbnails hide, and the panes stack |
-| ≤ 900 px | First launch: the picture moves above the form |
+| ≤ 1100 px | Review: the Pages toggle and the thumbnails hide, and the contract and the column stack |
+| ≤ 900 px | First launch: the picture is a 220 px band above a full-width card, with no shadow and square corners |
 | ≤ 860 px | The sidebar goes above the content; two-column grids and flow side panels stack; tables scroll sideways |
-| Text size 150% or 200% (`html[data-text]`, set by `app.js`) | Same as ≤ 860 px, and the app bar, steps and button rows wrap; the window width is unchanged, so the media queries don't fire |
+| Text size 150% or 200% (`html[data-text]`, set by `app.js`) | Same as ≤ 860 px, and the app bar, steps and button rows wrap. First launch is laid out as at ≤ 900 px. In the review the Pages toggle and the thumbnails hide, the contract and the column stack, and the group headings, the progress line and the detail head wrap. The window width is unchanged, so the media queries don't fire |
 
 The design target is a laptop of about 1366 × 768 (Spec 14.4).
 
 ## 4. Icons
 
-**The drawn ink set** is in `prototype/icons.js`: a 16 px grid, stroked with `currentColor`, round caps and joins, and no fills or tiles. They are used as `<svg class="icon"><use href="#i-name"/></svg>`. `.icon` is 16 × 16, coloured `--text-2`, and inherits the colour inside buttons.
+**The icon set** is in `prototype/icons.js`. It is [Remix Icon](https://remixicon.com) 4.9.1 in its line style: a 24 px grid, filled paths in `currentColor`, with no tiles. It replaced the drawn ink set (1.6 px strokes on a 16 px grid) on 14 Nov 2026, at the owner's request (design direction, principle 9, has the earlier choice). Icons are used as `<svg class="icon"><use href="#i-name"/></svg>`. `.icon` is 16 × 16, coloured `--text-2`, and inherits the colour inside buttons.
 
-There are 47 icons in the sprite:
+Four icons are still hand-drawn, on the old 16 px stroked grid, because Remix has no match: `approx` (≈), `ring-dashed` and `thread`, and `help`, whose Remix version is too small at 12 px inside the Unsure stamp.
 
-`approx arrow-left arrow-right book check chev-down chev-left chev-right clock cloud-off copy doc dots download drag eye-off filter gear help info key link list lock mail merge minus paste pause pencil play plus refresh ring-dashed scissors search shield textsize thread trash undo unlock upload users wand warn x`
+There are 46 icons in the sprite, 42 from Remix and the 4 above:
+
+`approx arrow-left arrow-right book check chev-down chev-left chev-right clock cloud-off copy doc dots download drag eye-off filter gear help info key link list lock mail merge minus paste pause pencil play plus refresh ring-dashed scissors search shield textsize thread trash undo unlock upload users warn x`
+
+**Licence.** The Remix icons are under the Remix Icon License v1.0 (January 2026), not the repository's licence. The text is in `prototype/LICENSE-remixicon.txt`. A plain reading, not legal advice: it allows the icons inside a product that is sold, as functional parts, and forbids selling or redistributing them as an icon pack, or using one as a logo. [ADR 0007](adr/0007-document-reading-stack.md) records it, and the third-party licences page lists it ([ux-copy 4.18](ux-copy.md#418-third-party-licences-licenceshtml-not-built-yet)).
 
 **Rules.**
 
@@ -257,7 +267,7 @@ These make an app look machine-made, or look like every other AI tool. None is u
 | --- | --- |
 | A sparkle, a wand or a robot to mean AI | The pencilled stamp and the plain words “AI judgment” |
 | Gradients, glow and blur | Flat tone. The pencil hatch is the one pattern, and it means "pencilled" |
-| Emoji | An icon from the drawn set, next to a word |
+| Emoji | An icon from the set, next to a word |
 | Illustration beyond the First launch picture | Real content |
 | Skeleton loaders, shimmer and spinners | The reading log and the step gauges |
 | Typing or streaming effects on text | The finished text, shown at once |
@@ -310,15 +320,15 @@ This is the main signal in the app (ADR 0002). It is 22 px tall, with a 1.5 px b
 | `.preferred` `.acceptable` `.walk` `.unsure` `.grey` | The level |
 | `.pencilled` | The app judged it from the wording (AI judgment): a dashed graphite border (`--pencil`) and a hatched block. **Only pencilled stamps are dashed** (ADR 0002, amendment). |
 
-The stamp is always followed by a `?` button (`.q`) that opens the definition, at least in the summary bar and the detail panel.
+The stamp is always followed by a `?` button (`.q`) that opens the definition, at least in the heading of each group in the Labels list and in the detail.
 
 ### 5.3 Pin `.pin`
 
-An 18 × 18 square with a 1.5 px border in the label colour, a dark number (Sans 600 11) and a 3 px radius. It sits in the page margin beside a clause and opens that clause's detail panel. Pins are numbered down the page (1, 2, 3…), not by position: in the sample, position 10 has pin 7. The same number appears on the label's row in the Labels tab.
+An 18 × 18 square with a 1.5 px border in the label colour, a dark number (Sans 600 11) and a 3 px radius. A pin is **inked** (`.inked`) once the user has decided its label, and an outline until then. The fill is the label's fg shade, so the 11 px number keeps 4.5:1, and the number turns `--bg-surface`. A pencilled pin has a dashed `--pencil` outline, then a solid `--pencil` fill. This holds for the pin on the page and the pin on the list row. The pin's accessible name ends “, checked” or “, not checked”. It sits in the page margin beside a clause and opens that clause's detail in the right column. Pins are numbered down the page (1, 2, 3…), not by position: in the sample, position 10 has pin 7. The same number appears on the label's row in the Labels list.
 
 ### 5.4 Clause wash `.clause`
 
-This is a typeset clause on the sheet. It is a grid of pin, number and text (`22px 40px 1fr`). The level class tints `.text` with the label's bg colour, `.pencilled` adds a dashed graphite underline, and `.focus` adds a 2 px ink outline. Not-covered clauses are not drawn on the page (ADR 0001).
+This is a typeset clause on the sheet. It is a grid of pin, number and text (`22px 40px 1fr`). At rest only walk-away and unsure clauses carry their wash (the label's bg colour on `.text`). A preferred or acceptable clause shows only its pin, and gets its wash only when it is selected (`.focus`). `.pencilled` adds a dashed graphite underline on any level, and `.focus` adds a 2 px ink outline. The review scrolls the contract to the clause of the open detail and gives it `.focus`. Not-covered clauses are not drawn on the page (ADR 0001).
 
 ### 5.5 Contract sheet `.sheet`
 
@@ -362,7 +372,7 @@ A 16 px circle gauge plus a next step. It is never a pill and never red (Spec 14
 | Segmented | `.segmented` | A sunken track; the pressed item is raised on surface with weight 500 |
 | Tabs | `.tabs` | The same look as segmented, with `role="tab"` and `aria-selected` |
 | Option | `.option` | A tone row with a radio or checkbox; when checked it gets a 2 px ink outline |
-| Command search | `.search-commands` | A 32 px toolbar box that opens the palette, with a Ctrl+K hint |
+| Command search | `.search-commands` | A 32 px toolbar box that opens the palette, with a Ctrl+K hint. The review has no such box: its first row in the More actions menu, “Search commands”, opens the palette. |
 
 Validation messages sit below the field in Unsure colours, with an icon and words.
 
@@ -381,13 +391,13 @@ There are two warning levels and three types of message.
 
 | Component | Class | Use |
 | --- | --- | --- |
-| Banner | `.banner` | Top of the review only: hidden text, unloaded document, playbook changed, unedited starter, and the practice review. It uses a banner colour, sits full width below the app bar, and holds an icon, the words and one or two small actions. Once the user has read the hidden-text, unloaded-document or unedited-starter banner (by clicking its action: “Show me”, “What this means” then “Got it”, or “Got it”), it shrinks to a chip. The playbook-changed banner stays until the review is re-run, and the practice banner stays (decided 14 Nov 2026). |
-| Summary-bar chip | `.link` button in `.summary` | The shrunk banner: an icon and a short name of the warning (“1 piece of hidden text”, “Example playbook, unedited”). It reuses the look of the summary bar's “[n] document not loaded” button, so there is no new class. A click reopens the banner, or the dialog for the unloaded document. |
-| Notice | `.notice` | An inline tone strip with an icon and text. It is used for information such as the governing-law chip and auto-delete. |
+| Banner | `.banner` | Top of the review only, and never more than one at a time: the practice review and the playbook-changed warning. It uses a banner colour, sits full width below the app bar, and holds an icon, the words and one or two small actions. The practice banner stays. The playbook-changed banner stays until the review is re-run. The hidden-text, unloaded-document and unedited-starter warnings are not banners: they are “Read first” rows (next row). |
+| Read-first row | `.warn-row` | A row at the top of the Labels list, under a “Read first” heading. It holds an Unsure-colour icon, a short name (“1 piece of hidden text”, “Master Agreement not loaded”, “Example playbook, unedited”), a tick slot and a chevron. A click opens the hidden-text or starter warning in the column, with its full text, its actions and “All labels”, or opens the unloaded-document dialog. The row counts as read after its action (“Show me”, “Got it”): it turns faint and gets a tick, and it still opens. *Replaces the owner decision of 14 Nov 2026 that a read banner shrinks to a chip in the summary bar. Replaced 14 Nov 2026, the same day, when the summary bar went.* |
+| Notice | `.notice` | An inline tone strip with an icon and text. It is used for information such as auto-delete. |
 | Warning notice | `.notice.warn` | Unsure colours, for anything that blocks or needs a fix. *(Defined per page; see 8.1.)* |
 | Toast | `.toast` | An ink bar (8 px corners) at the bottom centre with short past-tense words: "Copied", "Saved", "Replaced. Check the marked words." It is triggered by `data-toast`. |
-| Reading log | `.log` (running) | Mono timestamp plus a Serif 15 line. A stopped line uses Unsure fg. The direction's "pencilled while running, inked when done" isn't built yet (see 8.3). |
-| Progress bars | `.bars` (running), `.progress` (review) | 3–4 px tall: ink when done, Unsure when stopped |
+| Reading log | `.log` (running) | Mono timestamp plus a Serif 15 line. A finished line is `--text` and upright. The line of the step still running is `--pencil` italic with a 1 px dashed underline (`.running`, `aria-current="step"`). A stopped line keeps Unsure fg. Nothing animates. |
+| Progress bars | `.bars` (running), `.progress` (review) | 3–4 px tall: ink when done, Unsure when stopped. The review's bar is 3 px, under one line of text. |
 
 ### 5.12 Overlays
 
@@ -395,7 +405,7 @@ There are two warning levels and three types of message.
 | --- | --- | --- |
 | Dialog | `dialog` | A surface background, `--r-lg`, the dialog shadow, at most 560 px wide. It has a `.dialog-body` (24 px, gap 14) and a `.dialog-foot` (right-aligned, gap 8). |
 | Wide dialog | `dialog.wide` | At most 860 px (rewrite, before and after) |
-| Side panel | `dialog.panel` | Full height on the right, at most 480 px wide, square corners. Used for the detail panel and Suggestions. |
+| Side panel | `dialog.panel` | Full height on the right, at most 480 px wide, square corners. Used for Suggestions. The label detail is not an overlay: it sits in the review's right column (5.14). |
 | Command palette | `dialog.palette` | 10vh from the top; a 48 px input, grouped results, and a shortcut on every row |
 | Menu | `.menu` | A popover of at least 200 px, `--r-lg`, the menu shadow, 8 × 10 items |
 
@@ -405,7 +415,7 @@ There are two warning levels and three types of message.
 | --- | --- | --- |
 | Sidebar | `.sidebar` | 232 px, sticky, on surface; ends in `.sidebar-foot` (privacy mode, credit) |
 | Nav item | `.nav a` | A 16 px icon and the label. When current: sunken, 500, and a 3 px ink marker on the right. **The marker is never red.** |
-| App bar | `.appbar` | 56 px, for flow screens: back, the title with a small subtitle, steps, search, actions |
+| App bar | `.appbar` | 56 px, for flow screens: back, the title with a small subtitle, steps, search, actions. In the review: back, the title and subtitle, a spacer, Private mode, a “…” More actions menu (`.menu`) and Output. |
 | Steps | `.steps` | Numbered 18 px rings joined by 22 px hairlines. The current step is an ink disc with white text. |
 | Flow footer | `.flow-foot` | Sticky at the bottom with the primary action ("Looks right, continue", "Send for review") |
 | Page head | `.page-head` | The title and a muted line on the left, actions on the right |
@@ -414,9 +424,13 @@ There are two warning levels and three types of message.
 
 | Component | Class | Notes |
 | --- | --- | --- |
-| Summary bar | `.summary` | A count for each level: a stamp, a bold number and a `?` |
-| Thumbnails | `.thumbs` | A 96 px column of page thumbnails, with label dots |
-| Label list | `.label-list` | 40 px rows: a pin, a mono §, and a description that truncates |
+| Pages toggle | `.pages-toggle` | A ghost button at the left of the viewer bar, with `aria-pressed`. It shows or hides the thumbnails. It is hidden at ≤ 1100 px and at 150% and 200% text. |
+| Thumbnails | `.thumbs` | A 96 px column of page thumbnails, with label dots. Hidden until the Pages toggle is pressed. The dots still use colour alone (8.3). |
+| Progress block | `.progress-block` | One line, “2 of 11 positions checked”, with “Next unchecked” and J on the right, and a 3 px ink bar under it |
+| Group heading | `.group-head` | The stamp, the count of positions and the `?`. The Labels list is grouped by level: Walk-away, Unsure, Acceptable, Preferred. “· 1 pencilled in” sits next to Unsure and “· 3 in Missing” next to Acceptable. |
+| Label list | `.label-list` | 40 px rows: a pin, a mono §, and a description that truncates. A row has no stamp, because its group heading has it. A checked row is faint, with a tick. The column truncates a long row with an ellipsis and never widens, so the tabs stay in view. |
+| Governing-law line | `.law-line` | A small faint line at the bottom of the Labels list: an icon and one sentence. The two-law and no-law versions use the Unsure icon colour. |
+| Detail | `.detail`, `.detail-head`, `.detail-card` | One label's detail, in the right column in place of the list. The head (`.detail-head`) is sticky: “All labels” (Escape does the same), “Next unchecked” and J, then the title. `.detail-card` is a tone card (`--bg-tone`, `--r-lg`, padding 16) holding the quote, its two links, the stamp and the lead sentence. |
 | Not-covered tick | `.label-list li.grey-confirm` | The tone row at the top of Not covered: "I've read the 35 not-covered parts" |
 | Evidence trail | `.trail` | A 12 px ring "knot" plus a step: the thread, shown as a list |
 | Decide buttons | `.decide` | Full-width option buttons, each with a `kbd` key hint |
@@ -429,19 +443,23 @@ There are two warning levels and three types of message.
 
 **Flow screen.** New review, Contract check, Privacy check and Running use the same layout: an app bar with steps, then the work area on the left (`minmax(0,1fr)`), then a side margin of 340–400 px on surface with a left hairline, then a sticky flow footer.
 
-**The margin.** The signature layout pattern is the margin beside the page (design direction, principle 3). The friend's notes, the reading log, the replacement list and the detail panel all sit in a right-hand surface column next to the paper. New screens should use it rather than inventing a new one.
+**The margin.** The signature layout pattern is the margin beside the page (design direction, principle 3). The friend's notes, the reading log, the replacement list and the review's list and detail all sit in a right-hand surface column next to the paper. New screens should use it rather than inventing a new one.
 
-**Detail panel order** (Spec 14.1, screen 8):
+**The review column** (principle 12). The review is the contract and one 400 px column. The column shows the Labels list (with Not covered and Missing as tabs), or one label's detail, or one “Read first” warning, and never two of them. Opening a label swaps the list for its detail. The contract stays visible and scrolls to the clause, which gets the focus outline. “All labels” or Escape brings the list back. Deciding on a label ticks its row and opens the next unchecked one. When none is left, a toast says “Every position is checked” and the list returns. Dialogs and the Suggestions side panel still open over the page. Nothing else covers the contract.
 
-1. the quote, with the exact words highlighted, and "Show on the page" (scrolls the page, the panel stays open) and "Rewrite this clause";
+**First launch** (Spec 14.1, screen 1). The picture fills the window. One paper card, about 440 px wide (`--bg-paper`, `--r-lg`, the sheet shadow), lies on it at the left. Its running head reads like a contract page: “Clause Tracer” on the left, “Runs on this computer” on the right, in capitals. The card shows one view at a time. **Welcome** has the logo, the headline, one line under it, the primary button (“Open the free sample contract”), the secondary button (“Check your own contract”) and the legal line. **Key** has “Back”, the heading, a short paragraph, the key field, the primary button of that view (“Save key”), “Skip for now”, the key lines, the folded four steps and the legal line. `?state=key` and the checking, key-ok and key-error states open the key view. Below 900 px, and at 150% and 200% text, the picture is a 220 px band above a full-width card.
+
+**Detail order** (Spec 14.1, screen 8). The head comes first: "All labels", "Next unchecked" with J, and the title. Then:
+
+1. the quote, with the exact words highlighted, and "Show on the page" (scrolls the contract, the column stays as it is) and "Rewrite this clause";
 2. the stamp and `?`;
-3. the lead sentence (the why, in one or two sentences);
+3. the lead sentence (the why, in one or two sentences). Items 1 to 3 sit together in one tone card;
 4. "why it could be the other level", the readings and the question to ask (unsure and AI judgment only), with the AI wording line under any AI-written block;
 5. what to check;
-6. the decision buttons ("Looks right", "Change it", or the three answers), then the note;
+6. the decision buttons ("Looks right", "Change it", or the three answers; keys 1, 2 and 3 act on the open detail only), then an "Add a note" link that reveals the note field;
 7. "More": the source line, the level matched, the longer explanation and the evidence trail.
 
-The source line moved into "More" on 14 Nov 2026 (owner decision 4).
+The source line moved into "More" on 14 Nov 2026 (owner decision 4). The detail moved from a dialog into the column the same day.
 
 **Empty state.** Say what it is, why it's empty and how to start, with real words. For example: "Check a contract against your playbook. It takes about 3 minutes…". Use one primary button and links for the rest.
 
@@ -449,7 +467,7 @@ The source line moved into "More" on 14 Nov 2026 (owner decision 4).
 
 **Confirm deletion.** The title names the thing ("Delete 3 reviews?"). The body lists what goes and says it can't be undone. The button repeats the verb.
 
-**Command palette.** Ctrl+K, or the "Search commands" box, opens it. It opens on the common commands, grouped, with a shortcut on each. Single keys (`data-key`, for example J for "Next unchecked") work only outside inputs.
+**Command palette.** Ctrl+K, or the "Search commands" box (in the review, the first row of the More actions menu), opens it. It opens on the common commands, grouped, with a shortcut on each. Single keys (`data-key`, for example J for "Next unchecked") work only outside inputs.
 
 **Links that leave the app** end with "(opens in your browser)".
 
@@ -473,6 +491,7 @@ The source line moved into "More" on 14 Nov 2026 (owner decision 4).
 - Every control can be reached with Tab.
 - Focus is a 2 px ink outline.
 - Dialogs use the native `<dialog>`, so focus is trapped and Escape closes them.
+- In the review, opening a detail moves focus to its title. Escape, or "All labels", returns to the list and puts focus back on the row it came from. Keys 1, 2 and 3 answer the open detail, and J opens the next unchecked label.
 - Tabs use `role="tablist"` with `aria-controls`.
 - Segmented buttons use `aria-pressed`.
 - Nav uses `aria-current="page"`.
@@ -488,7 +507,7 @@ The source line moved into "More" on 14 Nov 2026 (owner decision 4).
 
 ## 8. Audit: where the prototype drifts
 
-**Summary.** 17 screens, about 60 shared classes and 47 icons. 25 issues found, 9 fixed (counted 14 Nov 2026; 14 found and 4 fixed on 7 Nov 2026). The tokens are well used in shared CSS. Most drift sits in page-local `<style>` blocks and inline styles.
+**Summary.** 17 screens, about 60 shared classes and 46 icons. 28 issues found, 11 fixed (counted 14 Nov 2026; 14 found and 4 fixed on 7 Nov 2026). The tokens are well used in shared CSS. Most drift sits in page-local `<style>` blocks and inline styles.
 
 ### 8.1 Naming and duplication
 
@@ -523,12 +542,15 @@ The source line moved into "More" on 14 Nov 2026 (owner decision 4).
 | Input and button borders are 1.6:1 against surface, below the 3:1 needed for a control's edge (WCAG 1.4.11) | Spec 14.4 (AA) | Darken `--line-strong` to about `#8C9097` light / `#6A6E75` dark, or check that the fill difference carries the edge |
 | ✅ **Fixed.** Icon stroke is 1.6 px, but the direction said 1.75 px | Design direction, principle 9 | 1.6 accepted; the direction now says 1.6 |
 | ✅ **Fixed.** The direction said "Inter" in action 7, but principle 4 later dropped Inter for Plex | design-direction.md | Action 7 now points to Plex |
-| The reading log isn't pencilled while running and inked when done | Design direction, principle 8 | Style running lines in `--pencil` and finished lines in `--text` |
+| ✅ **Fixed 15 Nov 2026.** The reading log isn't pencilled while running and inked when done | Design direction, principle 8 | Finished lines are `--text`, the running line is `--pencil` italic with a dashed underline |
 | ✅ **Fixed.** The rewrite diff showed deleted words in walk-away red, which is decoration | ADR 0003 | Struck through in `--text-2` |
-| 72 inline `style=` attributes in review.html (mostly `gap` and contract-table cells) | review.html | Fine for a prototype; don't carry them into the build |
-| Page-thumbnail label dots in the review use colour alone | Rule 5, Spec 14.4 (found 14 Nov 2026) | Add the label's icon or a count beside each dot |
+| 106 inline `style=` attributes in review.html (mostly `gap` and contract-table cells; counted 14 Nov 2026) | review.html | Fine for a prototype; don't carry them into the build |
+| Page-thumbnail label dots in the review use colour alone. The thumbnails are now hidden by default, behind the Pages toggle, but this is not fixed. | Rule 5, Spec 14.4 (found 14 Nov 2026) | Add the label's icon or a count beside each dot |
 | ✅ **Fixed 14 Nov 2026.** At 200% text size, 11 of 15 pages scrolled sideways in a 1366 px window (measured by script) | Spec 14.4, section 7 "Text size" (found 14 Nov 2026) | Owner decided 14 Nov 2026: it must fit. At 150% and 200% `styles.css` stacks the sidebar and columns, lets rows wrap and scrolls tables inside their own box. No page or state scrolls sideways at 100%, 125%, 150% or 200% |
 | ✅ **Fixed 14 Nov 2026.** The detail panel's order differed: the prototype showed the stamp first, section 6 and Spec 14.1 say the quote first | Section 6, Spec 14.1 screen 8 (found 14 Nov 2026) | Quote first in every panel of the prototype, then the stamp. The source line moved into "More" the same day. |
+| ✅ **Fixed 14 Nov 2026.** The review's right column showed a summary bar, a stack of banners, a list and a detail dialog at once. The owner called it overwhelming. | Principle 12 (owner, 14 Nov 2026) | The contract and one column. The column shows the list or one label's detail. The summary bar and the read-banner chips are gone, the three read warnings are “Read first” rows, and the thumbnails are hidden by default. |
+| The toggle knob and the Settings fold chevron move for 150 ms and don't check `prefers-reduced-motion` | Section 3.9 (found 15 Nov 2026) | Wrap both transitions in `@media (prefers-reduced-motion: no-preference)` |
+| Four icons are hand-drawn strokes on a 16 px grid (`approx`, `ring-dashed`, `thread`, `help`) among 42 filled Remix icons on a 24 px grid, so their weight differs | Section 4 (found 14 Nov 2026) | Redraw them as filled 24 px paths, or find Remix matches that stay readable at 12 px in a stamp |
 
 ### 8.4 Component completeness
 

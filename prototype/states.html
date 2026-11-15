@@ -68,7 +68,8 @@
       <section class="card">
         <h2 class="h2">1 First launch</h2>
         <ul>
-          <li><a href="index.html">Default</a><span>Not legal advice, key guide, Save key, Skip for now, the sample contract.</span></li>
+          <li><a href="index.html">Default</a><span>Welcome: the sample contract, Check your own contract, Not legal advice.</span></li>
+          <li><a href="index.html?state=key">Key view</a><span>“Check your own contract” opens it. “Back” returns to Welcome.</span></li>
           <li><a href="index.html?state=checking">Checking key</a></li>
           <li><a href="index.html?state=key-ok">Key works</a></li>
           <li><a href="index.html?state=key-error">Key error</a><span>Plain fix, no red.</span></li>
@@ -133,12 +134,13 @@
       <section class="card">
         <h2 class="h2">7 Review</h2>
         <ul>
-          <li><a href="review.html">Default</a><span>Hidden text and unloaded-document banners, governing law, counter, Next unchecked (J).</span></li>
+          <li><a href="review.html">Default</a><span>The contract and one column: counter, Next unchecked (J), Read first (hidden text, unloaded document), labels grouped by level, governing law at the end.</span></li>
           <li><a href="review.html?state=playbook-changed">Playbook changed: Re-run</a></li>
           <li><a href="review.html?state=unsure-heavy">More than half unsure: guidance</a></li>
           <li><a href="review.html?state=unedited-starter">Unedited starter playbook</a></li>
-          <li><a href="review.html?state=banners-read">Banners read: hidden text, unloaded document</a><span>Each banner has shrunk to a chip in the summary bar. Click “Show me” or “Got it” in the default review to see it happen.</span></li>
-          <li><a href="review.html?state=unedited-starter-read">Banner read: unedited starter</a><span>The chip “Example playbook, unedited” reopens the banner.</span></li>
+          <li><a href="review.html?state=banners-read">Warnings read: hidden text, unloaded document</a><span>Each row in Read first is faint, with a tick. Click “Show me” or “Got it” in the default review to see it happen.</span></li>
+          <li><a href="review.html?state=unedited-starter-read">Warning read: unedited starter</a><span>The row “Example playbook, unedited” is faint, with a tick, and still opens the warning.</span></li>
+          <li><a href="review.html#warn-hidden">Read first: hidden text, opened in the column</a> · <a href="review.html?state=unedited-starter#warn-starter">unedited starter, opened</a></li>
           <li><a href="review.html?state=two-law">Two governing-law clauses</a></li>
           <li><a href="review.html?state=no-law">No governing-law clause</a></li>
           <li><a href="review.html?state=mixed">Privacy badge “Mixed”</a></li>
@@ -148,7 +150,7 @@
       </section>
 
       <section class="card">
-        <h2 class="h2">8 Detail panel · 9 Change it</h2>
+        <h2 class="h2">8 Detail, in the column · 9 Change it</h2>
         <ul>
           <li><a href="review.html#detail-1">Walk-away with evidence trail</a></li>
           <li><a href="review.html#detail-4">Unsure: the quote couldn't be confirmed</a></li>
