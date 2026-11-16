@@ -156,6 +156,7 @@ from clause_tracer.core.ports import (
     ReviewStore,
     SecretStore,
 )
+from clause_tracer.core.quote_fold import fold_for_quote_check
 from clause_tracer.core.request_hash import request_sha256, to_plain
 from clause_tracer.core.results import (
     CallFailed,
@@ -327,6 +328,7 @@ __all__: list[str] = [
     "convert_to_unit",
     "due_at",
     "evidence_reasons",
+    "fold_for_quote_check",
     "in_warning_window",
     "is_better",
     "is_due",
