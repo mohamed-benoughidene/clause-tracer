@@ -1,10 +1,10 @@
 # core
 
 ## Purpose
-Pure rules: playbook and review models and label picking, with no files, network, clock or AI.
+Pure rules and shapes: every shape, port, error and fake; label picking, playbook checks, output scans, the last check before drawing, auto-delete dates and the cost estimate. No files, network, clock or AI: only `__main__` reads a file (Constitution S1, S2).
 
 ## Spec
-`docs/spec.md` section 5, and section 6.1 step 8 (pick labels).
+`docs/spec.md` sections 4.1 (playbook checks), 5 (labelling rules), 6.1 step 8 (pick labels), 6.2 (rules for every AI step) and 9 (cost and auto-delete).
 
 ## Ids and enums
 Imported from `clause_tracer.core`, never from a file inside the package (B2).
@@ -211,8 +211,23 @@ The fakes live in `fakes.py`, use only the standard library and `core`, and are 
 | `in_warning_window(last_change: datetime, days: int, now: datetime, protected_until: datetime \| None = None) -> bool` | `due_at(...) - WARNING_WINDOW <= now < due_at(...)` | The last three days before the due date; closed at the start, open at the end |
 | `protected_until_after_lowering(lowered_at: datetime) -> datetime` | `lowered_at + LOWERING_GRACE` | The end of the three-day grace held after the setting was lowered. `WARNING_WINDOW` and `LOWERING_GRACE` are both `timedelta(days=3)` |
 
+## Owner tables
+The expected answers of the acceptance tests live in `tests/tables/`. Only the owner edits them (Constitution T11): no commit may change code and an owner table together, and `scripts/check_owner_tables.py` checks this. Each file starts with the header line, then a `# Format:` line naming its owner task.
+
+| File | Columns | Owner task |
+| --- | --- | --- |
+| `label_rules.toml` | `id`, `rule`, `note` (optional), one input in the sample format (`position`, `match`, optional `values`, `judged`, `clauses_to_read`, `outside_documents`), then the expected `level`, `reasons`, `written_by` | S1-M3-T6 |
+| `units.toml` | `id`, `number`, `unit` (absent for none), `target`, `expected` (a fraction string or a reason code value) | S1-M3-T7 |
+| `spec_14_5.toml` | `id`, `position`, `level`, `reasons`, `written_by`: one row per starter position | S1-M3-T8 |
+| `playbook_checks.toml` | `id`, `positions` (position tables in the sample format), `problems` (`{ position, code }` tables, empty when the playbook passes) | S1-M3-T9 |
+| `auto_delete.toml` | `id`, `last_change`, `now`, `days`, `protected_until` (optional), then the expected `due_at`, `due`, `warning` | S1-M4-T5 |
+| `scans.toml` | `[lists]` (the eight word lists), `[caps]` (one length cap per `TextSlot`), and `[[case]]` rows: `id`, `text`, `slot`, `label`, `allowed_numbers`, `acceptable_limits`, `known_placeholders`, `defined_roles`, `personal_data`, `clause_numbers`, `quote`, `source_text`, `instruction_given`, then the expected `findings` | S1-M5-T1 |
+| `cost_estimate.toml` | `id`, `positions`, `words_positions`, `clauses`, `contract_tokens`, `input_per_million`, `cached_input_per_million`, `output_per_million`, then the expected `calls`, `low_usd`, `high_usd` | S1-M5-T9 |
+
 ## Depends on
 Nothing. It imports no other clause_tracer module.
 
 ## Run alone
-`.venv/bin/uv run python -m clause_tracer.core`
+`.venv/bin/uv run python -m clause_tracer.core [--input <sample.toml>]`
+
+Labels the Spec 14.5 sample (`samples/spec-14-5.toml`), or the sample file given with `--input`, and prints one line per position, in playbook order: position id, topic, level, the reasons joined by `,` (or `-` when none) and the written-by value, separated by tabs. It exits 0. A file that cannot be read, or is not a valid sample, prints `clause_tracer.core: …` to standard error and exits 3 ("input file", system design 6.2).

@@ -104,3 +104,19 @@ def test_enums_are_str_enums() -> None:
             assert member.value == member.name.lower(), (
                 f"{members.__name__}.{member.name} has value {member.value!r}"
             )
+
+
+def test_every_public_name_is_in_the_readme() -> None:
+    import re
+    from pathlib import Path
+
+    import clause_tracer.core
+
+    readme = Path(clause_tracer.core.__file__).parent / "README.md"
+    spans = re.findall(r"`([^`\n]+)`", readme.read_text(encoding="utf-8"))
+    missing = [
+        name
+        for name in clause_tracer.core.__all__
+        if not any(re.search(rf"\b{re.escape(name)}\b", span) for span in spans)
+    ]
+    assert missing == []
