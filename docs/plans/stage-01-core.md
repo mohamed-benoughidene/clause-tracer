@@ -323,7 +323,7 @@ Every task in M2 extends one shared test, `test_fields_match_system_design` in `
   - **Rules:** [System design 3.4](../system-design.md#34-core-shapes-for-stage-1) (14 Nov 2026), I3, I4, S3.
   - **Depends on:** S1-M2-T5.
 
-- [ ] **S1-M2-T8: Remove the coverage omit again**
+- [x] **S1-M2-T8: Remove the coverage omit again**
   - **Build:** In `scripts/check.sh`, change the coverage report line back to what S1-M1-T3 wrote, so the 95% floor covers the test files of `core` again as the plan first had it:
     `run coverage report --include='src/clause_tracer/core/*' --fail-under=95`.
     This undoes S1-M1-T9, as the owner asked on 16 Nov 2026. Run it only once the shapes of S1-M2-T1 to S1-M2-T7 exist and every file in `src/clause_tracer/core/tests/` is fully executed by its own run, so the floor holds with the tests measured too. If the floor then still fails, stop and tell the owner; do not lower the floor, do not re-add the omit on your own.
@@ -911,6 +911,7 @@ Planning found questions 1 to 17. The owner answered all of them on 14 Nov 2026;
 | 16 Nov 2026 | The coverage floor in `scripts/check.sh` gained `--omit='src/clause_tracer/core/tests/*'`, so the 95% floor measures `core`'s shipped code, not its test files. Reason: the floor as written also measured the test files, and the architecture tests of S1-M1-T6 cannot fully execute until the first shapes of S1-M2-T1 exist, so `check.sh` failed although every test passed. The owner chose this on 16 Nov 2026 and asked to remove the omit again once milestone 2 is implemented, so the floor covers the test files as the plan first wrote it. To do after S1-M2-T1's shapes make the tests fully covered. | S1-M1-T6, testing strategy 11 |
 | 16 Nov 2026 | Milestone 1 ticked (tasks S1-M1-T1 to S1-M1-T8, plus section 4's checks), and the status set to In progress. Added two tasks the owner asked for: S1-M1-T9 records that the coverage omit was made, and S1-M2-T8 removes it again once milestone 2's shapes exist. | Plans README ("Status", "When the plan is wrong": add a task) |
 | 16 Nov 2026 | S1-M2-T6 hand check: `make_request(inputs={"a": 1})` does **not** fail mypy, as the plan expected. The plan's own signature `make_request(**changes: object)` routes every value through untyped keyword arguments, so the call site is not checked. The type seam itself holds: constructing `AiRequest(...)` directly with `inputs={"a": 1}` does fail mypy (`arg-type`). Strict mypy does flag the `dataclasses.replace(request, **changes)` inside the helper (`arg-type`, six errors), so that line carries one `# type: ignore[arg-type]` with a comment. No code change beyond that; the scratch file was not committed. | S1-M2-T6, plans README ("When the plan is wrong") |
+| 16 Nov 2026 | The coverage omit is gone: S1-M2-T8 changed the coverage report line in `scripts/check.sh` back to `run coverage report --include='src/clause_tracer/core/*' --fail-under=95`, as S1-M1-T9 promised once milestone 2's shapes existed. The 95% floor now covers the test files of `core` again, as the plan first had it; `core` measures 99% with them included. | S1-M2-T8 |
 
 ## 9. Notes for the next stage
 
