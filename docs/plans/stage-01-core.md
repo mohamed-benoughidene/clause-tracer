@@ -362,7 +362,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** T11.
   - **Depends on:** S1-M3-T1, S1-M1-T5.
 
-- [ ] **S1-M3-T3: Read positions and playbooks from the sample format**
+- [x] **S1-M3-T3: Read positions and playbooks from the sample format**
   - **Build:** In `src/clause_tracer/core/sample_input.py` (not exported; only `__main__` and tests use it). Every error is `ValueError(f"{where}: …")` naming the key.
     - `def parse_position(data: Mapping[str, object], where: str) -> Position`. Keys: `id` (str, required), `topic` (str, required), `type` (`"number"`, `"yes_no"` or `"words"`, required), `why_note` (str, optional, default `None`). For `number`: `unit` (a `Unit` value), `direction` (a `Direction` value), `preferred_limit` and `acceptable_limit` (a TOML integer or a string `Decimal` parses), `missing_level` (a `Level` value), all required. For `yes_no`: `question`, `yes_level`, `no_level` required; `missing_level` optional, defaulting to the `no_level`. For `words`: `preferred`, `acceptable`, `walk_away` (str) and `missing_level`, all required. Any other key raises. A TOML float raises.
     - `def parse_playbook(data: Mapping[str, object], *, schema_version: int) -> Playbook`. Keys: `id`, `name`, `side` (str), `starter` (bool), `positions` (a list of position tables, read with `parse_position(..., where=f"position {i}")`). `customer_id` is `None`.
