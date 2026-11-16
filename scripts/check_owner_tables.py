@@ -69,6 +69,15 @@ def commit_message(repo: Path, sha: str) -> str:
     return _git(repo, "log", "-1", "--format=%B", sha)
 
 
+def _report(change: str, paths: Iterable[str]) -> None:
+    """Print one failing change and its owner tables to standard error."""
+    tables = sorted(p for p in paths if is_owner_table(p))
+    print(
+        f"owner-table guard: {change} edits code and an owner table: {', '.join(tables)}",
+        file=sys.stderr,
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     """Run the guard on the working tree, or on every commit since a base."""
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -82,12 +91,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.commits is None:
         paths = working_tree_paths(repo)
         if change_fails(paths):
-            tables = sorted(p for p in paths if is_owner_table(p))
-            print(
-                "owner-table guard: working tree edits code and an owner table: "
-                f"{', '.join(tables)}",
-                file=sys.stderr,
-            )
+            _report("working tree", paths)
             return 1
         return 0
     failed = False
@@ -96,11 +100,7 @@ def main(argv: list[str] | None = None) -> int:
             continue
         paths = commit_paths(repo, sha)
         if change_fails(paths):
-            tables = sorted(p for p in paths if is_owner_table(p))
-            print(
-                f"owner-table guard: {sha[:7]} edits code and an owner table: {', '.join(tables)}",
-                file=sys.stderr,
-            )
+            _report(sha[:7], paths)
             failed = True
     return 1 if failed else 0
 
