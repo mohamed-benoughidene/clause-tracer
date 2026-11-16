@@ -184,7 +184,12 @@ from clause_tracer.core.scan_rules import (
     LAW_WORDS,
     LENGTH_CAPS,
 )
-from clause_tracer.core.scans import contains_phrase, scan_text
+from clause_tracer.core.scans import (
+    contains_phrase,
+    mask_abbreviations,
+    scan_style,
+    scan_text,
+)
 from clause_tracer.core.settings import Settings
 from clause_tracer.core.units import convert_to_unit
 from clause_tracer.core.wording import Span, Wording
@@ -291,6 +296,7 @@ __all__: list[str] = [
     "ReviewId",
     "ReviewStatus",
     "ReviewStore",
+    "scan_style",
     "scan_text",
     "ScanContext",
     "ScanFinding",
@@ -336,6 +342,7 @@ __all__: list[str] = [
     "label_position",
     "level_for_limits",
     "level_rank",
+    "mask_abbreviations",
     "number_verdicts",
     "protected_until_after_lowering",
     "request_sha256",

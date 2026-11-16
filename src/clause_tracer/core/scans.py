@@ -12,10 +12,15 @@ import re
 from collections.abc import Mapping
 from types import MappingProxyType
 
+from clause_tracer.core.checks import ScanContext
 from clause_tracer.core.enums import Level, ScanFinding, TextSlot
 from clause_tracer.core.scan_rules import (
+    ABBREVIATIONS,
     ADVICE_PHRASES,
     CONTACT_WORDS,
+    EVALUATIVE_WORDS,
+    FILLER_PHRASES,
+    FIRST_PERSON_WORDS,
     INJECTION_PHRASES,
     LAW_WORDS,
     LENGTH_CAPS,
@@ -41,6 +46,22 @@ _WORD_LIST_SCANS: tuple[tuple[ScanFinding, tuple[str, ...]], ...] = (
     (ScanFinding.ADVICE, ADVICE_PHRASES),
     (ScanFinding.INJECTION_TELL, INJECTION_PHRASES),
     (ScanFinding.CONTACT_WORD, CONTACT_WORDS),
+)
+
+# The user speaks in the message and the question to ask, so the
+# first-person scan leaves both out (question 18a).
+FIRST_PERSON_SLOTS: frozenset[TextSlot] = frozenset(
+    {TextSlot.REASON, TextSlot.READING, TextSlot.REWRITE}
+)
+
+# The style scans compare the text with what the AI was given: the
+# template message or the clause for a rewrite, the quote for the rest
+# (question 18b).
+_SOURCE_SLOTS: frozenset[TextSlot] = frozenset({TextSlot.MESSAGE, TextSlot.REWRITE})
+
+_ABBREVIATION_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = tuple(
+    (abbreviation, re.compile(r"(?<![\w.])" + re.escape(abbreviation), re.IGNORECASE))
+    for abbreviation in ABBREVIATIONS
 )
 
 
@@ -86,4 +107,58 @@ def scan_text(text: str, slot: TextSlot, label: Level | None) -> tuple[ScanFindi
     )
     if other_label_word:
         findings.append(ScanFinding.WRONG_LABEL_WORD)
+    return tuple(findings)
+
+
+def mask_abbreviations(text: str) -> str:
+    """Blank out every listed abbreviation with spaces, keeping the length.
+
+    Both texts of a comparison are masked, so "i.e." is never read as
+    the first-person "I". Anything the mask covers cannot match.
+    """
+
+    masked = text
+    for abbreviation, pattern in _ABBREVIATION_PATTERNS:
+        masked = pattern.sub(" " * len(abbreviation), masked)
+    return masked
+
+
+def _added_words(text: str, source: str | None, words: tuple[str, ...]) -> bool:
+    """True when some listed word is in the text but not in its source.
+
+    The scans look for words the AI added, so a word that is already in
+    the text the AI was given passes (question 18b).
+    """
+
+    for word in words:
+        in_text = contains_phrase(text, word)
+        in_source = source is not None and contains_phrase(source, word)
+        if in_text and not in_source:
+            return True
+    return False
+
+
+def scan_style(text: str, slot: TextSlot, context: ScanContext) -> tuple[ScanFinding, ...]:
+    """The style scans: signs of machine-made text (ux-copy 1.1).
+
+    A listed word counts only when the AI added it, comparing the text
+    with its quote, or with the message or clause a rewrite starts from.
+    An exclamation mark counts as filler unless the source holds one.
+    Findings in ScanFinding member order, no repeats.
+    """
+
+    source = context.source_text if slot in _SOURCE_SLOTS else context.quote
+    findings: list[ScanFinding] = []
+    if slot in FIRST_PERSON_SLOTS:
+        masked_text = mask_abbreviations(text)
+        masked_source = mask_abbreviations(source) if source is not None else None
+        first_person_added = _added_words(masked_text, masked_source, FIRST_PERSON_WORDS)
+        if first_person_added:
+            findings.append(ScanFinding.FIRST_PERSON)
+    filler_added = _added_words(text, source, FILLER_PHRASES)
+    exclamation_added = "!" in text and (source is None or "!" not in source)
+    if filler_added or exclamation_added:
+        findings.append(ScanFinding.FILLER_PHRASE)
+    if _added_words(text, source, EVALUATIVE_WORDS):
+        findings.append(ScanFinding.EVALUATIVE_WORD)
     return tuple(findings)
