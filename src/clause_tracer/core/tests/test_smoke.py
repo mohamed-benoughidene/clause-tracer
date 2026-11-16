@@ -37,3 +37,10 @@ def test_bad_input_returns_3(tmp_path: Path, capsys: pytest.CaptureFixture[str])
     path.write_text("x = ", encoding="utf-8")
     assert main(["--input", str(path)]) == 3
     assert capsys.readouterr().err.startswith("clause_tracer.core: ")
+
+
+def test_non_utf8_input_returns_3(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    path = tmp_path / "latin1.toml"
+    path.write_bytes(b"\xff")
+    assert main(["--input", str(path)]) == 3
+    assert capsys.readouterr().err.startswith("clause_tracer.core: ")

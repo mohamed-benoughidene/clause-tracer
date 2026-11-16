@@ -29,7 +29,7 @@ def main(argv: list[str] | None = None) -> int:
     except OSError:
         print(f"clause_tracer.core: cannot read {path}", file=sys.stderr)
         return EXIT_INPUT_FILE
-    except tomllib.TOMLDecodeError as error:
+    except ValueError as error:  # TOMLDecodeError, or bytes that are not UTF-8
         print(f"clause_tracer.core: {error}", file=sys.stderr)
         return EXIT_INPUT_FILE
 
