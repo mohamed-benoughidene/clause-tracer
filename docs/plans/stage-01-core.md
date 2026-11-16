@@ -3,9 +3,9 @@
 | | |
 | --- | --- |
 | Stage | 1, `core` |
-| Status | Draft |
+| Status | Accepted |
 | Branch | One branch for each milestone, cut from `main`: `feat/core-m1-foundations`, `feat/core-m2-shapes`, `feat/core-m3-label-rules`, `feat/core-m4-ports-and-fakes`, `feat/core-m5-scans-and-last-check`, `feat/core-m6-run-alone`. See [the README](README.md), "Branches and pull requests" |
-| Accepted on | Not yet |
+| Accepted on | 16 Nov 2026 |
 | Stage outline | [System design section 15.1](../system-design.md#151-stage-1-core) |
 
 ## 1. Goal
