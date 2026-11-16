@@ -41,6 +41,43 @@ Imported from `clause_tracer.core`, never from a file inside the package (B2).
 - `UNSURE_REASONS`: a `frozenset[ReasonCode]`, every code except `RANGE`, `CLAUSES_DISAGREE` and `AMOUNT_PERCENT_DISAGREE` (17 codes). A value that carries one of these is unsure; the three left out are notes shown beside a label.
 - `PLACEHOLDER_OPEN` = `"⟦"`, `PLACEHOLDER_CLOSE` = `"⟧"`: the placeholder marker of Spec 4.2.
 
+## Errors
+Every error the project raises on purpose subclasses `ClauseTracerError` (I6). Its constructor
+takes `context: Mapping[str, str | int] | None = None`, kept as a read-only `MappingProxyType`
+in `.context`; the message is the code; context holds ids, step names and counts only.
+
+| Class | Group | Code |
+| --- | --- | --- |
+| `ClauseTracerError` | — (base) | `""` |
+| `InputError` | base | `""` |
+| `ModelServiceError` | base | `""` |
+| `LocalError` | base | `""` |
+| `ReviewCancelled` | base (and leaf) | `review_cancelled` |
+| `UnreadableFileError` | Input | `unreadable_file` |
+| `ScannedPdfError` | Input | `scanned_pdf` |
+| `OldWordFileError` | Input | `old_word_file` |
+| `InputTooLargeError` | Input | `input_too_large` |
+| `NotUtf8Error` | Input | `not_utf8` |
+| `EncryptedPdfError` | Input | `encrypted_pdf` |
+| `PlaybookFormatError` | Input | `playbook_format` |
+| `NetworkUnavailableError` | Model service | `network_unavailable` |
+| `InvalidApiKeyError` | Model service | `invalid_api_key` |
+| `NoCreditError` | Model service | `no_credit` |
+| `RateLimitedError` | Model service | `rate_limited` |
+| `NoPrivateModelError` | Model service | `no_private_model` |
+| `ModelTimeoutError` | Model service | `model_timeout` |
+| `ModelReplyInvalidError` | Model service | `model_reply_invalid` |
+| `SecretStoreUnavailableError` | Local | `secret_store_unavailable` |
+| `StorageCorruptError` | Local | `storage_corrupt` |
+| `SchemaTooNewError` | Local | `schema_too_new` |
+| `ConfigError` | Local | `config` |
+| `DuplicateRecordError` | Local | `duplicate_record` |
+
+`RateLimitedError` is the one leaf with an extra keyword argument,
+`retry_after_seconds: int | None = None`: the wait the AI service asked for. It is kept as
+`.retry_after_seconds` and, when given, in `context["retry_after_seconds"]`; a negative value
+raises `ValueError`.
+
 ## Input shape (planned)
 Plain typed values: the playbook snapshot, positions and extracted values.
 
