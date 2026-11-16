@@ -3,9 +3,9 @@
 | | |
 | --- | --- |
 | Stage | 1, `core` |
-| Status | Draft |
+| Status | In progress |
 | Branch | One branch for each milestone, cut from `main`: `feat/core-m1-foundations`, `feat/core-m2-shapes`, `feat/core-m3-label-rules`, `feat/core-m4-ports-and-fakes`, `feat/core-m5-scans-and-last-check`, `feat/core-m6-run-alone`. See [the README](README.md), "Branches and pull requests" |
-| Accepted on | Not yet |
+| Accepted on | 16 Nov 2026 |
 | Stage outline | [System design section 15.1](../system-design.md#151-stage-1-core) |
 
 ## 1. Goal
@@ -59,16 +59,16 @@
 
 ## 4. Checks before starting
 
-- [ ] **The plan is Accepted.** Questions 1 to 18 in section 6 are answered (all on 14 Nov 2026). No task waits on an open question.
-- [ ] **The skeleton passes.** Run `.venv/bin/uv sync`, then `scripts/check.sh`. It must exit 0 before any change. Confirm that `core` holds only the files listed in section 2.
-- [ ] **Pydantic `TypeAdapter` builds frozen, slotted, keyword-only dataclasses** ([ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) action item 2, [system design 3.4](../system-design.md#34-core-shapes-for-stage-1) "Check first"). Run it after S1-M1-T2 (Pydantic installed) and before S1-M1-T7 (the first enum). How:
+- [x] **The plan is Accepted.** Questions 1 to 18 in section 6 are answered (all on 14 Nov 2026). No task waits on an open question.
+- [x] **The skeleton passes.** Run `.venv/bin/uv sync`, then `scripts/check.sh`. It must exit 0 before any change. Confirm that `core` holds only the files listed in section 2.
+- [x] **Pydantic `TypeAdapter` builds frozen, slotted, keyword-only dataclasses** ([ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) action item 2, [system design 3.4](../system-design.md#34-core-shapes-for-stage-1) "Check first"). Run it after S1-M1-T2 (Pydantic installed) and before S1-M1-T7 (the first enum). How:
   1. Write a throwaway test file in your scratch folder, outside the repo. Never commit it.
   2. In it, define `@dataclass(frozen=True, slots=True, kw_only=True)` classes that use every kind of field the shapes need: `int`, `str`, `bytes`, `bool`, `float`, `Decimal`, `datetime` (aware), a `NewType` over `str`, a `StrEnum`, `X | None`, `tuple[X, ...]`, `tuple[int | None, ...]`, a nested dataclass, a field with a default (`unlimited: bool = False`), a `Mapping[str, object]` field that `__post_init__` wraps in `MappingProxyType`, a field typed as a union of three dataclasses (like `Position.rule`), and a field typed as an empty base dataclass given a subclass instance (like `AiRequest.inputs: StepInputs`).
   3. Run `.venv/bin/uv run pytest <that file>`. Assert, for `TypeAdapter(...).validate_python(...)` and `validate_json(...)`: the result is an instance of the dataclass itself (not a Pydantic copy); assigning a field raises `FrozenInstanceError`; the instance has no `__dict__`; a JSON list becomes a tuple; a wrong type raises `ValidationError`; the union field becomes the right one of the three dataclasses for each input; `__post_init__` ran (the mapping is a `MappingProxyType`). Note what type comes back for the base-class field given a subclass, and for a JSON-loaded `Decimal` and `datetime`.
   4. Pass: write the Pydantic and Python versions and the result, including the base-class note, in this plan's change log, and tell the owner. Ticking the ADR's action item is the owner's call. The base-class note feeds the stage 6 question in [system design 15.6](../system-design.md#156-stage-6-the-encrypted-store-secrets-the-runner-and-the-first-commands).
   5. Fail, or any other surprise: **stop**. Bring it to the owner before any shape is written. A base-class field that comes back as the base class is not a failure: write it down.
-- [ ] **The docs are on `main`.** The `docs/` branch that holds this plan, the spec and the system design has been merged by its own pull request ([the README](README.md), "Branches and pull requests"). Milestone 1 is cut from that `main`.
-- [ ] **Remind the owner** to start writing the ten test contracts now, because they take longest ([system design 15.1](../system-design.md#151-stage-1-core)).
+- [x] **The docs are on `main`.** The `docs/` branch that holds this plan, the spec and the system design has been merged by its own pull request ([the README](README.md), "Branches and pull requests"). Milestone 1 is cut from that `main`.
+- [x] **Remind the owner** to start writing the ten test contracts now, because they take longest ([system design 15.1](../system-design.md#151-stage-1-core)).
 
 ## 5. Milestones and tasks
 
@@ -87,7 +87,7 @@ Rules for every task:
 
 The stage's tools are locked, coverage and the owner-table guard run in `scripts/check.sh`, the architecture tests guard `core`, and `from clause_tracer.core import Level, ClauseTracerError` works.
 
-- [ ] **S1-M1-T1: Add Hypothesis**
+- [x] **S1-M1-T1: Add Hypothesis**
   - **Build:** Run `.venv/bin/uv add --dev hypothesis`. Commit `pyproject.toml` and `uv.lock` together, with the message `build(deps): add hypothesis for property tests`.
   - **Files:** `pyproject.toml`, `uv.lock`.
   - **Tests first:** None. This task adds a tool.
@@ -95,7 +95,7 @@ The stage's tools are locked, coverage and the owner-table guard run in `scripts
   - **Rules:** [Testing strategy 5](../testing-strategy.md#5-the-offset-chain-seven-invariants), [ADR 0013](../adr/0013-test-layers-and-release-gates.md); AGENTS.md (commit `uv.lock`).
   - **Depends on:** None.
 
-- [ ] **S1-M1-T2: Add Pydantic as a runtime dependency**
+- [x] **S1-M1-T2: Add Pydantic as a runtime dependency**
   - **Build:** Run `.venv/bin/uv add pydantic`. It goes into `[project] dependencies`. Commit `pyproject.toml` and `uv.lock` together, with the message `build(deps): add pydantic for edge validation`. Nothing in `core` imports it. Then run the TypeAdapter check of section 4 and write its result in the change log (section 8) in the same commit.
   - **Files:** `pyproject.toml`, `uv.lock`, `docs/plans/stage-01-core.md` (change log).
   - **Tests first:** None. The check in section 4 runs right after the install.
@@ -103,7 +103,7 @@ The stage's tools are locked, coverage and the owner-table guard run in `scripts
   - **Rules:** [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) (amendment of 14 Nov 2026, action item 2), D4, I9.
   - **Depends on:** S1-M1-T1.
 
-- [ ] **S1-M1-T3: Measure branch coverage, with a 95% floor for `core`**
+- [x] **S1-M1-T3: Measure branch coverage, with a 95% floor for `core`**
   - **Build:**
     1. Run `.venv/bin/uv add --dev coverage`.
     2. In `pyproject.toml` add:
@@ -128,7 +128,7 @@ The stage's tools are locked, coverage and the owner-table guard run in `scripts
   - **Rules:** [Testing strategy 11](../testing-strategy.md#11-coverage-targets), [ADR 0013](../adr/0013-test-layers-and-release-gates.md) amendment of 14 Nov 2026.
   - **Depends on:** S1-M1-T1.
 
-- [ ] **S1-M1-T4: The owner-table guard: its rules**
+- [x] **S1-M1-T4: The owner-table guard: its rules**
   - **Build:** A new script `scripts/check_owner_tables.py`, standard library only, with these functions. This task writes the pure part; S1-M1-T5 adds the git part.
     - `OWNER_TABLE_PATTERN = re.compile(r"(^|/)tests/tables/")` and `APPROVAL_LINE = "Owner-Approved-Tables: yes"`.
     - `def is_owner_table(path: str) -> bool`: true when `OWNER_TABLE_PATTERN.search(path)` matches. Paths use `/` and are relative to the repo root.
@@ -145,7 +145,7 @@ The stage's tools are locked, coverage and the owner-table guard run in `scripts
   - **Rules:** T11, [testing strategy 10](../testing-strategy.md#10-keeping-agent-written-tests-honest), [ADR 0013](../adr/0013-test-layers-and-release-gates.md) action item 2 and amendment of 14 Nov 2026.
   - **Depends on:** None.
 
-- [ ] **S1-M1-T5: The owner-table guard in `check.sh` and CI**
+- [x] **S1-M1-T5: The owner-table guard in `check.sh` and CI**
   - **Build:** In `scripts/check_owner_tables.py` add:
     - `def working_tree_paths(repo: Path) -> tuple[str, ...]`: the sorted, unique paths from `git diff --name-only HEAD` plus `git ls-files --others --exclude-standard`, run with `subprocess.run(..., cwd=repo, check=True, capture_output=True, text=True)`.
     - `def commit_paths(repo: Path, sha: str) -> tuple[str, ...]`: from `git diff-tree --no-commit-id --name-only -r <sha>`.
@@ -170,7 +170,7 @@ The stage's tools are locked, coverage and the owner-table guard run in `scripts
   - **Rules:** T11, I12 (exit codes), [testing strategy 10](../testing-strategy.md#10-keeping-agent-written-tests-honest).
   - **Depends on:** S1-M1-T4.
 
-- [ ] **S1-M1-T6: Architecture tests for `core`**
+- [x] **S1-M1-T6: Architecture tests for `core`**
   - **Build:** Tests that guard the rules of `core` itself. They pass on the empty skeleton and keep passing as code is added.
   - **Files:** `src/clause_tracer/core/tests/test_architecture.py`.
   - **Tests first:**
@@ -184,7 +184,7 @@ The stage's tools are locked, coverage and the owner-table guard run in `scripts
   - **Rules:** T9, T1, B3, [ADR 0015](../adr/0015-provider-ready-seam.md) action item 2, [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md), [testing strategy 12](../testing-strategy.md#12-when-each-test-runs).
   - **Depends on:** None.
 
-- [ ] **S1-M1-T7: Ids, enums and constants**
+- [x] **S1-M1-T7: Ids, enums and constants**
   - **Build:**
     - `src/clause_tracer/core/ids.py`: the seven ids of system design 3.4, each `X = NewType("X", str)`.
     - `src/clause_tracer/core/enums.py`: the enums `Level`, `PositionType`, `Direction`, `Unit`, `Answer`, `ReasonCode`, `WrittenBy`, `ReviewStatus`, `PrivacyMode`, `FileKind`, `PlaceholderKind`, `SegmentKind`, `HiddenReason`, `PiiSource`, `TextSlot`, `ScanFinding`, `DrawFailure` and `PlaybookProblemCode`, with exactly the members of system design 3.4 in the listed order. Then `UNSURE_REASONS: frozenset[ReasonCode] = frozenset(ReasonCode) - {ReasonCode.RANGE, ReasonCode.CLAUSES_DISAGREE, ReasonCode.AMOUNT_PERCENT_DISAGREE}`, and `PLACEHOLDER_OPEN = "⟦"`, `PLACEHOLDER_CLOSE = "⟧"`.
@@ -199,7 +199,7 @@ The stage's tools are locked, coverage and the owner-table guard run in `scripts
   - **Rules:** [System design 3.4](../system-design.md#34-core-shapes-for-stage-1), [ADR 0012](../adr/0012-missing-unsure-and-evidence-failures.md) action item 1, I7 (rules return codes, never prose), T1.
   - **Depends on:** S1-M1-T6, the TypeAdapter check.
 
-- [ ] **S1-M1-T8: The error tree**
+- [x] **S1-M1-T8: The error tree**
   - **Build:** In `src/clause_tracer/core/errors.py`, the classes of [system design 3.4, "Errors"](../system-design.md#34-core-shapes-for-stage-1), exactly: the base, the four groups and the 20 leaf classes with their codes. The base:
     ```python
     class ClauseTracerError(Exception):
@@ -243,6 +243,18 @@ The stage's tools are locked, coverage and the owner-table guard run in `scripts
   - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_errors.py` reports 9 passed, and `scripts/check.sh` exits 0.
   - **Rules:** I5, I6, I7, [system design 6.4](../system-design.md#64-errors), [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md).
   - **Depends on:** S1-M1-T7.
+
+- [x] **S1-M1-T9: The coverage floor omits `core`'s tests (temporary)**
+  - **Build:** Done 16 Nov 2026, on the owner's decision in the working session. The line in `scripts/check.sh` that S1-M1-T3 added,
+    `run coverage report --include='src/clause_tracer/core/*' --fail-under=95`,
+    became
+    `run coverage report --include='src/clause_tracer/core/*' --omit='src/clause_tracer/core/tests/*' --fail-under=95`,
+    so the 95% floor measures `core`'s shipped code and not its test files. Reason: the architecture tests of S1-M1-T6 cannot fully execute their loops until the first shapes of S1-M2-T1 exist, so the floor as written failed although every test passed. The change is recorded in the change log (16 Nov 2026).
+  - **Files:** `scripts/check.sh`, `docs/plans/stage-01-core.md` (change log).
+  - **Tests first:** none. This task changes a check, not code.
+  - **Done when:** `scripts/check.sh` exits 0. Met: commit `4fcc949`.
+  - **Rules:** [Testing strategy 11](../testing-strategy.md#11-coverage-targets) (the floor is per package); plans README ("When the plan is wrong").
+  - **Depends on:** S1-M1-T6.
 
 ### M2: Shapes
 
@@ -310,6 +322,16 @@ Every task in M2 extends one shared test, `test_fields_match_system_design` in `
   - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_shapes.py` passes, and `scripts/check.sh` exits 0.
   - **Rules:** [System design 3.4](../system-design.md#34-core-shapes-for-stage-1) (14 Nov 2026), I3, I4, S3.
   - **Depends on:** S1-M2-T5.
+
+- [ ] **S1-M2-T8: Remove the coverage omit again**
+  - **Build:** In `scripts/check.sh`, change the coverage report line back to what S1-M1-T3 wrote, so the 95% floor covers the test files of `core` again as the plan first had it:
+    `run coverage report --include='src/clause_tracer/core/*' --fail-under=95`.
+    This undoes S1-M1-T9, as the owner asked on 16 Nov 2026. Run it only once the shapes of S1-M2-T1 to S1-M2-T7 exist and every file in `src/clause_tracer/core/tests/` is fully executed by its own run, so the floor holds with the tests measured too. If the floor then still fails, stop and tell the owner; do not lower the floor, do not re-add the omit on your own.
+  - **Files:** `scripts/check.sh`, `docs/plans/stage-01-core.md` (change log: a dated line saying the omit is gone).
+  - **Tests first:** none. This task changes a check, not code.
+  - **Done when:** `scripts/check.sh` exits 0 with no `--omit` in the coverage line, and `git grep -n "omit" scripts/check.sh` finds nothing.
+  - **Rules:** [Testing strategy 11](../testing-strategy.md#11-coverage-targets); plans README ("When the plan is wrong").
+  - **Depends on:** S1-M2-T7.
 
 ### M3: Playbook checks and label rules
 
@@ -883,7 +905,11 @@ Planning found questions 1 to 17. The owner answered all of them on 14 Nov 2026;
 
 | Date | Change | Why |
 | --- | --- | --- |
-| None | | |
+| 16 Nov 2026 | Accepted (owner, in the working session). Status set to Accepted on `feat/core-m1-foundations`. | Plans README, "Status" |
+| 16 Nov 2026 | TypeAdapter check (section 4) passed: Pydantic 2.14.3 (pydantic-core 2.50.4), Python 3.12. `TypeAdapter(...).validate_python(...)` and `validate_json(...)` on `@dataclass(frozen=True, slots=True, kw_only=True)` classes return the dataclass itself, not a Pydantic copy; fields raise `FrozenInstanceError`; the instance has no `__dict__`; a JSON list becomes a tuple; a wrong type raises `ValidationError`; a union of three dataclasses picks the right member; `__post_init__` runs and the mapping becomes a `MappingProxyType`. A JSON-loaded `Decimal` and an aware `datetime` come back as those types. **Base-class note:** a field typed as an empty base dataclass, given a subclass instance, comes back as the base class, not the subclass (the subclass identity is lost). This feeds the stage 6 question in system design 15.6. | S1-M1-T2, ADR 0005 action item 2 |
+| 16 Nov 2026 | `test_import_core_loads_only_stdlib` changed from comparing against `sys.stdlib_module_names` alone to a baseline comparison: the same subprocess runs once without importing `clause_tracer.core`, and importing it may add only `clause_tracer` and standard-library names. Reason: the OS loads a system-wide `sitecustomize` (the apport hook) in every Python process, so the original wording failed before `core` was imported. The owner chose this on 16 Nov 2026. The goal of testing strategy 12 ("importing core loads only the standard library") is still enforced: any non-stdlib import `core` causes still fails. | S1-M1-T6, testing strategy 12 |
+| 16 Nov 2026 | The coverage floor in `scripts/check.sh` gained `--omit='src/clause_tracer/core/tests/*'`, so the 95% floor measures `core`'s shipped code, not its test files. Reason: the floor as written also measured the test files, and the architecture tests of S1-M1-T6 cannot fully execute until the first shapes of S1-M2-T1 exist, so `check.sh` failed although every test passed. The owner chose this on 16 Nov 2026 and asked to remove the omit again once milestone 2 is implemented, so the floor covers the test files as the plan first wrote it. To do after S1-M2-T1's shapes make the tests fully covered. | S1-M1-T6, testing strategy 11 |
+| 16 Nov 2026 | Milestone 1 ticked (tasks S1-M1-T1 to S1-M1-T8, plus section 4's checks), and the status set to In progress. Added two tasks the owner asked for: S1-M1-T9 records that the coverage omit was made, and S1-M2-T8 removes it again once milestone 2's shapes exist. | Plans README ("Status", "When the plan is wrong": add a task) |
 
 ## 9. Notes for the next stage
 

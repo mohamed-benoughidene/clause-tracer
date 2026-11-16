@@ -13,9 +13,11 @@ else
   exit 1
 fi
 
+run python scripts/check_owner_tables.py
 run ruff check
 run ruff format --check
 run mypy
 run lint-imports
 run python scripts/copy_lint.py
-run pytest -q
+run coverage run -m pytest -q
+run coverage report --include='src/clause_tracer/core/*' --omit='src/clause_tracer/core/tests/*' --fail-under=95

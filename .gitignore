@@ -38,3 +38,6 @@ build/
 
 # Research working notes (kept locally; the reports carry the findings)
 research_notes/
+
+# Coverage data (regenerated on every check run)
+.coverage
