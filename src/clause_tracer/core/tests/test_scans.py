@@ -28,6 +28,7 @@ from clause_tracer.core import (
     scan_style,
     scan_text,
 )
+from clause_tracer.core.scans import NUMBER_ABBREVIATIONS
 from clause_tracer.core.tests.owner_tables import TABLES_DIR, load_table
 from clause_tracer.core.tests.scan_cases import SCAN_CASE_KEYS, ScanCase, scan_cases
 from clause_tracer.core.tests.shapes_for_tests import make_scan_context
@@ -272,6 +273,35 @@ def test_sentence_scans_table(case: ScanCase) -> None:
     assert set(scan_style(case.text, case.slot, case.context)) & {ScanFinding.ADDED_SENTENCE} == (
         case.findings & {ScanFinding.ADDED_SENTENCE}
     )
+
+
+def test_list_marker_is_not_first_person() -> None:
+    for marker in ("(i)", "(iv)", "(I)"):
+        holds = ScanFinding.FIRST_PERSON in scan_style(
+            f"Clause 5.4{marker} sets 60 days.", TextSlot.REASON, make_scan_context()
+        )
+        assert not holds, marker
+
+
+def test_first_person_beside_a_list_marker_fails() -> None:
+    holds = ScanFinding.FIRST_PERSON in scan_style(
+        "I read 5.4(i) as 60 days.", TextSlot.REASON, make_scan_context()
+    )
+    assert holds
+
+
+def test_no_before_a_number_is_masked() -> None:
+    assert count_sentences("See No. 5 now.") == 1
+    assert count_sentences("See no.5 now.") == 1
+
+
+def test_no_without_a_number_ends_a_sentence() -> None:
+    assert count_sentences("The answer is no. They pay.") == 2
+
+
+def test_number_abbreviations_are_listed() -> None:
+    for abbreviation in NUMBER_ABBREVIATIONS:
+        assert abbreviation in ABBREVIATIONS
 
 
 def test_count_sentences_examples() -> None:

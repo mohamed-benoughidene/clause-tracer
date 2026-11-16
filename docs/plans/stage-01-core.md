@@ -3,7 +3,7 @@
 | | |
 | --- | --- |
 | Stage | 1, `core` |
-| Status | In progress |
+| Status | Done |
 | Branch | One branch for each milestone, cut from `main`: `feat/core-m1-foundations`, `feat/core-m2-shapes`, `feat/core-m3-label-rules`, `feat/core-m4-ports-and-fakes`, `feat/core-m5-scans-and-last-check`, `feat/core-m6-run-alone`. See [the README](README.md), "Branches and pull requests" |
 | Accepted on | 16 Nov 2026 |
 | Stage outline | [System design section 15.1](../system-design.md#151-stage-1-core) |
@@ -829,7 +829,7 @@ The output scans give the owner's findings for every case in the scan table, the
 
 `python -m clause_tracer.core` prints the Spec 14.5 labels, the README records everything `core` offers, and the owner has the stage report.
 
-- [ ] **S1-M6-T1: Run `core` alone on the sample**
+- [x] **S1-M6-T1: Run `core` alone on the sample**
   - **Build:** Rewrite `src/clause_tracer/core/__main__.py`: `def main(argv: list[str] | None = None) -> int`. It parses `--input` with `argparse` (a `Path`, default `Path(__file__).parent / "samples" / "spec-14-5.toml"`), reads the file with `tomllib.load` in binary mode, and calls `parse_sample` and `label_all`. For each label it prints one line: position id, topic, level value, the reason values joined by `,` (or `-` when none), and the written-by value, separated by tabs. It returns 0. A file that cannot be opened prints `clause_tracer.core: cannot read <path>` to standard error and returns 3; a `tomllib.TOMLDecodeError` or `ValueError` prints `clause_tracer.core: <message>` to standard error and returns 3 (exit code 3 is "input file", system design 6.2). Only `__main__` reads a file; nothing else in `core` does.
   - **Files:** `src/clause_tracer/core/__main__.py`, `src/clause_tracer/core/tests/test_smoke.py`.
   - **Tests first:** in `test_smoke.py`: `test_main_returns_zero` (`main([]) == 0`); `test_main_prints_one_line_per_position` (11 lines, whose first and third columns match the position and `level` of each row of the owner's `spec_14_5.toml`); `test_missing_input_returns_3` (standard error names the path); `test_bad_input_returns_3` (a file in `tmp_path` holding `x = `).
@@ -837,7 +837,7 @@ The output scans give the owner's findings for every case in the scan table, the
   - **Rules:** S1, S2, I12, T1, [system design 6.2](../system-design.md#62-the-command-line).
   - **Depends on:** S1-M3-T17.
 
-- [ ] **S1-M6-T2: Finish the module README and the module map**
+- [x] **S1-M6-T2: Finish the module README and the module map**
   - **Build:** Make `src/clause_tracer/core/README.md` complete, with these headings in order: "Purpose", "Spec", "Ids and enums", "Errors", "Shapes", "Ports", "Fakes", "Functions" (each public function with its signature and one line on what it returns and raises), "Owner tables" (each file, its columns, its owner task, and "only the owner edits it"), "Depends on", "Run alone". Update the `core` row of `src/clause_tracer/README.md` to: "Pure rules and shapes: every shape, port, error and fake; label picking, playbook checks, output scans, the last check before drawing, auto-delete dates and the cost estimate (Spec 4.1, 5, 6.1 step 8, 6.2, 9)." Change the docstring of `core/__init__.py` to: `"""Pure rules and shapes: labelling, checks and fakes, with no files, network, clock or AI. Implements Spec section 5 (labelling rules); T1 of the Constitution."""`.
   - **Files:** `src/clause_tracer/core/README.md`, `src/clause_tracer/README.md`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_architecture.py`.
   - **Tests first:** `test_every_public_name_is_in_the_readme` in `test_architecture.py`: every name in `clause_tracer.core.__all__` appears in the README text inside backticks.
@@ -845,13 +845,42 @@ The output scans give the owner's findings for every case in the scan table, the
   - **Rules:** S3, I11, [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) action item 4, [WRITING_DOCS](../../WRITING_DOCS.md) sections 2 and 9.
   - **Depends on:** S1-M6-T1, S1-M5-T13, S1-M5-T10, S1-M5-T8, S1-M4-T7, S1-M3-T11.
 
-- [ ] **S1-M6-T3: Stage report to the owner**
+- [x] **S1-M6-T3: Stage report to the owner**
   - **Build:** Run every check in section 7. Write "Notes for the next stage" (section 9). Update the status lines the README names under "When the stage is done". Set this plan's status to Done, then send the owner the report that section 7 describes.
   - **Files:** `docs/plans/stage-01-core.md`, `AGENTS.md` ("Where the project stands"), `README.md` (status line), `docs/testing-strategy.md` (section 13).
   - **Tests first:** None. Check: every box in section 7 is ticked.
   - **Done when:** the owner has the report and confirms the stage is Done.
   - **Rules:** [Plans README](README.md) ("When the stage is done").
   - **Depends on:** S1-M6-T2.
+
+- [x] **S1-M6-T4: A sample file that is not UTF-8 exits 3**
+  - **Build:** In `__main__.py`, the `except` around `tomllib.load` catches `ValueError` instead of only `tomllib.TOMLDecodeError`: bytes that are not UTF-8 raise `UnicodeDecodeError`, a `ValueError`, which escaped as a traceback. Found during the stage 1 close.
+  - **Files:** `src/clause_tracer/core/__main__.py`, `src/clause_tracer/core/tests/test_smoke.py`.
+  - **Tests first:** `test_non_utf8_input_returns_3` (a file in `tmp_path` holding the byte `0xff`; standard error starts `clause_tracer.core: `).
+  - **Done when:** the test passes and `scripts/check.sh` exits 0.
+  - **Rules:** S1-M6-T1, [system design 6.2](../system-design.md#62-the-command-line).
+  - **Depends on:** S1-M6-T1.
+
+- [x] **S1-M6-T5: Scan rows for list markers and "no." (Owner)**
+  - **Build:** Owner only. Append rows to `scans.toml` in the format of S1-M5-T1. Cases, proposed, owner to check: a reason citing "5.4(i)" passes; one citing "5.4(I)" passes; a reason with "I" beside "5.4(i)" still fails `first_person`; a rewrite adding "No. 5" adds no sentence; a rewrite adding "Refunds: no." as its own sentence fails `added_sentence`. The AI agent does not write or change it (T11).
+  - **Files:** `src/clause_tracer/core/tests/tables/scans.toml`.
+  - **Tests first:** None. The owner's values are the expected answers.
+
+- [x] **S1-M6-T6: List markers are not "I", and "no." needs a number**
+  - **Build:** In `scans.py`: (a) `LIST_MARKER_PATTERN = re.compile(r"\([ivxlcdm]+\)", re.IGNORECASE)`, a bracketed Roman-numeral list marker such as "(i)", "(iv)" or "(I)". Before the first-person scan, `scan_style` blanks every list marker to spaces of the same length, in the text and in its source, after masking abbreviations. The pronoun "I" still matches in any letter case. (b) `NUMBER_ABBREVIATIONS: tuple[str, ...] = ("no.",)`: a listed abbreviation in this tuple is masked only when a digit follows, after optional whitespace (`(?=\s*\d)`), so "No. 5" does not end a sentence and "no." before a space and a word does. Both constants stay on `scans.py` (the precedent of milestone 5). Update the `core` README rows of `mask_abbreviations` and `scan_style`.
+  - **Files:** `src/clause_tracer/core/scans.py`, `src/clause_tracer/core/tests/test_scans.py`, `src/clause_tracer/core/README.md`.
+  - **Tests first:** in `test_scans.py`: `test_list_marker_is_not_first_person` ("(i)", "(iv)" and "(I)" in a reason pass); `test_first_person_beside_a_list_marker_fails`; `test_no_before_a_number_is_masked` (`count_sentences("See No. 5 now.") == 1`); `test_no_without_a_number_ends_a_sentence` (`count_sentences("The answer is no. They pay.") == 2`); `test_number_abbreviations_are_listed` (each is in `ABBREVIATIONS`).
+  - **Done when:** the tests and every row of S1-M6-T5 pass, and `scripts/check.sh` exits 0.
+  - **Rules:** [Spec 6.2](../spec.md#62-rules-for-every-ai-step) (first person, added sentences), Spec 5 (never guess: a missed sentence end fails open).
+  - **Depends on:** S1-M5-T5, S1-M6-T5.
+
+- [x] **S1-M6-T7: Cost figures and the law-word note**
+  - **Build:** Docs only. Replace the 50,000-word and 10,000-word cost figures in [system design 1.2](../system-design.md#12-qualities-it-must-have) with the formula's figures from the owner's `cost_estimate.toml`, and add a dated amendment to [ADR 0010](../adr/0010-starting-models.md) giving the same figures. Add a "Check in this stage" bullet to system design 15.10: the law word "legal" also matches "legal fees", which sends a sound reason to the template; count how often in the paid runs and decide then.
+  - **Files:** `docs/system-design.md`, `docs/adr/0010-starting-models.md`.
+  - **Tests first:** None.
+  - **Done when:** both docs give the formula's figures, and `scripts/check.sh` exits 0.
+  - **Rules:** [WRITING_DOCS](../../WRITING_DOCS.md) sections 2 and 9.
+  - **Depends on:** S1-M5-T9.
 
 ## 6. Open questions
 
@@ -880,21 +909,21 @@ Planning found questions 1 to 17. The owner answered all of them on 14 Nov 2026;
 
 ## 7. Done when
 
-- [ ] Every task above is ticked.
-- [ ] `scripts/check.sh` exits 0: the owner-table guard, ruff, format, mypy strict, `lint-imports`, the copy lint, pytest under coverage, and the coverage floor.
-- [ ] Branch coverage of `src/clause_tracer/core/` is at least 95% (`coverage report --include='src/clause_tracer/core/*'`).
-- [ ] The five import contracts in `pyproject.toml` are unchanged and pass.
-- [ ] The architecture test passes: importing `core` loads only the standard library.
-- [ ] The architecture test passes: no `core` shape has a provider-specific field (ADR 0015 action item 2).
-- [ ] The label-rule tests cover every row of the Spec 14.5 sample, against the owner's table.
-- [ ] No commit changed code and an owner table together (T11): `.venv/bin/uv run python scripts/check_owner_tables.py --commits main` exits 0 on each milestone branch before its pull request.
-- [ ] Every promise the stage touches has its test (T13): every planted walk-away gets walk-away (`test_readable_walk_away_wins`); no made-up quote reaches the screen (`test_one_changed_character_fails` in `test_draw_check.py`); every evidence link scrolls to the right place (`test_invariant_7_*`); values on hidden text are unsure (`test_hidden_quote_makes_value_unsure`); no acceptable limit reaches the message step (`test_acceptable_limit_fails_in_every_form`); no AI text states what a law allows (`test_every_law_word_fails_in_any_case`); auto-delete runs on schedule (`test_due_exactly_when_now_reaches_the_due_date`); every stored text keeps a written-by value (`test_wording_needs_written_by`).
-- [ ] The five style scans of Spec 6.2 give the owner's findings for every row of `scans.toml` (`test_full_scans_table`), and the "Keep" strings of ux-copy 1.1 pass them (`test_keep_strings_pass_style_scans`).
-- [ ] The cost estimate gives 30 calls for the starter playbook over 50 clauses (`test_starter_makes_30_calls`).
-- [ ] `src/clause_tracer/core/README.md` records the shapes, ports, fakes, functions and owner tables (S3, ADR 0005 action item 4), and `src/clause_tracer/README.md` matches it.
-- [ ] `.venv/bin/uv run python -m clause_tracer.core` runs alone on the sample (S1) and exits 0.
-- [ ] The TypeAdapter check result is in the change log.
-- [ ] The owner has been told what was built, and what stage 2 should know:
+- [x] Every task above is ticked.
+- [x] `scripts/check.sh` exits 0: the owner-table guard, ruff, format, mypy strict, `lint-imports`, the copy lint, pytest under coverage, and the coverage floor.
+- [x] Branch coverage of `src/clause_tracer/core/` is at least 95% (`coverage report --include='src/clause_tracer/core/*'`).
+- [x] The five import contracts in `pyproject.toml` are unchanged and pass.
+- [x] The architecture test passes: importing `core` loads only the standard library.
+- [x] The architecture test passes: no `core` shape has a provider-specific field (ADR 0015 action item 2).
+- [x] The label-rule tests cover every row of the Spec 14.5 sample, against the owner's table.
+- [x] No commit changed code and an owner table together (T11): `.venv/bin/uv run python scripts/check_owner_tables.py --commits main` exits 0 on each milestone branch before its pull request.
+- [x] Every promise the stage touches has its test (T13): every planted walk-away gets walk-away (`test_readable_walk_away_wins`); no made-up quote reaches the screen (`test_one_changed_character_fails` in `test_draw_check.py`); every evidence link scrolls to the right place (`test_invariant_7_*`); values on hidden text are unsure (`test_hidden_quote_makes_value_unsure`); no acceptable limit reaches the message step (`test_acceptable_limit_fails_in_every_form`); no AI text states what a law allows (`test_every_law_word_fails_in_any_case`); auto-delete runs on schedule (`test_due_exactly_when_now_reaches_the_due_date`); every stored text keeps a written-by value (`test_wording_needs_written_by`).
+- [x] The five style scans of Spec 6.2 give the owner's findings for every row of `scans.toml` (`test_full_scans_table`), and the "Keep" strings of ux-copy 1.1 pass them (`test_keep_strings_pass_style_scans`).
+- [x] The cost estimate gives 30 calls for the starter playbook over 50 clauses (`test_starter_makes_30_calls`).
+- [x] `src/clause_tracer/core/README.md` records the shapes, ports, fakes, functions and owner tables (S3, ADR 0005 action item 4), and `src/clause_tracer/README.md` matches it.
+- [x] `.venv/bin/uv run python -m clause_tracer.core` runs alone on the sample (S1) and exits 0.
+- [x] The TypeAdapter check result is in the change log.
+- [x] The owner has been told what was built, and what stage 2 should know:
   - the shapes `ingest` will fill (`Document`, `SourceFile`, `Clause`, `Sentence`, `MatchKey`, `InputWarning`, `Span`), and that a document without glyphs has empty `glyphs`, `char_map` and `pages`;
   - the answers to questions 16 to 18, and the "never guess" principle behind 16 and 17;
   - for stage 8: which `ScanContext` fields each AI text needs (the clause numbers and quote for a reason, the source and the instruction for a rewrite), and that the scans catch signs, not a fluent sentence that is wrong (Spec 6.2);
@@ -921,9 +950,32 @@ Planning found questions 1 to 17. The owner answered all of them on 14 Nov 2026;
 | 16 Nov 2026 | S1-M5-T4's property `test_map_shape` was wrong as the plan stated it: `len(to_original) == len(text) + 1` fails for a text of two spaces, where the fold gives one folded character. Hypothesis found it during S1-M5-T5's check run. The shape doc (system design 3.4: "one entry per folded character plus a last entry") and the task's own whitespace example (`to_original == (0, 1, 5, 6)`) both say the right property, so the test now asserts `len(to_original) == len(fold.text) + 1`, pinned with `@example(text="  ")`. The fold code itself was correct and unchanged. The owner approved the change afterwards, on 16 Nov 2026, and the task now states the same property. | Plans README ("When the plan is wrong"), testing strategy 5 (every bug found becomes a committed `@example`) |
 | 16 Nov 2026 | S1-M5-T13: the strategy's uniqueness assumption counts overlapping places, the same count the last check uses, so a quote like "aa" in "aaa" is filtered out instead of failing the property falsely. The plan's wording ("occurs exactly once") is read as occurrence places. | Plans README ("When the plan is wrong") |
 | 16 Nov 2026 | Milestone 5 review (both axes) done. One reading recorded for the owner: the compiled scan patterns, `MIN_ANCHOR_LETTERS`, `SENTENCE_END_PATTERN` and the two token constants are public on their own modules but not re-exported from `clause_tracer.core`, although the tasks say "export". This follows the accepted precedent of S1-M4-T6, where `WARNING_WINDOW` and `LOWERING_GRACE` stayed on `auto_delete.py`; the facade holds what callers import, and no test imports these. If the owner wants them in the facade, the fix is small. The review's other findings (a double placeholder scan, a page lookup inside the loop, two test-helper smells, an `__all__` ordering slip) were fixed in two refactor commits. | Plans README ("When the plan is wrong"), AGENTS.md (review findings go to the owner) |
+| 16 Nov 2026 | Milestone 6 ticked (tasks S1-M6-T1 to S1-M6-T3) and every box of section 7 checked: `scripts/check.sh` exits 0 (1063 tests), branch coverage of `core` is 97%, the owner-table guard passes against `main`, and `python -m clause_tracer.core` prints the 11 Spec 14.5 labels. S1-M6-T2 keeps the `core/__init__.py` docstring on two lines: the plan's one-line form is 163 characters, over ruff's 100, and the words are the same. Status set to Done and the report sent; S1-M6-T3 is done once the owner confirms it. | Plans README ("When the stage is done") |
+| 16 Nov 2026 | Added S1-M6-T4 to S1-M6-T7 after the stage 1 report, on the owner's decisions of the same day. T4 records the UTF-8 fix already made. T5 and T6 fix two scan-list hazards: "I" matched the list marker "(i)", and "no." hid a sentence end. T7 brings the cost figures of the docs in line with the formula and records the third hazard ("legal" in "legal fees") for stage 10, where the owner decides it. | Plans README ("When the plan is wrong": add a task) |
+| 16 Nov 2026 | S1-M6-T5 and S1-M6-T6 ticked. The owner appended five rows to `scans.toml` in its own commit, `666f6b0`, so the table now holds 94 cases; every row passes with the fix of S1-M6-T6. | Plans README ("Owner tasks") |
 
 ## 9. Notes for the next stage
 
-Filled in when the stage is done: what was built, what differs from the outline, and what stage 2 should know. One note is already recorded, added on 16 Nov 2026 before the stage closes so it cannot be lost:
+Written on 16 Nov 2026, when the stage closed.
+
+**What was built.** `core` holds every shape, enum, error, port and fake of system design 3.4; the label rules of Spec 5 (`label_position`, `label_all`); the Spec 4.1 playbook checks (`check_playbook`); unit conversion; the request hash; the auto-delete dates; the output scans of Spec 6.2 (`scan_text`, `scan_style`, `scan_ai_text`); the quote-check fold and the last check before drawing; and the cost estimate of system design 7. `python -m clause_tracer.core` labels the Spec 14.5 sample. Seven owner tables hold the expected answers ([the core README](../../src/clause_tracer/core/README.md), "Owner tables"). Importing `core` loads only the standard library, and no shape has a provider-specific field.
+
+**What differs from the outline.** Each difference is in the change log (section 8): the standard-library import test compares against a baseline process; `spans_overlap` needs a shared code point; the concrete port stubs in `test_ports.py` raise `NotImplementedError`; the fold property counts folded characters; the uniqueness filter of S1-M5-T13 counts overlapping places; the scan patterns and constants stay on their own modules, not the `core` facade; the milestone 5 branch was named `feat/core-m5-scans-and-cost`.
+
+**For stage 2 (`ingest`).**
+- `ingest` fills `Document`, `SourceFile`, `Clause`, `Sentence`, `MatchKey`, `InputWarning` and `Span`. A document without glyphs has empty `glyphs`, `char_map` and `pages`, and the last check then draws no boxes (question 11).
+- Questions 16 to 18 are answered in section 6. Questions 16 and 17 rest on one principle, stated in [Spec 5](../spec.md#5-labelling-rules): when code cannot be sure, the label is unsure, the reason is named, and the user is shown the clause. It never guesses in either direction.
+- The fold note below.
+
+**For later stages.**
+- Stage 8 fills `ScanContext` for each AI text: for a reason, the clause numbers and the quote it rests on; for a reading or question, the quote; for a message, the template as `source_text`; for a rewrite, the clause as `source_text` and `instruction_given` when the user typed an instruction. Every text also needs its `label`, `allowed_numbers`, `acceptable_limits`, `known_placeholders` and `defined_roles`. The scans catch signs, not a fluent sentence that is wrong (Spec 6.2).
+- `RateLimitedError` exists. Stage 6 maps it to Interrupted with its own message; stage 9 raises it from an HTTP 429 after the retries.
+- The owner's scan lists had three hazards. Two are fixed (S1-M6-T5 and S1-M6-T6): a list marker such as "(i)" is no longer the word "I", and "no." is an abbreviation only before a number. The third, `"legal"` matching "legal fees", waits for stage 10's paid runs: [system design 15.10](../system-design.md#1510-stage-10-the-paid-test-set), "Check in this stage".
+- The docs now give the cost formula's figures (S1-M6-T7): $0.29 to $1.32 for 10,000 words and $0.75 to $5.88 for 50,000 words on a Sonnet-class model ([system design 1.2](../system-design.md#12-qualities-it-must-have), [ADR 0010](../adr/0010-starting-models.md), amendment of 16 Nov 2026). The researcher's earlier $0.82 and $3.77 stay in ADR 0010's history.
+- `cli` has no `README.md` or `samples/` yet, which the planned "every module has a README" architecture test will need.
+- Start the ten test contracts of testing strategy 13 now: they take the longest.
+- Decision-record action items this stage closes, for the owner to tick: ADR 0005 items 2 and 4, ADR 0012 item 1, ADR 0013 items 1 and 2 (the guard part), ADR 0015 items 1 and 2.
+
+One note was recorded on 16 Nov 2026 before the stage closed, so it could not be lost:
 
 **The fold is built once, in `core`.** Stage 1 built the Spec 2 quote-check fold as `fold_for_quote_check` (S1-M5-T4), returning `QuoteFold` (`text`, `to_original`), and the last check before drawing uses it (S1-M5-T11). System design 3.4 also defines `MatchKey` (`text`, `to_canonical`) — the folded copy and index map of section 4.2, which stage 2 builds with "the fold for them". The two index maps are not the same thing: `to_canonical` maps the folded text into `Document.text` for matching; `to_original` maps a folded character back to the text the fold came from. The folding rules themselves (quotes made straight, whitespace runs collapsed) are one set of rules in the Spec. When planning stage 2, decide whether one shared fold implementation in `core` serves both shapes, and record the decision in its home (system design 4.2 or a short ADR). Do not build a second fold without saying so.

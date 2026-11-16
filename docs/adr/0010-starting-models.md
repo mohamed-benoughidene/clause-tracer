@@ -111,3 +111,14 @@ What this settles, and what it doesn't:
 - **Both models were served by Google's endpoint**, which is on the zero-retention list.
 - **Not tested:** a prompt that invites a schema break (action item 2), reasoning tokens, hostile contracts, and anything beyond one form. The cache lasts minutes, so a slow review may pay for the first call more than once.
 
+## Amendment (16 Nov 2026): cost figures from the formula
+
+Stage 1 built the cost estimate of [system design 7](../system-design.md#7-caching-resume-and-cost) in `core`, checked against the owner's `cost_estimate.toml`. For the starter playbook (11 positions, 30 calls over 50 clauses), at $2.00 input, $0.20 cached input and $10.00 output per million tokens, it gives:
+
+| Model | 10,000-word review | 50,000-word review |
+|-------|--------------------|--------------------|
+| Claude Sonnet 5.5, every call hits the cache | $0.29 | $0.75 |
+| Claude Sonnet 5.5, no call hits the cache | $1.32 | $5.88 |
+| Claude Haiku 5.5 ($0.10 / $0.01 / $0.50) | $0.015 to $0.066 | not computed |
+
+These replace the researcher's estimates in the Decision section ($0.28 and $0.82, or $3.77 when caching fails) wherever a figure is quoted. The high end is higher than the researcher's because the formula charges the whole contract at full price on every call. The cached price of a tenth of the input price is an assumption, and the figures are arithmetic, not a measured review: the paid runs of stage 10 measure the real cost.

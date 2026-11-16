@@ -19,7 +19,7 @@ Run `scripts/check.sh` before you call a code change done. It must pass with no 
 
 ## Where the project stands
 
-The design is done. The app code is an empty skeleton: every module exists, runs alone and passes its smoke test, but no app feature is built yet. The one working program is the repo's own copy lint in `scripts/`. The repo holds:
+The design is done. Build stage 1 is done: `core` holds the shapes, ports, fakes and pure rules (label picking, playbook checks, output scans, the last check before drawing, auto-delete dates and the cost estimate), and `python -m clause_tracer.core` labels the Spec 14.5 sample. Every other module is still an empty skeleton: it exists, runs alone and passes its smoke test, but no app feature is built yet. Stage 2, `ingest`, is next. The repo holds:
 
 - `src/clause_tracer/`: the Python package. [Its README](src/clause_tracer/README.md) maps the modules. [ADR 0004](docs/adr/0004-code-layout.md) explains the layout.
 - `tests/`: integration and end-to-end tests only. Unit tests live beside each module, in `src/clause_tracer/<module>/tests/`.

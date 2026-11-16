@@ -172,11 +172,11 @@ These thresholds are the project's own. No regulator or bar has published an acc
 
 The owner set the budget on 12 Nov 2026: **about $10.76 in total** ($5.76 in hand, plus $5). The plan below fits inside what is left of it, with a small reserve.
 
-**What a run costs.** Prices were fetched on 11 Nov 2026 and change weekly. All figures are estimates until the first paid run measures them.
+**What a run costs.** Prices were fetched on 11 Nov 2026 and change weekly. All figures are estimates until the first paid run measures them. The first row comes from the stage 1 cost formula (system design 7, 16 Nov 2026); the rows below it assume the cache hits, and a run where it misses costs about four and a half times as much for 10,000 words, and about eight times for 50,000.
 
 | Run | Cheap model (Claude Haiku 5.5) | Sonnet-class model |
 | --- | --- | --- |
-| One review of a 10,000-word contract | `[Assumption]` 1 to 3 cents | about $0.28 |
+| One review of a 10,000-word contract | `[Assumption]` 1.5 cents, or 7 cents if no call hits the cache | about $0.29, or $1.32 if no call hits the cache |
 | Ten contracts, one run each | `[Assumption]` 10 to 30 cents | about $2.80 |
 | Ten contracts, ten injected variants and 100 built cases, three runs each | `[Assumption]` about $2 | about $34 |
 | The same with 300 built cases | $3 to $4 | about $67 |
@@ -302,9 +302,9 @@ These are the project's own targets, anchored on a common industry guide (60% ac
 
 | Gap | Closed in build stage |
 | --- | --- |
-| No label-rule tables, no property tests | 1 (`core`) |
-| No replay fake | 1 |
-| No coverage measurement; no guard on owner tables | 1 |
+| No label-rule tables, no property tests | 1 (`core`): closed 16 Nov 2026 |
+| No replay fake | 1: closed 16 Nov 2026 |
+| No coverage measurement; no guard on owner tables | 1: closed 16 Nov 2026 |
 | No suite-wide socket block (`pytest-socket`) | 6, with the first adapters |
 | No nightly job (Hypothesis at 2,000 examples, file fuzzing) | 5, with the hostile-file fuzzing |
 | No samples or golden files in any module | 2 to 5, with each module |

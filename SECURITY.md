@@ -29,7 +29,7 @@ We'll keep you updated, and we'll agree a date with you before anything is made 
 
 ## Supported versions
 
-Clause Tracer is still in design, so no version has been released yet. Until then, only the latest commit on `main` is supported. Once releases start, the latest release will get security fixes.
+Clause Tracer is still being built, so no version has been released yet. Until then, only the latest commit on `main` is supported. Once releases start, the latest release will get security fixes.
 
 ## What counts
 

@@ -8,7 +8,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-FSL--1.1--ALv2-blue" alt="License: FSL-1.1-ALv2"></a>
-  <img src="https://img.shields.io/badge/status-design%20%26%20prototype-orange" alt="Status: design and prototype">
+  <img src="https://img.shields.io/badge/status-in%20build-orange" alt="Status: in build">
   <img src="https://img.shields.io/badge/platforms-Linux%20%7C%20Windows-lightgrey" alt="Platforms: Linux and Windows">
   <img src="https://img.shields.io/badge/telemetry-none-brightgreen" alt="Telemetry: none">
 </p>
@@ -19,7 +19,7 @@ With **Clause Tracer**, you write a **playbook**, your rules for a good deal: "p
 
 It runs on your own computer, with your own [OpenRouter](https://openrouter.ai) key. Names and addresses are replaced before anything is sent to an AI model. There's no account, no server run by the project and no telemetry.
 
-> **Status: in design.** The spec, design system and a clickable HTML prototype are done. The code skeleton is in place, but no app feature is built and the app isn't usable yet. [Try the prototype](#try-the-prototype) and [watch the repo](https://github.com/mohamed-benoughidene/clause-tracer) to follow along.
+> **Status: in build.** The spec, design system and a clickable HTML prototype are done. Build stage 1 of 12 is done: the pure rules that pick labels and check the AI's words. No app feature is usable yet. [Try the prototype](#try-the-prototype) and [watch the repo](https://github.com/mohamed-benoughidene/clause-tracer) to follow along.
 
 ## Why Clause Tracer
 

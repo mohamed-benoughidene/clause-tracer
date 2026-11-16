@@ -68,10 +68,29 @@ FIRST_PERSON_SLOTS: frozenset[TextSlot] = frozenset(
 # (question 18b).
 _SOURCE_SLOTS: frozenset[TextSlot] = frozenset({TextSlot.MESSAGE, TextSlot.REWRITE})
 
+# A listed abbreviation that is also an ordinary word is masked only
+# when a digit follows: "No. 5" does not end a sentence, but "the answer
+# is no. They pay." does (decided 16 Nov 2026). Missing a sentence end
+# would let an added sentence through.
+NUMBER_ABBREVIATIONS: tuple[str, ...] = ("no.",)
+
 _ABBREVIATION_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = tuple(
-    (abbreviation, re.compile(r"(?<![\w.])" + re.escape(abbreviation), re.IGNORECASE))
+    (
+        abbreviation,
+        re.compile(
+            r"(?<![\w.])"
+            + re.escape(abbreviation)
+            + (r"(?=\s*\d)" if abbreviation in NUMBER_ABBREVIATIONS else ""),
+            re.IGNORECASE,
+        ),
+    )
     for abbreviation in ABBREVIATIONS
 )
+
+# A bracketed Roman-numeral list marker, such as "(i)", "(iv)" or "(I)",
+# is not the word "I": it is blanked before the first-person scan
+# (decided 16 Nov 2026).
+LIST_MARKER_PATTERN = re.compile(r"\([ivxlcdm]+\)", re.IGNORECASE)
 
 # A reason needs an anchor: a clause number given to the step, or a
 # quoted word of at least four letters that is in the quote (Spec 6.2).
@@ -156,6 +175,12 @@ def mask_abbreviations(text: str) -> str:
     return masked
 
 
+def _mask_list_markers(text: str) -> str:
+    """Blank out every bracketed list marker with spaces, keeping the length."""
+
+    return LIST_MARKER_PATTERN.sub(lambda match: " " * len(match.group()), text)
+
+
 def _added_words(text: str, source: str | None, words: tuple[str, ...]) -> bool:
     """True when some listed word is in the text but not in its source.
 
@@ -183,8 +208,10 @@ def scan_style(text: str, slot: TextSlot, context: ScanContext) -> tuple[ScanFin
     source = context.source_text if slot in _SOURCE_SLOTS else context.quote
     findings: list[ScanFinding] = []
     if slot in FIRST_PERSON_SLOTS:
-        masked_text = mask_abbreviations(text)
-        masked_source = mask_abbreviations(source) if source is not None else None
+        masked_text = _mask_list_markers(mask_abbreviations(text))
+        masked_source = (
+            _mask_list_markers(mask_abbreviations(source)) if source is not None else None
+        )
         first_person_added = _added_words(masked_text, masked_source, FIRST_PERSON_WORDS)
         if first_person_added:
             findings.append(ScanFinding.FIRST_PERSON)
