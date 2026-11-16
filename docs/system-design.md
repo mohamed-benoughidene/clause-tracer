@@ -24,7 +24,7 @@ Clause Tracer checks one contract against the user's own playbook and shows the 
 | Privacy | No confirmed personal item, note or name in any outgoing request or log. Proven by test on every change | Spec 11 |
 | Correct labels | Every planted walk-away found. At least 90% of numbers and labels correct on the test set | Spec 11 |
 | Evidence | No quote reaches the screen unless code found it word for word in the contract | Spec 11 |
-| Cost per review | `[Assumption]` about $0.28 for a 10,000-word contract and $0.82 for 50,000 words on a Sonnet-class model; a few cents on a cheap model | [ADR 0010](adr/0010-starting-models.md) |
+| Cost per review | `[Assumption]` by the formula of section 7, at $2.00 input, $0.20 cached input and $10.00 output per million tokens: $0.29 to $1.32 for a 10,000-word contract and $0.75 to $5.88 for 50,000 words on a Sonnet-class model; 1.5 to 7 cents for 10,000 words on Claude Haiku 5.5. The low end is every call hitting the cache, the high end none | [ADR 0010](adr/0010-starting-models.md), amendment of 16 Nov 2026 |
 | Input size | `[Assumption]` files up to 20 MB and 50,000 words (about 95,000 tokens at the 1.9 tokens per word the 13 Nov 2026 probe measured, [ADR 0010](adr/0010-starting-models.md); about 2,500 sentences) | Spec 9 |
 | Offline | Saved reviews open offline. A draft can be prepared offline. Only AI steps need the internet | Spec 9 |
 | Systems | Linux (Ubuntu 24.04 and later, Mint 22 and later, Debian 13, Fedora by archive) and Windows 10/11. Mac later | Spec 9 |
@@ -429,7 +429,7 @@ One base `ClauseTracerError(code, context)` in `core`, with a small tree of expe
 - **A parser fix costs nothing.** Fixed code re-reads the saved replies with no new AI calls (D2).
 - **Test fixtures come free.** Saved replies from a paid run become replay fixtures.
 
-**Prompt caching.** Prompts put the byte-stable system text first, the contract block next, and the per-position task last, so the provider can reuse the prefix. The app reads the cached-token count on every call and warns when caching misses, because a miss raises the cost of a 50,000-word review from about $0.82 to about $3.77 on the recommended default model `[Assumption]`.
+**Prompt caching.** Prompts put the byte-stable system text first, the contract block next, and the per-position task last, so the provider can reuse the prefix. The app reads the cached-token count on every call and warns when caching misses, because a miss raises the cost of a 50,000-word review from about $0.75 to about $5.88 on the recommended default model, by the formula below `[Assumption]`.
 
 **Estimate.** `[Assumption]` A review of 11 positions over about 50 clauses makes roughly 30 to 35 AI calls: one forward match per position, a few reverse-match batches, a handful of pair checks, one extraction per number or yes/no position, one judge call and one explain call per words position, one more call per value that is unsure because of vague wording (for its readings and question), and the sort-not-covered calls. Code writes every other panel sentence, with no AI call (decided 14 Nov 2026, Spec 6.1 step 10). Before that decision the count was 35 to 40, with an explain call for every second position. The pre-run estimate is shown as a range and is calibrated from the `usage.cost` of real runs.
 
@@ -736,6 +736,7 @@ The task plan of each stage is written in `docs/plans/` just before the stage is
 - **Changed from the report.** The budget sets the model plan: paid testing runs on Claude Haiku 5.5, and the default Sonnet-class model gets one pass of the ten contracts at most ([`testing-strategy.md`](testing-strategy.md) section 7.5). Comparisons run only where the budget allows.
 - **Done when** a first baseline is recorded and the results are brought to the owner: real cost per review, input limits (Spec 13), the unsure share, the undecodable-character level, clause-type accuracy and the disagreement rate.
 - **Tests, in the testing strategy.** Section 7.
+- **Check in this stage** (owner, 16 Nov 2026). The law-word scan flags "legal" in "legal fees" or "legal costs", so a sound reason that quotes such a clause falls back to the code's template. Nothing wrong reaches the user, but good AI text is lost. Count how often this happens in the paid runs, then decide: keep it, let a law word pass when it is in the quote, or change the list. Do not drop "legal" without a replacement, or "this is legal" gets through.
 
 ### 15.11 Stage 11: `writing` and the rest of `outputs`
 

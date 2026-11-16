@@ -874,7 +874,7 @@ The output scans give the owner's findings for every case in the scan table, the
   - **Rules:** [Spec 6.2](../spec.md#62-rules-for-every-ai-step) (first person, added sentences), Spec 5 (never guess: a missed sentence end fails open).
   - **Depends on:** S1-M5-T5, S1-M6-T5.
 
-- [ ] **S1-M6-T7: Cost figures and the law-word note**
+- [x] **S1-M6-T7: Cost figures and the law-word note**
   - **Build:** Docs only. Replace the 50,000-word and 10,000-word cost figures in [system design 1.2](../system-design.md#12-qualities-it-must-have) with the formula's figures from the owner's `cost_estimate.toml`, and add a dated amendment to [ADR 0010](../adr/0010-starting-models.md) giving the same figures. Add a "Check in this stage" bullet to system design 15.10: the law word "legal" also matches "legal fees", which sends a sound reason to the template; count how often in the paid runs and decide then.
   - **Files:** `docs/system-design.md`, `docs/adr/0010-starting-models.md`.
   - **Tests first:** None.
@@ -969,8 +969,8 @@ Written on 16 Nov 2026, when the stage closed.
 **For later stages.**
 - Stage 8 fills `ScanContext` for each AI text: for a reason, the clause numbers and the quote it rests on; for a reading or question, the quote; for a message, the template as `source_text`; for a rewrite, the clause as `source_text` and `instruction_given` when the user typed an instruction. Every text also needs its `label`, `allowed_numbers`, `acceptable_limits`, `known_placeholders` and `defined_roles`. The scans catch signs, not a fluent sentence that is wrong (Spec 6.2).
 - `RateLimitedError` exists. Stage 6 maps it to Interrupted with its own message; stage 9 raises it from an HTTP 429 after the retries.
-- Three hazards in the owner's scan lists, left for the owner to decide: `"I"` matches the "(i)" of a clause number; `"legal"` matches "legal fees"; the abbreviation `"no."` hides the end of a sentence that ends in "no.".
-- The cost formula gives $0.75 to $5.88 for a 50,000-word contract at the Sonnet-class prices of `cost_estimate.toml`; [system design 1.2](../system-design.md#12-qualities-it-must-have) and [ADR 0010](../adr/0010-starting-models.md) still state the researcher's earlier estimate of $0.82, or $3.77 when caching fails. The two need reconciling in a docs change.
+- The owner's scan lists had three hazards. Two are fixed (S1-M6-T5 and S1-M6-T6): a list marker such as "(i)" is no longer the word "I", and "no." is an abbreviation only before a number. The third, `"legal"` matching "legal fees", waits for stage 10's paid runs: [system design 15.10](../system-design.md#1510-stage-10-the-paid-test-set), "Check in this stage".
+- The docs now give the cost formula's figures (S1-M6-T7): $0.29 to $1.32 for 10,000 words and $0.75 to $5.88 for 50,000 words on a Sonnet-class model ([system design 1.2](../system-design.md#12-qualities-it-must-have), [ADR 0010](../adr/0010-starting-models.md), amendment of 16 Nov 2026). The researcher's earlier $0.82 and $3.77 stay in ADR 0010's history.
 - `cli` has no `README.md` or `samples/` yet, which the planned "every module has a README" architecture test will need.
 - Start the ten test contracts of testing strategy 13 now: they take the longest.
 - Decision-record action items this stage closes, for the owner to tick: ADR 0005 items 2 and 4, ADR 0012 item 1, ADR 0013 items 1 and 2 (the guard part), ADR 0015 items 1 and 2.
