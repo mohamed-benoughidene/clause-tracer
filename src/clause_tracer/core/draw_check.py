@@ -62,6 +62,7 @@ def check_before_drawing(
         char_map_matches_text = len(document.char_map) == len(document.text)
         if not char_map_matches_text:
             return DrawRefused(failure=DrawFailure.CHAR_MAP_LENGTH)
+        pages_by_number = {page.number: page for page in document.pages}
         for index in range(evidence.quote.start, evidence.quote.end):
             glyph_index = document.char_map[index]
             if glyph_index is None:
@@ -71,10 +72,7 @@ def check_before_drawing(
             glyph = document.glyphs[glyph_index]
             if glyph.page != glyph.box.page:
                 return DrawRefused(failure=DrawFailure.PAGE_MISMATCH)
-            page = next(
-                (candidate for candidate in document.pages if candidate.number == glyph.page),
-                None,
-            )
+            page = pages_by_number.get(glyph.page)
             if page is None:
                 return DrawRefused(failure=DrawFailure.PAGE_UNKNOWN)
             box = glyph.box

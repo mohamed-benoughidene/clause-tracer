@@ -41,11 +41,16 @@ CURLY_TEXT = (
     "1. Payment. The Client pays within 60 days. Late “fees”  apply."
     " The Client pays within 60 days."
 )
+CURLY_PIECES = (
+    "1. Payment. ",
+    "The Client pays within 60 days. ",
+    "Late “fees”  apply. ",
+    "The Client pays within 60 days.",
+)
 A_SOURCE = SourceFile(name="sample.pdf", kind=FileKind.PDF, sha256="0" * 64, size=1)
 
 
-def _sentence_spans(text: str) -> tuple[Span, ...]:
-    pieces = PIECES if text == FULL_TEXT else _curly_pieces()
+def _sentence_spans(pieces: tuple[str, ...]) -> tuple[Span, ...]:
     spans: list[Span] = []
     start = 0
     for piece in pieces:
@@ -54,24 +59,16 @@ def _sentence_spans(text: str) -> tuple[Span, ...]:
     return tuple(spans)
 
 
-def _curly_pieces() -> tuple[str, ...]:
-    return (
-        "1. Payment. ",
-        "The Client pays within 60 days. ",
-        "Late “fees”  apply. ",
-        "The Client pays within 60 days.",
-    )
-
-
-def _clause(text: str = FULL_TEXT) -> Clause:
-    spans = _sentence_spans(text)
+def _clause(pieces: tuple[str, ...] = PIECES) -> Clause:
+    spans = _sentence_spans(pieces)
+    clause_length = sum(len(piece) for piece in pieces)
     return Clause(
         id=ClauseId("c1"),
         number="1",
         heading=None,
         level=1,
         parent_id=None,
-        span=Span(start=0, end=len(text)),
+        span=Span(start=0, end=clause_length),
         numbering_source="test",
         sentences=tuple(
             Sentence(id=sentence_id, span=span)
@@ -113,7 +110,7 @@ def test_exact_quote_passes() -> None:
 
 def test_curly_quotes_and_spaces_pass() -> None:
     document = _document(CURLY_TEXT)
-    clause = _clause(CURLY_TEXT)
+    clause = _clause(CURLY_PIECES)
     region = Span(start=44, end=64)
     fold = fold_for_quote_check(document.text[region.start : region.end])
     needle = fold_for_quote_check('Late "fees" apply.').text
