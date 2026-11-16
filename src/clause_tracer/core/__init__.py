@@ -186,6 +186,7 @@ from clause_tracer.core.scan_rules import (
 )
 from clause_tracer.core.scans import (
     contains_phrase,
+    count_sentences,
     has_clause_number,
     has_quoted_word,
     mask_abbreviations,
@@ -335,6 +336,7 @@ __all__: list[str] = [
     "check_playbook",
     "combine_rule_4",
     "contains_phrase",
+    "count_sentences",
     "convert_to_unit",
     "due_at",
     "evidence_reasons",

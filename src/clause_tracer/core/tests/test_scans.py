@@ -15,6 +15,7 @@ from clause_tracer.core import (
     ScanFinding,
     TextSlot,
     contains_phrase,
+    count_sentences,
     mask_abbreviations,
     scan_style,
     scan_text,
@@ -256,3 +257,82 @@ def test_no_anchor_only_checks_reasons() -> None:
     for slot in other_slots:
         findings = scan_style("The wording is vague.", slot, make_scan_context())
         assert ScanFinding.NO_ANCHOR not in findings, slot
+
+
+@pytest.mark.parametrize("case", _CASES, ids=_CASE_IDS)
+def test_sentence_scans_table(case: ScanCase) -> None:
+    assert set(scan_style(case.text, case.slot, case.context)) & {ScanFinding.ADDED_SENTENCE} == (
+        case.findings & {ScanFinding.ADDED_SENTENCE}
+    )
+
+
+def test_count_sentences_examples() -> None:
+    counts = (
+        ("", 0),
+        ("   ", 0),
+        ("Pay in 30 days.", 1),
+        ("Pay. Now!", 2),
+        ("Is it 1.5 days? Yes.", 2),
+        ("See e.g. clause 4.", 1),
+        ("No end mark", 1),
+        ("The fee is “reasonable.” Ask.", 2),
+    )
+    for text, expected in counts:
+        assert count_sentences(text) == expected, text
+
+
+def test_message_may_not_add_a_sentence() -> None:
+    source = "Thanks for sending the agreement. Could we look at a few points?"
+    findings = scan_style(
+        "Thanks for sending the agreement. Could we look at a few points?"
+        " That would help me plan the work.",
+        TextSlot.MESSAGE,
+        make_scan_context(source_text=source),
+    )
+    assert ScanFinding.ADDED_SENTENCE in findings
+
+
+def test_message_may_drop_a_sentence() -> None:
+    source = "Thanks for sending the agreement. Could we look at a few points?"
+    findings = scan_style(
+        "Could we look at a few points?",
+        TextSlot.MESSAGE,
+        make_scan_context(source_text=source),
+    )
+    assert ScanFinding.ADDED_SENTENCE not in findings
+
+
+def test_clause_rewrite_may_not_add_a_sentence() -> None:
+    findings = scan_style(
+        "The Client pays within 30 days. Late payment carries interest.",
+        TextSlot.REWRITE,
+        make_scan_context(source_text="The Client pays within 30 days."),
+    )
+    assert ScanFinding.ADDED_SENTENCE in findings
+
+
+def test_instruction_allows_more_sentences() -> None:
+    findings = scan_style(
+        "The Client pays within 30 days. Late payment carries interest.",
+        TextSlot.REWRITE,
+        make_scan_context(source_text="The Client pays within 30 days.", instruction_given=True),
+    )
+    assert ScanFinding.ADDED_SENTENCE not in findings
+
+
+def test_missing_source_fails_closed() -> None:
+    in_message = scan_style("Pay now.", TextSlot.MESSAGE, make_scan_context())
+    in_rewrite = scan_style("Pay now.", TextSlot.REWRITE, make_scan_context())
+    in_rewrite_with_instruction = scan_style(
+        "Pay now.", TextSlot.REWRITE, make_scan_context(instruction_given=True)
+    )
+    assert ScanFinding.ADDED_SENTENCE in in_message
+    assert ScanFinding.ADDED_SENTENCE in in_rewrite
+    assert ScanFinding.ADDED_SENTENCE not in in_rewrite_with_instruction
+
+
+def test_added_sentence_only_checks_rewrites() -> None:
+    findings = scan_style(
+        "5.4 says 60 days. 5.5 says 30 days.", TextSlot.REASON, make_scan_context()
+    )
+    assert ScanFinding.ADDED_SENTENCE not in findings

@@ -70,6 +70,13 @@ _ABBREVIATION_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = tuple(
 MIN_ANCHOR_LETTERS = 4
 QUOTED_RUN_PATTERN = re.compile(r'"([^"]+)"')
 
+# One or more of ".", "?" and "!", then any closing quotes or brackets,
+# then a space, a line break or the end of the text. "1.5" does not end
+# a sentence, and the listed abbreviations are masked out first. The
+# stage 2 splitter (NUPunkt) is not used here: core imports no other
+# module, and both texts of a comparison are counted by this one rule.
+SENTENCE_END_PATTERN = re.compile(r"[.?!]+[\"'’”)\]]*(?=\s|$)")
+
 
 def contains_phrase(text: str, phrase: str) -> bool:
     """True when the phrase appears as a whole word or phrase, any case.
@@ -173,7 +180,30 @@ def scan_style(text: str, slot: TextSlot, context: ScanContext) -> tuple[ScanFin
         )
         if not anchored:
             findings.append(ScanFinding.NO_ANCHOR)
+    may_add_sentences = slot is TextSlot.MESSAGE or (
+        slot is TextSlot.REWRITE and not context.instruction_given
+    )
+    if may_add_sentences:
+        no_source = context.source_text is None
+        more_than_source = context.source_text is not None and count_sentences(
+            text
+        ) > count_sentences(context.source_text)
+        if no_source or more_than_source:
+            findings.append(ScanFinding.ADDED_SENTENCE)
     return tuple(findings)
+
+
+def count_sentences(text: str) -> int:
+    """The number of sentences by the scans' own small rule.
+
+    A sentence ends at ".", "?" or "!" followed by a space or the end of
+    the text; "1.5" and the listed abbreviations do not end one, and
+    text with no end mark is one sentence. Pieces with no letter or
+    digit, such as the tail after a final mark, do not count.
+    """
+
+    pieces = SENTENCE_END_PATTERN.split(mask_abbreviations(text))
+    return sum(1 for piece in pieces if any(character.isalnum() for character in piece))
 
 
 def has_clause_number(text: str, clause_numbers: Iterable[str]) -> bool:
