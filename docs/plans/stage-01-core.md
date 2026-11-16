@@ -861,12 +861,12 @@ The output scans give the owner's findings for every case in the scan table, the
   - **Rules:** S1-M6-T1, [system design 6.2](../system-design.md#62-the-command-line).
   - **Depends on:** S1-M6-T1.
 
-- [ ] **S1-M6-T5: Scan rows for list markers and "no." (Owner)**
+- [x] **S1-M6-T5: Scan rows for list markers and "no." (Owner)**
   - **Build:** Owner only. Append rows to `scans.toml` in the format of S1-M5-T1. Cases, proposed, owner to check: a reason citing "5.4(i)" passes; one citing "5.4(I)" passes; a reason with "I" beside "5.4(i)" still fails `first_person`; a rewrite adding "No. 5" adds no sentence; a rewrite adding "Refunds: no." as its own sentence fails `added_sentence`. The AI agent does not write or change it (T11).
   - **Files:** `src/clause_tracer/core/tests/tables/scans.toml`.
   - **Tests first:** None. The owner's values are the expected answers.
 
-- [ ] **S1-M6-T6: List markers are not "I", and "no." needs a number**
+- [x] **S1-M6-T6: List markers are not "I", and "no." needs a number**
   - **Build:** In `scans.py`: (a) `LIST_MARKER_PATTERN = re.compile(r"\([ivxlcdm]+\)", re.IGNORECASE)`, a bracketed Roman-numeral list marker such as "(i)", "(iv)" or "(I)". Before the first-person scan, `scan_style` blanks every list marker to spaces of the same length, in the text and in its source, after masking abbreviations. The pronoun "I" still matches in any letter case. (b) `NUMBER_ABBREVIATIONS: tuple[str, ...] = ("no.",)`: a listed abbreviation in this tuple is masked only when a digit follows, after optional whitespace (`(?=\s*\d)`), so "No. 5" does not end a sentence and "no." before a space and a word does. Both constants stay on `scans.py` (the precedent of milestone 5). Update the `core` README rows of `mask_abbreviations` and `scan_style`.
   - **Files:** `src/clause_tracer/core/scans.py`, `src/clause_tracer/core/tests/test_scans.py`, `src/clause_tracer/core/README.md`.
   - **Tests first:** in `test_scans.py`: `test_list_marker_is_not_first_person` ("(i)", "(iv)" and "(I)" in a reason pass); `test_first_person_beside_a_list_marker_fails`; `test_no_before_a_number_is_masked` (`count_sentences("See No. 5 now.") == 1`); `test_no_without_a_number_ends_a_sentence` (`count_sentences("The answer is no. They pay.") == 2`); `test_number_abbreviations_are_listed` (each is in `ABBREVIATIONS`).
@@ -952,6 +952,7 @@ Planning found questions 1 to 17. The owner answered all of them on 14 Nov 2026;
 | 16 Nov 2026 | Milestone 5 review (both axes) done. One reading recorded for the owner: the compiled scan patterns, `MIN_ANCHOR_LETTERS`, `SENTENCE_END_PATTERN` and the two token constants are public on their own modules but not re-exported from `clause_tracer.core`, although the tasks say "export". This follows the accepted precedent of S1-M4-T6, where `WARNING_WINDOW` and `LOWERING_GRACE` stayed on `auto_delete.py`; the facade holds what callers import, and no test imports these. If the owner wants them in the facade, the fix is small. The review's other findings (a double placeholder scan, a page lookup inside the loop, two test-helper smells, an `__all__` ordering slip) were fixed in two refactor commits. | Plans README ("When the plan is wrong"), AGENTS.md (review findings go to the owner) |
 | 16 Nov 2026 | Milestone 6 ticked (tasks S1-M6-T1 to S1-M6-T3) and every box of section 7 checked: `scripts/check.sh` exits 0 (1063 tests), branch coverage of `core` is 97%, the owner-table guard passes against `main`, and `python -m clause_tracer.core` prints the 11 Spec 14.5 labels. S1-M6-T2 keeps the `core/__init__.py` docstring on two lines: the plan's one-line form is 163 characters, over ruff's 100, and the words are the same. Status set to Done and the report sent; S1-M6-T3 is done once the owner confirms it. | Plans README ("When the stage is done") |
 | 16 Nov 2026 | Added S1-M6-T4 to S1-M6-T7 after the stage 1 report, on the owner's decisions of the same day. T4 records the UTF-8 fix already made. T5 and T6 fix two scan-list hazards: "I" matched the list marker "(i)", and "no." hid a sentence end. T7 brings the cost figures of the docs in line with the formula and records the third hazard ("legal" in "legal fees") for stage 10, where the owner decides it. | Plans README ("When the plan is wrong": add a task) |
+| 16 Nov 2026 | S1-M6-T5 and S1-M6-T6 ticked. The owner appended five rows to `scans.toml` in its own commit, `666f6b0`, so the table now holds 94 cases; every row passes with the fix of S1-M6-T6. | Plans README ("Owner tasks") |
 
 ## 9. Notes for the next stage
 
