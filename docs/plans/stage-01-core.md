@@ -372,7 +372,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** S1 (sample input), D4, T1 (pure: it parses data already read; only `__main__` reads files).
   - **Depends on:** S1-M2-T4.
 
-- [ ] **S1-M3-T4: Read label inputs from the sample format**
+- [x] **S1-M3-T4: Read label inputs from the sample format**
   - **Build:** In `src/clause_tracer/core/sample_input.py`:
     - `def parse_label_inputs(entries: Sequence[Mapping[str, object]], playbook: Playbook) -> tuple[tuple[LabelInput, ...], UnreadableSpans]`. Each entry has keys `position` (str, required: a position id of `playbook`, or `ValueError`), `match` (`"found"`, `"nothing"`, `"unconfirmed"` or `"failed"`, required), `values` (list, default empty), `judged` (list, default empty), `clauses_to_read` (list of str, default empty), `outside_documents` (list of str, default empty).
     - A value table has keys `clause` (str, required), `raw`, `number`, `range_high`, `unit`, `start_point`, `answer` (an `Answer` value), `vague` (bool, default false), `amount`, `total`, `reasons` (list of `ReasonCode` values, default empty), `unlimited` (bool, default false), `quote` (`"confirmed"`, `"unplaced"` or `"none"`, default `"confirmed"`), `on` (`"visible"`, `"hidden"` or `"undecodable"`, default `"visible"`). It becomes a `CheckedValue` with `raw_value=raw`, `unit_as_written=unit`, `start_point_as_written=start_point`, `condition=None`, and the other fields by name.
