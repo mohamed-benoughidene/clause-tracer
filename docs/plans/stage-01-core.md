@@ -354,7 +354,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** T11, [testing strategy 10](../testing-strategy.md#10-keeping-agent-written-tests-honest), [ADR 0013](../adr/0013-test-layers-and-release-gates.md) "Agent guard".
   - **Depends on:** S1-M1-T7.
 
-- [ ] **S1-M3-T2: Create the seven empty owner tables**
+- [x] **S1-M3-T2: Create the seven empty owner tables**
   - **Build:** Create these files, each holding exactly two lines: the `HEADER` line, then `# Format: docs/plans/stage-01-core.md, task <id>.` with the id of the owner task that fills it: `label_rules.toml` (S1-M3-T6), `units.toml` (S1-M3-T7), `spec_14_5.toml` (S1-M3-T8), `playbook_checks.toml` (S1-M3-T9), `auto_delete.toml` (S1-M4-T5), `scans.toml` (S1-M5-T1), `cost_estimate.toml` (S1-M5-T9). This commit holds these seven files and the plan tick, and no code, so the owner-table guard passes.
   - **Files:** the seven files in `src/clause_tracer/core/tests/tables/`.
   - **Tests first:** None. The loader test of S1-M3-T1 already covers a header-only file.
