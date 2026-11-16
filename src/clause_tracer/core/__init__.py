@@ -141,6 +141,7 @@ from clause_tracer.core.ports import (
     ReviewStore,
     SecretStore,
 )
+from clause_tracer.core.request_hash import request_sha256, to_plain
 from clause_tracer.core.results import (
     CallFailed,
     CheckedValue,
@@ -286,8 +287,10 @@ __all__: list[str] = [
     "level_for_limits",
     "level_rank",
     "number_verdicts",
+    "request_sha256",
     "sort_reasons",
     "spans_overlap",
+    "to_plain",
     "unreadable_spans",
     "words_verdict",
     "worst_level",
