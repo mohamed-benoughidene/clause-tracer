@@ -160,6 +160,7 @@ arguments, with exactly the fields of system design 3.4 in that order (ADR 0005)
 | `number_verdicts(rule: NumberRule, value: CheckedValue, unreadable: UnreadableSpans) -> tuple[ValueVerdict, ...]` | the verdicts of one number value, before Rule 4 combines them | Unlimited: walk-away when lower is better, unsure with `UNLIMITED_UNCLEAR` when higher is better. Amount without total → `AMOUNT_WITHOUT_TOTAL`; amount and percent compared rounded half up to a whole percent. A range gives one verdict per end with `RANGE`. Any reason from `UNSURE_REASONS` → one unsure verdict |
 | `yes_no_verdict(rule: YesNoRule, value: CheckedValue, unreadable: UnreadableSpans) -> ValueVerdict` | `YES` takes the rule's yes level; `NO`, `UNCLEAR` and `MISSING` take the no level (Rule 2) | A conditional yes is unsure with `CONDITIONAL_YES`; no answer → `NO_VALUE`; any unsure reason → unsure |
 | `words_verdict(judged: JudgedLevel, unreadable: UnreadableSpans) -> ValueVerdict` | the judged level, kept as it is | An unsure judgement is unsure with `JUDGED_UNSURE`; hidden or undecodable text under it → unsure (Rule 9) |
+| `combine_rule_4(verdicts: tuple[ValueVerdict, ...]) -> tuple[Level, tuple[ReasonCode, ...]]` | the Rule 4 level and the sorted reasons of every value | Walk-away if any readable value is walk-away, else unsure if any value is unsure, else the worst level. Readable values that differ between clauses add `CLAUSES_DISAGREE`. An empty tuple raises `ValueError` |
 
 ## Depends on
 Nothing. It imports no other clause_tracer module.

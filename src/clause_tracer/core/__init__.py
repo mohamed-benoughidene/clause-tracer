@@ -93,6 +93,7 @@ from clause_tracer.core.ids import (
     SentenceId,
 )
 from clause_tracer.core.labels import (
+    combine_rule_4,
     evidence_reasons,
     level_for_limits,
     number_verdicts,
@@ -262,6 +263,7 @@ __all__: list[str] = [
     "WrittenBy",
     "YesNoRule",
     "check_playbook",
+    "combine_rule_4",
     "convert_to_unit",
     "evidence_reasons",
     "is_better",

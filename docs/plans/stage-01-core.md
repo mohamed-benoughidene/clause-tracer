@@ -514,7 +514,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rules 2 and 9, T1.
   - **Depends on:** S1-M3-T13.
 
-- [ ] **S1-M3-T15: Combining values (Rule 4)**
+- [x] **S1-M3-T15: Combining values (Rule 4)**
   - **Build:** In `src/clause_tracer/core/labels.py`, export `def combine_rule_4(verdicts: tuple[ValueVerdict, ...]) -> tuple[Level, tuple[ReasonCode, ...]]`:
     - An empty tuple raises `ValueError("no values to combine")`.
     - Level: `WALK_AWAY` if any verdict is `WALK_AWAY` (a verdict that is not `UNSURE` is readable); else `UNSURE` if any verdict is `UNSURE`; else `worst_level` of all.

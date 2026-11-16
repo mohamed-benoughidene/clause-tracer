@@ -12,7 +12,7 @@ from fractions import Fraction
 
 from clause_tracer.core.enums import UNSURE_REASONS, Answer, Direction, Level, ReasonCode, Unit
 from clause_tracer.core.ids import ClauseId
-from clause_tracer.core.levels import sort_reasons, spans_overlap
+from clause_tracer.core.levels import sort_reasons, spans_overlap, worst_level
 from clause_tracer.core.playbook import NumberRule, YesNoRule
 from clause_tracer.core.results import (
     CheckedValue,
@@ -206,3 +206,33 @@ def words_verdict(judged: JudgedLevel, unreadable: UnreadableSpans) -> ValueVerd
     return _verdict_for(
         judged.clause_id, judged.evidence, judged.level, reasons, judged.level.value
     )
+
+
+def combine_rule_4(verdicts: tuple[ValueVerdict, ...]) -> tuple[Level, tuple[ReasonCode, ...]]:
+    """Rule 4: mixed values, in this order (Spec 5).
+
+    The level is walk-away if any readable value gives walk-away, else
+    unsure if any value is unsure, else the worst level. Clauses whose
+    readable values differ add CLAUSES_DISAGREE. The reasons of every
+    value are kept, at every level.
+    """
+
+    if not verdicts:
+        raise ValueError("no values to combine")
+    readable_by_clause: dict[ClauseId, set[str]] = {}
+    for verdict in verdicts:
+        if verdict.readable_value is not None:
+            readable_by_clause.setdefault(verdict.clause_id, set()).add(verdict.readable_value)
+    keys = {"|".join(sorted(values)) for values in readable_by_clause.values()}
+    clauses_disagree = len(keys) >= 2
+    levels = [verdict.level for verdict in verdicts]
+    if Level.WALK_AWAY in levels:
+        level = Level.WALK_AWAY
+    elif Level.UNSURE in levels:
+        level = Level.UNSURE
+    else:
+        level = worst_level(levels)
+    reasons = [reason for verdict in verdicts for reason in verdict.reasons]
+    if clauses_disagree:
+        reasons.append(ReasonCode.CLAUSES_DISAGREE)
+    return level, sort_reasons(reasons)

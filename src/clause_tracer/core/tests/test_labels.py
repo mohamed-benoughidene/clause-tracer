@@ -3,7 +3,12 @@
 import dataclasses
 from decimal import Decimal
 
+import pytest
+from hypothesis import given
+from hypothesis import strategies as st
+
 from clause_tracer.core import (
+    UNSURE_REASONS,
     Answer,
     CheckedValue,
     ClauseId,
@@ -18,11 +23,14 @@ from clause_tracer.core import (
     Span,
     Unit,
     UnreadableSpans,
+    ValueVerdict,
     YesNoRule,
+    combine_rule_4,
     number_verdicts,
     words_verdict,
     yes_no_verdict,
 )
+from clause_tracer.core.tests.strategies import value_verdicts
 
 PAYMENT_DAYS = NumberRule(
     unit=Unit.DAYS,
@@ -240,3 +248,78 @@ def test_hidden_judged_level_is_unsure() -> None:
     verdict = words_verdict(judged(), unreadable)
     assert verdict.level is Level.UNSURE
     assert verdict.reasons == (ReasonCode.HIDDEN_TEXT,)
+
+
+def test_empty_raises() -> None:
+    with pytest.raises(ValueError, match="no values to combine"):
+        combine_rule_4(())
+
+
+def _readable(clause: str, readable: str, level: Level) -> ValueVerdict:
+    return ValueVerdict(
+        clause_id=ClauseId(clause),
+        level=level,
+        reasons=(),
+        evidence=None,
+        readable_value=readable,
+    )
+
+
+def test_clauses_that_disagree() -> None:
+    # Clauses that give different values: every one appears with
+    # "These clauses disagree" (Rule 4, question 16f).
+    verdicts = (
+        _readable("c1", "12", Level.PREFERRED),
+        _readable("c2", "6", Level.PREFERRED),
+        _readable("c2", "9", Level.ACCEPTABLE),
+    )
+    level, reasons = combine_rule_4(verdicts)
+    assert level is Level.ACCEPTABLE
+    assert ReasonCode.CLAUSES_DISAGREE in reasons
+
+
+def test_same_value_in_two_clauses_agrees() -> None:
+    verdicts = (
+        _readable("c1", "30", Level.ACCEPTABLE),
+        _readable("c2", "30", Level.ACCEPTABLE),
+    )
+    level, reasons = combine_rule_4(verdicts)
+    assert level is Level.ACCEPTABLE
+    assert ReasonCode.CLAUSES_DISAGREE not in reasons
+
+
+def test_range_in_one_clause_agrees() -> None:
+    # A range inside one clause is not a disagreement (Rule 4, 16f).
+    verdicts = (
+        _readable("c1", "6", Level.PREFERRED),
+        _readable("c1", "9", Level.ACCEPTABLE),
+    )
+    level, reasons = combine_rule_4(verdicts)
+    assert level is Level.ACCEPTABLE
+    assert ReasonCode.CLAUSES_DISAGREE not in reasons
+
+
+@given(verdict_list=st.lists(value_verdicts(), min_size=1, max_size=6), data=st.data())
+def test_order_never_changes_the_result(
+    verdict_list: list[ValueVerdict], data: st.DataObject
+) -> None:
+    shuffled = data.draw(st.permutations(verdict_list))
+    assert combine_rule_4(tuple(shuffled)) == combine_rule_4(tuple(verdict_list))
+
+
+@given(
+    verdict_list=st.lists(value_verdicts(), min_size=0, max_size=5),
+    walk_away=value_verdicts().filter(lambda verdict: verdict.level is Level.WALK_AWAY),
+)
+def test_readable_walk_away_wins(verdict_list: list[ValueVerdict], walk_away: ValueVerdict) -> None:
+    # Promise test: every planted walk-away gets walk-away (Spec 11).
+    level, _ = combine_rule_4((*verdict_list, walk_away))
+    assert level is Level.WALK_AWAY
+
+
+@given(verdict_list=st.lists(value_verdicts(), min_size=1, max_size=6))
+def test_unsure_always_has_a_reason(verdict_list: list[ValueVerdict]) -> None:
+    # Never guess: an unsure label names a reason (Spec 5).
+    level, reasons = combine_rule_4(tuple(verdict_list))
+    if level is Level.UNSURE:
+        assert any(reason in UNSURE_REASONS for reason in reasons)
