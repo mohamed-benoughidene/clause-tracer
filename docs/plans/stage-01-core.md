@@ -503,7 +503,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** [Spec 5](../spec.md#5-labelling-rules) (the "never guess" principle, Rules 1, 3, 5, 6, 9); I3, I4, T1, T13.
   - **Depends on:** S1-M3-T10, S1-M3-T12.
 
-- [ ] **S1-M3-T14: Yes/no and words values (Rules 2 and 9)**
+- [x] **S1-M3-T14: Yes/no and words values (Rules 2 and 9)**
   - **Build:** In `src/clause_tracer/core/labels.py`, export:
     - `def yes_no_verdict(rule: YesNoRule, value: CheckedValue, unreadable: UnreadableSpans) -> ValueVerdict`: `reasons` = `value.reasons` plus `evidence_reasons(...)`. When `value.answer` is `None`, add `NO_VALUE` if `reasons` holds nothing from `UNSURE_REASONS`. When it is `CONDITIONAL_YES`, add `CONDITIONAL_YES`. If `reasons` holds anything from `UNSURE_REASONS`: `level=UNSURE`, `readable_value=None`. Else `YES` gives `rule.yes_level`, and `NO`, `UNCLEAR` and `MISSING` give `rule.no_level`; `readable_value=value.answer.value`.
     - `def words_verdict(judged: JudgedLevel, unreadable: UnreadableSpans) -> ValueVerdict`: `reasons = evidence_reasons(judged.evidence, unreadable)`; add `JUDGED_UNSURE` when `judged.level` is `UNSURE` (question 16d). If `reasons` holds anything from `UNSURE_REASONS`: `level=UNSURE`, `readable_value=None`. Else `level=judged.level`, `readable_value=judged.level.value`.

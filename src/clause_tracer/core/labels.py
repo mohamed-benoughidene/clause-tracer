@@ -10,12 +10,14 @@ import math
 from decimal import Decimal
 from fractions import Fraction
 
-from clause_tracer.core.enums import UNSURE_REASONS, Direction, Level, ReasonCode, Unit
+from clause_tracer.core.enums import UNSURE_REASONS, Answer, Direction, Level, ReasonCode, Unit
+from clause_tracer.core.ids import ClauseId
 from clause_tracer.core.levels import sort_reasons, spans_overlap
-from clause_tracer.core.playbook import NumberRule
+from clause_tracer.core.playbook import NumberRule, YesNoRule
 from clause_tracer.core.results import (
     CheckedValue,
     Evidence,
+    JudgedLevel,
     UnreadableSpans,
     ValueVerdict,
 )
@@ -63,11 +65,21 @@ def _half_up_to_whole(number: Fraction) -> int:
 def _verdict(
     value: CheckedValue, level: Level, reasons: list[ReasonCode], readable_value: str | None
 ) -> ValueVerdict:
+    return _verdict_for(value.clause_id, value.evidence, level, reasons, readable_value)
+
+
+def _verdict_for(
+    clause_id: ClauseId,
+    evidence: Evidence | None,
+    level: Level,
+    reasons: list[ReasonCode],
+    readable_value: str | None,
+) -> ValueVerdict:
     return ValueVerdict(
-        clause_id=value.clause_id,
+        clause_id=clause_id,
         level=level,
         reasons=sort_reasons(reasons),
-        evidence=value.evidence,
+        evidence=evidence,
         readable_value=readable_value,
     )
 
@@ -159,4 +171,38 @@ def number_verdicts(
         return (_verdict(value, Level.WALK_AWAY, reasons, "unlimited"),)
     return tuple(
         _verdict(value, level_for_limits(rule, number), reasons, str(number)) for number in numbers
+    )
+
+
+def yes_no_verdict(
+    rule: YesNoRule, value: CheckedValue, unreadable: UnreadableSpans
+) -> ValueVerdict:
+    """The verdict of one yes/no value (Rule 2; the quote check, Rule 9)."""
+
+    reasons = list(value.reasons) + list(evidence_reasons(value.evidence, unreadable))
+    if value.answer is None:
+        if not _has_unsure_reason(reasons):
+            reasons.append(ReasonCode.NO_VALUE)
+        # No answer is unsure either way.
+        return _verdict(value, Level.UNSURE, reasons, None)
+    if value.answer is Answer.CONDITIONAL_YES:
+        reasons.append(ReasonCode.CONDITIONAL_YES)
+    if _has_unsure_reason(reasons):
+        return _verdict(value, Level.UNSURE, reasons, None)
+    # "No" equals "missing" (and "unclear"): all three take the no level.
+    level = rule.yes_level if value.answer is Answer.YES else rule.no_level
+    return _verdict(value, level, reasons, value.answer.value)
+
+
+def words_verdict(judged: JudgedLevel, unreadable: UnreadableSpans) -> ValueVerdict:
+    """The verdict of one AI judgement for a words position (Rules 4 and 9)."""
+
+    reasons = list(evidence_reasons(judged.evidence, unreadable))
+    if judged.level is Level.UNSURE:
+        # The AI could not judge it (question 16d).
+        reasons.append(ReasonCode.JUDGED_UNSURE)
+    if _has_unsure_reason(reasons):
+        return _verdict_for(judged.clause_id, judged.evidence, Level.UNSURE, reasons, None)
+    return _verdict_for(
+        judged.clause_id, judged.evidence, judged.level, reasons, judged.level.value
     )

@@ -4,10 +4,12 @@ import dataclasses
 from decimal import Decimal
 
 from clause_tracer.core import (
+    Answer,
     CheckedValue,
     ClauseId,
     Direction,
     Evidence,
+    JudgedLevel,
     Level,
     NumberRule,
     PositionId,
@@ -16,7 +18,10 @@ from clause_tracer.core import (
     Span,
     Unit,
     UnreadableSpans,
+    YesNoRule,
     number_verdicts,
+    words_verdict,
+    yes_no_verdict,
 )
 
 PAYMENT_DAYS = NumberRule(
@@ -30,6 +35,11 @@ DEPOSIT_PERCENT = NumberRule(
     direction=Direction.HIGHER_IS_BETTER,
     preferred_limit=Decimal(50),
     acceptable_limit=Decimal(25),
+)
+PAID_IF_CANCELLED = YesNoRule(
+    question="Paid if cancelled",
+    yes_level=Level.PREFERRED,
+    no_level=Level.WALK_AWAY,
 )
 
 NO_HIDDEN = UnreadableSpans(hidden=(), undecodable=())
@@ -158,3 +168,75 @@ def test_business_days_are_unsure() -> None:
     assert len(verdicts) == 1
     assert verdicts[0].level is Level.UNSURE
     assert verdicts[0].reasons == (ReasonCode.BUSINESS_DAYS,)
+
+
+def judged(**changes: object) -> JudgedLevel:
+    """A judged acceptable level on clause c10, with any field replaced."""
+
+    base = JudgedLevel(
+        position_id=PositionId("10"),
+        clause_id=ClauseId("c10"),
+        evidence=Evidence(
+            clause_id=ClauseId("c10"),
+            sentence_ids=(SentenceId("c10.s1"),),
+            quote=Span(start=0, end=10),
+            placed=True,
+        ),
+        level=Level.ACCEPTABLE,
+    )
+    # The plan fixes this signature as **changes: object, a deliberate bag
+    # of replacements (see shapes_for_tests.make_request, S1-M2-T6).
+    return dataclasses.replace(base, **changes)  # type: ignore[arg-type]
+
+
+def test_yes_gives_yes_level() -> None:
+    verdict = yes_no_verdict(PAID_IF_CANCELLED, value(answer=Answer.YES), NO_HIDDEN)
+    assert verdict.level is Level.PREFERRED
+    assert verdict.readable_value == "yes"
+    assert verdict.reasons == ()
+
+
+def test_no_unclear_and_missing_give_no_level() -> None:
+    # Rule 2: "No" equals "missing" (and "unclear").
+    for answer in (Answer.NO, Answer.UNCLEAR, Answer.MISSING):
+        verdict = yes_no_verdict(PAID_IF_CANCELLED, value(answer=answer), NO_HIDDEN)
+        assert verdict.level is Level.WALK_AWAY, answer
+        assert verdict.readable_value == answer.value
+
+
+def test_conditional_yes_is_unsure() -> None:
+    # A conditional yes gives unsure, with the condition quoted (Rule 2).
+    verdict = yes_no_verdict(PAID_IF_CANCELLED, value(answer=Answer.CONDITIONAL_YES), NO_HIDDEN)
+    assert verdict.level is Level.UNSURE
+    assert verdict.reasons == (ReasonCode.CONDITIONAL_YES,)
+    assert verdict.readable_value is None
+
+
+def test_hidden_yes_is_unsure() -> None:
+    # Rule 9: a value whose quote includes hidden text becomes unsure.
+    unreadable = UnreadableSpans(hidden=(Span(start=5, end=8),), undecodable=())
+    verdict = yes_no_verdict(PAID_IF_CANCELLED, value(answer=Answer.YES), unreadable)
+    assert verdict.level is Level.UNSURE
+    assert verdict.reasons == (ReasonCode.HIDDEN_TEXT,)
+
+
+def test_judged_level_is_kept() -> None:
+    verdict = words_verdict(judged(), NO_HIDDEN)
+    assert verdict.level is Level.ACCEPTABLE
+    assert verdict.readable_value == "acceptable"
+    assert verdict.reasons == ()
+
+
+def test_judged_unsure_has_a_reason() -> None:
+    # The AI answering unsure is unsure with judged_unsure (16d).
+    verdict = words_verdict(judged(level=Level.UNSURE), NO_HIDDEN)
+    assert verdict.level is Level.UNSURE
+    assert verdict.reasons == (ReasonCode.JUDGED_UNSURE,)
+    assert verdict.readable_value is None
+
+
+def test_hidden_judged_level_is_unsure() -> None:
+    unreadable = UnreadableSpans(hidden=(Span(start=5, end=8),), undecodable=())
+    verdict = words_verdict(judged(), unreadable)
+    assert verdict.level is Level.UNSURE
+    assert verdict.reasons == (ReasonCode.HIDDEN_TEXT,)

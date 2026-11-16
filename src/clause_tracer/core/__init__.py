@@ -92,7 +92,13 @@ from clause_tracer.core.ids import (
     ReviewId,
     SentenceId,
 )
-from clause_tracer.core.labels import evidence_reasons, level_for_limits, number_verdicts
+from clause_tracer.core.labels import (
+    evidence_reasons,
+    level_for_limits,
+    number_verdicts,
+    words_verdict,
+    yes_no_verdict,
+)
 from clause_tracer.core.levels import (
     is_better,
     level_rank,
@@ -265,5 +271,7 @@ __all__: list[str] = [
     "sort_reasons",
     "spans_overlap",
     "unreadable_spans",
+    "words_verdict",
     "worst_level",
+    "yes_no_verdict",
 ]
