@@ -176,6 +176,8 @@ The fakes live in `fakes.py`, use only the standard library and `core`, and are 
 | --- | --- | --- |
 | `LAW_WORDS`, `ADVICE_PHRASES`, `INJECTION_PHRASES`, `CONTACT_WORDS`, `FIRST_PERSON_WORDS`, `FILLER_PHRASES`, `EVALUATIVE_WORDS`, `ABBREVIATIONS` | word lists, each a `tuple[str, ...]` | The output scans' word lists, copied from the owner's scan table (T11); a test checks the copy matches. The owner owns the values |
 | `LENGTH_CAPS: Mapping[TextSlot, int]` | one maximum length in characters per kind of AI text | Read-only (`MappingProxyType`); values from the owner's scan table. Text over its cap fails the scan (Spec 6.2) |
+| `contains_phrase(text: str, phrase: str) -> bool` | True when the phrase appears as a whole word or phrase, in any letter case | Curly apostrophes in the text are made straight first, so a phrase written with straight ones matches (question 17a) |
+| `scan_text(text: str, slot: TextSlot, label: Level \| None) -> tuple[ScanFinding, ...]` | the word and pattern findings: `TOO_LONG`, law words, advice, injection tells, contact words, web and email addresses, `WRONG_LABEL_WORD` | In `ScanFinding` member order, no repeats; empty when the text passes. `WEB_ADDRESS_PATTERN` and `EMAIL_PATTERN` hold what counts as an address (question 17e); `LABEL_WORDS` holds each level's words, and any word of another level is flagged (question 17d) |
 | `level_rank(level: Level) -> int` | `PREFERRED` 0, `ACCEPTABLE` 1, `WALK_AWAY` 2 | `UNSURE` raises `ValueError("unsure has no rank")` |
 | `is_better(a: Level, b: Level) -> bool` | `level_rank(a) < level_rank(b)` | Strictly better; unsure has no rank |
 | `worst_level(levels: Iterable[Level]) -> Level` | the level with the highest rank | An empty input raises `ValueError` |

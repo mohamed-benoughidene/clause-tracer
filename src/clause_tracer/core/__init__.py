@@ -183,6 +183,7 @@ from clause_tracer.core.scan_rules import (
     LAW_WORDS,
     LENGTH_CAPS,
 )
+from clause_tracer.core.scans import contains_phrase, scan_text
 from clause_tracer.core.settings import Settings
 from clause_tracer.core.units import convert_to_unit
 from clause_tracer.core.wording import Span, Wording
@@ -289,6 +290,7 @@ __all__: list[str] = [
     "ReviewId",
     "ReviewStatus",
     "ReviewStore",
+    "scan_text",
     "ScanContext",
     "ScanFinding",
     "ScannedPdfError",
@@ -321,6 +323,7 @@ __all__: list[str] = [
     "assert_all_used",
     "check_playbook",
     "combine_rule_4",
+    "contains_phrase",
     "convert_to_unit",
     "due_at",
     "evidence_reasons",
