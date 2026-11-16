@@ -62,7 +62,7 @@ def test_import_core_loads_only_stdlib() -> None:
 
 def test_public_dataclasses_are_frozen_slotted_keyword_only() -> None:
     for shape in _exported_classes():
-        params = shape.__dataclass_params__
+        params = shape.__dataclass_params__  # type: ignore[attr-defined]
         assert params.frozen, f"{shape.__name__} is not frozen"
         assert "__slots__" in shape.__dict__, f"{shape.__name__} has no slots"
         for field in dataclasses.fields(shape):
