@@ -1,2 +1,79 @@
 # Expected answers. Only the owner edits this file. Constitution T11.
 # Format: docs/plans/stage-01-core.md, task S1-M3-T8.
+
+[[case]]
+id = "1-days-until-paid"
+position = "1"
+level = "walk_away"
+reasons = []
+written_by = "code"
+
+[[case]]
+id = "2-upfront-deposit"
+position = "2"
+level = "acceptable"
+reasons = []
+written_by = "code"
+
+[[case]]
+id = "3-late-fee"
+position = "3"
+level = "acceptable"
+reasons = []
+written_by = "code"
+
+[[case]]
+id = "4-paid-if-cancelled"
+position = "4"
+level = "unsure"
+reasons = ["quote_not_confirmed"]
+written_by = "code"
+
+[[case]]
+id = "5-revision-rounds"
+position = "5"
+level = "unsure"
+reasons = ["vague_wording"]
+written_by = "code"
+
+[[case]]
+id = "6-extra-work-paid"
+position = "6"
+level = "preferred"
+reasons = []
+written_by = "code"
+
+[[case]]
+id = "7a-ownership-after-payment"
+position = "7a"
+level = "walk_away"
+reasons = []
+written_by = "code"
+
+[[case]]
+id = "7b-reuse-if-unpaid"
+position = "7b"
+level = "acceptable"
+reasons = []
+written_by = "code"
+
+[[case]]
+id = "8-portfolio"
+position = "8"
+level = "acceptable"
+reasons = []
+written_by = "code"
+
+[[case]]
+id = "9-non-compete"
+position = "9"
+level = "walk_away"
+reasons = ["range", "clauses_disagree"]
+written_by = "code"
+
+[[case]]
+id = "10-liability-cap"
+position = "10"
+level = "unsure"
+reasons = ["unloaded_document"]
+written_by = "code"
