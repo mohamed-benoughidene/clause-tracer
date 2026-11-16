@@ -27,6 +27,7 @@ from clause_tracer.core.checks import (
     QuoteFold,
     ScanContext,
 )
+from clause_tracer.core.cost import estimate_calls, estimate_cost
 from clause_tracer.core.document import (
     Clause,
     Document,
@@ -341,6 +342,8 @@ __all__: list[str] = [
     "count_sentences",
     "convert_to_unit",
     "due_at",
+    "estimate_calls",
+    "estimate_cost",
     "evidence_reasons",
     "fold_for_quote_check",
     "in_warning_window",
