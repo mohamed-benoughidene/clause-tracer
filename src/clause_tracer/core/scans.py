@@ -247,8 +247,9 @@ def scan_ai_text(
 
     found: set[ScanFinding] = set(scan_text(text, slot, context.label))
     found.update(scan_style(text, slot, context))
-    placeholder_regions = [match.span() for match in PLACEHOLDER_PATTERN.finditer(text)]
-    for match in PLACEHOLDER_PATTERN.finditer(text):
+    placeholder_matches = list(PLACEHOLDER_PATTERN.finditer(text))
+    placeholder_regions = [match.span() for match in placeholder_matches]
+    for match in placeholder_matches:
         if match.group(0) not in context.known_placeholders:
             found.add(ScanFinding.UNKNOWN_PLACEHOLDER)
     for match in NUMBER_PATTERN.finditer(text):
