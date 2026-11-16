@@ -13,6 +13,7 @@ else
   exit 1
 fi
 
+run python scripts/check_owner_tables.py
 run ruff check
 run ruff format --check
 run mypy

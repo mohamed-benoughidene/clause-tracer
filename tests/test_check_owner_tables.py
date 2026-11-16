@@ -40,3 +40,96 @@ def test_approval_line() -> None:
     assert guard.is_approved("fix\n\nOwner-Approved-Tables: yes\n")
     assert not guard.is_approved("Owner-Approved-Tables: no")
     assert not guard.is_approved("owner-approved-tables: yes")
+
+
+def _make_repo(repo: Path) -> str:
+    """A fresh git repo with one committed README.md; returns the base sha."""
+    import subprocess
+
+    def run(*args: str) -> str:
+        return subprocess.run(args, cwd=repo, check=True, capture_output=True, text=True).stdout
+
+    subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+    run("git", "config", "user.name", "Test")
+    run("git", "config", "user.email", "test@example.com")
+    (repo / "README.md").write_text("test repo\n", encoding="utf-8")
+    run("git", "add", "README.md")
+    run("git", "commit", "-q", "-m", "base")
+    return run("git", "rev-parse", "HEAD").strip()
+
+
+def test_working_tree_mixed_change_fails(tmp_path: Path, monkeypatch: object) -> None:
+    _make_repo(tmp_path)
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "a.py").write_text("x = 1\n", encoding="utf-8")
+    tables = tmp_path / "pkg" / "tests" / "tables"
+    tables.mkdir(parents=True)
+    (tables / "t.toml").write_text("x = 1\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    assert guard.main([]) == 1
+
+
+def test_working_tree_tables_only_passes(tmp_path: Path, monkeypatch: object) -> None:
+    _make_repo(tmp_path)
+    tables = tmp_path / "pkg" / "tests" / "tables"
+    tables.mkdir(parents=True)
+    (tables / "t.toml").write_text("x = 1\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    assert guard.main([]) == 0
+
+
+def test_commits_checked_one_by_one(tmp_path: Path, monkeypatch: object) -> None:
+    import subprocess
+
+    base = _make_repo(tmp_path)
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "a.py").write_text("x = 1\n", encoding="utf-8")
+    subprocess.run(["git", "add", "src/a.py"], cwd=tmp_path, check=True)
+    subprocess.run(["git", "commit", "-q", "-m", "code only"], cwd=tmp_path, check=True)
+    tables = tmp_path / "pkg" / "tests" / "tables"
+    tables.mkdir(parents=True)
+    (tables / "t.toml").write_text("x = 1\n", encoding="utf-8")
+    subprocess.run(["git", "add", "pkg"], cwd=tmp_path, check=True)
+    subprocess.run(["git", "commit", "-q", "-m", "table only"], cwd=tmp_path, check=True)
+    monkeypatch.chdir(tmp_path)
+    assert guard.main(["--commits", base]) == 0
+
+
+def test_mixed_commit_fails(tmp_path: Path, monkeypatch: object) -> None:
+    import subprocess
+
+    base = _make_repo(tmp_path)
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "a.py").write_text("x = 1\n", encoding="utf-8")
+    tables = tmp_path / "pkg" / "tests" / "tables"
+    tables.mkdir(parents=True)
+    (tables / "t.toml").write_text("x = 1\n", encoding="utf-8")
+    subprocess.run(["git", "add", "."], cwd=tmp_path, check=True)
+    subprocess.run(["git", "commit", "-q", "-m", "both in one"], cwd=tmp_path, check=True)
+    monkeypatch.chdir(tmp_path)
+    assert guard.main(["--commits", base]) == 1
+
+
+def test_approved_mixed_commit_passes(tmp_path: Path, monkeypatch: object) -> None:
+    import subprocess
+
+    base = _make_repo(tmp_path)
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "a.py").write_text("x = 1\n", encoding="utf-8")
+    tables = tmp_path / "pkg" / "tests" / "tables"
+    tables.mkdir(parents=True)
+    (tables / "t.toml").write_text("x = 1\n", encoding="utf-8")
+    subprocess.run(["git", "add", "."], cwd=tmp_path, check=True)
+    subprocess.run(
+        [
+            "git",
+            "commit",
+            "-q",
+            "-m",
+            "both in one\n\nOwner-Approved-Tables: yes",
+        ],
+        cwd=tmp_path,
+        check=True,
+    )
+    monkeypatch.chdir(tmp_path)
+    assert guard.main(["--commits", base]) == 0
