@@ -1,4 +1,7 @@
-"""The last check before drawing (S1-M5-T11 and T12, system design 4.2)."""
+"""The last check before drawing (S1-M5-T11 to T13, system design 4.2)."""
+
+from hypothesis import assume, example, given
+from hypothesis import strategies as st
 
 from clause_tracer.core import (
     Clause,
@@ -19,6 +22,7 @@ from clause_tracer.core import (
     check_before_drawing,
     fold_for_quote_check,
 )
+from clause_tracer.core.tests.strategies import documents_with_quote
 
 FULL_TEXT = (
     "1. Payment. The Client pays within 60 days. Late fees apply. The Client pays within 60 days."
@@ -324,3 +328,47 @@ def test_document_without_glyphs_skips_boxes() -> None:
     evidence = _evidence(3, Span(start=44, end=60))
     result = check_before_drawing(_document(), _clause(), evidence, "Late fees apply.")
     assert result == DrawAllowed(evidence=evidence)
+
+
+@given(documents_with_quote())
+def test_invariant_7_last_check_agrees(
+    built: tuple[Document, Clause, Evidence, str],
+) -> None:
+    # Promise test: every evidence link scrolls to the right place
+    # (Spec 11, unit part): invariant 7, the last check agrees.
+    document, clause, evidence, quote_text = built
+    result = check_before_drawing(document, clause, evidence, quote_text)
+    assert result == DrawAllowed(evidence=evidence)
+
+
+_UNPAIRED_QUOTES = "'\"‘’“”"
+
+
+@given(built=documents_with_quote(), choice=st.integers(0, 79))
+@example(
+    built=(
+        _document(),
+        _clause(),
+        _evidence(3, Span(start=44, end=60)),
+        "Late fees apply.",
+    ),
+    choice=0,
+)
+def test_invariant_7_changed_character_fails(
+    built: tuple[Document, Clause, Evidence, str], choice: int
+) -> None:
+    # Promise test: every evidence link scrolls to the right place
+    # (Spec 11, unit part): changing one character of the quote fails.
+    document, clause, evidence, quote_text = built
+    pickable = [
+        index
+        for index, character in enumerate(quote_text)
+        if not character.isspace() and character not in _UNPAIRED_QUOTES
+    ]
+    assume(len(pickable) > 0)
+    picked = pickable[choice % len(pickable)]
+    original_character = quote_text[picked]
+    replacement = "Y" if original_character == "X" else "X"
+    changed = quote_text[:picked] + replacement + quote_text[picked + 1 :]
+    result = check_before_drawing(document, clause, evidence, changed)
+    assert isinstance(result, DrawRefused)
