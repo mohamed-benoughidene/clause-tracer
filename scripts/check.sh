@@ -20,4 +20,4 @@ run mypy
 run lint-imports
 run python scripts/copy_lint.py
 run coverage run -m pytest -q
-run coverage report --include='src/clause_tracer/core/*' --omit='src/clause_tracer/core/tests/*' --fail-under=95
+run coverage report --include='src/clause_tracer/core/*' --fail-under=95

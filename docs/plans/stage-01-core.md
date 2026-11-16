@@ -262,7 +262,7 @@ Every shape in system design 3.4 exists as a frozen, slotted, keyword-only datac
 
 Every task in M2 extends one shared test, `test_fields_match_system_design` in `src/clause_tracer/core/tests/test_shapes.py`. It holds a dict `EXPECTED_FIELDS: dict[type, tuple[str, ...]]` that maps each shape to its field names, copied in order from system design 3.4, and asserts `tuple(f.name for f in dataclasses.fields(shape)) == EXPECTED_FIELDS[shape]` for each entry (one `pytest.mark.parametrize` case per shape). Each task adds its shapes to the dict. Each task also adds its shapes to the README under "Shapes".
 
-- [ ] **S1-M2-T1: Wording and page-location shapes**
+- [x] **S1-M2-T1: Wording and page-location shapes**
   - **Build:** In `src/clause_tracer/core/wording.py`: `Wording` and `Span`. In `src/clause_tracer/core/document.py`: `PageBox`, `Page` and `Glyph`. Each exactly as in system design 3.4, no more fields. In `src/clause_tracer/core/ports.py`: `CancelCheck = Callable[[], bool]` (a type alias, with a one-line docstring comment above it: `# Returns True once the user has cancelled.`). Export all six names.
   - **Files:** `src/clause_tracer/core/wording.py`, `src/clause_tracer/core/document.py`, `src/clause_tracer/core/ports.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_shapes.py`, `src/clause_tracer/core/README.md`.
   - **Tests first:** in `test_shapes.py`: `test_fields_match_system_design` (the five shapes); `test_wording_needs_written_by` (**promise test**, "every stored text keeps a written-by value", Spec 4.7 and 6.2): `Wording(text="x")` raises `TypeError`, and `dataclasses.fields(Wording)` shows `written_by` with no default; `test_shapes_need_keywords`: `Span(1, 2)` raises `TypeError`.
@@ -270,7 +270,7 @@ Every task in M2 extends one shared test, `test_fields_match_system_design` in `
   - **Rules:** [ADR 0016](../adr/0016-legal-positions-without-a-lawyer.md), [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) and its 13 Nov amendment, T13, T1, S3.
   - **Depends on:** S1-M1-T7.
 
-- [ ] **S1-M2-T2: Document shapes**
+- [x] **S1-M2-T2: Document shapes**
   - **Build:** In `src/clause_tracer/core/document.py`: `SourceFile`, `HiddenText`, `TrackedChange`, `InputWarning`, `Document`, `MatchKey`, `Sentence` and `Clause`, each exactly as in system design 3.4, no more fields. Export all eight.
   - **Files:** `src/clause_tracer/core/document.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_shapes.py`, `src/clause_tracer/core/README.md`.
   - **Tests first:** `test_fields_match_system_design` (the eight shapes); `test_document_without_glyphs`: a `Document` with `text="Pay in 30 days."`, `char_map=()`, `glyphs=()`, `pages=()` builds; `test_span_counts_code_points`: for `text = "\U0001F600 fee"`, `text[Span(start=2, end=5).start:Span(start=2, end=5).end] == "fee"`.
@@ -278,7 +278,7 @@ Every task in M2 extends one shared test, `test_fields_match_system_design` in `
   - **Rules:** [System design 3.4 and 4.2](../system-design.md#42-the-offset-chain), D1, D6, S3.
   - **Depends on:** S1-M2-T1.
 
-- [ ] **S1-M2-T3: Link and placeholder shapes**
+- [x] **S1-M2-T3: Link and placeholder shapes**
   - **Build:** In `src/clause_tracer/core/link_map.py`: `CrossReference`, `DefinedTerm`, `Override`, `OutsideDocument` and `LinkMap`. In `src/clause_tracer/core/placeholders.py`: `Party`, `PiiSuggestion`, `PlaceholderEntity`, `Segment` and `PlaceholderText`. Each exactly as in system design 3.4, no more fields. Export all ten.
   - **Files:** `src/clause_tracer/core/link_map.py`, `src/clause_tracer/core/placeholders.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_shapes.py`, `src/clause_tracer/core/README.md`.
   - **Tests first:** `test_fields_match_system_design` (the ten shapes); `test_unresolved_targets_are_kept`: `CrossReference(source=Span(start=0, end=4), target=None)` and `Override(clause_id=ClauseId("4"), target=None, overrides_target=True, evidence=Span(start=0, end=4))` build, and their `target` is `None`.
@@ -286,7 +286,7 @@ Every task in M2 extends one shared test, `test_fields_match_system_design` in `
   - **Rules:** [System design 3.4](../system-design.md#34-core-shapes-for-stage-1), [ADR 0008](../adr/0008-personal-data-detection-bundle.md), S3.
   - **Depends on:** S1-M2-T2.
 
-- [ ] **S1-M2-T4: Playbook and settings shapes**
+- [x] **S1-M2-T4: Playbook and settings shapes**
   - **Build:** In `src/clause_tracer/core/playbook.py`: `NumberRule`, `YesNoRule`, `WordsRule`, `Position`, `Playbook` and `PlaybookSnapshot`. In `src/clause_tracer/core/settings.py`: `Settings`. Each exactly as in system design 3.4, no more fields. Export all seven.
   - **Files:** `src/clause_tracer/core/playbook.py`, `src/clause_tracer/core/settings.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_shapes.py`, `src/clause_tracer/core/README.md`.
   - **Tests first:** `test_fields_match_system_design` (the seven shapes); `test_playbook_text_is_plain_str`: the type hints (`typing.get_type_hints`) of `Playbook.name`, `Position.topic`, `YesNoRule.question` and the three `WordsRule` fields are `str`, not `Wording` (decided 13 Nov 2026).
@@ -294,7 +294,7 @@ Every task in M2 extends one shared test, `test_fields_match_system_design` in `
   - **Rules:** [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) 13 Nov amendment, [Spec 4.1](../spec.md#41-playbooks), I13, D6, S3.
   - **Depends on:** S1-M2-T1.
 
-- [ ] **S1-M2-T5: Review result shapes**
+- [x] **S1-M2-T5: Review result shapes**
   - **Build:** In `src/clause_tracer/core/results.py`: `Evidence`, `CheckedValue` (with `unlimited: bool = False` as its last field), `JudgedLevel`, `MatchFound`, `NothingFound`, `MatchUnconfirmed`, `CallFailed`, `ToolLabel` and `NotCoveredClause`, each exactly as in system design 3.4, no more fields. Then the alias `MatchResult = MatchFound | NothingFound | MatchUnconfirmed | CallFailed`. Export all ten names.
   - **Files:** `src/clause_tracer/core/results.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_shapes.py`, `src/clause_tracer/core/README.md`.
   - **Tests first:** `test_fields_match_system_design` (the nine shapes); `test_match_results_are_unrelated`: for each ordered pair of the four match types, neither is a subclass of the other; `test_unlimited_defaults_to_false`: a `CheckedValue` built without `unlimited` has `unlimited is False`; `test_reason_fields_hold_reason_codes`: the type hint of `CheckedValue.reasons` and `ToolLabel.reasons` is `tuple[ReasonCode, ...]`.
@@ -302,7 +302,7 @@ Every task in M2 extends one shared test, `test_fields_match_system_design` in `
   - **Rules:** I4, [ADR 0012](../adr/0012-missing-unsure-and-evidence-failures.md) and its 14 Nov amendment, [ADR 0002](../adr/0002-label-look-split-stamp.md), D5, S3.
   - **Depends on:** S1-M2-T2, S1-M2-T4.
 
-- [ ] **S1-M2-T6: AI request and record shapes**
+- [x] **S1-M2-T6: AI request and record shapes**
   - **Build:** In `src/clause_tracer/core/ai.py`: `StepInputs` (no fields, docstring `"""Base class of every step's own input shape."""`), `PromptMessage`, `AiRequest`, `Usage`, `AiReply` and `AiRecord`, each exactly as in system design 3.4, no more fields. `AiRequest` gets:
     ```python
     def __post_init__(self) -> None:
@@ -315,7 +315,7 @@ Every task in M2 extends one shared test, `test_fields_match_system_design` in `
   - **Rules:** [ADR 0015](../adr/0015-provider-ready-seam.md) and its amendment, [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) 13 and 14 Nov amendments, [system design 6.3](../system-design.md#63-the-ai-request), D6, D8, S3.
   - **Depends on:** S1-M2-T1.
 
-- [ ] **S1-M2-T7: Shapes for the stage 1 functions**
+- [x] **S1-M2-T7: Shapes for the stage 1 functions**
   - **Build:** In `src/clause_tracer/core/results.py`: `UnreadableSpans`, `LabelInput` and `ValueVerdict`. In `src/clause_tracer/core/checks.py`: `ScanContext`, `QuoteFold`, `DrawAllowed`, `DrawRefused`, `CallPrices`, `CostInputs`, `CostRange` and `PlaybookProblem`. Each exactly as in the system design 3.4 table "Shapes for the stage 1 functions", no more fields. Export all eleven.
   - **Files:** `src/clause_tracer/core/results.py`, `src/clause_tracer/core/checks.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_shapes.py`, `src/clause_tracer/core/README.md`.
   - **Tests first:** `test_fields_match_system_design` (the eleven shapes); `test_draw_results_are_unrelated`: neither `DrawAllowed` nor `DrawRefused` is a subclass of the other.
@@ -323,7 +323,7 @@ Every task in M2 extends one shared test, `test_fields_match_system_design` in `
   - **Rules:** [System design 3.4](../system-design.md#34-core-shapes-for-stage-1) (14 Nov 2026), I3, I4, S3.
   - **Depends on:** S1-M2-T5.
 
-- [ ] **S1-M2-T8: Remove the coverage omit again**
+- [x] **S1-M2-T8: Remove the coverage omit again**
   - **Build:** In `scripts/check.sh`, change the coverage report line back to what S1-M1-T3 wrote, so the 95% floor covers the test files of `core` again as the plan first had it:
     `run coverage report --include='src/clause_tracer/core/*' --fail-under=95`.
     This undoes S1-M1-T9, as the owner asked on 16 Nov 2026. Run it only once the shapes of S1-M2-T1 to S1-M2-T7 exist and every file in `src/clause_tracer/core/tests/` is fully executed by its own run, so the floor holds with the tests measured too. If the floor then still fails, stop and tell the owner; do not lower the floor, do not re-add the omit on your own.
@@ -910,7 +910,12 @@ Planning found questions 1 to 17. The owner answered all of them on 14 Nov 2026;
 | 16 Nov 2026 | `test_import_core_loads_only_stdlib` changed from comparing against `sys.stdlib_module_names` alone to a baseline comparison: the same subprocess runs once without importing `clause_tracer.core`, and importing it may add only `clause_tracer` and standard-library names. Reason: the OS loads a system-wide `sitecustomize` (the apport hook) in every Python process, so the original wording failed before `core` was imported. The owner chose this on 16 Nov 2026. The goal of testing strategy 12 ("importing core loads only the standard library") is still enforced: any non-stdlib import `core` causes still fails. | S1-M1-T6, testing strategy 12 |
 | 16 Nov 2026 | The coverage floor in `scripts/check.sh` gained `--omit='src/clause_tracer/core/tests/*'`, so the 95% floor measures `core`'s shipped code, not its test files. Reason: the floor as written also measured the test files, and the architecture tests of S1-M1-T6 cannot fully execute until the first shapes of S1-M2-T1 exist, so `check.sh` failed although every test passed. The owner chose this on 16 Nov 2026 and asked to remove the omit again once milestone 2 is implemented, so the floor covers the test files as the plan first wrote it. To do after S1-M2-T1's shapes make the tests fully covered. | S1-M1-T6, testing strategy 11 |
 | 16 Nov 2026 | Milestone 1 ticked (tasks S1-M1-T1 to S1-M1-T8, plus section 4's checks), and the status set to In progress. Added two tasks the owner asked for: S1-M1-T9 records that the coverage omit was made, and S1-M2-T8 removes it again once milestone 2's shapes exist. | Plans README ("Status", "When the plan is wrong": add a task) |
+| 16 Nov 2026 | S1-M2-T6 hand check: `make_request(inputs={"a": 1})` does **not** fail mypy, as the plan expected. The plan's own signature `make_request(**changes: object)` routes every value through untyped keyword arguments, so the call site is not checked. The type seam itself holds: constructing `AiRequest(...)` directly with `inputs={"a": 1}` does fail mypy (`arg-type`). Strict mypy does flag the `dataclasses.replace(request, **changes)` inside the helper (`arg-type`, six errors), so that line carries one `# type: ignore[arg-type]` with a comment. No code change beyond that; the scratch file was not committed. | S1-M2-T6, plans README ("When the plan is wrong") |
+| 16 Nov 2026 | The coverage omit is gone: S1-M2-T8 changed the coverage report line in `scripts/check.sh` back to `run coverage report --include='src/clause_tracer/core/*' --fail-under=95`, as S1-M1-T9 promised once milestone 2's shapes existed. The 95% floor now covers the test files of `core` again, as the plan first had it; `core` measures 99% with them included. | S1-M2-T8 |
+| 16 Nov 2026 | Added the fold-sharing note to section 9 before the stage closes, so it cannot be lost. The milestone 2 review (standards axis) flagged that `MatchKey` and `QuoteFold` share a silhouette; both are mandated by system design 3.4, and the decision on one shared fold implementation belongs to stage 2's plan. The note decides nothing; it hands the question to stage 2. | Plans README ("Notes for the next stage", "When the plan is wrong": add a note) |
 
 ## 9. Notes for the next stage
 
-None yet. Filled in when the stage is done: what was built, what differs from the outline, and what stage 2 should know.
+Filled in when the stage is done: what was built, what differs from the outline, and what stage 2 should know. One note is already recorded, added on 16 Nov 2026 before the stage closes so it cannot be lost:
+
+**The fold is built once, in `core`.** Stage 1 built the Spec 2 quote-check fold as `fold_for_quote_check` (S1-M5-T4), returning `QuoteFold` (`text`, `to_original`), and the last check before drawing uses it (S1-M5-T11). System design 3.4 also defines `MatchKey` (`text`, `to_canonical`) — the folded copy and index map of section 4.2, which stage 2 builds with "the fold for them". The two index maps are not the same thing: `to_canonical` maps the folded text into `Document.text` for matching; `to_original` maps a folded character back to the text the fold came from. The folding rules themselves (quotes made straight, whitespace runs collapsed) are one set of rules in the Spec. When planning stage 2, decide whether one shared fold implementation in `core` serves both shapes, and record the decision in its home (system design 4.2 or a short ADR). Do not build a second fold without saying so.
