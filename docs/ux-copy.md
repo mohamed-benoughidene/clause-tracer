@@ -363,7 +363,7 @@ The card shows one view at a time: Welcome, then Key. “Check your own contract
 | Readings | Reading 1: a small number of rounds, decided together. · Reading 2: as many rounds as the Agency asks for. · Ends with the AI wording line. | AI |
 | Question | Question to ask: “Can we agree that 2 rounds of revisions are included, and extra rounds are paid at the hourly rate?” · On a words position: “Can you send the Master Agreement, and confirm it doesn't raise the Developer's liability above the fees paid?” · Conditional yes: “Can we agree consent won't be refused without a good reason?” | AI, except a conditional yes (code) |
 | Conflict | These clauses disagree. Ask which applies. | code |
-| Range | 14.3 gives a range. The worse end was used. | code |
+| Range | 14.3 gives a range. The worse end was used. · On an unsure value: 14.3 gives a range. | code |
 | Quote failed | This one is unsure. The quote found doesn't match the contract word for word, so it isn't used. · Couldn't confirm the wording. Check 12.2 yourself. · Unsure: asked twice, and both times the AI's quote wasn't in the contract. | code |
 | Searches disagreed | This one is unsure. One search found wording about this in 9.2, and a second check didn't agree. · The searches disagreed about 9.2. Read it yourself. · Unsure: a clause may cover this position, but it couldn't be confirmed. · What to check: Read 9.2. Does it limit who you can work for? | code |
 | Quote not marked on the page | These words are in the contract, but they couldn't be marked on the page. Find them in 5.4. · (the label is kept) · trail: Clause · not marked on the page | code |

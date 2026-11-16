@@ -824,3 +824,36 @@ values = [{ clause = "c2", amount = "1000", number = "25", unit = "%" }]
 level = "unsure"
 reasons = ["amount_without_total"]
 written_by = "code"
+
+[[case]]
+id = "r5-business-days-range"
+rule = "rule5"
+note = "A range in business days: unsure, and the reasons still say it was a range (decided 16 Nov 2026)"
+position = "1"
+match = "found"
+values = [{ clause = "c1", number = "10", range_high = "15", unit = "business days" }]
+level = "unsure"
+reasons = ["business_days", "range"]
+written_by = "code"
+
+[[case]]
+id = "r6-amount-and-percent-with-range"
+rule = "rule6"
+note = "Amount 300 of 1000 matches 30%, and the clause gives 30 to 60%: both ends count, with range (decided 16 Nov 2026)"
+position = "2"
+match = "found"
+values = [{ clause = "c1", amount = "300", total = "1000", number = "30", range_high = "60", unit = "%" }]
+level = "acceptable"
+reasons = ["range"]
+written_by = "code"
+
+[[case]]
+id = "r6-amount-without-total-with-range"
+rule = "rule6"
+note = "No total, so unsure, and the reasons still say it was a range (decided 16 Nov 2026)"
+position = "2"
+match = "found"
+values = [{ clause = "c1", amount = "500", number = "30", range_high = "60", unit = "%" }]
+level = "unsure"
+reasons = ["amount_without_total", "range"]
+written_by = "code"
