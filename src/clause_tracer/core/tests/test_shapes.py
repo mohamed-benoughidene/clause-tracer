@@ -1,6 +1,7 @@
 """Every shape matches system design 3.4: names, fields, order (S3)."""
 
 import dataclasses
+from typing import get_type_hints
 
 import pytest
 
@@ -16,6 +17,7 @@ from clause_tracer.core import (
     InputWarning,
     LinkMap,
     MatchKey,
+    NumberRule,
     OutsideDocument,
     Override,
     Page,
@@ -24,12 +26,18 @@ from clause_tracer.core import (
     PiiSuggestion,
     PlaceholderEntity,
     PlaceholderText,
+    Playbook,
+    PlaybookSnapshot,
+    Position,
     Segment,
     Sentence,
+    Settings,
     SourceFile,
     Span,
     TrackedChange,
     Wording,
+    WordsRule,
+    YesNoRule,
 )
 
 EXPECTED_FIELDS: dict[type, tuple[str, ...]] = {
@@ -83,6 +91,29 @@ EXPECTED_FIELDS: dict[type, tuple[str, ...]] = {
     PlaceholderEntity: ("id", "kind", "number", "spans"),
     Segment: ("kind", "sent", "original", "entity_id"),
     PlaceholderText: ("text", "entities", "segments"),
+    NumberRule: ("unit", "direction", "preferred_limit", "acceptable_limit"),
+    YesNoRule: ("question", "yes_level", "no_level"),
+    WordsRule: ("preferred", "acceptable", "walk_away"),
+    Position: ("id", "topic", "type", "rule", "missing_level", "why_note"),
+    Playbook: (
+        "id",
+        "schema_version",
+        "name",
+        "side",
+        "customer_id",
+        "positions",
+        "starter",
+    ),
+    PlaybookSnapshot: ("playbook", "taken_at", "unedited_starter"),
+    Settings: (
+        "default_model",
+        "step_models",
+        "private_mode_default",
+        "send_why_notes",
+        "auto_delete_days",
+        "data_dir",
+        "log_level",
+    ),
 }
 
 
@@ -152,3 +183,16 @@ def test_unresolved_targets_are_kept() -> None:
         evidence=Span(start=0, end=4),
     )
     assert override.target is None
+
+
+def test_playbook_text_is_plain_str() -> None:
+    # Playbook text carries no written-by value (decided 13 Nov 2026,
+    # ADR 0005 amendment): the hints are str, not Wording.
+    hints = get_type_hints(Playbook)
+    assert hints["name"] is str
+    assert get_type_hints(Position)["topic"] is str
+    assert get_type_hints(YesNoRule)["question"] is str
+    words_hints = get_type_hints(WordsRule)
+    assert words_hints["preferred"] is str
+    assert words_hints["acceptable"] is str
+    assert words_hints["walk_away"] is str

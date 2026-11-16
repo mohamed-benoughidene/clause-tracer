@@ -107,6 +107,13 @@ arguments, with exactly the fields of system design 3.4 in that order (ADR 0005)
 | `PlaceholderEntity` | `id: str, kind: PlaceholderKind, number: int, spans: tuple[Span, ...]` | One placeholder, such as Person 1, for every variant of one name |
 | `Segment` | `kind: SegmentKind, sent: Span, original: Span, entity_id: str \| None` | Tiles both texts, so a quote maps back exactly |
 | `PlaceholderText` | `text: str, entities: tuple[PlaceholderEntity, ...], segments: tuple[Segment, ...]` | The only contract text that leaves the computer |
+| `NumberRule` | `unit: Unit, direction: Direction, preferred_limit: Decimal, acceptable_limit: Decimal` | Rule 1 |
+| `YesNoRule` | `question: str, yes_level: Level, no_level: Level` | Rule 2; the missing level is always the "no" level |
+| `WordsRule` | `preferred: str, acceptable: str, walk_away: str` | One sentence per level |
+| `Position` | `id: PositionId, topic: str, type: PositionType, rule: NumberRule \| YesNoRule \| WordsRule, missing_level: Level, why_note: str \| None` | One playbook rule (Spec 4.1) |
+| `Playbook` | `id: PlaybookId, schema_version: int, name: str, side: str, customer_id: CustomerId \| None, positions: tuple[Position, ...], starter: bool` | Starters are read-only |
+| `PlaybookSnapshot` | `playbook: Playbook, taken_at: datetime, unedited_starter: bool` | Taken at "Send for review"; drives "by the example playbook" |
+| `Settings` | `default_model: str, step_models: tuple[tuple[str, str], ...], private_mode_default: bool, send_why_notes: bool, auto_delete_days: int, data_dir: str, log_level: str` | Loaded once at start-up and passed in (I13, Spec 14.3) |
 | `CancelCheck` | a type alias: `Callable[[], bool]` | Returns True once the user has cancelled (ADR 0005) |
 
 ## Depends on

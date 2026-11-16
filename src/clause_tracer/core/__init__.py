@@ -88,7 +88,16 @@ from clause_tracer.core.placeholders import (
     PlaceholderText,
     Segment,
 )
+from clause_tracer.core.playbook import (
+    NumberRule,
+    Playbook,
+    PlaybookSnapshot,
+    Position,
+    WordsRule,
+    YesNoRule,
+)
 from clause_tracer.core.ports import CancelCheck
+from clause_tracer.core.settings import Settings
 from clause_tracer.core.wording import Span, Wording
 
 __all__: list[str] = [
@@ -125,6 +134,7 @@ __all__: list[str] = [
     "NoCreditError",
     "NoPrivateModelError",
     "NotUtf8Error",
+    "NumberRule",
     "OldWordFileError",
     "OutsideDocument",
     "Override",
@@ -138,9 +148,12 @@ __all__: list[str] = [
     "PlaceholderEntity",
     "PlaceholderKind",
     "PlaceholderText",
+    "Playbook",
     "PlaybookFormatError",
     "PlaybookId",
     "PlaybookProblemCode",
+    "PlaybookSnapshot",
+    "Position",
     "PositionId",
     "PositionType",
     "PrivacyMode",
@@ -158,6 +171,7 @@ __all__: list[str] = [
     "SegmentKind",
     "Sentence",
     "SentenceId",
+    "Settings",
     "SourceFile",
     "Span",
     "StorageCorruptError",
@@ -167,5 +181,7 @@ __all__: list[str] = [
     "Unit",
     "UnreadableFileError",
     "Wording",
+    "WordsRule",
     "WrittenBy",
+    "YesNoRule",
 ]

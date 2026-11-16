@@ -286,7 +286,7 @@ Every task in M2 extends one shared test, `test_fields_match_system_design` in `
   - **Rules:** [System design 3.4](../system-design.md#34-core-shapes-for-stage-1), [ADR 0008](../adr/0008-personal-data-detection-bundle.md), S3.
   - **Depends on:** S1-M2-T2.
 
-- [ ] **S1-M2-T4: Playbook and settings shapes**
+- [x] **S1-M2-T4: Playbook and settings shapes**
   - **Build:** In `src/clause_tracer/core/playbook.py`: `NumberRule`, `YesNoRule`, `WordsRule`, `Position`, `Playbook` and `PlaybookSnapshot`. In `src/clause_tracer/core/settings.py`: `Settings`. Each exactly as in system design 3.4, no more fields. Export all seven.
   - **Files:** `src/clause_tracer/core/playbook.py`, `src/clause_tracer/core/settings.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_shapes.py`, `src/clause_tracer/core/README.md`.
   - **Tests first:** `test_fields_match_system_design` (the seven shapes); `test_playbook_text_is_plain_str`: the type hints (`typing.get_type_hints`) of `Playbook.name`, `Position.topic`, `YesNoRule.question` and the three `WordsRule` fields are `str`, not `Wording` (decided 13 Nov 2026).
