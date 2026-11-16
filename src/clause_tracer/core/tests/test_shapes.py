@@ -6,6 +6,9 @@ from typing import get_type_hints
 import pytest
 
 from clause_tracer.core import (
+    AiRecord,
+    AiReply,
+    AiRequest,
     CallFailed,
     CheckedValue,
     Clause,
@@ -37,18 +40,22 @@ from clause_tracer.core import (
     Playbook,
     PlaybookSnapshot,
     Position,
+    PromptMessage,
     ReasonCode,
     Segment,
     Sentence,
     Settings,
     SourceFile,
     Span,
+    StepInputs,
     ToolLabel,
     TrackedChange,
+    Usage,
     Wording,
     WordsRule,
     YesNoRule,
 )
+from clause_tracer.core.tests.shapes_for_tests import make_request
 
 EXPECTED_FIELDS: dict[type, tuple[str, ...]] = {
     Wording: ("text", "written_by"),
@@ -78,6 +85,42 @@ EXPECTED_FIELDS: dict[type, tuple[str, ...]] = {
     CallFailed: ("code",),
     ToolLabel: ("position_id", "level", "reasons", "evidence", "written_by"),
     NotCoveredClause: ("clause_id", "clause_type"),
+    StepInputs: (),
+    PromptMessage: ("role", "text"),
+    AiRequest: (
+        "step",
+        "prompt_id",
+        "prompt_version",
+        "inputs",
+        "messages",
+        "schema_id",
+        "json_schema",
+        "model",
+        "privacy_mode",
+        "max_tokens",
+    ),
+    Usage: ("input_tokens", "cached_input_tokens", "output_tokens", "cost_usd"),
+    AiReply: (
+        "raw_body",
+        "text",
+        "model_used",
+        "provider_used",
+        "usage",
+        "generation_id",
+    ),
+    AiRecord: (
+        "record_id",
+        "schema_version",
+        "review_id",
+        "step",
+        "attempt",
+        "request_sha256",
+        "request",
+        "reply",
+        "error_code",
+        "started_at",
+        "finished_at",
+    ),
     PageBox: ("page", "x0", "top", "x1", "bottom"),
     Page: ("number", "width", "height"),
     Glyph: ("page", "box"),
@@ -253,3 +296,22 @@ def test_reason_fields_hold_reason_codes() -> None:
     # Rules return codes, never prose (I7).
     assert get_type_hints(CheckedValue)["reasons"] == tuple[ReasonCode, ...]
     assert get_type_hints(ToolLabel)["reasons"] == tuple[ReasonCode, ...]
+
+
+def test_json_schema_is_read_only() -> None:
+    # The top level of json_schema cannot be changed (system design 3.4, 6.3).
+    with pytest.raises(TypeError):
+        make_request().json_schema["type"] = "array"  # type: ignore[index]
+
+
+def test_json_schema_is_copied() -> None:
+    # A dict passed in and then changed leaves the request's json_schema unchanged.
+    schema: dict[str, object] = {"type": "object"}
+    request = make_request(json_schema=schema)
+    schema["type"] = "array"
+    assert request.json_schema["type"] == "object"
+
+
+def test_record_has_schema_version() -> None:
+    # AiRecord carries its own schema_version (decided 14 Nov 2026).
+    assert dataclasses.fields(AiRecord)[1].name == "schema_version"

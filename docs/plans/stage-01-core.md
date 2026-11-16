@@ -302,7 +302,7 @@ Every task in M2 extends one shared test, `test_fields_match_system_design` in `
   - **Rules:** I4, [ADR 0012](../adr/0012-missing-unsure-and-evidence-failures.md) and its 14 Nov amendment, [ADR 0002](../adr/0002-label-look-split-stamp.md), D5, S3.
   - **Depends on:** S1-M2-T2, S1-M2-T4.
 
-- [ ] **S1-M2-T6: AI request and record shapes**
+- [x] **S1-M2-T6: AI request and record shapes**
   - **Build:** In `src/clause_tracer/core/ai.py`: `StepInputs` (no fields, docstring `"""Base class of every step's own input shape."""`), `PromptMessage`, `AiRequest`, `Usage`, `AiReply` and `AiRecord`, each exactly as in system design 3.4, no more fields. `AiRequest` gets:
     ```python
     def __post_init__(self) -> None:
@@ -910,6 +910,7 @@ Planning found questions 1 to 17. The owner answered all of them on 14 Nov 2026;
 | 16 Nov 2026 | `test_import_core_loads_only_stdlib` changed from comparing against `sys.stdlib_module_names` alone to a baseline comparison: the same subprocess runs once without importing `clause_tracer.core`, and importing it may add only `clause_tracer` and standard-library names. Reason: the OS loads a system-wide `sitecustomize` (the apport hook) in every Python process, so the original wording failed before `core` was imported. The owner chose this on 16 Nov 2026. The goal of testing strategy 12 ("importing core loads only the standard library") is still enforced: any non-stdlib import `core` causes still fails. | S1-M1-T6, testing strategy 12 |
 | 16 Nov 2026 | The coverage floor in `scripts/check.sh` gained `--omit='src/clause_tracer/core/tests/*'`, so the 95% floor measures `core`'s shipped code, not its test files. Reason: the floor as written also measured the test files, and the architecture tests of S1-M1-T6 cannot fully execute until the first shapes of S1-M2-T1 exist, so `check.sh` failed although every test passed. The owner chose this on 16 Nov 2026 and asked to remove the omit again once milestone 2 is implemented, so the floor covers the test files as the plan first wrote it. To do after S1-M2-T1's shapes make the tests fully covered. | S1-M1-T6, testing strategy 11 |
 | 16 Nov 2026 | Milestone 1 ticked (tasks S1-M1-T1 to S1-M1-T8, plus section 4's checks), and the status set to In progress. Added two tasks the owner asked for: S1-M1-T9 records that the coverage omit was made, and S1-M2-T8 removes it again once milestone 2's shapes exist. | Plans README ("Status", "When the plan is wrong": add a task) |
+| 16 Nov 2026 | S1-M2-T6 hand check: `make_request(inputs={"a": 1})` does **not** fail mypy, as the plan expected. The plan's own signature `make_request(**changes: object)` routes every value through untyped keyword arguments, so the call site is not checked. The type seam itself holds: constructing `AiRequest(...)` directly with `inputs={"a": 1}` does fail mypy (`arg-type`). Strict mypy does flag the `dataclasses.replace(request, **changes)` inside the helper (`arg-type`, six errors), so that line carries one `# type: ignore[arg-type]` with a comment. No code change beyond that; the scratch file was not committed. | S1-M2-T6, plans README ("When the plan is wrong") |
 
 ## 9. Notes for the next stage
 

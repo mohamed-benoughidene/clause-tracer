@@ -3,6 +3,14 @@
 Implements Spec section 5 (labelling rules); T1 of the Constitution.
 """
 
+from clause_tracer.core.ai import (
+    AiRecord,
+    AiReply,
+    AiRequest,
+    PromptMessage,
+    StepInputs,
+    Usage,
+)
 from clause_tracer.core.document import (
     Clause,
     Document,
@@ -113,6 +121,9 @@ from clause_tracer.core.settings import Settings
 from clause_tracer.core.wording import Span, Wording
 
 __all__: list[str] = [
+    "AiRecord",
+    "AiReply",
+    "AiRequest",
     "Answer",
     "CallFailed",
     "CancelCheck",
@@ -178,6 +189,7 @@ __all__: list[str] = [
     "PositionId",
     "PositionType",
     "PrivacyMode",
+    "PromptMessage",
     "RateLimitedError",
     "ReasonCode",
     "RecordId",
@@ -195,6 +207,7 @@ __all__: list[str] = [
     "Settings",
     "SourceFile",
     "Span",
+    "StepInputs",
     "StorageCorruptError",
     "TextSlot",
     "ToolLabel",
@@ -202,6 +215,7 @@ __all__: list[str] = [
     "UNSURE_REASONS",
     "Unit",
     "UnreadableFileError",
+    "Usage",
     "Wording",
     "WordsRule",
     "WrittenBy",

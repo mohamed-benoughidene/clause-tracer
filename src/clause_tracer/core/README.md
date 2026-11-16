@@ -124,6 +124,12 @@ arguments, with exactly the fields of system design 3.4 in that order (ADR 0005)
 | `MatchResult` | a type alias: the union of the four match types | The `match` field of `LabelInput` |
 | `ToolLabel` | `position_id: PositionId, level: Level, reasons: tuple[ReasonCode, ...], evidence: tuple[Evidence, ...], written_by: WrittenBy` | The label code picked; `written_by` is AI only for words positions, which are drawn in pencil (ADR 0002) |
 | `NotCoveredClause` | `clause_id: ClauseId, clause_type: str` | A type from the closed list, plus the clause's own first line (ADR 0011) |
+| `StepInputs` | no fields | The base class of every step's own input shape; each step defines a frozen, slotted, keyword-only subclass (decided 14 Nov 2026) |
+| `PromptMessage` | `role: str, text: str` | One rendered prompt part |
+| `AiRequest` | `step: str, prompt_id: str, prompt_version: int, inputs: StepInputs, messages: tuple[PromptMessage, ...], schema_id: str, json_schema: Mapping[str, object], model: str, privacy_mode: PrivacyMode, max_tokens: int` | The accepted form of one AI call (section 6.3, ADR 0015). `__post_init__` replaces `json_schema` with a `MappingProxyType` copy, so the top level cannot be changed |
+| `Usage` | `input_tokens: int, cached_input_tokens: int, output_tokens: int, cost_usd: Decimal \| None` | Cached tokens are read on every call (ADR 0010); one neutral cost amount, or `None` |
+| `AiReply` | `raw_body: bytes, text: str, model_used: str, provider_used: str, usage: Usage, generation_id: str` | The exact reply, saved before it is parsed (D8) |
+| `AiRecord` | `record_id: RecordId, schema_version: int, review_id: ReviewId, step: str, attempt: int, request_sha256: str, request: AiRequest, reply: AiReply \| None, error_code: str \| None, started_at: datetime, finished_at: datetime` | Raw and append-only, failed calls too (D1, D8); its hash keys the cache and the replay fake. Every datetime is timezone-aware |
 | `CancelCheck` | a type alias: `Callable[[], bool]` | Returns True once the user has cancelled (ADR 0005) |
 
 ## Depends on

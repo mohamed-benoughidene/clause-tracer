@@ -1,0 +1,37 @@
+"""Test-only shapes and builders for the core tests. Not exported from core."""
+
+import dataclasses
+
+from clause_tracer.core.ai import AiRequest, PromptMessage, StepInputs
+from clause_tracer.core.enums import PrivacyMode
+from clause_tracer.core.ids import ClauseId
+
+
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class EchoInputs(StepInputs):
+    """A test-only step input shape (system design 3.4, S1-M2-T6)."""
+
+    clause_id: ClauseId
+    text: str
+
+
+def make_request(**changes: object) -> AiRequest:
+    """One fixed AiRequest, with any field replaced by name."""
+
+    request = AiRequest(
+        step="echo",
+        prompt_id="echo",
+        prompt_version=1,
+        inputs=EchoInputs(clause_id=ClauseId("4.2"), text="Pay in 30 days."),
+        messages=(PromptMessage(role="user", text="Quote the clause."),),
+        schema_id="echo-reply",
+        json_schema={"type": "object"},
+        model="test-model",
+        privacy_mode=PrivacyMode.ON,
+        max_tokens=200,
+    )
+    # The plan fixes this signature as **changes: object, a deliberate bag of
+    # replacements. dataclasses.replace is typed per-field, so mypy cannot
+    # verify the values through the bag; the call is checked at the AiRequest
+    # constructor itself (recorded in the plan's change log, 16 Nov 2026).
+    return dataclasses.replace(request, **changes)  # type: ignore[arg-type]
