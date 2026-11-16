@@ -57,4 +57,30 @@ def check_before_drawing(
     end = region.start + folded_region.to_original[place + quote_length - 1] + 1
     if Span(start=start, end=end) != evidence.quote:
         return DrawRefused(failure=DrawFailure.SPAN_MISMATCH)
+    has_glyphs = len(document.glyphs) > 0
+    if has_glyphs:
+        char_map_matches_text = len(document.char_map) == len(document.text)
+        if not char_map_matches_text:
+            return DrawRefused(failure=DrawFailure.CHAR_MAP_LENGTH)
+        for index in range(evidence.quote.start, evidence.quote.end):
+            glyph_index = document.char_map[index]
+            if glyph_index is None:
+                continue
+            if glyph_index < 0 or glyph_index >= len(document.glyphs):
+                return DrawRefused(failure=DrawFailure.GLYPH_MISSING)
+            glyph = document.glyphs[glyph_index]
+            if glyph.page != glyph.box.page:
+                return DrawRefused(failure=DrawFailure.PAGE_MISMATCH)
+            page = next(
+                (candidate for candidate in document.pages if candidate.number == glyph.page),
+                None,
+            )
+            if page is None:
+                return DrawRefused(failure=DrawFailure.PAGE_UNKNOWN)
+            box = glyph.box
+            box_inside_page = (
+                0 <= box.x0 <= box.x1 <= page.width and 0 <= box.top <= box.bottom <= page.height
+            )
+            if not box_inside_page:
+                return DrawRefused(failure=DrawFailure.BOX_OUTSIDE_PAGE)
     return DrawAllowed(evidence=evidence)

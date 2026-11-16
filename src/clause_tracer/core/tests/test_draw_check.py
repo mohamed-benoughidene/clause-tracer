@@ -9,6 +9,9 @@ from clause_tracer.core import (
     DrawRefused,
     Evidence,
     FileKind,
+    Glyph,
+    Page,
+    PageBox,
     Sentence,
     SentenceId,
     SourceFile,
@@ -210,4 +213,114 @@ def test_offsets_count_code_points() -> None:
         placed=True,
     )
     result = check_before_drawing(document, clause, evidence, "The Client pays within 60 days.")
+    assert result == DrawAllowed(evidence=evidence)
+
+
+def _glyphed_document(
+    text: str = FULL_TEXT,
+    *,
+    box: PageBox | None = None,
+    char_map: tuple[int | None, ...] | None = None,
+    glyphs: tuple[Glyph, ...] | None = None,
+    pages: tuple[Page, ...] | None = None,
+) -> Document:
+    default_box = box if box is not None else PageBox(page=1, x0=0, top=0, x1=5, bottom=10)
+    default_glyphs = (
+        glyphs if glyphs is not None else tuple(Glyph(page=1, box=default_box) for _ in text)
+    )
+    default_char_map = char_map if char_map is not None else tuple(range(len(text)))
+    default_pages = pages if pages is not None else (Page(number=1, width=600.0, height=800.0),)
+    return Document(
+        schema_version=1,
+        source=A_SOURCE,
+        text=text,
+        char_map=default_char_map,
+        glyphs=default_glyphs,
+        pages=default_pages,
+        furniture=(),
+        hidden=(),
+        undecodable=(),
+        tracked_changes=(),
+        warnings=(),
+    )
+
+
+def test_box_inside_page_passes() -> None:
+    evidence = _evidence(3, Span(start=44, end=60))
+    result = check_before_drawing(_glyphed_document(), _clause(), evidence, "Late fees apply.")
+    assert result == DrawAllowed(evidence=evidence)
+
+
+def test_box_past_page_edge_fails() -> None:
+    document = _glyphed_document(box=PageBox(page=1, x0=0, top=0, x1=601, bottom=10))
+    evidence = _evidence(3, Span(start=44, end=60))
+    result = check_before_drawing(document, _clause(), evidence, "Late fees apply.")
+    assert result == DrawRefused(failure=DrawFailure.BOX_OUTSIDE_PAGE)
+
+
+def test_character_without_glyph_fails() -> None:
+    char_map = tuple(range(44)) + (999,) + tuple(range(45, len(FULL_TEXT)))
+    document = _glyphed_document(char_map=char_map)
+    evidence = _evidence(3, Span(start=44, end=60))
+    result = check_before_drawing(document, _clause(), evidence, "Late fees apply.")
+    assert result == DrawRefused(failure=DrawFailure.GLYPH_MISSING)
+
+
+def test_inserted_characters_need_no_box() -> None:
+    char_map = tuple(range(44)) + (None,) + tuple(range(45, len(FULL_TEXT)))
+    document = _glyphed_document(char_map=char_map)
+    evidence = _evidence(3, Span(start=44, end=60))
+    result = check_before_drawing(document, _clause(), evidence, "Late fees apply.")
+    assert result == DrawAllowed(evidence=evidence)
+
+
+def test_ligature_passes() -> None:
+    # Two characters pointing at one glyph, as a ligature does.
+    glyph_count = len(FULL_TEXT) - 1
+    char_map = tuple(range(45)) + (44,) + tuple(range(45, glyph_count))
+    document = _glyphed_document(
+        char_map=char_map,
+        glyphs=tuple(
+            Glyph(page=1, box=PageBox(page=1, x0=0, top=0, x1=5, bottom=10))
+            for _ in range(glyph_count)
+        ),
+    )
+    evidence = _evidence(3, Span(start=44, end=60))
+    result = check_before_drawing(document, _clause(), evidence, "Late fees apply.")
+    assert result == DrawAllowed(evidence=evidence)
+
+
+def test_unknown_page_fails() -> None:
+    document = _glyphed_document(
+        box=PageBox(page=2, x0=0, top=0, x1=5, bottom=10),
+        glyphs=tuple(
+            Glyph(page=2, box=PageBox(page=2, x0=0, top=0, x1=5, bottom=10)) for _ in FULL_TEXT
+        ),
+    )
+    evidence = _evidence(3, Span(start=44, end=60))
+    result = check_before_drawing(document, _clause(), evidence, "Late fees apply.")
+    assert result == DrawRefused(failure=DrawFailure.PAGE_UNKNOWN)
+
+
+def test_page_mismatch_fails() -> None:
+    document = _glyphed_document(
+        glyphs=tuple(
+            Glyph(page=1, box=PageBox(page=2, x0=0, top=0, x1=5, bottom=10)) for _ in FULL_TEXT
+        )
+    )
+    evidence = _evidence(3, Span(start=44, end=60))
+    result = check_before_drawing(document, _clause(), evidence, "Late fees apply.")
+    assert result == DrawRefused(failure=DrawFailure.PAGE_MISMATCH)
+
+
+def test_char_map_length_fails() -> None:
+    document = _glyphed_document(char_map=tuple(range(len(FULL_TEXT) - 1)))
+    evidence = _evidence(3, Span(start=44, end=60))
+    result = check_before_drawing(document, _clause(), evidence, "Late fees apply.")
+    assert result == DrawRefused(failure=DrawFailure.CHAR_MAP_LENGTH)
+
+
+def test_document_without_glyphs_skips_boxes() -> None:
+    evidence = _evidence(3, Span(start=44, end=60))
+    result = check_before_drawing(_document(), _clause(), evidence, "Late fees apply.")
     assert result == DrawAllowed(evidence=evidence)
