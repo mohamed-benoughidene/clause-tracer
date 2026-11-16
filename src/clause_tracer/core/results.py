@@ -11,6 +11,8 @@ from decimal import Decimal
 
 from clause_tracer.core.enums import Answer, Level, ReasonCode, WrittenBy
 from clause_tracer.core.ids import ClauseId, PositionId, SentenceId
+from clause_tracer.core.link_map import OutsideDocument
+from clause_tracer.core.playbook import Position
 from clause_tracer.core.wording import Span
 
 
@@ -111,3 +113,37 @@ class NotCoveredClause:
 
     clause_id: ClauseId
     clause_type: str
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class UnreadableSpans:
+    """The Rule 9 input: hidden and undecodable spans of one document."""
+
+    hidden: tuple[Span, ...]
+    undecodable: tuple[Span, ...]
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class LabelInput:
+    """Everything the label rules need for one position, in one bundle (I3)."""
+
+    position: Position
+    match: MatchResult
+    values: tuple[CheckedValue, ...]
+    judged: tuple[JudgedLevel, ...]
+    outside_documents: tuple[OutsideDocument, ...]
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class ValueVerdict:
+    """One value after Rules 1 to 3, 5, 6 and 9, before Rule 4 combines them.
+
+    readable_value is None exactly when level is UNSURE; Rule 4 compares it
+    to find clauses that disagree.
+    """
+
+    clause_id: ClauseId
+    level: Level
+    reasons: tuple[ReasonCode, ...]
+    evidence: Evidence | None
+    readable_value: str | None

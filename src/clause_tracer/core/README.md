@@ -130,6 +130,17 @@ arguments, with exactly the fields of system design 3.4 in that order (ADR 0005)
 | `Usage` | `input_tokens: int, cached_input_tokens: int, output_tokens: int, cost_usd: Decimal \| None` | Cached tokens are read on every call (ADR 0010); one neutral cost amount, or `None` |
 | `AiReply` | `raw_body: bytes, text: str, model_used: str, provider_used: str, usage: Usage, generation_id: str` | The exact reply, saved before it is parsed (D8) |
 | `AiRecord` | `record_id: RecordId, schema_version: int, review_id: ReviewId, step: str, attempt: int, request_sha256: str, request: AiRequest, reply: AiReply \| None, error_code: str \| None, started_at: datetime, finished_at: datetime` | Raw and append-only, failed calls too (D1, D8); its hash keys the cache and the replay fake. Every datetime is timezone-aware |
+| `UnreadableSpans` | `hidden: tuple[Span, ...], undecodable: tuple[Span, ...]` | The Rule 9 input; `unreadable_spans(document)` builds it |
+| `LabelInput` | `position: Position, match: MatchResult, values: tuple[CheckedValue, ...], judged: tuple[JudgedLevel, ...], outside_documents: tuple[OutsideDocument, ...]` | Everything the label rules need for one position, in one bundle (I3) |
+| `ValueVerdict` | `clause_id: ClauseId, level: Level, reasons: tuple[ReasonCode, ...], evidence: Evidence \| None, readable_value: str \| None` | One value after Rules 1 to 3, 5, 6 and 9, before Rule 4 combines them; `readable_value` is `None` exactly when `level` is `UNSURE` |
+| `ScanContext` | `label: Level \| None, allowed_numbers: tuple[Decimal, ...], acceptable_limits: tuple[Decimal, ...], known_placeholders: tuple[str, ...], defined_roles: tuple[str, ...], clause_numbers: tuple[str, ...], quote: str \| None, source_text: str \| None, instruction_given: bool` | What one output scan compares the AI text with |
+| `QuoteFold` | `text: str, to_original: tuple[int, ...]` | The Spec 2 quote-check fold, with its index map; one entry per folded character plus a last entry equal to the original length |
+| `DrawAllowed` | `evidence: Evidence` | The last check before drawing approved this evidence |
+| `DrawRefused` | `failure: DrawFailure` | The last check refused; a separate type, so a refusal cannot pass as an approval (I4) |
+| `CallPrices` | `input_per_million: Decimal, cached_input_per_million: Decimal, output_per_million: Decimal` | US dollars per million tokens, passed in by the caller (ADR 0015) |
+| `CostInputs` | `positions: int, words_positions: int, clauses: int, contract_tokens: int, prices: CallPrices` | The input of the pre-run estimate (section 7) |
+| `CostRange` | `calls: int, low_usd: Decimal, high_usd: Decimal` | The estimate: the call count, and the cost from "cache hits on every call" (low) to "never hits" (high) |
+| `PlaybookProblem` | `position_id: PositionId \| None, code: PlaybookProblemCode` | One failed playbook check (Spec 4.1); `position_id` is `None` for a whole-playbook problem |
 | `CancelCheck` | a type alias: `Callable[[], bool]` | Returns True once the user has cancelled (ADR 0005) |
 
 ## Depends on

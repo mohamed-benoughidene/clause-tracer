@@ -315,7 +315,7 @@ Every task in M2 extends one shared test, `test_fields_match_system_design` in `
   - **Rules:** [ADR 0015](../adr/0015-provider-ready-seam.md) and its amendment, [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) 13 and 14 Nov amendments, [system design 6.3](../system-design.md#63-the-ai-request), D6, D8, S3.
   - **Depends on:** S1-M2-T1.
 
-- [ ] **S1-M2-T7: Shapes for the stage 1 functions**
+- [x] **S1-M2-T7: Shapes for the stage 1 functions**
   - **Build:** In `src/clause_tracer/core/results.py`: `UnreadableSpans`, `LabelInput` and `ValueVerdict`. In `src/clause_tracer/core/checks.py`: `ScanContext`, `QuoteFold`, `DrawAllowed`, `DrawRefused`, `CallPrices`, `CostInputs`, `CostRange` and `PlaybookProblem`. Each exactly as in the system design 3.4 table "Shapes for the stage 1 functions", no more fields. Export all eleven.
   - **Files:** `src/clause_tracer/core/results.py`, `src/clause_tracer/core/checks.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_shapes.py`, `src/clause_tracer/core/README.md`.
   - **Tests first:** `test_fields_match_system_design` (the eleven shapes); `test_draw_results_are_unrelated`: neither `DrawAllowed` nor `DrawRefused` is a subclass of the other.
