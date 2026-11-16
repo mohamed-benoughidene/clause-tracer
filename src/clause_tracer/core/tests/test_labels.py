@@ -23,6 +23,8 @@ from clause_tracer.core import (
     NothingFound,
     NumberRule,
     OutsideDocument,
+    Playbook,
+    PlaybookId,
     Position,
     PositionId,
     PositionType,
@@ -36,6 +38,7 @@ from clause_tracer.core import (
     WrittenBy,
     YesNoRule,
     combine_rule_4,
+    label_all,
     label_position,
     number_verdicts,
     words_verdict,
@@ -517,3 +520,50 @@ def test_position_mismatch_raises() -> None:
             ),
             NO_HIDDEN,
         )
+
+
+def _playbook_of(position_list: tuple[Position, ...]) -> Playbook:
+    return Playbook(
+        id=PlaybookId("test"),
+        schema_version=1,
+        name="Test",
+        side="test",
+        customer_id=None,
+        positions=position_list,
+        starter=False,
+    )
+
+
+def _nothing_found(position: Position) -> LabelInput:
+    return LabelInput(
+        position=position,
+        match=NothingFound(position_id=position.id, searches=()),
+        values=(),
+        judged=(),
+        outside_documents=(),
+    )
+
+
+@given(position_list=st.lists(positions(), min_size=1, max_size=6, unique_by=lambda p: p.id))
+def test_no_position_is_dropped(position_list: list[Position]) -> None:
+    # Rule 3: a position is never dropped silently (Spec 5).
+    labels = label_all(
+        _playbook_of(tuple(position_list)),
+        tuple(_nothing_found(position) for position in position_list),
+        NO_HIDDEN,
+    )
+    assert [label.position_id for label in labels] == [position.id for position in position_list]
+
+
+def test_missing_input_raises() -> None:
+    playbook = _playbook_of((DAYS_POSITION, DEPOSIT_POSITION))
+    inputs = (_nothing_found(DAYS_POSITION),)
+    with pytest.raises(ValueError, match="no input"):
+        label_all(playbook, inputs, NO_HIDDEN)
+
+
+def test_duplicate_input_raises() -> None:
+    playbook = _playbook_of((DAYS_POSITION,))
+    inputs = (_nothing_found(DAYS_POSITION), _nothing_found(DAYS_POSITION))
+    with pytest.raises(ValueError, match="one position"):
+        label_all(playbook, inputs, NO_HIDDEN)

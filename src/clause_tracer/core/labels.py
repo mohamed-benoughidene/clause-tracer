@@ -20,9 +20,9 @@ from clause_tracer.core.enums import (
     Unit,
     WrittenBy,
 )
-from clause_tracer.core.ids import ClauseId
+from clause_tracer.core.ids import ClauseId, PositionId
 from clause_tracer.core.levels import sort_reasons, spans_overlap, worst_level
-from clause_tracer.core.playbook import NumberRule, WordsRule, YesNoRule
+from clause_tracer.core.playbook import NumberRule, Playbook, WordsRule, YesNoRule
 from clause_tracer.core.results import (
     CallFailed,
     CheckedValue,
@@ -346,3 +346,31 @@ def label_position(item: LabelInput, unreadable: UnreadableSpans) -> ToolLabel:
         evidence=tuple(evidence),
         written_by=written_by,
     )
+
+
+def label_all(
+    playbook: Playbook,
+    inputs: tuple[LabelInput, ...],
+    unreadable: UnreadableSpans,
+) -> tuple[ToolLabel, ...]:
+    """Every position of the playbook, in playbook order (Spec 5, Rule 3).
+
+    Raises ValueError when a position has no input, when two inputs name
+    one position, or when an input names a position not in the playbook.
+    """
+
+    playbook_ids = {position.id for position in playbook.positions}
+    by_position: dict[PositionId, LabelInput] = {}
+    for item in inputs:
+        if item.position.id in by_position:
+            raise ValueError(f"two inputs name one position: {item.position.id}")
+        if item.position.id not in playbook_ids:
+            raise ValueError(f"input names a position not in the playbook: {item.position.id}")
+        by_position[item.position.id] = item
+    labels: list[ToolLabel] = []
+    for position in playbook.positions:
+        found = by_position.get(position.id)
+        if found is None:
+            raise ValueError(f"position {position.id} has no input")
+        labels.append(label_position(found, unreadable))
+    return tuple(labels)

@@ -95,6 +95,7 @@ from clause_tracer.core.ids import (
 from clause_tracer.core.labels import (
     combine_rule_4,
     evidence_reasons,
+    label_all,
     label_position,
     level_for_limits,
     number_verdicts,
@@ -268,6 +269,7 @@ __all__: list[str] = [
     "convert_to_unit",
     "evidence_reasons",
     "is_better",
+    "label_all",
     "level_for_limits",
     "level_rank",
     "number_verdicts",
