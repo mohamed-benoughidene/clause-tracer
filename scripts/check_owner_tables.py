@@ -6,7 +6,6 @@ so the expected answers and the code that must match them are never
 written in one step. See docs/testing-strategy.md section 10.
 """
 
-import argparse
 import re
 from collections.abc import Iterable
 
