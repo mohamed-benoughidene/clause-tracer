@@ -93,9 +93,9 @@ reasons = []
 written_by = "code"
 
 [[case]]
-id = "r1-none-is-zero"
+id = "r1-zero-at-a-zero-limit"
 rule = "rule1"
-note = "No non-compete: the AI reads 'none' as 0"
+note = "Zero months at a limit of 0. Core never sees the word none: the parser gives 0 (plan question 6)"
 position = "9"
 match = "found"
 values = [{ clause = "c9", raw = "none", number = "0", unit = "months" }]
@@ -716,9 +716,111 @@ written_by = "code"
 [[case]]
 id = "edge-k-unlimited-months"
 rule = "edge"
+note = "Lower is better, on a months position. The higher-is-better half of 16(k) is r1-unlimited-higher-is-better"
 position = "9"
 match = "found"
 values = [{ clause = "c9", raw = "for an unlimited period", unlimited = true }]
 level = "walk_away"
 reasons = []
+written_by = "code"
+
+# ---------------------------------------------------------------- Added after review, 16 Nov 2026
+
+[[case]]
+id = "r9-hidden-walk-away-beside-readable-value"
+rule = "rule9"
+note = "A walk-away resting on hidden text is not readable, so it cannot win under Rule 4 step 1 (Spec 11 promise)"
+position = "1"
+match = "found"
+values = [
+    { clause = "c1", number = "60", unit = "days", on = "hidden" },
+    { clause = "c2", number = "20", unit = "days" },
+]
+level = "unsure"
+reasons = ["hidden_text"]
+written_by = "code"
+
+[[case]]
+id = "r6-amount-and-percent-agree-half-up"
+rule = "rule6"
+note = "525 of 1000 is 52.5, which rounds half up to 53 and matches the written 53. Banker's rounding would give 52 and disagree. The number kept is 52.5, so preferred"
+position = "2"
+match = "found"
+values = [{ clause = "c2", amount = "525", total = "1000", number = "53", unit = "%" }]
+level = "preferred"
+reasons = []
+written_by = "code"
+
+[[case]]
+id = "r4-yes-no-clauses-disagree"
+rule = "rule4"
+position = "4"
+match = "found"
+values = [
+    { clause = "c4a", answer = "yes" },
+    { clause = "c4b", answer = "no" },
+]
+level = "walk_away"
+reasons = ["clauses_disagree"]
+written_by = "code"
+
+[[case]]
+id = "r4-words-clauses-disagree"
+rule = "rule4"
+position = "10"
+match = "found"
+judged = [
+    { clause = "c10a", level = "preferred" },
+    { clause = "c10b", level = "acceptable" },
+]
+level = "acceptable"
+reasons = ["clauses_disagree"]
+written_by = "ai"
+
+[[case]]
+id = "r10-judged-words-walk-away-stays"
+rule = "rule10"
+position = "10"
+match = "found"
+judged = [{ clause = "c10", level = "walk_away" }]
+outside_documents = ["Master Agreement"]
+level = "walk_away"
+reasons = []
+written_by = "ai"
+
+[[case]]
+id = "r10-missing-preferred-becomes-unsure"
+rule = "rule10"
+position = "9"
+match = "nothing"
+outside_documents = ["Master Agreement"]
+level = "unsure"
+reasons = ["unloaded_document"]
+written_by = "code"
+
+# Owner question 1: follows plan T15 (answers compared as words). Change if you decide "no" and "unclear" agree.
+[[case]]
+id = "r4-yes-no-no-beside-unclear"
+rule = "rule4"
+note = "Same level, different answers: the plan counts this as a disagreement"
+position = "4"
+match = "found"
+values = [
+    { clause = "c4a", answer = "no" },
+    { clause = "c4b", answer = "unclear" },
+]
+level = "walk_away"
+reasons = ["clauses_disagree"]
+written_by = "code"
+
+# Owner question 2: follows plan T13 (an amount with no total is unsure, the written percentage is not used).
+[[case]]
+id = "r6-amount-and-percent-without-total"
+rule = "rule6"
+note = "1000 with a written 25% and no total: the plan makes it unsure"
+position = "2"
+match = "found"
+values = [{ clause = "c2", amount = "1000", number = "25", unit = "%" }]
+level = "unsure"
+reasons = ["amount_without_total"]
 written_by = "code"

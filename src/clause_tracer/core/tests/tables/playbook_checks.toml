@@ -86,7 +86,7 @@ missing_level = "walk_away"
 
 [[case]]
 id = "negative-and-over-100"
-# Two problems on one position, in member order
+# Two problems on one position
 problems = [
     { position = "2", code = "limit_negative" },
     { position = "2", code = "percent_over_100" },
@@ -242,3 +242,71 @@ type = "yes_no"
 question = "Paid if cancelled"
 yes_level = "preferred"
 no_level = "walk_away"
+
+# ---------------------------------------------------------------- Added after review, 16 Nov 2026
+
+[[case]]
+id = "no-level-unsure"
+problems = [{ position = "3", code = "yes_no_level_unsure" }]
+
+[[case.positions]]
+id = "3"
+topic = "Paid if cancelled"
+type = "yes_no"
+question = "Paid if cancelled"
+yes_level = "preferred"
+no_level = "unsure"
+
+[[case]]
+id = "negative-acceptable-limit"
+problems = [{ position = "2", code = "limit_negative" }]
+
+[[case.positions]]
+id = "2"
+topic = "Upfront deposit"
+type = "number"
+unit = "percent"
+direction = "higher_is_better"
+preferred_limit = "50"
+acceptable_limit = "-1"
+missing_level = "walk_away"
+
+[[case]]
+id = "acceptable-limit-over-100"
+problems = [{ position = "2", code = "percent_over_100" }]
+
+[[case.positions]]
+id = "2"
+topic = "Late fee"
+type = "number"
+unit = "percent"
+direction = "lower_is_better"
+preferred_limit = "50"
+acceptable_limit = "150"
+missing_level = "walk_away"
+
+[[case]]
+id = "empty-acceptable-text"
+problems = [{ position = "4", code = "level_text_empty" }]
+
+[[case.positions]]
+id = "4"
+topic = "Liability cap"
+type = "words"
+preferred = "At most the fees paid"
+acceptable = ""
+walk_away = "Above 2x fees"
+missing_level = "walk_away"
+
+[[case]]
+id = "empty-walk-away-text"
+problems = [{ position = "4", code = "level_text_empty" }]
+
+[[case.positions]]
+id = "4"
+topic = "Liability cap"
+type = "words"
+preferred = "At most the fees paid"
+acceptable = "Up to 2x fees"
+walk_away = "  "
+missing_level = "walk_away"

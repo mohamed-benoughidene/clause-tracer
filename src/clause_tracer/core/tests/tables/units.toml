@@ -295,3 +295,11 @@ id = "no-unit-percent"
 number = "33.3"
 target = "percent"
 expected = "333/10"
+
+# Added after review, 16 Nov 2026: only one trailing dot is dropped
+[[case]]
+id = "two-trailing-dots"
+number = "2"
+unit = "days.."
+target = "days"
+expected = "unit_unknown"
