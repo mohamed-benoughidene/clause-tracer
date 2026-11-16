@@ -2,7 +2,7 @@
 
 import dataclasses
 
-from clause_tracer.core.ai import AiRequest, PromptMessage, StepInputs
+from clause_tracer.core.ai import AiReply, AiRequest, PromptMessage, StepInputs, Usage
 from clause_tracer.core.enums import PrivacyMode
 from clause_tracer.core.ids import ClauseId
 
@@ -35,3 +35,16 @@ def make_request(**changes: object) -> AiRequest:
     # verify the values through the bag; the call is checked at the AiRequest
     # constructor itself (recorded in the plan's change log, 16 Nov 2026).
     return dataclasses.replace(request, **changes)  # type: ignore[arg-type]
+
+
+def make_reply(text: str = "{}") -> AiReply:
+    """One fixed AiReply, with the body text replaced by name."""
+
+    return AiReply(
+        raw_body=text.encode(),
+        text=text,
+        model_used="test-model",
+        provider_used="test-provider",
+        usage=Usage(input_tokens=10, cached_input_tokens=0, output_tokens=5, cost_usd=None),
+        generation_id="gen-1",
+    )

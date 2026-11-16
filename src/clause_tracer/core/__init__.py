@@ -83,6 +83,7 @@ from clause_tracer.core.errors import (
     StorageCorruptError,
     UnreadableFileError,
 )
+from clause_tracer.core.fakes import ReplayAiClient, UnrecordedRequest, assert_all_used
 from clause_tracer.core.ids import (
     ClauseId,
     CustomerId,
@@ -245,6 +246,7 @@ __all__: list[str] = [
     "RateLimitedError",
     "ReasonCode",
     "RecordId",
+    "ReplayAiClient",
     "ReviewCancelled",
     "ReviewId",
     "ReviewStatus",
@@ -271,12 +273,14 @@ __all__: list[str] = [
     "Unit",
     "UnreadableFileError",
     "UnreadableSpans",
+    "UnrecordedRequest",
     "Usage",
     "ValueVerdict",
     "Wording",
     "WordsRule",
     "WrittenBy",
     "YesNoRule",
+    "assert_all_used",
     "check_playbook",
     "combine_rule_4",
     "convert_to_unit",

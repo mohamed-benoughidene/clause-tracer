@@ -156,6 +156,16 @@ Every real adapter must pass the same contract suite in `tests/contracts/` (T2, 
 | `SecretStore` | `get_secret(provider_id: str) -> str \| None`; `put_secret(provider_id: str, secret: str) -> None`; `delete_secret(provider_id: str) -> None` | Each raises `SecretStoreUnavailableError` when the store cannot be reached; `get_secret` returns `None` when nothing is stored; `delete_secret` is idempotent (I8). Never plain text (ADR 0006, ADR 0015) |
 | `Clock` | `now() -> datetime` | Returns a timezone-aware time (T2) |
 
+## Fakes
+The fakes live in `fakes.py`, use only the standard library and `core`, and are exported from
+`clause_tracer.core`. Every real adapter must pass the same contract suite in `tests/contracts/`
+(ADR 0013, T12).
+
+| Fake | Port | Behaviour |
+| --- | --- | --- |
+| `ReplayAiClient(recordings)` | `AiClient` | Keys are `request_sha256` values; the client keeps a copy. `complete` returns the recorded reply and marks the key used; a miss raises `UnrecordedRequest` (an `AssertionError`, so a caught `ClauseTracerError` cannot swallow it) naming the step and the hash. A recording may be asked for more than once. `unused_keys()` returns the sorted keys never asked for; `fail_next(error_type)` makes the next call raise that model-service error, once. `assert_all_used(client)` raises `AssertionError("unused recordings: …")` when any key is unused |
+| `UnrecordedRequest` | — | The replay fake's miss, a test failure, not a project error |
+
 ## Functions
 
 | Function | Returns | Notes |
