@@ -74,6 +74,20 @@ from clause_tracer.core.ids import (
     ReviewId,
     SentenceId,
 )
+from clause_tracer.core.link_map import (
+    CrossReference,
+    DefinedTerm,
+    LinkMap,
+    OutsideDocument,
+    Override,
+)
+from clause_tracer.core.placeholders import (
+    Party,
+    PiiSuggestion,
+    PlaceholderEntity,
+    PlaceholderText,
+    Segment,
+)
 from clause_tracer.core.ports import CancelCheck
 from clause_tracer.core.wording import Span, Wording
 
@@ -84,7 +98,9 @@ __all__: list[str] = [
     "ClauseId",
     "ClauseTracerError",
     "ConfigError",
+    "CrossReference",
     "CustomerId",
+    "DefinedTerm",
     "Direction",
     "Document",
     "DrawFailure",
@@ -99,6 +115,7 @@ __all__: list[str] = [
     "InputWarning",
     "InvalidApiKeyError",
     "Level",
+    "LinkMap",
     "LocalError",
     "MatchKey",
     "ModelReplyInvalidError",
@@ -109,12 +126,18 @@ __all__: list[str] = [
     "NoPrivateModelError",
     "NotUtf8Error",
     "OldWordFileError",
+    "OutsideDocument",
+    "Override",
     "PLACEHOLDER_CLOSE",
     "PLACEHOLDER_OPEN",
     "Page",
     "PageBox",
+    "Party",
     "PiiSource",
+    "PiiSuggestion",
+    "PlaceholderEntity",
     "PlaceholderKind",
+    "PlaceholderText",
     "PlaybookFormatError",
     "PlaybookId",
     "PlaybookProblemCode",
@@ -131,6 +154,7 @@ __all__: list[str] = [
     "ScannedPdfError",
     "SchemaTooNewError",
     "SecretStoreUnavailableError",
+    "Segment",
     "SegmentKind",
     "Sentence",
     "SentenceId",

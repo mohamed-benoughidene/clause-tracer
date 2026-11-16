@@ -278,7 +278,7 @@ Every task in M2 extends one shared test, `test_fields_match_system_design` in `
   - **Rules:** [System design 3.4 and 4.2](../system-design.md#42-the-offset-chain), D1, D6, S3.
   - **Depends on:** S1-M2-T1.
 
-- [ ] **S1-M2-T3: Link and placeholder shapes**
+- [x] **S1-M2-T3: Link and placeholder shapes**
   - **Build:** In `src/clause_tracer/core/link_map.py`: `CrossReference`, `DefinedTerm`, `Override`, `OutsideDocument` and `LinkMap`. In `src/clause_tracer/core/placeholders.py`: `Party`, `PiiSuggestion`, `PlaceholderEntity`, `Segment` and `PlaceholderText`. Each exactly as in system design 3.4, no more fields. Export all ten.
   - **Files:** `src/clause_tracer/core/link_map.py`, `src/clause_tracer/core/placeholders.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_shapes.py`, `src/clause_tracer/core/README.md`.
   - **Tests first:** `test_fields_match_system_design` (the ten shapes); `test_unresolved_targets_are_kept`: `CrossReference(source=Span(start=0, end=4), target=None)` and `Override(clause_id=ClauseId("4"), target=None, overrides_target=True, evidence=Span(start=0, end=4))` build, and their `target` is `None`.

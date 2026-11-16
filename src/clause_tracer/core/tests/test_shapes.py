@@ -6,14 +6,25 @@ import pytest
 
 from clause_tracer.core import (
     Clause,
+    ClauseId,
+    CrossReference,
+    DefinedTerm,
     Document,
     FileKind,
     Glyph,
     HiddenText,
     InputWarning,
+    LinkMap,
     MatchKey,
+    OutsideDocument,
+    Override,
     Page,
     PageBox,
+    Party,
+    PiiSuggestion,
+    PlaceholderEntity,
+    PlaceholderText,
+    Segment,
     Sentence,
     SourceFile,
     Span,
@@ -56,6 +67,22 @@ EXPECTED_FIELDS: dict[type, tuple[str, ...]] = {
         "numbering_source",
         "sentences",
     ),
+    CrossReference: ("source", "target"),
+    DefinedTerm: ("term", "definition", "uses"),
+    Override: ("clause_id", "target", "overrides_target", "evidence"),
+    OutsideDocument: ("name", "evidence"),
+    LinkMap: (
+        "references",
+        "terms",
+        "overrides",
+        "outside_documents",
+        "undefined_terms",
+    ),
+    Party: ("name", "address", "yours"),
+    PiiSuggestion: ("span", "kind", "source"),
+    PlaceholderEntity: ("id", "kind", "number", "spans"),
+    Segment: ("kind", "sent", "original", "entity_id"),
+    PlaceholderText: ("text", "entities", "segments"),
 }
 
 
@@ -112,3 +139,16 @@ def test_span_counts_code_points() -> None:
     text = "\U0001f600 fee"
     span = Span(start=2, end=5)
     assert text[span.start : span.end] == "fee"
+
+
+def test_unresolved_targets_are_kept() -> None:
+    # An unresolved target is kept, with no target (system design 3.4).
+    reference = CrossReference(source=Span(start=0, end=4), target=None)
+    assert reference.target is None
+    override = Override(
+        clause_id=ClauseId("4"),
+        target=None,
+        overrides_target=True,
+        evidence=Span(start=0, end=4),
+    )
+    assert override.target is None
