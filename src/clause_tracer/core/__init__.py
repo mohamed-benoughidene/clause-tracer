@@ -186,6 +186,8 @@ from clause_tracer.core.scan_rules import (
 )
 from clause_tracer.core.scans import (
     contains_phrase,
+    has_clause_number,
+    has_quoted_word,
     mask_abbreviations,
     scan_style,
     scan_text,
@@ -232,6 +234,8 @@ __all__: list[str] = [
     "FILLER_PHRASES",
     "FixedClock",
     "Glyph",
+    "has_clause_number",
+    "has_quoted_word",
     "HiddenReason",
     "HiddenText",
     "InputError",

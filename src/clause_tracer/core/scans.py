@@ -9,11 +9,12 @@ more; if that fails too, the code template is used.
 """
 
 import re
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from types import MappingProxyType
 
 from clause_tracer.core.checks import ScanContext
 from clause_tracer.core.enums import Level, ScanFinding, TextSlot
+from clause_tracer.core.quote_fold import fold_for_quote_check
 from clause_tracer.core.scan_rules import (
     ABBREVIATIONS,
     ADVICE_PHRASES,
@@ -63,6 +64,11 @@ _ABBREVIATION_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = tuple(
     (abbreviation, re.compile(r"(?<![\w.])" + re.escape(abbreviation), re.IGNORECASE))
     for abbreviation in ABBREVIATIONS
 )
+
+# A reason needs an anchor: a clause number given to the step, or a
+# quoted word of at least four letters that is in the quote (Spec 6.2).
+MIN_ANCHOR_LETTERS = 4
+QUOTED_RUN_PATTERN = re.compile(r'"([^"]+)"')
 
 
 def contains_phrase(text: str, phrase: str) -> bool:
@@ -161,4 +167,44 @@ def scan_style(text: str, slot: TextSlot, context: ScanContext) -> tuple[ScanFin
         findings.append(ScanFinding.FILLER_PHRASE)
     if _added_words(text, source, EVALUATIVE_WORDS):
         findings.append(ScanFinding.EVALUATIVE_WORD)
+    if slot is TextSlot.REASON:
+        anchored = has_clause_number(text, context.clause_numbers) or has_quoted_word(
+            text, context.quote
+        )
+        if not anchored:
+            findings.append(ScanFinding.NO_ANCHOR)
     return tuple(findings)
+
+
+def has_clause_number(text: str, clause_numbers: Iterable[str]) -> bool:
+    """True when the text names one of the clause numbers the step was given.
+
+    The whole number must appear alone: "5.4" is found in "Read 5.4."
+    but not in "5.40" or "15.4".
+    """
+
+    for number in clause_numbers:
+        stripped = number.strip()
+        if stripped == "":
+            continue
+        pattern = r"(?<![\w.])" + re.escape(stripped) + r"(?!\w|\.\w)"
+        if re.search(pattern, text, re.IGNORECASE) is not None:
+            return True
+    return False
+
+
+def has_quoted_word(text: str, quote: str | None) -> bool:
+    """True when the text quotes a word of at least four letters that is
+    in the quote the reason rests on. Both texts are folded first, so
+    curly double quotes count as straight ones."""
+
+    if quote is None:
+        return False
+    folded = fold_for_quote_check(text).text
+    folded_quote = fold_for_quote_check(quote).text
+    for match in QUOTED_RUN_PATTERN.finditer(folded):
+        run = match.group(1).strip(" .,;:!?")
+        enough_letters = sum(character.isalpha() for character in run) >= MIN_ANCHOR_LETTERS
+        if enough_letters and contains_phrase(folded_quote, run):
+            return True
+    return False

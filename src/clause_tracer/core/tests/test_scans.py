@@ -181,3 +181,78 @@ def test_keep_strings_pass_style_scans() -> None:
     for text in keep_strings:
         findings = scan_style(text, TextSlot.READING, make_scan_context())
         assert not (set(findings) & WORD_STYLE_FINDINGS), text
+
+
+@pytest.mark.parametrize("case", _CASES, ids=_CASE_IDS)
+def test_anchor_scans_table(case: ScanCase) -> None:
+    assert set(scan_style(case.text, case.slot, case.context)) & {ScanFinding.NO_ANCHOR} == (
+        case.findings & {ScanFinding.NO_ANCHOR}
+    )
+
+
+def test_clause_number_anchors_a_reason() -> None:
+    findings = scan_style(
+        "5.4 sets no deadline.",
+        TextSlot.REASON,
+        make_scan_context(clause_numbers=("5.4",)),
+    )
+    assert ScanFinding.NO_ANCHOR not in findings
+
+
+def test_longer_number_is_not_an_anchor() -> None:
+    for text in ("5.40 sets no deadline.", "15.4 sets no deadline."):
+        findings = scan_style(text, TextSlot.REASON, make_scan_context(clause_numbers=("5.4",)))
+        assert ScanFinding.NO_ANCHOR in findings, text
+
+
+def test_number_at_sentence_end_anchors() -> None:
+    findings = scan_style("Read 5.4.", TextSlot.REASON, make_scan_context(clause_numbers=("5.4",)))
+    assert ScanFinding.NO_ANCHOR not in findings
+
+
+def test_quoted_word_from_the_quote_anchors() -> None:
+    findings = scan_style(
+        "“Reasonable” has no number, so it can't be checked against your limit.",
+        TextSlot.REASON,
+        make_scan_context(quote="within a reasonable time"),
+    )
+    assert ScanFinding.NO_ANCHOR not in findings
+
+
+def test_straight_quotes_also_count() -> None:
+    findings = scan_style(
+        '"Reasonable" has no number.',
+        TextSlot.REASON,
+        make_scan_context(quote="within a reasonable time"),
+    )
+    assert ScanFinding.NO_ANCHOR not in findings
+
+
+def test_short_quoted_word_is_not_an_anchor() -> None:
+    findings = scan_style(
+        "“the” has no number.",
+        TextSlot.REASON,
+        make_scan_context(quote="the time"),
+    )
+    assert ScanFinding.NO_ANCHOR in findings
+
+
+def test_quoted_word_not_in_the_quote_fails() -> None:
+    findings = scan_style(
+        "“prompt” payment is not defined.",
+        TextSlot.REASON,
+        make_scan_context(quote="within a reasonable time"),
+    )
+    assert ScanFinding.NO_ANCHOR in findings
+
+
+def test_reason_without_quote_or_clause_fails() -> None:
+    findings = scan_style('"Reasonable" has no number.', TextSlot.REASON, make_scan_context())
+    assert ScanFinding.NO_ANCHOR in findings
+
+
+def test_no_anchor_only_checks_reasons() -> None:
+    other_slots = {TextSlot.READING, TextSlot.QUESTION, TextSlot.MESSAGE, TextSlot.REWRITE}
+    for slot in other_slots:
+        findings = scan_style("The wording is vague.", slot, make_scan_context())
+        assert ScanFinding.NO_ANCHOR not in findings, slot
