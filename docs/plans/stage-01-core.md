@@ -398,7 +398,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** S1 (a sample input), D1, AGENTS.md (sample names from Spec 14.5 only), [Spec 7 and 14.5](../spec.md#145-sample-data).
   - **Depends on:** S1-M3-T4.
 
-- [ ] **S1-M3-T6: Label-rule table (Owner)**
+- [x] **S1-M3-T6: Label-rule table (Owner)**
   - **Build:** Owner only. The rows of `label_rules.toml`. Columns: `id` (str), `rule` (one of `"rule1"`, `"rule2"`, `"rule3"`, `"rule4"`, `"rule5"`, `"rule6"`, `"rule7"`, `"rule9"`, `"rule10"`, `"edge"`; Rule 8 gives no label), `note` (str, optional), then one input in the sample format of S1-M3-T4 (`position` is a Spec 7 position id from the sample file; `match`; optional `values`, `judged`, `clauses_to_read`, `outside_documents`), then the expected answer: `level` (a `Level` value), `reasons` (a list of `ReasonCode` values; order does not matter), `written_by` (`"code"` or `"ai"`). Cases to cover, proposed, owner to check: Rule 1 at each limit and just past it, in both directions (positions 1 and 2), "none" as 0 (position 9), "unlimited" when lower is better (position 5: walk-away) and when higher is better (position 2: unsure, `unlimited_unclear`); Rule 2 yes, no, unclear, missing and conditional yes; Rule 3 quote not confirmed, number not in quote, and a confirmed quote that is not placed (label kept); Rule 4 a readable walk-away beside an unsure value, unsure beside acceptable, worst of preferred and acceptable, clauses that disagree; Rule 5 vague wording, another start point, unknown figures, business days; Rule 6 weeks, months and years each way, a range, a deposit amount with and without a total, an amount and a percentage that disagree; Rule 7 nothing found for each missing level, `MATCH_UNCONFIRMED`, and a failed call for a position whose missing level is preferred; Rule 9 hidden and undecodable text under a walk-away value; Rule 10 a walk-away that stays walk-away and an acceptable that becomes unsure; `edge` one row per item of question 16. The AI agent does not write or change it (T11). It may list, in chat, which Spec lines still have no row.
   - **Files:** `src/clause_tracer/core/tests/tables/label_rules.toml`.
   - **Tests first:** None. The owner's values are the expected answers.
@@ -406,7 +406,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** T11, [Spec 5](../spec.md#5-labelling-rules), [testing strategy 4 and 14](../testing-strategy.md#14-example-tests).
   - **Depends on:** S1-M3-T2, S1-M3-T5.
 
-- [ ] **S1-M3-T7: Unit table (Owner)**
+- [x] **S1-M3-T7: Unit table (Owner)**
   - **Build:** Owner only. The rows of `units.toml`. Columns: `id` (str), `number` (a decimal string), `unit` (the unit as written, or absent for none), `target` (a `Unit` value), `expected` (a number as a string that `fractions.Fraction` reads, for example `"14"` or `"7/30"`, or the reason code value `"business_days"` or `"unit_unknown"`). Cases to cover, proposed, owner to check: every spelling in the list of S1-M3-T12 to each target it converts to; a week, a month and a year to days and to months; business days and working days; an unknown word; days to percent (no conversion); no unit (question 16a). The AI agent does not write or change it (T11).
   - **Files:** `src/clause_tracer/core/tests/tables/units.toml`.
   - **Tests first:** None. The owner's values are the expected answers.
@@ -414,7 +414,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** T11, [Spec 5](../spec.md#5-labelling-rules) Rule 6.
   - **Depends on:** S1-M3-T2.
 
-- [ ] **S1-M3-T8: Spec 14.5 label table (Owner)**
+- [x] **S1-M3-T8: Spec 14.5 label table (Owner)**
   - **Build:** Owner only. One row per starter position in `spec_14_5.toml`. Columns: `id` (str), `position` (a Spec 7 position id), `level`, `reasons` (a list of `ReasonCode` values), `written_by` (`"code"` or `"ai"`). The AI agent does not write or change it (T11).
   - **Files:** `src/clause_tracer/core/tests/tables/spec_14_5.toml`.
   - **Tests first:** None. The owner's values are the expected answers.
@@ -422,7 +422,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** T11, [Spec 14.5](../spec.md#145-sample-data), [system design 15.1](../system-design.md#151-stage-1-core) "Done when".
   - **Depends on:** S1-M3-T5.
 
-- [ ] **S1-M3-T9: Playbook-check table (Owner)**
+- [x] **S1-M3-T9: Playbook-check table (Owner)**
   - **Build:** Owner only. The rows of `playbook_checks.toml`. Columns: `id` (str), `positions` (a list of position tables in the format of S1-M3-T3), `problems` (a list of inline tables `{ position = "<id>", code = "<PlaybookProblemCode value>" }`, empty when the playbook passes). Cases to cover, proposed, owner to check: a negative limit; a percentage over 100; equal limits and reversed limits, in both directions; yes level not better than no level; a yes/no level of unsure; a yes/no missing level that is not the no level; an empty words level text (`"   "`); two positions with one id; a playbook with no problem. The AI agent does not write or change it (T11).
   - **Files:** `src/clause_tracer/core/tests/tables/playbook_checks.toml`.
   - **Tests first:** None. The owner's values are the expected answers.
