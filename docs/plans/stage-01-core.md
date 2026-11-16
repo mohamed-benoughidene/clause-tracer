@@ -294,7 +294,7 @@ Every task in M2 extends one shared test, `test_fields_match_system_design` in `
   - **Rules:** [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) 13 Nov amendment, [Spec 4.1](../spec.md#41-playbooks), I13, D6, S3.
   - **Depends on:** S1-M2-T1.
 
-- [ ] **S1-M2-T5: Review result shapes**
+- [x] **S1-M2-T5: Review result shapes**
   - **Build:** In `src/clause_tracer/core/results.py`: `Evidence`, `CheckedValue` (with `unlimited: bool = False` as its last field), `JudgedLevel`, `MatchFound`, `NothingFound`, `MatchUnconfirmed`, `CallFailed`, `ToolLabel` and `NotCoveredClause`, each exactly as in system design 3.4, no more fields. Then the alias `MatchResult = MatchFound | NothingFound | MatchUnconfirmed | CallFailed`. Export all ten names.
   - **Files:** `src/clause_tracer/core/results.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_shapes.py`, `src/clause_tracer/core/README.md`.
   - **Tests first:** `test_fields_match_system_design` (the nine shapes); `test_match_results_are_unrelated`: for each ordered pair of the four match types, neither is a subclass of the other; `test_unlimited_defaults_to_false`: a `CheckedValue` built without `unlimited` has `unlimited is False`; `test_reason_fields_hold_reason_codes`: the type hint of `CheckedValue.reasons` and `ToolLabel.reasons` is `tuple[ReasonCode, ...]`.

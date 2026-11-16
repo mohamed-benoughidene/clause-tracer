@@ -114,6 +114,16 @@ arguments, with exactly the fields of system design 3.4 in that order (ADR 0005)
 | `Playbook` | `id: PlaybookId, schema_version: int, name: str, side: str, customer_id: CustomerId \| None, positions: tuple[Position, ...], starter: bool` | Starters are read-only |
 | `PlaybookSnapshot` | `playbook: Playbook, taken_at: datetime, unedited_starter: bool` | Taken at "Send for review"; drives "by the example playbook" |
 | `Settings` | `default_model: str, step_models: tuple[tuple[str, str], ...], private_mode_default: bool, send_why_notes: bool, auto_delete_days: int, data_dir: str, log_level: str` | Loaded once at start-up and passed in (I13, Spec 14.3) |
+| `Evidence` | `clause_id: ClauseId, sentence_ids: tuple[SentenceId, ...], quote: Span, placed: bool` | A confirmed quote; `placed` is false when it could not be marked on the page; the label stays (ADR 0012) |
+| `CheckedValue` | `position_id: PositionId, clause_id: ClauseId, evidence: Evidence \| None, raw_value: str \| None, number: Decimal \| None, range_high: Decimal \| None, unit_as_written: str \| None, start_point_as_written: str \| None, answer: Answer \| None, condition: Span \| None, vague: bool, amount: Decimal \| None, total: Decimal \| None, reasons: tuple[ReasonCode, ...], unlimited: bool = False` | One value after the quote check; the input of the number and yes/no label rules (Spec 6.1 step 6b). "None" arrives as `number == 0`; `unlimited` is true when the contract says the value has no limit |
+| `JudgedLevel` | `position_id: PositionId, clause_id: ClauseId, evidence: Evidence \| None, level: Level` | One AI judgement for a words position (step 9) |
+| `MatchFound` | `position_id: PositionId, clause_ids: tuple[ClauseId, ...]` | The position was found in the clauses named |
+| `NothingFound` | `position_id: PositionId, searches: tuple[str, ...]` | Fills the "Where it was searched" panel |
+| `MatchUnconfirmed` | `position_id: PositionId, clauses_to_read: tuple[ClauseId, ...]` | The searches disagree: unsure with `MATCH_UNCONFIRMED` (ADR 0012) |
+| `CallFailed` | `code: str` | The call failed; a separate type, so it can never pass as "nothing found" (I4) |
+| `MatchResult` | a type alias: the union of the four match types | The `match` field of `LabelInput` |
+| `ToolLabel` | `position_id: PositionId, level: Level, reasons: tuple[ReasonCode, ...], evidence: tuple[Evidence, ...], written_by: WrittenBy` | The label code picked; `written_by` is AI only for words positions, which are drawn in pencil (ADR 0002) |
+| `NotCoveredClause` | `clause_id: ClauseId, clause_type: str` | A type from the closed list, plus the clause's own first line (ADR 0011) |
 | `CancelCheck` | a type alias: `Callable[[], bool]` | Returns True once the user has cancelled (ADR 0005) |
 
 ## Depends on

@@ -6,17 +6,25 @@ from typing import get_type_hints
 import pytest
 
 from clause_tracer.core import (
+    CallFailed,
+    CheckedValue,
     Clause,
     ClauseId,
     CrossReference,
     DefinedTerm,
     Document,
+    Evidence,
     FileKind,
     Glyph,
     HiddenText,
     InputWarning,
+    JudgedLevel,
     LinkMap,
+    MatchFound,
     MatchKey,
+    MatchUnconfirmed,
+    NotCoveredClause,
+    NothingFound,
     NumberRule,
     OutsideDocument,
     Override,
@@ -29,11 +37,13 @@ from clause_tracer.core import (
     Playbook,
     PlaybookSnapshot,
     Position,
+    ReasonCode,
     Segment,
     Sentence,
     Settings,
     SourceFile,
     Span,
+    ToolLabel,
     TrackedChange,
     Wording,
     WordsRule,
@@ -43,6 +53,31 @@ from clause_tracer.core import (
 EXPECTED_FIELDS: dict[type, tuple[str, ...]] = {
     Wording: ("text", "written_by"),
     Span: ("start", "end"),
+    Evidence: ("clause_id", "sentence_ids", "quote", "placed"),
+    CheckedValue: (
+        "position_id",
+        "clause_id",
+        "evidence",
+        "raw_value",
+        "number",
+        "range_high",
+        "unit_as_written",
+        "start_point_as_written",
+        "answer",
+        "condition",
+        "vague",
+        "amount",
+        "total",
+        "reasons",
+        "unlimited",
+    ),
+    JudgedLevel: ("position_id", "clause_id", "evidence", "level"),
+    MatchFound: ("position_id", "clause_ids"),
+    NothingFound: ("position_id", "searches"),
+    MatchUnconfirmed: ("position_id", "clauses_to_read"),
+    CallFailed: ("code",),
+    ToolLabel: ("position_id", "level", "reasons", "evidence", "written_by"),
+    NotCoveredClause: ("clause_id", "clause_type"),
     PageBox: ("page", "x0", "top", "x1", "bottom"),
     Page: ("number", "width", "height"),
     Glyph: ("page", "box"),
@@ -196,3 +231,25 @@ def test_playbook_text_is_plain_str() -> None:
     assert words_hints["preferred"] is str
     assert words_hints["acceptable"] is str
     assert words_hints["walk_away"] is str
+
+
+def test_match_results_are_unrelated() -> None:
+    # Four separate types, so a failed call can never pass as "nothing
+    # found" (I4, system design 3.4).
+    match_types = (MatchFound, NothingFound, MatchUnconfirmed, CallFailed)
+    for a in match_types:
+        for b in match_types:
+            if a is not b:
+                assert not issubclass(a, b), f"{a.__name__} subclasses {b.__name__}"
+
+
+def test_unlimited_defaults_to_false() -> None:
+    # "Unlimited" is CheckedValue.unlimited (decided 14 Nov 2026).
+    fields = {f.name: f for f in dataclasses.fields(CheckedValue)}
+    assert fields["unlimited"].default is False
+
+
+def test_reason_fields_hold_reason_codes() -> None:
+    # Rules return codes, never prose (I7).
+    assert get_type_hints(CheckedValue)["reasons"] == tuple[ReasonCode, ...]
+    assert get_type_hints(ToolLabel)["reasons"] == tuple[ReasonCode, ...]
