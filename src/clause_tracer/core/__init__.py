@@ -11,6 +11,12 @@ from clause_tracer.core.ai import (
     StepInputs,
     Usage,
 )
+from clause_tracer.core.auto_delete import (
+    due_at,
+    in_warning_window,
+    is_due,
+    protected_until_after_lowering,
+)
 from clause_tracer.core.checks import (
     CallPrices,
     CostInputs,
@@ -294,13 +300,17 @@ __all__: list[str] = [
     "check_playbook",
     "combine_rule_4",
     "convert_to_unit",
+    "due_at",
     "evidence_reasons",
+    "in_warning_window",
     "is_better",
+    "is_due",
     "label_all",
     "label_position",
     "level_for_limits",
     "level_rank",
     "number_verdicts",
+    "protected_until_after_lowering",
     "request_sha256",
     "sort_reasons",
     "spans_overlap",
