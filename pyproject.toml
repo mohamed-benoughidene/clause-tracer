@@ -15,7 +15,14 @@ dependencies = []
 clause-tracer = "clause_tracer.cli.__main__:main"
 
 [dependency-groups]
-dev = ["pytest", "ruff", "mypy", "import-linter", "uv"]  # uv lives in .venv, so sync must keep it
+dev = [
+    "pytest",
+    "ruff",
+    "mypy",
+    "import-linter",
+    "uv",
+    "hypothesis>=6.170.15",
+]  # uv lives in .venv, so sync must keep it
 
 [tool.uv]
 # Keep everything inside the repo: the download cache, and the system Python (no managed downloads).
