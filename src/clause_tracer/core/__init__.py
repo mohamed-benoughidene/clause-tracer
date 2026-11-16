@@ -122,6 +122,7 @@ from clause_tracer.core.playbook import (
     WordsRule,
     YesNoRule,
 )
+from clause_tracer.core.playbook_checks import check_playbook
 from clause_tracer.core.ports import CancelCheck
 from clause_tracer.core.results import (
     CallFailed,
@@ -252,6 +253,7 @@ __all__: list[str] = [
     "WordsRule",
     "WrittenBy",
     "YesNoRule",
+    "check_playbook",
     "is_better",
     "level_rank",
     "sort_reasons",

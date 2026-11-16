@@ -444,7 +444,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rule 4, T1, T6.
   - **Depends on:** S1-M2-T7.
 
-- [ ] **S1-M3-T11: Playbook checks**
+- [x] **S1-M3-T11: Playbook checks**
   - **Build:** In `src/clause_tracer/core/playbook_checks.py`, export `def check_playbook(playbook: Playbook) -> tuple[PlaybookProblem, ...]`. Problems come in playbook order; within one position, in `PlaybookProblemCode` member order. For each position:
     - `DUPLICATE_POSITION_ID` when an earlier position has the same id.
     - `RULE_TYPE_MISMATCH` when the rule's class does not match the type (`NUMBER` with `NumberRule`, `YES_NO` with `YesNoRule`, `WORDS` with `WordsRule`). Then skip the other checks for that position.
