@@ -302,9 +302,9 @@ These are the project's own targets, anchored on a common industry guide (60% ac
 
 | Gap | Closed in build stage |
 | --- | --- |
-| No label-rule tables, no property tests | 1 (`core`) |
-| No replay fake | 1 |
-| No coverage measurement; no guard on owner tables | 1 |
+| No label-rule tables, no property tests | 1 (`core`): closed 16 Nov 2026 |
+| No replay fake | 1: closed 16 Nov 2026 |
+| No coverage measurement; no guard on owner tables | 1: closed 16 Nov 2026 |
 | No suite-wide socket block (`pytest-socket`) | 6, with the first adapters |
 | No nightly job (Hypothesis at 2,000 examples, file fuzzing) | 5, with the hostile-file fuzzing |
 | No samples or golden files in any module | 2 to 5, with each module |
