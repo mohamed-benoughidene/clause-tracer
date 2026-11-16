@@ -24,6 +24,7 @@ dev = [
     "import-linter",
     "uv",
     "hypothesis>=6.170.15",
+    "coverage>=7.17.3",
 ]  # uv lives in .venv, so sync must keep it
 
 [tool.uv]
@@ -125,3 +126,11 @@ modules = [
     "clause_tracer.writing",
     "clause_tracer.outputs",
 ]
+
+[tool.coverage.run]
+branch = true
+source = ["clause_tracer"]
+
+[tool.coverage.report]
+exclude_also = ["if __name__ == .__main__.:"]
+show_missing = true

@@ -18,4 +18,5 @@ run ruff format --check
 run mypy
 run lint-imports
 run python scripts/copy_lint.py
-run pytest -q
+run coverage run -m pytest -q
+run coverage report --include='src/clause_tracer/core/*' --fail-under=95
