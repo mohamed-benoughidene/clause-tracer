@@ -435,7 +435,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
     - `def level_rank(level: Level) -> int`: `PREFERRED` 0, `ACCEPTABLE` 1, `WALK_AWAY` 2. `UNSURE` raises `ValueError("unsure has no rank")`.
     - `def is_better(a: Level, b: Level) -> bool`: `level_rank(a) < level_rank(b)`.
     - `def worst_level(levels: Iterable[Level]) -> Level`: the level with the highest rank; an empty input raises `ValueError`.
-    - `def spans_overlap(a: Span, b: Span) -> bool`: `a.start < b.end and b.start < a.end`.
+    - `def spans_overlap(a: Span, b: Span) -> bool`: `max(a.start, b.start) < min(a.end, b.end)` (true only when the spans share at least one code point; an empty span overlaps nothing).
     - `def unreadable_spans(document: Document) -> UnreadableSpans`: `hidden` is every `HiddenText.span` that is not `None`, in order; `undecodable` is `document.undecodable`.
     - `def sort_reasons(reasons: Iterable[ReasonCode]) -> tuple[ReasonCode, ...]`: no repeats, in `ReasonCode` member order.
   - **Files:** `src/clause_tracer/core/levels.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_levels.py`, `src/clause_tracer/core/tests/strategies.py`, `src/clause_tracer/core/README.md` ("Functions").
@@ -913,6 +913,7 @@ Planning found questions 1 to 17. The owner answered all of them on 14 Nov 2026;
 | 16 Nov 2026 | S1-M2-T6 hand check: `make_request(inputs={"a": 1})` does **not** fail mypy, as the plan expected. The plan's own signature `make_request(**changes: object)` routes every value through untyped keyword arguments, so the call site is not checked. The type seam itself holds: constructing `AiRequest(...)` directly with `inputs={"a": 1}` does fail mypy (`arg-type`). Strict mypy does flag the `dataclasses.replace(request, **changes)` inside the helper (`arg-type`, six errors), so that line carries one `# type: ignore[arg-type]` with a comment. No code change beyond that; the scratch file was not committed. | S1-M2-T6, plans README ("When the plan is wrong") |
 | 16 Nov 2026 | The coverage omit is gone: S1-M2-T8 changed the coverage report line in `scripts/check.sh` back to `run coverage report --include='src/clause_tracer/core/*' --fail-under=95`, as S1-M1-T9 promised once milestone 2's shapes existed. The 95% floor now covers the test files of `core` again, as the plan first had it; `core` measures 99% with them included. | S1-M2-T8 |
 | 16 Nov 2026 | Added the fold-sharing note to section 9 before the stage closes, so it cannot be lost. The milestone 2 review (standards axis) flagged that `MatchKey` and `QuoteFold` share a silhouette; both are mandated by system design 3.4, and the decision on one shared fold implementation belongs to stage 2's plan. The note decides nothing; it hands the question to stage 2. | Plans README ("Notes for the next stage", "When the plan is wrong": add a note) |
+| 16 Nov 2026 | S1-M3-T10. The `spans_overlap` formula returned true for an empty span inside another span (`3..3` and `0..9`), against the planned test. The owner chose the test's meaning: spans overlap only when they share a code point. Formula changed to `max(a.start, b.start) < min(a.end, b.end)`. | Plans README ("When the plan is wrong"), owner decision of 16 Nov 2026 |
 
 ## 9. Notes for the next stage
 
