@@ -92,6 +92,7 @@ from clause_tracer.core.ids import (
     ReviewId,
     SentenceId,
 )
+from clause_tracer.core.labels import evidence_reasons, level_for_limits, number_verdicts
 from clause_tracer.core.levels import (
     is_better,
     level_rank,
@@ -256,8 +257,11 @@ __all__: list[str] = [
     "YesNoRule",
     "check_playbook",
     "convert_to_unit",
+    "evidence_reasons",
     "is_better",
+    "level_for_limits",
     "level_rank",
+    "number_verdicts",
     "sort_reasons",
     "spans_overlap",
     "unreadable_spans",

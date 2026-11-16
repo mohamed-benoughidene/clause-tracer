@@ -472,7 +472,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rule 6, T1, T6, T11.
   - **Depends on:** S1-M3-T7.
 
-- [ ] **S1-M3-T13: Number values (Rules 1, 3, 5, 6 and 9)**
+- [x] **S1-M3-T13: Number values (Rules 1, 3, 5, 6 and 9)**
   - **Build:** In `src/clause_tracer/core/labels.py`, export:
     - `def evidence_reasons(evidence: Evidence | None, unreadable: UnreadableSpans) -> tuple[ReasonCode, ...]`: `QUOTE_NOT_CONFIRMED` when `evidence` is `None` (question 16b); otherwise `HIDDEN_TEXT` when `evidence.quote` overlaps any hidden span, and `UNDECODABLE_TEXT` when it overlaps any undecodable span. Sorted with `sort_reasons`. `evidence.placed` never matters (Rule 3: an unplaced quote keeps its label).
     - `def level_for_limits(rule: NumberRule, number: Fraction) -> Level`: for `LOWER_IS_BETTER`, `PREFERRED` when `number <= preferred_limit`, else `ACCEPTABLE` when `number <= acceptable_limit`, else `WALK_AWAY`; for `HIGHER_IS_BETTER` the same with `>=`.
