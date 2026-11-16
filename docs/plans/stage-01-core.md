@@ -883,7 +883,8 @@ Planning found questions 1 to 17. The owner answered all of them on 14 Nov 2026;
 
 | Date | Change | Why |
 | --- | --- | --- |
-| None | | |
+| 16 Nov 2026 | Accepted (owner, in the working session). Status set to Accepted on `feat/core-m1-foundations`. | Plans README, "Status" |
+| 16 Nov 2026 | TypeAdapter check (section 4) passed: Pydantic 2.14.3 (pydantic-core 2.50.4), Python 3.12. `TypeAdapter(...).validate_python(...)` and `validate_json(...)` on `@dataclass(frozen=True, slots=True, kw_only=True)` classes return the dataclass itself, not a Pydantic copy; fields raise `FrozenInstanceError`; the instance has no `__dict__`; a JSON list becomes a tuple; a wrong type raises `ValidationError`; a union of three dataclasses picks the right member; `__post_init__` runs and the mapping becomes a `MappingProxyType`. A JSON-loaded `Decimal` and an aware `datetime` come back as those types. **Base-class note:** a field typed as an empty base dataclass, given a subclass instance, comes back as the base class, not the subclass (the subclass identity is lost). This feeds the stage 6 question in system design 15.6. | S1-M1-T2, ADR 0005 action item 2 |
 
 ## 9. Notes for the next stage
 
