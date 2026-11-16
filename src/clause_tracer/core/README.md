@@ -154,6 +154,7 @@ arguments, with exactly the fields of system design 3.4 in that order (ADR 0005)
 | `unreadable_spans(document: Document) -> UnreadableSpans` | every `HiddenText.span` that is not `None`, in order, as `hidden`; `document.undecodable` as `undecodable` | The Rule 9 input |
 | `sort_reasons(reasons: Iterable[ReasonCode]) -> tuple[ReasonCode, ...]` | the reasons without repeats, in `ReasonCode` member order | Rules return codes in a fixed order (I7) |
 | `check_playbook(playbook: Playbook) -> tuple[PlaybookProblem, ...]` | the playbook's problems, empty when it passes (Spec 4.1) | In playbook order; within one position, in `PlaybookProblemCode` member order. A `RULE_TYPE_MISMATCH` skips the position's other checks. Stages 6 and 12 share it (ADR 0005, 14 Nov 2026) |
+| `convert_to_unit(number: Decimal, unit_as_written: str \| None, target: Unit) -> Fraction \| ReasonCode` | the number in the target unit, or `BUSINESS_DAYS` / `UNIT_UNKNOWN` (Rule 6) | `None` means already in the target unit (16a). Spelling normalised: lower case, stripped, space runs collapsed, one trailing `.` dropped. Week 7 days, month 30, year 365 or 12 months |
 
 ## Depends on
 Nothing. It imports no other clause_tracer module.

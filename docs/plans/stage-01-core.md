@@ -457,7 +457,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** [Spec 4.1](../spec.md#41-playbooks), [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) 14 Nov amendment, T1, T11, I4.
   - **Depends on:** S1-M3-T9, S1-M3-T10.
 
-- [ ] **S1-M3-T12: Unit conversion (Rule 6)**
+- [x] **S1-M3-T12: Unit conversion (Rule 6)**
   - **Build:** In `src/clause_tracer/core/units.py`, export `def convert_to_unit(number: Decimal, unit_as_written: str | None, target: Unit) -> Fraction | ReasonCode`.
     - `None` means the number is already in the target unit: return `Fraction(number)` (question 16a).
     - Otherwise normalise the spelling: lower case, strip spaces at both ends, collapse runs of spaces to one, drop one trailing `.`. Then look it up:
