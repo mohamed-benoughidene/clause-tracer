@@ -2,6 +2,7 @@
 
 import tomllib
 from decimal import Decimal
+from pathlib import Path
 
 import pytest
 
@@ -28,6 +29,8 @@ from clause_tracer.core.sample_input import (
 from clause_tracer.core.wording import Span
 
 WHERE = "position 0"
+
+SPEC_14_5 = Path(__file__).parent.parent / "samples" / "spec-14-5.toml"
 
 
 def _data(text: str) -> dict[str, object]:
@@ -410,4 +413,12 @@ def test_parse_sample_top_level() -> None:
     assert sample.playbook.id == "starter-freelancer"
     assert sample.playbook.schema_version == 1
     assert [str(input.position.id) for input in sample.inputs] == ["1"]
+    assert sample.unreadable == UnreadableSpans(hidden=(), undecodable=())
+
+
+def test_spec_14_5_sample_parses() -> None:
+    sample = parse_sample(tomllib.loads(SPEC_14_5.read_text(encoding="utf-8")))
+    ids = ["1", "2", "3", "4", "5", "6", "7a", "7b", "8", "9", "10"]
+    assert [str(position.id) for position in sample.playbook.positions] == ids
+    assert [str(entry.position.id) for entry in sample.inputs] == ids
     assert sample.unreadable == UnreadableSpans(hidden=(), undecodable=())

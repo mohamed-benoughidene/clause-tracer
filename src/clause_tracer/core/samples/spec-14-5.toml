@@ -1,0 +1,167 @@
+# The Spec 14.5 sample: inputs only, not expected labels (Spec 14.5).
+# The starter playbook of Spec 7, its eleven positions in Spec 7 order,
+# and one input per position, built to exercise every label of the
+# Spec 14.5 table. Expected labels live in the owner's spec_14_5 table.
+
+schema_version = 1
+
+[playbook]
+id = "starter-freelancer"
+name = "Freelancer receiving a service agreement from the other side"
+side = "service provider"
+starter = true
+
+[[playbook.positions]]
+id = "1"
+topic = "Days until I'm paid, from invoice date"
+type = "number"
+unit = "days"
+direction = "lower_is_better"
+preferred_limit = "15"
+acceptable_limit = "30"
+missing_level = "unsure"
+
+[[playbook.positions]]
+id = "2"
+topic = "Upfront deposit"
+type = "number"
+unit = "percent"
+direction = "higher_is_better"
+preferred_limit = "50"
+acceptable_limit = "25"
+missing_level = "walk_away"
+
+[[playbook.positions]]
+id = "3"
+topic = "Late payment fee exists"
+type = "yes_no"
+question = "Late payment fee exists"
+yes_level = "preferred"
+no_level = "acceptable"
+
+[[playbook.positions]]
+id = "4"
+topic = "Paid for work done if the other side cancels"
+type = "yes_no"
+question = "Paid for work done if the other side cancels"
+yes_level = "preferred"
+no_level = "walk_away"
+
+[[playbook.positions]]
+id = "5"
+topic = "Revision rounds included"
+type = "number"
+unit = "rounds"
+direction = "lower_is_better"
+preferred_limit = "2"
+acceptable_limit = "3"
+missing_level = "walk_away"
+
+[[playbook.positions]]
+id = "6"
+topic = "Extra work is paid extra"
+type = "yes_no"
+question = "Extra work is paid extra"
+yes_level = "preferred"
+no_level = "walk_away"
+
+[[playbook.positions]]
+id = "7a"
+topic = "Ownership passes only after full payment"
+type = "yes_no"
+question = "Ownership passes only after full payment"
+yes_level = "preferred"
+no_level = "walk_away"
+
+[[playbook.positions]]
+id = "7b"
+topic = "If unpaid, I can reuse or resell the work"
+type = "yes_no"
+question = "If unpaid, I can reuse or resell the work"
+yes_level = "preferred"
+no_level = "acceptable"
+
+[[playbook.positions]]
+id = "8"
+topic = "I can show the work in my portfolio"
+type = "yes_no"
+question = "I can show the work in my portfolio"
+yes_level = "preferred"
+no_level = "acceptable"
+
+[[playbook.positions]]
+id = "9"
+topic = "Non-compete length"
+type = "number"
+unit = "months"
+direction = "lower_is_better"
+preferred_limit = "0"
+acceptable_limit = "6"
+missing_level = "preferred"
+
+[[playbook.positions]]
+id = "10"
+topic = "My liability is capped"
+type = "words"
+preferred = "At most the fees paid"
+acceptable = "Above the fees, up to 2x fees"
+walk_away = "Above 2x fees, a fixed sum, or uncapped"
+missing_level = "walk_away"
+
+[[input]]
+position = "1"
+match = "found"
+values = [{ clause = "c1", number = "60", unit = "days" }]
+
+[[input]]
+position = "2"
+match = "found"
+values = [{ clause = "c2", number = "25", unit = "%" }]
+
+[[input]]
+position = "3"
+match = "nothing"
+
+[[input]]
+position = "4"
+match = "found"
+values = [
+    { clause = "c4", answer = "no", quote = "none", reasons = ["quote_not_confirmed"] },
+]
+
+[[input]]
+position = "5"
+match = "found"
+values = [{ clause = "c5", raw = "reasonable revisions", vague = true }]
+
+[[input]]
+position = "6"
+match = "found"
+values = [{ clause = "c6", answer = "yes" }]
+
+[[input]]
+position = "7a"
+match = "found"
+values = [{ clause = "c7", answer = "no" }]
+
+[[input]]
+position = "7b"
+match = "nothing"
+
+[[input]]
+position = "8"
+match = "nothing"
+
+[[input]]
+position = "9"
+match = "found"
+values = [
+    { clause = "c9a", number = "12", unit = "months" },
+    { clause = "c9b", number = "6", range_high = "9", unit = "months" },
+]
+
+[[input]]
+position = "10"
+match = "found"
+judged = [{ clause = "c10", level = "preferred" }]
+outside_documents = ["Master Agreement"]
