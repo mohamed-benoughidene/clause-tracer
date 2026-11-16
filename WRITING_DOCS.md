@@ -80,7 +80,7 @@ This table was checked on 14 Nov 2026. When you add a promise or find a new copy
 | "Check for updates" only opens the release page in the browser. The app never contacts GitHub itself | Spec 8.1, 12 and 14.3, Settings (About), ux-copy |
 | Every AI-written text is checked and marked as written by AI | Spec 6.2, Review and Output pages, ux-copy |
 | Source available, never "open source" | README, Spec 1, Help, ux-copy, `docs/README.md` |
-| The app is in design, and nothing is released yet | README (status note and badge), `SECURITY.md` (supported versions) |
+| The app is being built, and nothing is released yet | README (status note and badge), `SECURITY.md` (supported versions) |
 
 **Example: adding accounts.** Suppose a later version adds sign-in and cloud sync. Then, in the same change:
 
