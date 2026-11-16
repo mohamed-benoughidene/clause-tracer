@@ -4,6 +4,7 @@ import dataclasses
 from datetime import datetime, timedelta
 
 from clause_tracer.core.ai import AiRecord, AiReply, AiRequest, PromptMessage, StepInputs, Usage
+from clause_tracer.core.checks import ScanContext
 from clause_tracer.core.enums import PrivacyMode
 from clause_tracer.core.ids import ClauseId, RecordId, ReviewId
 from clause_tracer.core.request_hash import request_sha256
@@ -37,6 +38,25 @@ def make_request(**changes: object) -> AiRequest:
     # verify the values through the bag; the call is checked at the AiRequest
     # constructor itself (recorded in the plan's change log, 16 Nov 2026).
     return dataclasses.replace(request, **changes)  # type: ignore[arg-type]
+
+
+def make_scan_context(**changes: object) -> ScanContext:
+    """One empty ScanContext, with any field replaced by name."""
+
+    context = ScanContext(
+        label=None,
+        allowed_numbers=(),
+        acceptable_limits=(),
+        known_placeholders=(),
+        defined_roles=(),
+        clause_numbers=(),
+        quote=None,
+        source_text=None,
+        instruction_given=False,
+    )
+    # The plan fixes this signature as **changes: object, a deliberate bag of
+    # replacements; the call is checked at the ScanContext constructor itself.
+    return dataclasses.replace(context, **changes)  # type: ignore[arg-type]
 
 
 def make_reply(text: str = "{}") -> AiReply:

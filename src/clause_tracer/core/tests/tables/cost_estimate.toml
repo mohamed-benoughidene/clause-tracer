@@ -1,2 +1,170 @@
 # Expected answers. Only the owner edits this file. Constitution T11.
 # Format: docs/plans/stage-01-core.md, task S1-M5-T9.
+
+# The starter playbook over 50 clauses, a 10,000-word contract, a cheap price.
+[[case]]
+id = "starter_cheap_model"
+positions = 11
+words_positions = 1
+clauses = 50
+contract_tokens = 19000
+input_per_million = "0.10"
+cached_input_per_million = "0.01"
+output_per_million = "0.50"
+calls = 30
+low_usd = "0.0147"
+high_usd = "0.0660"
+
+# The same review at a Sonnet-class price.
+[[case]]
+id = "starter_sonnet_class"
+positions = 11
+words_positions = 1
+clauses = 50
+contract_tokens = 19000
+input_per_million = "2.00"
+cached_input_per_million = "0.20"
+output_per_million = "10.00"
+calls = 30
+low_usd = "0.2940"
+high_usd = "1.3200"
+
+# A 50,000-word contract.
+[[case]]
+id = "fifty_thousand_words_sonnet_class"
+positions = 11
+words_positions = 1
+clauses = 50
+contract_tokens = 95000
+input_per_million = "2.00"
+cached_input_per_million = "0.20"
+output_per_million = "10.00"
+calls = 30
+low_usd = "0.7500"
+high_usd = "5.8800"
+
+# One number position over one clause.
+[[case]]
+id = "one_position_one_clause"
+positions = 1
+words_positions = 0
+clauses = 1
+contract_tokens = 500
+input_per_million = "2.00"
+cached_input_per_million = "0.20"
+output_per_million = "10.00"
+calls = 5
+low_usd = "0.0305"
+high_usd = "0.0350"
+
+# One words position: a judge and an explain call, no extraction.
+[[case]]
+id = "one_words_position_one_clause"
+positions = 1
+words_positions = 1
+clauses = 1
+contract_tokens = 500
+input_per_million = "2.00"
+cached_input_per_million = "0.20"
+output_per_million = "10.00"
+calls = 6
+low_usd = "0.0366"
+high_usd = "0.0420"
+
+# Every position is a words position.
+[[case]]
+id = "every_position_is_words"
+positions = 3
+words_positions = 3
+clauses = 10
+contract_tokens = 2000
+input_per_million = "0.10"
+cached_input_per_million = "0.01"
+output_per_million = "0.50"
+calls = 12
+low_usd = "0.0038"
+high_usd = "0.0060"
+
+# No clauses and no contract tokens: no clause batches; the other 26 calls pay only task and output tokens.
+[[case]]
+id = "zero_clauses"
+positions = 11
+words_positions = 1
+clauses = 0
+contract_tokens = 0
+input_per_million = "2.00"
+cached_input_per_million = "0.20"
+output_per_million = "10.00"
+calls = 26
+low_usd = "0.1560"
+high_usd = "0.1560"
+
+# 25 clauses fill exactly one batch.
+[[case]]
+id = "clauses_fill_one_batch"
+positions = 11
+words_positions = 1
+clauses = 25
+contract_tokens = 9500
+input_per_million = "0.10"
+cached_input_per_million = "0.01"
+output_per_million = "0.50"
+calls = 28
+low_usd = "0.0111"
+high_usd = "0.0350"
+
+# 26 clauses start a second batch.
+[[case]]
+id = "clauses_start_a_second_batch"
+positions = 11
+words_positions = 1
+clauses = 26
+contract_tokens = 9500
+input_per_million = "0.10"
+cached_input_per_million = "0.01"
+output_per_million = "0.50"
+calls = 30
+low_usd = "0.0119"
+high_usd = "0.0375"
+
+# 4 positions make one pair check.
+[[case]]
+id = "four_positions_one_pair_check"
+positions = 4
+words_positions = 0
+clauses = 10
+contract_tokens = 2000
+input_per_million = "0.10"
+cached_input_per_million = "0.01"
+output_per_million = "0.50"
+calls = 11
+low_usd = "0.0035"
+high_usd = "0.0055"
+
+# 5 positions make two pair checks.
+[[case]]
+id = "five_positions_two_pair_checks"
+positions = 5
+words_positions = 0
+clauses = 10
+contract_tokens = 2000
+input_per_million = "0.10"
+cached_input_per_million = "0.01"
+output_per_million = "0.50"
+calls = 14
+low_usd = "0.0045"
+high_usd = "0.0070"
+
+# The low end ends in exactly 5 at the fifth decimal place, so half up and half even differ.
+[[case]]
+id = "rounds_half_up_at_the_fourth_place"
+positions = 1
+words_positions = 0
+clauses = 1
+contract_tokens = 600
+input_per_million = "0.04"
+cached_input_per_million = "0.01"
+output_per_million = "0.01"
+calls = 5
+low_usd = "0.0003"
+high_usd = "0.0003"

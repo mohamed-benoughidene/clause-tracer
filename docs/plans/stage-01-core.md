@@ -639,7 +639,7 @@ Any later module can be tested against a fake of each port. The replay fake fail
 
 The output scans give the owner's findings for every case in the scan table, the cost estimate gives the owner's ranges, and the last check before drawing passes invariant 7.
 
-- [ ] **S1-M5-T1: Scan table (Owner)**
+- [x] **S1-M5-T1: Scan table (Owner)**
   - **Build:** Owner only. `scans.toml` holds two sections and the cases.
     - `[lists]`: `law_words`, `advice_phrases`, `injection_phrases`, `contact_words`, `first_person_words`, `filler_phrases`, `evaluative_words`, `abbreviations`, each a list of strings. Proposed starting values, owner to check: law words `"legal"`, `"illegal"`, `"lawful"`, `"unlawful"`, `"enforceable"`, `"unenforceable"`, `"the law"`; advice `"safe to sign"`, `"you should sign"`, `"do not sign"`, `"don't sign"`, `"we recommend"`; injection tells `"ignore"`, `"disregard"`, `"mark every"`, `"system prompt"`; contact words `"call"`, `"visit"`; first-person words `"I"`, `"I'm"`, `"I'd"`, `"I'll"`, `"I've"`, `"we"`, `"we're"`, `"we'd"`, `"we'll"`, `"we've"`, `"my"`, `"our"`; filler phrases `"certainly"`, `"here is"`, `"here's"`, `"I hope"`, `"it's important to note"`, `"please note"`, `"overall"`, `"in summary"`, `"as an AI"`, `"feel free"`, `"rest assured"`, `"crucial"`, `"ensure that"`; evaluative words `"fair"`, `"unfair"`, `"concerning"`, `"problematic"`, `"favourable"`, `"standard"`, `"typical"`, `"risky"`; abbreviations (each ends in `.`) `"e.g."`, `"i.e."`, `"etc."`, `"approx."`, `"no."`, `"cl."`, `"mr."`, `"mrs."`, `"ms."`, `"dr."`, `"vs."`. Write apostrophes straight: the scans make curly ones straight before they match.
     - `[caps]`: one integer per `TextSlot` value (`reason`, `reading`, `question`, `message`, `rewrite`), the maximum length in characters. Proposed starting values, owner to check: reason 280, reading 200, question 200, message 3000, rewrite 2000.
@@ -659,7 +659,7 @@ The output scans give the owner's findings for every case in the scan table, the
   - **Rules:** T11, [Spec 6.2](../spec.md#62-rules-for-every-ai-step) (with the length caps and the style scans), [testing strategy 4](../testing-strategy.md#4-what-to-test-in-each-module) (`core` row), question 18.
   - **Depends on:** S1-M3-T2.
 
-- [ ] **S1-M5-T2: The scan lists and caps in code**
+- [x] **S1-M5-T2: The scan lists and caps in code**
   - **Build:** In `src/clause_tracer/core/scan_rules.py`, export `LAW_WORDS`, `ADVICE_PHRASES`, `INJECTION_PHRASES`, `CONTACT_WORDS`, `FIRST_PERSON_WORDS`, `FILLER_PHRASES`, `EVALUATIVE_WORDS`, `ABBREVIATIONS` (each `tuple[str, ...]`, from the lists `law_words` to `abbreviations` in that order) and `LENGTH_CAPS: Mapping[TextSlot, int]` (a `MappingProxyType`), with the values copied from the owner's `scans.toml` in the same order. The owner owns the values; the code holds a copy.
   - **Files:** `src/clause_tracer/core/scan_rules.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_scans.py`, `src/clause_tracer/core/README.md` ("Functions").
   - **Tests first:** in `test_scans.py`: `test_scan_rules_match_owner_table` (load `scans.toml` with `sections=frozenset({"lists", "caps"})`; each list equals its tuple; the caps equal `LENGTH_CAPS`, with one entry per `TextSlot`).
@@ -667,7 +667,7 @@ The output scans give the owner's findings for every case in the scan table, the
   - **Rules:** T11, [system design 3.4](../system-design.md#34-core-shapes-for-stage-1) (decided 14 Nov 2026: the owner's table holds the values).
   - **Depends on:** S1-M5-T1, S1-M1-T7.
 
-- [ ] **S1-M5-T3: Word and pattern scans**
+- [x] **S1-M5-T3: Word and pattern scans**
   - **Build:** In `src/clause_tracer/core/scans.py`, export:
     - `WEB_ADDRESS_PATTERN = re.compile(r"\bhttps?://\S+|\bwww\.\S+|\b(?:[a-z0-9-]+\.)+(?:com|org|net|io|co|uk|eu|info|biz|dev|app|me|ai)\b", re.IGNORECASE)` and `EMAIL_PATTERN = re.compile(r"[^\s@]+@[^\s@]+\.[^\s@]+")`.
     - `LABEL_WORDS: Mapping[Level, tuple[str, ...]]`: `PREFERRED` `("preferred",)`, `ACCEPTABLE` `("acceptable",)`, `WALK_AWAY` `("walk-away", "walk away")`, `UNSURE` `("unsure",)`.
@@ -679,15 +679,15 @@ The output scans give the owner's findings for every case in the scan table, the
   - **Rules:** T1, T13, T11, I4, [Spec 6.2](../spec.md#62-rules-for-every-ai-step), [system design 8.2](../system-design.md#82-calls-to-the-ai-service).
   - **Depends on:** S1-M5-T2.
 
-- [ ] **S1-M5-T4: The quote-check fold**
+- [x] **S1-M5-T4: The quote-check fold**
   - **Build:** In `src/clause_tracer/core/quote_fold.py`, export `def fold_for_quote_check(text: str) -> QuoteFold`, the fold of Spec 2. Walk the text once: `‘ ’ ‚ ‛` (`‘ ’ ‚ ‛`) become `'`; `“ ” „ ‟` (`“ ” „ ‟`) become `"`; a run of characters for which `str.isspace()` is true becomes one `" "`, mapped to the run's first character; every other character is kept. `to_original[i]` is the index in `text` of folded character `i`, and the last entry is `len(text)`.
   - **Files:** `src/clause_tracer/core/quote_fold.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_quote_fold.py`, `src/clause_tracer/core/README.md` ("Functions").
-  - **Tests first:** in `test_quote_fold.py`: `test_curly_quotes_become_straight` (`"“a” ‘b’"` folds to `"\"a\" 'b'"`); `test_whitespace_runs_collapse` (`"a \n\t b"` folds to `"a b"` with `to_original == (0, 1, 5, 6)`); `test_empty_text` (`QuoteFold(text="", to_original=(0,))`); the property `test_map_shape` (for `text()`: `len(to_original) == len(text) + 1`, it is strictly increasing, and its last entry is the original length); the property `test_fold_is_idempotent` (folding the folded text gives the same text).
+  - **Tests first:** in `test_quote_fold.py`: `test_curly_quotes_become_straight` (`"“a” ‘b’"` folds to `"\"a\" 'b'"`); `test_whitespace_runs_collapse` (`"a \n\t b"` folds to `"a b"` with `to_original == (0, 1, 5, 6)`); `test_empty_text` (`QuoteFold(text="", to_original=(0,))`); the property `test_map_shape` (for `text()`: `len(to_original) == len(fold.text) + 1`, one entry per folded character plus the last, it is strictly increasing, and its last entry is the original length); the property `test_fold_is_idempotent` (folding the folded text gives the same text).
   - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_quote_fold.py` reports 5 passed, and `scripts/check.sh` exits 0.
   - **Rules:** T1, T6, [Spec 2](../spec.md#2-glossary) (quote check), [ADR 0012](../adr/0012-missing-unsure-and-evidence-failures.md) 14 Nov amendment.
   - **Depends on:** S1-M2-T7.
 
-- [ ] **S1-M5-T5: Style scans: first-person, filler and evaluative words**
+- [x] **S1-M5-T5: Style scans: first-person, filler and evaluative words**
   - **Build:** In `src/clause_tracer/core/scans.py`, export:
     - `FIRST_PERSON_SLOTS: frozenset[TextSlot] = frozenset({TextSlot.REASON, TextSlot.READING, TextSlot.REWRITE})`. The message and the question to ask are left out, because the user speaks in them (question 18a).
     - `def mask_abbreviations(text: str) -> str`: for each item `a` of `ABBREVIATIONS`, replace every match of `re.compile(r"(?<![\w.])" + re.escape(a), re.IGNORECASE)` in `text` with `" " * len(a)`. The result has the same length as `text`.
@@ -714,7 +714,7 @@ The output scans give the owner's findings for every case in the scan table, the
   - **Rules:** T1, T11, I4, [Spec 6.2](../spec.md#62-rules-for-every-ai-step) (style scans, and how the scans match), [ux-copy 1.1](../ux-copy.md#11-signs-of-machine-made-text), question 18.
   - **Depends on:** S1-M5-T3.
 
-- [ ] **S1-M5-T6: Style scans: a reason with no anchor**
+- [x] **S1-M5-T6: Style scans: a reason with no anchor**
   - **Build:** In `src/clause_tracer/core/scans.py`, export:
     - `MIN_ANCHOR_LETTERS = 4` and `QUOTED_RUN_PATTERN = re.compile(r'"([^"]+)"')`.
     - `def has_clause_number(text: str, clause_numbers: Iterable[str]) -> bool`: true when some `n` in `clause_numbers` with `n.strip() != ""` has `re.search(r"(?<![\w.])" + re.escape(n.strip()) + r"(?!\w|\.\w)", text, re.IGNORECASE)`. So `5.4` is found in "Read 5.4." but not in "5.40" or "15.4".
@@ -736,7 +736,7 @@ The output scans give the owner's findings for every case in the scan table, the
   - **Rules:** T1, T11, I4, [Spec 6.2](../spec.md#62-rules-for-every-ai-step) (style scans), [Spec 2](../spec.md#2-glossary) (the quote-check fold).
   - **Depends on:** S1-M5-T5, S1-M5-T4.
 
-- [ ] **S1-M5-T7: Style scans: added sentences**
+- [x] **S1-M5-T7: Style scans: added sentences**
   - **Build:** In `src/clause_tracer/core/scans.py`, export:
     - `SENTENCE_END_PATTERN = re.compile(r"[.?!]+[\"'’”)\]]*(?=\s|$)")`: one or more of `.`, `?` and `!`, then any closing quotes or brackets, then a space, a line break or the end of the text.
     - `def count_sentences(text: str) -> int`: split `mask_abbreviations(text)` with `SENTENCE_END_PATTERN.split`, and count the pieces that hold at least one character for which `str.isalnum()` is true. So "1.5" does not end a sentence, an abbreviation in `ABBREVIATIONS` does not end one, and text with no end mark is one sentence. The sentence splitter of stage 2 (`ingest`, NUPunkt) is not used: `core` imports no other module, and stage 2 is built later. Both texts of a comparison are counted by this one rule.
@@ -755,7 +755,7 @@ The output scans give the owner's findings for every case in the scan table, the
   - **Rules:** T1, T11, I4, the import rules in AGENTS.md (`core` imports no other module), [Spec 6.2](../spec.md#62-rules-for-every-ai-step) (style scans).
   - **Depends on:** S1-M5-T6.
 
-- [ ] **S1-M5-T8: Value and name scans**
+- [x] **S1-M5-T8: Value and name scans**
   - **Build:** In `src/clause_tracer/core/scans.py`, export:
     - `NUMBER_PATTERN = re.compile(r"\d+(?:,\d{3})*(?:\.\d+)?")` and `PLACEHOLDER_PATTERN = re.compile(re.escape(PLACEHOLDER_OPEN) + "[^" + re.escape(PLACEHOLDER_CLOSE) + "]*" + re.escape(PLACEHOLDER_CLOSE))`.
     - `def scan_ai_text(text: str, slot: TextSlot, context: ScanContext, detector: PiiDetector) -> tuple[ScanFinding, ...]`. It starts from `scan_text(text, slot, context.label)`, adds `scan_style(text, slot, context)`, and adds:
@@ -769,7 +769,7 @@ The output scans give the owner's findings for every case in the scan table, the
   - **Rules:** P4 (detector passed in), T2, T13, T11, [Spec 6.2](../spec.md#62-rules-for-every-ai-step).
   - **Depends on:** S1-M5-T7, S1-M4-T4.
 
-- [ ] **S1-M5-T9: Cost estimate table (Owner)**
+- [x] **S1-M5-T9: Cost estimate table (Owner)**
   - **Build:** Owner only. The rows of `cost_estimate.toml`. Columns: `id`; `positions`, `words_positions`, `clauses`, `contract_tokens` (integers); `input_per_million`, `cached_input_per_million`, `output_per_million` (decimal strings, US dollars); the expected `calls` (integer), `low_usd` and `high_usd` (decimal strings with at most four decimal places), worked out by the formula of [system design 7](../system-design.md#7-caching-resume-and-cost). Cases to cover, proposed, owner to check: the starter playbook (11 positions, 1 words position) over 50 clauses with a 10,000-word contract (19,000 tokens), at a cheap and at a Sonnet-class price; a 50,000-word contract (95,000 tokens); one position over one clause; zero clauses; a case whose amounts round at the fourth decimal place. The AI agent does not write or change it (T11).
   - **Files:** `src/clause_tracer/core/tests/tables/cost_estimate.toml`.
   - **Tests first:** None. The owner's values are the expected answers.
@@ -777,7 +777,7 @@ The output scans give the owner's findings for every case in the scan table, the
   - **Rules:** T11, [Spec 9](../spec.md#9-running-the-app) (cost), [system design 7](../system-design.md#7-caching-resume-and-cost) (estimate).
   - **Depends on:** S1-M3-T2.
 
-- [ ] **S1-M5-T10: Cost estimate**
+- [x] **S1-M5-T10: Cost estimate**
   - **Build:** In `src/clause_tracer/core/cost.py`, export `TASK_TOKENS_PER_CALL = 1000`, `OUTPUT_TOKENS_PER_CALL = 400` and:
     - `def estimate_calls(positions: int, words_positions: int, clauses: int) -> int`: the sum of the table in system design 7, with `math.ceil`.
     - `def estimate_cost(inputs: CostInputs) -> CostRange`: `calls = estimate_calls(...)`. Per call, in `Decimal`: `low_call = (T * cached + TASK * input + OUTPUT * output) / 1_000_000` and `high_call = ((T + TASK) * input + OUTPUT * output) / 1_000_000`, where `T` is `contract_tokens`. `low_usd` and `high_usd` are `calls` times each, then `.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)`.
@@ -788,7 +788,7 @@ The output scans give the owner's findings for every case in the scan table, the
   - **Rules:** T1, T11, [ADR 0015](../adr/0015-provider-ready-seam.md), [ADR 0010](../adr/0010-starting-models.md), [Spec 9](../spec.md#9-running-the-app).
   - **Depends on:** S1-M5-T9, S1-M2-T7.
 
-- [ ] **S1-M5-T11: Last check before drawing: the text**
+- [x] **S1-M5-T11: Last check before drawing: the text**
   - **Build:** In `src/clause_tracer/core/draw_check.py`, export `def check_before_drawing(document: Document, clause: Clause, evidence: Evidence, quote_text: str) -> DrawAllowed | DrawRefused`. It stops at the first failure and returns `DrawRefused(failure=…)`:
     1. `evidence.clause_id != clause.id`: `CLAUSE_MISMATCH`.
     2. `evidence.sentence_ids` is empty, or holds an id that is not a sentence of `clause`: `SENTENCE_UNKNOWN`.
@@ -804,7 +804,7 @@ The output scans give the owner's findings for every case in the scan table, the
   - **Rules:** T1, T13, I5, I4, [system design 4.2](../system-design.md#42-the-offset-chain), [Spec 2](../spec.md#2-glossary) (quote check).
   - **Depends on:** S1-M5-T4, S1-M2-T5.
 
-- [ ] **S1-M5-T12: Last check before drawing: page boxes**
+- [x] **S1-M5-T12: Last check before drawing: page boxes**
   - **Build:** In `check_before_drawing`, between step 6 and step 7, and only when `document.glyphs` is not empty (decided 14 Nov 2026):
     1. `len(document.char_map) != len(document.text)`: `CHAR_MAP_LENGTH`.
     2. For each index `k` from `evidence.quote.start` to `evidence.quote.end - 1`: `g = document.char_map[k]`. `None` (a character the app inserted) needs no box. `g < 0` or `g >= len(document.glyphs)`: `GLYPH_MISSING`. With `glyph = document.glyphs[g]`: `glyph.page != glyph.box.page`: `PAGE_MISMATCH`; no page in `document.pages` has `number == glyph.page`: `PAGE_UNKNOWN`; unless `0 <= box.x0 <= box.x1 <= page.width` and `0 <= box.top <= box.bottom <= page.height`: `BOX_OUTSIDE_PAGE`.
@@ -814,7 +814,7 @@ The output scans give the owner's findings for every case in the scan table, the
   - **Rules:** T1, I5, [ADR 0007](../adr/0007-document-reading-stack.md) (one coordinate system), [ADR 0012](../adr/0012-missing-unsure-and-evidence-failures.md) (unplaceable quote, and the 14 Nov amendment).
   - **Depends on:** S1-M5-T11.
 
-- [ ] **S1-M5-T13: Invariant 7 with the hazard alphabet**
+- [x] **S1-M5-T13: Invariant 7 with the hazard alphabet**
   - **Build:** In `src/clause_tracer/core/tests/strategies.py`, add:
     - `HAZARD_ALPHABET: tuple[str, ...]`: the characters of `"abcXYZ019"`, space, `"\n"`, `" "`, the ligatures `"ﬁ"` and `"ﬂ"`, the soft hyphen `"­"`, `"'"`, `'"'`, `"‘"`, `"’"`, `"“"`, `"”"`, the zero-width characters `"​"`, `"‌"`, `"‍"`, `"﻿"`, the bidi controls `"‪"` to `"‮"` and `"⁦"` to `"⁩"`, `"ß"`, the astral characters `"\U0001F600"` and `"\U0001D400"`, and `"⟦"`, `"⟧"`.
     - `def hazard_text() -> SearchStrategy[str]`: `text(alphabet=sampled_from(HAZARD_ALPHABET), min_size=1, max_size=80)`.
@@ -917,6 +917,10 @@ Planning found questions 1 to 17. The owner answered all of them on 14 Nov 2026;
 | 16 Nov 2026 | Added the fold-sharing note to section 9 before the stage closes, so it cannot be lost. The milestone 2 review (standards axis) flagged that `MatchKey` and `QuoteFold` share a silhouette; both are mandated by system design 3.4, and the decision on one shared fold implementation belongs to stage 2's plan. The note decides nothing; it hands the question to stage 2. | Plans README ("Notes for the next stage", "When the plan is wrong": add a note) |
 | 16 Nov 2026 | S1-M3-T10. The `spans_overlap` formula returned true for an empty span inside another span (`3..3` and `0..9`), against the planned test. The owner chose the test's meaning: spans overlap only when they share a code point. Formula changed to `max(a.start, b.start) < min(a.end, b.end)`. | Plans README ("When the plan is wrong"), owner decision of 16 Nov 2026 |
 | 16 Nov 2026 | Milestone 4 ticked (tasks S1-M4-T1 to S1-M4-T7). The owner wrote `auto_delete.toml` (18 rows) in its own commit, `a2fe1da`. One plan deviation, recorded per the plans README: mypy strict rejects `...` bodies in the concrete stub classes of `test_ports.py` (`empty-body`), so the stubs raise `NotImplementedError` instead; the `Protocol` method bodies keep the planned `...`. S1-M4-T3 kept two tests beyond its list (`test_used_recording_is_not_unused`, `test_assert_all_used_passes_when_all_used`), so its "Done when" now says 9 passed. | Plans README ("Status", "When the plan is wrong") |
+| 16 Nov 2026 | Milestone 5 ticked (tasks S1-M5-T1 to S1-M5-T13). The owner wrote both owner tables in its own commits: `scans.toml` (89 cases, `63f4a12`) and `cost_estimate.toml` (12 rows, `3542947`); the owner confirmed both are done, so T1 and T9 are ticked. The milestone branch is `feat/core-m5-scans-and-cost` (already cut and named when work began), not the plan's `feat/core-m5-scans-and-last-check`; same milestone, different words. | Plans README ("Status", "Owner tasks") |
+| 16 Nov 2026 | S1-M5-T4's property `test_map_shape` was wrong as the plan stated it: `len(to_original) == len(text) + 1` fails for a text of two spaces, where the fold gives one folded character. Hypothesis found it during S1-M5-T5's check run. The shape doc (system design 3.4: "one entry per folded character plus a last entry") and the task's own whitespace example (`to_original == (0, 1, 5, 6)`) both say the right property, so the test now asserts `len(to_original) == len(fold.text) + 1`, pinned with `@example(text="  ")`. The fold code itself was correct and unchanged. The owner approved the change afterwards, on 16 Nov 2026, and the task now states the same property. | Plans README ("When the plan is wrong"), testing strategy 5 (every bug found becomes a committed `@example`) |
+| 16 Nov 2026 | S1-M5-T13: the strategy's uniqueness assumption counts overlapping places, the same count the last check uses, so a quote like "aa" in "aaa" is filtered out instead of failing the property falsely. The plan's wording ("occurs exactly once") is read as occurrence places. | Plans README ("When the plan is wrong") |
+| 16 Nov 2026 | Milestone 5 review (both axes) done. One reading recorded for the owner: the compiled scan patterns, `MIN_ANCHOR_LETTERS`, `SENTENCE_END_PATTERN` and the two token constants are public on their own modules but not re-exported from `clause_tracer.core`, although the tasks say "export". This follows the accepted precedent of S1-M4-T6, where `WARNING_WINDOW` and `LOWERING_GRACE` stayed on `auto_delete.py`; the facade holds what callers import, and no test imports these. If the owner wants them in the facade, the fix is small. The review's other findings (a double placeholder scan, a page lookup inside the loop, two test-helper smells, an `__all__` ordering slip) were fixed in two refactor commits. | Plans README ("When the plan is wrong"), AGENTS.md (review findings go to the owner) |
 
 ## 9. Notes for the next stage
 

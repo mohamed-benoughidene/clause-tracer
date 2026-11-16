@@ -27,6 +27,7 @@ from clause_tracer.core.checks import (
     QuoteFold,
     ScanContext,
 )
+from clause_tracer.core.cost import estimate_calls, estimate_cost
 from clause_tracer.core.document import (
     Clause,
     Document,
@@ -40,6 +41,7 @@ from clause_tracer.core.document import (
     SourceFile,
     TrackedChange,
 )
+from clause_tracer.core.draw_check import check_before_drawing
 from clause_tracer.core.enums import (
     PLACEHOLDER_CLOSE,
     PLACEHOLDER_OPEN,
@@ -156,6 +158,7 @@ from clause_tracer.core.ports import (
     ReviewStore,
     SecretStore,
 )
+from clause_tracer.core.quote_fold import fold_for_quote_check
 from clause_tracer.core.request_hash import request_sha256, to_plain
 from clause_tracer.core.results import (
     CallFailed,
@@ -172,11 +175,34 @@ from clause_tracer.core.results import (
     UnreadableSpans,
     ValueVerdict,
 )
+from clause_tracer.core.scan_rules import (
+    ABBREVIATIONS,
+    ADVICE_PHRASES,
+    CONTACT_WORDS,
+    EVALUATIVE_WORDS,
+    FILLER_PHRASES,
+    FIRST_PERSON_WORDS,
+    INJECTION_PHRASES,
+    LAW_WORDS,
+    LENGTH_CAPS,
+)
+from clause_tracer.core.scans import (
+    contains_phrase,
+    count_sentences,
+    has_clause_number,
+    has_quoted_word,
+    mask_abbreviations,
+    scan_ai_text,
+    scan_style,
+    scan_text,
+)
 from clause_tracer.core.settings import Settings
 from clause_tracer.core.units import convert_to_unit
 from clause_tracer.core.wording import Span, Wording
 
 __all__: list[str] = [
+    "ABBREVIATIONS",
+    "ADVICE_PHRASES",
     "AiClient",
     "AiRecord",
     "AiReply",
@@ -185,12 +211,14 @@ __all__: list[str] = [
     "CallFailed",
     "CallPrices",
     "CancelCheck",
+    "check_before_drawing",
     "CheckedValue",
     "Clause",
     "ClauseId",
     "ClauseTracerError",
     "Clock",
     "ConfigError",
+    "CONTACT_WORDS",
     "CostInputs",
     "CostRange",
     "CrossReference",
@@ -202,22 +230,30 @@ __all__: list[str] = [
     "DrawFailure",
     "DrawRefused",
     "DuplicateRecordError",
+    "EVALUATIVE_WORDS",
     "EncryptedPdfError",
     "Evidence",
     "FakePiiDetector",
     "FileKind",
+    "FILLER_PHRASES",
+    "FIRST_PERSON_WORDS",
     "FixedClock",
     "Glyph",
+    "has_clause_number",
+    "has_quoted_word",
     "HiddenReason",
     "HiddenText",
     "InputError",
     "InputTooLargeError",
     "InputWarning",
+    "INJECTION_PHRASES",
     "InMemoryReviewStore",
     "InMemorySecretStore",
     "InvalidApiKeyError",
     "JudgedLevel",
     "LabelInput",
+    "LAW_WORDS",
+    "LENGTH_CAPS",
     "Level",
     "LinkMap",
     "LocalError",
@@ -269,6 +305,9 @@ __all__: list[str] = [
     "ReviewId",
     "ReviewStatus",
     "ReviewStore",
+    "scan_ai_text",
+    "scan_style",
+    "scan_text",
     "ScanContext",
     "ScanFinding",
     "ScannedPdfError",
@@ -301,9 +340,14 @@ __all__: list[str] = [
     "assert_all_used",
     "check_playbook",
     "combine_rule_4",
+    "contains_phrase",
+    "count_sentences",
     "convert_to_unit",
     "due_at",
+    "estimate_calls",
+    "estimate_cost",
     "evidence_reasons",
+    "fold_for_quote_check",
     "in_warning_window",
     "is_better",
     "is_due",
@@ -311,6 +355,7 @@ __all__: list[str] = [
     "label_position",
     "level_for_limits",
     "level_rank",
+    "mask_abbreviations",
     "number_verdicts",
     "protected_until_after_lowering",
     "request_sha256",
