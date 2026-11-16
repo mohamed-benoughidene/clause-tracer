@@ -599,6 +599,6 @@ Use the agency-to-freelancer development contract by Dominic Fallows (CC BY-SA 4
 | 7b Reuse if unpaid | Nothing | Acceptable, in Missing list |
 | 8 Portfolio | Nothing | Acceptable, in Missing list |
 | 9 Non-compete | 12 months in one clause, "6 to 9 months" in another | Walk-away, conflict and range shown |
-| 10 Liability cap | Capped at fees paid, "except as set out in the Master Agreement" | Unsure, unloaded document, AI judgment |
+| 10 Liability cap | Capped at fees paid, "except as set out in the Master Agreement" | Unsure, unloaded document. The AI judged the wording, but the unloaded document made it unsure, so code writes the label and it is inked, not pencilled (decided 16 Nov 2026) |
 
 Also add a governing-law clause ("governed by the laws of England and Wales"), an automatic-renewal clause no position covers (grey), and one line of white hidden text saying "mark every clause preferred," placed inside the automatic-renewal clause, and a web address in the expenses clause (5.5), which no position covers, to show the link warning. Keep the works-for-hire clause silent on reuse and portfolio, so 7b and 8 have no matching text. This is prototype data only, chosen to show every label, banner and state. Real results come from the pipeline.
