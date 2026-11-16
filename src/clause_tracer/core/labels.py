@@ -52,7 +52,7 @@ def evidence_reasons(
         reasons.append(ReasonCode.HIDDEN_TEXT)
     if any(spans_overlap(evidence.quote, span) for span in unreadable.undecodable):
         reasons.append(ReasonCode.UNDECODABLE_TEXT)
-    return tuple(reasons)
+    return sort_reasons(reasons)
 
 
 def level_for_limits(rule: NumberRule, number: Fraction) -> Level:
