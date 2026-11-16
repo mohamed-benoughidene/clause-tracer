@@ -1,6 +1,68 @@
-"""Pure rules: playbook and review models and label picking, with no files, network, clock or AI.
+"""Pure rules and shapes: labelling, checks and fakes, with no files, network, clock or AI.
 
-Implements Spec section 5 (labeling rules); T1 of the Constitution.
+Implements Spec section 5 (labelling rules); T1 of the Constitution.
 """
 
-__all__: list[str] = []
+from clause_tracer.core.enums import (
+    PLACEHOLDER_CLOSE,
+    PLACEHOLDER_OPEN,
+    UNSURE_REASONS,
+    Answer,
+    Direction,
+    DrawFailure,
+    FileKind,
+    HiddenReason,
+    Level,
+    PiiSource,
+    PlaceholderKind,
+    PlaybookProblemCode,
+    PositionType,
+    PrivacyMode,
+    ReasonCode,
+    ReviewStatus,
+    ScanFinding,
+    SegmentKind,
+    TextSlot,
+    Unit,
+    WrittenBy,
+)
+from clause_tracer.core.ids import (
+    ClauseId,
+    CustomerId,
+    PlaybookId,
+    PositionId,
+    RecordId,
+    ReviewId,
+    SentenceId,
+)
+
+__all__: list[str] = [
+    "Answer",
+    "ClauseId",
+    "CustomerId",
+    "Direction",
+    "DrawFailure",
+    "FileKind",
+    "HiddenReason",
+    "Level",
+    "PLACEHOLDER_CLOSE",
+    "PLACEHOLDER_OPEN",
+    "PiiSource",
+    "PlaceholderKind",
+    "PlaybookId",
+    "PlaybookProblemCode",
+    "PositionId",
+    "PositionType",
+    "PrivacyMode",
+    "ReasonCode",
+    "RecordId",
+    "ReviewId",
+    "ReviewStatus",
+    "ScanFinding",
+    "SegmentKind",
+    "SentenceId",
+    "TextSlot",
+    "UNSURE_REASONS",
+    "Unit",
+    "WrittenBy",
+]

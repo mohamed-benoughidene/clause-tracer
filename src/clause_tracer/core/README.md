@@ -6,6 +6,41 @@ Pure rules: playbook and review models and label picking, with no files, network
 ## Spec
 `docs/spec.md` section 5, and section 6.1 step 8 (pick labels).
 
+## Ids and enums
+Imported from `clause_tracer.core`, never from a file inside the package (B2).
+
+**Ids.** Each is `NewType` over `str`, made at the edge, opaque to `core` (system design 3.4):
+`ReviewId`, `PlaybookId`, `CustomerId`, `PositionId`, `ClauseId`, `SentenceId`, `RecordId`.
+
+**Enums.** Each is a `StrEnum`; every member's value is its member name in lower case
+(for example `Level.WALK_AWAY == "walk_away"`). Members, in order:
+
+| Enum | Members |
+| --- | --- |
+| `Level` | `PREFERRED`, `ACCEPTABLE`, `WALK_AWAY`, `UNSURE` |
+| `PositionType` | `NUMBER`, `YES_NO`, `WORDS` |
+| `Direction` | `LOWER_IS_BETTER`, `HIGHER_IS_BETTER` |
+| `Unit` | `DAYS`, `PERCENT`, `MONTHS`, `ROUNDS` |
+| `Answer` | `YES`, `CONDITIONAL_YES`, `NO`, `UNCLEAR`, `MISSING` |
+| `ReasonCode` | `QUOTE_NOT_CONFIRMED`, `NUMBER_NOT_IN_QUOTE`, `VAGUE_WORDING`, `OTHER_START_POINT`, `UNKNOWN_FIGURES`, `BUSINESS_DAYS`, `UNIT_UNKNOWN`, `AMOUNT_WITHOUT_TOTAL`, `AMOUNT_PERCENT_DISAGREE`, `CONDITIONAL_YES`, `RANGE`, `CLAUSES_DISAGREE`, `HIDDEN_TEXT`, `UNDECODABLE_TEXT`, `UNLOADED_DOCUMENT`, `REPLY_BROKEN_TWICE`, `MATCH_UNCONFIRMED`, `NO_VALUE`, `JUDGED_UNSURE`, `UNLIMITED_UNCLEAR` |
+| `WrittenBy` | `CODE`, `AI`, `USER` |
+| `ReviewStatus` | `DRAFT`, `RUNNING`, `INTERRUPTED`, `FAILED`, `READY_TO_CHECK`, `DONE` |
+| `PrivacyMode` | `ON`, `OFF` |
+| `FileKind` | `PDF`, `WORD`, `TEXT`, `MARKDOWN`, `PASTED` |
+| `PlaceholderKind` | `PERSON`, `COMPANY`, `ADDRESS`, `EMAIL`, `PHONE`, `ID`, `BANK` |
+| `SegmentKind` | `COPY`, `ENTITY`, `ESCAPE` |
+| `HiddenReason` | `LOW_CONTRAST`, `TINY_FONT`, `OFF_PAGE`, `INVISIBLE_TEXT`, `HIDDEN_LAYER`, `WORD_HIDDEN_RUN`, `COMMENT`, `ZERO_WIDTH`, `BIDI_CONTROL` |
+| `PiiSource` | `PARTY_DETAILS`, `PATTERN`, `RULE`, `NER`, `USER` |
+| `TextSlot` | `REASON`, `READING`, `QUESTION`, `MESSAGE`, `REWRITE` |
+| `ScanFinding` | `TOO_LONG`, `LAW_WORD`, `ADVICE`, `INJECTION_TELL`, `CONTACT_WORD`, `WEB_ADDRESS`, `EMAIL_ADDRESS`, `WRONG_LABEL_WORD`, `ACCEPTABLE_LIMIT`, `NUMBER_NOT_ALLOWED`, `UNKNOWN_PLACEHOLDER`, `PERSONAL_DATA`, `FIRST_PERSON`, `FILLER_PHRASE`, `EVALUATIVE_WORD`, `NO_ANCHOR`, `ADDED_SENTENCE` |
+| `DrawFailure` | `CLAUSE_MISMATCH`, `SENTENCE_UNKNOWN`, `EMPTY_QUOTE`, `SPAN_OUTSIDE_SENTENCES`, `QUOTE_NOT_FOUND`, `QUOTE_NOT_UNIQUE`, `SPAN_MISMATCH`, `CHAR_MAP_LENGTH`, `GLYPH_MISSING`, `PAGE_UNKNOWN`, `PAGE_MISMATCH`, `BOX_OUTSIDE_PAGE` |
+| `PlaybookProblemCode` | `DUPLICATE_POSITION_ID`, `RULE_TYPE_MISMATCH`, `LIMIT_NEGATIVE`, `PERCENT_OVER_100`, `LIMITS_NOT_STRICTER`, `YES_NO_LEVEL_UNSURE`, `YES_NOT_BETTER`, `MISSING_LEVEL_NOT_NO_LEVEL`, `LEVEL_TEXT_EMPTY` |
+
+**Constants.**
+
+- `UNSURE_REASONS`: a `frozenset[ReasonCode]`, every code except `RANGE`, `CLAUSES_DISAGREE` and `AMOUNT_PERCENT_DISAGREE` (17 codes). A value that carries one of these is unsure; the three left out are notes shown beside a label.
+- `PLACEHOLDER_OPEN` = `"⟦"`, `PLACEHOLDER_CLOSE` = `"⟧"`: the placeholder marker of Spec 4.2.
+
 ## Input shape (planned)
 Plain typed values: the playbook snapshot, positions and extracted values.
 
