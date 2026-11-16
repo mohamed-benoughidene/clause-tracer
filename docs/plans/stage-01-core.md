@@ -270,7 +270,7 @@ Every task in M2 extends one shared test, `test_fields_match_system_design` in `
   - **Rules:** [ADR 0016](../adr/0016-legal-positions-without-a-lawyer.md), [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) and its 13 Nov amendment, T13, T1, S3.
   - **Depends on:** S1-M1-T7.
 
-- [ ] **S1-M2-T2: Document shapes**
+- [x] **S1-M2-T2: Document shapes**
   - **Build:** In `src/clause_tracer/core/document.py`: `SourceFile`, `HiddenText`, `TrackedChange`, `InputWarning`, `Document`, `MatchKey`, `Sentence` and `Clause`, each exactly as in system design 3.4, no more fields. Export all eight.
   - **Files:** `src/clause_tracer/core/document.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_shapes.py`, `src/clause_tracer/core/README.md`.
   - **Tests first:** `test_fields_match_system_design` (the eight shapes); `test_document_without_glyphs`: a `Document` with `text="Pay in 30 days."`, `char_map=()`, `glyphs=()`, `pages=()` builds; `test_span_counts_code_points`: for `text = "\U0001F600 fee"`, `text[Span(start=2, end=5).start:Span(start=2, end=5).end] == "fee"`.

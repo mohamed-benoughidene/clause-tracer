@@ -4,7 +4,22 @@ import dataclasses
 
 import pytest
 
-from clause_tracer.core import Glyph, Page, PageBox, Span, Wording
+from clause_tracer.core import (
+    Clause,
+    Document,
+    FileKind,
+    Glyph,
+    HiddenText,
+    InputWarning,
+    MatchKey,
+    Page,
+    PageBox,
+    Sentence,
+    SourceFile,
+    Span,
+    TrackedChange,
+    Wording,
+)
 
 EXPECTED_FIELDS: dict[type, tuple[str, ...]] = {
     Wording: ("text", "written_by"),
@@ -12,6 +27,35 @@ EXPECTED_FIELDS: dict[type, tuple[str, ...]] = {
     PageBox: ("page", "x0", "top", "x1", "bottom"),
     Page: ("number", "width", "height"),
     Glyph: ("page", "box"),
+    SourceFile: ("name", "kind", "sha256", "size"),
+    HiddenText: ("span", "reason", "boxes"),
+    TrackedChange: ("earlier", "new", "author", "span"),
+    InputWarning: ("code", "page"),
+    Document: (
+        "schema_version",
+        "source",
+        "text",
+        "char_map",
+        "glyphs",
+        "pages",
+        "furniture",
+        "hidden",
+        "undecodable",
+        "tracked_changes",
+        "warnings",
+    ),
+    MatchKey: ("text", "to_canonical"),
+    Sentence: ("id", "span"),
+    Clause: (
+        "id",
+        "number",
+        "heading",
+        "level",
+        "parent_id",
+        "span",
+        "numbering_source",
+        "sentences",
+    ),
 }
 
 
@@ -40,3 +84,31 @@ def test_wording_needs_written_by() -> None:
 def test_shapes_need_keywords() -> None:
     with pytest.raises(TypeError):
         Span(1, 2)  # type: ignore[call-arg]
+
+
+def test_document_without_glyphs() -> None:
+    # A document without glyphs has empty glyphs, char_map and pages
+    # (decided 14 Nov 2026, system design 3.4).
+    document = Document(
+        schema_version=1,
+        source=SourceFile(name="contract.pdf", kind=FileKind.PDF, sha256="ab", size=3),
+        text="Pay in 30 days.",
+        char_map=(),
+        glyphs=(),
+        pages=(),
+        furniture=(),
+        hidden=(),
+        undecodable=(),
+        tracked_changes=(),
+        warnings=(),
+    )
+    assert document.glyphs == ()
+    assert document.char_map == ()
+    assert document.pages == ()
+
+
+def test_span_counts_code_points() -> None:
+    # Offsets count code points (section 4.2): the emoji is one code point.
+    text = "\U0001f600 fee"
+    span = Span(start=2, end=5)
+    assert text[span.start : span.end] == "fee"

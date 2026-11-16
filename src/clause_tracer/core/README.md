@@ -89,6 +89,14 @@ arguments, with exactly the fields of system design 3.4 in that order (ADR 0005)
 | `PageBox` | `page: int, x0: float, top: float, x1: float, bottom: float` | PDF points, top-left origin, one coordinate system (ADR 0007) |
 | `Page` | `number: int, width: float, height: float` | Pages are numbered from 1 |
 | `Glyph` | `page: int, box: PageBox` | One drawn character; `page` is a `Page.number` and equals `box.page` |
+| `SourceFile` | `name: str, kind: FileKind, sha256: str, size: int` | Points at the raw bytes, which the store keeps unchanged (D1) |
+| `HiddenText` | `span: Span \| None, reason: HiddenReason, boxes: tuple[PageBox, ...]` | Flagged, never removed (D1); no span when the text is not in the canonical text |
+| `TrackedChange` | `earlier: str, new: str, author: str, span: Span \| None` | Listed at the contract check; the accepted view is the contract (ADR 0012) |
+| `InputWarning` | `code: str, page: int \| None` | Undecodable pages, scanned pages in a mixed file, not English (Spec 9) |
+| `Document` | `schema_version: int, source: SourceFile, text: str, char_map: tuple[int \| None, ...], glyphs: tuple[Glyph, ...], pages: tuple[Page, ...], furniture: tuple[Span, ...], hidden: tuple[HiddenText, ...], undecodable: tuple[Span, ...], tracked_changes: tuple[TrackedChange, ...], warnings: tuple[InputWarning, ...]` | The one canonical text (section 4.2). A document without glyphs has `glyphs == ()`, `char_map == ()` and `pages == ()` |
+| `MatchKey` | `text: str, to_canonical: tuple[int, ...]` | Folded copy with its index map (section 4.2) |
+| `Sentence` | `id: SentenceId, span: Span` | Stable ids such as `4.2.s3`, which the AI points at |
+| `Clause` | `id: ClauseId, number: str \| None, heading: str \| None, level: int, parent_id: ClauseId \| None, span: Span, numbering_source: str, sentences: tuple[Sentence, ...]` | One clause, or one paragraph when the contract has no numbers (Spec 6.1 step 2) |
 | `CancelCheck` | a type alias: `Callable[[], bool]` | Returns True once the user has cancelled (ADR 0005) |
 
 ## Depends on
