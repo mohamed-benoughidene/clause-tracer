@@ -137,20 +137,38 @@ def _percent_amount_numbers(
     total: Decimal | None,
 ) -> list[Fraction]:
     if total is None or total <= 0:
-        # A total of 0 counts as no total (Rule 6, question 16e).
+        # A total of 0 counts as no total (Rule 6, question 16e). The
+        # clause gave a range even so (decided 16 Nov 2026).
+        if value.range_high is not None:
+            reasons.append(ReasonCode.RANGE)
         reasons.append(ReasonCode.AMOUNT_WITHOUT_TOTAL)
         return []
     computed = Fraction(amount) / Fraction(total) * 100
     if value.number is None:
+        if value.range_high is not None:
+            reasons.append(ReasonCode.RANGE)
         return [computed]
     converted = _converted(value.number, value.unit_as_written, rule)
     if isinstance(converted, ReasonCode):
         reasons.append(converted)
+        # The computed percentage still counts; the range says itself
+        # even when the number did not convert (decided 16 Nov 2026).
+        if value.range_high is not None:
+            reasons.append(ReasonCode.RANGE)
         return [computed]
     if _half_up_to_whole(computed) != _half_up_to_whole(converted):
         reasons.append(ReasonCode.AMOUNT_PERCENT_DISAGREE)
-        return [computed, converted]
-    return [computed]
+        numbers = [computed, converted]
+    else:
+        numbers = [computed]
+    if value.range_high is not None:
+        reasons.append(ReasonCode.RANGE)
+        # The range end is a last number, not compared with the
+        # computed percentage; a failed conversion adds no reason.
+        converted_high = _converted(value.range_high, value.unit_as_written, rule)
+        if not isinstance(converted_high, ReasonCode):
+            numbers.append(converted_high)
+    return numbers
 
 
 def _plain_numbers(
@@ -159,6 +177,10 @@ def _plain_numbers(
     converted = _converted(number, value.unit_as_written, rule)
     if isinstance(converted, ReasonCode):
         reasons.append(converted)
+        # The clause gave a range, so the reason says so, even when the
+        # first number did not convert (decided 16 Nov 2026).
+        if value.range_high is not None:
+            reasons.append(ReasonCode.RANGE)
         return []
     numbers = [converted]
     if value.range_high is not None:

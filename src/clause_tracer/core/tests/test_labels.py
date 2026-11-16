@@ -567,3 +567,39 @@ def test_duplicate_input_raises() -> None:
     inputs = (_nothing_found(DAYS_POSITION), _nothing_found(DAYS_POSITION))
     with pytest.raises(ValueError, match="one position"):
         label_all(playbook, inputs, NO_HIDDEN)
+
+
+def test_range_with_unknown_unit_keeps_range() -> None:
+    # The clause gave a range, so the reason says so even when the
+    # number did not convert (decided 16 Nov 2026).
+    verdicts = number_verdicts(
+        PAYMENT_DAYS,
+        value(number=Decimal(10), range_high=Decimal(15), unit_as_written="business days"),
+        NO_HIDDEN,
+    )
+    assert len(verdicts) == 1
+    assert verdicts[0].level is Level.UNSURE
+    assert verdicts[0].readable_value is None
+    assert verdicts[0].reasons == (ReasonCode.BUSINESS_DAYS, ReasonCode.RANGE)
+
+
+def test_amount_with_range_adds_range() -> None:
+    # The range end counts as a last number; it is not compared with
+    # the computed percentage (decided 16 Nov 2026).
+    verdicts = number_verdicts(
+        DEPOSIT_PERCENT,
+        value(
+            number=Decimal(30),
+            range_high=Decimal(60),
+            unit_as_written="%",
+            amount=Decimal(300),
+            total=Decimal(1000),
+        ),
+        NO_HIDDEN,
+    )
+    assert len(verdicts) == 2
+    assert verdicts[0].level is Level.ACCEPTABLE
+    assert verdicts[0].readable_value == "30"
+    assert verdicts[1].level is Level.PREFERRED
+    assert verdicts[1].readable_value == "60"
+    assert all(verdict.reasons == (ReasonCode.RANGE,) for verdict in verdicts)
