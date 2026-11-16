@@ -172,11 +172,24 @@ from clause_tracer.core.results import (
     UnreadableSpans,
     ValueVerdict,
 )
+from clause_tracer.core.scan_rules import (
+    ABBREVIATIONS,
+    ADVICE_PHRASES,
+    CONTACT_WORDS,
+    EVALUATIVE_WORDS,
+    FILLER_PHRASES,
+    FIRST_PERSON_WORDS,
+    INJECTION_PHRASES,
+    LAW_WORDS,
+    LENGTH_CAPS,
+)
 from clause_tracer.core.settings import Settings
 from clause_tracer.core.units import convert_to_unit
 from clause_tracer.core.wording import Span, Wording
 
 __all__: list[str] = [
+    "ABBREVIATIONS",
+    "ADVICE_PHRASES",
     "AiClient",
     "AiRecord",
     "AiReply",
@@ -191,6 +204,7 @@ __all__: list[str] = [
     "ClauseTracerError",
     "Clock",
     "ConfigError",
+    "CONTACT_WORDS",
     "CostInputs",
     "CostRange",
     "CrossReference",
@@ -202,10 +216,13 @@ __all__: list[str] = [
     "DrawFailure",
     "DrawRefused",
     "DuplicateRecordError",
+    "EVALUATIVE_WORDS",
     "EncryptedPdfError",
     "Evidence",
     "FakePiiDetector",
     "FileKind",
+    "FIRST_PERSON_WORDS",
+    "FILLER_PHRASES",
     "FixedClock",
     "Glyph",
     "HiddenReason",
@@ -213,11 +230,14 @@ __all__: list[str] = [
     "InputError",
     "InputTooLargeError",
     "InputWarning",
+    "INJECTION_PHRASES",
     "InMemoryReviewStore",
     "InMemorySecretStore",
     "InvalidApiKeyError",
     "JudgedLevel",
     "LabelInput",
+    "LAW_WORDS",
+    "LENGTH_CAPS",
     "Level",
     "LinkMap",
     "LocalError",

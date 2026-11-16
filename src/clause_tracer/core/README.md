@@ -174,6 +174,8 @@ The fakes live in `fakes.py`, use only the standard library and `core`, and are 
 
 | Function | Returns | Notes |
 | --- | --- | --- |
+| `LAW_WORDS`, `ADVICE_PHRASES`, `INJECTION_PHRASES`, `CONTACT_WORDS`, `FIRST_PERSON_WORDS`, `FILLER_PHRASES`, `EVALUATIVE_WORDS`, `ABBREVIATIONS` | word lists, each a `tuple[str, ...]` | The output scans' word lists, copied from the owner's scan table (T11); a test checks the copy matches. The owner owns the values |
+| `LENGTH_CAPS: Mapping[TextSlot, int]` | one maximum length in characters per kind of AI text | Read-only (`MappingProxyType`); values from the owner's scan table. Text over its cap fails the scan (Spec 6.2) |
 | `level_rank(level: Level) -> int` | `PREFERRED` 0, `ACCEPTABLE` 1, `WALK_AWAY` 2 | `UNSURE` raises `ValueError("unsure has no rank")` |
 | `is_better(a: Level, b: Level) -> bool` | `level_rank(a) < level_rank(b)` | Strictly better; unsure has no rank |
 | `worst_level(levels: Iterable[Level]) -> Level` | the level with the highest rank | An empty input raises `ValueError` |
