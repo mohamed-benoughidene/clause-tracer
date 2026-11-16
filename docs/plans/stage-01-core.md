@@ -430,7 +430,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** T11, [Spec 4.1](../spec.md#41-playbooks).
   - **Depends on:** S1-M3-T2.
 
-- [ ] **S1-M3-T10: Level order, span overlap and reason order**
+- [x] **S1-M3-T10: Level order, span overlap and reason order**
   - **Build:** In `src/clause_tracer/core/levels.py`, export each:
     - `def level_rank(level: Level) -> int`: `PREFERRED` 0, `ACCEPTABLE` 1, `WALK_AWAY` 2. `UNSURE` raises `ValueError("unsure has no rank")`.
     - `def is_better(a: Level, b: Level) -> bool`: `level_rank(a) < level_rank(b)`.

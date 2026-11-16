@@ -143,6 +143,17 @@ arguments, with exactly the fields of system design 3.4 in that order (ADR 0005)
 | `PlaybookProblem` | `position_id: PositionId \| None, code: PlaybookProblemCode` | One failed playbook check (Spec 4.1); `position_id` is `None` for a whole-playbook problem |
 | `CancelCheck` | a type alias: `Callable[[], bool]` | Returns True once the user has cancelled (ADR 0005) |
 
+## Functions
+
+| Function | Returns | Notes |
+| --- | --- | --- |
+| `level_rank(level: Level) -> int` | `PREFERRED` 0, `ACCEPTABLE` 1, `WALK_AWAY` 2 | `UNSURE` raises `ValueError("unsure has no rank")` |
+| `is_better(a: Level, b: Level) -> bool` | `level_rank(a) < level_rank(b)` | Strictly better; unsure has no rank |
+| `worst_level(levels: Iterable[Level]) -> Level` | the level with the highest rank | An empty input raises `ValueError` |
+| `spans_overlap(a: Span, b: Span) -> bool` | `a.start < b.end and b.start < a.end` | Half-open spans (section 4.2) |
+| `unreadable_spans(document: Document) -> UnreadableSpans` | every `HiddenText.span` that is not `None`, in order, as `hidden`; `document.undecodable` as `undecodable` | The Rule 9 input |
+| `sort_reasons(reasons: Iterable[ReasonCode]) -> tuple[ReasonCode, ...]` | the reasons without repeats, in `ReasonCode` member order | Rules return codes in a fixed order (I7) |
+
 ## Depends on
 Nothing. It imports no other clause_tracer module.
 

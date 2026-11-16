@@ -92,6 +92,14 @@ from clause_tracer.core.ids import (
     ReviewId,
     SentenceId,
 )
+from clause_tracer.core.levels import (
+    is_better,
+    level_rank,
+    sort_reasons,
+    spans_overlap,
+    unreadable_spans,
+    worst_level,
+)
 from clause_tracer.core.link_map import (
     CrossReference,
     DefinedTerm,
@@ -244,4 +252,10 @@ __all__: list[str] = [
     "WordsRule",
     "WrittenBy",
     "YesNoRule",
+    "is_better",
+    "level_rank",
+    "sort_reasons",
+    "spans_overlap",
+    "unreadable_spans",
+    "worst_level",
 ]
