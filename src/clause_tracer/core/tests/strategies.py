@@ -6,10 +6,18 @@ from hypothesis.strategies import SearchStrategy, composite
 from clause_tracer.core import (
     UNSURE_REASONS,
     ClauseId,
+    Direction,
     Level,
+    NumberRule,
+    Position,
+    PositionId,
+    PositionType,
     ReasonCode,
     Span,
+    Unit,
     ValueVerdict,
+    WordsRule,
+    YesNoRule,
 )
 
 
@@ -50,4 +58,47 @@ def value_verdicts(draw: st.DrawFn) -> ValueVerdict:
         reasons=tuple(reasons),
         evidence=None,
         readable_value=readable,
+    )
+
+
+@composite
+def positions(draw: st.DrawFn) -> Position:
+    """Playbook positions of any type, with limits ordered so the
+    preferred limit is the stricter one."""
+
+    number = draw(st.integers(0, 99))
+    position_type = draw(st.sampled_from(PositionType))
+    unit = draw(st.sampled_from(Unit))
+    direction = draw(st.sampled_from(Direction))
+    first = draw(st.decimals(0, 100, places=0))
+    second = draw(st.decimals(0, 100, places=0))
+    if direction is Direction.LOWER_IS_BETTER:
+        rule: NumberRule | YesNoRule | WordsRule = NumberRule(
+            unit=unit,
+            direction=direction,
+            preferred_limit=min(first, second),
+            acceptable_limit=max(first, second),
+        )
+    else:
+        rule = NumberRule(
+            unit=unit,
+            direction=direction,
+            preferred_limit=max(first, second),
+            acceptable_limit=min(first, second),
+        )
+    if position_type is PositionType.YES_NO:
+        rule = YesNoRule(
+            question="q",
+            yes_level=draw(st.sampled_from([Level.PREFERRED, Level.ACCEPTABLE, Level.WALK_AWAY])),
+            no_level=draw(st.sampled_from([Level.PREFERRED, Level.ACCEPTABLE, Level.WALK_AWAY])),
+        )
+    elif position_type is PositionType.WORDS:
+        rule = WordsRule(preferred="a", acceptable="b", walk_away="c")
+    return Position(
+        id=PositionId(f"p{number}"),
+        topic="t",
+        type=position_type,
+        rule=rule,
+        missing_level=draw(st.sampled_from(Level)),
+        why_note=None,
     )

@@ -10,27 +10,39 @@ from hypothesis import strategies as st
 from clause_tracer.core import (
     UNSURE_REASONS,
     Answer,
+    CallFailed,
     CheckedValue,
     ClauseId,
     Direction,
     Evidence,
     JudgedLevel,
+    LabelInput,
     Level,
+    MatchFound,
+    MatchResult,
+    NothingFound,
     NumberRule,
+    OutsideDocument,
+    Position,
     PositionId,
+    PositionType,
     ReasonCode,
     SentenceId,
     Span,
     Unit,
     UnreadableSpans,
     ValueVerdict,
+    WordsRule,
+    WrittenBy,
     YesNoRule,
     combine_rule_4,
+    label_position,
     number_verdicts,
     words_verdict,
     yes_no_verdict,
 )
-from clause_tracer.core.tests.strategies import value_verdicts
+from clause_tracer.core.tests.label_cases import LabelCase, label_rule_cases
+from clause_tracer.core.tests.strategies import positions, value_verdicts
 
 PAYMENT_DAYS = NumberRule(
     unit=Unit.DAYS,
@@ -323,3 +335,185 @@ def test_unsure_always_has_a_reason(verdict_list: list[ValueVerdict]) -> None:
     level, reasons = combine_rule_4(tuple(verdict_list))
     if level is Level.UNSURE:
         assert any(reason in UNSURE_REASONS for reason in reasons)
+
+
+def _input(
+    position: Position,
+    match: MatchResult,
+    **changes: object,
+) -> LabelInput:
+    fields: dict[str, object] = {
+        "position": position,
+        "match": match,
+        "values": (),
+        "judged": (),
+        "outside_documents": (),
+    }
+    fields.update(changes)
+    return LabelInput(**fields)  # type: ignore[arg-type]
+
+
+DAYS_POSITION = Position(
+    id=PositionId("1"),
+    topic="Days until I'm paid, from invoice date",
+    type=PositionType.NUMBER,
+    rule=PAYMENT_DAYS,
+    missing_level=Level.UNSURE,
+    why_note=None,
+)
+DEPOSIT_POSITION = Position(
+    id=PositionId("2"),
+    topic="Upfront deposit",
+    type=PositionType.NUMBER,
+    rule=DEPOSIT_PERCENT,
+    missing_level=Level.WALK_AWAY,
+    why_note=None,
+)
+WORDS_POSITION = Position(
+    id=PositionId("10"),
+    topic="My liability is capped",
+    type=PositionType.WORDS,
+    rule=WordsRule(
+        preferred="At most the fees paid",
+        acceptable="Above the fees, up to 2x fees",
+        walk_away="Above 2x fees, a fixed sum, or uncapped",
+    ),
+    missing_level=Level.WALK_AWAY,
+    why_note=None,
+)
+
+_TABLE_ROWS = label_rule_cases()
+_TABLE_IDS = [case.id for case in _TABLE_ROWS]
+
+
+@pytest.mark.parametrize("case", _TABLE_ROWS, ids=_TABLE_IDS)
+def test_label_rules_table(case: LabelCase) -> None:
+    label = label_position(case.label_input, case.unreadable)
+    assert label.level is case.level, case.id
+    assert frozenset(label.reasons) == case.reasons, case.id
+    assert label.written_by is case.written_by, case.id
+
+
+def test_every_rule_has_rows() -> None:
+    rules = {case.rule for case in _TABLE_ROWS}
+    for rule in (
+        "rule1",
+        "rule2",
+        "rule3",
+        "rule4",
+        "rule5",
+        "rule6",
+        "rule7",
+        "rule9",
+        "rule10",
+    ):
+        assert rule in rules
+
+
+@given(position=positions())
+def test_failed_call_never_gives_a_missing_level(position: Position) -> None:
+    # A failed call gives unsure, never the missing level (system design 8.2).
+    label = label_position(_input(position, CallFailed(code="model_reply_invalid")), NO_HIDDEN)
+    assert label.level is Level.UNSURE
+    assert label.reasons == (ReasonCode.REPLY_BROKEN_TWICE,)
+
+
+def test_words_label_is_written_by_ai() -> None:
+    label = label_position(
+        _input(
+            WORDS_POSITION,
+            MatchFound(position_id=PositionId("10"), clause_ids=(ClauseId("c10"),)),
+            judged=(judged(),),
+        ),
+        NO_HIDDEN,
+    )
+    assert label.written_by is WrittenBy.AI
+    assert label.level is Level.ACCEPTABLE
+
+
+def test_missing_words_label_is_written_by_code() -> None:
+    # A label a rule produced on a words position is written by code.
+    label = label_position(
+        _input(
+            WORDS_POSITION,
+            NothingFound(position_id=PositionId("10"), searches=()),
+        ),
+        NO_HIDDEN,
+    )
+    assert label.written_by is WrittenBy.CODE
+    assert label.level is Level.WALK_AWAY
+
+
+def test_rule_10_keeps_a_walk_away() -> None:
+    # A walk-away the app found in a clause stays walk-away and gets no
+    # extra reason (Rule 10).
+    label = label_position(
+        _input(
+            DAYS_POSITION,
+            MatchFound(position_id=PositionId("1"), clause_ids=(ClauseId("c1"),)),
+            values=(value(),),
+            outside_documents=(
+                OutsideDocument(name="Master Agreement", evidence=Span(start=0, end=0)),
+            ),
+        ),
+        NO_HIDDEN,
+    )
+    assert label.level is Level.WALK_AWAY
+    assert label.reasons == ()
+
+
+def test_rule_10_makes_a_missing_walk_away_unsure() -> None:
+    # A Missing label whose missing level is walk-away becomes unsure (16h).
+    label = label_position(
+        _input(
+            DEPOSIT_POSITION,
+            NothingFound(position_id=PositionId("2"), searches=()),
+            outside_documents=(
+                OutsideDocument(name="Master Agreement", evidence=Span(start=0, end=0)),
+            ),
+        ),
+        NO_HIDDEN,
+    )
+    assert label.level is Level.UNSURE
+    assert label.reasons == (ReasonCode.UNLOADED_DOCUMENT,)
+
+
+def test_words_label_turned_unsure_is_written_by_code() -> None:
+    # A words label a rule turned unsure is written by code (16i).
+    label = label_position(
+        _input(
+            WORDS_POSITION,
+            MatchFound(position_id=PositionId("10"), clause_ids=(ClauseId("c10"),)),
+            judged=(judged(),),
+            outside_documents=(
+                OutsideDocument(name="Master Agreement", evidence=Span(start=0, end=0)),
+            ),
+        ),
+        NO_HIDDEN,
+    )
+    assert label.level is Level.UNSURE
+    assert label.reasons == (ReasonCode.UNLOADED_DOCUMENT,)
+    assert label.written_by is WrittenBy.CODE
+
+
+def test_judged_words_label_is_written_by_ai() -> None:
+    label = label_position(
+        _input(
+            WORDS_POSITION,
+            MatchFound(position_id=PositionId("10"), clause_ids=(ClauseId("c10"),)),
+            judged=(judged(),),
+        ),
+        NO_HIDDEN,
+    )
+    assert label.written_by is WrittenBy.AI
+
+
+def test_position_mismatch_raises() -> None:
+    with pytest.raises(ValueError, match="another position"):
+        label_position(
+            _input(
+                DAYS_POSITION,
+                MatchFound(position_id=PositionId("2"), clause_ids=()),
+            ),
+            NO_HIDDEN,
+        )

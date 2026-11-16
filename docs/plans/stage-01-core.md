@@ -526,7 +526,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rule 4, T1, T6, T13, I4.
   - **Depends on:** S1-M3-T14.
 
-- [ ] **S1-M3-T16: One label per position (Rules 7 and 10)**
+- [x] **S1-M3-T16: One label per position (Rules 7 and 10)**
   - **Build:** In `src/clause_tracer/core/labels.py`, export `def label_position(item: LabelInput, unreadable: UnreadableSpans) -> ToolLabel`:
     1. Raise `ValueError` when: the match is not a `CallFailed` and its `position_id` differs from `item.position.id`; any value or judged level has another `position_id`; the rule's class does not match the position type; a `WORDS` position has `values`; a `NUMBER` or `YES_NO` position has `judged`.
     2. `CallFailed`: `level=UNSURE`, `reasons=(REPLY_BROKEN_TWICE,)`, `evidence=()`, `written_by=CODE`.

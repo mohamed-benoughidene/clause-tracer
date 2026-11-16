@@ -10,14 +10,29 @@ import math
 from decimal import Decimal
 from fractions import Fraction
 
-from clause_tracer.core.enums import UNSURE_REASONS, Answer, Direction, Level, ReasonCode, Unit
+from clause_tracer.core.enums import (
+    UNSURE_REASONS,
+    Answer,
+    Direction,
+    Level,
+    PositionType,
+    ReasonCode,
+    Unit,
+    WrittenBy,
+)
 from clause_tracer.core.ids import ClauseId
 from clause_tracer.core.levels import sort_reasons, spans_overlap, worst_level
-from clause_tracer.core.playbook import NumberRule, YesNoRule
+from clause_tracer.core.playbook import NumberRule, WordsRule, YesNoRule
 from clause_tracer.core.results import (
+    CallFailed,
     CheckedValue,
     Evidence,
     JudgedLevel,
+    LabelInput,
+    MatchFound,
+    MatchUnconfirmed,
+    NothingFound,
+    ToolLabel,
     UnreadableSpans,
     ValueVerdict,
 )
@@ -236,3 +251,98 @@ def combine_rule_4(verdicts: tuple[ValueVerdict, ...]) -> tuple[Level, tuple[Rea
     if clauses_disagree:
         reasons.append(ReasonCode.CLAUSES_DISAGREE)
     return level, sort_reasons(reasons)
+
+
+def _check_references(item: LabelInput) -> None:
+    """Raise ValueError when a part of the input does not belong to its position."""
+
+    position = item.position
+    if not isinstance(item.match, CallFailed) and item.match.position_id != position.id:
+        raise ValueError(f"match names another position, not {position.id}")
+    for value in item.values:
+        if value.position_id != position.id:
+            raise ValueError(f"a value names another position, not {position.id}")
+    for judged in item.judged:
+        if judged.position_id != position.id:
+            raise ValueError(f"a judged level names another position, not {position.id}")
+    if position.type is PositionType.WORDS and item.values:
+        raise ValueError(f"position {position.id} is a words position but holds values")
+    if position.type is not PositionType.WORDS and item.judged:
+        raise ValueError(f"position {position.id} takes values, not judged levels")
+
+
+def label_position(item: LabelInput, unreadable: UnreadableSpans) -> ToolLabel:
+    """The label of one position: Rules 3, 4, 7 and 10 (Spec 5)."""
+
+    _check_references(item)
+    position = item.position
+    number_rule: NumberRule | None = None
+    yes_no_rule: YesNoRule | None = None
+    if position.type is PositionType.NUMBER:
+        if not isinstance(position.rule, NumberRule):
+            raise ValueError(f"position {position.id} is a number with another kind of rule")
+        number_rule = position.rule
+    elif position.type is PositionType.YES_NO:
+        if not isinstance(position.rule, YesNoRule):
+            raise ValueError(f"position {position.id} is a yes/no with another kind of rule")
+        yes_no_rule = position.rule
+    elif not isinstance(position.rule, WordsRule):
+        raise ValueError(f"position {position.id} is a words position with another rule")
+    match = item.match
+    evidence: list[Evidence] = []
+    if isinstance(match, CallFailed):
+        # A failed call never passes as "nothing found" (I4, system design 8.2).
+        level = Level.UNSURE
+        reasons: list[ReasonCode] = [ReasonCode.REPLY_BROKEN_TWICE]
+    elif isinstance(match, NothingFound):
+        # Rule 7: a yes/no position goes to its no level (Spec 4.1).
+        level = yes_no_rule.no_level if yes_no_rule is not None else position.missing_level
+        reasons = []
+    elif isinstance(match, MatchUnconfirmed):
+        # The searches disagree: unsure, the clause to read is named (ADR 0012).
+        level = Level.UNSURE
+        reasons = [ReasonCode.MATCH_UNCONFIRMED]
+    else:
+        verdicts: list[ValueVerdict] = []
+        if number_rule is not None:
+            for value in item.values:
+                verdicts.extend(number_verdicts(number_rule, value, unreadable))
+        elif yes_no_rule is not None:
+            for value in item.values:
+                verdicts.append(yes_no_verdict(yes_no_rule, value, unreadable))
+        else:
+            for judged in item.judged:
+                verdicts.append(words_verdict(judged, unreadable))
+        if not verdicts:
+            # A found clause with no value and no answer (question 16c).
+            level = Level.UNSURE
+            reasons = [ReasonCode.NO_VALUE]
+        else:
+            level, combined = combine_rule_4(tuple(verdicts))
+            reasons = list(combined)
+            for verdict in verdicts:
+                if verdict.evidence is not None and verdict.evidence not in evidence:
+                    evidence.append(verdict.evidence)
+    # Rule 10: an unloaded document in the trail makes the label unsure,
+    # except a walk-away Rule 4 step 1 already gave (question 16h).
+    found_walk_away = isinstance(match, MatchFound) and level is Level.WALK_AWAY
+    if item.outside_documents and not found_walk_away:
+        level = Level.UNSURE
+        reasons.append(ReasonCode.UNLOADED_DOCUMENT)
+    # Only a level the AI actually judged is written by AI, and drawn in
+    # pencil (ADR 0002, question 16i).
+    if (
+        position.type is PositionType.WORDS
+        and isinstance(match, MatchFound)
+        and level is not Level.UNSURE
+    ):
+        written_by = WrittenBy.AI
+    else:
+        written_by = WrittenBy.CODE
+    return ToolLabel(
+        position_id=position.id,
+        level=level,
+        reasons=sort_reasons(reasons),
+        evidence=tuple(evidence),
+        written_by=written_by,
+    )
