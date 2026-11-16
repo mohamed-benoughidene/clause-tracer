@@ -143,6 +143,19 @@ arguments, with exactly the fields of system design 3.4 in that order (ADR 0005)
 | `PlaybookProblem` | `position_id: PositionId \| None, code: PlaybookProblemCode` | One failed playbook check (Spec 4.1); `position_id` is `None` for a whole-playbook problem |
 | `CancelCheck` | a type alias: `Callable[[], bool]` | Returns True once the user has cancelled (ADR 0005) |
 
+## Ports
+The five ports are `typing.Protocol` classes in `ports.py` (P4, B3). Adapters are passed in,
+never imported. Each method's docstring holds `Input`, `Output`, `Raises` and `Side effects`.
+Every real adapter must pass the same contract suite in `tests/contracts/` (T2, ADR 0005).
+
+| Port | Methods | Notes |
+| --- | --- | --- |
+| `AiClient` | `complete(request: AiRequest) -> AiReply` | Raises model-service errors. Network retries live in the adapter; the one reask lives in the step (ADR 0005) |
+| `PiiDetector` | `find(text: str) -> tuple[PiiSuggestion, ...]` | Behind the code finders (ADR 0008) |
+| `ReviewStore` | `save_record(record: AiRecord) -> None`; `load_records(review_id: ReviewId) -> tuple[AiRecord, ...]`; `list_reviews() -> tuple[ReviewId, ...]`; `delete_review(review_id: ReviewId) -> None`; `purge_expired(now: datetime, auto_delete_days: int) -> tuple[ReviewId, ...]` | Hides the encrypted store (ADR 0006). `save_record` raises `DuplicateRecordError` for a saved `record_id` (append-only, D1); `load_records` returns records in the order saved, or `()`; `delete_review` is idempotent (I8); `purge_expired` deletes the reviews due under the auto-delete rules and returns their ids, sorted. Until stage 6, a review's last change is the latest `finished_at` of its records |
+| `SecretStore` | `get_secret(provider_id: str) -> str \| None`; `put_secret(provider_id: str, secret: str) -> None`; `delete_secret(provider_id: str) -> None` | Each raises `SecretStoreUnavailableError` when the store cannot be reached; `get_secret` returns `None` when nothing is stored; `delete_secret` is idempotent (I8). Never plain text (ADR 0006, ADR 0015) |
+| `Clock` | `now() -> datetime` | Returns a timezone-aware time (T2) |
+
 ## Functions
 
 | Function | Returns | Notes |

@@ -133,7 +133,14 @@ from clause_tracer.core.playbook import (
     YesNoRule,
 )
 from clause_tracer.core.playbook_checks import check_playbook
-from clause_tracer.core.ports import CancelCheck
+from clause_tracer.core.ports import (
+    AiClient,
+    CancelCheck,
+    Clock,
+    PiiDetector,
+    ReviewStore,
+    SecretStore,
+)
 from clause_tracer.core.results import (
     CallFailed,
     CheckedValue,
@@ -154,6 +161,7 @@ from clause_tracer.core.units import convert_to_unit
 from clause_tracer.core.wording import Span, Wording
 
 __all__: list[str] = [
+    "AiClient",
     "AiRecord",
     "AiReply",
     "AiRequest",
@@ -165,6 +173,7 @@ __all__: list[str] = [
     "Clause",
     "ClauseId",
     "ClauseTracerError",
+    "Clock",
     "ConfigError",
     "CostInputs",
     "CostRange",
@@ -214,6 +223,7 @@ __all__: list[str] = [
     "Page",
     "PageBox",
     "Party",
+    "PiiDetector",
     "PiiSource",
     "PiiSuggestion",
     "PlaceholderEntity",
@@ -237,10 +247,12 @@ __all__: list[str] = [
     "ReviewCancelled",
     "ReviewId",
     "ReviewStatus",
+    "ReviewStore",
     "ScanContext",
     "ScanFinding",
     "ScannedPdfError",
     "SchemaTooNewError",
+    "SecretStore",
     "SecretStoreUnavailableError",
     "Segment",
     "SegmentKind",
