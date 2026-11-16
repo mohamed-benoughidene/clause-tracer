@@ -1,0 +1,312 @@
+# Expected answers. Only the owner edits this file. Constitution T11.
+# Format: docs/plans/stage-01-core.md, task S1-M3-T9.
+
+[[case]]
+id = "clean-playbook"
+problems = []
+
+[[case.positions]]
+id = "1"
+topic = "Days until paid"
+type = "number"
+unit = "days"
+direction = "lower_is_better"
+preferred_limit = "15"
+acceptable_limit = "30"
+missing_level = "unsure"
+
+[[case.positions]]
+id = "2"
+topic = "Upfront deposit"
+type = "number"
+unit = "percent"
+direction = "higher_is_better"
+preferred_limit = "50"
+acceptable_limit = "25"
+missing_level = "walk_away"
+
+[[case.positions]]
+id = "3"
+topic = "Paid if cancelled"
+type = "yes_no"
+question = "Paid if cancelled"
+yes_level = "preferred"
+no_level = "walk_away"
+
+[[case.positions]]
+id = "4"
+topic = "Liability cap"
+type = "words"
+preferred = "At most the fees paid"
+acceptable = "Up to 2x fees"
+walk_away = "Above 2x fees"
+missing_level = "walk_away"
+
+[[case]]
+id = "negative-limit"
+problems = [{ position = "1", code = "limit_negative" }]
+
+[[case.positions]]
+id = "1"
+topic = "Days until paid"
+type = "number"
+unit = "days"
+direction = "lower_is_better"
+preferred_limit = "-1"
+acceptable_limit = "30"
+missing_level = "unsure"
+
+[[case]]
+id = "percent-over-100"
+problems = [{ position = "2", code = "percent_over_100" }]
+
+[[case.positions]]
+id = "2"
+topic = "Upfront deposit"
+type = "number"
+unit = "percent"
+direction = "higher_is_better"
+preferred_limit = "150"
+acceptable_limit = "25"
+missing_level = "walk_away"
+
+[[case]]
+id = "percent-at-100-passes"
+problems = []
+
+[[case.positions]]
+id = "2"
+topic = "Upfront deposit"
+type = "number"
+unit = "percent"
+direction = "higher_is_better"
+preferred_limit = "100"
+acceptable_limit = "0"
+missing_level = "walk_away"
+
+[[case]]
+id = "negative-and-over-100"
+# Two problems on one position
+problems = [
+    { position = "2", code = "limit_negative" },
+    { position = "2", code = "percent_over_100" },
+]
+
+[[case.positions]]
+id = "2"
+topic = "Upfront deposit"
+type = "number"
+unit = "percent"
+direction = "higher_is_better"
+preferred_limit = "150"
+acceptable_limit = "-5"
+missing_level = "walk_away"
+
+[[case]]
+id = "equal-limits-lower-is-better"
+problems = [{ position = "1", code = "limits_not_stricter" }]
+
+[[case.positions]]
+id = "1"
+topic = "Days until paid"
+type = "number"
+unit = "days"
+direction = "lower_is_better"
+preferred_limit = "30"
+acceptable_limit = "30"
+missing_level = "unsure"
+
+[[case]]
+id = "reversed-limits-lower-is-better"
+problems = [{ position = "1", code = "limits_not_stricter" }]
+
+[[case.positions]]
+id = "1"
+topic = "Days until paid"
+type = "number"
+unit = "days"
+direction = "lower_is_better"
+preferred_limit = "30"
+acceptable_limit = "15"
+missing_level = "unsure"
+
+[[case]]
+id = "equal-limits-higher-is-better"
+problems = [{ position = "2", code = "limits_not_stricter" }]
+
+[[case.positions]]
+id = "2"
+topic = "Upfront deposit"
+type = "number"
+unit = "percent"
+direction = "higher_is_better"
+preferred_limit = "25"
+acceptable_limit = "25"
+missing_level = "walk_away"
+
+[[case]]
+id = "reversed-limits-higher-is-better"
+problems = [{ position = "2", code = "limits_not_stricter" }]
+
+[[case.positions]]
+id = "2"
+topic = "Upfront deposit"
+type = "number"
+unit = "percent"
+direction = "higher_is_better"
+preferred_limit = "25"
+acceptable_limit = "50"
+missing_level = "walk_away"
+
+[[case]]
+id = "yes-worse-than-no"
+problems = [{ position = "3", code = "yes_not_better" }]
+
+[[case.positions]]
+id = "3"
+topic = "Paid if cancelled"
+type = "yes_no"
+question = "Paid if cancelled"
+yes_level = "walk_away"
+no_level = "preferred"
+
+[[case]]
+id = "yes-equal-to-no"
+problems = [{ position = "3", code = "yes_not_better" }]
+
+[[case.positions]]
+id = "3"
+topic = "Paid if cancelled"
+type = "yes_no"
+question = "Paid if cancelled"
+yes_level = "acceptable"
+no_level = "acceptable"
+
+[[case]]
+id = "yes-no-level-unsure"
+# yes_not_better is skipped when a level is unsure
+problems = [{ position = "3", code = "yes_no_level_unsure" }]
+
+[[case.positions]]
+id = "3"
+topic = "Paid if cancelled"
+type = "yes_no"
+question = "Paid if cancelled"
+yes_level = "unsure"
+no_level = "walk_away"
+
+[[case]]
+id = "missing-level-not-no-level"
+problems = [{ position = "3", code = "missing_level_not_no_level" }]
+
+[[case.positions]]
+id = "3"
+topic = "Paid if cancelled"
+type = "yes_no"
+question = "Paid if cancelled"
+yes_level = "preferred"
+no_level = "walk_away"
+missing_level = "acceptable"
+
+[[case]]
+id = "empty-words-text"
+problems = [{ position = "4", code = "level_text_empty" }]
+
+[[case.positions]]
+id = "4"
+topic = "Liability cap"
+type = "words"
+preferred = "   "
+acceptable = "Up to 2x fees"
+walk_away = "Above 2x fees"
+missing_level = "walk_away"
+
+[[case]]
+id = "duplicate-position-id"
+problems = [{ position = "1", code = "duplicate_position_id" }]
+
+[[case.positions]]
+id = "1"
+topic = "Days until paid"
+type = "number"
+unit = "days"
+direction = "lower_is_better"
+preferred_limit = "15"
+acceptable_limit = "30"
+missing_level = "unsure"
+
+[[case.positions]]
+id = "1"
+topic = "Paid if cancelled"
+type = "yes_no"
+question = "Paid if cancelled"
+yes_level = "preferred"
+no_level = "walk_away"
+
+# ---------------------------------------------------------------- Added after review, 16 Nov 2026
+
+[[case]]
+id = "no-level-unsure"
+problems = [{ position = "3", code = "yes_no_level_unsure" }]
+
+[[case.positions]]
+id = "3"
+topic = "Paid if cancelled"
+type = "yes_no"
+question = "Paid if cancelled"
+yes_level = "preferred"
+no_level = "unsure"
+
+[[case]]
+id = "negative-acceptable-limit"
+problems = [{ position = "2", code = "limit_negative" }]
+
+[[case.positions]]
+id = "2"
+topic = "Upfront deposit"
+type = "number"
+unit = "percent"
+direction = "higher_is_better"
+preferred_limit = "50"
+acceptable_limit = "-1"
+missing_level = "walk_away"
+
+[[case]]
+id = "acceptable-limit-over-100"
+problems = [{ position = "2", code = "percent_over_100" }]
+
+[[case.positions]]
+id = "2"
+topic = "Late fee"
+type = "number"
+unit = "percent"
+direction = "lower_is_better"
+preferred_limit = "50"
+acceptable_limit = "150"
+missing_level = "walk_away"
+
+[[case]]
+id = "empty-acceptable-text"
+problems = [{ position = "4", code = "level_text_empty" }]
+
+[[case.positions]]
+id = "4"
+topic = "Liability cap"
+type = "words"
+preferred = "At most the fees paid"
+acceptable = ""
+walk_away = "Above 2x fees"
+missing_level = "walk_away"
+
+[[case]]
+id = "empty-walk-away-text"
+problems = [{ position = "4", code = "level_text_empty" }]
+
+[[case.positions]]
+id = "4"
+topic = "Liability cap"
+type = "words"
+preferred = "At most the fees paid"
+acceptable = "Up to 2x fees"
+walk_away = "  "
+missing_level = "walk_away"

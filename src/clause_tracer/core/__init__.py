@@ -92,6 +92,24 @@ from clause_tracer.core.ids import (
     ReviewId,
     SentenceId,
 )
+from clause_tracer.core.labels import (
+    combine_rule_4,
+    evidence_reasons,
+    label_all,
+    label_position,
+    level_for_limits,
+    number_verdicts,
+    words_verdict,
+    yes_no_verdict,
+)
+from clause_tracer.core.levels import (
+    is_better,
+    level_rank,
+    sort_reasons,
+    spans_overlap,
+    unreadable_spans,
+    worst_level,
+)
 from clause_tracer.core.link_map import (
     CrossReference,
     DefinedTerm,
@@ -114,6 +132,7 @@ from clause_tracer.core.playbook import (
     WordsRule,
     YesNoRule,
 )
+from clause_tracer.core.playbook_checks import check_playbook
 from clause_tracer.core.ports import CancelCheck
 from clause_tracer.core.results import (
     CallFailed,
@@ -131,6 +150,7 @@ from clause_tracer.core.results import (
     ValueVerdict,
 )
 from clause_tracer.core.settings import Settings
+from clause_tracer.core.units import convert_to_unit
 from clause_tracer.core.wording import Span, Wording
 
 __all__: list[str] = [
@@ -244,4 +264,20 @@ __all__: list[str] = [
     "WordsRule",
     "WrittenBy",
     "YesNoRule",
+    "check_playbook",
+    "combine_rule_4",
+    "convert_to_unit",
+    "evidence_reasons",
+    "is_better",
+    "label_all",
+    "label_position",
+    "level_for_limits",
+    "level_rank",
+    "number_verdicts",
+    "sort_reasons",
+    "spans_overlap",
+    "unreadable_spans",
+    "words_verdict",
+    "worst_level",
+    "yes_no_verdict",
 ]

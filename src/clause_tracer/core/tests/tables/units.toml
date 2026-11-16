@@ -1,0 +1,305 @@
+# Expected answers. Only the owner edits this file. Constitution T11.
+# Format: docs/plans/stage-01-core.md, task S1-M3-T7.
+
+# Days spellings
+[[case]]
+id = "day-to-days"
+number = "1"
+unit = "day"
+target = "days"
+expected = "1"
+
+[[case]]
+id = "days-to-days"
+number = "20"
+unit = "days"
+target = "days"
+expected = "20"
+
+[[case]]
+id = "calendar-day-to-days"
+number = "1"
+unit = "calendar day"
+target = "days"
+expected = "1"
+
+[[case]]
+id = "calendar-days-to-days"
+number = "45"
+unit = "calendar days"
+target = "days"
+expected = "45"
+
+[[case]]
+id = "day-to-months"
+number = "1"
+unit = "day"
+target = "months"
+expected = "1/30"
+
+[[case]]
+id = "days-to-months"
+number = "90"
+unit = "days"
+target = "months"
+expected = "3"
+
+[[case]]
+id = "calendar-day-to-months"
+number = "15"
+unit = "calendar day"
+target = "months"
+expected = "1/2"
+
+[[case]]
+id = "calendar-days-to-months"
+number = "60"
+unit = "calendar days"
+target = "months"
+expected = "2"
+
+# Weeks
+[[case]]
+id = "week-to-days"
+number = "1"
+unit = "week"
+target = "days"
+expected = "7"
+
+[[case]]
+id = "weeks-to-days"
+number = "2"
+unit = "weeks"
+target = "days"
+expected = "14"
+
+[[case]]
+id = "week-to-months"
+number = "1"
+unit = "week"
+target = "months"
+expected = "7/30"
+
+[[case]]
+id = "weeks-to-months"
+number = "6"
+unit = "weeks"
+target = "months"
+expected = "7/5"
+
+# Months
+[[case]]
+id = "month-to-days"
+number = "1"
+unit = "month"
+target = "days"
+expected = "30"
+
+[[case]]
+id = "months-to-days"
+number = "1.5"
+unit = "months"
+target = "days"
+expected = "45"
+
+[[case]]
+id = "month-to-months"
+number = "1"
+unit = "month"
+target = "months"
+expected = "1"
+
+[[case]]
+id = "months-to-months"
+number = "12"
+unit = "months"
+target = "months"
+expected = "12"
+
+# Years
+[[case]]
+id = "year-to-days"
+number = "1"
+unit = "year"
+target = "days"
+expected = "365"
+
+[[case]]
+id = "years-to-days"
+number = "2"
+unit = "years"
+target = "days"
+expected = "730"
+
+[[case]]
+id = "year-to-months"
+number = "1"
+unit = "year"
+target = "months"
+expected = "12"
+
+[[case]]
+id = "years-to-months"
+number = "0.5"
+unit = "years"
+target = "months"
+expected = "6"
+
+# Percent
+[[case]]
+id = "percent-sign-to-percent"
+number = "25"
+unit = "%"
+target = "percent"
+expected = "25"
+
+[[case]]
+id = "percent-word-to-percent"
+number = "50"
+unit = "percent"
+target = "percent"
+expected = "50"
+
+[[case]]
+id = "per-cent-to-percent"
+number = "12.5"
+unit = "per cent"
+target = "percent"
+expected = "25/2"
+
+# Rounds
+[[case]]
+id = "round-to-rounds"
+number = "1"
+unit = "round"
+target = "rounds"
+expected = "1"
+
+[[case]]
+id = "rounds-to-rounds"
+number = "2"
+unit = "rounds"
+target = "rounds"
+expected = "2"
+
+[[case]]
+id = "revision-to-rounds"
+number = "1"
+unit = "revision"
+target = "rounds"
+expected = "1"
+
+[[case]]
+id = "revisions-to-rounds"
+number = "3"
+unit = "revisions"
+target = "rounds"
+expected = "3"
+
+[[case]]
+id = "round-of-revisions-to-rounds"
+number = "1"
+unit = "round of revisions"
+target = "rounds"
+expected = "1"
+
+[[case]]
+id = "rounds-of-revisions-to-rounds"
+number = "4"
+unit = "rounds of revisions"
+target = "rounds"
+expected = "4"
+
+# Spelling is normalised: case, outer spaces, inner space runs, one trailing dot
+[[case]]
+id = "normalised-spelling"
+number = "2"
+unit = "  Calendar   DAYS. "
+target = "days"
+expected = "2"
+
+[[case]]
+id = "normalised-per-cent"
+number = "30"
+unit = "Per  Cent"
+target = "percent"
+expected = "30"
+
+# Business and working days are never converted
+[[case]]
+id = "business-day"
+number = "1"
+unit = "business day"
+target = "days"
+expected = "business_days"
+
+[[case]]
+id = "business-days"
+number = "10"
+unit = "business days"
+target = "days"
+expected = "business_days"
+
+[[case]]
+id = "working-day"
+number = "1"
+unit = "working day"
+target = "days"
+expected = "business_days"
+
+[[case]]
+id = "working-days"
+number = "5"
+unit = "working days"
+target = "months"
+expected = "business_days"
+
+# Unknown words and pairs that do not convert
+[[case]]
+id = "unknown-word"
+number = "2"
+unit = "fortnights"
+target = "days"
+expected = "unit_unknown"
+
+[[case]]
+id = "days-to-percent"
+number = "30"
+unit = "days"
+target = "percent"
+expected = "unit_unknown"
+
+[[case]]
+id = "percent-to-days"
+number = "30"
+unit = "%"
+target = "days"
+expected = "unit_unknown"
+
+[[case]]
+id = "rounds-to-months"
+number = "2"
+unit = "rounds"
+target = "months"
+expected = "unit_unknown"
+
+# No unit as written: the number is already in the target unit (question 16a)
+[[case]]
+id = "no-unit-days"
+number = "30"
+target = "days"
+expected = "30"
+
+[[case]]
+id = "no-unit-percent"
+number = "33.3"
+target = "percent"
+expected = "333/10"
+
+# Added after review, 16 Nov 2026: only one trailing dot is dropped
+[[case]]
+id = "two-trailing-dots"
+number = "2"
+unit = "days.."
+target = "days"
+expected = "unit_unknown"

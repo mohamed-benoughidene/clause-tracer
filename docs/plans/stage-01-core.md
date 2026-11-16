@@ -341,7 +341,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
 
 **Sample format.** The Spec 14.5 sample file (S1-M3-T5) and the label-rule table use one format for positions and inputs, read by `clause_tracer.core.sample_input` (S1-M3-T3 and T4).
 
-- [ ] **S1-M3-T1: The owner-table loader**
+- [x] **S1-M3-T1: The owner-table loader**
   - **Build:** In `src/clause_tracer/core/tests/owner_tables.py`:
     - `HEADER = "# Expected answers. Only the owner edits this file. Constitution T11."` and `TABLES_DIR = Path(__file__).parent / "tables"`.
     - `class OwnerTableError(ValueError)`.
@@ -354,7 +354,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** T11, [testing strategy 10](../testing-strategy.md#10-keeping-agent-written-tests-honest), [ADR 0013](../adr/0013-test-layers-and-release-gates.md) "Agent guard".
   - **Depends on:** S1-M1-T7.
 
-- [ ] **S1-M3-T2: Create the seven empty owner tables**
+- [x] **S1-M3-T2: Create the seven empty owner tables**
   - **Build:** Create these files, each holding exactly two lines: the `HEADER` line, then `# Format: docs/plans/stage-01-core.md, task <id>.` with the id of the owner task that fills it: `label_rules.toml` (S1-M3-T6), `units.toml` (S1-M3-T7), `spec_14_5.toml` (S1-M3-T8), `playbook_checks.toml` (S1-M3-T9), `auto_delete.toml` (S1-M4-T5), `scans.toml` (S1-M5-T1), `cost_estimate.toml` (S1-M5-T9). This commit holds these seven files and the plan tick, and no code, so the owner-table guard passes.
   - **Files:** the seven files in `src/clause_tracer/core/tests/tables/`.
   - **Tests first:** None. The loader test of S1-M3-T1 already covers a header-only file.
@@ -362,7 +362,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** T11.
   - **Depends on:** S1-M3-T1, S1-M1-T5.
 
-- [ ] **S1-M3-T3: Read positions and playbooks from the sample format**
+- [x] **S1-M3-T3: Read positions and playbooks from the sample format**
   - **Build:** In `src/clause_tracer/core/sample_input.py` (not exported; only `__main__` and tests use it). Every error is `ValueError(f"{where}: …")` naming the key.
     - `def parse_position(data: Mapping[str, object], where: str) -> Position`. Keys: `id` (str, required), `topic` (str, required), `type` (`"number"`, `"yes_no"` or `"words"`, required), `why_note` (str, optional, default `None`). For `number`: `unit` (a `Unit` value), `direction` (a `Direction` value), `preferred_limit` and `acceptable_limit` (a TOML integer or a string `Decimal` parses), `missing_level` (a `Level` value), all required. For `yes_no`: `question`, `yes_level`, `no_level` required; `missing_level` optional, defaulting to the `no_level`. For `words`: `preferred`, `acceptable`, `walk_away` (str) and `missing_level`, all required. Any other key raises. A TOML float raises.
     - `def parse_playbook(data: Mapping[str, object], *, schema_version: int) -> Playbook`. Keys: `id`, `name`, `side` (str), `starter` (bool), `positions` (a list of position tables, read with `parse_position(..., where=f"position {i}")`). `customer_id` is `None`.
@@ -372,7 +372,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** S1 (sample input), D4, T1 (pure: it parses data already read; only `__main__` reads files).
   - **Depends on:** S1-M2-T4.
 
-- [ ] **S1-M3-T4: Read label inputs from the sample format**
+- [x] **S1-M3-T4: Read label inputs from the sample format**
   - **Build:** In `src/clause_tracer/core/sample_input.py`:
     - `def parse_label_inputs(entries: Sequence[Mapping[str, object]], playbook: Playbook) -> tuple[tuple[LabelInput, ...], UnreadableSpans]`. Each entry has keys `position` (str, required: a position id of `playbook`, or `ValueError`), `match` (`"found"`, `"nothing"`, `"unconfirmed"` or `"failed"`, required), `values` (list, default empty), `judged` (list, default empty), `clauses_to_read` (list of str, default empty), `outside_documents` (list of str, default empty).
     - A value table has keys `clause` (str, required), `raw`, `number`, `range_high`, `unit`, `start_point`, `answer` (an `Answer` value), `vague` (bool, default false), `amount`, `total`, `reasons` (list of `ReasonCode` values, default empty), `unlimited` (bool, default false), `quote` (`"confirmed"`, `"unplaced"` or `"none"`, default `"confirmed"`), `on` (`"visible"`, `"hidden"` or `"undecodable"`, default `"visible"`). It becomes a `CheckedValue` with `raw_value=raw`, `unit_as_written=unit`, `start_point_as_written=start_point`, `condition=None`, and the other fields by name.
@@ -387,7 +387,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** S1, D4, T1, I3.
   - **Depends on:** S1-M3-T3, S1-M2-T7.
 
-- [ ] **S1-M3-T5: The Spec 14.5 sample input file**
+- [x] **S1-M3-T5: The Spec 14.5 sample input file**
   - **Build:** `src/clause_tracer/core/samples/spec-14-5.toml`, with `schema_version = 1`. These are inputs, not expected labels.
     - `[playbook]`: `id = "starter-freelancer"`, `name = "Freelancer receiving a service agreement from the other side"`, `side = "service provider"`, `starter = true`, and one `[[playbook.positions]]` per row of Spec 7, in Spec 7 order, with `id` the row number (`"1"`, `"2"`, `"3"`, `"4"`, `"5"`, `"6"`, `"7a"`, `"7b"`, `"8"`, `"9"`, `"10"`) and `topic` the "Position" text of Spec 7 word for word. Yes/no positions use the topic as `question`. Number positions: 1 is days, lower is better, 15 and 30, missing `unsure`; 2 is percent, higher is better, 50 and 25, missing `walk_away`; 5 is rounds, lower is better, 2 and 3, missing `walk_away`; 9 is months, lower is better, 0 and 6, missing `preferred`. Yes/no positions: 3, 7b and 8 have yes `preferred`, no `acceptable`; 4, 6 and 7a have yes `preferred`, no `walk_away`. Position 10 is words, with the three level texts of Spec 7 word for word, missing `walk_away`. No `why_note` (Spec 7 does not give their text).
     - One `[[input]]` per position, in the same order: 1 `found`, value `clause = "c1"`, `number = "60"`, `unit = "days"`; 2 `found`, value `c2`, `"25"`, `unit = "%"`; 3 `nothing`; 4 `found`, value `c4`, `answer = "no"`, `quote = "none"`, `reasons = ["quote_not_confirmed"]`; 5 `found`, value `c5`, `raw = "reasonable revisions"`, `vague = true`; 6 `found`, value `c6`, `answer = "yes"`; 7a `found`, value `c7`, `answer = "no"`; 7b `nothing`; 8 `nothing`; 9 `found`, values `c9a` with `"12"` `months`, and `c9b` with `number = "6"`, `range_high = "9"`, `unit = "months"`; 10 `found`, judged `c10` with `level = "preferred"`, and `outside_documents = ["Master Agreement"]`.
@@ -398,7 +398,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** S1 (a sample input), D1, AGENTS.md (sample names from Spec 14.5 only), [Spec 7 and 14.5](../spec.md#145-sample-data).
   - **Depends on:** S1-M3-T4.
 
-- [ ] **S1-M3-T6: Label-rule table (Owner)**
+- [x] **S1-M3-T6: Label-rule table (Owner)**
   - **Build:** Owner only. The rows of `label_rules.toml`. Columns: `id` (str), `rule` (one of `"rule1"`, `"rule2"`, `"rule3"`, `"rule4"`, `"rule5"`, `"rule6"`, `"rule7"`, `"rule9"`, `"rule10"`, `"edge"`; Rule 8 gives no label), `note` (str, optional), then one input in the sample format of S1-M3-T4 (`position` is a Spec 7 position id from the sample file; `match`; optional `values`, `judged`, `clauses_to_read`, `outside_documents`), then the expected answer: `level` (a `Level` value), `reasons` (a list of `ReasonCode` values; order does not matter), `written_by` (`"code"` or `"ai"`). Cases to cover, proposed, owner to check: Rule 1 at each limit and just past it, in both directions (positions 1 and 2), "none" as 0 (position 9), "unlimited" when lower is better (position 5: walk-away) and when higher is better (position 2: unsure, `unlimited_unclear`); Rule 2 yes, no, unclear, missing and conditional yes; Rule 3 quote not confirmed, number not in quote, and a confirmed quote that is not placed (label kept); Rule 4 a readable walk-away beside an unsure value, unsure beside acceptable, worst of preferred and acceptable, clauses that disagree; Rule 5 vague wording, another start point, unknown figures, business days; Rule 6 weeks, months and years each way, a range, a deposit amount with and without a total, an amount and a percentage that disagree; Rule 7 nothing found for each missing level, `MATCH_UNCONFIRMED`, and a failed call for a position whose missing level is preferred; Rule 9 hidden and undecodable text under a walk-away value; Rule 10 a walk-away that stays walk-away and an acceptable that becomes unsure; `edge` one row per item of question 16. The AI agent does not write or change it (T11). It may list, in chat, which Spec lines still have no row.
   - **Files:** `src/clause_tracer/core/tests/tables/label_rules.toml`.
   - **Tests first:** None. The owner's values are the expected answers.
@@ -406,7 +406,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** T11, [Spec 5](../spec.md#5-labelling-rules), [testing strategy 4 and 14](../testing-strategy.md#14-example-tests).
   - **Depends on:** S1-M3-T2, S1-M3-T5.
 
-- [ ] **S1-M3-T7: Unit table (Owner)**
+- [x] **S1-M3-T7: Unit table (Owner)**
   - **Build:** Owner only. The rows of `units.toml`. Columns: `id` (str), `number` (a decimal string), `unit` (the unit as written, or absent for none), `target` (a `Unit` value), `expected` (a number as a string that `fractions.Fraction` reads, for example `"14"` or `"7/30"`, or the reason code value `"business_days"` or `"unit_unknown"`). Cases to cover, proposed, owner to check: every spelling in the list of S1-M3-T12 to each target it converts to; a week, a month and a year to days and to months; business days and working days; an unknown word; days to percent (no conversion); no unit (question 16a). The AI agent does not write or change it (T11).
   - **Files:** `src/clause_tracer/core/tests/tables/units.toml`.
   - **Tests first:** None. The owner's values are the expected answers.
@@ -414,7 +414,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** T11, [Spec 5](../spec.md#5-labelling-rules) Rule 6.
   - **Depends on:** S1-M3-T2.
 
-- [ ] **S1-M3-T8: Spec 14.5 label table (Owner)**
+- [x] **S1-M3-T8: Spec 14.5 label table (Owner)**
   - **Build:** Owner only. One row per starter position in `spec_14_5.toml`. Columns: `id` (str), `position` (a Spec 7 position id), `level`, `reasons` (a list of `ReasonCode` values), `written_by` (`"code"` or `"ai"`). The AI agent does not write or change it (T11).
   - **Files:** `src/clause_tracer/core/tests/tables/spec_14_5.toml`.
   - **Tests first:** None. The owner's values are the expected answers.
@@ -422,7 +422,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** T11, [Spec 14.5](../spec.md#145-sample-data), [system design 15.1](../system-design.md#151-stage-1-core) "Done when".
   - **Depends on:** S1-M3-T5.
 
-- [ ] **S1-M3-T9: Playbook-check table (Owner)**
+- [x] **S1-M3-T9: Playbook-check table (Owner)**
   - **Build:** Owner only. The rows of `playbook_checks.toml`. Columns: `id` (str), `positions` (a list of position tables in the format of S1-M3-T3), `problems` (a list of inline tables `{ position = "<id>", code = "<PlaybookProblemCode value>" }`, empty when the playbook passes). Cases to cover, proposed, owner to check: a negative limit; a percentage over 100; equal limits and reversed limits, in both directions; yes level not better than no level; a yes/no level of unsure; a yes/no missing level that is not the no level; an empty words level text (`"   "`); two positions with one id; a playbook with no problem. The AI agent does not write or change it (T11).
   - **Files:** `src/clause_tracer/core/tests/tables/playbook_checks.toml`.
   - **Tests first:** None. The owner's values are the expected answers.
@@ -430,12 +430,12 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** T11, [Spec 4.1](../spec.md#41-playbooks).
   - **Depends on:** S1-M3-T2.
 
-- [ ] **S1-M3-T10: Level order, span overlap and reason order**
+- [x] **S1-M3-T10: Level order, span overlap and reason order**
   - **Build:** In `src/clause_tracer/core/levels.py`, export each:
     - `def level_rank(level: Level) -> int`: `PREFERRED` 0, `ACCEPTABLE` 1, `WALK_AWAY` 2. `UNSURE` raises `ValueError("unsure has no rank")`.
     - `def is_better(a: Level, b: Level) -> bool`: `level_rank(a) < level_rank(b)`.
     - `def worst_level(levels: Iterable[Level]) -> Level`: the level with the highest rank; an empty input raises `ValueError`.
-    - `def spans_overlap(a: Span, b: Span) -> bool`: `a.start < b.end and b.start < a.end`.
+    - `def spans_overlap(a: Span, b: Span) -> bool`: `max(a.start, b.start) < min(a.end, b.end)` (true only when the spans share at least one code point; an empty span overlaps nothing).
     - `def unreadable_spans(document: Document) -> UnreadableSpans`: `hidden` is every `HiddenText.span` that is not `None`, in order; `undecodable` is `document.undecodable`.
     - `def sort_reasons(reasons: Iterable[ReasonCode]) -> tuple[ReasonCode, ...]`: no repeats, in `ReasonCode` member order.
   - **Files:** `src/clause_tracer/core/levels.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_levels.py`, `src/clause_tracer/core/tests/strategies.py`, `src/clause_tracer/core/README.md` ("Functions").
@@ -444,7 +444,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rule 4, T1, T6.
   - **Depends on:** S1-M2-T7.
 
-- [ ] **S1-M3-T11: Playbook checks**
+- [x] **S1-M3-T11: Playbook checks**
   - **Build:** In `src/clause_tracer/core/playbook_checks.py`, export `def check_playbook(playbook: Playbook) -> tuple[PlaybookProblem, ...]`. Problems come in playbook order; within one position, in `PlaybookProblemCode` member order. For each position:
     - `DUPLICATE_POSITION_ID` when an earlier position has the same id.
     - `RULE_TYPE_MISMATCH` when the rule's class does not match the type (`NUMBER` with `NumberRule`, `YES_NO` with `YesNoRule`, `WORDS` with `WordsRule`). Then skip the other checks for that position.
@@ -457,7 +457,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** [Spec 4.1](../spec.md#41-playbooks), [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) 14 Nov amendment, T1, T11, I4.
   - **Depends on:** S1-M3-T9, S1-M3-T10.
 
-- [ ] **S1-M3-T12: Unit conversion (Rule 6)**
+- [x] **S1-M3-T12: Unit conversion (Rule 6)**
   - **Build:** In `src/clause_tracer/core/units.py`, export `def convert_to_unit(number: Decimal, unit_as_written: str | None, target: Unit) -> Fraction | ReasonCode`.
     - `None` means the number is already in the target unit: return `Fraction(number)` (question 16a).
     - Otherwise normalise the spelling: lower case, strip spaces at both ends, collapse runs of spaces to one, drop one trailing `.`. Then look it up:
@@ -472,7 +472,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rule 6, T1, T6, T11.
   - **Depends on:** S1-M3-T7.
 
-- [ ] **S1-M3-T13: Number values (Rules 1, 3, 5, 6 and 9)**
+- [x] **S1-M3-T13: Number values (Rules 1, 3, 5, 6 and 9)**
   - **Build:** In `src/clause_tracer/core/labels.py`, export:
     - `def evidence_reasons(evidence: Evidence | None, unreadable: UnreadableSpans) -> tuple[ReasonCode, ...]`: `QUOTE_NOT_CONFIRMED` when `evidence` is `None` (question 16b); otherwise `HIDDEN_TEXT` when `evidence.quote` overlaps any hidden span, and `UNDECODABLE_TEXT` when it overlaps any undecodable span. Sorted with `sort_reasons`. `evidence.placed` never matters (Rule 3: an unplaced quote keeps its label).
     - `def level_for_limits(rule: NumberRule, number: Fraction) -> Level`: for `LOWER_IS_BETTER`, `PREFERRED` when `number <= preferred_limit`, else `ACCEPTABLE` when `number <= acceptable_limit`, else `WALK_AWAY`; for `HIGHER_IS_BETTER` the same with `>=`.
@@ -480,8 +480,8 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
       1. `reasons` = `value.reasons` plus `evidence_reasons(value.evidence, unreadable)`. Add `VAGUE_WORDING` when `value.vague`.
       2. Numbers: take the first case that fits.
          - `value.unlimited`: when `rule.direction` is `HIGHER_IS_BETTER`, add `UNLIMITED_UNCLEAR` (Rule 1, decided 14 Nov 2026). The value has no numbers.
-         - `rule.unit` is `PERCENT` and `value.amount` is not `None`: when `value.total` is `None` or not above 0, add `AMOUNT_WITHOUT_TOTAL`, and the value has no numbers. Otherwise the computed percentage is `Fraction(amount) / Fraction(total) * 100`. When `value.number` is `None`, the computed percentage is the one number. When `value.number` is given, convert it with `convert_to_unit(value.number, value.unit_as_written, rule.unit)`. A `ReasonCode` result is added to `reasons`, and the computed percentage is the one number. Otherwise, when the converted value and the computed percentage, each rounded half up to a whole number (`math.floor(x + Fraction(1, 2))`), differ, add `AMOUNT_PERCENT_DISAGREE`, and the numbers are the computed percentage then the converted value. When they match, the computed percentage is the one number (question 16e).
-         - `value.number` is not `None`: convert it with `convert_to_unit(value.number, value.unit_as_written, rule.unit)`; a `ReasonCode` result is added to `reasons` and the value has no numbers, otherwise it is the first number. If `value.range_high` is not `None`, convert it the same way, add it as a second number when it converted, and add `RANGE`.
+         - `rule.unit` is `PERCENT` and `value.amount` is not `None`: when `value.total` is `None` or not above 0, add `AMOUNT_WITHOUT_TOTAL`, and the value has no numbers. Otherwise the computed percentage is `Fraction(amount) / Fraction(total) * 100`. When `value.number` is `None`, the computed percentage is the one number. When `value.number` is given, convert it with `convert_to_unit(value.number, value.unit_as_written, rule.unit)`. A `ReasonCode` result is added to `reasons`, and the computed percentage is the one number. Otherwise, when the converted value and the computed percentage, each rounded half up to a whole number (`math.floor(x + Fraction(1, 2))`), differ, add `AMOUNT_PERCENT_DISAGREE`, and the numbers are the computed percentage then the converted value. When they match, the computed percentage is the one number (question 16e). Then, if `value.range_high` is not `None`, add `RANGE`, even when the value has no numbers (decided 16 Nov 2026). When `value.number` converted, also convert `value.range_high` the same way and add it as the last number when it converted; it is not compared with the computed percentage. A failed conversion of `value.range_high` adds no reason.
+         - `value.number` is not `None`: convert it with `convert_to_unit(value.number, value.unit_as_written, rule.unit)`; a `ReasonCode` result is added to `reasons` and the value has no numbers, otherwise it is the first number. If `value.range_high` is not `None`, add `RANGE`, even when the first number did not convert (decided 16 Nov 2026: the clause gave a range, so the reason says so). When the first number converted, also convert `value.range_high` the same way and add it as a second number when it converted. A failed conversion of `value.range_high` adds no reason.
          - Otherwise: add `NO_VALUE` when `reasons` holds nothing from `UNSURE_REASONS` yet (question 16c).
       3. If `reasons` holds anything from `UNSURE_REASONS`: return one verdict with `level=UNSURE`, `readable_value=None`.
       4. If `value.unlimited` (so `rule.direction` is `LOWER_IS_BETTER`, because step 3 caught the other direction): return one verdict with `level=WALK_AWAY`, `readable_value="unlimited"` (Rule 1: unlimited is the worst value when lower is better).
@@ -496,6 +496,8 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
     - `test_missing_quote_is_unsure`: `evidence=None` gives `UNSURE` with `QUOTE_NOT_CONFIRMED`.
     - `test_reason_on_value_makes_it_unsure`: `reasons=(OTHER_START_POINT,)` gives `UNSURE` (Rule 5, decided 14 Nov 2026).
     - `test_range_gives_two_verdicts`: `number=6, range_high=9` gives two verdicts, both with `RANGE`.
+    - `test_range_with_unknown_unit_keeps_range`: `number=10, range_high=15, unit_as_written="business days"` gives one verdict, `UNSURE`, `readable_value is None`, reasons `(BUSINESS_DAYS, RANGE)`.
+    - `test_amount_with_range_adds_range`: with `DEPOSIT_PERCENT`, `amount=300, total=1000, number=30, range_high=60, unit_as_written="%"` gives two verdicts, `ACCEPTABLE` with `readable_value == "30"` then `PREFERRED` with `readable_value == "60"`, both with reasons `(RANGE,)`.
     - `test_unlimited_is_walk_away_when_lower_is_better`: with `PAYMENT_DAYS`, `unlimited=True` gives one verdict, `WALK_AWAY`, `readable_value == "unlimited"`, `reasons == ()`.
     - `test_unlimited_is_unsure_when_higher_is_better`: with `DEPOSIT_PERCENT`, `unlimited=True` gives one verdict, `UNSURE`, `readable_value is None`, `reasons == (UNLIMITED_UNCLEAR,)`.
     - `test_business_days_are_unsure`: `unit_as_written="business days"` gives `UNSURE` with `BUSINESS_DAYS`.
@@ -503,7 +505,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** [Spec 5](../spec.md#5-labelling-rules) (the "never guess" principle, Rules 1, 3, 5, 6, 9); I3, I4, T1, T13.
   - **Depends on:** S1-M3-T10, S1-M3-T12.
 
-- [ ] **S1-M3-T14: Yes/no and words values (Rules 2 and 9)**
+- [x] **S1-M3-T14: Yes/no and words values (Rules 2 and 9)**
   - **Build:** In `src/clause_tracer/core/labels.py`, export:
     - `def yes_no_verdict(rule: YesNoRule, value: CheckedValue, unreadable: UnreadableSpans) -> ValueVerdict`: `reasons` = `value.reasons` plus `evidence_reasons(...)`. When `value.answer` is `None`, add `NO_VALUE` if `reasons` holds nothing from `UNSURE_REASONS`. When it is `CONDITIONAL_YES`, add `CONDITIONAL_YES`. If `reasons` holds anything from `UNSURE_REASONS`: `level=UNSURE`, `readable_value=None`. Else `YES` gives `rule.yes_level`, and `NO`, `UNCLEAR` and `MISSING` give `rule.no_level`; `readable_value=value.answer.value`.
     - `def words_verdict(judged: JudgedLevel, unreadable: UnreadableSpans) -> ValueVerdict`: `reasons = evidence_reasons(judged.evidence, unreadable)`; add `JUDGED_UNSURE` when `judged.level` is `UNSURE` (question 16d). If `reasons` holds anything from `UNSURE_REASONS`: `level=UNSURE`, `readable_value=None`. Else `level=judged.level`, `readable_value=judged.level.value`.
@@ -514,7 +516,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rules 2 and 9, T1.
   - **Depends on:** S1-M3-T13.
 
-- [ ] **S1-M3-T15: Combining values (Rule 4)**
+- [x] **S1-M3-T15: Combining values (Rule 4)**
   - **Build:** In `src/clause_tracer/core/labels.py`, export `def combine_rule_4(verdicts: tuple[ValueVerdict, ...]) -> tuple[Level, tuple[ReasonCode, ...]]`:
     - An empty tuple raises `ValueError("no values to combine")`.
     - Level: `WALK_AWAY` if any verdict is `WALK_AWAY` (a verdict that is not `UNSURE` is readable); else `UNSURE` if any verdict is `UNSURE`; else `worst_level` of all.
@@ -526,7 +528,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rule 4, T1, T6, T13, I4.
   - **Depends on:** S1-M3-T14.
 
-- [ ] **S1-M3-T16: One label per position (Rules 7 and 10)**
+- [x] **S1-M3-T16: One label per position (Rules 7 and 10)**
   - **Build:** In `src/clause_tracer/core/labels.py`, export `def label_position(item: LabelInput, unreadable: UnreadableSpans) -> ToolLabel`:
     1. Raise `ValueError` when: the match is not a `CallFailed` and its `position_id` differs from `item.position.id`; any value or judged level has another `position_id`; the rule's class does not match the position type; a `WORDS` position has `values`; a `NUMBER` or `YES_NO` position has `judged`.
     2. `CallFailed`: `level=UNSURE`, `reasons=(REPLY_BROKEN_TWICE,)`, `evidence=()`, `written_by=CODE`.
@@ -545,7 +547,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
   - **Rules:** [Spec 5](../spec.md#5-labelling-rules) Rules 3, 4, 7 and 10, [ADR 0012](../adr/0012-missing-unsure-and-evidence-failures.md) and its 14 Nov amendment, [ADR 0002](../adr/0002-label-look-split-stamp.md), I4, [system design 8.2](../system-design.md#82-calls-to-the-ai-service), T11.
   - **Depends on:** S1-M3-T6, S1-M3-T14, S1-M3-T15.
 
-- [ ] **S1-M3-T17: Every position of a playbook, and the Spec 14.5 sample**
+- [x] **S1-M3-T17: Every position of a playbook, and the Spec 14.5 sample**
   - **Build:** In `src/clause_tracer/core/labels.py`, export `def label_all(playbook: Playbook, inputs: tuple[LabelInput, ...], unreadable: UnreadableSpans) -> tuple[ToolLabel, ...]`. It raises `ValueError` when a position has no input, when two inputs name one position, or when an input names a position not in the playbook. It returns `label_position` of each position's input, in playbook order.
   - **Files:** `src/clause_tracer/core/labels.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_spec_14_5.py`, `src/clause_tracer/core/tests/test_labels.py`, `src/clause_tracer/core/README.md` ("Functions").
   - **Tests first:** in `test_spec_14_5.py`: `test_spec_14_5_sample`, one case per row of `spec_14_5.toml` (case keys `id, position, level, reasons, written_by`, all required): the label of that position from `label_all` on the sample file matches `level`, `frozenset(reasons)` and `written_by`; `test_spec_14_5_table_covers_every_position` (the table's positions are exactly the 11 sample ids). In `test_labels.py`: the property `test_no_position_is_dropped` (Spec 5 Rule 3: for a list of 1 to 6 `positions()` with unique ids, each given a `NothingFound` input, `label_all` returns one label per position, with the ids in playbook order); `test_missing_input_raises`; `test_duplicate_input_raises`.
@@ -913,6 +915,7 @@ Planning found questions 1 to 17. The owner answered all of them on 14 Nov 2026;
 | 16 Nov 2026 | S1-M2-T6 hand check: `make_request(inputs={"a": 1})` does **not** fail mypy, as the plan expected. The plan's own signature `make_request(**changes: object)` routes every value through untyped keyword arguments, so the call site is not checked. The type seam itself holds: constructing `AiRequest(...)` directly with `inputs={"a": 1}` does fail mypy (`arg-type`). Strict mypy does flag the `dataclasses.replace(request, **changes)` inside the helper (`arg-type`, six errors), so that line carries one `# type: ignore[arg-type]` with a comment. No code change beyond that; the scratch file was not committed. | S1-M2-T6, plans README ("When the plan is wrong") |
 | 16 Nov 2026 | The coverage omit is gone: S1-M2-T8 changed the coverage report line in `scripts/check.sh` back to `run coverage report --include='src/clause_tracer/core/*' --fail-under=95`, as S1-M1-T9 promised once milestone 2's shapes existed. The 95% floor now covers the test files of `core` again, as the plan first had it; `core` measures 99% with them included. | S1-M2-T8 |
 | 16 Nov 2026 | Added the fold-sharing note to section 9 before the stage closes, so it cannot be lost. The milestone 2 review (standards axis) flagged that `MatchKey` and `QuoteFold` share a silhouette; both are mandated by system design 3.4, and the decision on one shared fold implementation belongs to stage 2's plan. The note decides nothing; it hands the question to stage 2. | Plans README ("Notes for the next stage", "When the plan is wrong": add a note) |
+| 16 Nov 2026 | S1-M3-T10. The `spans_overlap` formula returned true for an empty span inside another span (`3..3` and `0..9`), against the planned test. The owner chose the test's meaning: spans overlap only when they share a code point. Formula changed to `max(a.start, b.start) < min(a.end, b.end)`. | Plans README ("When the plan is wrong"), owner decision of 16 Nov 2026 |
 
 ## 9. Notes for the next stage
 

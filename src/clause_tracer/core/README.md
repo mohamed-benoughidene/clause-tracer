@@ -143,6 +143,27 @@ arguments, with exactly the fields of system design 3.4 in that order (ADR 0005)
 | `PlaybookProblem` | `position_id: PositionId \| None, code: PlaybookProblemCode` | One failed playbook check (Spec 4.1); `position_id` is `None` for a whole-playbook problem |
 | `CancelCheck` | a type alias: `Callable[[], bool]` | Returns True once the user has cancelled (ADR 0005) |
 
+## Functions
+
+| Function | Returns | Notes |
+| --- | --- | --- |
+| `level_rank(level: Level) -> int` | `PREFERRED` 0, `ACCEPTABLE` 1, `WALK_AWAY` 2 | `UNSURE` raises `ValueError("unsure has no rank")` |
+| `is_better(a: Level, b: Level) -> bool` | `level_rank(a) < level_rank(b)` | Strictly better; unsure has no rank |
+| `worst_level(levels: Iterable[Level]) -> Level` | the level with the highest rank | An empty input raises `ValueError` |
+| `spans_overlap(a: Span, b: Span) -> bool` | `a.start < b.end and b.start < a.end` | Half-open spans (section 4.2) |
+| `unreadable_spans(document: Document) -> UnreadableSpans` | every `HiddenText.span` that is not `None`, in order, as `hidden`; `document.undecodable` as `undecodable` | The Rule 9 input |
+| `sort_reasons(reasons: Iterable[ReasonCode]) -> tuple[ReasonCode, ...]` | the reasons without repeats, in `ReasonCode` member order | Rules return codes in a fixed order (I7) |
+| `check_playbook(playbook: Playbook) -> tuple[PlaybookProblem, ...]` | the playbook's problems, empty when it passes (Spec 4.1) | In playbook order; within one position, in `PlaybookProblemCode` member order. A `RULE_TYPE_MISMATCH` skips the position's other checks. Stages 6 and 12 share it (ADR 0005, 14 Nov 2026) |
+| `convert_to_unit(number: Decimal, unit_as_written: str \| None, target: Unit) -> Fraction \| ReasonCode` | the number in the target unit, or `BUSINESS_DAYS` / `UNIT_UNKNOWN` (Rule 6) | `None` means already in the target unit (16a). Spelling normalised: lower case, stripped, space runs collapsed, one trailing `.` dropped. Week 7 days, month 30, year 365 or 12 months |
+| `evidence_reasons(evidence: Evidence \| None, unreadable: UnreadableSpans) -> tuple[ReasonCode, ...]` | `QUOTE_NOT_CONFIRMED` when evidence is `None`; else `HIDDEN_TEXT` / `UNDECODABLE_TEXT` when the quote overlaps such a span | An unplaced quote keeps its label (Rule 3, ADR 0012) |
+| `level_for_limits(rule: NumberRule, number: Fraction) -> Level` | preferred, acceptable or walk-away by the rule's limits (Rule 1) | Lower-is-better uses `<=`; higher-is-better `>=` |
+| `number_verdicts(rule: NumberRule, value: CheckedValue, unreadable: UnreadableSpans) -> tuple[ValueVerdict, ...]` | the verdicts of one number value, before Rule 4 combines them | Unlimited: walk-away when lower is better, unsure with `UNLIMITED_UNCLEAR` when higher is better. Amount without total → `AMOUNT_WITHOUT_TOTAL`; amount and percent compared rounded half up to a whole percent. A range gives one verdict per end with `RANGE`; `RANGE` is added whenever `range_high` is given, even when the value is unsure, and the range end is the last number, not compared with the computed percentage. Any reason from `UNSURE_REASONS` → one unsure verdict |
+| `yes_no_verdict(rule: YesNoRule, value: CheckedValue, unreadable: UnreadableSpans) -> ValueVerdict` | `YES` takes the rule's yes level; `NO`, `UNCLEAR` and `MISSING` take the no level (Rule 2) | A conditional yes is unsure with `CONDITIONAL_YES`; no answer → `NO_VALUE`; any unsure reason → unsure |
+| `words_verdict(judged: JudgedLevel, unreadable: UnreadableSpans) -> ValueVerdict` | the judged level, kept as it is | An unsure judgement is unsure with `JUDGED_UNSURE`; hidden or undecodable text under it → unsure (Rule 9) |
+| `combine_rule_4(verdicts: tuple[ValueVerdict, ...]) -> tuple[Level, tuple[ReasonCode, ...]]` | the Rule 4 level and the sorted reasons of every value | Walk-away if any readable value is walk-away, else unsure if any value is unsure, else the worst level. Readable values that differ between clauses add `CLAUSES_DISAGREE`. An empty tuple raises `ValueError` |
+| `label_position(item: LabelInput, unreadable: UnreadableSpans) -> ToolLabel` | the label of one position (Rules 3, 4, 7 and 10) | Raises `ValueError` when any part names another position, the rule class does not match the type, or a words position holds values (or a number/yes-no one holds judged levels). A failed call, an unconfirmed match or a found match with no value is unsure. Missing takes the rule's no level for yes/no, else the position's missing level. An outside document makes the label unsure, except a walk-away Rule 4 step 1 gave. `written_by` is AI only for a words position the AI judged to a readable level (ADR 0002) |
+| `label_all(playbook: Playbook, inputs: tuple[LabelInput, ...], unreadable: UnreadableSpans) -> tuple[ToolLabel, ...]` | one label per playbook position, in playbook order | Raises `ValueError` when a position has no input, two inputs name one position, or an input names a position not in the playbook |
+
 ## Depends on
 Nothing. It imports no other clause_tracer module.
 
