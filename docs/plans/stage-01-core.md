@@ -262,7 +262,7 @@ Every shape in system design 3.4 exists as a frozen, slotted, keyword-only datac
 
 Every task in M2 extends one shared test, `test_fields_match_system_design` in `src/clause_tracer/core/tests/test_shapes.py`. It holds a dict `EXPECTED_FIELDS: dict[type, tuple[str, ...]]` that maps each shape to its field names, copied in order from system design 3.4, and asserts `tuple(f.name for f in dataclasses.fields(shape)) == EXPECTED_FIELDS[shape]` for each entry (one `pytest.mark.parametrize` case per shape). Each task adds its shapes to the dict. Each task also adds its shapes to the README under "Shapes".
 
-- [ ] **S1-M2-T1: Wording and page-location shapes**
+- [x] **S1-M2-T1: Wording and page-location shapes**
   - **Build:** In `src/clause_tracer/core/wording.py`: `Wording` and `Span`. In `src/clause_tracer/core/document.py`: `PageBox`, `Page` and `Glyph`. Each exactly as in system design 3.4, no more fields. In `src/clause_tracer/core/ports.py`: `CancelCheck = Callable[[], bool]` (a type alias, with a one-line docstring comment above it: `# Returns True once the user has cancelled.`). Export all six names.
   - **Files:** `src/clause_tracer/core/wording.py`, `src/clause_tracer/core/document.py`, `src/clause_tracer/core/ports.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_shapes.py`, `src/clause_tracer/core/README.md`.
   - **Tests first:** in `test_shapes.py`: `test_fields_match_system_design` (the five shapes); `test_wording_needs_written_by` (**promise test**, "every stored text keeps a written-by value", Spec 4.7 and 6.2): `Wording(text="x")` raises `TypeError`, and `dataclasses.fields(Wording)` shows `written_by` with no default; `test_shapes_need_keywords`: `Span(1, 2)` raises `TypeError`.

@@ -3,6 +3,11 @@
 Implements Spec section 5 (labelling rules); T1 of the Constitution.
 """
 
+from clause_tracer.core.document import (
+    Glyph,
+    Page,
+    PageBox,
+)
 from clause_tracer.core.enums import (
     PLACEHOLDER_CLOSE,
     PLACEHOLDER_OPEN,
@@ -61,9 +66,12 @@ from clause_tracer.core.ids import (
     ReviewId,
     SentenceId,
 )
+from clause_tracer.core.ports import CancelCheck
+from clause_tracer.core.wording import Span, Wording
 
 __all__: list[str] = [
     "Answer",
+    "CancelCheck",
     "ClauseId",
     "ClauseTracerError",
     "ConfigError",
@@ -73,6 +81,7 @@ __all__: list[str] = [
     "DuplicateRecordError",
     "EncryptedPdfError",
     "FileKind",
+    "Glyph",
     "HiddenReason",
     "InputError",
     "InputTooLargeError",
@@ -87,6 +96,8 @@ __all__: list[str] = [
     "NoPrivateModelError",
     "NotUtf8Error",
     "OldWordFileError",
+    "Page",
+    "PageBox",
     "PLACEHOLDER_CLOSE",
     "PLACEHOLDER_OPEN",
     "PiiSource",
@@ -109,10 +120,12 @@ __all__: list[str] = [
     "SecretStoreUnavailableError",
     "SegmentKind",
     "SentenceId",
+    "Span",
     "StorageCorruptError",
     "TextSlot",
     "UNSURE_REASONS",
     "Unit",
     "UnreadableFileError",
+    "Wording",
     "WrittenBy",
 ]

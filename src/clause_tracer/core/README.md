@@ -78,11 +78,18 @@ in `.context`; the message is the code; context holds ids, step names and counts
 `.retry_after_seconds` and, when given, in `context["retry_after_seconds"]`; a negative value
 raises `ValueError`.
 
-## Input shape (planned)
-Plain typed values: the playbook snapshot, positions and extracted values.
+## Shapes
+Every shape is `@dataclass(frozen=True, slots=True, kw_only=True)`, built with keyword
+arguments, with exactly the fields of system design 3.4 in that order (ADR 0005).
 
-## Output shape (planned)
-Frozen dataclasses, and a label for each position.
+| Shape | Fields | Why |
+| --- | --- | --- |
+| `Wording` | `text: str, written_by: WrittenBy` | Every stored label reason, Missing text, question, message, rewrite and note (ADR 0016) |
+| `Span` | `start: int, end: int` | A place in the canonical text; half-open, counts code points (section 4.2) |
+| `PageBox` | `page: int, x0: float, top: float, x1: float, bottom: float` | PDF points, top-left origin, one coordinate system (ADR 0007) |
+| `Page` | `number: int, width: float, height: float` | Pages are numbered from 1 |
+| `Glyph` | `page: int, box: PageBox` | One drawn character; `page` is a `Page.number` and equals `box.page` |
+| `CancelCheck` | a type alias: `Callable[[], bool]` | Returns True once the user has cancelled (ADR 0005) |
 
 ## Depends on
 Nothing. It imports no other clause_tracer module.
