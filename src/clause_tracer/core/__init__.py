@@ -92,6 +92,7 @@ from clause_tracer.core.errors import (
 from clause_tracer.core.fakes import (
     FakePiiDetector,
     FixedClock,
+    InMemoryReviewStore,
     InMemorySecretStore,
     ReplayAiClient,
     UnrecordedRequest,
@@ -212,6 +213,7 @@ __all__: list[str] = [
     "InputError",
     "InputTooLargeError",
     "InputWarning",
+    "InMemoryReviewStore",
     "InMemorySecretStore",
     "InvalidApiKeyError",
     "JudgedLevel",

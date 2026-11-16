@@ -8,8 +8,14 @@ pass the same contract suite in tests/contracts/ (ADR 0013, T12).
 from collections.abc import Mapping
 from datetime import datetime, timedelta
 
-from clause_tracer.core.ai import AiReply, AiRequest
-from clause_tracer.core.errors import ModelServiceError, SecretStoreUnavailableError
+from clause_tracer.core.ai import AiRecord, AiReply, AiRequest
+from clause_tracer.core.auto_delete import is_due
+from clause_tracer.core.errors import (
+    DuplicateRecordError,
+    ModelServiceError,
+    SecretStoreUnavailableError,
+)
+from clause_tracer.core.ids import RecordId, ReviewId
 from clause_tracer.core.placeholders import PiiSuggestion
 from clause_tracer.core.request_hash import request_sha256
 
@@ -107,6 +113,55 @@ class InMemorySecretStore:
     def _raise_when_unavailable(self, provider_id: str) -> None:
         if not self._available:
             raise SecretStoreUnavailableError({"provider_id": provider_id})
+
+
+class InMemoryReviewStore:
+    """A ReviewStore fake that keeps raw AI records in memory (stage 1 stand-in)."""
+
+    def __init__(self) -> None:
+        self._records: dict[ReviewId, list[AiRecord]] = {}
+        self._record_ids: set[RecordId] = set()
+
+    def save_record(self, record: AiRecord) -> None:
+        """Append one AI record; the record id is taken across every review (D1)."""
+
+        if record.record_id in self._record_ids:
+            raise DuplicateRecordError({"record_id": record.record_id})
+        self._record_ids.add(record.record_id)
+        self._records.setdefault(record.review_id, []).append(record)
+
+    def load_records(self, review_id: ReviewId) -> tuple[AiRecord, ...]:
+        """Return the review's records in the order saved, or ()."""
+
+        return tuple(self._records.get(review_id, ()))
+
+    def list_reviews(self) -> tuple[ReviewId, ...]:
+        """Return the sorted ids of reviews that hold at least one record."""
+
+        return tuple(sorted(review for review, records in self._records.items() if records))
+
+    def delete_review(self, review_id: ReviewId) -> None:
+        """Remove the review and its records; a missing review does nothing (I8)."""
+
+        for record in self._records.pop(review_id, []):
+            self._record_ids.discard(record.record_id)
+
+    def purge_expired(self, now: datetime, auto_delete_days: int) -> tuple[ReviewId, ...]:
+        """Delete every review due under the auto-delete rules; return their ids, sorted.
+
+        A review's last change is the latest finished_at of its records, the
+        stage 1 stand-in (system design 3.4); stage 6 adds user state.
+        """
+
+        due = [
+            review
+            for review, records in self._records.items()
+            if records
+            and is_due(max(record.finished_at for record in records), auto_delete_days, now)
+        ]
+        for review in due:
+            self.delete_review(review)
+        return tuple(sorted(due))
 
 
 class FixedClock:

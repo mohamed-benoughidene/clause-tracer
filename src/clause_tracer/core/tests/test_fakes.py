@@ -4,7 +4,15 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from clause_tracer.core import Clock, FixedClock, InMemorySecretStore, PiiDetector, SecretStore
+from clause_tracer.core import (
+    Clock,
+    FixedClock,
+    InMemoryReviewStore,
+    InMemorySecretStore,
+    PiiDetector,
+    ReviewStore,
+    SecretStore,
+)
 from clause_tracer.core.enums import PiiSource, PlaceholderKind
 from clause_tracer.core.fakes import FakePiiDetector
 from clause_tracer.core.placeholders import PiiSuggestion
@@ -61,6 +69,8 @@ def test_fakes_satisfy_their_ports() -> None:
     detector: PiiDetector = FakePiiDetector({})
     secrets: SecretStore = InMemorySecretStore()
     clock: Clock = FixedClock(NOW)
+    review_store: ReviewStore = InMemoryReviewStore()
     assert detector is not None
     assert secrets is not None
     assert clock is not None
+    assert review_store is not None
