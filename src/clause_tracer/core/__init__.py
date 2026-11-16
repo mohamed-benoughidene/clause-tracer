@@ -41,6 +41,7 @@ from clause_tracer.core.document import (
     SourceFile,
     TrackedChange,
 )
+from clause_tracer.core.draw_check import check_before_drawing
 from clause_tracer.core.enums import (
     PLACEHOLDER_CLOSE,
     PLACEHOLDER_OPEN,
@@ -210,6 +211,7 @@ __all__: list[str] = [
     "CallFailed",
     "CallPrices",
     "CancelCheck",
+    "check_before_drawing",
     "CheckedValue",
     "Clause",
     "ClauseId",
