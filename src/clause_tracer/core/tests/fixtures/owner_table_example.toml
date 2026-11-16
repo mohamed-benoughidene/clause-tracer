@@ -1,0 +1,12 @@
+# Expected answers. Only the owner edits this file. Constitution T11.
+# Format: test fixture for the loader, not an owner table.
+
+[[case]]
+id = "a"
+level = "walk_away"
+limit = "15"
+
+[[case]]
+id = "b"
+level = "walk_away"
+limit = "15"

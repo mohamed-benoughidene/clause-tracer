@@ -341,7 +341,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
 
 **Sample format.** The Spec 14.5 sample file (S1-M3-T5) and the label-rule table use one format for positions and inputs, read by `clause_tracer.core.sample_input` (S1-M3-T3 and T4).
 
-- [ ] **S1-M3-T1: The owner-table loader**
+- [x] **S1-M3-T1: The owner-table loader**
   - **Build:** In `src/clause_tracer/core/tests/owner_tables.py`:
     - `HEADER = "# Expected answers. Only the owner edits this file. Constitution T11."` and `TABLES_DIR = Path(__file__).parent / "tables"`.
     - `class OwnerTableError(ValueError)`.
