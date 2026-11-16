@@ -853,6 +853,35 @@ The output scans give the owner's findings for every case in the scan table, the
   - **Rules:** [Plans README](README.md) ("When the stage is done").
   - **Depends on:** S1-M6-T2.
 
+- [x] **S1-M6-T4: A sample file that is not UTF-8 exits 3**
+  - **Build:** In `__main__.py`, the `except` around `tomllib.load` catches `ValueError` instead of only `tomllib.TOMLDecodeError`: bytes that are not UTF-8 raise `UnicodeDecodeError`, a `ValueError`, which escaped as a traceback. Found during the stage 1 close.
+  - **Files:** `src/clause_tracer/core/__main__.py`, `src/clause_tracer/core/tests/test_smoke.py`.
+  - **Tests first:** `test_non_utf8_input_returns_3` (a file in `tmp_path` holding the byte `0xff`; standard error starts `clause_tracer.core: `).
+  - **Done when:** the test passes and `scripts/check.sh` exits 0.
+  - **Rules:** S1-M6-T1, [system design 6.2](../system-design.md#62-the-command-line).
+  - **Depends on:** S1-M6-T1.
+
+- [ ] **S1-M6-T5: Scan rows for list markers and "no." (Owner)**
+  - **Build:** Owner only. Append rows to `scans.toml` in the format of S1-M5-T1. Cases, proposed, owner to check: a reason citing "5.4(i)" passes; one citing "5.4(I)" passes; a reason with "I" beside "5.4(i)" still fails `first_person`; a rewrite adding "No. 5" adds no sentence; a rewrite adding "Refunds: no." as its own sentence fails `added_sentence`. The AI agent does not write or change it (T11).
+  - **Files:** `src/clause_tracer/core/tests/tables/scans.toml`.
+  - **Tests first:** None. The owner's values are the expected answers.
+
+- [ ] **S1-M6-T6: List markers are not "I", and "no." needs a number**
+  - **Build:** In `scans.py`: (a) `LIST_MARKER_PATTERN = re.compile(r"\([ivxlcdm]+\)", re.IGNORECASE)`, a bracketed Roman-numeral list marker such as "(i)", "(iv)" or "(I)". Before the first-person scan, `scan_style` blanks every list marker to spaces of the same length, in the text and in its source, after masking abbreviations. The pronoun "I" still matches in any letter case. (b) `NUMBER_ABBREVIATIONS: tuple[str, ...] = ("no.",)`: a listed abbreviation in this tuple is masked only when a digit follows, after optional whitespace (`(?=\s*\d)`), so "No. 5" does not end a sentence and "no." before a space and a word does. Both constants stay on `scans.py` (the precedent of milestone 5). Update the `core` README rows of `mask_abbreviations` and `scan_style`.
+  - **Files:** `src/clause_tracer/core/scans.py`, `src/clause_tracer/core/tests/test_scans.py`, `src/clause_tracer/core/README.md`.
+  - **Tests first:** in `test_scans.py`: `test_list_marker_is_not_first_person` ("(i)", "(iv)" and "(I)" in a reason pass); `test_first_person_beside_a_list_marker_fails`; `test_no_before_a_number_is_masked` (`count_sentences("See No. 5 now.") == 1`); `test_no_without_a_number_ends_a_sentence` (`count_sentences("The answer is no. They pay.") == 2`); `test_number_abbreviations_are_listed` (each is in `ABBREVIATIONS`).
+  - **Done when:** the tests and every row of S1-M6-T5 pass, and `scripts/check.sh` exits 0.
+  - **Rules:** [Spec 6.2](../spec.md#62-rules-for-every-ai-step) (first person, added sentences), Spec 5 (never guess: a missed sentence end fails open).
+  - **Depends on:** S1-M5-T5, S1-M6-T5.
+
+- [ ] **S1-M6-T7: Cost figures and the law-word note**
+  - **Build:** Docs only. Replace the 50,000-word and 10,000-word cost figures in [system design 1.2](../system-design.md#12-qualities-it-must-have) with the formula's figures from the owner's `cost_estimate.toml`, and add a dated amendment to [ADR 0010](../adr/0010-starting-models.md) giving the same figures. Add a "Check in this stage" bullet to system design 15.10: the law word "legal" also matches "legal fees", which sends a sound reason to the template; count how often in the paid runs and decide then.
+  - **Files:** `docs/system-design.md`, `docs/adr/0010-starting-models.md`.
+  - **Tests first:** None.
+  - **Done when:** both docs give the formula's figures, and `scripts/check.sh` exits 0.
+  - **Rules:** [WRITING_DOCS](../../WRITING_DOCS.md) sections 2 and 9.
+  - **Depends on:** S1-M5-T9.
+
 ## 6. Open questions
 
 Planning found questions 1 to 17. The owner answered all of them on 14 Nov 2026; each answer is recorded in its home. Questions 16 and 17 are the label and scan edge cases. They were answered under one principle, stated once in [Spec 5](../spec.md#5-labelling-rules): when code cannot be sure, the label is unsure, the reason is named, and the user is shown the clause. It never guesses in either direction. The same day the owner added the rate-limit case, which is in the error-tree task S1-M1-T8 and in [Spec 6.2 and 6.3](../spec.md#62-rules-for-every-ai-step). Later that day the owner decided who writes a label's panel words and added five style scans ([Spec 6.1 step 10 and 6.2](../spec.md#62-rules-for-every-ai-step)). Planning those scans found question 18, which the owner answered the same day, as recommended; tasks S1-M5-T1 and S1-M5-T5 follow that answer.
@@ -921,7 +950,8 @@ Planning found questions 1 to 17. The owner answered all of them on 14 Nov 2026;
 | 16 Nov 2026 | S1-M5-T4's property `test_map_shape` was wrong as the plan stated it: `len(to_original) == len(text) + 1` fails for a text of two spaces, where the fold gives one folded character. Hypothesis found it during S1-M5-T5's check run. The shape doc (system design 3.4: "one entry per folded character plus a last entry") and the task's own whitespace example (`to_original == (0, 1, 5, 6)`) both say the right property, so the test now asserts `len(to_original) == len(fold.text) + 1`, pinned with `@example(text="  ")`. The fold code itself was correct and unchanged. The owner approved the change afterwards, on 16 Nov 2026, and the task now states the same property. | Plans README ("When the plan is wrong"), testing strategy 5 (every bug found becomes a committed `@example`) |
 | 16 Nov 2026 | S1-M5-T13: the strategy's uniqueness assumption counts overlapping places, the same count the last check uses, so a quote like "aa" in "aaa" is filtered out instead of failing the property falsely. The plan's wording ("occurs exactly once") is read as occurrence places. | Plans README ("When the plan is wrong") |
 | 16 Nov 2026 | Milestone 5 review (both axes) done. One reading recorded for the owner: the compiled scan patterns, `MIN_ANCHOR_LETTERS`, `SENTENCE_END_PATTERN` and the two token constants are public on their own modules but not re-exported from `clause_tracer.core`, although the tasks say "export". This follows the accepted precedent of S1-M4-T6, where `WARNING_WINDOW` and `LOWERING_GRACE` stayed on `auto_delete.py`; the facade holds what callers import, and no test imports these. If the owner wants them in the facade, the fix is small. The review's other findings (a double placeholder scan, a page lookup inside the loop, two test-helper smells, an `__all__` ordering slip) were fixed in two refactor commits. | Plans README ("When the plan is wrong"), AGENTS.md (review findings go to the owner) |
-| 16 Nov 2026 | Milestone 6 ticked (tasks S1-M6-T1 to S1-M6-T3) and every box of section 7 checked: `scripts/check.sh` exits 0 (1063 tests), branch coverage of `core` is 97%, the owner-table guard passes against `main`, and `python -m clause_tracer.core` prints the 11 Spec 14.5 labels. S1-M6-T2 keeps the `core/__init__.py` docstring on two lines: the plan's one-line form is 163 characters, over ruff's 100, and the words are the same. A sample file that is not UTF-8 also exits 3 (`test_non_utf8_input_returns_3`, beyond the planned tests). Status set to Done and the report sent; S1-M6-T3 is done once the owner confirms it. | Plans README ("When the stage is done") |
+| 16 Nov 2026 | Milestone 6 ticked (tasks S1-M6-T1 to S1-M6-T3) and every box of section 7 checked: `scripts/check.sh` exits 0 (1063 tests), branch coverage of `core` is 97%, the owner-table guard passes against `main`, and `python -m clause_tracer.core` prints the 11 Spec 14.5 labels. S1-M6-T2 keeps the `core/__init__.py` docstring on two lines: the plan's one-line form is 163 characters, over ruff's 100, and the words are the same. Status set to Done and the report sent; S1-M6-T3 is done once the owner confirms it. | Plans README ("When the stage is done") |
+| 16 Nov 2026 | Added S1-M6-T4 to S1-M6-T7 after the stage 1 report, on the owner's decisions of the same day. T4 records the UTF-8 fix already made. T5 and T6 fix two scan-list hazards: "I" matched the list marker "(i)", and "no." hid a sentence end. T7 brings the cost figures of the docs in line with the formula and records the third hazard ("legal" in "legal fees") for stage 10, where the owner decides it. | Plans README ("When the plan is wrong": add a task) |
 
 ## 9. Notes for the next stage
 
