@@ -83,7 +83,14 @@ from clause_tracer.core.errors import (
     StorageCorruptError,
     UnreadableFileError,
 )
-from clause_tracer.core.fakes import ReplayAiClient, UnrecordedRequest, assert_all_used
+from clause_tracer.core.fakes import (
+    FakePiiDetector,
+    FixedClock,
+    InMemorySecretStore,
+    ReplayAiClient,
+    UnrecordedRequest,
+    assert_all_used,
+)
 from clause_tracer.core.ids import (
     ClauseId,
     CustomerId,
@@ -190,13 +197,16 @@ __all__: list[str] = [
     "DuplicateRecordError",
     "EncryptedPdfError",
     "Evidence",
+    "FakePiiDetector",
     "FileKind",
+    "FixedClock",
     "Glyph",
     "HiddenReason",
     "HiddenText",
     "InputError",
     "InputTooLargeError",
     "InputWarning",
+    "InMemorySecretStore",
     "InvalidApiKeyError",
     "JudgedLevel",
     "LabelInput",

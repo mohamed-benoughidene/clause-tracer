@@ -164,6 +164,9 @@ The fakes live in `fakes.py`, use only the standard library and `core`, and are 
 | Fake | Port | Behaviour |
 | --- | --- | --- |
 | `ReplayAiClient(recordings)` | `AiClient` | Keys are `request_sha256` values; the client keeps a copy. `complete` returns the recorded reply and marks the key used; a miss raises `UnrecordedRequest` (an `AssertionError`, so a caught `ClauseTracerError` cannot swallow it) naming the step and the hash. A recording may be asked for more than once. `unused_keys()` returns the sorted keys never asked for; `fail_next(error_type)` makes the next call raise that model-service error, once. `assert_all_used(client)` raises `AssertionError("unused recordings: …")` when any key is unused |
+| `FakePiiDetector(planted)` | `PiiDetector` | `find(text)` returns the suggestions planted for that exact text, or `()` for a text not planted |
+| `InMemorySecretStore(available=True)` | `SecretStore` | Keeps secrets in a dict. `set_available(False)` makes each of the three `SecretStore` methods raise `SecretStoreUnavailableError({"provider_id": …})`. `delete_secret` of a missing id does nothing (I8) |
+| `FixedClock(now)` | `Clock` | Returns the fixed time. `set(when)` sets it; `advance(delta)` moves it (a negative delta moves it back). A naive datetime raises `ValueError("datetime must be timezone-aware")` |
 | `UnrecordedRequest` | — | The replay fake's miss, a test failure, not a project error |
 
 ## Functions
