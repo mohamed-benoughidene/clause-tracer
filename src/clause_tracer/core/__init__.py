@@ -190,6 +190,7 @@ from clause_tracer.core.scans import (
     has_clause_number,
     has_quoted_word,
     mask_abbreviations,
+    scan_ai_text,
     scan_style,
     scan_text,
 )
@@ -301,6 +302,7 @@ __all__: list[str] = [
     "ReviewId",
     "ReviewStatus",
     "ReviewStore",
+    "scan_ai_text",
     "scan_style",
     "scan_text",
     "ScanContext",

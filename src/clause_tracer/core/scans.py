@@ -10,10 +10,18 @@ more; if that fails too, the code template is used.
 
 import re
 from collections.abc import Iterable, Mapping
+from decimal import Decimal
 from types import MappingProxyType
 
 from clause_tracer.core.checks import ScanContext
-from clause_tracer.core.enums import Level, ScanFinding, TextSlot
+from clause_tracer.core.enums import (
+    PLACEHOLDER_CLOSE,
+    PLACEHOLDER_OPEN,
+    Level,
+    ScanFinding,
+    TextSlot,
+)
+from clause_tracer.core.ports import PiiDetector
 from clause_tracer.core.quote_fold import fold_for_quote_check
 from clause_tracer.core.scan_rules import (
     ABBREVIATIONS,
@@ -76,6 +84,18 @@ QUOTED_RUN_PATTERN = re.compile(r'"([^"]+)"')
 # stage 2 splitter (NUPunkt) is not used here: core imports no other
 # module, and both texts of a comparison are counted by this one rule.
 SENTENCE_END_PATTERN = re.compile(r"[.?!]+[\"'’”)\]]*(?=\s|$)")
+
+# Numbers are checked as digits only, with an optional thousands
+# separator and decimals; numbers written in words are not checked in
+# stage 1 (question 17b). A placeholder is "⟦…⟧" (Spec 4.2).
+NUMBER_PATTERN = re.compile(r"\d+(?:,\d{3})*(?:\.\d+)?")
+PLACEHOLDER_PATTERN = re.compile(
+    re.escape(PLACEHOLDER_OPEN)
+    + "[^"
+    + re.escape(PLACEHOLDER_CLOSE)
+    + "]*"
+    + re.escape(PLACEHOLDER_CLOSE)
+)
 
 
 def contains_phrase(text: str, phrase: str) -> bool:
@@ -204,6 +224,50 @@ def count_sentences(text: str) -> int:
 
     pieces = SENTENCE_END_PATTERN.split(mask_abbreviations(text))
     return sum(1 for piece in pieces if any(character.isalnum() for character in piece))
+
+
+def _inside_any(span: tuple[int, int], regions: list[tuple[int, int]]) -> bool:
+    """True when the span lies wholly inside one of the regions."""
+
+    return any(start <= span[0] and span[1] <= end for start, end in regions)
+
+
+def scan_ai_text(
+    text: str, slot: TextSlot, context: ScanContext, detector: PiiDetector
+) -> tuple[ScanFinding, ...]:
+    """Every scan of one piece of AI text: words, patterns, style,
+    numbers, placeholders and personal data.
+
+    A number that is an acceptable limit fails even when it is also
+    allowed, in every slot, so the template is used (questions 17c and
+    17f). A number inside a known placeholder is the placeholder's own,
+    not the AI's. A name the detector reports passes only when it is a
+    defined role. Findings in ScanFinding member order, no repeats.
+    """
+
+    found: set[ScanFinding] = set(scan_text(text, slot, context.label))
+    found.update(scan_style(text, slot, context))
+    placeholder_regions = [match.span() for match in PLACEHOLDER_PATTERN.finditer(text)]
+    for match in PLACEHOLDER_PATTERN.finditer(text):
+        if match.group(0) not in context.known_placeholders:
+            found.add(ScanFinding.UNKNOWN_PLACEHOLDER)
+    for match in NUMBER_PATTERN.finditer(text):
+        if _inside_any(match.span(), placeholder_regions):
+            continue
+        number = Decimal(match.group(0).replace(",", ""))
+        if number in context.acceptable_limits:
+            found.add(ScanFinding.ACCEPTABLE_LIMIT)
+        elif number not in context.allowed_numbers:
+            found.add(ScanFinding.NUMBER_NOT_ALLOWED)
+    defined_roles = {role.casefold() for role in context.defined_roles}
+    for suggestion in detector.find(text):
+        span = (suggestion.span.start, suggestion.span.end)
+        if _inside_any(span, placeholder_regions):
+            continue
+        suggested_text = text[suggestion.span.start : suggestion.span.end]
+        if suggested_text.casefold() not in defined_roles:
+            found.add(ScanFinding.PERSONAL_DATA)
+    return tuple(member for member in ScanFinding if member in found)
 
 
 def has_clause_number(text: str, clause_numbers: Iterable[str]) -> bool:

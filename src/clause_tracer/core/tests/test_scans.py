@@ -1,5 +1,7 @@
 """The output scans (S1-M5-T2 to S1-M5-T8, Spec 6.2)."""
 
+from decimal import Decimal
+
 import pytest
 
 from clause_tracer.core import (
@@ -12,11 +14,17 @@ from clause_tracer.core import (
     INJECTION_PHRASES,
     LAW_WORDS,
     LENGTH_CAPS,
+    FakePiiDetector,
+    PiiSource,
+    PiiSuggestion,
+    PlaceholderKind,
     ScanFinding,
+    Span,
     TextSlot,
     contains_phrase,
     count_sentences,
     mask_abbreviations,
+    scan_ai_text,
     scan_style,
     scan_text,
 )
@@ -336,3 +344,79 @@ def test_added_sentence_only_checks_rewrites() -> None:
         "5.4 says 60 days. 5.5 says 30 days.", TextSlot.REASON, make_scan_context()
     )
     assert ScanFinding.ADDED_SENTENCE not in findings
+
+
+def _planted_detector(case: ScanCase) -> FakePiiDetector:
+    planted: dict[str, tuple[PiiSuggestion, ...]] = {}
+    if case.personal_data:
+        suggestions = tuple(
+            PiiSuggestion(
+                span=Span(start=case.text.index(item), end=case.text.index(item) + len(item)),
+                kind=PlaceholderKind.PERSON,
+                source=PiiSource.NER,
+            )
+            for item in case.personal_data
+        )
+        planted[case.text] = suggestions
+    return FakePiiDetector(planted)
+
+
+@pytest.mark.parametrize("case", _CASES, ids=_CASE_IDS)
+def test_full_scans_table(case: ScanCase) -> None:
+    detector = _planted_detector(case)
+    assert set(scan_ai_text(case.text, case.slot, case.context, detector)) == case.findings
+
+
+def test_acceptable_limit_fails_in_every_form() -> None:
+    # Promise test: no acceptable limit reaches the message step
+    # (Spec 11, scan part).
+    context = make_scan_context(
+        allowed_numbers=(Decimal("30"),), acceptable_limits=(Decimal("30"),)
+    )
+    for text in ("30", "30 days", "30.00"):
+        holds = ScanFinding.ACCEPTABLE_LIMIT in scan_ai_text(
+            text, TextSlot.MESSAGE, context, FakePiiDetector({})
+        )
+        assert holds, text
+
+
+def test_number_inside_known_placeholder_passes() -> None:
+    findings = scan_ai_text(
+        "Ask ⟦Person 1⟧.",
+        TextSlot.READING,
+        make_scan_context(known_placeholders=("⟦Person 1⟧",)),
+        FakePiiDetector({}),
+    )
+    assert findings == ()
+
+
+def test_invented_name_fails() -> None:
+    detector = FakePiiDetector(
+        {
+            "Dear John,": (
+                PiiSuggestion(
+                    span=Span(start=5, end=9),
+                    kind=PlaceholderKind.PERSON,
+                    source=PiiSource.NER,
+                ),
+            )
+        }
+    )
+    findings = scan_ai_text("Dear John,", TextSlot.READING, make_scan_context(), detector)
+    assert findings == (ScanFinding.PERSONAL_DATA,)
+
+
+def test_number_in_words_is_not_checked() -> None:
+    # The stage 1 limit: numbers written in words are not checked (question 17b).
+    findings = scan_ai_text(
+        "Pay within thirty days.", TextSlot.READING, make_scan_context(), FakePiiDetector({})
+    )
+    assert findings == ()
+
+
+def test_full_scan_includes_style_scans() -> None:
+    findings = scan_ai_text(
+        "I hope this helps!", TextSlot.READING, make_scan_context(), FakePiiDetector({})
+    )
+    assert ScanFinding.FIRST_PERSON in findings
+    assert ScanFinding.FILLER_PHRASE in findings
