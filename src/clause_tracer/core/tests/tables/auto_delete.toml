@@ -1,2 +1,169 @@
 # Expected answers. Only the owner edits this file. Constitution T11.
 # Format: docs/plans/stage-01-core.md, task S1-M4-T5.
+
+[[case]]
+id = "now_at_due_date"
+last_change = 2026-10-01T09:00:00Z
+days = 30
+now = 2026-10-31T09:00:00Z
+due_at = 2026-10-31T09:00:00Z
+due = true
+warning = false
+
+[[case]]
+id = "one_second_before_due"
+last_change = 2026-10-01T09:00:00Z
+days = 30
+now = 2026-10-31T08:59:59Z
+due_at = 2026-10-31T09:00:00Z
+due = false
+warning = true
+
+[[case]]
+id = "warning_window_start_boundary"
+last_change = 2026-10-01T09:00:00Z
+days = 30
+now = 2026-10-28T09:00:00Z
+due_at = 2026-10-31T09:00:00Z
+due = false
+warning = true
+
+[[case]]
+id = "one_second_outside_warning_window"
+last_change = 2026-10-01T09:00:00Z
+days = 30
+now = 2026-10-28T08:59:59Z
+due_at = 2026-10-31T09:00:00Z
+due = false
+warning = false
+
+[[case]]
+id = "seven_days_one_day_left"
+last_change = 2026-11-01T09:00:00Z
+days = 7
+now = 2026-11-07T09:00:00Z
+due_at = 2026-11-08T09:00:00Z
+due = false
+warning = true
+
+[[case]]
+id = "ninety_days_not_yet_near"
+last_change = 2026-08-01T09:00:00Z
+days = 90
+now = 2026-10-01T09:00:00Z
+due_at = 2026-10-30T09:00:00Z
+due = false
+warning = false
+
+[[case]]
+id = "ninety_days_at_due_date"
+last_change = 2026-08-01T09:00:00Z
+days = 90
+now = 2026-10-30T09:00:00Z
+due_at = 2026-10-30T09:00:00Z
+due = true
+warning = false
+
+[[case]]
+id = "keep_it_restarts_the_clock"
+last_change = 2026-10-30T12:00:00Z
+days = 30
+now = 2026-10-31T09:00:00Z
+due_at = 2026-11-29T12:00:00Z
+due = false
+warning = false
+
+[[case]]
+id = "lowered_setting_date_inside_grace"
+last_change = 2026-11-01T09:00:00Z
+days = 7
+now = 2026-11-11T09:00:00Z
+protected_until = 2026-11-13T09:00:00Z
+due_at = 2026-11-13T09:00:00Z
+due = false
+warning = true
+
+[[case]]
+id = "grace_extends_the_date"
+last_change = 2026-10-01T09:00:00Z
+days = 30
+now = 2026-11-05T09:00:00Z
+protected_until = 2026-11-05T09:00:00Z
+due_at = 2026-11-05T09:00:00Z
+due = true
+warning = false
+
+[[case]]
+id = "lowered_setting_date_after_grace"
+last_change = 2026-11-10T09:00:00Z
+days = 7
+now = 2026-11-15T09:00:00Z
+protected_until = 2026-11-13T10:00:00Z
+due_at = 2026-11-17T09:00:00Z
+due = false
+warning = true
+
+[[case]]
+id = "laptop_off_for_months"
+last_change = 2026-03-01T09:00:00Z
+days = 30
+now = 2026-11-16T09:00:00Z
+due_at = 2026-03-31T09:00:00Z
+due = true
+warning = false
+
+[[case]]
+id = "clock_jumped_backwards"
+last_change = 2026-11-16T09:00:00Z
+days = 30
+now = 2026-11-10T00:00:00Z
+due_at = 2026-12-16T09:00:00Z
+due = false
+warning = false
+
+[[case]]
+id = "now_in_another_offset_at_due_date"
+last_change = 2026-10-01T09:00:00Z
+days = 30
+now = 2026-10-31T10:00:00+01:00
+due_at = 2026-10-31T09:00:00Z
+due = true
+warning = false
+
+[[case]]
+id = "grace_end_equals_normal_date"
+last_change = 2026-11-01T09:00:00Z
+days = 7
+now = 2026-11-08T09:00:00Z
+protected_until = 2026-11-08T09:00:00Z
+due_at = 2026-11-08T09:00:00Z
+due = true
+warning = false
+
+[[case]]
+id = "one_second_before_grace_ends"
+last_change = 2026-11-01T09:00:00Z
+days = 7
+now = 2026-11-13T08:59:59Z
+protected_until = 2026-11-13T09:00:00Z
+due_at = 2026-11-13T09:00:00Z
+due = false
+warning = true
+
+[[case]]
+id = "seven_days_warning_start_boundary"
+last_change = 2026-11-01T09:00:00Z
+days = 7
+now = 2026-11-05T09:00:00Z
+due_at = 2026-11-08T09:00:00Z
+due = false
+warning = true
+
+[[case]]
+id = "ninety_days_one_second_outside_warning"
+last_change = 2026-08-01T09:00:00Z
+days = 90
+now = 2026-10-27T08:59:59Z
+due_at = 2026-10-30T09:00:00Z
+due = false
+warning = false

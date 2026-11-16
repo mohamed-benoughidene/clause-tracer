@@ -559,7 +559,7 @@ Table-driven tests over the owner's tables pass for the playbook checks, for uni
 
 Any later module can be tested against a fake of each port. The replay fake fails on a request it does not know, the contract suites in `tests/contracts/` pass against each fake, and a fixed clock drives auto-delete.
 
-- [ ] **S1-M4-T1: The five ports**
+- [x] **S1-M4-T1: The five ports**
   - **Build:** In `src/clause_tracer/core/ports.py`, beside `CancelCheck`: `AiClient`, `PiiDetector`, `ReviewStore`, `SecretStore` and `Clock` as `typing.Protocol` classes, with exactly the method signatures of system design 3.4 ("Ports"), each method body `...`. Each method has a docstring of four lines: `Input: …`, `Output: …`, `Raises: …`, `Side effects: …`, filled from the "Notes" column of that table (write `None.` where a line does not apply). Export all five.
   - **Files:** `src/clause_tracer/core/ports.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/test_ports.py`, `src/clause_tracer/core/README.md` ("Ports").
   - **Tests first:** in `test_ports.py`: `test_ports_have_exactly_the_system_design_methods` (for each port, the set of names in its `__dict__` that do not start with `_` equals the method names of 3.4); `test_stubs_satisfy_the_ports`: one small stub class per port with the right methods, each assigned to a variable annotated with the port type (`client: AiClient = _StubAiClient()`), so mypy strict checks them. Check by hand once that a stub whose `complete` takes `str` fails mypy, and do not commit it.
@@ -567,7 +567,7 @@ Any later module can be tested against a fake of each port. The replay fake fail
   - **Rules:** P4, T2, B3, I11, [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) 14 Nov amendment, [ADR 0015](../adr/0015-provider-ready-seam.md), [system design 3.1](../system-design.md#31-the-engine).
   - **Depends on:** S1-M1-T8, S1-M2-T3, S1-M2-T6.
 
-- [ ] **S1-M4-T2: Pure hash of the exact request**
+- [x] **S1-M4-T2: Pure hash of the exact request**
   - **Build:** In `src/clause_tracer/core/request_hash.py`, export:
     - `def to_plain(value: object) -> object`, checked in this order: `None`, `bool`, `int`, `float` stay as they are; an `Enum` member becomes its `value`; a `str` stays; a `Decimal` becomes `str(value)`; a `datetime` becomes `value.isoformat()`; `bytes` become `base64.b64encode(value).decode("ascii")`; a `tuple` or `list` becomes a list of `to_plain` of each item; a `Mapping` becomes a dict of `to_plain` of each value (a key that is not a `str` raises `TypeError`); a dataclass instance becomes `{"__type__": type(value).__qualname__, <field name>: to_plain(<field value>) for each field}`; anything else raises `TypeError(f"cannot hash {type(value).__name__}")`.
     - `def request_sha256(request: AiRequest) -> str`: `hashlib.sha256(json.dumps(to_plain(request), sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False).encode("utf-8")).hexdigest()`.
@@ -577,7 +577,7 @@ Any later module can be tested against a fake of each port. The replay fake fail
   - **Rules:** T1, D8, [ADR 0013](../adr/0013-test-layers-and-release-gates.md) 13 Nov amendment, [system design 7](../system-design.md#7-caching-resume-and-cost).
   - **Depends on:** S1-M2-T6.
 
-- [ ] **S1-M4-T3: The replay fake**
+- [x] **S1-M4-T3: The replay fake**
   - **Build:** In `src/clause_tracer/core/fakes.py` (standard library and `core` only), export:
     - `class UnrecordedRequest(AssertionError)`. It is a test failure, not a project error, so code under test that catches `ClauseTracerError` cannot swallow it.
     - `class ReplayAiClient` with `def __init__(self, recordings: Mapping[str, AiReply]) -> None` (keys are `request_sha256` values; the client keeps a copy); `def complete(self, request: AiRequest) -> AiReply`; `def unused_keys(self) -> tuple[str, ...]` (sorted keys never asked for); `def fail_next(self, error_type: type[ModelServiceError]) -> None`. `complete` first checks a pending failure: if one is set, it clears it and raises `error_type({"step": request.step})`. Then it hashes the request; a miss raises `UnrecordedRequest(f"unrecorded request: step={request.step} sha256={key}")`; a hit marks the key used and returns the reply. A recording may be asked for more than once.
@@ -585,11 +585,11 @@ Any later module can be tested against a fake of each port. The replay fake fail
     In `src/clause_tracer/core/tests/conftest.py`, add the fixture `make_replay_client`: it yields a function `(recordings: Mapping[str, AiReply]) -> ReplayAiClient` and, after the test, calls `assert_all_used` on every client it made.
   - **Files:** `src/clause_tracer/core/fakes.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/tests/conftest.py`, `src/clause_tracer/core/tests/test_replay_fake.py`, `src/clause_tracer/core/tests/shapes_for_tests.py` (add `def make_reply(text: str = "{}") -> AiReply` with `raw_body=text.encode()`, `model_used="test-model"`, `provider_used="test-provider"`, `Usage(input_tokens=10, cached_input_tokens=0, output_tokens=5, cost_usd=None)`, `generation_id="gen-1"`), `src/clause_tracer/core/README.md` ("Fakes").
   - **Tests first:** in `test_replay_fake.py`: `test_recorded_request_returns_its_reply`; `test_one_character_change_raises` (a request whose message text differs by one character raises `UnrecordedRequest`; the message contains `step=echo` and the hash, and not `Quote the clause`); `test_unused_recording_is_reported`; `test_assert_all_used_raises_on_unused`; `test_fail_next_raises_once` (`fail_next(ModelTimeoutError)`: the next call raises `ModelTimeoutError` with `context["step"] == "echo"`, the call after returns the reply); `test_fixture_client_works` (uses `make_replay_client` with one recording that the test asks for); `test_replay_fake_is_an_ai_client` (`client: AiClient = ReplayAiClient({})`, checked by mypy).
-  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_replay_fake.py` reports 7 passed, and `scripts/check.sh` exits 0.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_replay_fake.py` reports 9 passed, and `scripts/check.sh` exits 0.
   - **Rules:** T3, T7, T12, T1, [ADR 0013](../adr/0013-test-layers-and-release-gates.md) action item 1 and amendments, [testing strategy 6.1](../testing-strategy.md#61-the-replay-fake).
   - **Depends on:** S1-M4-T1, S1-M4-T2.
 
-- [ ] **S1-M4-T4: Fake detector, secret store and clock, with the first contract suite**
+- [x] **S1-M4-T4: Fake detector, secret store and clock, with the first contract suite**
   - **Build:** In `src/clause_tracer/core/fakes.py`, export:
     - `class FakePiiDetector` with `def __init__(self, planted: Mapping[str, tuple[PiiSuggestion, ...]]) -> None` and `def find(self, text: str) -> tuple[PiiSuggestion, ...]`, which returns `planted[text]`, or `()` for a text not planted.
     - `class InMemorySecretStore` with `def __init__(self, *, available: bool = True) -> None`, `def set_available(self, available: bool) -> None`, and the three `SecretStore` methods. When not available, each of the three raises `SecretStoreUnavailableError({"provider_id": provider_id})`. `delete_secret` of a missing id does nothing (I8).
@@ -601,7 +601,7 @@ Any later module can be tested against a fake of each port. The replay fake fail
   - **Rules:** T3, T2, I8, [ADR 0006](../adr/0006-encrypted-storage-and-secrets.md), [ADR 0015](../adr/0015-provider-ready-seam.md) (credentials under a provider id), [testing strategy 3](../testing-strategy.md#3-five-layers).
   - **Depends on:** S1-M4-T1.
 
-- [ ] **S1-M4-T5: Auto-delete table (Owner)**
+- [x] **S1-M4-T5: Auto-delete table (Owner)**
   - **Build:** Owner only. The rows of `auto_delete.toml`. Columns: `id` (str); `last_change`, `now` (TOML offset datetimes, written like `2026-11-01T09:00:00Z`); `days` (7, 30 or 90); `protected_until` (an offset datetime, optional: the end of the 3-day grace after the setting was lowered); and the expected answers `due_at` (offset datetime), `due` (bool), `warning` (bool). Cases to cover, proposed, owner to check: "now" exactly at the due date, and one second before it; each of 7, 30 and 90 days; "Keep it" (a later `last_change`); the warning at exactly 3 days before, and one second more than 3 days before; a lowered setting whose new date falls inside the grace; a laptop off for months; a clock that jumped backwards, so "now" is before `last_change` (Spec 9: not due). The AI agent does not write or change it (T11).
   - **Files:** `src/clause_tracer/core/tests/tables/auto_delete.toml`.
   - **Tests first:** None. The owner's values are the expected answers.
@@ -609,7 +609,7 @@ Any later module can be tested against a fake of each port. The replay fake fail
   - **Rules:** T11, [Spec 9](../spec.md#9-running-the-app) (auto-delete), [testing strategy 8](../testing-strategy.md#8-privacy-and-security-tests) (auto-delete row).
   - **Depends on:** S1-M3-T2.
 
-- [ ] **S1-M4-T6: Auto-delete date rules**
+- [x] **S1-M4-T6: Auto-delete date rules**
   - **Build:** In `src/clause_tracer/core/auto_delete.py`, export `WARNING_WINDOW = timedelta(days=3)`, `LOWERING_GRACE = timedelta(days=3)` and these pure functions. None reads a clock. Each raises `ValueError("datetime must be timezone-aware")` for a naive datetime and `ValueError("days must be 1 or more")` when `days < 1`.
     - `def due_at(last_change: datetime, days: int, protected_until: datetime | None = None) -> datetime`: `last_change + timedelta(days=days)`, or `protected_until` when that is later.
     - `def is_due(last_change: datetime, days: int, now: datetime, protected_until: datetime | None = None) -> bool`: `now >= due_at(...)`. A clock behind `last_change` is therefore never due (Spec 9, decided 14 Nov 2026).
@@ -621,7 +621,7 @@ Any later module can be tested against a fake of each port. The replay fake fail
   - **Rules:** T1, T2, T13, T11, [Spec 9](../spec.md#9-running-the-app).
   - **Depends on:** S1-M4-T5.
 
-- [ ] **S1-M4-T7: In-memory review store, with its contract suite**
+- [x] **S1-M4-T7: In-memory review store, with its contract suite**
   - **Build:** In `src/clause_tracer/core/fakes.py`, export `class InMemoryReviewStore` with `def __init__(self) -> None` and the five `ReviewStore` methods of system design 3.4:
     - `save_record` raises `DuplicateRecordError({"record_id": record.record_id})` when any review already holds that `record_id`.
     - `load_records` returns the review's records in the order saved, or `()`.
@@ -916,6 +916,7 @@ Planning found questions 1 to 17. The owner answered all of them on 14 Nov 2026;
 | 16 Nov 2026 | The coverage omit is gone: S1-M2-T8 changed the coverage report line in `scripts/check.sh` back to `run coverage report --include='src/clause_tracer/core/*' --fail-under=95`, as S1-M1-T9 promised once milestone 2's shapes existed. The 95% floor now covers the test files of `core` again, as the plan first had it; `core` measures 99% with them included. | S1-M2-T8 |
 | 16 Nov 2026 | Added the fold-sharing note to section 9 before the stage closes, so it cannot be lost. The milestone 2 review (standards axis) flagged that `MatchKey` and `QuoteFold` share a silhouette; both are mandated by system design 3.4, and the decision on one shared fold implementation belongs to stage 2's plan. The note decides nothing; it hands the question to stage 2. | Plans README ("Notes for the next stage", "When the plan is wrong": add a note) |
 | 16 Nov 2026 | S1-M3-T10. The `spans_overlap` formula returned true for an empty span inside another span (`3..3` and `0..9`), against the planned test. The owner chose the test's meaning: spans overlap only when they share a code point. Formula changed to `max(a.start, b.start) < min(a.end, b.end)`. | Plans README ("When the plan is wrong"), owner decision of 16 Nov 2026 |
+| 16 Nov 2026 | Milestone 4 ticked (tasks S1-M4-T1 to S1-M4-T7). The owner wrote `auto_delete.toml` (18 rows) in its own commit, `a2fe1da`. One plan deviation, recorded per the plans README: mypy strict rejects `...` bodies in the concrete stub classes of `test_ports.py` (`empty-body`), so the stubs raise `NotImplementedError` instead; the `Protocol` method bodies keep the planned `...`. S1-M4-T3 kept two tests beyond its list (`test_used_recording_is_not_unused`, `test_assert_all_used_passes_when_all_used`), so its "Done when" now says 9 passed. | Plans README ("Status", "When the plan is wrong") |
 
 ## 9. Notes for the next stage
 

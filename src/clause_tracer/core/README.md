@@ -143,6 +143,33 @@ arguments, with exactly the fields of system design 3.4 in that order (ADR 0005)
 | `PlaybookProblem` | `position_id: PositionId \| None, code: PlaybookProblemCode` | One failed playbook check (Spec 4.1); `position_id` is `None` for a whole-playbook problem |
 | `CancelCheck` | a type alias: `Callable[[], bool]` | Returns True once the user has cancelled (ADR 0005) |
 
+## Ports
+The five ports are `typing.Protocol` classes in `ports.py` (P4, B3). Adapters are passed in,
+never imported. Each method's docstring holds `Input`, `Output`, `Raises` and `Side effects`.
+Every real adapter must pass the same contract suite in `tests/contracts/` (T2, ADR 0005).
+
+| Port | Methods | Notes |
+| --- | --- | --- |
+| `AiClient` | `complete(request: AiRequest) -> AiReply` | Raises model-service errors. Network retries live in the adapter; the one reask lives in the step (ADR 0005) |
+| `PiiDetector` | `find(text: str) -> tuple[PiiSuggestion, ...]` | Behind the code finders (ADR 0008) |
+| `ReviewStore` | `save_record(record: AiRecord) -> None`; `load_records(review_id: ReviewId) -> tuple[AiRecord, ...]`; `list_reviews() -> tuple[ReviewId, ...]`; `delete_review(review_id: ReviewId) -> None`; `purge_expired(now: datetime, auto_delete_days: int) -> tuple[ReviewId, ...]` | Hides the encrypted store (ADR 0006). `save_record` raises `DuplicateRecordError` for a saved `record_id` (append-only, D1); `load_records` returns records in the order saved, or `()`; `delete_review` is idempotent (I8); `purge_expired` deletes the reviews due under the auto-delete rules and returns their ids, sorted. Until stage 6, a review's last change is the latest `finished_at` of its records |
+| `SecretStore` | `get_secret(provider_id: str) -> str \| None`; `put_secret(provider_id: str, secret: str) -> None`; `delete_secret(provider_id: str) -> None` | Each raises `SecretStoreUnavailableError` when the store cannot be reached; `get_secret` returns `None` when nothing is stored; `delete_secret` is idempotent (I8). Never plain text (ADR 0006, ADR 0015) |
+| `Clock` | `now() -> datetime` | Returns a timezone-aware time (T2) |
+
+## Fakes
+The fakes live in `fakes.py`, use only the standard library and `core`, and are exported from
+`clause_tracer.core`. Every real adapter must pass the same contract suite in `tests/contracts/`
+(ADR 0013, T12).
+
+| Fake | Port | Behaviour |
+| --- | --- | --- |
+| `ReplayAiClient(recordings)` | `AiClient` | Keys are `request_sha256` values; the client keeps a copy. `complete` returns the recorded reply and marks the key used; a miss raises `UnrecordedRequest` (an `AssertionError`, so a caught `ClauseTracerError` cannot swallow it) naming the step and the hash. A recording may be asked for more than once. `unused_keys()` returns the sorted keys never asked for; `fail_next(error_type)` makes the next call raise that model-service error, once. `assert_all_used(client)` raises `AssertionError("unused recordings: …")` when any key is unused |
+| `FakePiiDetector(planted)` | `PiiDetector` | `find(text)` returns the suggestions planted for that exact text, or `()` for a text not planted |
+| `InMemorySecretStore(available=True)` | `SecretStore` | Keeps secrets in a dict. `set_available(False)` makes each of the three `SecretStore` methods raise `SecretStoreUnavailableError({"provider_id": …})`. `delete_secret` of a missing id does nothing (I8) |
+| `InMemoryReviewStore()` | `ReviewStore` | Keeps raw records in memory. `save_record` raises `DuplicateRecordError({"record_id": …})` for a record id any review already holds (append-only, D1); `load_records` returns the order saved, or `()`; `list_reviews` returns the sorted ids of reviews holding at least one record; `delete_review` is idempotent (I8); `purge_expired(now, days)` deletes each review whose latest `finished_at` is due under the auto-delete rules and returns their ids, sorted (the stage 1 stand-in for a review's last change) |
+| `FixedClock(now)` | `Clock` | Returns the fixed time. `set(when)` sets it; `advance(delta)` moves it (a negative delta moves it back). A naive datetime raises `ValueError("datetime must be timezone-aware")` |
+| `UnrecordedRequest` | — | The replay fake's miss, a test failure, not a project error |
+
 ## Functions
 
 | Function | Returns | Notes |
@@ -163,6 +190,12 @@ arguments, with exactly the fields of system design 3.4 in that order (ADR 0005)
 | `combine_rule_4(verdicts: tuple[ValueVerdict, ...]) -> tuple[Level, tuple[ReasonCode, ...]]` | the Rule 4 level and the sorted reasons of every value | Walk-away if any readable value is walk-away, else unsure if any value is unsure, else the worst level. Readable values that differ between clauses add `CLAUSES_DISAGREE`. An empty tuple raises `ValueError` |
 | `label_position(item: LabelInput, unreadable: UnreadableSpans) -> ToolLabel` | the label of one position (Rules 3, 4, 7 and 10) | Raises `ValueError` when any part names another position, the rule class does not match the type, or a words position holds values (or a number/yes-no one holds judged levels). A failed call, an unconfirmed match or a found match with no value is unsure. Missing takes the rule's no level for yes/no, else the position's missing level. An outside document makes the label unsure, except a walk-away Rule 4 step 1 gave. `written_by` is AI only for a words position the AI judged to a readable level (ADR 0002) |
 | `label_all(playbook: Playbook, inputs: tuple[LabelInput, ...], unreadable: UnreadableSpans) -> tuple[ToolLabel, ...]` | one label per playbook position, in playbook order | Raises `ValueError` when a position has no input, two inputs name one position, or an input names a position not in the playbook |
+| `to_plain(value: object) -> object` | the value as JSON-serialisable plain data | Checked in this order: `None`, `bool`, `int`, `float` stay; an `Enum` member becomes its value; a `str` stays; a `Decimal` becomes its `str`; a `datetime` becomes its `isoformat`; `bytes` become base64 ascii; a tuple or list becomes a list; a `Mapping` becomes a dict (a non-`str` key raises `TypeError`); a dataclass instance becomes `{"__type__": <qualname>, <field>: <plain>, ...}`. Anything else raises `TypeError(f"cannot hash {type(value).__name__}")` |
+| `request_sha256(request: AiRequest) -> str` | the sha256 of the exact request | `hashlib.sha256(json.dumps(to_plain(request), sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False).encode("utf-8")).hexdigest()`. Keys the cache, the resume and the replay fake (system design 7) |
+| `due_at(last_change: datetime, days: int, protected_until: datetime \| None = None) -> datetime` | `last_change + timedelta(days=days)`, or `protected_until` when that is later | Pure; reads no clock. `ValueError("days must be 1 or more")` when `days < 1`; `ValueError("datetime must be timezone-aware")` for a naive datetime (Spec 9) |
+| `is_due(last_change: datetime, days: int, now: datetime, protected_until: datetime \| None = None) -> bool` | `now >= due_at(...)` | A clock behind `last_change` is never due, so a jump backwards deletes nothing (Spec 9, decided 14 Nov 2026) |
+| `in_warning_window(last_change: datetime, days: int, now: datetime, protected_until: datetime \| None = None) -> bool` | `due_at(...) - WARNING_WINDOW <= now < due_at(...)` | The last three days before the due date; closed at the start, open at the end |
+| `protected_until_after_lowering(lowered_at: datetime) -> datetime` | `lowered_at + LOWERING_GRACE` | The end of the three-day grace held after the setting was lowered. `WARNING_WINDOW` and `LOWERING_GRACE` are both `timedelta(days=3)` |
 
 ## Depends on
 Nothing. It imports no other clause_tracer module.

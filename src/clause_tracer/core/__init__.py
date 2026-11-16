@@ -11,6 +11,12 @@ from clause_tracer.core.ai import (
     StepInputs,
     Usage,
 )
+from clause_tracer.core.auto_delete import (
+    due_at,
+    in_warning_window,
+    is_due,
+    protected_until_after_lowering,
+)
 from clause_tracer.core.checks import (
     CallPrices,
     CostInputs,
@@ -83,6 +89,15 @@ from clause_tracer.core.errors import (
     StorageCorruptError,
     UnreadableFileError,
 )
+from clause_tracer.core.fakes import (
+    FakePiiDetector,
+    FixedClock,
+    InMemoryReviewStore,
+    InMemorySecretStore,
+    ReplayAiClient,
+    UnrecordedRequest,
+    assert_all_used,
+)
 from clause_tracer.core.ids import (
     ClauseId,
     CustomerId,
@@ -133,7 +148,15 @@ from clause_tracer.core.playbook import (
     YesNoRule,
 )
 from clause_tracer.core.playbook_checks import check_playbook
-from clause_tracer.core.ports import CancelCheck
+from clause_tracer.core.ports import (
+    AiClient,
+    CancelCheck,
+    Clock,
+    PiiDetector,
+    ReviewStore,
+    SecretStore,
+)
+from clause_tracer.core.request_hash import request_sha256, to_plain
 from clause_tracer.core.results import (
     CallFailed,
     CheckedValue,
@@ -154,6 +177,7 @@ from clause_tracer.core.units import convert_to_unit
 from clause_tracer.core.wording import Span, Wording
 
 __all__: list[str] = [
+    "AiClient",
     "AiRecord",
     "AiReply",
     "AiRequest",
@@ -165,6 +189,7 @@ __all__: list[str] = [
     "Clause",
     "ClauseId",
     "ClauseTracerError",
+    "Clock",
     "ConfigError",
     "CostInputs",
     "CostRange",
@@ -179,13 +204,17 @@ __all__: list[str] = [
     "DuplicateRecordError",
     "EncryptedPdfError",
     "Evidence",
+    "FakePiiDetector",
     "FileKind",
+    "FixedClock",
     "Glyph",
     "HiddenReason",
     "HiddenText",
     "InputError",
     "InputTooLargeError",
     "InputWarning",
+    "InMemoryReviewStore",
+    "InMemorySecretStore",
     "InvalidApiKeyError",
     "JudgedLevel",
     "LabelInput",
@@ -214,6 +243,7 @@ __all__: list[str] = [
     "Page",
     "PageBox",
     "Party",
+    "PiiDetector",
     "PiiSource",
     "PiiSuggestion",
     "PlaceholderEntity",
@@ -234,13 +264,16 @@ __all__: list[str] = [
     "RateLimitedError",
     "ReasonCode",
     "RecordId",
+    "ReplayAiClient",
     "ReviewCancelled",
     "ReviewId",
     "ReviewStatus",
+    "ReviewStore",
     "ScanContext",
     "ScanFinding",
     "ScannedPdfError",
     "SchemaTooNewError",
+    "SecretStore",
     "SecretStoreUnavailableError",
     "Segment",
     "SegmentKind",
@@ -258,24 +291,32 @@ __all__: list[str] = [
     "Unit",
     "UnreadableFileError",
     "UnreadableSpans",
+    "UnrecordedRequest",
     "Usage",
     "ValueVerdict",
     "Wording",
     "WordsRule",
     "WrittenBy",
     "YesNoRule",
+    "assert_all_used",
     "check_playbook",
     "combine_rule_4",
     "convert_to_unit",
+    "due_at",
     "evidence_reasons",
+    "in_warning_window",
     "is_better",
+    "is_due",
     "label_all",
     "label_position",
     "level_for_limits",
     "level_rank",
     "number_verdicts",
+    "protected_until_after_lowering",
+    "request_sha256",
     "sort_reasons",
     "spans_overlap",
+    "to_plain",
     "unreadable_spans",
     "words_verdict",
     "worst_level",
