@@ -180,7 +180,7 @@ When this is done, `split_clauses` gives the clauses of a document with their se
   - **Rules:** T1, T6.
   - **Depends on:** None
 
-- [ ] **S2-M3-T2: The continuity rules**
+- [x] **S2-M3-T2: The continuity rules**
   - **Build:** In `src/clause_tracer/ingest/_numbering.py`:
     - `def is_decimal_successor(previous: tuple[int, ...], parts: tuple[int, ...]) -> bool`. With `m = len(previous)` and `n = len(parts)`, it is true when some `k` from 1 to `min(n, m + 1)` has all three of: `parts[:k-1] == previous[:k-1]`; either `k <= m and parts[k-1] == previous[k-1] + 1` (the next sibling at depth `k`) or `k == m + 1 and parts[k-1] == 1` (the first child); and every part after position `k` equals 1.
     - `class ParenStyle(StrEnum)` with `LOWER`, `ROMAN`, `UPPER`, `DIGIT`.
