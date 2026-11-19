@@ -31,6 +31,25 @@ the text is encoded. For a text with too many characters the error's context
 holds `size_chars`; for one with too many bytes it holds `size_bytes`. Both hold
 `limit_bytes`. No side effects.
 
+## Splitting
+
+### `split_clauses`
+
+`split_clauses(document: Document) -> tuple[Clause, ...]`
+
+Reads only `document.text`. Returns the clauses in text order, each with its
+id, number, heading, level, parent, span and sentences. A blank text gives no
+clauses. When no marker is accepted, the text is split by paragraph. No errors
+and no side effects.
+
+Clause ids come from the number and the order: `5.1`, `7.1(a)(i)`, `S1` and
+`S1.2` inside a schedule, `p1` for a clause with no number, `5.1~2` when a
+number appears twice, and `4` for `Article IV`.
+
+`numbering_source` is `numbers` when a marker opens the clauses, and
+`paragraphs` when no marker is accepted. The clauses cover the whole text:
+each starts where the one before ends.
+
 ## Output shape
 A `Document` with no glyphs: `glyphs`, `char_map`, `pages`, `furniture`, `hidden`,
 `undecodable` and `tracked_changes` are empty in stage 2.
