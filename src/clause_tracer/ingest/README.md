@@ -46,17 +46,27 @@ Clause ids come from the number and the order: `5.1`, `7.1(a)(i)`, `S1` and
 `S1.2` inside a schedule, `p1` for a clause with no number, `5.1~2` when a
 number appears twice, and `4` for `Article IV`.
 
+A schedule marker (`Schedule 1`) opens a clause only when nothing follows the
+designation, or a separator follows it: `·`, `:`, `-`, `–` or `—`. A line such
+as `Schedule 2 to this Agreement ...` is body text.
+
+`number` keeps the digits as the text writes them: `01.2` gives `01.2`, and
+its id is `1.2`.
+
 `numbering_source` is `numbers` when a marker opens the clauses, and
 `paragraphs` when no marker is accepted. In the paragraph case, a blank line
 between two non-blank lines starts a new paragraph; when the text has no such
-blank line, every non-blank line is a paragraph. The first clause starts at 0
+blank line, every non-blank line is a paragraph. A line holding only spaces,
+tabs and byte-order marks counts as blank. The first clause starts at 0
 and the last ends at the end of the text. The clauses cover the whole text:
 each starts where the one before ends.
 
-A clause that a marker starts has a heading when the rest of its line is short,
-does not end like a sentence, and every later line in the clause is blank. An
-unnumbered heading clause takes its own line as the heading. The clause of text
-before the first clause has no heading.
+A numbered clause has a heading when its marker is a decimal number, a keyword,
+a schedule or a bare number, the rest of its line is short, does not end like a
+sentence, and every later line in the clause is blank. A bracketed item such as
+`(a)` never has a heading. An unnumbered heading clause takes its own line as
+the heading, and only when a marker follows it or the line comes after a blank
+line. The clause of text before the first clause has no heading.
 
 Sentence ids add `.s1`, `.s2` and so on to the clause id (`5.1.s3`). A clause's
 sentences cover the whole clause: each starts where the one before ends. The

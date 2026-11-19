@@ -41,7 +41,13 @@ def split_lines(text: str) -> tuple[Line, ...]:
     return tuple(lines)
 
 
-def is_blank(line: Line) -> bool:
-    """True when the line holds only spaces and tabs."""
+def is_blank_text(text: str) -> bool:
+    """True when the text holds only spaces, tabs, line breaks and byte-order marks."""
 
-    return line.text.strip() == ""
+    return text.replace("﻿", "").strip() == ""
+
+
+def is_blank(line: Line) -> bool:
+    """True when the line holds only spaces, tabs and byte-order marks."""
+
+    return is_blank_text(line.text)

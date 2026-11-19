@@ -6,11 +6,11 @@ the clause before it. The clauses cover the whole text, so no word of the
 contract falls outside a clause (Spec 5, never guess).
 """
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from typing import Final
 
 from clause_tracer.core import Clause, ClauseId, Document, Sentence, SentenceId, Span
-from clause_tracer.ingest._lines import Line, is_blank, split_lines
+from clause_tracer.ingest._lines import Line, is_blank, is_blank_text, split_lines
 from clause_tracer.ingest._markers import (
     EMPHASIS_STRIP,
     HEADING_STRIP,
@@ -43,6 +43,12 @@ class _ClauseStart:
     line_end: int
     heading_source: str | None
     numbering_source: str
+    kind: MarkerKind | None
+
+
+HEADED_KINDS: Final[frozenset[MarkerKind]] = frozenset(
+    {MarkerKind.DECIMAL, MarkerKind.KEYWORD, MarkerKind.SCHEDULE, MarkerKind.BARE}
+)
 
 
 def _is_proper_prefix(prefix: tuple[int, ...], parts: tuple[int, ...]) -> bool:
@@ -105,6 +111,7 @@ def _marker_clause_start(
         line_end=line.end,
         heading_source=line.text[marker.body_start :],
         numbering_source=NUMBERING_NUMBERS,
+        kind=marker.kind,
     )
 
 
@@ -115,9 +122,11 @@ def _heading_for(record: _ClauseStart, text: str, span_end: int) -> str | None:
         return None
     if record.number is None:
         return record.heading_source.strip(EMPHASIS_STRIP)
+    if record.kind not in HEADED_KINDS:
+        return None
     rest = record.heading_source.strip(EMPHASIS_STRIP)
     title = rest.strip(HEADING_STRIP)
-    later_lines_are_blank = text[record.line_end : span_end].strip() == ""
+    later_lines_are_blank = is_blank_text(text[record.line_end : span_end])
     if title == "" or len(rest) > 100 or rest[-1] in ".;:,":
         return None
     if not later_lines_are_blank:
@@ -149,174 +158,175 @@ def _sentences_for(
     return tuple(sentences)
 
 
-def _open_numbered_clause(
-    *,
-    marker: Marker,
-    line: Line,
-    parts: tuple[int, ...],
-    open_decimal: dict[tuple[int, ...], str],
-    scope_prefix: str,
-    scope_parent: str | None,
-    levels: dict[str, int],
-    used_ids: set[str],
-) -> tuple[_ClauseStart, dict[tuple[int, ...], str]]:
-    """Build the clause a decimal or bare number starts, under its open parent.
+@dataclass(slots=True)
+class _WalkState:
+    """The walk's mutable state, in one object (B6). Private to this file.
 
-    Returns the clause and the open decimal numbers with this clause added.
-    The caller decides whether the number is accepted.
+    The walk reads and changes these fields. Each step takes the state and only
+    the inputs that are not walk state.
     """
 
+    used_ids: set[str] = field(default_factory=set)
+    levels: dict[str, int] = field(default_factory=dict)
+    scope_prefix: str = ""
+    scope_parent: str | None = None
+    last_decimal: tuple[int, ...] | None = None
+    open_decimal: dict[tuple[int, ...], str] = field(default_factory=dict)
+    base: str | None = None
+    paren_stack: list[tuple[ParenStyle, int, str]] = field(default_factory=list)
+    suspended: list[tuple[tuple[int, ...], dict[tuple[int, ...], str]]] = field(
+        default_factory=list
+    )
+
+
+def _open_numbered_clause(state: _WalkState, marker: Marker, line: Line) -> _ClauseStart:
+    """Build the clause a decimal, keyword or bare number starts, under its open parent.
+
+    Updates the walk state: the open numbers, the last number, the bracket stack
+    and the base. The caller has already decided the number is accepted.
+    """
+
+    parts = marker.parts
     open_parents = {
-        key: value for key, value in open_decimal.items() if _is_proper_prefix(key, parts)
+        key: value for key, value in state.open_decimal.items() if _is_proper_prefix(key, parts)
     }
     parent_id = (
         max(open_parents.items(), key=lambda item: len(item[0]))[1]
         if open_parents
-        else scope_parent
+        else state.scope_parent
     )
-    level = 1 if parent_id is None else levels[parent_id] + 1
-    clause_id = _unique(scope_prefix + marker.id_part, used_ids)
-    levels[clause_id] = level
+    level = 1 if parent_id is None else state.levels[parent_id] + 1
+    clause_id = _unique(state.scope_prefix + marker.id_part, state.used_ids)
+    state.levels[clause_id] = level
     open_parents[parts] = clause_id
     record = _marker_clause_start(marker, line, clause_id, parent_id, level)
-    return record, open_parents
+    state.open_decimal = open_parents
+    state.last_decimal = parts
+    state.base = record.id
+    state.paren_stack = []
+    return record
+
+
+def _accept_decimal(state: _WalkState, parts: tuple[int, ...]) -> bool:
+    """True when a decimal or keyword number is accepted. A number that continues a
+    suspended run restores that run's state; no other state changes."""
+
+    previous = state.last_decimal
+    if previous is None or is_decimal_successor(previous, parts):
+        return True
+    for suspended_index in range(len(state.suspended) - 1, -1, -1):
+        run_last, run_open = state.suspended[suspended_index]
+        if is_decimal_successor(run_last, parts):
+            state.last_decimal = run_last
+            state.open_decimal = run_open
+            del state.suspended[suspended_index:]
+            return True
+    if parts == (1,):
+        state.suspended.append((previous, state.open_decimal))
+        state.open_decimal = {}
+        return True
+    return False
+
+
+def _accept_bare(state: _WalkState, parts: tuple[int, ...]) -> bool:
+    """True when a bare number follows on from the numbering so far."""
+
+    previous = state.last_decimal
+    if previous is None:
+        return parts == (1,)
+    return is_decimal_successor(previous, parts)
+
+
+def _open_schedule(state: _WalkState, marker: Marker, line: Line) -> _ClauseStart:
+    """Build the clause a schedule heading starts, and reset the walk for its body."""
+
+    clause_id = _unique(marker.token, state.used_ids)
+    state.levels[clause_id] = 1
+    state.scope_prefix = f"{clause_id}."
+    state.scope_parent = clause_id
+    state.base = clause_id
+    state.last_decimal = None
+    state.open_decimal = {}
+    state.paren_stack = []
+    state.suspended = []
+    return _marker_clause_start(marker, line, clause_id, None, 1)
+
+
+def _open_unnumbered_heading(state: _WalkState, line: Line) -> _ClauseStart:
+    """Build the clause an unnumbered heading line starts, and end the bracket run."""
+
+    state.paren_stack = []
+    state.base = None
+    return _ClauseStart(
+        id=None,
+        number=None,
+        parent_id=None,
+        level=1,
+        start=line.start,
+        body_start=line.start,
+        line_end=line.end,
+        heading_source=line.text,
+        numbering_source=NUMBERING_NUMBERS,
+        kind=None,
+    )
+
+
+def _open_paren_clause(state: _WalkState, marker: Marker, line: Line) -> _ClauseStart | None:
+    """Build the clause a bracketed marker starts, or None when it is not the next one."""
+
+    readings = paren_readings(marker.token)
+    chosen: tuple[ParenStyle, int] | None = None
+    for stack_index in range(len(state.paren_stack) - 1, -1, -1):
+        style, value, _open_clause = state.paren_stack[stack_index]
+        if (style, value + 1) in readings:
+            del state.paren_stack[stack_index:]
+            chosen = (style, value + 1)
+            break
+    if chosen is None:
+        for style, value in readings:
+            style_already_open = any(
+                open_style == style for open_style, _open_value, _open_clause in state.paren_stack
+            )
+            if value == 1 and not style_already_open:
+                chosen = (style, value)
+                break
+    if chosen is None:
+        return None
+    parent_id = state.paren_stack[-1][2] if state.paren_stack else state.base
+    id_prefix = parent_id if parent_id is not None else state.scope_prefix
+    clause_id = _unique(id_prefix + marker.id_part, state.used_ids)
+    level = 1 if parent_id is None else state.levels[parent_id] + 1
+    state.levels[clause_id] = level
+    record = _marker_clause_start(marker, line, clause_id, parent_id, level)
+    state.paren_stack.append((chosen[0], chosen[1], clause_id))
+    return record
 
 
 def _find_clause_starts(lines: tuple[Line, ...]) -> list[_ClauseStart]:
     """Walk the lines and return the clauses a marker or heading starts."""
 
     starts: list[_ClauseStart] = []
-    used_ids: set[str] = set()
-    levels: dict[str, int] = {}
     markers = [find_marker(line.text) for line in lines]
-
-    scope_prefix = ""
-    scope_parent: str | None = None
-    last_decimal: tuple[int, ...] | None = None
-    open_decimal: dict[tuple[int, ...], str] = {}
-    base: str | None = None
-    paren_stack: list[tuple[ParenStyle, int, str]] = []
-    suspended: list[tuple[tuple[int, ...], dict[tuple[int, ...], str]]] = []
+    state = _WalkState()
 
     for index, line in enumerate(lines):
         marker = markers[index]
         if marker is None:
             if _is_heading_at(lines, markers, index):
-                starts.append(
-                    _ClauseStart(
-                        id=None,
-                        number=None,
-                        parent_id=None,
-                        level=1,
-                        start=line.start,
-                        body_start=line.start,
-                        line_end=line.end,
-                        heading_source=line.text,
-                        numbering_source=NUMBERING_NUMBERS,
-                    )
-                )
-                paren_stack = []
-                base = None
+                starts.append(_open_unnumbered_heading(state, line))
             continue
-
         if marker.kind is MarkerKind.SCHEDULE:
-            clause_id = _unique(marker.token, used_ids)
-            levels[clause_id] = 1
-            starts.append(_marker_clause_start(marker, line, clause_id, None, 1))
-            scope_prefix = f"{clause_id}."
-            scope_parent = clause_id
-            base = clause_id
-            last_decimal = None
-            open_decimal = {}
-            paren_stack = []
-            suspended = []
-            continue
-
-        if marker.kind is MarkerKind.DECIMAL or marker.kind is MarkerKind.KEYWORD:
-            parts = marker.parts
-            accepted = False
-            if last_decimal is None or is_decimal_successor(last_decimal, parts):
-                accepted = True
-            else:
-                for suspended_index in range(len(suspended) - 1, -1, -1):
-                    run_last, run_open = suspended[suspended_index]
-                    if is_decimal_successor(run_last, parts):
-                        last_decimal = run_last
-                        open_decimal = run_open
-                        del suspended[suspended_index:]
-                        accepted = True
-                        break
-                if not accepted and parts == (1,):
-                    suspended.append((last_decimal, open_decimal))
-                    open_decimal = {}
-                    accepted = True
-            if not accepted:
-                continue
-            record, open_decimal = _open_numbered_clause(
-                marker=marker,
-                line=line,
-                parts=parts,
-                open_decimal=open_decimal,
-                scope_prefix=scope_prefix,
-                scope_parent=scope_parent,
-                levels=levels,
-                used_ids=used_ids,
-            )
-            starts.append(record)
-            last_decimal = parts
-            base = record.id
-            paren_stack = []
-            continue
-
-        if marker.kind is MarkerKind.BARE:
-            parts = marker.parts
-            accepted = (last_decimal is None and parts == (1,)) or (
-                last_decimal is not None and is_decimal_successor(last_decimal, parts)
-            )
-            if not accepted:
-                continue
-            record, open_decimal = _open_numbered_clause(
-                marker=marker,
-                line=line,
-                parts=parts,
-                open_decimal=open_decimal,
-                scope_prefix=scope_prefix,
-                scope_parent=scope_parent,
-                levels=levels,
-                used_ids=used_ids,
-            )
-            starts.append(record)
-            last_decimal = parts
-            base = record.id
-            paren_stack = []
-            continue
-
-        readings = paren_readings(marker.token)
-        chosen: tuple[ParenStyle, int] | None = None
-        for stack_index in range(len(paren_stack) - 1, -1, -1):
-            style, value, _open_clause = paren_stack[stack_index]
-            if (style, value + 1) in readings:
-                del paren_stack[stack_index:]
-                chosen = (style, value + 1)
-                break
-        if chosen is None:
-            for style, value in readings:
-                style_already_open = any(
-                    open_style == style for open_style, _open_value, _open_clause in paren_stack
-                )
-                if value == 1 and not style_already_open:
-                    chosen = (style, value)
-                    break
-        if chosen is None:
-            continue
-        parent_id = paren_stack[-1][2] if paren_stack else base
-        id_prefix = parent_id if parent_id is not None else scope_prefix
-        clause_id = _unique(id_prefix + marker.id_part, used_ids)
-        level = 1 if parent_id is None else levels[parent_id] + 1
-        levels[clause_id] = level
-        starts.append(_marker_clause_start(marker, line, clause_id, parent_id, level))
-        paren_stack.append((chosen[0], chosen[1], clause_id))
-
+            starts.append(_open_schedule(state, marker, line))
+        elif marker.kind is MarkerKind.DECIMAL or marker.kind is MarkerKind.KEYWORD:
+            if _accept_decimal(state, marker.parts):
+                starts.append(_open_numbered_clause(state, marker, line))
+        elif marker.kind is MarkerKind.BARE:
+            if _accept_bare(state, marker.parts):
+                starts.append(_open_numbered_clause(state, marker, line))
+        else:
+            record = _open_paren_clause(state, marker, line)
+            if record is not None:
+                starts.append(record)
     return starts
 
 
@@ -328,7 +338,7 @@ def _build_clauses(text: str, starts: list[_ClauseStart]) -> tuple[Clause, ...]:
     first = records[0]
     if first.start > 0:
         text_before = text[: first.start]
-        if text_before.strip() != "":
+        if not is_blank_text(text_before):
             records.insert(
                 0,
                 _ClauseStart(
@@ -341,6 +351,7 @@ def _build_clauses(text: str, starts: list[_ClauseStart]) -> tuple[Clause, ...]:
                     line_end=0,
                     heading_source=None,
                     numbering_source=NUMBERING_NUMBERS,
+                    kind=None,
                 ),
             )
         else:
@@ -456,7 +467,7 @@ def split_clauses(document: Document) -> tuple[Clause, ...]:
     """
 
     text = document.text
-    if text.strip() == "":
+    if is_blank_text(text):
         return ()
 
     lines = split_lines(text)

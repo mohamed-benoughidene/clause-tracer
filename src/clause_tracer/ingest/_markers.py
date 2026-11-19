@@ -44,6 +44,7 @@ CLOSE: Final[str] = r"(?:\*\*|__)?"
 AFTER: Final[str] = r"(?=[ \t]|$)"
 
 EMPHASIS_STRIP: Final[str] = " \t\ufeff#*_"
+SCHEDULE_SEPARATORS: Final[str] = "\u00b7:-\u2013\u2014"
 HEADING_STRIP: Final[str] = EMPHASIS_STRIP + "·:-–—"
 
 MONTH_NAMES: Final[frozenset[str]] = frozenset(
@@ -105,11 +106,20 @@ def _is_heading_like(line_text: str) -> bool:
     return len(stripped) <= 100 and stripped[-1] not in ".;:,"
 
 
+def _has_schedule_separator(line_text: str, designation_end: int) -> bool:
+    """True when nothing follows the designation, or a separator does."""
+
+    rest = line_text[designation_end:].lstrip(" \t")
+    return rest == "" or rest[0] in SCHEDULE_SEPARATORS
+
+
 def _find_schedule(line_text: str) -> Marker | None:
     match = _SCHEDULE.match(line_text)
     if match is None:
         return None
     if not _is_heading_like(line_text):
+        return None
+    if not _has_schedule_separator(line_text, match.end()):
         return None
     word = match.group("word")
     designation = match.group("des")
@@ -130,14 +140,15 @@ def _find_decimal(line_text: str) -> Marker | None:
         return None
     if match.group("dot") is None and "." not in match.group("num"):
         return None
-    parts = tuple(int(part) for part in match.group("num").split("."))
-    written = ".".join(str(part) for part in parts)
+    written = match.group("num")
+    parts = tuple(int(part) for part in written.split("."))
+    id_part = ".".join(str(part) for part in parts)
     return Marker(
         kind=MarkerKind.DECIMAL,
         parts=parts,
         token="",
         written=written,
-        id_part=written,
+        id_part=id_part,
         body_start=_body_start(line_text, match.end()),
     )
 

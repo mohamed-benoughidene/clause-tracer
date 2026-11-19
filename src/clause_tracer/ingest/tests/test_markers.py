@@ -38,7 +38,7 @@ def marker(
             "  12.3.4\tText",
             marker(MarkerKind.DECIMAL, (12, 3, 4), "", "12.3.4", "12.3.4", 9),
         ),
-        ("05. Old style", marker(MarkerKind.DECIMAL, (5,), "", "5", "5", 4)),
+        ("05. Old style", marker(MarkerKind.DECIMAL, (5,), "", "05", "5", 4)),
         ("7.", marker(MarkerKind.DECIMAL, (7,), "", "7", "7", 2)),
         ("5 November 2026", None),
         ("12.11.2026 is the date", None),

@@ -384,3 +384,37 @@ def test_sentence_ids_count_from_one_in_each_clause() -> None:
         "1.1.s2",
     )
     assert tuple(str(sentence.id) for sentence in clauses[1].sentences) == ("1.2.s1",)
+
+
+def test_wrapped_schedule_words_mid_clause_are_text() -> None:
+    text = (
+        "1. Payment\n"
+        "The Supplier must pay the fee.\n"
+        "Schedule 2 to this Agreement and the Customer will pay\n"
+        "1.1 Later."
+    )
+
+    assert ids(text) == ("1", "1.1")
+
+
+def test_paren_items_have_no_heading_and_bare_numbers_keep_theirs() -> None:
+    clauses = clauses_of("1. Lists\n(a) the Supplier\n(b) the Customer")
+
+    assert clauses[0].heading == "Lists"
+    assert clauses[1].heading is None
+    assert clauses[2].heading is None
+    assert clauses_of("1 Definitions\n2 Terms")[0].heading == "Definitions"
+
+
+def test_text_that_starts_with_a_byte_order_mark_and_blank_line_has_no_preamble() -> None:
+    clauses = clauses_of("﻿\n\n1. Foo\nbar")
+
+    assert len(clauses) == 1
+    assert clauses[0].number == "1"
+
+
+def test_number_keeps_its_written_digits_and_id_is_normalised() -> None:
+    clause = clauses_of("01.2 Text")[0]
+
+    assert clause.number == "01.2"
+    assert clause.id == "1.2"

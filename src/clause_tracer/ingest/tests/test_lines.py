@@ -29,6 +29,10 @@ def test_blank_line() -> None:
     assert not is_blank(Line(start=0, end=2, text=" a"))
 
 
+def test_line_with_only_a_byte_order_mark_is_blank() -> None:
+    assert is_blank(Line(start=0, end=1, text="﻿"))
+
+
 @given(source=hazard_text())
 def test_lines_point_into_the_text(source: str) -> None:
     for line in split_lines(source):
