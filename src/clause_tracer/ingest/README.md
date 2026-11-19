@@ -25,7 +25,9 @@ line breaks and byte-order marks is present. No side effects.
 Reads pasted text exactly like a text file. Raises `InputTooLargeError` over
 20 MB or 50,000 words, `NotUtf8Error` for a lone surrogate, and `EmptyInputError`
 when no character other than spaces, line breaks and byte-order marks is present.
-No side effects.
+The character count is checked before the text is encoded. For a text with too
+many characters the error's context holds `size_chars`; for one with too many
+bytes it holds `size_bytes`. Both hold `limit_bytes`. No side effects.
 
 ## Output shape
 A `Document` with no glyphs: `glyphs`, `char_map`, `pages`, `furniture`, `hidden`,

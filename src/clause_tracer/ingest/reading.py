@@ -48,11 +48,14 @@ def read_pasted_text(text: str) -> Document:
 
     Input:   the pasted text.
     Output:  a Document whose text is the input, character for character.
-    Raises:  InputTooLargeError over 20 MB or 50,000 words; NotUtf8Error for a
-             lone surrogate; EmptyInputError when the text has no visible character.
+    Raises:  InputTooLargeError over 20 MB in characters or bytes, or over
+             50,000 words; NotUtf8Error for a lone surrogate; EmptyInputError
+             when the text has no visible character.
     Effects: none. Does not read or write files (I11).
     """
 
+    if len(text) > MAX_FILE_BYTES:
+        raise InputTooLargeError({"size_chars": len(text), "limit_bytes": MAX_FILE_BYTES})
     try:
         data = text.encode("utf-8", errors="strict")
     except UnicodeEncodeError as error:
