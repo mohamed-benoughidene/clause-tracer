@@ -13,6 +13,7 @@ from clause_tracer.core import (
     EmptyInputError,
     FileKind,
     InputTooLargeError,
+    NotTextError,
     NotUtf8Error,
     SourceFile,
 )
@@ -28,7 +29,8 @@ def read_text_file(data: bytes, *, kind: FileKind, name: str) -> Document:
     Output:  a Document whose text is the decoded bytes, character for character.
     Raises:  ValueError for any other kind (a caller bug); InputTooLargeError
              over 20 MB or 50,000 words; NotUtf8Error for bytes that are not
-             strict UTF-8; EmptyInputError when the text has no visible character.
+             strict UTF-8; NotTextError for a NUL character; EmptyInputError
+             when the text has no visible character.
     Effects: none. Does not read or write files (I11).
     """
 
@@ -49,8 +51,9 @@ def read_pasted_text(text: str) -> Document:
     Input:   the pasted text.
     Output:  a Document whose text is the input, character for character.
     Raises:  InputTooLargeError over 20 MB in characters or bytes, or over
-             50,000 words; NotUtf8Error for a lone surrogate; EmptyInputError
-             when the text has no visible character.
+             50,000 words; NotUtf8Error for a lone surrogate; NotTextError for
+             a NUL character; EmptyInputError when the text has no visible
+             character.
     Effects: none. Does not read or write files (I11).
     """
 
@@ -66,8 +69,11 @@ def read_pasted_text(text: str) -> Document:
 
 
 def _build_document(data: bytes, text: str, *, kind: FileKind, name: str) -> Document:
-    """Run the shared checks, then build the document (steps 4, 5 and 6)."""
+    """Run the NUL, blank and word checks (steps 4, 5 and 6), then build (7)."""
 
+    nul_offset = text.find("\x00")
+    if nul_offset != -1:
+        raise NotTextError({"char_offset": nul_offset})
     has_no_visible_text = text.replace("\ufeff", "").strip() == ""
     if has_no_visible_text:
         raise EmptyInputError()

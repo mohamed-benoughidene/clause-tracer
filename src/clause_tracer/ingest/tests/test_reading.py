@@ -9,6 +9,7 @@ from clause_tracer.core import (
     EmptyInputError,
     FileKind,
     InputTooLargeError,
+    NotTextError,
     NotUtf8Error,
 )
 from clause_tracer.ingest import read_pasted_text, read_text_file
@@ -53,6 +54,18 @@ def test_not_utf8_raises() -> None:
         read_text_file(b"caf\xe9 bar", kind=FileKind.TEXT, name="a.txt")
 
     assert raised.value.context["byte_offset"] == 3
+
+
+def test_nul_in_file_raises() -> None:
+    with pytest.raises(NotTextError) as raised:
+        read_text_file(b"abc\x00def", kind=FileKind.TEXT, name="a.txt")
+
+    assert raised.value.context["char_offset"] == 3
+
+
+def test_nul_only_file_raises() -> None:
+    with pytest.raises(NotTextError):
+        read_text_file(b"\x00", kind=FileKind.TEXT, name="a.txt")
 
 
 def test_file_over_the_byte_limit_raises() -> None:
@@ -147,6 +160,13 @@ def test_pasted_bom_only_raises() -> None:
 def test_pasted_lone_surrogate_raises() -> None:
     with pytest.raises(NotUtf8Error) as raised:
         read_pasted_text("a\ud800b")
+
+    assert raised.value.context["char_offset"] == 1
+
+
+def test_pasted_nul_raises() -> None:
+    with pytest.raises(NotTextError) as raised:
+        read_pasted_text("a\x00b")
 
     assert raised.value.context["char_offset"] == 1
 
