@@ -47,7 +47,10 @@ Clause ids come from the number and the order: `5.1`, `7.1(a)(i)`, `S1` and
 number appears twice, and `4` for `Article IV`.
 
 `numbering_source` is `numbers` when a marker opens the clauses, and
-`paragraphs` when no marker is accepted. The clauses cover the whole text:
+`paragraphs` when no marker is accepted. In the paragraph case, a blank line
+between two non-blank lines starts a new paragraph; when the text has no such
+blank line, every non-blank line is a paragraph. The first clause starts at 0
+and the last ends at the end of the text. The clauses cover the whole text:
 each starts where the one before ends.
 
 A clause that a marker starts has a heading when the rest of its line is short,

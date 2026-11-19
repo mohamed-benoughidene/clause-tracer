@@ -118,14 +118,13 @@ def _heading_for(record: _ClauseStart, text: str, span_end: int) -> str | None:
 
 
 def _sentences_for(
-    record: _ClauseStart,
     clause_id: str,
     span: Span,
+    body_start: int,
     text: str,
 ) -> tuple[Sentence, ...]:
     """Split one clause into sentences, with the number in the first one."""
 
-    body_start = record.body_start if record.number is not None else span.start
     boundaries = [span.start]
     starts = sentence_starts(text[body_start : span.end])
     boundaries.extend(body_start + start for start in starts[1:])
@@ -328,6 +327,7 @@ def _build_clauses(text: str, starts: list[_ClauseStart]) -> tuple[Clause, ...]:
         end = numbered[index + 1].start if index + 1 < len(numbered) else len(text)
         assert record.id is not None
         span = Span(start=record.start, end=end)
+        body_start = record.body_start if record.number is not None else span.start
         clauses.append(
             Clause(
                 id=ClauseId(record.id),
@@ -337,28 +337,73 @@ def _build_clauses(text: str, starts: list[_ClauseStart]) -> tuple[Clause, ...]:
                 parent_id=(ClauseId(record.parent_id) if record.parent_id is not None else None),
                 span=span,
                 numbering_source=record.numbering_source,
-                sentences=_sentences_for(record, record.id, span, text),
+                sentences=_sentences_for(record.id, span, body_start, text),
             )
         )
     return tuple(clauses)
 
 
-def _split_paragraphs(text: str) -> tuple[Clause, ...]:
-    """One paragraph clause over the whole text (S2-M3-T9 fills this in)."""
+def _has_blank_line_between(lines: tuple[Line, ...]) -> bool:
+    """True when a blank line stands between two non-blank lines."""
 
-    span = Span(start=0, end=len(text))
-    return (
-        Clause(
-            id=ClauseId("p1"),
-            number=None,
-            heading=None,
-            level=1,
-            parent_id=None,
-            span=span,
-            numbering_source=NUMBERING_PARAGRAPHS,
-            sentences=(Sentence(id=SentenceId("p1.s1"), span=span),),
-        ),
-    )
+    seen_non_blank = False
+    seen_blank_after_non_blank = False
+    for line in lines:
+        if is_blank(line):
+            if seen_non_blank:
+                seen_blank_after_non_blank = True
+        else:
+            if seen_blank_after_non_blank:
+                return True
+            seen_non_blank = True
+    return False
+
+
+def _paragraph_line_groups(lines: tuple[Line, ...]) -> list[list[Line]]:
+    """Group lines into paragraphs, by blank lines when the text has them."""
+
+    if not _has_blank_line_between(lines):
+        return [[line] for line in lines if not is_blank(line)]
+
+    groups: list[list[Line]] = []
+    current: list[Line] = []
+    for line in lines:
+        if is_blank(line):
+            if current:
+                groups.append(current)
+                current = []
+        else:
+            current.append(line)
+    if current:
+        groups.append(current)
+    return groups
+
+
+def _split_paragraphs(text: str) -> tuple[Clause, ...]:
+    """Split a text with no accepted marker into paragraph clauses."""
+
+    groups = _paragraph_line_groups(split_lines(text))
+    clauses: list[Clause] = []
+    for index, group in enumerate(groups):
+        is_first = index == 0
+        start = 0 if is_first else group[0].start
+        is_last = index + 1 == len(groups)
+        end = len(text) if is_last else groups[index + 1][0].start
+        clause_id = f"p{index + 1}"
+        span = Span(start=start, end=end)
+        clauses.append(
+            Clause(
+                id=ClauseId(clause_id),
+                number=None,
+                heading=None,
+                level=1,
+                parent_id=None,
+                span=span,
+                numbering_source=NUMBERING_PARAGRAPHS,
+                sentences=_sentences_for(clause_id, span, span.start, text),
+            )
+        )
+    return tuple(clauses)
 
 
 def split_clauses(document: Document) -> tuple[Clause, ...]:

@@ -254,11 +254,49 @@ def test_short_line_inside_a_sentence_is_not_a_heading() -> None:
     assert ids(text) == ("1.1", "1.2")
 
 
-def test_no_marker_is_one_paragraph_clause_for_now() -> None:
+def test_paragraphs_by_blank_lines() -> None:
+    text = "First part\nwraps here.\n\nSecond part.\n\n\nThird."
+
+    clauses = clauses_of(text)
+
+    assert tuple(str(clause.id) for clause in clauses) == ("p1", "p2", "p3")
+    assert tuple(clause.span.start for clause in clauses) == (0, 24, 39)
+    for clause in clauses:
+        assert clause.numbering_source == "paragraphs"
+
+
+def test_paragraphs_by_lines_when_no_blank_line() -> None:
+    clauses = clauses_of("First.\nSecond.\nThird.")
+
+    assert tuple(str(clause.id) for clause in clauses) == ("p1", "p2", "p3")
+
+
+def test_one_paragraph() -> None:
     clauses = clauses_of("Just words.")
 
     assert tuple(str(clause.id) for clause in clauses) == ("p1",)
-    assert clauses[0].numbering_source == "paragraphs"
+    assert clauses[0].span.start == 0
+    assert clauses[0].span.end == len("Just words.")
+
+
+def test_paragraph_clauses_cover_the_text() -> None:
+    text = "First part\nwraps here.\n\nSecond part.\n\n\nThird."
+
+    clauses = clauses_of(text)
+
+    assert clauses[0].span.start == 0
+    assert clauses[-1].span.end == len(text)
+    for earlier, later in zip(clauses, clauses[1:], strict=False):
+        assert earlier.span.end == later.span.start
+
+
+def test_paragraph_sentences() -> None:
+    clauses = clauses_of("One. Two.")
+
+    assert tuple(str(sentence.id) for sentence in clauses[0].sentences) == (
+        "p1.s1",
+        "p1.s2",
+    )
 
 
 def test_numbered_heading_line_has_a_heading() -> None:
