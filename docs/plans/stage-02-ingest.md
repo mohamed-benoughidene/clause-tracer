@@ -81,7 +81,7 @@ When this is done, NUPunkt and Lingua are pinned, `ingest` has a coverage floor,
   - **Rules:** [ADR 0007](../adr/0007-document-reading-stack.md) (NUPunkt), D2 (ids rebuild the same way).
   - **Depends on:** None
 
-- [ ] **S2-M1-T2: An 85% coverage floor for `ingest`**
+- [x] **S2-M1-T2: An 85% coverage floor for `ingest`**
   - **Build:** In `scripts/check.sh`, add one last line: `run coverage report --include='src/clause_tracer/ingest/*' --fail-under=85`. In `scripts/README.md`, change the `check.sh` row to say "a 95% branch-coverage floor for `core` and an 85% floor for `ingest`".
   - **Files:** `scripts/check.sh`, `scripts/README.md`.
   - **Tests first:** None. The check is the script itself.
