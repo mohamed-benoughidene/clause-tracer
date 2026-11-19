@@ -24,6 +24,7 @@ from clause_tracer.ingest._numbering import (
     is_decimal_successor,
     paren_readings,
 )
+from clause_tracer.ingest._sentences import sentence_starts
 
 NUMBERING_NUMBERS: Final[str] = "numbers"
 NUMBERING_PARAGRAPHS: Final[str] = "paragraphs"
@@ -114,6 +115,31 @@ def _heading_for(record: _ClauseStart, text: str, span_end: int) -> str | None:
     if not later_lines_are_blank:
         return None
     return title
+
+
+def _sentences_for(
+    record: _ClauseStart,
+    clause_id: str,
+    span: Span,
+    text: str,
+) -> tuple[Sentence, ...]:
+    """Split one clause into sentences, with the number in the first one."""
+
+    body_start = record.body_start if record.number is not None else span.start
+    boundaries = [span.start]
+    starts = sentence_starts(text[body_start : span.end])
+    boundaries.extend(body_start + start for start in starts[1:])
+
+    sentences: list[Sentence] = []
+    for index, boundary in enumerate(boundaries):
+        end = boundaries[index + 1] if index + 1 < len(boundaries) else span.end
+        sentences.append(
+            Sentence(
+                id=SentenceId(f"{clause_id}.s{index + 1}"),
+                span=Span(start=boundary, end=end),
+            )
+        )
+    return tuple(sentences)
 
 
 def _find_clause_starts(lines: tuple[Line, ...]) -> list[_ClauseStart]:
@@ -311,7 +337,7 @@ def _build_clauses(text: str, starts: list[_ClauseStart]) -> tuple[Clause, ...]:
                 parent_id=(ClauseId(record.parent_id) if record.parent_id is not None else None),
                 span=span,
                 numbering_source=record.numbering_source,
-                sentences=(Sentence(id=SentenceId(f"{record.id}.s1"), span=span),),
+                sentences=_sentences_for(record, record.id, span, text),
             )
         )
     return tuple(clauses)

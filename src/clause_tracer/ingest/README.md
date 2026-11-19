@@ -55,6 +55,10 @@ does not end like a sentence, and every later line in the clause is blank. An
 unnumbered heading clause takes its own line as the heading. The clause of text
 before the first clause has no heading.
 
+Sentence ids add `.s1`, `.s2` and so on to the clause id (`5.1.s3`). A clause's
+sentences cover the whole clause: each starts where the one before ends. The
+clause number stays in the first sentence.
+
 ## Output shape
 A `Document` with no glyphs: `glyphs`, `char_map`, `pages`, `furniture`, `hidden`,
 `undecodable` and `tracked_changes` are empty in stage 2.

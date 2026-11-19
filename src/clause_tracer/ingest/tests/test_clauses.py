@@ -314,3 +314,35 @@ def test_heading_clause_heading() -> None:
     clauses = clauses_of(text)
 
     assert clauses[2].heading == "Background"
+
+
+def test_sentences_cover_the_clause() -> None:
+    text = "5.4 Invoices are paid within 60 days. Interest runs at 4% p.a. from the due date."
+
+    clauses = clauses_of(text)
+
+    assert len(clauses) == 1
+    sentences = clauses[0].sentences
+    assert tuple(str(sentence.id) for sentence in sentences) == ("5.4.s1", "5.4.s2")
+    assert tuple(sentence.span for sentence in sentences) == (
+        Span(start=0, end=38),
+        Span(start=38, end=81),
+    )
+
+
+def test_the_number_stays_in_the_first_sentence() -> None:
+    clauses = clauses_of("5. Charges and payment")
+
+    assert len(clauses) == 1
+    assert len(clauses[0].sentences) == 1
+    assert clauses[0].sentences[0].span == clauses[0].span
+
+
+def test_sentence_ids_count_from_one_in_each_clause() -> None:
+    clauses = clauses_of("1.1 One. Two.\n1.2 Three.")
+
+    assert tuple(str(sentence.id) for sentence in clauses[0].sentences) == (
+        "1.1.s1",
+        "1.1.s2",
+    )
+    assert tuple(str(sentence.id) for sentence in clauses[1].sentences) == ("1.2.s1",)
