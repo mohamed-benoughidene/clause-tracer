@@ -3,6 +3,11 @@
 Implements Spec section 6.1 steps 1-2.
 """
 
+from clause_tracer.ingest.clauses import (
+    NUMBERING_NUMBERS,
+    NUMBERING_PARAGRAPHS,
+    split_clauses,
+)
 from clause_tracer.ingest.reading import (
     DOCUMENT_SCHEMA_VERSION,
     read_pasted_text,
@@ -11,6 +16,9 @@ from clause_tracer.ingest.reading import (
 
 __all__: list[str] = [
     "DOCUMENT_SCHEMA_VERSION",
+    "NUMBERING_NUMBERS",
+    "NUMBERING_PARAGRAPHS",
     "read_pasted_text",
     "read_text_file",
+    "split_clauses",
 ]
