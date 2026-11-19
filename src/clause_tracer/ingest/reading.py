@@ -57,14 +57,14 @@ def read_pasted_text(text: str) -> Document:
         data = text.encode("utf-8", errors="strict")
     except UnicodeEncodeError as error:
         raise NotUtf8Error({"char_offset": error.start}) from error
+    if len(data) > MAX_FILE_BYTES:
+        raise InputTooLargeError({"size_bytes": len(data), "limit_bytes": MAX_FILE_BYTES})
     return _build_document(data, text, kind=FileKind.PASTED, name="")
 
 
 def _build_document(data: bytes, text: str, *, kind: FileKind, name: str) -> Document:
-    """Run the shared checks, then build the document (steps 2, 4, 5 and 6)."""
+    """Run the shared checks, then build the document (steps 4, 5 and 6)."""
 
-    if len(data) > MAX_FILE_BYTES:
-        raise InputTooLargeError({"size_bytes": len(data), "limit_bytes": MAX_FILE_BYTES})
     if text.strip() == "":
         raise EmptyInputError()
     words = count_words(text)
