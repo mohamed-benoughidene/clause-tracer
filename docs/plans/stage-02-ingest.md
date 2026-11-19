@@ -53,11 +53,11 @@
 
 ## 4. Checks before starting
 
-- [ ] **The plan is Accepted.** Questions 1 to 9 in section 6 were answered on 17 Nov 2026, and the tasks follow the answers.
-- [ ] **The skeleton passes.** Run `.venv/bin/uv sync`, then `scripts/check.sh`. It must exit 0 before any change.
+- [x] **The plan is Accepted.** Questions 1 to 9 in section 6 were answered on 17 Nov 2026, and the tasks follow the answers.
+- [x] **The skeleton passes.** Run `.venv/bin/uv sync`, then `scripts/check.sh`. It must exit 0 before any change.
 - [x] **NUPunkt behaves as this plan assumes.** The planner checked these on 16 Nov 2026 with `nupunkt` 0.8.0 (MIT, no dependencies, Python 3.11 or later, ships `py.typed`). Run them again after S2-M1-T1: `nupunkt.sentence_spans(text)` returns a list of `(start, end)` pairs; the offsets count code points (`"x\U0001F600. Next one here."` gives a first pair of `(0, 3)`); the same text gives the same pairs on two calls; an empty string gives `[]`. If one fails, stop and bring it to the owner.
 - [x] **Lingua behaves as this plan assumes.** The planner checked these on 17 Nov 2026 with `lingua-language-detector` 2.2.0 (Apache-2.0, Python 3.12 or later, ships `py.typed`). Run them again after S2-M1-T6: with `LanguageDetectorBuilder.from_all_languages().build()`, `detect_language_of("Les factures sont payées dans un délai de soixante jours à compter de la date de facture.")` is `Language.FRENCH`, `detect_language_of("Invoices will be paid within 60 days of the invoice date.")` is `Language.ENGLISH`, and a second call gives the same answer. Every row of `not_english.toml` gives its `warned` value under the rule of S2-M5-T4. If one fails, stop and bring it to the owner.
-- [ ] **The docs are on `main`.** The `docs/` branch that holds this plan, with any spec or system design change the answers needed, is merged. Milestone 1 is cut from that `main`.
+- [x] **The docs are on `main`.** The `docs/` branch that holds this plan, with any spec or system design change the answers needed, is merged. Milestone 1 is cut from that `main`.
 
 ## 5. Milestones and tasks
 
