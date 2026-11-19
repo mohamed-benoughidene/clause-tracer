@@ -17,7 +17,8 @@ from clause_tracer.ingest._numbering import paren_readings, roman_numeral_value
 
 
 class MarkerKind(StrEnum):
-    """The six forms that can open a clause."""
+    """The five kinds of marker that can open a clause: DECIMAL (1.2),
+    PAREN ((a)), SCHEDULE (Schedule 1), KEYWORD (Article 5) and BARE (3 Term)."""
 
     DECIMAL = auto()
     PAREN = auto()
@@ -97,13 +98,18 @@ def _body_start(line_text: str, match_end: int) -> int:
     return index
 
 
+def _is_heading_like(line_text: str) -> bool:
+    """True when a numbered line is short and does not end like a sentence."""
+
+    stripped = line_text.strip(EMPHASIS_STRIP)
+    return len(stripped) <= 100 and stripped[-1] not in ".;:,"
+
+
 def _find_schedule(line_text: str) -> Marker | None:
     match = _SCHEDULE.match(line_text)
     if match is None:
         return None
-    stripped = line_text.strip(EMPHASIS_STRIP)
-    is_heading_like = len(stripped) <= 100 and stripped[-1] not in ".;:,"
-    if not is_heading_like:
+    if not _is_heading_like(line_text):
         return None
     word = match.group("word")
     designation = match.group("des")
@@ -201,8 +207,7 @@ def _find_bare(line_text: str) -> Marker | None:
     word = match.group("word")
     has_no_tab = "\t" not in line_text
     is_not_a_month = word.rstrip(",.;:") not in MONTH_NAMES
-    stripped = line_text.strip(EMPHASIS_STRIP)
-    is_heading_like = len(stripped) <= 100 and stripped[-1] not in ".;:,"
+    is_heading_like = _is_heading_like(line_text)
     if not (has_no_tab and is_not_a_month and is_heading_like):
         return None
     num = match.group("num")

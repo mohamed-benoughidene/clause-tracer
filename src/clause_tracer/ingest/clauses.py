@@ -63,21 +63,29 @@ def _unique(base: str, used: set[str]) -> str:
     return unique
 
 
-def _has_marker_after(lines: tuple[Line, ...], index: int) -> bool:
-    for later in lines[index + 1 :]:
-        if is_blank(later):
+def _has_marker_after(
+    lines: tuple[Line, ...],
+    markers: list[Marker | None],
+    index: int,
+) -> bool:
+    for later_index in range(index + 1, len(lines)):
+        if is_blank(lines[later_index]):
             continue
-        return find_marker(later.text) is not None
+        return markers[later_index] is not None
     return False
 
 
-def _is_heading_at(lines: tuple[Line, ...], index: int) -> bool:
+def _is_heading_at(
+    lines: tuple[Line, ...],
+    markers: list[Marker | None],
+    index: int,
+) -> bool:
     if index == 0:
         return False
     line = lines[index]
     if not is_heading_line(line.text):
         return False
-    return is_blank(lines[index - 1]) or _has_marker_after(lines, index)
+    return is_blank(lines[index - 1]) or _has_marker_after(lines, markers, index)
 
 
 def _marker_clause_start(
@@ -141,12 +149,46 @@ def _sentences_for(
     return tuple(sentences)
 
 
+def _open_numbered_clause(
+    *,
+    marker: Marker,
+    line: Line,
+    parts: tuple[int, ...],
+    open_decimal: dict[tuple[int, ...], str],
+    scope_prefix: str,
+    scope_parent: str | None,
+    levels: dict[str, int],
+    used_ids: set[str],
+) -> tuple[_ClauseStart, dict[tuple[int, ...], str]]:
+    """Build the clause a decimal or bare number starts, under its open parent.
+
+    Returns the clause and the open decimal numbers with this clause added.
+    The caller decides whether the number is accepted.
+    """
+
+    open_parents = {
+        key: value for key, value in open_decimal.items() if _is_proper_prefix(key, parts)
+    }
+    parent_id = (
+        max(open_parents.items(), key=lambda item: len(item[0]))[1]
+        if open_parents
+        else scope_parent
+    )
+    level = 1 if parent_id is None else levels[parent_id] + 1
+    clause_id = _unique(scope_prefix + marker.id_part, used_ids)
+    levels[clause_id] = level
+    open_parents[parts] = clause_id
+    record = _marker_clause_start(marker, line, clause_id, parent_id, level)
+    return record, open_parents
+
+
 def _find_clause_starts(lines: tuple[Line, ...]) -> list[_ClauseStart]:
     """Walk the lines and return the clauses a marker or heading starts."""
 
     starts: list[_ClauseStart] = []
     used_ids: set[str] = set()
     levels: dict[str, int] = {}
+    markers = [find_marker(line.text) for line in lines]
 
     scope_prefix = ""
     scope_parent: str | None = None
@@ -157,9 +199,9 @@ def _find_clause_starts(lines: tuple[Line, ...]) -> list[_ClauseStart]:
     suspended: list[tuple[tuple[int, ...], dict[tuple[int, ...], str]]] = []
 
     for index, line in enumerate(lines):
-        marker = find_marker(line.text)
+        marker = markers[index]
         if marker is None:
-            if _is_heading_at(lines, index):
+            if _is_heading_at(lines, markers, index):
                 starts.append(
                     _ClauseStart(
                         id=None,
@@ -210,21 +252,19 @@ def _find_clause_starts(lines: tuple[Line, ...]) -> list[_ClauseStart]:
                     accepted = True
             if not accepted:
                 continue
-            open_decimal = {
-                key: value for key, value in open_decimal.items() if _is_proper_prefix(key, parts)
-            }
-            parent_id = (
-                max(open_decimal.items(), key=lambda item: len(item[0]))[1]
-                if open_decimal
-                else scope_parent
+            record, open_decimal = _open_numbered_clause(
+                marker=marker,
+                line=line,
+                parts=parts,
+                open_decimal=open_decimal,
+                scope_prefix=scope_prefix,
+                scope_parent=scope_parent,
+                levels=levels,
+                used_ids=used_ids,
             )
-            level = 1 if parent_id is None else levels[parent_id] + 1
-            clause_id = _unique(scope_prefix + marker.id_part, used_ids)
-            levels[clause_id] = level
-            starts.append(_marker_clause_start(marker, line, clause_id, parent_id, level))
-            open_decimal[parts] = clause_id
+            starts.append(record)
             last_decimal = parts
-            base = clause_id
+            base = record.id
             paren_stack = []
             continue
 
@@ -235,21 +275,19 @@ def _find_clause_starts(lines: tuple[Line, ...]) -> list[_ClauseStart]:
             )
             if not accepted:
                 continue
-            open_decimal = {
-                key: value for key, value in open_decimal.items() if _is_proper_prefix(key, parts)
-            }
-            parent_id = (
-                max(open_decimal.items(), key=lambda item: len(item[0]))[1]
-                if open_decimal
-                else scope_parent
+            record, open_decimal = _open_numbered_clause(
+                marker=marker,
+                line=line,
+                parts=parts,
+                open_decimal=open_decimal,
+                scope_prefix=scope_prefix,
+                scope_parent=scope_parent,
+                levels=levels,
+                used_ids=used_ids,
             )
-            level = 1 if parent_id is None else levels[parent_id] + 1
-            clause_id = _unique(scope_prefix + marker.id_part, used_ids)
-            levels[clause_id] = level
-            starts.append(_marker_clause_start(marker, line, clause_id, parent_id, level))
-            open_decimal[parts] = clause_id
+            starts.append(record)
             last_decimal = parts
-            base = clause_id
+            base = record.id
             paren_stack = []
             continue
 
