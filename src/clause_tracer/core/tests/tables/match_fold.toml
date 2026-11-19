@@ -1,0 +1,68 @@
+# Expected answers. Only the owner edits this file. Constitution T11.
+# Format: docs/plans/stage-02-ingest.md, task S2-M5-T1.
+
+# Case never matters when finding a name or a term.
+[[case]]
+id = "capital-letters"
+text = "The AGENCY Shall Pay"
+expected = "the agency shall pay"
+
+# Testing strategy 5: folding can change the length.
+[[case]]
+id = "sharp-s-becomes-two-letters"
+text = "Hauptstraße 14"
+expected = "hauptstrasse 14"
+
+# U+FB01, one drawn shape, is two letters.
+[[case]]
+id = "ligature-fi"
+text = "\ufb01fteen days"
+expected = "fifteen days"
+
+# Curly quotes become straight ones.
+[[case]]
+id = "curly-quotes"
+text = "“the Developer” and the Agency’s staff"
+expected = "\"the developer\" and the agency's staff"
+
+# U+00AD is dropped.
+[[case]]
+id = "soft-hyphen-inside-a-word"
+text = "pay\u00adment"
+expected = "payment"
+
+# U+200B is dropped, so it cannot hide a keyword.
+[[case]]
+id = "zero-width-space-inside-a-word"
+text = "non\u200bcompete"
+expected = "noncompete"
+
+# U+00A0 is a space.
+[[case]]
+id = "no-break-space"
+text = "60\u00a0days"
+expected = "60 days"
+
+# A run of spaces and line breaks is one space.
+[[case]]
+id = "spaces-and-line-breaks"
+text = "within  60 \n\n days"
+expected = "within 60 days"
+
+# Every kind of dash is one hyphen.
+[[case]]
+id = "en-dash-between-numbers"
+text = "2009–2010"
+expected = "2009-2010"
+
+# U+202E, a right-to-left override, is dropped.
+[[case]]
+id = "bidi-control"
+text = "\u202epaid in full"
+expected = "paid in full"
+
+# Full-width letters and digits (U+FF21 and on) become plain ones.
+[[case]]
+id = "full-width-letters"
+text = "\uff21\uff22\uff23 \uff11\uff12"
+expected = "abc 12"

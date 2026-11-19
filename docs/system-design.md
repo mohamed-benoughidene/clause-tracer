@@ -180,9 +180,9 @@ The values column gives the exact member names.
 | `TrackedChange` | `earlier: str, new: str, author: str, span: Span \| None` | Listed at the contract check. The accepted view is the contract (ADR 0012) |
 | `InputWarning` | `code: str, page: int \| None` | Undecodable pages, scanned pages in a mixed file, not English (Spec 9) |
 | `Document` | `schema_version: int, source: SourceFile, text: str, char_map: tuple[int \| None, ...], glyphs: tuple[Glyph, ...], pages: tuple[Page, ...], furniture: tuple[Span, ...], hidden: tuple[HiddenText, ...], undecodable: tuple[Span, ...], tracked_changes: tuple[TrackedChange, ...], warnings: tuple[InputWarning, ...]` | The one canonical text. When the document has glyphs (a PDF), `char_map` has one entry per character of `text`: the index of its glyph in `glyphs`, or `None` for a character the app inserted. A document without glyphs (text, Markdown, pasted text, Word) has `glyphs == ()`, `char_map == ()` and `pages == ()` (decided 14 Nov 2026). Word comments are hidden text (Spec 2), so they sit in `hidden` |
-| `MatchKey` | `text: str, to_canonical: tuple[int, ...]` | Folded copy with its index map (section 4.2) |
+| `MatchKey` | `text: str, to_canonical: tuple[int, ...]` | Folded copy with its index map (section 4.2). Built in `core` by the wide fold `fold_for_matching`; `to_canonical` has one last entry equal to the text's length |
 | `Sentence` | `id: SentenceId, span: Span` | Stable ids such as `4.2.s3`, which the AI points at |
-| `Clause` | `id: ClauseId, number: str \| None, heading: str \| None, level: int, parent_id: ClauseId \| None, span: Span, numbering_source: str, sentences: tuple[Sentence, ...]` | One clause, or one paragraph when the contract has no numbers (Spec 6.1 step 2) |
+| `Clause` | `id: ClauseId, number: str \| None, heading: str \| None, level: int, parent_id: ClauseId \| None, span: Span, numbering_source: str, sentences: tuple[Sentence, ...]` | One clause, or one paragraph when the contract has no numbers (Spec 6.1 step 2). Ids come from the number and the order (section 5.1) |
 | `CrossReference` | `source: Span, target: ClauseId \| None` | An unresolved target is kept, with no target |
 | `DefinedTerm` | `term: str, definition: Span, uses: tuple[Span, ...]` | Evidence trail, and the privacy allow-list (section 4.1) |
 | `Override` | `clause_id: ClauseId, target: ClauseId \| None, overrides_target: bool, evidence: Span` | Direction matters. No target means it joins every trail (Spec 4.5) |
@@ -232,7 +232,7 @@ The values column gives the exact member names.
 
 - `ClauseTracerError(Exception)` takes one argument, `context: Mapping[str, str | int] | None = None`, and keeps it as a read-only `MappingProxyType` in `self.context`. Each class has a class attribute `code: ClassVar[str]`. Context holds ids, step names and counts only, never contract text.
 - Four groups, each a direct subclass of `ClauseTracerError`: `InputError`, `ModelServiceError`, `LocalError`, and `ReviewCancelled` (the cancellation group is this one class). The base and the three group classes have `code = ""`.
-- Input errors, with their codes: `UnreadableFileError` `unreadable_file`, `ScannedPdfError` `scanned_pdf`, `OldWordFileError` `old_word_file`, `InputTooLargeError` `input_too_large`, `NotUtf8Error` `not_utf8`, `EncryptedPdfError` `encrypted_pdf`, `PlaybookFormatError` `playbook_format`.
+- Input errors, with their codes: `UnreadableFileError` `unreadable_file`, `ScannedPdfError` `scanned_pdf`, `OldWordFileError` `old_word_file`, `InputTooLargeError` `input_too_large`, `NotUtf8Error` `not_utf8`, `EmptyInputError` `empty_input` (a file or paste with no character other than spaces and line breaks, Spec 14.2; added 17 Nov 2026), `EncryptedPdfError` `encrypted_pdf`, `PlaybookFormatError` `playbook_format`.
 - Model-service errors: `NetworkUnavailableError` `network_unavailable`, `InvalidApiKeyError` `invalid_api_key`, `NoCreditError` `no_credit`, `RateLimitedError` `rate_limited`, `NoPrivateModelError` `no_private_model`, `ModelTimeoutError` `model_timeout`, `ModelReplyInvalidError` `model_reply_invalid`. `RateLimitedError` is the one leaf with an extra argument: `retry_after_seconds: int | None = None`, the wait the AI service asked for. It is kept as `self.retry_after_seconds` and, when given, as `context["retry_after_seconds"]`. A negative value raises `ValueError` (added 14 Nov 2026).
 - Local errors: `SecretStoreUnavailableError` `secret_store_unavailable`, `StorageCorruptError` `storage_corrupt`, `SchemaTooNewError` `schema_too_new`, `ConfigError` `config`, `DuplicateRecordError` `duplicate_record`.
 - Cancellation: `ReviewCancelled` `review_cancelled`.
@@ -326,6 +326,17 @@ Every position in the app points into **one canonical text**, built from the pag
         └── exact maps back ◄── quote ◄── AI reply: sentence ids + short quote
 ```
 
+**Two folds, both in `core`** (decided 17 Nov 2026). `fold_for_quote_check` is the narrow Spec 2 fold, and the only one that confirms a quote. `fold_for_matching` builds the `MatchKey`, which finds names, terms and keywords. It applies NFKC and case-folding to each character, so `ß` becomes `ss`. It drops soft hyphens and zero-width and bidi characters, makes curly quotes straight and every dash one hyphen, and collapses runs of spaces. `links`, `privacy` and `checking` fold their own words with the same function.
+
+**Clauses cover the whole text** (decided 17 Nov 2026). No word of the contract falls outside a clause, because text in no clause would never be matched or sent (Spec 5, "never guess"). A numbered heading is a clause of its own and the parent of its sub-clauses. Text before the first number is a clause. A line that starts nothing belongs to the clause before it. On the sample contract this gives 64 clauses. The splitter reads, at the start of a line:
+- `5.`, `5.1` to `5.1.2.3.4`;
+- `(a)`, `(i)`, `(A)` and `(1)`, and also `a)` and `i)`;
+- `Clause 5` and `Article IV`, with ids in Arabic numbers;
+- a bare `3 Payment`, but never on a line with a tab, never with a month name, and before any numbering only a bare `1`;
+- schedule headings, which start numbering again.
+
+Markdown symbols before a number are looked past and kept in the text. A number counts only when it follows on from the numbering so far. A short unnumbered line is a heading of its own when a blank line stands before it, or when the next non-blank line starts with a marker (a number, a bracketed item, a keyword or a schedule heading), and it ends any open bracketed list. The full rules are in the [stage 2 plan](plans/stage-02-ingest.md), milestone 3.
+
 The AI answers with pointers: clause and sentence ids from a closed list, then a short quote. Code confirms the quote appears exactly once inside the cited sentences, maps it back through the segments to the real text, and from there to page boxes. The same rule runs again, by a different code path, right before a highlight is drawn. If that last check fails, nothing is drawn and the app says "Check [clause] yourself." The full reasoning is in [the seams report](../reports/Clause%20Tracer%20pipeline%20seams.md).
 
 ## 5. Data model and storage
@@ -338,7 +349,7 @@ The AI answers with pointers: clause and sentence ids from a closed list, then a
 | **Derived** | Canonical text, clauses, links, values, labels, explanations, the report | Rebuildable from raw; stored with `derived_by = step@version` and its cache key (D2) |
 | **User state** | Checks, notes, ticks, tone, suggestions | Kept apart, keyed by stable position ids, so Re-run keeps it (Spec 6.3) |
 
-Every stored record carries a schema version. Numbered migrations move derived data forward, after the encrypted file is copied to a numbered backup (D5, D6, D7). Ids are opaque strings made at the edge. Clause and sentence ids are derived from the clause number and span, so they stay the same when the same file is read again.
+Every stored record carries a schema version. Numbered migrations move derived data forward, after the encrypted file is copied to a numbered backup (D5, D6, D7). Ids are opaque strings made at the edge. Clause and sentence ids come from the clause number and the order, never from offsets, so they stay the same when the same file is read again: `5.1`, `7.1(a)(i)`, `S1.2` inside Schedule 1, `p3` for the third clause with no number, a `~2` ending when a number appears twice, and `5.1.s3` for a sentence (decided 17 Nov 2026).
 
 ### 5.2 Where it is stored
 
@@ -562,7 +573,7 @@ If a hosted option is ever added, these promises change and every copy must be u
 
 ## 13. Decisions
 
-The owner accepted ADRs 0005 to 0015 on 12 Nov 2026, and ADR 0016 on 13 Nov 2026.
+The owner accepted ADRs 0005 to 0015 on 12 Nov 2026, ADR 0016 on 13 Nov 2026, and ADR 0017 on 17 Nov 2026.
 
 | Decision | What was accepted | Record |
 | --- | --- | --- |
@@ -644,10 +655,10 @@ The task plan of each stage is written in `docs/plans/` just before the stage is
 ### 15.2 Stage 2: `ingest` for text, Markdown and pasted text
 
 - **Builds.** Strict UTF-8 reading (`NotUtf8Error`); Markdown shown as plain characters; the size limits `[Assumption]` (Spec 9); the clause splitter with its stack of open levels and continuity check, falling back to paragraphs; sentence ids with NUPunkt, tolerant of missed breaks; match keys with index maps; the not-English warning (Spec 9).
-- **Governed by.** ADR 0004, [ADR 0007](adr/0007-document-reading-stack.md) (NUPunkt).
+- **Governed by.** ADR 0004, [ADR 0007](adr/0007-document-reading-stack.md) (NUPunkt), [ADR 0017](adr/0017-language-detection-with-lingua.md) (Lingua).
 - **Done when** `python -m clause_tracer.ingest` reads the sample contract and prints its clauses and sentences, and the golden files match.
 - **Tests, in the testing strategy.** Section 4 (the `ingest` row), section 5 (invariants 2 and 4), section 3 (golden files).
-- **Not yet decided:** how the app detects that a contract is mostly not English. Spec 9 asks for the warning; no ADR names a method or a library.
+- **Decided 17 Nov 2026:** the not-English check uses Lingua ([ADR 0017](adr/0017-language-detection-with-lingua.md)). The task plan is [the stage 2 plan](plans/stage-02-ingest.md).
 
 ### 15.3 Stage 3: `links`
 

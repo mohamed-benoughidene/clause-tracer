@@ -39,7 +39,7 @@ This folder holds the project's written documents: specs, design and copy guides
 | [0003](adr/0003-walk-away-takes-the-brand-red.md) | The brand red `#A91207` is used only for walk-away. |
 | [0004](adr/0004-code-layout.md) | The code is one package with a pure core, six pipeline modules, adapters and a CLI. The import rules are checked automatically. |
 
-ADRs 0005 to 0015 were all **accepted** by the project owner on 12 Nov 2026, and ADR 0016 on 13 Nov 2026.
+ADRs 0005 to 0015 were all **accepted** by the project owner on 12 Nov 2026, ADR 0016 on 13 Nov 2026, and ADR 0017 on 17 Nov 2026.
 
 | ADR | Decision or recommendation |
 | --- | --- |
@@ -55,6 +55,7 @@ ADRs 0005 to 0015 were all **accepted** by the project owner on 12 Nov 2026, and
 | [0014](adr/0014-protection-and-release-integrity.md) | Use no obfuscation. Protect the project with signed and attested releases and honest wording. A trade mark is deferred. |
 | [0015](adr/0015-provider-ready-seam.md) | Keep version 1 as specified, but keep the seams open for a later hosted option with accounts. |
 | [0016](adr/0016-legal-positions-without-a-lawyer.md) | Cautious working positions on the pikepdf licence, enforcing the project's licence and the EU AI Act, because no lawyer is available. |
+| [0017](adr/0017-language-detection-with-lingua.md) | Detect a contract's language with Lingua, which names the language, so the app can later support Arabic, French and others. It adds about 290 MB. |
 
 To record a new decision, copy [ADR 0005](adr/0005-engine-runner-shapes-and-ports.md) and give it the next number ([WRITING_DOCS.md](../WRITING_DOCS.md) section 6 has the format). ADRs 0001 to 0004 use an older, shorter format with front matter (`status`, `date`). If a later choice changes an ADR, add a dated **Amendment** section to it rather than rewriting it. ADR 0002 shows how.
 

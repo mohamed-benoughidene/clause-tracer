@@ -1,0 +1,63 @@
+# Expected answers. Only the owner edits this file. Constitution T11.
+# Format: docs/plans/stage-02-ingest.md, task S2-M5-T3.
+
+# Plain English contract wording: no warning.
+[[case]]
+id = "english-contract-paragraph"
+text = """
+This Agreement renews automatically for further 12-month periods unless either party gives 30 days' written notice before the end of the current period. The Developer will provide the Services with reasonable skill and care and in line with good industry practice. Invoices will be paid within 60 days of the invoice date. Each party will keep the other's confidential information private and use it only for this Agreement."""
+warned = false
+
+# French: warned.
+[[case]]
+id = "french-contract-paragraph"
+text = """
+Le présent contrat est conclu pour une durée de douze mois à compter de sa signature. Le prestataire s'engage à fournir les services avec soin. Les factures sont payées dans un délai de soixante jours à compter de la date de facture. Chaque partie garde confidentielles les informations de l'autre partie et ne les utilise que pour ce contrat."""
+warned = true
+
+# Arabic: warned.
+[[case]]
+id = "arabic-contract-paragraph"
+text = """
+يبدأ هذا العقد من تاريخ توقيعه ويستمر لمدة اثني عشر شهرا. يلتزم المطور بتقديم الخدمات بعناية ومهارة معقولة ووفقا لأفضل الممارسات المعمول بها في هذا المجال. تدفع الوكالة الفواتير خلال ستين يوما من تاريخ الفاتورة. يحافظ كل طرف على سرية معلومات الطرف الآخر ولا يستخدمها إلا لأغراض هذا العقد. يجوز لأي من الطرفين إنهاء هذا العقد بإشعار كتابي مدته أربعة عشر يوما. يخضع هذا العقد لقوانين الجزائر."""
+warned = true
+
+# A short English sentence of 10 words: no warning.
+[[case]]
+id = "english-short-sentence"
+text = """
+Invoices will be paid within 60 days of the invoice date."""
+warned = false
+
+# A short French sentence of 17 words: warned.
+[[case]]
+id = "french-short-sentence"
+text = """
+Les factures sont payées dans un délai de soixante jours à compter de la date de facture."""
+warned = true
+
+# Fewer than 10 words: too short to tell, so no warning, even in French.
+[[case]]
+id = "too-short-to-tell"
+text = """
+Le Client paie les frais."""
+warned = false
+
+# Mostly English, with a French schedule: no warning, because most of the contract is English.
+[[case]]
+id = "english-with-a-french-schedule"
+text = """
+This Agreement renews automatically for further 12-month periods unless either party gives 30 days' written notice before the end of the current period. The Developer will provide the Services with reasonable skill and care and in line with good industry practice. Invoices will be paid within 60 days of the invoice date. Each party will keep the other's confidential information private and use it only for this Agreement. Annexe 1. Le prestataire réalise le site du client selon les maquettes validées par l'agence. Les frais sont payés par étapes, à la livraison de chaque étape. Le prestataire remet le code source et la documentation à la fin du projet."""
+warned = false
+
+# A table whose words are English: no warning.
+[[case]]
+id = "table-of-numbers-with-few-words"
+text = """
+Milestone Work Target Charges
+1 Discovery Week 2 £1,600
+2 Build Week 6 £3,200
+3 Integration Week 9 £3,200
+4 Launch Week 11 £1,600
+Total £9,600"""
+warned = false

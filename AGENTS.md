@@ -29,7 +29,7 @@ The design is done. Build stage 1 is done: `core` holds the shapes, ports, fakes
 - `assets/`: the logo master files.
 - `reports/`: research reports on how to build the app. [The architecture report](reports/Clause%20Tracer%20pipeline%20architecture.md) is the research behind the build design; read it before planning a build stage. Its stage table and shapes sketch are historical: [docs/system-design.md](docs/system-design.md) sections 3.4 and 15 are current.
 
-Two design docs sit on top of the reports. Read both before planning a build stage: [docs/system-design.md](docs/system-design.md) says how the parts fit together, and [docs/testing-strategy.md](docs/testing-strategy.md) says which tests each stage needs. Both are accepted, and so are ADRs 0005 to 0016. Check an ADR's status line: a later one may be only proposed, which means a recommendation, not a decision. Before you build on a proposed one, ask the user whether it is accepted.
+Two design docs sit on top of the reports. Read both before planning a build stage: [docs/system-design.md](docs/system-design.md) says how the parts fit together, and [docs/testing-strategy.md](docs/testing-strategy.md) says which tests each stage needs. Both are accepted, and so are ADRs 0005 to 0017. Check an ADR's status line: a later one may be only proposed, which means a recommendation, not a decision. Before you build on a proposed one, ask the user whether it is accepted.
 
 Spec section 9 builds a Python command-line tool first, then wraps it as a desktop app. The build plan, with its twelve numbered stages, is [docs/system-design.md](docs/system-design.md) section 15; the stage table in the architecture report is historical. The task plan for the stage being built is in `docs/plans/`: read [docs/plans/README.md](docs/plans/README.md) before you implement or write a plan, and build only from a plan whose status is Accepted or In progress. Spec section 13 lists what is decided and what is still open. Bring open items to the user as a question. Don't pick one yourself.
 
@@ -66,3 +66,68 @@ Read [Constitution.md](Constitution.md) before you write, move or split any code
 - **The EU AI Act has a working position, not a settled answer** ([ADR 0016](docs/adr/0016-legal-positions-without-a-lawyer.md), Spec section 10). Never write that Article 50 doesn't apply to the app.
 - **Keep the repo free of real data.** Use the sample contract and the names from Spec 14.5, and invented placeholders for keys.
 - **Logo changes start outside the repo.** The build scripts are in `/home/mo/lab/Prototyping/logo/final/`. Copy the results into `assets/` and `prototype/` (see [assets/README.md](assets/README.md)).
+
+## How to write your replies to me
+
+Write your chat replies to me to about 80 percent of ASD-STE100 Issue 9 (Simplified Technical English, or STE). STE is the controlled English used in aircraft maintenance manuals. Numbers in brackets point to the rules in the official standard.
+
+### Switch
+
+- STE is on by default.
+- "stop ste mode" turns STE off. "ste mode" turns it back on.
+- Confirm each switch in one line.
+
+### Where STE applies
+
+STE applies only to what you write to me in chat. This includes plans, explanations, summaries, questions, and reports of what you did.
+
+STE does not apply to:
+1. Code and code comments.
+2. Docs, READMEs, and specs.
+3. Commit messages and pull request descriptions.
+4. Text that users of the app see, such as error messages and button labels.
+5. Replies in Arabic or French. STE is defined only for English.
+
+These follow the repo's own rules and the other sections of this file.
+
+### Rules
+
+Words
+1. Use one name for one thing in a reply. Do not switch names. [1.11]
+2. Do not use slang or jargon. Explain a technical term, a code term, or a project word in plain words the first time you use it. [1.9, 1.10]
+3. Do not put more than 3 nouns in a row. Use "of," "for," or "in" to break a longer group. [2.1]
+
+Verbs
+4. Use only the simple present, the simple past, and the simple future with "will." Do not use forms like "has been doing," "is doing," or "had done." [3.2, 3.4]
+5. Use the active voice. Use the passive only when nobody knows who did the action. [3.6]
+6. Use a direct verb for an action. Write "The test shows 3 errors," not "The test gives an indication of 3 errors." [3.7]
+7. Avoid "-ing" verb forms when they make a sentence unclear. This rule is partly kept, not a full ban. [3.5]
+
+Sentences
+8. Do not use contractions. Do not drop small words like "the" or "a" to save space. [4.2, 4.5]
+9. Put a long group of items in a vertical list. [4.3]
+10. Keep step sentences to 20 words or fewer. Keep explanation sentences to 25 words or fewer. [5.1, 6.3]
+11. Give each paragraph one topic, and put the main sentence first. Use no more than 3 sentences in a paragraph. [6.4 to 6.6]
+
+Steps and warnings
+12. Give one action per step, and start each step with a command verb. Two actions can share one step only when they happen at the same time. [5.2, 5.3]
+13. Put a condition first, then a comma, then the command. Example. "If the check fails, open the log." [5.4]
+14. Use notes only to give information. Never put an instruction, a limit, or a warning in a note. [5.5]
+15. Start a warning with its risk level. Use WARNING when data loss, money loss, or a security risk can occur. Use CAUTION when something can break but can be fixed. Then give the command. Then say what can happen if I ignore it. [7.1 to 7.3]
+
+### Rules not used
+
+- The STE dictionary of about 900 approved words and its strict word meanings. Use everyday words instead. [1.1 to 1.4, 3.1]
+- American spelling only. [1.14]
+
+### Limits
+
+- Accuracy wins. If an STE rewrite would change the meaning or remove a needed warning, keep the meaning.
+- Keep exact text exactly as it is. This includes code, commands, file paths, error messages, and quotes. [1.5, category 10]
+- Keep the tone direct, not cold.
+
+### Example
+
+Before: "So I've gone ahead and updated the parser, and it's now handling empty files properly. I've been running the tests and they're mostly passing, though you'll probably want to double-check the one that was failing earlier."
+
+After: "I changed the parser. It now stops on an empty file and shows a clear error. 41 of 42 tests pass. The date test still fails. Run the checks again before you merge."
