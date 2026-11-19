@@ -65,7 +65,8 @@ def read_pasted_text(text: str) -> Document:
 def _build_document(data: bytes, text: str, *, kind: FileKind, name: str) -> Document:
     """Run the shared checks, then build the document (steps 4, 5 and 6)."""
 
-    if text.strip() == "":
+    has_no_visible_text = text.replace("\ufeff", "").strip() == ""
+    if has_no_visible_text:
         raise EmptyInputError()
     words = count_words(text)
     if words > MAX_WORDS:

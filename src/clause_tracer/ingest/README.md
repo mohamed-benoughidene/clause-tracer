@@ -15,8 +15,8 @@ Read the contract file and split it into numbered clauses.
 Reads a text or Markdown file. `kind` is `FileKind.TEXT` or `FileKind.MARKDOWN`;
 another kind raises `ValueError`, which is a bug in the caller. Reads strict UTF-8.
 Raises `InputTooLargeError` over 20 MB or 50,000 words, `NotUtf8Error` for bytes
-that are not UTF-8, and `EmptyInputError` when no character other than spaces and
-line breaks is present. No side effects.
+that are not UTF-8, and `EmptyInputError` when no character other than spaces,
+line breaks and byte-order marks is present. No side effects.
 
 ### `read_pasted_text`
 
@@ -24,7 +24,8 @@ line breaks is present. No side effects.
 
 Reads pasted text exactly like a text file. Raises `InputTooLargeError` over
 20 MB or 50,000 words, `NotUtf8Error` for a lone surrogate, and `EmptyInputError`
-when no character other than spaces and line breaks is present. No side effects.
+when no character other than spaces, line breaks and byte-order marks is present.
+No side effects.
 
 ## Output shape
 A `Document` with no glyphs: `glyphs`, `char_map`, `pages`, `furniture`, `hidden`,

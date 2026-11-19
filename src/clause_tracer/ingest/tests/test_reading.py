@@ -98,6 +98,16 @@ def test_blank_file_raises() -> None:
         read_text_file(b" \n\t\r\n", kind=FileKind.TEXT, name="a.txt")
 
 
+def test_bom_only_file_raises() -> None:
+    with pytest.raises(EmptyInputError):
+        read_text_file(b"\xef\xbb\xbf", kind=FileKind.TEXT, name="a.txt")
+
+
+def test_bom_and_blank_file_raises() -> None:
+    with pytest.raises(EmptyInputError):
+        read_text_file(b"\xef\xbb\xbf \n", kind=FileKind.TEXT, name="a.txt")
+
+
 def test_wrong_kind_is_a_bug() -> None:
     with pytest.raises(ValueError):
         read_text_file(b"1. Pay now.", kind=FileKind.PDF, name="a.pdf")
@@ -127,6 +137,11 @@ def test_pasted_text_matches_the_same_text_as_a_file() -> None:
 def test_pasted_blank_raises() -> None:
     with pytest.raises(EmptyInputError):
         read_pasted_text("  \n")
+
+
+def test_pasted_bom_only_raises() -> None:
+    with pytest.raises(EmptyInputError):
+        read_pasted_text("\ufeff")
 
 
 def test_pasted_lone_surrogate_raises() -> None:
