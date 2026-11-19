@@ -26,7 +26,8 @@ def compare_or_update(path: Path, actual: str, *, update: bool) -> None:
         raise AssertionError(
             f"{path.name} is missing. Run pytest with --update-goldens, then read the file."
         )
-    expected = path.read_text(encoding="utf-8", newline="")
+    with path.open(encoding="utf-8", newline="") as handle:
+        expected = handle.read()
     assert actual == expected
 
 

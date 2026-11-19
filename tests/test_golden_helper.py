@@ -35,7 +35,7 @@ def test_update_writes_the_file(golden_compare: Callable[..., None], tmp_path: P
 
     golden_compare(path, "a\n", update=True)
 
-    assert path.read_text(encoding="utf-8", newline="") == "a\n"
+    assert path.read_bytes().decode("utf-8") == "a\n"
 
 
 def test_update_replaces_the_file(golden_compare: Callable[..., None], tmp_path: Path) -> None:
@@ -44,7 +44,7 @@ def test_update_replaces_the_file(golden_compare: Callable[..., None], tmp_path:
 
     golden_compare(path, "b\n", update=True)
 
-    assert path.read_text(encoding="utf-8", newline="") == "b\n"
+    assert path.read_bytes().decode("utf-8") == "b\n"
 
 
 def test_line_endings_are_kept(golden_compare: Callable[..., None], tmp_path: Path) -> None:
