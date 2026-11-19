@@ -1,4 +1,4 @@
-"""Read text and Markdown files into a Document (Spec 6.1 step 1).
+"""Read text, Markdown and pasted text into a Document (Spec 6.1 step 1).
 
 The decoded text is kept unchanged (D1): a byte-order mark, CRLF line ends
 and Markdown symbols all stay. A document without glyphs has empty glyph
@@ -40,6 +40,31 @@ def read_text_file(data: bytes, *, kind: FileKind, name: str) -> Document:
         text = data.decode("utf-8", errors="strict")
     except UnicodeDecodeError as error:
         raise NotUtf8Error({"byte_offset": error.start}) from error
+    return _build_document(data, text, kind=kind, name=name)
+
+
+def read_pasted_text(text: str) -> Document:
+    """Read pasted text into a document.
+
+    Input:   the pasted text.
+    Output:  a Document whose text is the input, character for character.
+    Raises:  InputTooLargeError over 20 MB or 50,000 words; NotUtf8Error for a
+             lone surrogate; EmptyInputError when the text has no visible character.
+    Effects: none. Does not read or write files (I11).
+    """
+
+    try:
+        data = text.encode("utf-8", errors="strict")
+    except UnicodeEncodeError as error:
+        raise NotUtf8Error({"char_offset": error.start}) from error
+    return _build_document(data, text, kind=FileKind.PASTED, name="")
+
+
+def _build_document(data: bytes, text: str, *, kind: FileKind, name: str) -> Document:
+    """Run the shared checks, then build the document (steps 2, 4, 5 and 6)."""
+
+    if len(data) > MAX_FILE_BYTES:
+        raise InputTooLargeError({"size_bytes": len(data), "limit_bytes": MAX_FILE_BYTES})
     if text.strip() == "":
         raise EmptyInputError()
     words = count_words(text)

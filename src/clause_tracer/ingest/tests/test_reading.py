@@ -11,7 +11,7 @@ from clause_tracer.core import (
     InputTooLargeError,
     NotUtf8Error,
 )
-from clause_tracer.ingest import read_text_file
+from clause_tracer.ingest import read_pasted_text, read_text_file
 from clause_tracer.ingest.limits import MAX_FILE_BYTES
 
 
@@ -101,3 +101,41 @@ def test_blank_file_raises() -> None:
 def test_wrong_kind_is_a_bug() -> None:
     with pytest.raises(ValueError):
         read_text_file(b"1. Pay now.", kind=FileKind.PDF, name="a.pdf")
+
+
+def test_pasted_text_is_kept() -> None:
+    text = "1. Pay\n# now"
+
+    document = read_pasted_text(text)
+
+    assert document.text == text
+    assert document.source.kind is FileKind.PASTED
+    assert document.source.name == ""
+    assert document.source.size == 12
+    assert document.source.sha256 == hashlib.sha256(text.encode()).hexdigest()
+
+
+def test_pasted_text_matches_the_same_text_as_a_file() -> None:
+    text = "(a) one\n(b) two"
+
+    assert (
+        read_pasted_text(text).text
+        == read_text_file(text.encode(), kind=FileKind.TEXT, name="a.txt").text
+    )
+
+
+def test_pasted_blank_raises() -> None:
+    with pytest.raises(EmptyInputError):
+        read_pasted_text("  \n")
+
+
+def test_pasted_lone_surrogate_raises() -> None:
+    with pytest.raises(NotUtf8Error) as raised:
+        read_pasted_text("a\ud800b")
+
+    assert raised.value.context["char_offset"] == 1
+
+
+def test_pasted_over_the_word_limit_raises() -> None:
+    with pytest.raises(InputTooLargeError):
+        read_pasted_text("a " * 50_001)

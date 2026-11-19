@@ -18,6 +18,14 @@ Raises `InputTooLargeError` over 20 MB or 50,000 words, `NotUtf8Error` for bytes
 that are not UTF-8, and `EmptyInputError` when no character other than spaces and
 line breaks is present. No side effects.
 
+### `read_pasted_text`
+
+`read_pasted_text(text: str) -> Document`
+
+Reads pasted text exactly like a text file. Raises `InputTooLargeError` over
+20 MB or 50,000 words, `NotUtf8Error` for a lone surrogate, and `EmptyInputError`
+when no character other than spaces and line breaks is present. No side effects.
+
 ## Output shape
 A `Document` with no glyphs: `glyphs`, `char_map`, `pages`, `furniture`, `hidden`,
 `undecodable` and `tracked_changes` are empty in stage 2.
