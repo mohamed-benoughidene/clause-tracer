@@ -89,7 +89,7 @@ When this is done, NUPunkt and Lingua are pinned, `ingest` has a coverage floor,
   - **Rules:** [Testing strategy 11](../testing-strategy.md#11-coverage-targets).
   - **Depends on:** None
 
-- [ ] **S2-M1-T3: The golden-file command**
+- [x] **S2-M1-T3: The golden-file command**
   - **Build:** Create `conftest.py` at the repo root with:
     - `def pytest_addoption(parser: pytest.Parser) -> None`, which adds the option `--update-goldens` (`action="store_true"`, `default=False`, help text `"Rewrite golden files instead of comparing them."`).
     - `def compare_or_update(path: Path, actual: str, *, update: bool) -> None`. When `update` is true, it creates the parent folder and writes `actual` to `path` as UTF-8 with `newline=""`. When false and `path` does not exist, it raises `AssertionError(f"{path.name} is missing. Run pytest with --update-goldens, then read the file.")`. When false and the file exists, it reads it as UTF-8 with `newline=""` and runs `assert actual == expected`.

@@ -8,5 +8,6 @@ Unit tests live beside each module, in `src/clause_tracer/<module>/tests/`.
 | `contracts/` | One behaviour suite per port, run against each fake now and each real adapter from stage 6 |
 | `test_cli_end_to_end.py` | The command-line tool, run as a subprocess (the smoke test) |
 | `test_copy_lint.py` | The copy lint in `scripts/copy_lint.py`, with small inline strings. A tooling test, not an app test |
+| `test_golden_helper.py` | The golden-file helper in the root `conftest.py`, including the missing-file message and line endings |
 | `test_check_owner_tables.py` | The owner-table guard in `scripts/check_owner_tables.py`, including its git behaviour |
 | `fixtures/` | Sample contracts and saved AI replies for the tests above. Empty so far; see its README |
