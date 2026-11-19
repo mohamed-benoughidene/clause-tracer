@@ -136,6 +136,16 @@ def test_pasted_lone_surrogate_raises() -> None:
     assert raised.value.context["char_offset"] == 1
 
 
+def test_pasted_over_the_byte_limit_raises() -> None:
+    with pytest.raises(InputTooLargeError) as raised:
+        read_pasted_text("a" * (MAX_FILE_BYTES + 1))
+
+    assert raised.value.context == {
+        "size_bytes": MAX_FILE_BYTES + 1,
+        "limit_bytes": MAX_FILE_BYTES,
+    }
+
+
 def test_pasted_over_the_word_limit_raises() -> None:
     with pytest.raises(InputTooLargeError):
         read_pasted_text("a " * 50_001)
