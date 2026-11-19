@@ -84,6 +84,7 @@ name = "clause-tracer"
 version = "0.0.0"
 source = { editable = "." }
 dependencies = [
+    { name = "nupunkt" },
     { name = "pydantic" },
 ]
 
@@ -99,7 +100,10 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "pydantic", specifier = ">=2.14.3" }]
+requires-dist = [
+    { name = "nupunkt", specifier = "==0.8.0" },
+    { name = "pydantic", specifier = ">=2.14.3" },
+]
 
 [package.metadata.requires-dev]
 dev = [
@@ -612,6 +616,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/d0/6f/43edf3be2748d0e40974a5ee046a8bb4c9961a4bdd3e7d5c6dcbf32d1af6/mypy_extensions-1.2.0.tar.gz", hash = "sha256:c6e275a07f1c2fc096b62940452d0eaa3f3af7de45d704787866240a7c6d5a51", size = 6566, upload-time = "2026-11-03T16:26:33.692Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b5/99/7b1adac7e97ce7bbda34792dc6e9b2f5cc5cffd1875883f78a818b2a2687/mypy_extensions-1.2.0-py3-none-any.whl", hash = "sha256:993e7a20aa5671eb41a7132cf555af30062da99729601601b9a8382b11cae768", size = 5114, upload-time = "2026-11-03T16:26:32.731Z" },
+]
+
+[[package]]
+name = "nupunkt"
+version = "0.8.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/bb/28/8daac6d8a466c74ed13784014f93c321613b0d58f43a0f9888156ce74663/nupunkt-0.8.0.tar.gz", hash = "sha256:d38168c549aa1eeb8161d828084a5785e2fad749a22c4517be371f55002e2e91", size = 146534, upload-time = "2026-09-28T11:19:18.999Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fd/e1/33da54f6939280c53b39a7f4257f8b145e0671a2528aae53299de47fcc2f/nupunkt-0.8.0-py3-none-any.whl", hash = "sha256:339e4b017eded7a060a17a55300854c35eb067c05857da0843cd93b5c1d85f9b", size = 148375, upload-time = "2026-09-28T11:19:17.742Z" },
 ]
 
 [[package]]

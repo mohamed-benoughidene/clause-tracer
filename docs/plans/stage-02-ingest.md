@@ -3,9 +3,9 @@
 | | |
 | --- | --- |
 | Stage | 2, `ingest` (text, Markdown and pasted text) |
-| Status | Draft |
+| Status | In progress |
 | Branch | One branch for each milestone, cut from `main`: `feat/ingest-m1-foundations`, `feat/ingest-m2-reading`, `feat/ingest-m3-clauses-and-sentences`, `feat/ingest-m4-samples-and-goldens`, `feat/ingest-m5-match-key-and-language`. See [the README](README.md), "Branches and pull requests" |
-| Accepted on | Not yet |
+| Accepted on | 19 Nov 2026 |
 | Stage outline | [System design section 15.2](../system-design.md#152-stage-2-ingest-for-text-markdown-and-pasted-text) |
 
 ## 1. Goal
@@ -55,7 +55,7 @@
 
 - [ ] **The plan is Accepted.** Questions 1 to 9 in section 6 were answered on 17 Nov 2026, and the tasks follow the answers.
 - [ ] **The skeleton passes.** Run `.venv/bin/uv sync`, then `scripts/check.sh`. It must exit 0 before any change.
-- [ ] **NUPunkt behaves as this plan assumes.** The planner checked these on 16 Nov 2026 with `nupunkt` 0.8.0 (MIT, no dependencies, Python 3.11 or later, ships `py.typed`). Run them again after S2-M1-T1: `nupunkt.sentence_spans(text)` returns a list of `(start, end)` pairs; the offsets count code points (`"x\U0001F600. Next one here."` gives a first pair of `(0, 3)`); the same text gives the same pairs on two calls; an empty string gives `[]`. If one fails, stop and bring it to the owner.
+- [x] **NUPunkt behaves as this plan assumes.** The planner checked these on 16 Nov 2026 with `nupunkt` 0.8.0 (MIT, no dependencies, Python 3.11 or later, ships `py.typed`). Run them again after S2-M1-T1: `nupunkt.sentence_spans(text)` returns a list of `(start, end)` pairs; the offsets count code points (`"x\U0001F600. Next one here."` gives a first pair of `(0, 3)`); the same text gives the same pairs on two calls; an empty string gives `[]`. If one fails, stop and bring it to the owner.
 - [ ] **Lingua behaves as this plan assumes.** The planner checked these on 17 Nov 2026 with `lingua-language-detector` 2.2.0 (Apache-2.0, Python 3.12 or later, ships `py.typed`). Run them again after S2-M1-T6: with `LanguageDetectorBuilder.from_all_languages().build()`, `detect_language_of("Les factures sont payées dans un délai de soixante jours à compter de la date de facture.")` is `Language.FRENCH`, `detect_language_of("Invoices will be paid within 60 days of the invoice date.")` is `Language.ENGLISH`, and a second call gives the same answer. Every row of `not_english.toml` gives its `warned` value under the rule of S2-M5-T4. If one fails, stop and bring it to the owner.
 - [ ] **The docs are on `main`.** The `docs/` branch that holds this plan, with any spec or system design change the answers needed, is merged. Milestone 1 is cut from that `main`.
 
@@ -73,7 +73,7 @@
 
 When this is done, NUPunkt and Lingua are pinned, `ingest` has a coverage floor, the golden-file command exists, and the empty owner tables are in place.
 
-- [ ] **S2-M1-T1: Add NUPunkt**
+- [x] **S2-M1-T1: Add NUPunkt**
   - **Build:** Run `.venv/bin/uv add 'nupunkt==0.8.0'`. It is a runtime dependency, pinned to one version, because sentence ids depend on where it puts sentence breaks. Commit `pyproject.toml` and `uv.lock`.
   - **Files:** `pyproject.toml`, `uv.lock`, `src/clause_tracer/ingest/tests/test_sentence_library.py`.
   - **Tests first:** in `test_sentence_library.py`: `test_nupunkt_version_is_pinned` (`nupunkt.__version__ == "0.8.0"`); `test_known_breaks` (`nupunkt.sentence_spans("Invoices are paid within 60 days. Interest runs at 4% p.a. from the due date. See cl. 5 below.")` equals `[(0, 33), (34, 77), (78, 94)]`); `test_offsets_count_code_points` (`nupunkt.sentence_spans("x\U0001F600. Next one here.")[0] == (0, 3)`); `test_empty_text_has_no_sentences` (`nupunkt.sentence_spans("") == []`).
