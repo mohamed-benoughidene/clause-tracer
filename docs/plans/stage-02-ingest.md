@@ -192,7 +192,7 @@ When this is done, `split_clauses` gives the clauses of a document with their se
   - **Rules:** T1, T6.
   - **Depends on:** None
 
-- [ ] **S2-M3-T3: Markers**
+- [x] **S2-M3-T3: Markers**
   - **Build:** Needs questions 7 and 8. In `src/clause_tracer/ingest/_markers.py`:
     - `class MarkerKind(StrEnum)` with `DECIMAL`, `PAREN`, `SCHEDULE`, `KEYWORD`, `BARE` (values are the lower-case names).
     - The shape `Marker` with fields `kind: MarkerKind`, `parts: tuple[int, ...]`, `token: str`, `written: str`, `id_part: str`, `body_start: int`. `written` is the number as the clause's `number` field shows it. `id_part` is the piece the clause id is built from.
