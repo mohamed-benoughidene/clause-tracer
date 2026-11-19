@@ -264,7 +264,7 @@ When this is done, `split_clauses` gives the clauses of a document with their se
   - **Rules:** T1, T6, B4 (the patterns that find a marker are hidden here), [Spec 9](../spec.md#9-running-the-app) (Markdown symbols stay plain characters in the text), [system design 4.2](../system-design.md#42-the-offset-chain) (what the splitter reads).
   - **Depends on:** S2-M3-T2
 
-- [ ] **S2-M3-T4: Sentence starts from NUPunkt**
+- [x] **S2-M3-T4: Sentence starts from NUPunkt**
   - **Build:** In `src/clause_tracer/ingest/_sentences.py`: `def sentence_starts(text: str) -> tuple[int, ...]`, which returns `tuple(start for start, _end in nupunkt.sentence_spans(text))`. This is the only file in the repo that imports `nupunkt`.
   - **Files:** `src/clause_tracer/ingest/_sentences.py`, `src/clause_tracer/ingest/tests/test_sentences.py`.
   - **Tests first:** in `test_sentences.py`: `test_starts_of_three_sentences` (the text of `test_known_breaks` in S2-M1-T1 gives `(0, 34, 78)`); `test_empty_text` (`""` gives `()`); `test_only_this_file_imports_nupunkt` (read every `.py` file under `src/clause_tracer/` except `ingest/_sentences.py` and the files in `ingest/tests/`; none contains the string `nupunkt`); the property `test_starts_are_strictly_increasing_and_inside_the_text` (for `hazard_text()`: each start is `>= 0` and `< len(text)`, and each is greater than the one before).
