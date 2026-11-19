@@ -17,6 +17,7 @@ from clause_tracer.core import (
     NetworkUnavailableError,
     NoCreditError,
     NoPrivateModelError,
+    NotTextError,
     NotUtf8Error,
     OldWordFileError,
     PlaybookFormatError,
@@ -36,6 +37,7 @@ LEAVES: tuple[type[Exception], ...] = (
     InputTooLargeError,
     NotUtf8Error,
     EmptyInputError,
+    NotTextError,
     EncryptedPdfError,
     PlaybookFormatError,
     NetworkUnavailableError,
@@ -67,6 +69,7 @@ EXPECTED_CODES: dict[type[Exception], str] = {
     InputTooLargeError: "input_too_large",
     NotUtf8Error: "not_utf8",
     EmptyInputError: "empty_input",
+    NotTextError: "not_text",
     EncryptedPdfError: "encrypted_pdf",
     PlaybookFormatError: "playbook_format",
     NetworkUnavailableError: "network_unavailable",
@@ -96,7 +99,7 @@ def test_codes_are_unique_lower_snake_case() -> None:
     codes = [leaf.code for leaf in LEAVES]  # type: ignore[attr-defined]
     for code in codes:
         assert pattern.match(code), f"{code} is not lower snake case"
-    assert len(set(codes)) == 21
+    assert len(set(codes)) == 22
 
 
 def test_codes_match_system_design() -> None:
@@ -126,6 +129,13 @@ def test_empty_input_error() -> None:
     error = EmptyInputError()
 
     assert error.code == "empty_input"
+    assert isinstance(error, InputError)
+
+
+def test_not_text_error() -> None:
+    error = NotTextError({"char_offset": 3})
+
+    assert error.code == "not_text"
     assert isinstance(error, InputError)
 
 

@@ -68,6 +68,10 @@ class EmptyInputError(InputError):
     code: ClassVar[str] = "empty_input"
 
 
+class NotTextError(InputError):
+    code: ClassVar[str] = "not_text"
+
+
 class EncryptedPdfError(InputError):
     code: ClassVar[str] = "encrypted_pdf"
 

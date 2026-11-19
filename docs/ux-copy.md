@@ -207,12 +207,12 @@ The card shows one view at a time: Welcome, then Key. “Check your own contract
 | No key | Add your OpenRouter key to run a review. What you've done here is kept. [Add key] |
 | Offline | You're offline. You can prepare this draft, but sending it for review needs the internet. |
 | Section 1 | Load the contract · [Load file] [Paste text] |
-| Load file dialog | Load the contract · Drop the contract here · [Choose a file] · PDF, Word, text or Markdown · up to 20 MB · read on this computer · Reading page 3 of 5 · [Cancel] · Contract loaded · 5 pages · 64 clauses found · [Replace] · First page · is this the right contract? · [Done] · [Close] (icon label). A file that can't be read shows its own message (Empty, Too large, Scanned and Old Word below) inside the dialog. |
+| Load file dialog | Load the contract · Drop the contract here · [Choose a file] · PDF, Word, text or Markdown · up to 20 MB · read on this computer · Reading page 3 of 5 · [Cancel] · Contract loaded · 5 pages · 64 clauses found · [Replace] · First page · is this the right contract? · [Done] · [Close] (icon label). A file that can't be read shows its own message (Empty, Not text, Too large, Scanned and Old Word below) inside the dialog. |
 | No file loaded (`?state=no-file`) | Drop the contract here · [Choose a file] · PDF, Word, text or Markdown · up to 20 MB · read on this computer. Continue is off. |
 | File card | [file name] · PDF · 5 pages · 929 words · real text · [Replace] |
 | Preview | First page · is this the right contract? |
 | Preview hint | Wrong file? Click Replace, or drop another file on this card. |
-| File card, other states | Mixed: PDF · 9 pages · 929 words · pages 7 and 8 scanned · Scanned: PDF · 5 pages · scanned images, no text · Too large: PDF · 48 MB · Empty: PDF · 0 pages · no text · Not English: PDF · 5 pages · not English · Old Word: Word 97–2003 (.doc) · can't be read |
+| File card, other states | Mixed: PDF · 9 pages · 929 words · pages 7 and 8 scanned · Scanned: PDF · 5 pages · scanned images, no text · Too large: PDF · 48 MB · Empty: PDF · 0 pages · no text · Binary: TXT · 12 KB · can't be read · Not English: PDF · 5 pages · not English · Old Word: Word 97–2003 (.doc) · can't be read |
 | Buttons on a blocking or warning notice | Paste text · Replace file · Paste their text · Choose another file |
 | Paste field | Contract text · Keep the clause numbers and headings. Paste only the pages you want reviewed. |
 | Review name | Review name · Pick a name you'll recognise later. |
@@ -220,6 +220,7 @@ The card shows one view at a time: Welcome, then Key. “Check your own contract
 | Mixed (warns, owner 15 Nov 2026) | Pages 7 and 8 are pictures, not text. They're skipped unless you paste their text. |
 | Too large (blocks) | This file is 48 MB. The limit is 20 MB. Paste only the pages you want reviewed. |
 | Empty (blocks) | This file has no text. Choose another file, or paste the text. |
+| Not text (blocks, owner 19 Nov 2026) | This file doesn't look like text. Choose another file, or paste the text. |
 | Old Word (blocks) | This is an old Word file. Open it in Word, save it as .docx, then load that. |
 | Tracked changes (warns) | This Word file has 14 tracked changes. The next step lists every change. |
 | Not English (warns) | This contract doesn't look like it's in English. Clause Tracer is built and tested for English contracts only, so: · fewer names and addresses are found for you. Check the privacy step carefully. · more labels may be wrong or unsure. · [Choose another file] |
@@ -858,3 +859,4 @@ One reviewer per screen compared the prototype with the spec, the design system 
 | 9 | Sample data disagreed: Customers counts against Playbooks, the dates on Home and Settings, and clause 14.5 did not hold the name “Ms Jones” that the privacy check asks about. | Customers counts follow Playbooks (1, 0, 0). “Today” in the prototype is 5 Nov 2026, so auto-delete dates follow it. Clause 14.5 now names Ms Jones. |
 | 10 | The first-launch headline was a fixed 32 px, but design-system 6 says fluid 32–42 px. | Fluid. |
 | 11 | The hidden-text chip: design-system 5 said “outlined in the contract”, but the deck says “Hidden text”. | “Hidden text”. |
+| 12 | Stage 2 added a blocking input state, a file or paste that holds a NUL character, and the deck had no words for it. | “Not text” is added to 4.3 (owner, 19 Nov 2026), with the spec lines and the prototype states. |
