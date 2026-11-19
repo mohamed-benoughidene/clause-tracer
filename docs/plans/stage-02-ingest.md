@@ -3,9 +3,9 @@
 | | |
 | --- | --- |
 | Stage | 2, `ingest` (text, Markdown and pasted text) |
-| Status | Draft |
+| Status | In progress |
 | Branch | One branch for each milestone, cut from `main`: `feat/ingest-m1-foundations`, `feat/ingest-m2-reading`, `feat/ingest-m3-clauses-and-sentences`, `feat/ingest-m4-samples-and-goldens`, `feat/ingest-m5-match-key-and-language`. See [the README](README.md), "Branches and pull requests" |
-| Accepted on | Not yet |
+| Accepted on | 19 Nov 2026 |
 | Stage outline | [System design section 15.2](../system-design.md#152-stage-2-ingest-for-text-markdown-and-pasted-text) |
 
 ## 1. Goal
@@ -53,11 +53,11 @@
 
 ## 4. Checks before starting
 
-- [ ] **The plan is Accepted.** Questions 1 to 9 in section 6 were answered on 17 Nov 2026, and the tasks follow the answers.
-- [ ] **The skeleton passes.** Run `.venv/bin/uv sync`, then `scripts/check.sh`. It must exit 0 before any change.
-- [ ] **NUPunkt behaves as this plan assumes.** The planner checked these on 16 Nov 2026 with `nupunkt` 0.8.0 (MIT, no dependencies, Python 3.11 or later, ships `py.typed`). Run them again after S2-M1-T1: `nupunkt.sentence_spans(text)` returns a list of `(start, end)` pairs; the offsets count code points (`"x\U0001F600. Next one here."` gives a first pair of `(0, 3)`); the same text gives the same pairs on two calls; an empty string gives `[]`. If one fails, stop and bring it to the owner.
-- [ ] **Lingua behaves as this plan assumes.** The planner checked these on 17 Nov 2026 with `lingua-language-detector` 2.2.0 (Apache-2.0, Python 3.12 or later, ships `py.typed`). Run them again after S2-M1-T6: with `LanguageDetectorBuilder.from_all_languages().build()`, `detect_language_of("Les factures sont payées dans un délai de soixante jours à compter de la date de facture.")` is `Language.FRENCH`, `detect_language_of("Invoices will be paid within 60 days of the invoice date.")` is `Language.ENGLISH`, and a second call gives the same answer. Every row of `not_english.toml` gives its `warned` value under the rule of S2-M5-T4. If one fails, stop and bring it to the owner.
-- [ ] **The docs are on `main`.** The `docs/` branch that holds this plan, with any spec or system design change the answers needed, is merged. Milestone 1 is cut from that `main`.
+- [x] **The plan is Accepted.** Questions 1 to 9 in section 6 were answered on 17 Nov 2026, and the tasks follow the answers.
+- [x] **The skeleton passes.** Run `.venv/bin/uv sync`, then `scripts/check.sh`. It must exit 0 before any change.
+- [x] **NUPunkt behaves as this plan assumes.** The planner checked these on 16 Nov 2026 with `nupunkt` 0.8.0 (MIT, no dependencies, Python 3.11 or later, ships `py.typed`). Run them again after S2-M1-T1: `nupunkt.sentence_spans(text)` returns a list of `(start, end)` pairs; the offsets count code points (`"x\U0001F600. Next one here."` gives a first pair of `(0, 3)`); the same text gives the same pairs on two calls; an empty string gives `[]`. If one fails, stop and bring it to the owner.
+- [x] **Lingua behaves as this plan assumes.** The planner checked these on 17 Nov 2026 with `lingua-language-detector` 2.2.0 (Apache-2.0, Python 3.12 or later, ships `py.typed`). Run them again after S2-M1-T6: with `LanguageDetectorBuilder.from_all_languages().build()`, `detect_language_of("Les factures sont payées dans un délai de soixante jours à compter de la date de facture.")` is `Language.FRENCH`, `detect_language_of("Invoices will be paid within 60 days of the invoice date.")` is `Language.ENGLISH`, and a second call gives the same answer. Every row of `not_english.toml` gives its `warned` value under the rule of S2-M5-T4. If one fails, stop and bring it to the owner.
+- [x] **The docs are on `main`.** The `docs/` branch that holds this plan, with any spec or system design change the answers needed, is merged. Milestone 1 is cut from that `main`.
 
 ## 5. Milestones and tasks
 
@@ -73,7 +73,7 @@
 
 When this is done, NUPunkt and Lingua are pinned, `ingest` has a coverage floor, the golden-file command exists, and the empty owner tables are in place.
 
-- [ ] **S2-M1-T1: Add NUPunkt**
+- [x] **S2-M1-T1: Add NUPunkt**
   - **Build:** Run `.venv/bin/uv add 'nupunkt==0.8.0'`. It is a runtime dependency, pinned to one version, because sentence ids depend on where it puts sentence breaks. Commit `pyproject.toml` and `uv.lock`.
   - **Files:** `pyproject.toml`, `uv.lock`, `src/clause_tracer/ingest/tests/test_sentence_library.py`.
   - **Tests first:** in `test_sentence_library.py`: `test_nupunkt_version_is_pinned` (`nupunkt.__version__ == "0.8.0"`); `test_known_breaks` (`nupunkt.sentence_spans("Invoices are paid within 60 days. Interest runs at 4% p.a. from the due date. See cl. 5 below.")` equals `[(0, 33), (34, 77), (78, 94)]`); `test_offsets_count_code_points` (`nupunkt.sentence_spans("x\U0001F600. Next one here.")[0] == (0, 3)`); `test_empty_text_has_no_sentences` (`nupunkt.sentence_spans("") == []`).
@@ -81,7 +81,7 @@ When this is done, NUPunkt and Lingua are pinned, `ingest` has a coverage floor,
   - **Rules:** [ADR 0007](../adr/0007-document-reading-stack.md) (NUPunkt), D2 (ids rebuild the same way).
   - **Depends on:** None
 
-- [ ] **S2-M1-T2: An 85% coverage floor for `ingest`**
+- [x] **S2-M1-T2: An 85% coverage floor for `ingest`**
   - **Build:** In `scripts/check.sh`, add one last line: `run coverage report --include='src/clause_tracer/ingest/*' --fail-under=85`. In `scripts/README.md`, change the `check.sh` row to say "a 95% branch-coverage floor for `core` and an 85% floor for `ingest`".
   - **Files:** `scripts/check.sh`, `scripts/README.md`.
   - **Tests first:** None. The check is the script itself.
@@ -89,7 +89,7 @@ When this is done, NUPunkt and Lingua are pinned, `ingest` has a coverage floor,
   - **Rules:** [Testing strategy 11](../testing-strategy.md#11-coverage-targets).
   - **Depends on:** None
 
-- [ ] **S2-M1-T3: The golden-file command**
+- [x] **S2-M1-T3: The golden-file command**
   - **Build:** Create `conftest.py` at the repo root with:
     - `def pytest_addoption(parser: pytest.Parser) -> None`, which adds the option `--update-goldens` (`action="store_true"`, `default=False`, help text `"Rewrite golden files instead of comparing them."`).
     - `def compare_or_update(path: Path, actual: str, *, update: bool) -> None`. When `update` is true, it creates the parent folder and writes `actual` to `path` as UTF-8 with `newline=""`. When false and `path` does not exist, it raises `AssertionError(f"{path.name} is missing. Run pytest with --update-goldens, then read the file.")`. When false and the file exists, it reads it as UTF-8 with `newline=""` and runs `assert actual == expected`.
@@ -110,7 +110,7 @@ When this is done, NUPunkt and Lingua are pinned, `ingest` has a coverage floor,
   - **Rules:** T11.
   - **Depends on:** None
 
-- [ ] **S2-M1-T5: The error for input with no text**
+- [x] **S2-M1-T5: The error for input with no text**
   - **Build:** Needs question 4. In `src/clause_tracer/core/errors.py`, add `class EmptyInputError(InputError)` with `code: ClassVar[str] = "empty_input"`, placed straight after `NotUtf8Error`. Export it from `src/clause_tracer/core/__init__.py`. In `src/clause_tracer/core/README.md`, add the row `` | `EmptyInputError` | Input | `empty_input` | `` after the `NotUtf8Error` row.
   - **Files:** `src/clause_tracer/core/errors.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/README.md`, `src/clause_tracer/core/tests/test_errors.py`.
   - **Tests first:** in `test_errors.py`, add `EmptyInputError` to the `LEAVES` tuple straight after `NotUtf8Error`, and add `test_empty_input_error` (`EmptyInputError().code == "empty_input"`, and it is an instance of `InputError`). See it fail before the class exists.
@@ -118,7 +118,7 @@ When this is done, NUPunkt and Lingua are pinned, `ingest` has a coverage floor,
   - **Rules:** I5, I6, D5 (a new error, no rename), [system design 6.4](../system-design.md#64-errors).
   - **Depends on:** None
 
-- [ ] **S2-M1-T6: Add Lingua**
+- [x] **S2-M1-T6: Add Lingua**
   - **Build:** Run `.venv/bin/uv add 'lingua-language-detector==2.2.0'`. It is a runtime dependency, pinned to one version, because the not-English warning depends on its models ([ADR 0017](../adr/0017-language-detection-with-lingua.md)). Commit `pyproject.toml` and `uv.lock`.
   - **Files:** `pyproject.toml`, `uv.lock`, `src/clause_tracer/ingest/tests/test_language_library.py`.
   - **Tests first:** in `test_language_library.py`, with `DETECTOR = LanguageDetectorBuilder.from_all_languages().build()` at module level: `test_lingua_version_is_pinned` (`importlib.metadata.version("lingua-language-detector") == "2.2.0"`); `test_french_sentence` (`DETECTOR.detect_language_of("Les factures sont payées dans un délai de soixante jours à compter de la date de facture.") == Language.FRENCH`); `test_english_sentence` (`DETECTOR.detect_language_of("Invoices will be paid within 60 days of the invoice date.") == Language.ENGLISH`); `test_same_answer_twice` (the French sentence gives the same language on two calls).
