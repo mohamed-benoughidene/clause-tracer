@@ -50,6 +50,11 @@ number appears twice, and `4` for `Article IV`.
 `paragraphs` when no marker is accepted. The clauses cover the whole text:
 each starts where the one before ends.
 
+A clause that a marker starts has a heading when the rest of its line is short,
+does not end like a sentence, and every later line in the clause is blank. An
+unnumbered heading clause takes its own line as the heading. The clause of text
+before the first clause has no heading.
+
 ## Output shape
 A `Document` with no glyphs: `glyphs`, `char_map`, `pages`, `furniture`, `hidden`,
 `undecodable` and `tracked_changes` are empty in stage 2.

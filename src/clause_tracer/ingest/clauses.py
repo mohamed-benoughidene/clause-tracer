@@ -12,6 +12,8 @@ from typing import Final
 from clause_tracer.core import Clause, ClauseId, Document, Sentence, SentenceId, Span
 from clause_tracer.ingest._lines import Line, is_blank, split_lines
 from clause_tracer.ingest._markers import (
+    EMPHASIS_STRIP,
+    HEADING_STRIP,
     Marker,
     MarkerKind,
     find_marker,
@@ -33,11 +35,12 @@ class _ClauseStart:
 
     id: str | None
     number: str | None
-    heading: str | None
     parent_id: str | None
     level: int
     start: int
     body_start: int
+    line_end: int
+    heading_source: str | None
     numbering_source: str
 
 
@@ -86,13 +89,31 @@ def _marker_clause_start(
     return _ClauseStart(
         id=clause_id,
         number=marker.written,
-        heading=None,
         parent_id=parent_id,
         level=level,
         start=line.start,
         body_start=line.start + marker.body_start,
+        line_end=line.end,
+        heading_source=line.text[marker.body_start :],
         numbering_source=NUMBERING_NUMBERS,
     )
+
+
+def _heading_for(record: _ClauseStart, text: str, span_end: int) -> str | None:
+    """The heading of one clause, or None when its line is not a heading."""
+
+    if record.heading_source is None:
+        return None
+    if record.number is None:
+        return record.heading_source.strip(EMPHASIS_STRIP)
+    rest = record.heading_source.strip(EMPHASIS_STRIP)
+    title = rest.strip(HEADING_STRIP)
+    later_lines_are_blank = text[record.line_end : span_end].strip() == ""
+    if title == "" or len(rest) > 100 or rest[-1] in ".;:,":
+        return None
+    if not later_lines_are_blank:
+        return None
+    return title
 
 
 def _find_clause_starts(lines: tuple[Line, ...]) -> list[_ClauseStart]:
@@ -118,11 +139,12 @@ def _find_clause_starts(lines: tuple[Line, ...]) -> list[_ClauseStart]:
                     _ClauseStart(
                         id=None,
                         number=None,
-                        heading=None,
                         parent_id=None,
                         level=1,
                         start=line.start,
                         body_start=line.start,
+                        line_end=line.end,
+                        heading_source=line.text,
                         numbering_source=NUMBERING_NUMBERS,
                     )
                 )
@@ -249,11 +271,12 @@ def _build_clauses(text: str, starts: list[_ClauseStart]) -> tuple[Clause, ...]:
                 _ClauseStart(
                     id=None,
                     number=None,
-                    heading=None,
                     parent_id=None,
                     level=1,
                     start=0,
                     body_start=0,
+                    line_end=0,
+                    heading_source=None,
                     numbering_source=NUMBERING_NUMBERS,
                 ),
             )
@@ -283,7 +306,7 @@ def _build_clauses(text: str, starts: list[_ClauseStart]) -> tuple[Clause, ...]:
             Clause(
                 id=ClauseId(record.id),
                 number=record.number,
-                heading=record.heading,
+                heading=_heading_for(record, text, end),
                 level=record.level,
                 parent_id=(ClauseId(record.parent_id) if record.parent_id is not None else None),
                 span=span,

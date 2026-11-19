@@ -259,3 +259,58 @@ def test_no_marker_is_one_paragraph_clause_for_now() -> None:
 
     assert tuple(str(clause.id) for clause in clauses) == ("p1",)
     assert clauses[0].numbering_source == "paragraphs"
+
+
+def test_numbered_heading_line_has_a_heading() -> None:
+    clauses = clauses_of(
+        "5. Charges and payment\n5.1 The Agency pays 25%.\n5.2 Invoices are paid in 60 days.\n"
+    )
+
+    assert clauses[0].heading == "Charges and payment"
+    assert clauses[1].heading is None
+    assert clauses[2].heading is None
+
+
+def test_line_ending_in_a_colon_is_not_a_heading() -> None:
+    clauses = clauses_of("1. Rules:\n(a) first:\n(i) one;\n(ii) two;\n(b) second.")
+
+    for clause in clauses:
+        assert clause.heading is None
+
+
+def test_schedule_heading() -> None:
+    text = (
+        "14. General\n14.1 Whole agreement.\nSchedule 1 · Services\n"
+        "1. Build the site.\n2. Hosting is extra."
+    )
+
+    clauses = clauses_of(text)
+
+    assert clauses[2].heading == "Services"
+    assert clauses[0].heading == "General"
+
+
+def test_markdown_heading() -> None:
+    clauses = clauses_of("## 1. Start\n**1.1** Now.")
+
+    assert clauses[0].heading == "Start"
+
+
+def test_long_line_is_not_a_heading() -> None:
+    clauses = clauses_of("1. " + "a" * 101 + "\n1.1 x.")
+
+    assert clauses[0].heading is None
+
+
+def test_clause_with_more_lines_has_no_heading() -> None:
+    clauses = clauses_of("1. Payment\nThe Agency pays on time.\n1.1 Now.")
+
+    assert clauses[0].heading is None
+
+
+def test_heading_clause_heading() -> None:
+    text = "1. Start\n1.1 Now.\n\nBackground\nThe Agency builds sites.\n\n2. Payment"
+
+    clauses = clauses_of(text)
+
+    assert clauses[2].heading == "Background"
