@@ -505,7 +505,7 @@ When this is done, `core` builds match keys, invariant 2 holds, a contract that 
 
 ## 6. Open questions
 
-The owner answered questions 1 to 9 on 17 Nov 2026 and question 10 on 19 Nov 2026. Each answer is recorded in its home. The recommendation column keeps the planner's first proposal, so where the answer differs, the answer wins. Question 11 is open.
+The owner answered questions 1 to 9 on 17 Nov 2026 and questions 10 and 11 on 19 Nov 2026. Each answer is recorded in its home. The recommendation column keeps the planner's first proposal, so where the answer differs, the answer wins.
 
 | # | Question | Needed by task | Recommendation (if any) | Owner's answer |
 | --- | --- | --- | --- | --- |
@@ -519,7 +519,7 @@ The owner answered questions 1 to 9 on 17 Nov 2026 and question 10 on 19 Nov 202
 | 8 | **May Markdown symbols stand before a clause number?** [Spec 9](../spec.md#9-running-the-app) says Markdown symbols are shown as plain characters. It does not say whether `## 3. The Services` or `**5.1** The Agency…` starts a clause. | S2-M3-T3 | Yes. The text keeps every symbol, and the splitter looks past `#`, `*` and `_` before a number and a closing `**` or `__` after it. Without this, most Markdown contracts fall back to paragraphs. |As recommended: [system design 4.2](../system-design.md#42-the-offset-chain) |
 | 9 | **The form of clause and sentence ids.** [System design 5.1](../system-design.md#51-three-kinds-of-data) says ids are "derived from the clause number and span". | S2-M3-T6 | Ids come from the number and the order, not from offsets: `5.1`, `7.1(a)(i)`, `S1.2` inside Schedule 1, `p3` for the third clause with no number, a `~2` ending when a number appears twice, and `5.1.s3` for a sentence. They are the same on every read of the same file, and a person can read them. Home: system design 5.1 and the `Clause` row of 3.4. |As recommended: [system design 5.1](../system-design.md#51-three-kinds-of-data) and the `Clause` row of [3.4](../system-design.md#34-core-shapes-for-stage-1) |
 | 10 | **Is a file with NUL characters text?** Strict UTF-8 accepts NUL, so a binary file with only ASCII bytes reads as text. No error in the tree fits. | S2-M2-T2 | None yet, the owner decides (options: leave it, reuse `NotUtf8Error`, or add a new error). | Owner, 19 Nov 2026: reject it. New error `NotTextError`, code `not_text`. |
-| 11 | **Does the paste box need its own size limit?** Spec 9 gives one limit for a file or a paste: 20 MB and 50,000 words. | S2-M2-T3 | None yet. | Not answered |
+| 11 | **Does the paste box need its own size limit?** Spec 9 gives one limit for a file or a paste: 20 MB and 50,000 words. | S2-M2-T3 | None yet. | Owner, 19 Nov 2026: no. A paste keeps the same limit as a file, 20 MB and 50,000 words, as Spec 9 says. |
 
 ## 7. Done when
 
@@ -545,6 +545,7 @@ The owner answered questions 1 to 9 on 17 Nov 2026 and question 10 on 19 Nov 202
 | 19 Nov 2026 | An independent review found the sample gives 64 clauses, not 63: the planner's transcription of the prototype had dropped the line `8. Confidentiality`. The count is 64 everywhere. The review also made the plan tighter where a reader had to guess: the BARE and PAREN rules of S2-M3-T6, when ids become unique, `body_start` for BARE, the lower-case Roman reading in S2-M3-T2, the input of `test_document_has_no_glyphs`, and the floor of S2-M3-T10 (33 tests). No rule changed. | A fresh agent built the splitter from the plan alone and compared it with every row. |
 | 19 Nov 2026 | The owner approved the review fixes of M2. A text with only a byte-order mark is empty (T2 step 5). The byte-limit check moves into `read_pasted_text`, and `_build_document` holds the shared checks (T3). The byte-order-mark rule adds three tests, and the pasted byte limit adds one. Question 10 asks whether a file with NUL characters is text. The review point on memory use was split: the paste now checks its character count before it encodes (see the row below), and the full word list stays, because the 20 MB limit bounds it. | The owner's request after the M2 review. |
 | 19 Nov 2026 | The owner approved the second round: the early character check in `read_pasted_text` (T3), `NotTextError` for NUL characters (T2, `core`, system design 3.4), and questions 10 and 11. | The owner's request after the M2 review. |
+| 19 Nov 2026 | The owner answered question 11: no separate paste limit. The owner also approved the words for the new error: "This file doesn't look like text. Choose another file, or paste the text." The words are in the spec (14.2 and the input limits), the copy deck (4.3 and section 6) and the prototype (the `not-text` and `load-not-text` states). The tests also ran on Python 3.12.16 (1,138 passed), the version CI uses. | The owner's answers, and the check that failed in M1. |
 
 ## 9. Notes for the next stage
 
