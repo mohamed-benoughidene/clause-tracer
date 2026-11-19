@@ -110,7 +110,7 @@ When this is done, NUPunkt and Lingua are pinned, `ingest` has a coverage floor,
   - **Rules:** T11.
   - **Depends on:** None
 
-- [ ] **S2-M1-T5: The error for input with no text**
+- [x] **S2-M1-T5: The error for input with no text**
   - **Build:** Needs question 4. In `src/clause_tracer/core/errors.py`, add `class EmptyInputError(InputError)` with `code: ClassVar[str] = "empty_input"`, placed straight after `NotUtf8Error`. Export it from `src/clause_tracer/core/__init__.py`. In `src/clause_tracer/core/README.md`, add the row `` | `EmptyInputError` | Input | `empty_input` | `` after the `NotUtf8Error` row.
   - **Files:** `src/clause_tracer/core/errors.py`, `src/clause_tracer/core/__init__.py`, `src/clause_tracer/core/README.md`, `src/clause_tracer/core/tests/test_errors.py`.
   - **Tests first:** in `test_errors.py`, add `EmptyInputError` to the `LEAVES` tuple straight after `NotUtf8Error`, and add `test_empty_input_error` (`EmptyInputError().code == "empty_input"`, and it is an instance of `InputError`). See it fail before the class exists.

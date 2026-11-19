@@ -58,6 +58,7 @@ in `.context`; the message is the code; context holds ids, step names and counts
 | `OldWordFileError` | Input | `old_word_file` |
 | `InputTooLargeError` | Input | `input_too_large` |
 | `NotUtf8Error` | Input | `not_utf8` |
+| `EmptyInputError` | Input | `empty_input` |
 | `EncryptedPdfError` | Input | `encrypted_pdf` |
 | `PlaybookFormatError` | Input | `playbook_format` |
 | `NetworkUnavailableError` | Model service | `network_unavailable` |

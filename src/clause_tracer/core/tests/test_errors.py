@@ -5,6 +5,7 @@ import re
 from clause_tracer.core import (
     ConfigError,
     DuplicateRecordError,
+    EmptyInputError,
     EncryptedPdfError,
     InputError,
     InputTooLargeError,
@@ -34,6 +35,7 @@ LEAVES: tuple[type[Exception], ...] = (
     OldWordFileError,
     InputTooLargeError,
     NotUtf8Error,
+    EmptyInputError,
     EncryptedPdfError,
     PlaybookFormatError,
     NetworkUnavailableError,
@@ -64,6 +66,7 @@ EXPECTED_CODES: dict[type[Exception], str] = {
     OldWordFileError: "old_word_file",
     InputTooLargeError: "input_too_large",
     NotUtf8Error: "not_utf8",
+    EmptyInputError: "empty_input",
     EncryptedPdfError: "encrypted_pdf",
     PlaybookFormatError: "playbook_format",
     NetworkUnavailableError: "network_unavailable",
@@ -93,7 +96,7 @@ def test_codes_are_unique_lower_snake_case() -> None:
     codes = [leaf.code for leaf in LEAVES]  # type: ignore[attr-defined]
     for code in codes:
         assert pattern.match(code), f"{code} is not lower snake case"
-    assert len(set(codes)) == 20
+    assert len(set(codes)) == 21
 
 
 def test_codes_match_system_design() -> None:
@@ -117,6 +120,13 @@ def test_context_defaults_to_empty() -> None:
 
 def test_message_is_the_code() -> None:
     assert str(NoCreditError()) == "no_credit"
+
+
+def test_empty_input_error() -> None:
+    error = EmptyInputError()
+
+    assert error.code == "empty_input"
+    assert isinstance(error, InputError)
 
 
 def test_rate_limited_carries_the_wait_time() -> None:

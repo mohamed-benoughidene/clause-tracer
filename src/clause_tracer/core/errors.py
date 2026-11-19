@@ -64,6 +64,10 @@ class NotUtf8Error(InputError):
     code: ClassVar[str] = "not_utf8"
 
 
+class EmptyInputError(InputError):
+    code: ClassVar[str] = "empty_input"
+
+
 class EncryptedPdfError(InputError):
     code: ClassVar[str] = "encrypted_pdf"
 
