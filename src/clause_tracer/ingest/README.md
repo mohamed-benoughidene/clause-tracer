@@ -80,4 +80,21 @@ A `Document` with no glyphs: `glyphs`, `char_map`, `pages`, `furniture`, `hidden
 core only.
 
 ## Run alone
-`.venv/bin/uv run python -m clause_tracer.ingest`
+`.venv/bin/uv run python -m clause_tracer.ingest` reads
+`samples/developer-agreement.txt`.
+
+`.venv/bin/uv run python -m clause_tracer.ingest --input samples/plain-paragraphs.md`
+reads another text or Markdown file. A `.md` suffix is read as Markdown; every
+other suffix is read as text.
+
+Exit 0 prints the outline and ends. Exit 3 means the file could not be read, or
+it failed an input check; the message names the error code (`not_utf8`, for
+example). The outline has one line for the source, the numbering and the
+warnings, then one line for each clause and one for each of its sentences.
+Cells are joined with one tab.
+
+## Golden files
+`tests/goldens/developer-agreement.outline.txt` and
+`tests/goldens/plain-paragraphs.outline.txt` hold the outline of each sample.
+Regenerate them only with `--update-goldens`, in a commit of their own, and ask
+the owner to read the diff.

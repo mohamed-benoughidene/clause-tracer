@@ -1,0 +1,14 @@
+source	markdown	371	b5859361afec5805f97264796ddb2ed3638c1a38a67e64a68f1f4d9e2b2ee648
+numbering	paragraphs
+warnings	-
+p1	-	level 1	-	0-24	-
+  p1.s1	0-24	# Letter of engagement
+p2	-	level 1	-	24-159	-
+  p2.s1	24-94	**Karim Benali** will build a booking page for Brightline St
+  p2.s2	94-159	The work starts on 1 December 2026 and takes about three wee
+p3	-	level 1	-	159-283	-
+  p3.s1	159-213	Brightline Studio Ltd will pay a fixed fee of £1,200.
+  p3.s2	213-283	Half is due before work starts, and half within 15 days of d
+p4	-	level 1	-	283-370	-
+  p4.s1	283-332	Either side may end this arrangement in writing.
+  p4.s2	332-370	Work done up to that day is paid for.

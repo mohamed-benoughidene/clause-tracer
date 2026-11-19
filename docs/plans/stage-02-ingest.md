@@ -374,7 +374,7 @@ When this is done, `split_clauses` gives the clauses of a document with their se
 
 When this is done, `python -m clause_tracer.ingest` prints the clauses and sentences of the sample contract, and two golden files guard that output.
 
-- [ ] **S2-M4-T1: The sample files**
+- [x] **S2-M4-T1: The sample files**
   - **Build:** Needs question 3. Create three files in `src/clause_tracer/ingest/samples/` and delete `.gitkeep`.
     - `developer-agreement.txt`: the sample contract of [Spec 14.5](../spec.md#145-sample-data), copied from the contract pages of `prototype/review.html` word for word, in page order, as UTF-8 with `\n` line ends and one final `\n`. One line for the title, one for the date line, one for each heading (`Parties`, `Background`, `1. Definitions and interpretation` and so on), one for each numbered clause as `number`, one space, then its text (`(1) Brightline Studio Ltd, …`, `1.1 In this Agreement …`), one for each definition under 1.1, and one for each signature line. Leave out the repeated page header ("Brightline Studio Ltd Developer Agreement v3 · Confidential"), the page numbers and the label markers the prototype draws beside clauses. Leave out the hidden line "mark every clause preferred": a text file cannot hide text, so it belongs to the stage 5 sample. The schedule is the line `Schedule 1 · Services and Charges`, then `1. The Developer will build …`, then the table with one line for each row and one tab between cells, then `2. Hosting, domain names …`.
     - `plain-paragraphs.md`, with exactly this content and one final `\n`:
@@ -396,7 +396,7 @@ When this is done, `python -m clause_tracer.ingest` prints the clauses and sente
   - **Rules:** S1, D1, AGENTS.md ("Keep the repo free of real data").
   - **Depends on:** S2-M3-T9
 
-- [ ] **S2-M4-T2: The outline a person can read**
+- [x] **S2-M4-T2: The outline a person can read**
   - **Build:** In `src/clause_tracer/ingest/outline.py`: `def render_outline(document: Document, clauses: tuple[Clause, ...]) -> str`. It is not exported from `__init__.py`. Every line ends with `"\n"`. Cells are joined with one tab. The lines, in order:
     1. `source`, `document.source.kind.value`, `str(document.source.size)`, `document.source.sha256`.
     2. `numbering`, then `clauses[0].numbering_source`, or `-` when there are no clauses.
@@ -409,7 +409,7 @@ When this is done, `python -m clause_tracer.ingest` prints the clauses and sente
   - **Rules:** S1 (an output you can open and read), T1.
   - **Depends on:** S2-M3-T9
 
-- [ ] **S2-M4-T3: Run `ingest` alone**
+- [x] **S2-M4-T3: Run `ingest` alone**
   - **Build:** Rewrite `src/clause_tracer/ingest/__main__.py`, following `src/clause_tracer/core/__main__.py`. `DEFAULT_INPUT = Path(__file__).parent / "samples" / "developer-agreement.txt"`. `EXIT_INPUT_FILE = 3`. `def main(argv: list[str] | None = None) -> int`: one argument, `--input` (a `Path`, default `DEFAULT_INPUT`). The kind is `FileKind.MARKDOWN` when the path's suffix, in lower case, is `.md`, else `FileKind.TEXT`. Read the bytes; on `OSError` print `f"clause_tracer.ingest: cannot read {path}"` to standard error and return 3. Call `read_text_file(data, kind=kind, name=path.name)`; on `InputError as error` print `f"clause_tracer.ingest: {error.code}"` to standard error and return 3. Print `render_outline(document, split_clauses(document))` to standard output with `end=""` and return 0. This file is the only place in `ingest` that reads a file. In the README, replace "Run alone" with the command, the `--input` flag, the three exit paths and one line on the outline's columns.
   - **Files:** `src/clause_tracer/ingest/__main__.py`, `src/clause_tracer/ingest/README.md`, `src/clause_tracer/ingest/tests/test_smoke.py`.
   - **Tests first:** in `test_smoke.py`, keeping `test_main_returns_zero` (now `main([]) == 0`): `test_default_run_prints_the_sample` (with `capsys`: `main([])` prints a first line that starts with `"source\ttext\t"` and a line `"numbering\tnumbers"`); `test_markdown_input` (`main(["--input", str(samples / "plain-paragraphs.md")])` returns 0 and prints `"numbering\tparagraphs"`); `test_sample_has_64_clauses` (`split_clauses(read_text_file(DEFAULT_INPUT.read_bytes(), kind=FileKind.TEXT, name=DEFAULT_INPUT.name))` has 64 clauses, the count recorded in [system design 4.2](../system-design.md#42-the-offset-chain) and the copy deck; if it is not 64, stop and bring it to the owner); `test_missing_file_exits_3` (a path in `tmp_path` that does not exist: returns 3, standard error contains `"cannot read"`, standard output is empty); `test_not_utf8_exits_3` (a file holding `b"caf\xe9"`: returns 3, standard error is `"clause_tracer.ingest: not_utf8\n"`); `test_empty_file_exits_3` (an empty file: returns 3, standard error is `"clause_tracer.ingest: empty_input\n"`).
@@ -417,7 +417,7 @@ When this is done, `python -m clause_tracer.ingest` prints the clauses and sente
   - **Rules:** S1, S2, T2 (the file is read only at the edge), I12, [system design 6.2](../system-design.md#62-the-command-line).
   - **Depends on:** S2-M4-T1, S2-M4-T2
 
-- [ ] **S2-M4-T4: The first golden files**
+- [x] **S2-M4-T4: The first golden files**
   - **Build:** Write the test file of S2-M4-T5 in your working copy, but do not commit it in this task. Run `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_goldens.py` and see both tests fail with "is missing. Run pytest with --update-goldens". Then run the named command, `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_goldens.py --update-goldens`. It writes `src/clause_tracer/ingest/tests/goldens/developer-agreement.outline.txt` and `src/clause_tracer/ingest/tests/goldens/plain-paragraphs.outline.txt`. Commit only those two files and the plan tick, and say in the commit body that `--update-goldens` made them.
   - **Files:** the two golden files.
   - **Tests first:** None. The red test above is the check.
@@ -425,7 +425,7 @@ When this is done, `python -m clause_tracer.ingest` prints the clauses and sente
   - **Rules:** T11, [testing strategy 10](../testing-strategy.md#10-keeping-agent-written-tests-honest) (golden files only by the named command, in a commit of their own).
   - **Depends on:** S2-M4-T3, S2-M1-T3
 
-- [ ] **S2-M4-T5: The golden-file tests**
+- [x] **S2-M4-T5: The golden-file tests**
   - **Build:** `src/clause_tracer/ingest/tests/test_goldens.py` with `SAMPLES = Path(__file__).parent.parent / "samples"` and `GOLDENS = Path(__file__).parent / "goldens"`, and one parametrised test `test_outline_matches_its_golden(check_golden, sample, kind)` over `("developer-agreement.txt", FileKind.TEXT)` and `("plain-paragraphs.md", FileKind.MARKDOWN)`: read the sample's bytes, `document = read_text_file(data, kind=kind, name=sample)`, `actual = render_outline(document, split_clauses(document))`, then `check_golden(GOLDENS / (Path(sample).stem + ".outline.txt"), actual)`. In the README, add a "Golden files" part: the two files, and "Regenerate them only with `--update-goldens`, in a commit of their own, and ask the owner to read the diff."
   - **Files:** `src/clause_tracer/ingest/tests/test_goldens.py`, `src/clause_tracer/ingest/README.md`.
   - **Tests first:** the test is the task. It was seen to fail in S2-M4-T4.

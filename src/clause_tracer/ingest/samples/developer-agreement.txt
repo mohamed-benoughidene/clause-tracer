@@ -1,0 +1,79 @@
+Development Services Agreement
+This Agreement is dated 5 November 2026.
+Parties
+(1) Brightline Studio Ltd, a company registered in England and Wales with company number 09876543, whose registered office is at 14 Harbour Street, Leeds LS1 4AB ("the Agency").
+(2) Karim Benali of 27 Rue Didouche Mourad, Algiers 16000, Algeria ("the Developer").
+Background
+(A) The Agency designs and builds websites for its own customers and wishes to engage the Developer to carry out development work on one of those projects.
+(B) The Developer is an independent contractor and agrees to provide the Services on the terms of this Agreement.
+1. Definitions and interpretation
+1.1 In this Agreement the following words have these meanings:
+"Charges" means the fees set out in Schedule 1.
+"Deliverables" means everything the Developer hands over as part of the Services, including code, designs and documentation.
+"Master Agreement" means the agreement between the Agency and its customer for the project.
+"Milestone" means a stage of the Services listed in Schedule 1.
+"Services" means the development work described in Schedule 1.
+1.2 Headings do not affect the meaning of this Agreement. Words in the singular include the plural.
+2. Start and term
+2.1 This Agreement starts on the date at the top and continues until the Services are complete, unless it ends earlier under clause 12.
+2.2 This Agreement renews automatically for further 12-month periods unless either party gives 30 days' written notice before the end of the current period.
+3. The Services
+3.1 The Developer will provide the Services with reasonable skill and care and in line with good industry practice.
+3.2 The Developer will make reasonable revisions to the Deliverables at the Agency's request.
+3.3 The Developer will use reasonable efforts to meet the Milestone dates in Schedule 1. Time is not of the essence.
+3.4 The Developer may decide how and where the Services are carried out, and may use their own equipment.
+4. Changes and extra work
+4.1 Work outside Schedule 1 must be agreed in writing and will be paid at the hourly rate of £45.
+4.2 Either party may ask for a change to the Services. A change only takes effect when both parties agree it in writing.
+5. Charges and payment
+5.1 The total Charges for the Services are £9,600, split by Milestone as set out in Schedule 1.
+5.2 The Agency will pay 25% of the total Charges on signing this Agreement.
+5.3 The Developer will invoice the Agency at accounts@brightline.example when each Milestone is delivered.
+5.4 Invoices will be paid within 60 days of the invoice date.
+5.5 The Agency will repay reasonable expenses that it has approved in writing before they are incurred, as set out in its expenses policy at https://docs.example.com/expenses-policy.
+5.6 All Charges are exclusive of VAT, which will be added where it applies.
+6. The Agency's obligations
+6.1 The Agency will provide the content, logins and approvals the Developer reasonably needs, and will reply to questions within 3 Business Days.
+7. Ownership of the work
+7.1 All work created under this Agreement is a work made for hire and belongs to the Agency from the moment it is created.
+7.2 The Developer waives any moral rights in the Deliverables to the extent allowed.
+7.3 Tools, code libraries and know-how the Developer owned before this Agreement stay the Developer's. The Agency may use any that are part of the Deliverables for the project.
+8. Confidentiality
+8.1 Each party will keep the other's confidential information private and use it only for this Agreement.
+8.2 Clause 8.1 does not apply to information that is public, that the receiving party already knew, or that the law requires it to share.
+9. Non-compete and non-solicitation
+9.1 For 12 months after this Agreement ends, the Developer will not provide similar services to any customer of the Agency.
+9.2 For 12 months after this Agreement ends, neither party will try to hire the other's staff.
+10. Warranties
+10.1 The Developer confirms the Deliverables will be their own original work, except for third-party material the Agency has approved.
+10.2 No other promises are given about the Services except those written in this Agreement.
+11. Liability
+11.1 The Developer's total liability is capped at the fees paid under this Agreement, except as set out in the Master Agreement.
+11.2 Neither party is liable for loss of profit or any indirect loss.
+12. Ending this Agreement
+12.1 Either party may end this Agreement with 14 days' written notice.
+12.2 If the Agency ends this Agreement, no payment is due for work in progress.
+12.3 Either party may end this Agreement at once by written notice if the other seriously breaks it and does not fix the breach within 14 days of being asked to.
+12.4 When this Agreement ends, each party will return the other's materials and confidential information.
+13. Data protection
+13.1 Each party will comply with data protection law when handling personal data under this Agreement.
+14. General
+14.1 This Agreement is the whole agreement between the parties about the Services.
+14.2 If this Agreement and Schedule 1 conflict, this Agreement prevails.
+14.3 The Developer will not work for a direct competitor of the Agency for 6 to 9 months after this Agreement ends.
+14.4 Neither party may transfer this Agreement to anyone else without the other's written consent.
+14.5 Notices must be in writing and sent by email to the addresses each party gives the other, with a copy to Ms Jones at the Developer's address.
+14.6 This Agreement is governed by the laws of England and Wales.
+
+Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director
+
+Signed by Karim Benali
+Schedule 1 · Services and Charges
+1. The Developer will build the front end and content management integration for the Agency's customer website, from the approved designs.
+Milestone	Work	Target	Charges
+1 Discovery	Review designs, plan the build	Week 2	£1,600
+2 Build	Templates and components	Week 6	£3,200
+3 Integration	Content management and forms	Week 9	£3,200
+4 Launch	Testing, fixes and go-live	Week 11	£1,600
+	Total		£9,600
+2. Hosting, domain names and third-party licences are provided by the Agency and are not part of the Services.
