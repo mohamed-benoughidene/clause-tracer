@@ -6,6 +6,7 @@ resolve gives no override: the reference stays visible with no target
 """
 
 import re
+from dataclasses import dataclass
 
 from clause_tracer.core import (
     Clause,
@@ -33,6 +34,20 @@ from clause_tracer.links._spans import trimmed
 
 _Group = tuple[Span, tuple[CrossReference, ...]]
 _Phrase = tuple[re.Match[str], bool]
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class _PrevailsContext:
+    """What one sentence with a prevails verb gives the rules (S3-M4-T6)."""
+
+    text: str
+    clause: Clause
+    sentence: Sentence
+    verb: re.Match[str]
+    references: tuple[CrossReference, ...]
+    outside: tuple[OutsideDocument, ...]
+    winner: Span
+    self_names: tuple[re.Match[str], ...]
 
 
 def find_overrides(
@@ -159,9 +174,12 @@ def _another_phrase_starts_before(
     phrase: re.Match[str],
     first_start: int,
 ) -> bool:
-    return any(
-        other is not phrase and phrase.end() < other.start() < first_start for other, _ in phrases
-    )
+    for other, _ in phrases:
+        starts_after_phrase = phrase.end() < other.start()
+        starts_before_first = other.start() < first_start
+        if other is not phrase and starts_after_phrase and starts_before_first:
+            return True
+    return False
 
 
 def _sentence_holds_an_outside_document(
@@ -196,12 +214,33 @@ def _prevails_for_sentence(
     outside: tuple[OutsideDocument, ...],
     directional: tuple[Override, ...],
 ) -> tuple[Override, ...]:
-    verb = PREVAILS_RE.search(text, sentence.span.start, sentence.span.end)
-    if verb is None:
+    context = _context_for(text, clause, sentence, references, outside)
+    if context is None:
         return ()
+    has_reference_in_winner = any(
+        _starts_in_winner(reference.source, context.winner) for reference in context.references
+    )
+    has_self_name_and_reference = bool(context.self_names) and has_reference_in_winner
+    if has_self_name_and_reference:
+        return ()
+    if context.self_names:
+        return _self_wins(context, directional)
+    return _reference_wins(context)
+
+
+def _context_for(
+    text: str,
+    clause: Clause,
+    sentence: Sentence,
+    references: tuple[CrossReference, ...],
+    outside: tuple[OutsideDocument, ...],
+) -> _PrevailsContext | None:
     is_heading_sentence = clause.heading is not None and sentence == clause.sentences[0]
     if is_heading_sentence:
-        return ()
+        return None
+    verb = PREVAILS_RE.search(text, sentence.span.start, sentence.span.end)
+    if verb is None:
+        return None
     sentence_references = tuple(
         reference
         for reference in references
@@ -212,75 +251,89 @@ def _prevails_for_sentence(
         for document in outside
         if sentence.span.start <= document.evidence.start < sentence.span.end
     )
-    winner_start = _winner_start(text, sentence, verb.start(), sentence_references)
-    winner_end = verb.start()
-    self_names = tuple(SELF_NAME_RE.finditer(text, winner_start, winner_end))
-    references_in_winner = tuple(
-        reference
-        for reference in sentence_references
-        if _overlaps_winner(reference.source, winner_start, winner_end)
+    winner = Span(
+        start=_winner_start(text, sentence, verb.start(), sentence_references),
+        end=verb.start(),
     )
-    leftover = _winner_leftover(text, winner_start, winner_end, self_names, sentence_references)
+    self_names = tuple(SELF_NAME_RE.finditer(text, winner.start, winner.end))
+    leftover = _winner_leftover(text, winner.start, winner.end, self_names, sentence_references)
     if WINNER_LEFTOVER_RE.fullmatch(leftover) is None:
-        return ()
-    evidence = trimmed(text, sentence.span)
-    if self_names:
-        if references_in_winner:
-            return ()
-        directional_targets = {
-            override.target
-            for override in directional
-            if override.clause_id == clause.id
-            and sentence.span.start <= override.evidence.start < sentence.span.end
-        }
-        losers = [
-            reference
-            for reference in sentence_references
-            if not _overlaps_winner(reference.source, winner_start, winner_end)
-            and reference.target is not None
-            and reference.target not in directional_targets
-        ]
-        if losers:
-            return tuple(
-                Override(
-                    clause_id=clause.id,
-                    target=loser.target,
-                    overrides_target=True,
-                    evidence=evidence,
-                )
-                for loser in losers
+        return None
+    return _PrevailsContext(
+        text=text,
+        clause=clause,
+        sentence=sentence,
+        verb=verb,
+        references=sentence_references,
+        outside=sentence_outside,
+        winner=winner,
+        self_names=self_names,
+    )
+
+
+def _self_wins(
+    context: _PrevailsContext,
+    directional: tuple[Override, ...],
+) -> tuple[Override, ...]:
+    directional_targets = _directional_targets(context, directional)
+    losers: list[CrossReference] = []
+    for reference in context.references:
+        is_outside_winner = not _starts_in_winner(reference.source, context.winner)
+        has_target = reference.target is not None
+        is_not_hidden = reference.target not in directional_targets
+        if is_outside_winner and has_target and is_not_hidden:
+            losers.append(reference)
+    evidence = trimmed(context.text, context.sentence.span)
+    if losers:
+        return tuple(
+            Override(
+                clause_id=context.clause.id,
+                target=loser.target,
+                overrides_target=True,
+                evidence=evidence,
             )
-        names_nothing = _names_nothing(
-            text,
-            sentence,
-            sentence_references,
-            sentence_outside,
-            self_names,
-            verb,
-            winner_start,
-            winner_end,
+            for loser in losers
         )
-        if names_nothing:
-            return (
-                Override(
-                    clause_id=clause.id,
-                    target=None,
-                    overrides_target=True,
-                    evidence=evidence,
-                ),
-            )
-        return ()
+    if _names_nothing(context):
+        return (
+            Override(
+                clause_id=context.clause.id,
+                target=None,
+                overrides_target=True,
+                evidence=evidence,
+            ),
+        )
+    return ()
+
+
+def _directional_targets(
+    context: _PrevailsContext,
+    directional: tuple[Override, ...],
+) -> frozenset[ClauseId | None]:
+    targets: set[ClauseId | None] = set()
+    for override in directional:
+        override_is_in_this_sentence = (
+            override.clause_id == context.clause.id
+            and context.sentence.span.start <= override.evidence.start < context.sentence.span.end
+        )
+        if override_is_in_this_sentence:
+            targets.add(override.target)
+    return frozenset(targets)
+
+
+def _reference_wins(context: _PrevailsContext) -> tuple[Override, ...]:
     winners = [
         reference
-        for reference in sentence_references
-        if winner_start <= reference.source.start < winner_end
+        for reference in context.references
+        if _starts_in_winner(reference.source, context.winner)
     ]
     if not winners:
         return ()
     first_start = min(reference.source.start for reference in winners)
+    evidence = trimmed(context.text, context.sentence.span)
     return tuple(
         Override(
-            clause_id=clause.id,
+            clause_id=context.clause.id,
             target=reference.target,
             overrides_target=False,
             evidence=evidence,
@@ -317,8 +370,8 @@ def _winner_start(
     return max(comma_end, lead_end)
 
 
-def _overlaps_winner(source: Span, winner_start: int, winner_end: int) -> bool:
-    return source.start < winner_end and source.end > winner_start
+def _starts_in_winner(source: Span, winner: Span) -> bool:
+    return winner.start <= source.start < winner.end
 
 
 def _winner_leftover(
@@ -355,24 +408,14 @@ def _blank(
         characters[position] = " "
 
 
-def _names_nothing(
-    text: str,
-    sentence: Sentence,
-    sentence_references: tuple[CrossReference, ...],
-    sentence_outside: tuple[OutsideDocument, ...],
-    self_names: tuple[re.Match[str], ...],
-    verb: re.Match[str],
-    winner_start: int,
-    winner_end: int,
-) -> bool:
-    last_word = self_names[0].group(0).split()[-1].casefold()
+def _names_nothing(context: _PrevailsContext) -> bool:
+    last_word = context.self_names[0].group(0).split()[-1].casefold()
     names_clause_or_section = last_word in ("clause", "section", "paragraph")
     no_reference_outside = all(
-        _overlaps_winner(reference.source, winner_start, winner_end)
-        for reference in sentence_references
+        _starts_in_winner(reference.source, context.winner) for reference in context.references
     )
-    no_outside_document = not sentence_outside
-    closing = text[verb.end() : trimmed(text, sentence.span).end]
+    no_outside_document = not context.outside
+    closing = context.text[context.verb.end() : trimmed(context.text, context.sentence.span).end]
     only_closing = all(character.isspace() or character in ".;:" for character in closing)
     return names_clause_or_section and no_reference_outside and no_outside_document and only_closing
 

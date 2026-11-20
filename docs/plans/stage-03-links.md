@@ -643,7 +643,7 @@ When this is done, `find_overrides` gives each override with its direction, and 
   - **Rules:** T1, T11, Spec 5 ("never guess"), S3-M4-T1 and T2 (this task refines both).
   - **Depends on:** S3-M4-T4
 
-- [ ] **S3-M4-T6: Split the prevails code, with one meaning of "in the winner part"**
+- [x] **S3-M4-T6: Split the prevails code, with one meaning of "in the winner part"**
   - **Why:** A code review of milestone 4 found that `_prevails_for_sentence` is about 100 lines with five returns, that `_names_nothing` takes 8 parameters, that three conditions are written inline, and that two steps give "a reference in the winner part" two meanings (any overlap in one, a start in the winner part in the other). A source cannot start before the winner part and end inside it (the comma rule never cuts inside a source, and a lead that holds a source start is not a lead), so one meaning changes no result. The owner accepted this cleanup on 20 Nov 2026. No behaviour changes.
   - **Build:** In `overrides.py`:
     - Add `@dataclass(frozen=True, slots=True, kw_only=True) class _PrevailsContext` with exactly these fields: `text: str`, `clause: Clause`, `sentence: Sentence`, `verb: re.Match[str]`, `references: tuple[CrossReference, ...]` (the sentence references), `outside: tuple[OutsideDocument, ...]` (the sentence outside documents), `winner: Span` (the winner part, `Span(start=winner_start, end=verb.start())`) and `self_names: tuple[re.Match[str], ...]`.
