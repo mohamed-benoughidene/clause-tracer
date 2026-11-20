@@ -16,6 +16,7 @@ from clause_tracer.ingest.reading import read_text_file
 
 DEFAULT_INPUT = Path(__file__).parent / "samples" / "developer-agreement.txt"
 EXIT_INPUT_FILE = 3  # "input file", system design 6.2
+MARKDOWN_SUFFIXES = frozenset({".md", ".markdown"})
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -25,7 +26,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     path: Path = args.input
 
-    kind = FileKind.MARKDOWN if path.suffix.lower() == ".md" else FileKind.TEXT
+    kind = FileKind.MARKDOWN if path.suffix.lower() in MARKDOWN_SUFFIXES else FileKind.TEXT
     try:
         data = path.read_bytes()
     except OSError:

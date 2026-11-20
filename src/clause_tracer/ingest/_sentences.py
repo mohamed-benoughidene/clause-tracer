@@ -17,6 +17,7 @@ from clause_tracer.ingest._lines import is_blank, split_lines
 
 _COLON_TRAILING: Final[str] = " \t\u00a0\ufeff*_"
 _COLONS: Final[tuple[str, ...]] = (":", "\uff1a")
+_ROW_EDGE: Final[str] = " \t\u00a0\ufeff"
 
 
 def colon_line_starts(text: str) -> tuple[int, ...]:
@@ -45,14 +46,15 @@ def tab_line_starts(text: str) -> tuple[int, ...]:
 
     Input:   one text, usually a clause's body.
     Output:  the start of each line with a tab that is not only at its start or
-             its end, in order, as code-point offsets. The first line of the
+             its end (spaces, no-break spaces and byte-order marks around it do
+             not count), in order, as code-point offsets. The first line of the
              text gives no start, because a sentence already starts there.
     Effects: none.
     """
 
     starts: list[int] = []
     for index, line in enumerate(split_lines(text)):
-        is_table_row = "\t" in line.text.strip(" \t")
+        is_table_row = "\t" in line.text.strip(_ROW_EDGE)
         if index > 0 and is_table_row:
             starts.append(line.start)
     return tuple(starts)

@@ -19,6 +19,7 @@ from clause_tracer.ingest._markers import (
     find_marker,
     is_heading_line,
     is_short_heading_line,
+    is_title_line,
 )
 from clause_tracer.ingest._numbering import (
     ParenStyle,
@@ -45,6 +46,7 @@ class _ClauseStart:
     heading_source: str | None
     numbering_source: str
     kind: MarkerKind | None
+    breaks_sentence: bool
 
 
 HEADED_KINDS: Final[frozenset[MarkerKind]] = frozenset(
@@ -91,7 +93,9 @@ def _is_heading_at(
     if not is_heading_line(line.text):
         return False
     is_first_line = index == 0
-    return is_first_line or is_blank(lines[index - 1]) or _has_marker_after(lines, markers, index)
+    is_title_first_line = is_first_line and is_title_line(line.text)
+    follows_blank_line = not is_first_line and is_blank(lines[index - 1])
+    return is_title_first_line or follows_blank_line or _has_marker_after(lines, markers, index)
 
 
 def _marker_clause_start(
@@ -112,6 +116,7 @@ def _marker_clause_start(
         heading_source=line.text[marker.body_start :],
         numbering_source=NUMBERING_NUMBERS,
         kind=marker.kind,
+        breaks_sentence=False,
     )
 
 
@@ -297,6 +302,7 @@ def _open_unnumbered_heading(state: _WalkState, line: Line) -> _ClauseStart:
         heading_source=line.text,
         numbering_source=NUMBERING_NUMBERS,
         kind=None,
+        breaks_sentence=is_short_heading_line(line.text),
     )
 
 
@@ -381,6 +387,7 @@ def _build_clauses(text: str, starts: list[_ClauseStart]) -> tuple[Clause, ...]:
                     heading_source=None,
                     numbering_source=NUMBERING_NUMBERS,
                     kind=None,
+                    breaks_sentence=False,
                 ),
             )
         else:
@@ -406,11 +413,7 @@ def _build_clauses(text: str, starts: list[_ClauseStart]) -> tuple[Clause, ...]:
         assert record.id is not None
         span = Span(start=record.start, end=end)
         body_start = record.body_start if record.number is not None else span.start
-        is_unnumbered_heading = record.number is None and record.heading_source is not None
-        breaks_after_heading = is_unnumbered_heading and is_short_heading_line(
-            record.heading_source or ""
-        )
-        heading_end = record.line_end if breaks_after_heading else None
+        heading_end = record.line_end if record.breaks_sentence else None
         clauses.append(
             Clause(
                 id=ClauseId(record.id),

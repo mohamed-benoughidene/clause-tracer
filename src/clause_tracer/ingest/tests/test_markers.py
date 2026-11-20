@@ -8,6 +8,7 @@ from clause_tracer.ingest._markers import (
     find_marker,
     is_heading_line,
     is_short_heading_line,
+    is_title_line,
 )
 
 
@@ -161,3 +162,22 @@ def test_is_heading_line(line: str, expected: bool) -> None:
 )
 def test_is_short_heading_line(line: str, expected: bool) -> None:
     assert is_short_heading_line(line) is expected
+
+
+@pytest.mark.parametrize(
+    ("line", "expected"),
+    [
+        ("Development Services Agreement", True),
+        ("Terms and Conditions", True),
+        ("Page 1 of 5", True),
+        ("CONFIDENTIAL", True),
+        ("**Master Services Agreement**", True),
+        ("Karim Benali", True),
+        ("This Agreement is made on", False),
+        ("and Then", False),
+        ("", False),
+        ("   ", False),
+    ],
+)
+def test_is_title_line(line: str, expected: bool) -> None:
+    assert is_title_line(line) is expected

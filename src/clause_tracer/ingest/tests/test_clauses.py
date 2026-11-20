@@ -584,3 +584,24 @@ def test_blank_sentence_joins_the_next() -> None:
         Span(start=0, end=27),
         Span(start=27, end=41),
     )
+
+
+def test_wrapped_first_line_is_not_a_heading() -> None:
+    clauses = clauses_of(
+        "This Agreement is made on\n5 November 2026 between the parties.\n1. Start\n1.1 Now."
+    )
+    assert tuple(clause.id for clause in clauses) == ("p1", "1", "1.1")
+    assert clauses[0].heading is None
+    assert tuple(sentence.span for sentence in clauses[0].sentences) == (Span(start=0, end=63),)
+
+
+def test_first_line_not_in_title_case_before_a_marker_is_a_heading() -> None:
+    clauses = clauses_of("Parties and recitals\n(1) Brightline Studio Ltd.")
+    assert tuple(clause.id for clause in clauses) == ("p1", "(1)")
+    assert clauses[0].heading == "Parties and recitals"
+
+
+def test_heading_after_blank_line_does_not_need_title_case() -> None:
+    clauses = clauses_of("1. Start\n1.1 Now.\n\nSigned by the parties\nKarim Benali\n")
+    assert clauses[2].id == "p1"
+    assert clauses[2].heading == "Signed by the parties"

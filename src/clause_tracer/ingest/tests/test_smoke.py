@@ -29,6 +29,18 @@ def test_markdown_input(capsys: pytest.CaptureFixture[str]) -> None:
     assert "numbering\tparagraphs" in capsys.readouterr().out.splitlines()
 
 
+def test_markdown_suffix_is_read_as_markdown(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    path = tmp_path / "letter.markdown"
+    path.write_bytes((SAMPLES / "plain-paragraphs.md").read_bytes())
+
+    assert main(["--input", str(path)]) == 0
+
+    first_line = capsys.readouterr().out.splitlines()[0]
+    assert first_line.startswith("source\tmarkdown\t")
+
+
 def test_sample_has_65_clauses() -> None:
     document = read_text_file(
         DEFAULT_INPUT.read_bytes(), kind=FileKind.TEXT, name=DEFAULT_INPUT.name

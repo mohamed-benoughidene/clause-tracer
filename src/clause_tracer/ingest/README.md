@@ -103,15 +103,20 @@ a schedule or a bare number, the rest of its line is short, does not end like a
 sentence, and every later line in the clause is blank. A bracketed item such as
 `(a)` never has a heading. An unnumbered heading clause takes its own line as
 the heading, and only when a marker follows it, the line comes after a blank
-line, or it is the first line of the text. A line that opens with `Signed`,
+line, or it is the first line of the text and in title case: every word starts
+with a capital letter, except the joining words a, an, and, by, for, in, of,
+on, or, the, to and with after the first word. So a first line such as
+`This Agreement is made on`, wrapped in the middle of a sentence, is not a
+heading. A line that opens with `Signed`,
 `Executed` or `In witness whereof` is a heading whatever its length. The clause
 of text before the first clause has no heading.
 
 The line of a short unnumbered heading ends a sentence: the next sentence starts
 at the next non-blank line. A long signature line does not end a sentence. A
-short first line that is not a title also becomes a heading, such as a name at
-the top of an address, a label such as `CONFIDENTIAL` or `Page 1 of 5`, or the
-first line of a title wrapped over two lines: a known limit.
+short first line in title case that is not a title also becomes a heading,
+such as a name at the top of an address, a label such as `CONFIDENTIAL` or
+`Page 1 of 5`, or the first line of a title wrapped over two lines: a known
+limit.
 
 In the paragraph case, a blank line between two non-blank lines starts a new
 paragraph; when the text has no such blank line, every non-blank line is a
@@ -164,8 +169,8 @@ The wide match fold's table lives in `core`: `core/tests/tables/match_fold.toml`
 `samples/developer-agreement.txt`.
 
 `.venv/bin/uv run python -m clause_tracer.ingest --input samples/plain-paragraphs.md`
-reads another text or Markdown file. A `.md` suffix is read as Markdown; every
-other suffix is read as text.
+reads another text or Markdown file. A `.md` or `.markdown` suffix, in any
+case, is read as Markdown; every other suffix is read as text.
 
 `.venv/bin/uv run python -m clause_tracer.ingest --full` prints each sentence in
 full instead of its first 60 characters. The flag writes to standard output only.

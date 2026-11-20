@@ -66,6 +66,8 @@ def test_colon_start_joins_the_library_starts() -> None:
         ("Intro.\n\tTotal\t£9,600", (7,)),
         ("Intro\n\tindented line", ()),
         ("Intro\ntrailing\t", ()),
+        ("Intro\n\u00a0\tindented line", ()),
+        ("Intro\n\ufeff\tindented line", ()),
     ],
 )
 def test_tab_line_starts(text: str, expected: tuple[int, ...]) -> None:

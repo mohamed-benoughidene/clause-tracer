@@ -49,6 +49,9 @@ HEADING_STRIP: Final[str] = EMPHASIS_STRIP + "·:-–—"
 
 SIGNATURE_OPENERS: Final[tuple[str, ...]] = ("signed", "executed", "in witness whereof")
 SIGNATURE_BOUNDARY: Final[str] = " :,;.*_"
+TITLE_JOINING_WORDS: Final[frozenset[str]] = frozenset(
+    {"a", "an", "and", "by", "for", "in", "of", "on", "or", "the", "to", "with"}
+)
 
 MONTH_NAMES: Final[frozenset[str]] = frozenset(
     {
@@ -262,6 +265,15 @@ def find_marker(line_text: str) -> Marker | None:
     return None
 
 
+def _opens_with(words: str, opener: str) -> bool:
+    """True when the words open with the opener as whole words."""
+
+    if not words.startswith(opener):
+        return False
+    is_whole_text = len(words) == len(opener)
+    return is_whole_text or words[len(opener)] in SIGNATURE_BOUNDARY
+
+
 def is_signature_line(line_text: str) -> bool:
     """True when a line opens a signature block.
 
@@ -273,11 +285,32 @@ def is_signature_line(line_text: str) -> bool:
     """
 
     words = " ".join(line_text.strip(EMPHASIS_STRIP).split()).casefold()
-    return any(
-        words.startswith(opener)
-        and (len(words) == len(opener) or words[len(opener)] in SIGNATURE_BOUNDARY)
-        for opener in SIGNATURE_OPENERS
-    )
+    return any(_opens_with(words, opener) for opener in SIGNATURE_OPENERS)
+
+
+def is_title_line(line_text: str) -> bool:
+    """True when a line is in title case.
+
+    Input:   one line of the document text, without its line break.
+    Output:  true when the line has at least one word and every word passes:
+             its first letter is a capital, or it has no letter, or it is one
+             of TITLE_JOINING_WORDS (compared case-folded) and not the first
+             word. So `Development Services Agreement`, `Page 1 of 5` and
+             `CONFIDENTIAL` pass, and `This Agreement is made on` does not.
+    Effects: none.
+    """
+
+    words = line_text.strip(EMPHASIS_STRIP).split()
+    if not words:
+        return False
+    for position, word in enumerate(words):
+        letters = [character for character in word if character.isalpha()]
+        has_no_letter = not letters
+        starts_with_capital = bool(letters) and letters[0].isupper()
+        is_joining_word = position > 0 and word.casefold() in TITLE_JOINING_WORDS
+        if not (has_no_letter or starts_with_capital or is_joining_word):
+            return False
+    return True
 
 
 def is_short_heading_line(line_text: str) -> bool:
@@ -311,7 +344,6 @@ def is_heading_line(line_text: str) -> bool:
     Effects: none.
     """
 
-    stripped = line_text.strip(EMPHASIS_STRIP)
-    if stripped == "" or "\t" in line_text:
+    if "\t" in line_text:
         return False
     return is_signature_line(line_text) or is_short_heading_line(line_text)
