@@ -271,7 +271,7 @@ When this is done, `find_references` finds every cross-reference with its source
   - **Rules:** T1, I4 (always the same return type), Spec 5 ("never guess").
   - **Depends on:** S3-M1-T5
 
-- [ ] **S3-M2-T2: Single cross-references**
+- [x] **S3-M2-T2: Single cross-references**
   - **Build:** In `src/clause_tracer/links/references.py`, `def find_references(text: str, index: ClauseIndex) -> tuple[CrossReference, ...]`, with these module-level patterns (in `src/clause_tracer/links/_patterns.py`):
     - `ITEM_NUMBER` is already in `_patterns.py` (S3-M2-T1). Add `ITEM_ARTICLE = r"(?:[0-9]{1,3}|[IVXLC]{1,7})(?:\.[0-9]{1,3}){0,4}(?:\([0-9A-Za-z]{1,4}\)){0,3}"` and `ITEM_SCHEDULE = r"(?:[0-9]{1,3}|[A-Z])(?:\.[0-9]{1,3}){0,4}(?:\([0-9A-Za-z]{1,4}\)){0,3}"`. `ITEM_SCHEDULE` stays upper-case only, because `ingest` reads a schedule designation in upper case (so `annex a` is not read). An article or schedule item can carry a `.` part or a bracket after its base; the key rules below give such an item the key `None`.
     - `DOCUMENT_WORDS = r"(?:[A-Z][a-z]+(?:-[A-Z][a-z]+)?\s+){1,4}"` and `DOCUMENT_NOUN = r"(?:Agreement|Contract|Deed|Addendum|Licence|License|Statement\s+of\s+Work|Terms\s+and\s+Conditions)"`. S3-M3-T3 builds `OUTSIDE_DOCUMENT` from them.
