@@ -83,6 +83,12 @@ also breaks there: a known limit.
 A `Document` with no glyphs: `glyphs`, `char_map`, `pages`, `furniture`, `hidden`,
 `undecodable` and `tracked_changes` are empty in stage 2.
 
+A text that does not look English carries the warning `not_english`. Lingua
+names the language of the text, and the warning is set when that language is
+not English. A text of fewer than 10 words is never warned about, because it is
+too short to tell (`[Assumption]`, tuned in testing). The warning never stops
+the read: the user can go on with the contract.
+
 ## Depends on
 core only.
 

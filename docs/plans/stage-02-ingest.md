@@ -606,7 +606,7 @@ When this is done, `core` builds match keys, invariant 2 holds, a contract that 
   - **Rules:** T11.
   - **Depends on:** S2-M1-T4
 
-- [ ] **S2-M5-T4: The not-English warning**
+- [x] **S2-M5-T4: The not-English warning**
   - **Build:** Needs question 1 ([ADR 0017](../adr/0017-language-detection-with-lingua.md)). In `src/clause_tracer/ingest/language.py`, the only file in the repo that imports `lingua`:
     - `WARNING_NOT_ENGLISH: Final[str] = "not_english"`, exported from `__init__.py`.
     - `MIN_WORDS_TO_JUDGE: Final[int] = 10`, with the comment `# [Assumption] tuned in testing.`
