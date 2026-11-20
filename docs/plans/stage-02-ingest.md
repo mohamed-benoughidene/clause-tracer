@@ -37,7 +37,7 @@
 - Turning error codes and warning codes into words, exit codes in `cli`, and the missing copy for a contract over the word limit: stage 6 (question 5).
 - Cross-references, defined terms and schedule references: stage 3.
 - The nightly 2,000-example Hypothesis profile: stage 5. The socket block: stage 6.
-- Numbering styles this stage does not read (question 7): `A)` and `1)` without an opening bracket; "Section 5" and other keywords; a keyword with a decimal number ("Clause 5.1"); Roman numbers without a keyword; and unnumbered headings longer than 8 words or 60 characters.
+- Numbering styles this stage does not read (question 7): `A)` and `1)` without an opening bracket; "Section 5" and other keywords; a keyword with a decimal number ("Clause 5.1"); Roman numbers without a keyword; and unnumbered headings longer than 8 words or 60 characters, except a line that opens with `Signed`, `Executed` or `In witness whereof`.
 
 ## 3. Read first
 
@@ -525,7 +525,7 @@ When this is done, `python -m clause_tracer.ingest` prints the clauses and sente
   - **Rules:** B4, I4, T1, S3, [Spec 5](../spec.md#5-labelling-rules) (a missed break only makes a sentence longer; this rule removes one kind of missed break, and adds a break after a hard-wrapped line that ends in a colon, a known limit), [system design 4.2](../system-design.md#42-the-offset-chain).
   - **Depends on:** S2-M4-T5
 
-- [ ] **S2-M4-T8: A signature line starts a clause**
+- [x] **S2-M4-T8: A signature line starts a clause**
   - **Build:** Decided by the owner on 20 Nov 2026 (question 13). In `src/clause_tracer/ingest/_markers.py`: `SIGNATURE_OPENERS: Final[tuple[str, ...]] = ("signed", "executed", "in witness whereof")`, `SIGNATURE_BOUNDARY: Final[str] = " :,;.*_"`, and `def is_signature_line(line_text: str) -> bool`. With `words = " ".join(line_text.strip(EMPHASIS_STRIP).split()).casefold()`, it is true when for some `opener` in `SIGNATURE_OPENERS` `words.startswith(opener)` holds and either `len(words) == len(opener)` or `words[len(opener)] in SIGNATURE_BOUNDARY`. Then change `is_heading_line`: after the `stripped == ""` check, add `if "\t" in line_text: return False` and then `if is_signature_line(line_text): return True`, before the length, word and capital-letter tests. So a table row with tabs that opens with `Signed` is never a heading, as before. Nothing else changes: `clauses.py` still asks for a blank line before the line, or a marker line after it (S2-M3-T6), so a long line that opens with `Signed` and has a text line before it stays in its clause. A later language adds its own openers to the same tuple.
     - In `src/clause_tracer/ingest/README.md`, at the end of the paragraph that begins "A numbered clause has a heading", add: "A line that opens with `Signed`, `Executed` or `In witness whereof` is a heading whatever its length." In [system design 4.2](../system-design.md#42-the-offset-chain), add the same sentence to the one about short unnumbered lines. In this plan, in the last bullet of section 2 ("Scope"), the one that begins "Numbering styles this stage does not read", change the end so that it reads: "and unnumbered headings longer than 8 words or 60 characters, except a line that opens with `Signed`, `Executed` or `In witness whereof`."
   - **Files:** `src/clause_tracer/ingest/_markers.py`, `src/clause_tracer/ingest/README.md`, `docs/system-design.md`, `docs/plans/stage-02-ingest.md`, `src/clause_tracer/ingest/tests/test_markers.py`, `src/clause_tracer/ingest/tests/test_clauses.py`.

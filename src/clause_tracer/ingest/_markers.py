@@ -47,6 +47,9 @@ EMPHASIS_STRIP: Final[str] = " \t\ufeff#*_"
 SCHEDULE_SEPARATORS: Final[str] = "\u00b7:-\u2013\u2014"
 HEADING_STRIP: Final[str] = EMPHASIS_STRIP + "·:-–—"
 
+SIGNATURE_OPENERS: Final[tuple[str, ...]] = ("signed", "executed", "in witness whereof")
+SIGNATURE_BOUNDARY: Final[str] = " :,;.*_"
+
 MONTH_NAMES: Final[frozenset[str]] = frozenset(
     {
         "January",
@@ -259,22 +262,44 @@ def find_marker(line_text: str) -> Marker | None:
     return None
 
 
+def is_signature_line(line_text: str) -> bool:
+    """True when a line opens a signature block.
+
+    Input:   one line of the document text, without its line break.
+    Output:  true when the line opens with "signed", "executed" or
+             "in witness whereof", as a word of its own. A later language adds
+             its own openers to the same tuple.
+    Effects: none.
+    """
+
+    words = " ".join(line_text.strip(EMPHASIS_STRIP).split()).casefold()
+    return any(
+        words.startswith(opener)
+        and (len(words) == len(opener) or words[len(opener)] in SIGNATURE_BOUNDARY)
+        for opener in SIGNATURE_OPENERS
+    )
+
+
 def is_heading_line(line_text: str) -> bool:
     """True when one line looks like an unnumbered heading on its own.
 
     Input:   one line of the document text, without its line break.
     Output:  true for a short, capitalised line that does not end like a
-             sentence. The lines around it are S2-M3-T6's concern.
+             sentence, and for a line that opens a signature block whatever its
+             length. The lines around it are S2-M3-T6's concern.
     Effects: none.
     """
 
     stripped = line_text.strip(EMPHASIS_STRIP)
     if stripped == "":
         return False
+    if "\t" in line_text:
+        return False
+    if is_signature_line(line_text):
+        return True
     return (
         len(stripped) <= 60
         and len(stripped.split()) <= 8
         and stripped[-1] not in ".,;:"
-        and "\t" not in line_text
         and stripped[0].isupper()
     )

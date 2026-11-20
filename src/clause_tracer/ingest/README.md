@@ -66,7 +66,9 @@ a schedule or a bare number, the rest of its line is short, does not end like a
 sentence, and every later line in the clause is blank. A bracketed item such as
 `(a)` never has a heading. An unnumbered heading clause takes its own line as
 the heading, and only when a marker follows it or the line comes after a blank
-line. The clause of text before the first clause has no heading.
+line. A line that opens with `Signed`, `Executed` or `In witness whereof` is a
+heading whatever its length. The clause of text before the first clause has no
+heading.
 
 Sentence ids add `.s1`, `.s2` and so on to the clause id (`5.1.s3`). A clause's
 sentences cover the whole clause: each starts where the one before ends. The

@@ -299,6 +299,32 @@ def test_paragraph_sentences() -> None:
     )
 
 
+def test_signature_line_starts_its_own_clause() -> None:
+    text = (
+        "14.6 Governed by English law.\n"
+        "\n"
+        "Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director\n"
+        "\n"
+        "Signed by Karim Benali"
+    )
+
+    clauses = clauses_of(text)
+
+    assert tuple(str(clause.id) for clause in clauses) == ("14.6", "p1", "p2")
+    assert clauses[1].heading == (
+        "Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director"
+    )
+
+
+def test_signed_line_after_a_text_line_stays_in_the_clause() -> None:
+    text = (
+        "9.1 The parties agree.\n"
+        "Signed by both parties on the date at the top of this Agreement, in two copies."
+    )
+
+    assert ids(text) == ("9.1",)
+
+
 def test_numbered_heading_line_has_a_heading() -> None:
     clauses = clauses_of(
         "5. Charges and payment\n5.1 The Agency pays 25%.\n5.2 Invoices are paid in 60 days.\n"
