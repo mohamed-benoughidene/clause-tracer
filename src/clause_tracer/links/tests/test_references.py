@@ -16,6 +16,17 @@ def _run(
     return case.document.text, find_references(case.document.text, index)
 
 
+_DEFINED = [
+    {"id": "4", "sentences": ["4. Fees."]},
+    {"id": "5", "sentences": ["5. Payment."]},
+    {"id": "6", "sentences": ["6. Expenses."]},
+]
+
+
+def _run_in_9(sentence: str) -> tuple[str, tuple[CrossReference, ...]]:
+    return _run([*_DEFINED, {"id": "9", "sentences": [sentence]}])
+
+
 def test_clause_reference() -> None:
     text, references = _run(
         [
@@ -226,3 +237,140 @@ def test_clause_in_schedule_body_only() -> None:
         ]
     )
     assert references == (CrossReference(source=span_of(text, "clause 12"), target=ClauseId("12")),)
+
+
+def test_range() -> None:
+    text, references = _run_in_9("9. Clauses 4 to 6 apply.")
+    source = span_of(text, "Clauses 4 to 6")
+    assert references == (
+        CrossReference(source=source, target=ClauseId("4")),
+        CrossReference(source=source, target=ClauseId("5")),
+        CrossReference(source=source, target=ClauseId("6")),
+    )
+
+
+def test_range_with_dash() -> None:
+    _, references = _run_in_9("9. clauses 4-6")
+    assert tuple(reference.target for reference in references) == (
+        ClauseId("4"),
+        ClauseId("5"),
+        ClauseId("6"),
+    )
+    _, references = _run_in_9("9. clauses 4\u20136")
+    assert tuple(reference.target for reference in references) == (
+        ClauseId("4"),
+        ClauseId("5"),
+        ClauseId("6"),
+    )
+
+
+def test_range_keeps_missing_members() -> None:
+    _, references = _run_in_9("9. clauses 5 to 7")
+    assert tuple(reference.target for reference in references) == (
+        ClauseId("5"),
+        ClauseId("6"),
+        None,
+    )
+
+
+def test_list() -> None:
+    _, references = _run_in_9("9. clauses 4, 5 and 9")
+    assert tuple(reference.target for reference in references) == (
+        ClauseId("4"),
+        ClauseId("5"),
+        ClauseId("9"),
+    )
+
+
+def test_list_with_or() -> None:
+    _, references = _run_in_9("9. clause 4 or 9")
+    assert tuple(reference.target for reference in references) == (
+        ClauseId("4"),
+        ClauseId("9"),
+    )
+
+
+def test_range_then_list() -> None:
+    _, references = _run_in_9("9. clauses 4 to 6 and 9")
+    assert tuple(reference.target for reference in references) == (
+        ClauseId("4"),
+        ClauseId("5"),
+        ClauseId("6"),
+        ClauseId("9"),
+    )
+
+
+def test_and_followed_by_a_word_stops() -> None:
+    text, references = _run(
+        [
+            {"id": "S1", "number": "Schedule 1", "sentences": ["Schedule 1 · Fees"]},
+            {"id": "1", "sentences": ["1. Schedule 1 and the Agency."]},
+        ]
+    )
+    assert references == (
+        CrossReference(source=span_of(text, "Schedule 1", 2), target=ClauseId("S1")),
+    )
+
+
+def test_over_long_range_keeps_its_ends() -> None:
+    _, references = _run_in_9("9. clauses 1 to 99")
+    assert tuple(reference.target for reference in references) == (None, None)
+
+
+def test_repeated_key_once() -> None:
+    _, references = _run_in_9("9. clauses 4 and 4")
+    assert len(references) == 1
+
+
+def test_list_stops_before_a_unit() -> None:
+    text, references = _run_in_9("9. clause 4, 30 days")
+    assert references == (CrossReference(source=span_of(text, "clause 4"), target=ClauseId("4")),)
+
+
+def test_range_stops_before_a_month() -> None:
+    text, references = _run(
+        [
+            {"id": "3", "sentences": ["3. Fees."]},
+            {"id": "9", "sentences": ["9. clause 3 - 5 July"]},
+        ]
+    )
+    assert references == (CrossReference(source=span_of(text, "clause 3"), target=ClauseId("3")),)
+
+
+def test_number_with_unit_is_not_a_reference() -> None:
+    _, references = _run([{"id": "9", "sentences": ["9. clause 4 days"]}])
+    assert references == ()
+
+
+def test_may_is_not_a_unit() -> None:
+    text, references = _run(
+        [
+            {"id": "4", "sentences": ["4. Fees."]},
+            {"id": "9", "sentences": ["9. Clause 4 may apply."]},
+        ]
+    )
+    assert references == (CrossReference(source=span_of(text, "Clause 4"), target=ClauseId("4")),)
+
+
+def test_decimal_before_a_unit_is_not_cut() -> None:
+    _, references = _run(
+        [
+            {"id": "4", "sentences": ["4. Fees."]},
+            {"id": "9", "sentences": ["9. see clause 4.5 days"]},
+        ]
+    )
+    assert references == ()
+
+
+def test_range_with_bad_roman() -> None:
+    text, references = _run(
+        [
+            {"id": "5", "sentences": ["5. Payment."]},
+            {"id": "9", "sentences": ["9. Articles IIII to V"]},
+        ]
+    )
+    source = span_of(text, "Articles IIII to V")
+    assert references == (
+        CrossReference(source=source, target=None),
+        CrossReference(source=source, target=ClauseId("5")),
+    )

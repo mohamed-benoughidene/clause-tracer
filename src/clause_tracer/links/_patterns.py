@@ -35,13 +35,21 @@ SEPARATOR: Final[str] = (
 )
 SEPARATOR_RE: Final[re.Pattern[str]] = re.compile(SEPARATOR)
 
+UNIT_AFTER: Final[str] = (
+    r"(?!\s*(?:%|(?i:per\s?cent|percent|days?|weeks?|months?|years?|hours?|"
+    r"business|working|calendar)(?![A-Za-z])|"
+    r"(?:January|February|March|April|May|June|July|August|September|October|"
+    r"November|December)(?![A-Za-z])))"
+)
+
 
 def _reference_pattern(keywords: str, item: str) -> re.Pattern[str]:
     """Build one reference pattern; the group `items` holds every item."""
 
+    guarded_item = f"(?:{item}){UNIT_AFTER}"
     return re.compile(
         rf"(?<![A-Za-z])(?P<kw>(?i:{keywords}))\s+"
-        rf"(?P<items>(?:{item})(?:{SEPARATOR}(?:{item}))*)"
+        rf"(?P<items>(?:{guarded_item})(?:{SEPARATOR}(?:{guarded_item}))*)"
         rf"(?![0-9A-Za-z]|\.[0-9])"
     )
 

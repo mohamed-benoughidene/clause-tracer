@@ -11,7 +11,7 @@ from typing import Final
 
 from clause_tracer.core import ClauseId, CrossReference, Span
 from clause_tracer.links._index import ClauseIndex
-from clause_tracer.links._numbers import normalise_number, roman_to_int
+from clause_tracer.links._numbers import expand_range, normalise_number, roman_to_int
 from clause_tracer.links._patterns import (
     ARTICLE_REFERENCE,
     NUMBER_REFERENCE,
@@ -37,6 +37,8 @@ class _Key:
 
     written: str
     resolution: str | None
+    schedule_letter: str | None = None
+    schedule_digits: str | None = None
 
 
 def find_references(text: str, index: ClauseIndex) -> tuple[CrossReference, ...]:
@@ -67,18 +69,81 @@ def _references_for_match(
     match: re.Match[str],
     family: _Family,
 ) -> tuple[CrossReference, ...]:
-    items = _split_items(match.group("items"))
+    items, separators = _split_items(match.group("items"))
     keyword = match.group("kw")
-    first = _parse_item(items[0], family, keyword)
-    target = _target(text, index, match, keyword, first)
-    if _is_own_number(text, index, match, items, target):
-        return ()
-    return (CrossReference(source=Span(start=match.start(), end=match.end()), target=target),)
+    parsed = [_parse_item(item, family, keyword) for item in items]
+    keys = _expand_keys(parsed, separators, family)
+    source = Span(start=match.start(), end=match.end())
+    references: list[CrossReference] = []
+    for key in keys:
+        target = _target(text, index, match, keyword, key)
+        if _is_own_number(text, index, match, items, target):
+            continue
+        references.append(CrossReference(source=source, target=target))
+    return tuple(references)
 
 
-def _split_items(raw: str) -> tuple[str, ...]:
+def _split_items(raw: str) -> tuple[tuple[str, ...], tuple[str, ...]]:
     parts = re.split(f"({SEPARATOR})", raw)
-    return tuple(parts[0::2])
+    return tuple(parts[0::2]), tuple(parts[1::2])
+
+
+def _expand_keys(
+    parsed: list[_Key],
+    separators: tuple[str, ...],
+    family: _Family,
+) -> tuple[_Key, ...]:
+    expanded: list[_Key] = [parsed[0]]
+    for index, separator in enumerate(separators, start=1):
+        if _is_range_separator(separator):
+            expanded.extend(_expand_pair(expanded[-1], parsed[index], family))
+        else:
+            expanded.append(parsed[index])
+    return _dedupe(expanded)
+
+
+def _is_range_separator(separator: str) -> bool:
+    return any(marker in separator for marker in ("to", "-", "\u2013", "\u2014"))
+
+
+def _expand_pair(first: _Key, second: _Key, family: _Family) -> tuple[_Key, ...]:
+    if family is _Family.SCHEDULE:
+        return _expand_schedule(first, second)
+    if first.resolution is None or second.resolution is None:
+        return (second,)
+    expanded = expand_range(first.written, second.written)
+    return tuple(_Key(written=key, resolution=key) for key in expanded[1:])
+
+
+def _expand_schedule(first: _Key, second: _Key) -> tuple[_Key, ...]:
+    if first.schedule_digits is None or second.schedule_digits is None:
+        return (second,)
+    letter = first.schedule_letter or ""
+    expanded = expand_range(first.schedule_digits, second.schedule_digits)
+    return tuple(
+        _Key(
+            written=letter + digits,
+            resolution=letter + digits,
+            schedule_letter=letter,
+            schedule_digits=digits if _is_plain_digits(digits) else None,
+        )
+        for digits in expanded[1:]
+    )
+
+
+def _is_plain_digits(written: str) -> bool:
+    return written.isdigit() and (len(written) == 1 or not written.startswith("0"))
+
+
+def _dedupe(keys: list[_Key]) -> tuple[_Key, ...]:
+    seen: set[str] = set()
+    kept: list[_Key] = []
+    for key in keys:
+        if key.written in seen:
+            continue
+        seen.add(key.written)
+        kept.append(key)
+    return tuple(kept)
 
 
 def _parse_item(item: str, family: _Family, keyword: str) -> _Key:
@@ -109,15 +174,21 @@ def _article_key(item: str) -> _Key:
 
 
 def _schedule_key(item: str, keyword: str) -> _Key:
+    letter = keyword[0].upper()
     match = _SCHEDULE_BASE_RE.match(item)
     if match is None:
-        return _Key(written=keyword[0].upper() + item, resolution=None)
+        return _Key(written=letter + item, resolution=None, schedule_letter=letter)
     base = match.group(0)
     tail = item[len(base) :]
-    key = keyword[0].upper() + item
+    key = letter + item
     if tail:
-        return _Key(written=key, resolution=None)
-    return _Key(written=key, resolution=key)
+        return _Key(written=key, resolution=None, schedule_letter=letter)
+    return _Key(
+        written=key,
+        resolution=key,
+        schedule_letter=letter,
+        schedule_digits=item if _is_plain_digits(item) else None,
+    )
 
 
 def _target(
