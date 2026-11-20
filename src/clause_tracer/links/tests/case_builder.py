@@ -97,7 +97,7 @@ def _parse_rows(rows: Sequence[Mapping[str, object]]) -> list[_Row]:
             raise ValueError("missing key id")
         if "sentences" not in row:
             raise ValueError("missing key sentences")
-        clause_id = cast(str, _string(row, "id"))
+        clause_id = _required_string(row, "id")
         sentences = _sentences(row["sentences"])
         parent = _string(row, "parent")
         heading = _string(row, "heading")
@@ -108,6 +108,8 @@ def _parse_rows(rows: Sequence[Mapping[str, object]]) -> list[_Row]:
         for sentence in sentences:
             if sentence == "" or "\n" in sentence or "\r" in sentence:
                 raise ValueError("a sentence must be non-empty and hold no line break")
+        if _is_paragraph_id(clause_id) and "number" in row:
+            raise ValueError(f"paragraph id {clause_id} cannot have a number")
 
         parent_id = None if parent is None else ClauseId(parent)
         if parent_id is None:
@@ -134,6 +136,13 @@ def _parse_rows(rows: Sequence[Mapping[str, object]]) -> list[_Row]:
         )
         levels[ClauseId(clause_id)] = level
     return parsed
+
+
+def _required_string(row: Mapping[str, object], key: str) -> str:
+    value = row[key]
+    if not isinstance(value, str):
+        raise ValueError(f"{key} must be a string")
+    return value
 
 
 def _string(row: Mapping[str, object], key: str) -> str | None:

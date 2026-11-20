@@ -68,6 +68,11 @@ def test_paragraph_ids() -> None:
         assert clause.number is None
 
 
+def test_paragraph_id_with_number_raises() -> None:
+    with pytest.raises(ValueError, match="paragraph id p1 cannot have a number"):
+        build_case([{"id": "p1", "number": "1", "sentences": ["x."]}])
+
+
 def test_number_key() -> None:
     sample = build_case([{"id": "S1", "number": "Schedule 1", "sentences": ["Schedule 1 · Fees"]}])
 
@@ -96,6 +101,11 @@ def test_missing_key_raises() -> None:
         build_case([{"id": "1"}])
     with pytest.raises(ValueError, match="missing key id"):
         build_case([{"sentences": ["x."]}])
+
+
+def test_wrong_type_id_still_reports_missing_sentences() -> None:
+    with pytest.raises(ValueError, match="missing key sentences"):
+        build_case([{"id": 3}])
 
 
 def test_sentence_spaces_are_kept() -> None:

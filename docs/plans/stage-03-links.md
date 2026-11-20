@@ -225,7 +225,7 @@ When this is done, `links` has a coverage floor, empty owner tables, a committed
   - **Rules:** D4 and I9, T1, S3. Do not change the fixture file.
   - **Depends on:** S3-M1-T6
 
-- [ ] **S3-M1-T10: Make the test-case builder refuse a paragraph id with a number, and type its id honestly**
+- [x] **S3-M1-T10: Make the test-case builder refuse a paragraph id with a number, and type its id honestly**
   - **Why:** A review of S3-M1-T7 found two gaps. A row with a paragraph id and a `number` key loses the number without an error (T7 set that order). And `cast(str, _string(row, "id"))` hides a `None` from mypy. `ingest` gives a paragraph clause (`p1`) the number `None` and never a number, so a test row with both is a shape that real input does not have.
   - **Build:** In `src/clause_tracer/links/tests/case_builder.py`:
     - In `_parse_rows`, after the check of the sentence text (the last check of the T5 error order), add: when `_is_paragraph_id(clause_id)` and the row has the key `number`, raise `ValueError(f"paragraph id {clause_id} cannot have a number")`. No existing error changes order. A row with a paragraph id and no `number` key still gets the number `None`.
