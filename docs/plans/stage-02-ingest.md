@@ -372,7 +372,7 @@ When this is done, `split_clauses` gives the clauses of a document with their se
 
 ### M4: Samples, run alone and golden files
 
-When this is done, `python -m clause_tracer.ingest` prints the clauses and sentences of the sample contract, and two golden files guard that output.
+When this is done, `python -m clause_tracer.ingest` prints the clauses and sentences of the sample contract, and two golden files guard that output. The owner's first read of the golden files (20 Nov 2026) found three limits, and tasks S2-M4-T7 to S2-M4-T12 fix them: a colon line stays joined to the line after it, a long signature line stays inside the clause before it, and the outline cuts every preview at 60 characters, so a person cannot check a whole sentence. Commits from S2-M4-T7 to S2-M4-T11 can leave `test_goldens.py`, `test_sample_has_65_clauses` and the first three new rows of `test_clause_table.py` red until S2-M4-T9 (the first two until S2-M4-T12). Push the branch after S2-M4-T12. A separate bug in a test strategy, found by the review of these tasks, is fixed in S2-M4-T13.
 
 - [x] **S2-M4-T1: The sample files**
   - **Build:** Needs question 3. Create three files in `src/clause_tracer/ingest/samples/` and delete `.gitkeep`.
@@ -434,12 +434,145 @@ When this is done, `python -m clause_tracer.ingest` prints the clauses and sente
   - **Depends on:** S2-M4-T4
 
 - [ ] **S2-M4-T6: Read the golden files (Owner)**
-  - **Build:** Owner only. Read `developer-agreement.outline.txt` and `plain-paragraphs.outline.txt` against the two samples. Each clause should start where a reader would start it, and each sentence break should be one a reader would accept or a missed break, never a break inside a word or a number. Say whether they are right. A wrong split is a splitter bug or a new row for the clause-splitter table, never a hand edit of a golden file.
+  - **Build:** Owner only. Read `developer-agreement.outline.txt` and `plain-paragraphs.outline.txt` against the two samples. Each clause should start where a reader would start it, and each sentence break should be one a reader would accept or a missed break, never a break inside a word or a number. Say whether they are right. A wrong split is a splitter bug or a new row for the clause-splitter table, never a hand edit of a golden file. The owner read the first files on 20 Nov 2026 and found the three limits that S2-M4-T7 to S2-M4-T12 fix. Read the files again after S2-M4-T12. To see whole sentences, run `.venv/bin/uv run python -m clause_tracer.ingest --full` (S2-M4-T10), because the golden files still cut each preview at 60 characters.
   - **Files:** None.
   - **Tests first:** None.
-  - **Done when:** The owner has read both files and said so.
+  - **Done when:** The owner has read both files again after S2-M4-T12 and said so.
   - **Rules:** T11.
-  - **Depends on:** S2-M4-T4
+  - **Depends on:** S2-M4-T4, S2-M4-T10, S2-M4-T12
+
+- [ ] **S2-M4-T7: Signature rows and the new clause count (Owner)**
+  - **Build:** Owner only. The rows below are the planner's draft of what the owner decided on 20 Nov 2026 (question 13). Every row is made of real lines of `developer-agreement.txt` (lines 65 to 71), and rows 2, 3 and 5 change only the first word or words of the signature line: a line that opens with `Signed`, `Executed` or `In witness whereof`, with a blank line before it, starts a clause of its own whatever its length. Read them, change any value that is wrong, and add them to the end of `src/clause_tracer/ingest/tests/tables/clause_split.toml`. The block is indented by 4 spaces here: remove those 4 spaces from every line when you copy it, or the `text` values get leading spaces. In the same step, in `src/clause_tracer/ingest/tests/test_smoke.py`, rename `test_sample_has_64_clauses` to `test_sample_has_65_clauses` and change `== 64` to `== 65`: the sample then has one clause more, because the signature line of Brightline Studio Ltd (73 characters) becomes the clause `p4` and `Signed by Karim Benali` becomes `p5`. A trial of the rules gave 65 clauses and 75 sentences (it was 64 and 74).
+
+    ```toml
+    # Lines 65 to 71 of developer-agreement.txt: a signature line opens a clause whatever its length (question 13, 20 Nov 2026).
+    [[case]]
+    id = "signature-line-over-60-characters-starts-a-clause"
+    text = """
+    14.5 Notices must be in writing and sent by email to the addresses each party gives the other, with a copy to Ms Jones at the Developer's address.
+    14.6 This Agreement is governed by the laws of England and Wales.
+
+    Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director
+
+    Signed by Karim Benali
+    Schedule 1 · Services and Charges"""
+    numbering = "numbers"
+    clauses = [
+      { id = "14.5", number = "14.5", level = 1, parent = "", heading = "", starts_with = "14.5 Notices must be in w" },
+      { id = "14.6", number = "14.6", level = 1, parent = "", heading = "", starts_with = "14.6 This Agreement is gov" },
+      { id = "p1", number = "", level = 1, parent = "", heading = "Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director", starts_with = "Signed for and on behalf of" },
+      { id = "p2", number = "", level = 1, parent = "", heading = "Signed by Karim Benali", starts_with = "Signed by Karim Benali" },
+      { id = "S1", number = "Schedule 1", level = 1, parent = "", heading = "Services and Charges", starts_with = "Schedule 1 · Services" },
+    ]
+
+    # The sample's signature line with its first word changed to Executed.
+    [[case]]
+    id = "executed-line-starts-a-clause"
+    text = """
+    14.6 This Agreement is governed by the laws of England and Wales.
+
+    Executed as a deed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director"""
+    numbering = "numbers"
+    clauses = [
+      { id = "14.6", number = "14.6", level = 1, parent = "", heading = "", starts_with = "14.6 This Agreement is gov" },
+      { id = "p1", number = "", level = 1, parent = "", heading = "Executed as a deed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director", starts_with = "Executed as a deed for and" },
+    ]
+
+    # The sample's signature line with its first words changed to In witness whereof.
+    [[case]]
+    id = "in-witness-whereof-line-starts-a-clause"
+    text = """
+    14.6 This Agreement is governed by the laws of England and Wales.
+
+    In witness whereof, for and on behalf of Brightline Studio Ltd by Sarah Jones, Director"""
+    numbering = "numbers"
+    clauses = [
+      { id = "14.6", number = "14.6", level = 1, parent = "", heading = "", starts_with = "14.6 This Agreement is gov" },
+      { id = "p1", number = "", level = 1, parent = "", heading = "In witness whereof, for and on behalf of Brightline Studio Ltd by Sarah Jones, Director", starts_with = "In witness whereof, for and" },
+    ]
+
+    # The sample's own lines with the blank line between them removed: with text right before it, the long Signed line is not a heading.
+    [[case]]
+    id = "signed-line-with-no-blank-line-before-it-stays-in-the-clause"
+    text = """
+    14.6 This Agreement is governed by the laws of England and Wales.
+    Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director"""
+    numbering = "numbers"
+    clauses = [
+      { id = "14.6", number = "14.6", level = 1, parent = "", heading = "", starts_with = "14.6 This Agreement is gov" },
+    ]
+
+    # The sample's signature line with its first word changed to Signedness, which is not the word Signed.
+    [[case]]
+    id = "a-word-that-only-starts-like-signed-is-text"
+    text = """
+    14.6 This Agreement is governed by the laws of England and Wales.
+
+    Signedness for and on behalf of Brightline Studio Ltd by Sarah Jones, Director"""
+    numbering = "numbers"
+    clauses = [
+      { id = "14.6", number = "14.6", level = 1, parent = "", heading = "", starts_with = "14.6 This Agreement is gov" },
+    ]
+    ```
+
+    The draft has one known limit, which the owner accepts by adding the rows: a sentence that opens with `Executed` or `Signed` after a blank line, such as `Executed copies must be kept by both parties.`, also becomes a clause of its own.
+  - **Files:** `src/clause_tracer/ingest/tests/tables/clause_split.toml`, `src/clause_tracer/ingest/tests/test_smoke.py`.
+  - **Tests first:** None. The owner's values are the expected answers.
+  - **Done when:** The owner has written the rows and the count and said so. `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_clause_table.py` then reports 33 tests, with 3 failing (the first three new rows) until S2-M4-T9, and `test_sample_has_65_clauses` fails until S2-M4-T9.
+  - **Rules:** T11.
+  - **Depends on:** S2-M4-T5
+
+- [ ] **S2-M4-T8: A colon line ends a sentence**
+  - **Build:** Decided by the owner on 20 Nov 2026 (question 12). In `src/clause_tracer/ingest/_sentences.py`, add `def colon_line_starts(text: str) -> tuple[int, ...]` and change `sentence_starts` to return `tuple(sorted(set(library_starts) | set(colon_line_starts(text))))`, where `library_starts` is what the NUPunkt call returned before. The file stays the only one that imports `nupunkt` (B4).
+    - `colon_line_starts` takes `lines = split_lines(text)` (from `clause_tracer.ingest._lines`). For each index `i` from 0 to `len(lines) - 2`: the line is a colon line when `lines[i].text.rstrip(" \t\u00a0\ufeff*_")` ends with `":"` or `"："` (U+FF1A). Write the characters as these escapes in the code, not as pasted characters. When it is a colon line and `lines[i + 1]` is not blank (`is_blank`), `lines[i + 1].start` is a start. It returns the starts in order. A colon line with no line after it, or with a blank line after it, gives no start. A colon in the middle of a line gives no start.
+    - Update the module docstring: sentence starts are the NUPunkt starts plus the starts after colon lines.
+    - In `src/clause_tracer/ingest/README.md`, add a new paragraph after the paragraph that ends "The clause number stays in the first sentence.": "A line that ends in a colon ends a sentence, so a lead-in line such as `1.1 In this Agreement the following words have these meanings:` is a sentence of its own. A hard-wrapped line that ends in a colon in the middle of a sentence also breaks there: a known limit." In [system design 4.2](../system-design.md#42-the-offset-chain), after the sentence about `Markdown symbols`, add the same sentence.
+  - **Files:** `src/clause_tracer/ingest/_sentences.py`, `src/clause_tracer/ingest/README.md`, `docs/system-design.md`, `src/clause_tracer/ingest/tests/test_sentences.py`, `src/clause_tracer/ingest/tests/test_clauses.py`.
+  - **Tests first:** in `test_sentences.py`: `test_colon_line_starts`, parametrised over (`text`, `expected`): `("Meanings:\nCharges means fees.", (10,))`, `("Meanings: \t\nCharges.", (12,))`, `("Meanings：\nNext", (10,))`, `("Meanings:\r\nNext", (11,))`, `("Meanings:\u00a0\nNext", (11,))`, `("**Terms:**\nNext", (11,))`, `("Meanings:\n\nNext", ())`, `("Meanings:\n", ())`, `("Note: this\nstays", ())`; `test_colon_line_is_a_sentence_start` (`'In this Agreement the following words have these meanings:\n"Charges" means the fees set out in Schedule 1.'` gives `(0, 59)`); `test_colon_start_joins_the_library_starts` (`"One. Two:\nThree."` gives `(0, 5, 10)`). In `test_clauses.py`: `test_colon_line_splits_the_lead_in_from_the_list` (`'1.1 In this Agreement the following words have these meanings:\n"Charges" means the fees.\n"Services" means the work.'` gives one clause `1.1` with sentence ids `("1.1.s1", "1.1.s2", "1.1.s3")` and spans `(Span(start=0, end=63), Span(start=63, end=89), Span(start=89, end=115))`).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_sentences.py` reports 15 passed, `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_clauses.py` reports 46 passed, and `scripts/check.sh` exits 0 except for `test_goldens.py`, `test_sample_has_65_clauses` and the first three new rows of `test_clause_table.py`, which pass after S2-M4-T9 (the first two after S2-M4-T12).
+  - **Rules:** B4, I4, T1, S3, [Spec 5](../spec.md#5-labelling-rules) (a missed break only makes a sentence longer; this rule removes one kind of missed break, and adds a break after a hard-wrapped line that ends in a colon, a known limit), [system design 4.2](../system-design.md#42-the-offset-chain).
+  - **Depends on:** S2-M4-T5
+
+- [ ] **S2-M4-T9: A signature line starts a clause**
+  - **Build:** Decided by the owner on 20 Nov 2026 (question 13). In `src/clause_tracer/ingest/_markers.py`: `SIGNATURE_OPENERS: Final[tuple[str, ...]] = ("signed", "executed", "in witness whereof")`, `SIGNATURE_BOUNDARY: Final[str] = " :,;.*_"`, and `def is_signature_line(line_text: str) -> bool`. With `words = " ".join(line_text.strip(EMPHASIS_STRIP).split()).casefold()`, it is true when for some `opener` in `SIGNATURE_OPENERS` `words.startswith(opener)` holds and either `len(words) == len(opener)` or `words[len(opener)] in SIGNATURE_BOUNDARY`. Then change `is_heading_line`: after the `stripped == ""` check, add `if "\t" in line_text: return False` and then `if is_signature_line(line_text): return True`, before the length, word and capital-letter tests. So a table row with tabs that opens with `Signed` is never a heading, as before. Nothing else changes: `clauses.py` still asks for a blank line before the line, or a marker line after it (S2-M3-T6), so a long line that opens with `Signed` and has a text line before it stays in its clause. A later language adds its own openers to the same tuple.
+    - In `src/clause_tracer/ingest/README.md`, at the end of the paragraph that begins "A numbered clause has a heading", add: "A line that opens with `Signed`, `Executed` or `In witness whereof` is a heading whatever its length." In [system design 4.2](../system-design.md#42-the-offset-chain), add the same sentence to the one about short unnumbered lines. In this plan, in the last bullet of section 2 ("Scope"), the one that begins "Numbering styles this stage does not read", change the end so that it reads: "and unnumbered headings longer than 8 words or 60 characters, except a line that opens with `Signed`, `Executed` or `In witness whereof`."
+  - **Files:** `src/clause_tracer/ingest/_markers.py`, `src/clause_tracer/ingest/README.md`, `docs/system-design.md`, `docs/plans/stage-02-ingest.md`, `src/clause_tracer/ingest/tests/test_markers.py`, `src/clause_tracer/ingest/tests/test_clauses.py`.
+  - **Tests first:** in `test_markers.py`, add these rows to the parametrised `test_is_heading_line`: `("Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director", True)`, `("Executed as a deed by Brightline Studio Ltd acting by a director in the presence of a witness", True)`, `("In witness whereof the parties have signed this Agreement on the date at the top", True)`, `("**Signed** by Karim Benali and returned to the Agency by post within three days", True)`, `("SIGNED BY BOTH PARTIES ON THE DATE AT THE TOP OF THIS AGREEMENT IN TWO COPIES", True)`, `("Signedness of the copies is checked by the Agency in person at the office", False)`, `("The signed copy is kept by the Agency in person at the office of the Developer", False)`, `("Signed\tby\tKarim Benali", False)`. In `test_clauses.py`: `test_signature_line_starts_its_own_clause` (`"14.6 Governed by English law.\n\nSigned for and on behalf of Brightline Studio Ltd by Sarah Jones, Director\n\nSigned by Karim Benali"` gives ids `("14.6", "p1", "p2")`, and `p1` has `heading == "Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director"`); `test_signed_line_after_a_text_line_stays_in_the_clause` (`"9.1 The parties agree.\nSigned by both parties on the date at the top of this Agreement, in two copies."` gives `("9.1",)`).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_markers.py` reports 62 passed, `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_clauses.py` reports 48 passed, `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_clause_table.py src/clause_tracer/ingest/tests/test_smoke.py` passes, and `scripts/check.sh` exits 0 except for `test_goldens.py` and `test_sample_has_65_clauses`, which fail until S2-M4-T12.
+  - **Rules:** T1, T11 (the rows of S2-M4-T7 were written first), S3, [Spec 5](../spec.md#5-labelling-rules) (never guess: a signature block is not part of the clause before it), [system design 4.2](../system-design.md#42-the-offset-chain).
+  - **Depends on:** S2-M4-T7, S2-M4-T8
+
+- [ ] **S2-M4-T10: Show whole sentences with `--full`**
+  - **Build:** Decided by the owner on 20 Nov 2026 (question 14). In `src/clause_tracer/ingest/outline.py`, change the signature to `def render_outline(document: Document, clauses: tuple[Clause, ...], *, full: bool = False) -> str` and `_preview` to `def _preview(text: str, start: int, end: int, *, full: bool) -> str`. When `full` is true the preview is the whole `" ".join(text[start:end].split())`, with no cut at 60 characters. The default keeps the cut, so the golden files do not change. In `src/clause_tracer/ingest/__main__.py`, add `parser.add_argument("--full", action="store_true", help="print each sentence in full")` and call `render_outline(document, split_clauses(document), full=args.full)`. The flag writes to standard output only. In the README, in the "Run alone" part, add the `--full` flag and "The golden files always use the cut preview."
+  - **Files:** `src/clause_tracer/ingest/outline.py`, `src/clause_tracer/ingest/__main__.py`, `src/clause_tracer/ingest/README.md`, `src/clause_tracer/ingest/tests/test_outline.py`, `src/clause_tracer/ingest/tests/test_smoke.py`.
+  - **Tests first:** in `test_outline.py`: `test_full_outline_does_not_cut_the_preview` (for `read_pasted_text("a" * 200)`, the last line of `render_outline(document, split_clauses(document), full=True)` is `"  p1.s1\t0-200\t" + "a" * 200`). In `test_smoke.py`: `test_full_flag_prints_whole_sentences` (with `capsys`: `main(["--full"])` returns 0 and the output contains the text `5.5 The Agency will repay reasonable expenses that it has approved in writing before they are incurred, as set out in its expenses policy at https://docs.example.com/expenses-policy.`); `test_without_the_flag_the_preview_is_cut` (`main([])` returns 0 and the output does not hold `expenses-policy`).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_outline.py` reports 4 passed, `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_smoke.py` reports 9 passed, and `scripts/check.sh` exits 0 except for the red tests named in the M4 introduction.
+  - **Rules:** S1 (an output you can open and read), T1, I12.
+  - **Depends on:** S2-M4-T3
+
+- [ ] **S2-M4-T11: The clause count is 65**
+  - **Build:** Change `64 clauses` to `65 clauses` in every place that states the count for the sample contract. The known places are: `docs/system-design.md` (section 4.2, "On the sample contract this gives 64 clauses"); `docs/ux-copy.md` (the "Load file dialog", "Log lines" and "Reading log" rows, and the "Facts" row with `Clauses: 64`, including "Matched 12 of 64 clauses to positions" and "Matched all 64 clauses to 11 positions"); `prototype/new-review.html`, `prototype/running.html` (every line, including the script array near line 342) and `prototype/states.html`; and `prototype/contract-check.html`, where `<dt>Clauses</dt><dd>64,` becomes `65,`. Then find any other place: `grep -rnE "\b64\b" docs prototype src --include=*.md --include=*.html --include=*.py | grep -i clause | grep -v "docs/plans/stage-02-ingest.md"`. In the change log of this plan, the new row (section 8) says that question 6 and the 19 Nov 2026 row that gives 64 keep it, because they record the count of that day. Run `.venv/bin/uv run python scripts/copy_lint.py`, then the two-minute check of [ux-copy 1.1](../ux-copy.md#11-signs-of-machine-made-text) on the changed rows.
+  - **Files:** `docs/system-design.md`, `docs/ux-copy.md`, `prototype/new-review.html`, `prototype/running.html`, `prototype/states.html`, `prototype/contract-check.html`, `docs/plans/stage-02-ingest.md`.
+  - **Tests first:** None. The check is the search command above: it prints no line that says 64 for the sample. The lines of this plan file are not checked, because its history keeps 64.
+  - **Done when:** The search prints no such line, `scripts/copy_lint.py` exits 0, the prototype pages named above show 65 when opened (preview server `prototype`, http://localhost:8767), and `scripts/check.sh` exits 0 except for the red tests named in the M4 introduction.
+  - **Rules:** [AGENTS.md](../../AGENTS.md) ("The deck, the page and the spec must match"), [WRITING_DOCS.md](../../WRITING_DOCS.md) section 9.
+  - **Depends on:** S2-M4-T9
+
+- [ ] **S2-M4-T12: Regenerate the developer-agreement golden file**
+  - **Build:** Run `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_goldens.py` and see the developer-agreement test fail and the plain-paragraphs test pass. Then run the named command, `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_goldens.py --update-goldens`. Commit only `src/clause_tracer/ingest/tests/goldens/developer-agreement.outline.txt` and the plan tick, and say in the commit body that `--update-goldens` made it. The diff must hold exactly these changes, and nothing else: (1) clause `1.1` gains a sentence: `1.1.s1` runs 659-722 (the lead-in line), the new `1.1.s2` runs 722-770 and starts `"Charges" means`, and the old `1.1.s2` to `1.1.s5` become `1.1.s3` to `1.1.s6` with the same spans; (2) clause `14.6` keeps only `14.6.s1`, 5497-5564; (3) a new clause `p4`, level 1, span 5564-5640, with the heading `Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director` and one sentence `p4.s1`, 5564-5640; (4) the old clause `p4` becomes `p5`, span 5640-5663, with `p5.s1`. The file then holds 65 clauses and 75 sentences. If the diff holds anything else, stop and bring it to the owner. The plain-paragraphs file does not change.
+  - **Files:** `src/clause_tracer/ingest/tests/goldens/developer-agreement.outline.txt`.
+  - **Tests first:** None. The red test above is the check.
+  - **Done when:** The commit holds no `.py` file, one golden file and the plan file, the diff is the four changes above, and `scripts/check.sh` exits 0 with no red test left.
+  - **Rules:** T11, [testing strategy 10](../testing-strategy.md#10-keeping-agent-written-tests-honest) (golden files only by the named command, in a commit of their own).
+  - **Depends on:** S2-M4-T8, S2-M4-T9
+
+- [ ] **S2-M4-T13: A blank text is never a usable contract-like text**
+  - **Build:** In `src/clause_tracer/ingest/tests/strategies.py`, add `from clause_tracer.ingest._lines import is_blank_text` and `def is_usable_text(text: str) -> bool`, which returns `not is_blank_text(text)`. In `contract_like_text`, replace `assume(text.strip() != "")` with `assume(is_usable_text(text))`. The old guard let a text of only a byte-order mark through, because `str.strip()` keeps U+FEFF, and `read_pasted_text` then raised `EmptyInputError`. A run of 1,500 Hypothesis examples hit it twice (`test_invariant_4_sentences_join_up_to_the_clause` and `test_invariant_4_ids_are_the_same_on_a_second_read`); the default 100 examples did not. The nightly 2,000-example profile of stage 5 would. No other file changes.
+  - **Files:** `src/clause_tracer/ingest/tests/strategies.py`, `src/clause_tracer/ingest/tests/test_strategies.py`.
+  - **Tests first:** in a new `test_strategies.py`: `test_is_usable_text`, parametrised over (`text`, `expected`): `("\ufeff", False)`, `("  \n", False)`, `("", False)`, `("a", True)`, `("\ufeff1. Start", True)`. See the first row fail before the change: write the test first, with `is_usable_text` defined as `return text.strip() != ""`, and see the byte-order-mark row fail; then change it to the final form.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_strategies.py` reports 5 passed, `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_clause_properties.py` passes, and `scripts/check.sh` exits 0 except for the red tests named in the M4 introduction.
+  - **Rules:** T1, T5, [testing strategy 5](../testing-strategy.md#5-the-offset-chain-seven-invariants) (invariant 4).
+  - **Depends on:** S2-M3-T10
 
 ### M5: The match key, the language warning and the close
 
@@ -505,7 +638,7 @@ When this is done, `core` builds match keys, invariant 2 holds, a contract that 
 
 ## 6. Open questions
 
-The owner answered questions 1 to 9 on 17 Nov 2026 and questions 10 and 11 on 19 Nov 2026. Each answer is recorded in its home. The recommendation column keeps the planner's first proposal, so where the answer differs, the answer wins.
+The owner answered questions 1 to 9 on 17 Nov 2026, questions 10 and 11 on 19 Nov 2026 and questions 12 to 14 on 20 Nov 2026. Each answer is recorded in its home. The recommendation column keeps the planner's first proposal, so where the answer differs, the answer wins.
 
 | # | Question | Needed by task | Recommendation (if any) | Owner's answer |
 | --- | --- | --- | --- | --- |
@@ -520,6 +653,9 @@ The owner answered questions 1 to 9 on 17 Nov 2026 and questions 10 and 11 on 19
 | 9 | **The form of clause and sentence ids.** [System design 5.1](../system-design.md#51-three-kinds-of-data) says ids are "derived from the clause number and span". | S2-M3-T6 | Ids come from the number and the order, not from offsets: `5.1`, `7.1(a)(i)`, `S1.2` inside Schedule 1, `p3` for the third clause with no number, a `~2` ending when a number appears twice, and `5.1.s3` for a sentence. They are the same on every read of the same file, and a person can read them. Home: system design 5.1 and the `Clause` row of 3.4. |As recommended: [system design 5.1](../system-design.md#51-three-kinds-of-data) and the `Clause` row of [3.4](../system-design.md#34-core-shapes-for-stage-1) |
 | 10 | **Is a file with NUL characters text?** Strict UTF-8 accepts NUL, so a binary file with only ASCII bytes reads as text. No error in the tree fits. | S2-M2-T2 | None yet, the owner decides (options: leave it, reuse `NotUtf8Error`, or add a new error). | Owner, 19 Nov 2026: reject it. New error `NotTextError`, code `not_text`. |
 | 11 | **Does the paste box need its own size limit?** Spec 9 gives one limit for a file or a paste: 20 MB and 50,000 words. | S2-M2-T3 | None yet. | Owner, 19 Nov 2026: no. A paste keeps the same limit as a file, 20 MB and 50,000 words, as Spec 9 says. |
+| 12 | **Does a line that ends in a colon end a sentence?** In the sample, `1.1.s1` holds the lead-in line "In this Agreement the following words have these meanings:" and the first definition, because NUPunkt looks for full stops. | S2-M4-T8 | Do nothing was the smallest option. A break after a colon line is narrow and language-neutral, and the MultiLegalSBD guidelines use the same rule. | Owner, 20 Nov 2026: break after a colon line. A known limit: a hard-wrapped line that ends in a colon inside a sentence also breaks. See [system design 4.2](../system-design.md#42-the-offset-chain) |
+| 13 | **Which lines open a clause when they are a signature line?** `Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director` is 73 characters, so the 60-character heading limit left it inside clause 14.6, while the shorter `Signed by Karim Benali` got its own clause. | S2-M4-T7, S2-M4-T9 | Lines that open with `Signed`, `Executed` or `In witness whereof`, whatever their length. | As recommended, 20 Nov 2026. A known limit: a sentence such as `Executed copies must be kept by both parties.` after a blank line also becomes a clause. See [system design 4.2](../system-design.md#42-the-offset-chain) |
+| 14 | **How does the owner read whole sentences?** The outline cuts each preview at 60 characters, so six lines of the first read looked like wrong breaks. | S2-M4-T10 | A `--full` flag on the command, which prints in full to the screen. The golden files keep the cut. | As recommended, 20 Nov 2026. See the README of `ingest` |
 
 ## 7. Done when
 
@@ -547,6 +683,7 @@ The owner answered questions 1 to 9 on 17 Nov 2026 and questions 10 and 11 on 19
 | 19 Nov 2026 | The owner approved the second round: the early character check in `read_pasted_text` (T3), `NotTextError` for NUL characters (T2, `core`, system design 3.4), and questions 10 and 11. | The owner's request after the M2 review. |
 | 19 Nov 2026 | The owner answered question 11: no separate paste limit. The owner also approved the words for the new error: "This file doesn't look like text. Choose another file, or paste the text." The words are in the spec (14.2 and the input limits), the copy deck (4.3 and section 6) and the prototype (the `not-text` and `load-not-text` states). The tests also ran on Python 3.12.16 (1,138 passed), the version CI uses. | The owner's answers, and the check that failed in M1. |
 | 19 Nov 2026 | A review of M3 found four gaps in the marker and heading rules; the owner approved these changes. A `Schedule N` line is a marker only when nothing or a separator (`·`, `:`, `-`, `–`, `—`) follows the designation. A clause that a bracketed marker started has no heading. A line with only a byte-order mark is blank. `written` keeps the number as the line writes it (`05.` gives `05`, the id stays `5`). Two changes were not made, because the owner table expects the old rule: any number may open the first clause (an excerpt can start at clause 5), and a short line after a blank line is still a heading clause. So a line such as `Signature` after a blank line becomes a clause of its own; this is a known limit. S2-M3-T1, T3 and T7 were reworded; `clause_split.toml` did not change; one expected value in `test_markers.py` changed and four tests were added. | The owner's answers to the M3 review. A wrapped line that began with `Schedule 2 to` had opened a schedule and given the next clause the wrong id. |
+| 20 Nov 2026 | The owner read the first golden files and found three limits. The owner decided (questions 12 to 14): a line that ends in a colon ends a sentence; a line that opens with `Signed`, `Executed` or `In witness whereof` is a heading whatever its length; and a `--full` flag prints whole sentences. Tasks S2-M4-T7 to S2-M4-T12 were added to milestone 4, and S2-M4-T6 now waits for them. S2-M4-T13 fixes an old bug in the `contract_like_text` test strategy that a review of these tasks found: a text of only a byte-order mark passed its blank-text guard. The sample gives 65 clauses and 75 sentences, not 64 and 74, so the count changes in the copy deck, the system design and the prototype (S2-M4-T11); question 6 and the 19 Nov 2026 row of this log that gives 64 keep it as the count of that day. | The owner's read of the golden files. A research report on splitting methods (`reports/Clause splitting methods across languages.md`) found that all three fixes fit a design that adds other languages later. |
 
 ## 9. Notes for the next stage
 
