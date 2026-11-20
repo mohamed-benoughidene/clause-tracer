@@ -410,7 +410,7 @@ When this is done, `find_references` finds every cross-reference with its source
 
 When this is done, `find_definitions`, `find_terms`, `find_outside_documents` and `find_undefined_terms` give each defined term with its definition and uses, each document that is not loaded, and the terms used but never defined, and the owner's terms and outside-documents tables pass.
 
-- [ ] **S3-M3-T1: Definitions**
+- [x] **S3-M3-T1: Definitions**
   - **Build:** Needs question 1, answered on 20 Nov 2026 as recommended. In `src/clause_tracer/links/terms.py`:
     - `@dataclass(frozen=True, slots=True, kw_only=True) class Definition` with exactly three fields: `term: str` (the term as the quotes hold it, without a leading "the "), `quoted: Span` (the term's characters inside the quotes) and `definition: Span` (the trimmed span of the sentence that holds the match).
     - In `_patterns.py`: `QUOTE_OPEN = "[\"\u201c\u2018']"`, `QUOTE_CLOSE = "[\"\u201d\u2019']"`, `TERM = r"[A-Z][A-Za-z0-9]*(?:[ \-][A-Za-z0-9]+){0,5}"`; `MEANS_DEFINITION = QUOTE_OPEN + r"(?:(?i:the)\s+)?(?P<term>" + TERM + r")" + QUOTE_CLOSE + r"\s+(?:means|shall\s+mean|has\s+the\s+meaning)\b"`; `BRACKET_DEFINITION = r"\(\s*(?:(?i:each|together|collectively)\s+)?(?:(?i:the|a|an)\s+)?" + QUOTE_OPEN + r"(?:(?i:the)\s+)?(?P<term>" + TERM + r")" + QUOTE_CLOSE + r"\s*\)"`.
@@ -422,7 +422,7 @@ When this is done, `find_definitions`, `find_terms`, `find_outside_documents` an
   - **Rules:** System design 3.4 (`DefinedTerm`), Spec 4.5.
   - **Depends on:** S3-M2-T1, S3-M2-T2
 
-- [ ] **S3-M3-T2: Uses of defined terms**
+- [x] **S3-M3-T2: Uses of defined terms**
   - **Build:** Needs question 1, answered on 20 Nov 2026 as recommended. In `terms.py`, `def find_terms(text: str, key: MatchKey, definitions: tuple[Definition, ...]) -> tuple[DefinedTerm, ...]`. `key` is `fold_for_matching(text)`, built once by the caller. Build `quoted_set = build_span_set(...)` of the `quoted` spans of every definition. Group the term texts of the definitions by their folded text `t = fold_for_matching(term).text`: terms with the same `t` (`Fee` and `FEE`) form one group and share their uses. Process the groups in this order: by the length of `t`, longest first, then by `t`. "Longer" means a longer folded text. For each group:
     - Find every occurrence of `t` in `key.text` with `str.find`, moving on by one character each time. An occurrence counts only when the folded character before it (if any) and the one after it (if any) are not `str.isalnum()`.
     - Map it back: `start = key.to_canonical[i]`, `end = key.to_canonical[i + len(t)]`.
@@ -448,7 +448,7 @@ When this is done, `find_definitions`, `find_terms`, `find_outside_documents` an
   - **Rules:** [System design 4.2](../system-design.md#42-the-offset-chain) (`links` folds its words with `fold_for_matching`; never confirm a quote on it), D3.
   - **Depends on:** S3-M3-T1
 
-- [ ] **S3-M3-T3: Documents that are not loaded**
+- [x] **S3-M3-T3: Documents that are not loaded**
   - **Build:** Needs question 3, answered on 20 Nov 2026 as recommended. `DOCUMENT_WORDS` and `DOCUMENT_NOUN` come from S3-M2-T2. In `_patterns.py`: `OUTSIDE_DOCUMENT = r"(?<![A-Za-z])" + DOCUMENT_WORDS + DOCUMENT_NOUN + r"(?![A-Za-z])(?!\s+[A-Z][a-z])"` (a document noun followed by a capitalised word is not a document name, so `the Software Licence Fee` is not one), `DROPPED_FIRST_WORDS: Final[frozenset[str]] = frozenset({"The", "This", "That", "These", "Those", "Each", "Any", "Such", "Our", "Your", "Its", "Their", "Under", "As", "In", "Of", "For", "By", "With", "See", "If", "Where", "Unless", "Subject"})`, `THIS_BEFORE = r"(?i:\bthis)\s+$"` and `OWN_NAME_DEFINITION = r"(?i:\bthis\s+(?:agreement|contract|deed)\b)"`. Policy, Order, and Terms and Conditions on their own are not document nouns. In `src/clause_tracer/links/outside.py`, `def find_outside_documents(text: str, index: ClauseIndex, definitions: tuple[Definition, ...]) -> tuple[OutsideDocument, ...]`. For each sentence `s` of each clause, in text order, that is not a heading sentence, and for each match of `OUTSIDE_DOCUMENT_RE.finditer(text, s.span.start, trimmed(text, s.span).end)` (so no match crosses a sentence break), in text order:
     - While its first word is in `DROPPED_FIRST_WORDS`, move the start past that word and the white space after it. When no capitalised word is left before the document noun, skip the match.
     - Skip it when `THIS_BEFORE_RE` matches `text[max(0, start - 10):start]`, with `start` the start after the dropped words.
@@ -462,7 +462,7 @@ When this is done, `find_definitions`, `find_terms`, `find_outside_documents` an
   - **Rules:** Spec 4.5 and Spec 5 Rule 10, [ADR 0012](../adr/0012-missing-unsure-and-evidence-failures.md).
   - **Depends on:** S3-M3-T1, S3-M2-T2
 
-- [ ] **S3-M3-T4: Terms used but never defined**
+- [x] **S3-M3-T4: Terms used but never defined**
   - **Build:** Needs question 2, answered on 20 Nov 2026 as recommended. In `_patterns.py`: `UNDEFINED_RUN = r"(?<![A-Za-z])[A-Z][a-z]+(?: [A-Z][a-z]+){1,3}(?![A-Za-z])"`. `SENTENCE_LEAD` is built in S3-M3-T1. In `terms.py`, `def find_undefined_terms(text: str, index: ClauseIndex, excluded: SpanSet) -> tuple[Span, ...]`. The caller builds `excluded` from every use of every term, every `quoted` span and every outside-document evidence span. For each sentence `s` of each clause, skip it when it is a heading sentence or holds a `"\t"`. In the others, every match of `UNDEFINED_RUN_RE.finditer(text, s.span.start, trimmed(text, s.span).end)` (it runs on the full text, so the look-behind sees the character before the sentence) is a term used but never defined, except a run that:
     - starts at the sentence's first word: `s.span.start + SENTENCE_LEAD_RE.match(text[s.span.start:s.span.end]).end()`;
     - overlaps `excluded` (`excluded.overlaps(run span)`).
@@ -490,7 +490,7 @@ When this is done, `find_definitions`, `find_terms`, `find_outside_documents` an
   - **Rules:** Constitution T11.
   - **Depends on:** S3-M1-T2
 
-- [ ] **S3-M3-T7: The terms table test**
+- [x] **S3-M3-T7: The terms table test**
   - **Build:** In `src/clause_tracer/links/tests/test_terms_table.py`: `CASE_KEYS = REQUIRED = frozenset({"id", "clauses", "terms", "undefined"})`. `test_terms_table(case)`, parametrised over the cases with the case id as the test id: build the case; `definitions = find_definitions(text, index)`; `terms = find_terms(text, fold_for_matching(text), definitions)`; `outside = find_outside_documents(text, index, definitions)`; `excluded = build_span_set([use for t in terms for use in t.uses] + [d.quoted for d in definitions] + [o.evidence for o in outside])`; `undefined = find_undefined_terms(text, index, excluded)`. Build a dict from sentence id to its trimmed span (`trimmed(text, s.span)`) from the case's clauses. Assert `terms` equals the expected tuple (each `definition` is the trimmed span of the named sentence, taken from that dict, each use from `span_of`) and `undefined` equals the expected spans. Load the table at module level with `load_table` and parametrise, exactly as `ingest/tests/test_clause_table.py` does. Each nested list item must be a `dict` (`assert isinstance(row, dict)`, as that file does); strings go through `as_str(value, where)`, booleans through `as_bool`, `nth` through `as_int` and defaults to 1 when absent; the `clauses` rows are passed to `build_case` as they are. `test_terms_table_has_rows` asserts at least 8 cases.
   - **Files:** `src/clause_tracer/links/tests/test_terms_table.py`.
   - **Tests first:** the two tests above, run before any fix. Never edit the table.
@@ -498,7 +498,7 @@ When this is done, `find_definitions`, `find_terms`, `find_outside_documents` an
   - **Rules:** T11, T13.
   - **Depends on:** S3-M3-T2, S3-M3-T3, S3-M3-T4, S3-M3-T5
 
-- [ ] **S3-M3-T8: The outside-documents table test**
+- [x] **S3-M3-T8: The outside-documents table test**
   - **Build:** In `src/clause_tracer/links/tests/test_outside_table.py`: `TABLE = Path(__file__).parent / "tables" / "outside_documents.toml"`, `CASE_KEYS = REQUIRED = frozenset({"id", "clauses", "outside"})`. `test_outside_table(case)`, parametrised over the cases: build the case, run `find_outside_documents(text, index, find_definitions(text, index))`, and assert the result equals the expected tuple, each `OutsideDocument(name=name, evidence=span_of(text, name, nth))`. Load the table at module level with `load_table` and parametrise, exactly as `ingest/tests/test_clause_table.py` does. Each nested list item must be a `dict` (`assert isinstance(row, dict)`, as that file does); strings go through `as_str(value, where)`, booleans through `as_bool`, `nth` through `as_int` and defaults to 1 when absent; the `clauses` rows are passed to `build_case` as they are. `test_outside_table_has_rows` asserts at least 6 cases.
   - **Files:** `src/clause_tracer/links/tests/test_outside_table.py`.
   - **Tests first:** the two tests above, run before any fix. Never edit the table.
