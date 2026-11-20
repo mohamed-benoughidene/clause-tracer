@@ -666,6 +666,13 @@ The task plan of each stage is written in `docs/plans/` just before the stage is
 - **Governed by.** ADR 0004. The run order puts `links` before `privacy` (section 4.1).
 - **Done when** `LinkMap` for the sample shows the Master Agreement reference and the defined roles that `privacy` will keep.
 - **Tests, in the testing strategy.** Section 4 (the `links` row).
+- **Decided 20 Nov 2026** (questions 1 to 6 of [the stage 3 plan](plans/stage-03-links.md), all as recommended):
+  - **Defined terms** (question 1). A term is stored without a leading "the" (`Agency`). A use is a whole word that starts with a capital letter in the contract: "the Agency's" counts, "an agency" does not.
+  - **Terms used but never defined** (question 2). Runs of 2 to 4 capitalised words in the middle of a sentence that are not a defined term, a heading or a table row. Single words are not listed. Names and addresses also show up, so stage 8 decides how the list is used.
+  - **Documents that are not loaded** (question 3). A capitalised name followed by Agreement, Contract, Deed, Addendum, Licence, License, Statement of Work, or Terms and Conditions. "This Agreement", the contract's own title, a term inside its own definition, headings, lower-case mentions and names in capitals are not read as one. On the sample this gives only the Master Agreement in 11.1, so Rule 10 stays on position 10.
+  - **Overrides** (question 4). "Notwithstanding" before a clause reference: this clause overrides the target. "Subject to", "save as set out in" and "except as set out in" before a clause reference: the target qualifies this clause. A "prevails" sentence says who wins in the words before the verb. An override names nothing only in two narrow forms: "Notwithstanding anything in this Agreement", and "…, this Clause prevails." with nothing after the verb. Neither is given when the same sentence names a document that is not loaded. A carve-out ("Clause 8.1 does not apply to …") is a cross-reference only. A lower-case document name is not seen: a known limit.
+  - **Unresolved targets** (question 5). An override whose clause does not exist is not kept, because an override with no target joins every trail. Its cross-reference is kept, with no target.
+  - **References inside a schedule** (question 6). "Paragraph" points only into that schedule. Any other word points to the body clause or the schedule clause, whichever exists; when both exist, the target is left empty, never guessed.
 
 ### 15.4 Stage 4: `privacy`, code finders and placeholders
 
@@ -673,6 +680,7 @@ The task plan of each stage is written in `docs/plans/` just before the stage is
 - **Governed by.** [ADR 0008](adr/0008-personal-data-detection-bundle.md), ADR 0004.
 - **Done when** anonymise then restore gives the original text on the sample and on generated text, and every Spec 14.5 name and address is replaced by code alone.
 - **Tests, in the testing strategy.** Section 4 (the `privacy` row), section 5 (invariant 3), section 14.
+- **Decided 20 Nov 2026** (question 7 of [the stage 3 plan](plans/stage-03-links.md)): a defined term that the typed party details or a name finder also match is dropped from the allow-list, so a party's short name (`Brightline Studio Ltd ("Brightline")`) is always replaced.
 
 ### 15.5 Stage 5: `ingest` for Word and PDF
 
@@ -726,6 +734,7 @@ The task plan of each stage is written in `docs/plans/` just before the stage is
   - **How a start point is compared** for Rule 5 ("30 days after acceptance" against "from invoice date"). Stage 1 only acts on an `OTHER_START_POINT` reason already on the value.
   - **Which module builds a label's evidence trail** (cross-references, defined terms, overrides), and so fills `LabelInput.outside_documents` for Rule 10.
   - **Whether the quote check reuses `core`'s quote-check fold.** Section 4.2 asks the last check before drawing to be a different code path; sharing the fold would share one part of it.
+- **Decided 20 Nov 2026** (question 8 of [the stage 3 plan](plans/stage-03-links.md)): an override that names a label's subject ("the payment terms prevail", Spec 4.5) is matched to labels here, in stage 8, which knows each position's topic. `links` reads only clause references, "this Agreement" and "this Clause".
 
 ### 15.9 Stage 9: the OpenRouter adapter and the first real run
 

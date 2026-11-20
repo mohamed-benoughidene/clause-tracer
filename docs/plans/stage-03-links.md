@@ -1,0 +1,624 @@
+# Stage 3 plan: `links`
+
+| | |
+| --- | --- |
+| Stage | 3, `links` |
+| Status | Draft |
+| Branch | One branch for each milestone, cut from `main`: `feat/links-m1-foundations`, `feat/links-m2-cross-references`, `feat/links-m3-terms-and-outside-documents`, `feat/links-m4-overrides`, `feat/links-m5-link-map-and-sample`. See [the README](README.md), "Branches and pull requests" |
+| Accepted on | Not yet |
+| Stage outline | [System design section 15.3](../system-design.md#153-stage-3-links) |
+
+## 1. Goal
+
+`links` reads a `Document` and its clauses and returns a `LinkMap`: cross-references (with ranges and "this Clause"), defined terms with their uses, terms used but never defined, overrides with their direction, and references to documents that are not loaded. Every edge carries its evidence span, and an unresolved target is kept. `python -m clause_tracer.links` prints the link map of the sample contract, which shows the Master Agreement reference and the defined roles "Agency" and "Developer" that `privacy` will keep.
+
+## 2. Scope
+
+**Where the code starts.** `src/clause_tracer/links/` is a skeleton: `__init__.py` (an empty `__all__`), `__main__.py` (prints "not built yet"), a README with "planned" shapes, `tests/__init__.py`, `tests/test_smoke.py` (calls `main()` with no arguments) and an empty `samples/` folder. `core` already holds every shape this stage returns, in [`core/link_map.py`](../../src/clause_tracer/core/link_map.py): `CrossReference`, `DefinedTerm`, `Override`, `OutsideDocument` and `LinkMap`, exactly as in [system design 3.4](../system-design.md#34-core-shapes-for-stage-1). `core` also holds `fold_for_matching` ([`core/match_fold.py`](../../src/clause_tracer/core/match_fold.py)), the owner-table loader ([`core/tests/owner_tables.py`](../../src/clause_tracer/core/tests/owner_tables.py)) and the hazard alphabet ([`core/tests/strategies.py`](../../src/clause_tracer/core/tests/strategies.py)). The root `conftest.py` holds the `check_golden` fixture and the `--update-goldens` option. `scripts/check.sh` has coverage floors for `core` and `ingest` only.
+
+**The import wall.** `links` may import only `core`, and the contract covers its tests and its `__main__` too ([`pyproject.toml`](../../pyproject.toml), "pipeline modules are independent"). So `links` can never call `split_clauses`. The sample therefore reaches `links` as a committed clause fixture (S3-M1-T3), which a test in the root `tests/` folder rebuilds from `ingest` and compares (S3-M1-T4). The root `tests/` folder is outside the package, so it may import both modules.
+
+### Builds
+
+- Cross-references: `Clause`, `Section`, `Paragraph`, `Sub-clause`, `Article` and schedule words (`Schedule`, `Annex`, `Appendix`, `Exhibit`) followed by a number, in any case, with lists ("clauses 4, 5 and 6") and ranges ("clauses 4 to 6"), and "this Clause". An unresolved target is kept with `target=None`.
+- Defined terms from `"X" means`, `"X" shall mean`, `"X" has the meaning` and bracketed `("the X")` / `(the "X")`, with every use, and terms used but never defined (question 2).
+- Overrides with their direction: "Notwithstanding" (this clause overrides the target), "Subject to", "save as set out in", "except as set out in" (the target qualifies this clause), and "prevails" / "takes precedence" sentences, including an override with no target (question 4).
+- References to documents that are not loaded (question 3).
+- `map_links`, the one public call, with its contract note (I11).
+- The clause fixture for the sample, its loader, and a drift test against `ingest`. A committed clause fixture and its loader are needed because the import wall keeps `links` from calling `ingest` (S1).
+- `python -m clause_tracer.links` with `--input`, a golden file of its output, and an end-to-end test from the sample text through `ingest` to `links`.
+- Owner tables for cross-references, terms, overrides, outside documents and the sample (Constitution T11).
+- Property tests of the link map, and an 85% branch-coverage floor for `links`.
+
+### Leaves to later stages
+
+- Building a label's evidence trail from the link map, and so filling `LabelInput.outside_documents` for Rule 10: stage 8 ([system design 15.8](../system-design.md#158-stage-8-checking-and-the-message-templates), "Not yet decided").
+- The privacy allow-list built from `LinkMap.terms`: stage 4. Passing `LinkMap.terms` from `cli` into `privacy`: stage 6, with the runner.
+- Storing the link map as a derived record with its cache key: stage 6.
+- Showing the trail and the "Refers to a document that isn't loaded" line: stage 12. The words are already in the copy deck.
+- Checking that a rewrite keeps every cross-reference: stage 11.
+- Hidden text in Word and PDF files: `links` reads all of `Document.text`, including text that stage 5 flags as hidden. Whether `links` skips `Document.hidden` spans, so a planted hidden "Notwithstanding anything in this Agreement" cannot join every trail, is decided in stage 5 (Spec 8.4).
+- A version constant for the derived record (`derived_by = step@version`, system design 5.1): stage 6.
+- Reference styles this stage does not read: `cl. 5`, `Part 2`, "the clause above", "the preceding paragraph", a definition written without quotes (`Charges means`), and a definition list in a schedule that uses a table.
+
+## 3. Read first
+
+- [AGENTS.md](../../AGENTS.md), the [Constitution](../../Constitution.md), [GIT_CONVENTIONS.md](../../GIT_CONVENTIONS.md), and [WRITING_DOCS.md](../../WRITING_DOCS.md) sections 2, 5 and 9.
+- [System design](../system-design.md): [3.4](../system-design.md#34-core-shapes-for-stage-1) (the `Clause`, `Sentence`, `MatchKey`, `CrossReference`, `DefinedTerm`, `Override`, `OutsideDocument` and `LinkMap` rows), [4.1](../system-design.md#41-the-fixed-pipeline) (`links` runs before `privacy`), [4.2](../system-design.md#42-the-offset-chain) (the two folds; clauses cover the whole text), [15.3](../system-design.md#153-stage-3-links). Skim 15.4 and 15.8 to see what later stages take from `links`.
+- [Testing strategy](../testing-strategy.md): sections [3](../testing-strategy.md#3-five-layers) (golden files), [4](../testing-strategy.md#4-what-to-test-in-each-module) (the `links` row), [5](../testing-strategy.md#5-the-offset-chain-seven-invariants) (the hazard alphabet), [10](../testing-strategy.md#10-keeping-agent-written-tests-honest), [11](../testing-strategy.md#11-coverage-targets) and [13](../testing-strategy.md#13-gaps-today-and-the-order-to-close-them).
+- [Spec](../spec.md): [2](../spec.md#2-glossary) (Evidence trail), [4.5](../spec.md#45-evidence-trail), [5](../spec.md#5-labelling-rules) (Rule 4 note on overrides, Rule 10, and the "never guess" principle), [6.1](../spec.md#61-steps) (step 5), [13](../spec.md#13-open-decisions-before-coding) and [14.5](../spec.md#145-sample-data) (position 10).
+- Decision records: [ADR 0004](../adr/0004-code-layout.md) (the layout and import rules), [ADR 0012](../adr/0012-missing-unsure-and-evidence-failures.md) (Rule 10 and its amendments), [ADR 0013](../adr/0013-test-layers-and-release-gates.md) (golden files and the agent guard).
+- [The architecture report](../../reports/Clause%20Tracer%20pipeline%20architecture.md), one part only, as background: [`links` finds four edge types by pattern](../../reports/Clause%20Tracer%20pipeline%20architecture.md#links-finds-four-edge-types-by-pattern-and-keeps-unresolved-targets). Its `resolved=False` field does not exist: an unresolved target is `target=None`. Where it and this plan differ, this plan wins.
+- [The stage 2 plan](stage-02-ingest.md), section 9, "For stage 3 (`links`)": the clause and sentence ids, spans, and the schedule ids.
+- The code: [`src/clause_tracer/links/`](../../src/clause_tracer/links/), [`src/clause_tracer/core/link_map.py`](../../src/clause_tracer/core/link_map.py), [`src/clause_tracer/core/document.py`](../../src/clause_tracer/core/document.py), [`src/clause_tracer/core/match_fold.py`](../../src/clause_tracer/core/match_fold.py), [`src/clause_tracer/core/tests/owner_tables.py`](../../src/clause_tracer/core/tests/owner_tables.py), [`src/clause_tracer/ingest/__main__.py`](../../src/clause_tracer/ingest/__main__.py) and [`src/clause_tracer/ingest/tests/test_architecture.py`](../../src/clause_tracer/ingest/tests/test_architecture.py) (patterns to copy), the root [`conftest.py`](../../conftest.py), [`pyproject.toml`](../../pyproject.toml) and [`scripts/check.sh`](../../scripts/check.sh).
+
+## 4. Checks before starting
+
+- [ ] **The plan is Accepted.** Questions 1 to 6 in section 6 are answered, and the tasks follow the answers. Question 8 is answered before S3-M5-T10. Question 7 is for the stage 4 plan.
+- [ ] **The skeleton passes.** Run `.venv/bin/uv sync`, then `scripts/check.sh`. It must exit 0 before any change.
+- [ ] **The sample outline is as this plan assumes.** Run `.venv/bin/uv run python -m clause_tracer.ingest --full`. It must print 65 clauses; the schedule heading has the id `S1` and the number `Schedule 1`; the party lines are `(1)` and `(2)`; the definitions are sentences `1.1.s2` to `1.1.s6`; clause `11.1` is one sentence holding "Master Agreement"; clause `14.2` is the sentence "14.2 If this Agreement and Schedule 1 conflict, this Agreement prevails."; and the signature lines `p4` and `p5` have a heading. The planner checked this on 20 Nov 2026. If one fails, stop and bring it to the owner.
+- [ ] **The docs are on `main`.** The `docs/` branch that holds this plan, with any spec or system design change the answers need, is merged. Milestone 1 is cut from that `main`.
+
+## 5. Milestones and tasks
+
+**Rules for every task.**
+
+- Every new shape in `links` is written `@dataclass(frozen=True, slots=True, kw_only=True)`.
+- A file whose name starts with `_` is internal to `links`. Only `__init__.py` re-exports names, and only the names a task says to export.
+- Offsets are half-open, count code points and point into `Document.text`. Every pattern runs on `Document.text` itself, except the search for a term's uses, which runs on the match key (S3-M3-T2).
+- Each pattern this plan gives as a string constant `NAME` lives in `src/clause_tracer/links/_patterns.py` as `NAME: Final[str]`, and is compiled there once as `NAME_RE: Final[re.Pattern[str]] = re.compile(NAME)`. The fragments `ITEM_NUMBER`, `ITEM_ARTICLE`, `ITEM_SCHEDULE`, `SEPARATOR`, `UNIT_AFTER`, `QUOTE_OPEN`, `QUOTE_CLOSE`, `TERM`, `DOCUMENT_WORDS` and `DOCUMENT_NOUN` are strings only, except that `SEPARATOR` is also compiled as `SEPARATOR_RE: Final[re.Pattern[str]] = re.compile(SEPARATOR)`, which S3-M4-T1 uses with `fullmatch`. The three reference patterns are compiled by `_reference_pattern`. `WRITTEN_NUMBER_RE` and `ROMAN_RE` are also compiled in `_patterns.py` (S3-M2-T1). Where a task runs a pattern, it calls the `NAME_RE` constant with the exact text the task gives.
+- While an owner task blocks a milestone, go on with the tasks of that milestone that do not depend on it. Do not start the next milestone's branch before the owner merges this one (README, "Branches and pull requests"). An owner task of a later milestone (for example a table) may be filled by the owner at any time.
+- `links` code is pure (T1): no file, clock, network or print, except in `__main__.py`.
+- Tests of `links` may import from `clause_tracer.core.tests` (the owner-table loader and the hazard alphabet). They never import another pipeline module.
+- A commit that fills an owner table holds no code (the owner-table guard). Golden files and the clause fixture never sit in a `tables` folder.
+- **Trimmed span.** "The trimmed span of a sentence" means its span with `end` moved back over every character for which `str.isspace()` is true, never below `start`. It is the function `trimmed` of `_spans.py` (S3-M2-T1). Tasks use it for evidence.
+- **Overlap.** Every "overlaps" or "inside" check in M3 and M5 uses a `SpanSet` (S3-M2-T1), so no task compares every pair of spans.
+- **Heading sentence.** A heading sentence is the first sentence of a clause whose `heading` is not `None`.
+- **Short test cases.** When a test gives only sentences and no rows, they form one clause with the row `{"id": "1", "sentences": [...]}` (number `1`, no heading). When a test names other clauses (for example "with a clause `4`"), each is a row `{"id": "4", "sentences": ["4. Text."]}` placed before the clause under test. Expected spans come from `span_of`; when the same words also stand in an earlier clause (a schedule heading), the test gives the `nth` that points past it.
+
+### M1: Foundations
+
+When this is done, `links` has a coverage floor, empty owner tables, a committed clause fixture of the sample that a root test keeps in step with `ingest`, and a test helper that builds small cases without `ingest`.
+
+- [ ] **S3-M1-T1: An 85% coverage floor for `links`**
+  - **Build:** In `scripts/check.sh`, add one last line: `run coverage report --include='src/clause_tracer/links/*' --fail-under=85`. In `scripts/README.md`, change the `check.sh` row to say "a 95% branch-coverage floor for `core` and an 85% floor for `ingest` and `links`".
+  - **Files:** `scripts/check.sh`, `scripts/README.md`.
+  - **Tests first:** None. The check is the script itself.
+  - **Done when:** `scripts/check.sh` exits 0 and its last lines show a coverage table for `links`. Then change 85 to 101 in your working copy, see the script exit non-zero, and put 85 back.
+  - **Rules:** [Testing strategy 11](../testing-strategy.md#11-coverage-targets).
+  - **Depends on:** None
+
+- [ ] **S3-M1-T2: Create the five empty owner tables**
+  - **Build:** Create these files, each holding exactly two lines: the `HEADER` line of `clause_tracer.core.tests.owner_tables`, then `# Format: docs/plans/stage-03-links.md, task <id>.` with the id of the owner task that fills it: `src/clause_tracer/links/tests/tables/references.toml` (S3-M2-T5), `src/clause_tracer/links/tests/tables/terms.toml` (S3-M3-T5), `src/clause_tracer/links/tests/tables/overrides.toml` (S3-M4-T3), `src/clause_tracer/links/tests/tables/outside_documents.toml` (S3-M3-T6), `src/clause_tracer/links/tests/tables/sample.toml` (S3-M5-T7). This commit holds these five files and the plan tick, and no code.
+  - **Files:** the five files above.
+  - **Tests first:** None. The loader test of S1-M3-T1 covers a header-only file.
+  - **Done when:** `.venv/bin/uv run python scripts/check_owner_tables.py` exits 0 before the commit, and `scripts/check.sh` exits 0.
+  - **Rules:** T11.
+  - **Depends on:** None
+
+- [ ] **S3-M1-T3: The clause fixture format, its writer and its loader**
+  - **Build:** In `src/clause_tracer/links/sample_clauses.py`:
+    - `FIXTURE_FORMAT: Final[str] = "clause-tracer-links-sample"` and `FIXTURE_VERSION: Final[int] = 1`.
+    - `@dataclass(frozen=True, slots=True, kw_only=True) class SampleInput` with exactly two fields: `document: Document` and `clauses: tuple[Clause, ...]`.
+    - `def dump_clause_fixture(document: Document, clauses: tuple[Clause, ...]) -> str`. It raises `ValueError("links sample: text documents only")` when any of `document.char_map`, `glyphs`, `pages`, `furniture`, `hidden`, `undecodable` or `tracked_changes` is not empty. Otherwise it returns `json.dumps(obj, ensure_ascii=False, indent=2) + "\n"`, where `obj` is this dict, with keys in this order:
+      ```text
+      {"format": FIXTURE_FORMAT, "version": FIXTURE_VERSION,
+       "document": {"schema_version": int, "source": {"name": str, "kind": str (the FileKind value), "sha256": str, "size": int},
+                    "text": str, "warnings": [{"code": str, "page": int | null}, ...]},
+       "clauses": [{"id": str, "number": str | null, "heading": str | null, "level": int, "parent_id": str | null,
+                    "start": int, "end": int, "numbering_source": str,
+                    "sentences": [{"id": str, "start": int, "end": int}, ...]}, ...]}
+      ```
+    - `def load_clause_fixture(text: str) -> SampleInput`. It parses `text` with `json.loads` and builds the `Document` (with `char_map`, `glyphs`, `pages`, `furniture`, `hidden`, `undecodable` and `tracked_changes` all `()`) and the clauses. It turns `kind` into `FileKind`, each warning into `InputWarning`, every JSON list into a tuple, and every id into `ClauseId` or `SentenceId`. It raises `ValueError` with a message that starts `links sample: ` in each of these cases, and no other error. The checks run in JSON order, and the first error is raised:
+      - the text is not JSON (`links sample: not JSON`);
+      - the top level is not an object (`links sample: top level is not an object`);
+      - `format` is not the value above (`links sample: format is not clause-tracer-links-sample`);
+      - `version` is not 1 (`links sample: version is not 1`);
+      - an object has a key not listed in the format, or lacks one (`links sample: unknown key <key>` / `links sample: missing key <key>`);
+      - a field has the wrong JSON type. Every field's JSON type is checked against the format, and `null` is allowed only where the format says `| null`. The message names the leaf key: `links sample: <key> has the wrong type`. A JSON `true` is not an `int`;
+      - `kind` is not `text`, `markdown` or `pasted` (`links sample: kind <kind> is not a text kind`);
+      - a span has `start < 0`, `end < start` or `end > len(text)` (`links sample: span of <id> is outside the text`).
+
+      The loader also checks the structure, with the same `ValueError` and prefix: two clauses with the same id (`links sample: duplicate clause id <id>`); a `parent_id` that no earlier clause has (`links sample: unknown parent <id>`); a sentence span that is not inside its clause span (`links sample: span of <id> is outside its clause`).
+    - Do not export anything from `__init__.py` yet.
+  - **Files:** `src/clause_tracer/links/sample_clauses.py`, `src/clause_tracer/links/tests/test_sample_clauses.py`.
+  - **Tests first:** in `test_sample_clauses.py`, with a helper `_document(text: str) -> Document` (source `SourceFile(name="t.txt", kind=FileKind.TEXT, sha256="0" * 64, size=len(text.encode()))`, `schema_version=1`, every tuple `()`) over the text `"1. Payment\n1.1 Paid.\n"` (21 characters), and two clauses: `1` (span 0 to 11, number `"1"`, heading `"Payment"`, level 1, no parent, `numbering_source="numbers"`, one sentence `1.s1` from 0 to 11) and `1.1` (span 11 to 21, number `"1.1"`, no heading, level 2, parent `1`, `numbering_source="numbers"`, one sentence `1.1.s1` from 11 to 21). A test that needs invalid JSON takes `json.loads(dump_clause_fixture(doc, clauses))`, changes the dict, and passes `json.dumps` of it to `load_clause_fixture`. Only `test_not_json` passes the literal `"{"`:
+    - `test_round_trip` (`load_clause_fixture(dump_clause_fixture(doc, clauses))` equals `SampleInput(document=doc, clauses=clauses)`);
+    - `test_dump_ends_with_one_newline` (the string ends with `"}\n"`);
+    - `test_dump_keeps_non_ascii` (a text holding `"£"` dumps the character `£`, not `\u00a3`);
+    - `test_warning_round_trips` (a document with `warnings=(InputWarning(code="not_english", page=None),)` round-trips);
+    - `test_dump_refuses_glyphs` (a document with `pages=(Page(number=1, width=1.0, height=1.0),)` raises `ValueError`);
+    - `test_not_json` (`"{"` raises `ValueError` whose message starts `links sample: `);
+    - `test_wrong_format` (`format` set to `"other"` raises);
+    - `test_wrong_version` (`"version": 2` raises);
+    - `test_unknown_key` (an extra key `"x"` in a clause raises, and the message names `x`);
+    - `test_missing_key` (a clause without `sentences` raises, and the message names `sentences`);
+    - `test_bool_is_not_int` (`"level": true` raises);
+    - `test_span_outside_text` (a clause `end` of `999` raises);
+    - `test_unknown_kind` (`"kind": "fax"` raises);
+    - `test_word_kind_is_refused` (`"kind": "word"` raises, and the message is `links sample: kind word is not a text kind`);
+    - `test_duplicate_clause_id` (the two clauses given the same id `1` raise);
+    - `test_unknown_parent` (the `parent_id` of clause `1.1` set to `"9"` raises);
+    - `test_sentence_outside_its_clause` (the end of sentence `1.s1` set to `15`, beyond the clause end 11, raises).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_sample_clauses.py` reports 17 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** D4 and I9 (validated once at the door), T1 (pure: the callers read the file), S1, S3.
+  - **Depends on:** None
+
+- [ ] **S3-M1-T4: The sample fixture and its drift test**
+  - **Build:** In `src/clause_tracer/links/__init__.py`, export `SampleInput`, `dump_clause_fixture` and `load_clause_fixture`. Create `tests/test_links_sample.py` with `SAMPLE_TEXT = Path(__file__).parent.parent / "src" / "clause_tracer" / "ingest" / "samples" / "developer-agreement.txt"` and `FIXTURE = Path(__file__).parent.parent / "src" / "clause_tracer" / "links" / "samples" / "developer-agreement.clauses.json"`. Generate the fixture with `.venv/bin/uv run pytest tests/test_links_sample.py --update-goldens`, then read it. Add a row for `test_links_sample.py` to `tests/README.md`: "The `links` clause fixture against `ingest`, and the sample from text to link map". Add `src/clause_tracer/links/samples/README.md`, which says the fixture is the `ingest` output for `src/clause_tracer/ingest/samples/developer-agreement.txt`, written only by `pytest tests/test_links_sample.py --update-goldens`, and never edited by hand.
+  - **Files:** `src/clause_tracer/links/__init__.py`, `tests/test_links_sample.py`, `tests/README.md`, `src/clause_tracer/links/samples/developer-agreement.clauses.json`, `src/clause_tracer/links/samples/README.md`.
+  - **Tests first:** in `tests/test_links_sample.py`: `test_fixture_matches_ingest(check_golden)` (`data = SAMPLE_TEXT.read_bytes()`; read it with `read_text_file(data, kind=FileKind.TEXT, name="developer-agreement.txt")`, then `check_golden(FIXTURE, dump_clause_fixture(document, split_clauses(document)))`); `test_fixture_loads_to_65_clauses` (`load_clause_fixture(FIXTURE.read_text(encoding="utf-8"))` has 65 clauses, the last with id `S1.2`).
+  - **Done when:** `.venv/bin/uv run pytest tests/test_links_sample.py` reports 2 passed without `--update-goldens`, and `scripts/check.sh` exits 0.
+  - **Rules:** T11 (regenerated only by the named command), S1, the import contracts ([ADR 0004](../adr/0004-code-layout.md)).
+  - **Depends on:** S3-M1-T3
+
+- [ ] **S3-M1-T5: The test-case builder**
+  - **Build:** In `src/clause_tracer/links/tests/case_builder.py` (test code, not exported):
+    - `def build_case(rows: Sequence[Mapping[str, object]]) -> SampleInput`. Each row has the key `id` (`str`), `sentences` (a non-empty list of `str`), and the optional keys `parent` (`str`), `heading` (`str`) and `number` (`str`). Any other key raises `ValueError(f"unknown key {key}")`. A missing `id` or `sentences` raises `ValueError(f"missing key {key}")`; the unknown-key check runs first, then the missing-key check (`id` before `sentences`). A wrong type raises `ValueError("sentences must be a non-empty list of strings")` for `sentences`, and `ValueError(f"{key} must be a string")` for `id`, `parent`, `heading` and `number`. A repeated `id` raises `ValueError(f"duplicate id {id}")`. A sentence that is empty or holds `"\n"` raises `ValueError("a sentence must be non-empty and hold no line break")`. Spaces at the start or end of a sentence are kept as written. `build_case([])` is allowed and gives the text `""` and no clauses. The text is the clauses joined by `"\n"`, and inside a clause the sentences joined by `" "`. Each sentence span covers its text and the one character that follows it (the space, or the `"\n"` after the clause), except the last sentence of the last clause. Each clause span runs from its first sentence's start to its last sentence's end. So the clauses tile the text with no gap. For each clause: `id = ClauseId(row["id"])`; `number` is the row's `number` when the row has one, else `None` when the id starts with `p`, else the id; `heading` from the row or `None`; `parent_id` from the row or `None`; `level = 1` with no parent, else the parent's level plus 1 (the parent must come earlier, else `ValueError(f"unknown parent {parent}")`); `numbering_source = "paragraphs"` when every id starts with `p`, else `"numbers"`; sentence ids `f"{id}.s{k}"` from 1. The document has `schema_version=1`, `source=SourceFile(name="case.txt", kind=FileKind.PASTED, sha256=hashlib.sha256(text.encode()).hexdigest(), size=len(text.encode()))`, and every tuple `()`.
+    - `def span_of(text: str, needle: str, nth: int = 1) -> Span`, the span of the `nth` occurrence of `needle` in `text` (counted with `str.find`, from 1). It raises `AssertionError(f"{needle!r} occurs fewer than {nth} times")`.
+  - **Files:** `src/clause_tracer/links/tests/case_builder.py`, `src/clause_tracer/links/tests/test_case_builder.py`.
+  - **Tests first:** in `test_case_builder.py`: `test_text_joins_sentences_and_clauses` (rows `{"id": "1", "sentences": ["A b.", "C d."]}` and `{"id": "2", "sentences": ["E."]}` give the text `"A b. C d.\nE."`); `test_spans_tile_the_text` (for the same rows: clause `1` is 0 to 10, clause `2` is 10 to 12, sentence `1.s1` is 0 to 5, `1.s2` is 5 to 10); `test_parent_sets_level` (rows `1` and `{"id": "1.1", "parent": "1", ...}`: `1.1` has level 2 and parent `1`); `test_unknown_parent_raises` (rows `[{"id": "1.1", "parent": "1", "sentences": ["x."]}]` raise `ValueError("unknown parent 1")`); `test_unknown_key_raises` (rows `[{"id": "1", "sentences": ["x."], "colour": "red"}]` raise `ValueError("unknown key colour")`); `test_paragraph_ids` (rows `p1`, `p2`: `numbering_source == "paragraphs"` and `number is None`); `test_number_key` (rows `[{"id": "S1", "number": "Schedule 1", "sentences": ["Schedule 1 · Fees"]}]`: the clause's number is `"Schedule 1"`); `test_empty_rows` (`build_case([])` has the text `""` and no clauses); `test_duplicate_id_raises` (two rows with the id `1` raise `ValueError("duplicate id 1")`); `test_missing_key_raises` (rows `[{"id": "1"}]` raise `ValueError("missing key sentences")`, and rows `[{"sentences": ["x."]}]` raise `ValueError("missing key id")`); `test_sentence_spaces_are_kept` (rows `[{"id": "1", "sentences": [" a "]}]` give the text `" a "` and the sentence `1.s1` from 0 to 3); `test_span_of_nth` (`span_of("a x a", "a", 2) == Span(start=4, end=5)`); `test_span_of_missing_raises` (`span_of("abc", "z")` raises `AssertionError`).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_case_builder.py` reports 13 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** T3 (a simple working stand-in for `ingest`), S2 (the tests run without other modules).
+  - **Depends on:** S3-M1-T3
+
+### M2: Cross-references
+
+When this is done, `find_references` finds every cross-reference with its source span and target, and the owner's references table passes.
+
+- [ ] **S3-M2-T1: Clause numbers and the clause index**
+  - **Build:**
+    - In `src/clause_tracer/links/_patterns.py` (created here; S3-M2-T2 adds to it): `ITEM_NUMBER: Final[str] = r"[0-9]{1,3}(?:\.[0-9]{1,3}){0,4}(?:\([0-9A-Za-z]{1,4}\)){0,3}"`, `WRITTEN_NUMBER_RE: Final[re.Pattern[str]] = re.compile(ITEM_NUMBER)` and `ROMAN_RE: Final[re.Pattern[str]] = re.compile(r"M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})")`.
+    - In `src/clause_tracer/links/_numbers.py`:
+      - Import `WRITTEN_NUMBER_RE` and `ROMAN_RE` from `_patterns.py`.
+      - `def normalise_number(written: str) -> str`. It uses `WRITTEN_NUMBER_RE.fullmatch(written)`; any other input raises `ValueError`. Each dotted part loses its leading zeros (`"0"` stays `"0"`); the bracketed tail is kept as written.
+      - `def roman_to_int(roman: str) -> int`. It accepts only strict upper-case Roman numbers from 1 to 3999 (`ROMAN_RE.fullmatch(roman)`, and not empty), and raises `ValueError` for anything else.
+      - `def expand_range(first: str, last: str) -> tuple[str, ...]`. The caller passes two normalised numbers, and `expand_range` trusts it. When both have no bracketed tail, the same number of dotted parts, the same parts except the last, and `int(last part of first) < int(last part of last)`, and the range holds at most `MAX_RANGE: Final[int] = 50` numbers, it returns every number from `first` to `last`. Otherwise it returns `(first, last)`, or `(first,)` when they are equal.
+    - In `src/clause_tracer/links/_spans.py`:
+      - `def trimmed(text: str, span: Span) -> Span`: the trimmed-span rule of section 5.
+      - `@dataclass(frozen=True, slots=True, kw_only=True) class SpanSet` with exactly two fields, `starts: tuple[int, ...]` and `max_ends: tuple[int, ...]`.
+      - `def build_span_set(spans: Iterable[Span]) -> SpanSet`: sort the spans by `(start, end)`; `starts` holds the sorted starts, and `max_ends[i]` is the largest `end` among the first `i + 1` sorted spans.
+      - Method `def overlaps(self, span: Span) -> bool`. An empty span (`start == end`) overlaps nothing: return `False` first. Else `i = bisect.bisect_left(self.starts, span.end)`, and return `i > 0 and self.max_ends[i - 1] > span.start`.
+    - In `src/clause_tracer/links/_index.py`: `@dataclass(frozen=True, slots=True, kw_only=True) class ClauseIndex` with exactly four fields: `clauses: tuple[Clause, ...]`; `starts: tuple[int, ...]` (the span starts, in order); `by_id: Mapping[ClauseId, Clause]` (the first clause with each id); and `resolvable: frozenset[str]` (every id that exactly one clause has and that no other id starts with followed by `~`). And `def build_index(clauses: tuple[Clause, ...]) -> ClauseIndex`, which raises `ValueError("clauses are not in text order")` when the starts are not strictly increasing or a span starts before the previous span ends. After that check, it raises `ValueError(f"clause {id} has a later parent")` for the first clause (in tuple order) whose `parent_id` is the id of a clause at the same place or later in the tuple, with `id` the id of the clause that has the parent. A `parent_id` that no clause has is allowed. So every parent comes earlier, and `top_ancestor` cannot loop. Methods:
+      - `def clause_at(self, offset: int) -> Clause | None`: the clause whose span holds `offset` (found with `i = bisect.bisect_right(self.starts, offset) - 1`), or `None` when `i` is below 0 or `offset >= span.end` of that clause.
+      - `def sentence_at(self, offset: int) -> Sentence | None`: the sentence of `clause_at(offset)` whose span holds `offset`, or `None`.
+      - `def resolve(self, key: str) -> ClauseId | None`: `ClauseId(key)` when `key in self.resolvable`; else `None`. A duplicated number is never guessed (Spec 5).
+      - `def top_ancestor(self, clause: Clause) -> Clause`: follows `parent_id` through `by_id` until a clause with no parent, and returns the last clause reached (so a parent id that no clause has ends the walk at the clause whose `parent_id` it is).
+      - `def in_schedule(self, clause: Clause) -> Clause | None`: let `t = self.top_ancestor(clause)`. It returns `t` when `t.number` is not `None` and starts (case ignored) with `schedule`, `annex`, `appendix` or `exhibit`, else `None`. The number of `clause` itself is never read, and a `None` number gives `None`.
+  - **Files:** `src/clause_tracer/links/_patterns.py`, `src/clause_tracer/links/_numbers.py`, `src/clause_tracer/links/_spans.py`, `src/clause_tracer/links/_index.py`, `src/clause_tracer/links/tests/test_numbers.py`, `src/clause_tracer/links/tests/test_spans.py`, `src/clause_tracer/links/tests/test_index.py`.
+  - **Tests first:**
+    - in `test_numbers.py`: `test_normalise_drops_leading_zeros` (`"05"` gives `"5"`, `"01.02"` gives `"1.2"`, `"0"` gives `"0"`, `"10.0"` gives `"10.0"`); `test_normalise_keeps_the_tail` (`"7.1(a)(i)"` gives `"7.1(a)(i)"`); `test_normalise_rejects_text` (`"a.1"` raises `ValueError`); `test_roman` (`"IV"` is 4, `"XII"` is 12, `"MMMCMXCIX"` is 3999); `test_roman_rejects` (`"IIII"`, `""` and `"iv"` raise `ValueError`); `test_expand_whole_numbers` (`("4", "6")` gives `("4", "5", "6")`); `test_expand_last_part` (`("4.1", "4.3")` gives `("4.1", "4.2", "4.3")`); `test_expand_depth_differs` (`("4", "4.2")` gives `("4", "4.2")`); `test_expand_backwards` (`("6", "4")` gives `("6", "4")`); `test_expand_tail` (`("4.1(a)", "4.1(c)")` gives `("4.1(a)", "4.1(c)")`); `test_expand_limit` (`("1", "50")` gives 50 numbers; `("1", "51")` gives `("1", "51")`); `test_expand_same` (`("4", "4")` gives `("4",)`).
+    - in `test_index.py`, with `build_case` rows `1` (`["1. Pay."]`), `1.1` (parent `1`, `["1.1 Paid in 30 days.", "Late fees apply."]`), `2` (`["2. End."]`), `2~2` (`["2. Again."]`): `test_clause_at_start_and_end` (offset 0 is clause `1`; the last character of `1.1` is `1.1`; `len(text)` gives `None`); `test_sentence_at` (the offset of `"Late"` is in `1.1.s2`); `test_resolve_unique` (`"1.1"` gives `ClauseId("1.1")`); `test_resolve_unknown` (`"9"` gives `None`); `test_resolve_duplicate_is_none` (`"2"` gives `None`); `test_top_ancestor` (for `1.1` it is clause `1`); `test_clause_at_before_first` (a case whose first clause starts at 0: offset `-1` gives `None`); `test_build_index_refuses_disorder` (the clauses of a two-clause `build_case` passed to `build_index` in reverse order raise `ValueError("clauses are not in text order")`); `test_build_index_refuses_later_parent` (a two-clause `build_case` with rows `1` and `2`, then clause `1` replaced with `dataclasses.replace(clause, parent_id=ClauseId("2"))`: `build_index` raises `ValueError("clause 1 has a later parent")`); `test_build_index_allows_unknown_parent` (the same two clauses, with clause `2` replaced to have `parent_id=ClauseId("9")`: `build_index` returns, and `top_ancestor` of clause `2` is clause `2`).
+    - in `test_spans.py`, with `Span(start=a, end=b)` written `(a, b)`: `test_trimmed` (the text `"ab \n"` with the span `(0, 4)` gives `(0, 2)`; the text `"   "` with the span `(0, 3)` gives `(0, 0)`); `test_overlap_inside` (the set `{(2, 8)}` and the span `(3, 4)`: `True`); `test_overlap_touching_is_not_overlap` (the set `{(2, 4)}` and the spans `(4, 6)` and `(0, 2)`: `False` for both); `test_overlap_long_earlier_span` (the set `{(0, 100), (10, 12)}` and the span `(50, 60)`: `True`); `test_empty_span_overlaps_nothing` (the set `{(2, 8)}` and the span `(3, 3)`: `False`); `test_empty_set` (`build_span_set(())` and the span `(0, 5)`: `False`).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_numbers.py src/clause_tracer/links/tests/test_spans.py src/clause_tracer/links/tests/test_index.py` reports 28 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** T1, I4 (always the same return type), Spec 5 ("never guess").
+  - **Depends on:** S3-M1-T5
+
+- [ ] **S3-M2-T2: Single cross-references**
+  - **Build:** In `src/clause_tracer/links/references.py`, `def find_references(text: str, index: ClauseIndex) -> tuple[CrossReference, ...]`, with these module-level patterns (in `src/clause_tracer/links/_patterns.py`):
+    - `ITEM_NUMBER` is already in `_patterns.py` (S3-M2-T1). Add `ITEM_ARTICLE = r"(?:[0-9]{1,3}|[IVXLC]{1,7})(?:\.[0-9]{1,3}){0,4}(?:\([0-9A-Za-z]{1,4}\)){0,3}"` and `ITEM_SCHEDULE = r"(?:[0-9]{1,3}|[A-Z])(?:\.[0-9]{1,3}){0,4}(?:\([0-9A-Za-z]{1,4}\)){0,3}"`. `ITEM_SCHEDULE` stays upper-case only, because `ingest` reads a schedule designation in upper case (so `annex a` is not read). An article or schedule item can carry a `.` part or a bracket after its base; the key rules below give such an item the key `None`.
+    - `DOCUMENT_WORDS = r"(?:[A-Z][a-z]+(?:-[A-Z][a-z]+)?\s+){1,4}"` and `DOCUMENT_NOUN = r"(?:Agreement|Contract|Deed|Addendum|Licence|License|Statement\s+of\s+Work|Terms\s+and\s+Conditions)"`. S3-M3-T3 builds `OUTSIDE_DOCUMENT` from them.
+    - `OF_DOCUMENT = r"\s+(?i:of|in|under)\s+(?:(?i:the)\s+)?" + DOCUMENT_WORDS + DOCUMENT_NOUN + r"(?![A-Za-z])"`, compiled as `OF_DOCUMENT_RE` by the general rule of section 5.
+    - `SEPARATOR = r"(?:\s*,\s*(?:(?:and|or)\s+)?|\s+(?:and|or)\s+|\s+to\s+|\s*[-\u2013\u2014]\s*)"` (no capturing group inside). It is also compiled as `SEPARATOR_RE: Final[re.Pattern[str]] = re.compile(SEPARATOR)`, which S3-M4-T1 uses with `fullmatch`.
+    - A helper `def _reference_pattern(keywords: str, item: str) -> re.Pattern[str]`, in `_patterns.py`, returns `re.compile(rf"(?<![A-Za-z])(?P<kw>(?i:{keywords}))\s+(?P<items>(?:{item})(?:{SEPARATOR}(?:{item}))*)(?![0-9A-Za-z]|\.[0-9])")`. The last look-ahead stops a unit check from cutting `clause 4.5 days` back to `clause 4`.
+    - `NUMBER_REFERENCE = _reference_pattern("clauses?|sections?|paragraphs?|sub-clauses?|subclauses?", ITEM_NUMBER)`; `ARTICLE_REFERENCE = _reference_pattern("articles?", ITEM_ARTICLE)`; `SCHEDULE_REFERENCE = _reference_pattern("schedules?|annex(?:es)?|appendix|appendices|exhibits?", ITEM_SCHEDULE)`. These three are already compiled, so they have no `_RE` twin; the code calls `NUMBER_REFERENCE.finditer(text)` and the same for the other two.
+    - The code reads the items and separators of a match with `re.split(f"({SEPARATOR})", match.group("items"))`: the items are at the even places of the list, and the separator before item `k` (counted from 0) is at place `2k - 1`. Until S3-M2-T3, only the first item of a match is used.
+
+    For each match of the three patterns, in text order, the code builds a list of keys:
+    - **Number family:** each item through `normalise_number`.
+    - **Article family:** a digit item through `normalise_number`; a Roman item through `roman_to_int` then `str`. A Roman item that `roman_to_int` rejects gives the key `None`. An article item with anything after its base (a `.` part or a bracket) gives the key `None`, so the reference is kept unresolved (Spec 5, never guess).
+    - **Schedule family:** the key is the keyword's first letter, upper-cased, followed by the item as written (`Schedule 1` gives `S1`, `annex A` gives `AA`, `Appendix 2` gives `A2`), which is how `ingest` builds schedule ids. A schedule item with anything after its base (a `.` part or a bracket) gives the key `None`, for the same reason.
+
+    Each key gives one `CrossReference(source=Span(start=match.start(), end=match.end()), target=<the target below>)`, or `target=None` for a `None` key. In this task, a match has one item; S3-M2-T3 adds lists and ranges.
+
+    **The target of a key.** Let `c = index.clause_at(match.start())` and `s = index.in_schedule(c)` (`s` is `None` when `c` is `None`). A key resolves as follows:
+    - Outside a schedule (`s` is `None`): `index.resolve(key)`.
+    - Inside a schedule, for the keyword `paragraph` or `paragraphs`: the key resolves only as `index.resolve(s.id + "." + key)`, and never against the body.
+    - Inside a schedule, for every other keyword: when both `index.resolve(s.id + "." + key)` and `index.resolve(key)` give a clause, the target is `None`; else whichever one gives a clause; else `None`.
+
+    **A reference into another document.** When `OF_DOCUMENT_RE.match(text, match.end())` matches, every target of that match is `None`. So `under Section 3 of the Master Agreement` is one reference with `target=None`.
+
+    **The clause's own number is not a reference.** Skip a match when it has one item, its target is the id of `c`, and every character of `text[c.span.start:match.start()]` is in `" \t#*>-_"`. So the heading `Schedule 1 · Services and Charges` is not a reference to itself.
+
+    The result is sorted by `source.start`, then by the order of the keys in the match. No errors.
+  - **Files:** `src/clause_tracer/links/_patterns.py`, `src/clause_tracer/links/references.py`, `src/clause_tracer/links/tests/test_references.py`.
+  - **Tests first:** in `test_references.py`, each with `build_case` and `span_of`:
+    - `test_clause_reference` (clauses `12` `["12. Ending."]` and `2` `["2. It ends under clause 12."]`: one reference, source `span_of(text, "clause 12")`, target `12`);
+    - `test_keyword_case_is_ignored` (`"See CLAUSE 12."` resolves to `12`);
+    - `test_section_reference_resolves_to_a_number` (`"see Section 14.2"` with a clause `14.2` resolves to `14.2`; Spec 4.5's own example);
+    - `test_unresolved_is_kept` (`"see clause 9"` with no clause `9`: one reference with `target=None`);
+    - `test_two_point_five_days_after_a_reference` (a clause `4` and `"see clause 4 within 2.5 days"`: one reference, to `4`, source `"clause 4"`);
+    - `test_bracketed_tail` (`"clause 7.1(a)"` with a clause `7.1(a)` resolves to it);
+    - `test_leading_zero` (`"clause 05"` with a clause `5` resolves to `5`);
+    - `test_article_roman` (`"Article IV"` with a clause `4` resolves to `4`);
+    - `test_article_bad_roman` (`"Article IIII"`: one reference with `target=None`);
+    - `test_article_with_tail_is_unresolved` (a clause `4` and `"see Article 4.1"`: one reference, source `"Article 4.1"`, `target=None`);
+    - `test_schedule_reference` (a clause `S1` with number `"Schedule 1"`, and `"set out in Schedule 1."` elsewhere: target `S1`);
+    - `test_annex_letter` (`"see Annex A"` with a clause `AA` (number `"Annex A"`): target `AA`);
+    - `test_schedule_with_tail_is_unresolved` (a clause `S1` with number `"Schedule 1"` and `"see Schedule 1.2"`: one reference, source `"Schedule 1.2"`, `target=None`);
+    - `test_schedule_heading_is_not_a_reference` (the clause `S1` (number `"Schedule 1"`) whose sentence is `"Schedule 1 · Services"`: no reference from it);
+    - `test_reference_to_own_number_in_text_is_kept` (clause `8.2` `["8.2 Clause 8.2 is new."]`: one reference to `8.2`, because `"8.2 "` stands before it);
+    - `test_duplicate_number_is_unresolved` (clauses `5` and `5~2`, and `"see clause 5"`: target `None`);
+    - `test_word_before_keyword` (`"subclause 3"` is found; `"Xclause 3"` is not);
+    - `test_reference_into_another_document` (a clause `3` and `"under Section 3 of the Master Agreement"`: one reference, target `None`);
+    - `test_paragraph_in_schedule` (clauses `2`, `S1` (number `"Schedule 1"`), `S1.2` (parent `S1`) holding `"see paragraph 2"`: target `S1.2`);
+    - `test_clause_in_schedule_ambiguous` (clauses `1`, `S1` (number `"Schedule 1"`), `S1.1` (parent `S1`) holding `"see clause 1"`: target `None`);
+    - `test_clause_in_schedule_body_only` (clauses `12`, `S1` (number `"Schedule 1"`), `S1.1` (parent `S1`) holding `"see clause 12"`: target `12`).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_references.py` reports 21 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** Spec 4.5, [testing strategy 4](../testing-strategy.md#4-what-to-test-in-each-module) ("an unresolved target is kept, not dropped"), Spec 5 ("never guess").
+  - **Depends on:** S3-M2-T1
+
+- [ ] **S3-M2-T3: Lists and ranges**
+  - **Build:** In `_patterns.py`, add `UNIT_AFTER = r"(?!\s*(?:%|(?i:per\s?cent|percent|days?|weeks?|months?|years?|hours?|business|working|calendar)(?![A-Za-z])|(?:January|February|March|April|May|June|July|August|September|October|November|December)(?![A-Za-z])))"`, and change `_reference_pattern` so that it writes `(?:{item}){UNIT_AFTER}` for every item, in the first place and in the places after each separator. Month names are capitalised and case-sensitive, so the word `may` is not a unit. So a number followed by a unit is not an item: `clause 4, 30 days` ends before `, 30`. Then in `find_references`, read every item and separator of a match with the `re.split` of S3-M2-T2. A separator that holds `to`, `-`, `\u2013` or `\u2014` makes a range between the key before it and the key after it: replace the two with `expand_range(before, after)` for the number family and the article family (Roman keys converted first); a range with a `None` end (a Roman key that failed) keeps both ends without expanding; for the schedule family, expand only when both designations are digits with no leading zero (`expand_range` on the two designations, then the keyword letter put back on each), else keep both keys as written. In a chained range (`1 to 3 to 5`), each range separator pairs the keys on either side of it, left to right: `1` with `3`, then `3` with `5`. Any other separator (a comma, `and`, `or`) makes a list. Every key gives one `CrossReference` with the source span of the whole match, from the keyword to the end of the last item, and the target rules of S3-M2-T2. Keys are kept in order. A key repeated inside one match is kept once (by key, not by target). A Roman item that `roman_to_int` rejects uses its written text (`IIII`) as its key for this rule, and still gives `target=None`. An article or schedule item with a tail does the same. Two different keys that both resolve to `None` give two references.
+  - **Files:** `src/clause_tracer/links/references.py`, `src/clause_tracer/links/tests/test_references.py`.
+  - **Tests first:** in `test_references.py`, with clauses `4`, `5`, `6` and `9` (and no clause `7`), except where a test names its own clauses:
+    - `test_range` (`"clauses 4 to 6"`: three references with targets `4`, `5`, `6`, each with the source `span_of(text, "clauses 4 to 6")`);
+    - `test_range_with_dash` (`"clauses 4-6"` and `"clauses 4\u20136"` give the same targets);
+    - `test_range_keeps_missing_members` (`"clauses 5 to 7"`: targets `5`, `6`, `None`);
+    - `test_list` (`"clauses 4, 5 and 9"`: targets `4`, `5`, `9`);
+    - `test_list_with_or` (`"clause 4 or 9"`: targets `4`, `9`);
+    - `test_range_then_list` (`"clauses 4 to 6 and 9"`: targets `4`, `5`, `6`, `9`);
+    - `test_and_followed_by_a_word_stops` (a clause `S1` (number `Schedule 1`, sentence `"Schedule 1 · Fees"`) and `"Schedule 1 and the Agency"` in clause `1`: one reference, source `span_of(text, "Schedule 1", 2)`, because the first hit is the schedule heading);
+    - `test_over_long_range_keeps_its_ends` (`"clauses 1 to 99"`, with no clause `1` and no clause `99` in the case: two references, both with `target=None`);
+    - `test_repeated_key_once` (`"clauses 4 and 4"`: one reference);
+    - `test_list_stops_before_a_unit` (a clause `4` and `"clause 4, 30 days"`: one reference, to `4`, source `"clause 4"`);
+    - `test_range_stops_before_a_month` (a clause `3` and `"clause 3 - 5 July"`: one reference, to `3`);
+    - `test_number_with_unit_is_not_a_reference` (`"clause 4 days"`: no reference);
+    - `test_may_is_not_a_unit` (a clause `4` and `"Clause 4 may apply."`: one reference, to `4`); `test_decimal_before_a_unit_is_not_cut` (a clause `4` and `"see clause 4.5 days"`: none);
+    - `test_range_with_bad_roman` (a clause `5` and `"Articles IIII to V"`: two references, with targets `None` and `5`).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_references.py` reports 36 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** [System design 15.3](../system-design.md#153-stage-3-links) ("including ranges"), Spec 5.
+  - **Depends on:** S3-M2-T2
+
+- [ ] **S3-M2-T4: "this Clause"**
+  - **Build:** In `_patterns.py`, `THIS_REFERENCE = r"(?<![A-Za-z])(?i:this)\s+(?P<kw>(?i:clause|section|paragraph|sub-clause|subclause|schedule|annex|appendix|exhibit))(?![A-Za-z])(?!\s*[0-9])(?!\s+[IVXLC]+(?![A-Za-z]))(?!\s+[A-Z](?![A-Za-z]))"`, run as `THIS_REFERENCE_RE`. The "this" references join the same result as the other references, sorted by `source.start`, with the same dedupe. A "this" reference in a heading sentence counts like any other. In `find_references`, for each match of `THIS_REFERENCE_RE`, with `c = index.clause_at(match.start())`: when `c` is `None`, `c.number is None` or `c.numbering_source == "paragraphs"`, the target is `None`. Else, for `clause`, `section`, `paragraph`, `sub-clause` and `subclause`, the target is `c.id`; for `schedule`, `annex`, `appendix` and `exhibit`, the target is `t.id` where `t = index.top_ancestor(c)`, when `t.number` starts with a schedule word (case ignored); else `None`. The source is the match span. "this Agreement" is never a reference.
+  - **Files:** `src/clause_tracer/links/_patterns.py`, `src/clause_tracer/links/references.py`, `src/clause_tracer/links/tests/test_references.py`.
+  - **Tests first:** `test_this_clause` (clause `5.1` `["5.1 This Clause applies."]`: target `5.1`, source `"This Clause"`); `test_this_schedule` (clauses `S1` (number `"Schedule 1"`) and `S1.1` (parent `S1`, `["1. This Schedule lists fees."]`): target `S1`); `test_this_schedule_outside_a_schedule` (in clause `3`: target `None`); `test_this_clause_with_number_is_one_reference` (`"this Clause 4"` with clause `4`: one reference, source `"Clause 4"`, target `4`); `test_this_agreement_is_not_a_reference` (`"5.1 This Agreement ends."`: no reference); `test_this_clause_in_paragraphs` (in `p2`: target `None`).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_references.py` reports 42 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** System design 15.3 ("this Clause"), Spec 5.
+  - **Depends on:** S3-M2-T3
+
+- [ ] **S3-M2-T5: The cross-references table (Owner)**
+  - **Build:** Owner only. Fill `src/clause_tracer/links/tests/tables/references.toml`. Each `[[case]]` has `id` (`str`), `clauses` (a list of inline tables in the `build_case` row format: `id`, `sentences`, and the optional keys `parent`, `heading` and `number`) and `references` (a list of `{ source = "exact text", nth = 1, target = "4" }`; `nth` is optional and defaults to 1; `target = ""` means unresolved), in the order `find_references` returns them. Cover at least: "Notwithstanding Clause 4" and "Subject to Clause 4" (both give a reference to `4`); a lower-case `clause 12`; a range; a list; a range with a missing member; "this Clause"; `2.5 days`; a reference in a paragraph-split text; and a schedule reference. The agent does not write or change this file (Constitution T11) and ticks the task after the owner says so.
+  - **Files:** `src/clause_tracer/links/tests/tables/references.toml`.
+  - **Tests first:** None. The owner's values are the expected answers.
+  - **Done when:** The owner has written at least 10 cases and said so.
+  - **Rules:** Constitution T11.
+  - **Depends on:** S3-M1-T2
+
+- [ ] **S3-M2-T6: The cross-references table test**
+  - **Build:** In `src/clause_tracer/links/tests/test_reference_table.py`: `TABLE = Path(__file__).parent / "tables" / "references.toml"`, `CASE_KEYS = REQUIRED = frozenset({"id", "clauses", "references"})`. `test_reference_table(case)`, parametrised over the cases with the case id as the test id: build the case, run `find_references(sample.document.text, build_index(sample.clauses))`, and assert the result equals the expected tuple, built with `span_of` and `ClauseId(target)` or `None`. Load the table at module level with `load_table` and parametrise the test over its cases, exactly as `ingest/tests/test_clause_table.py` does. Each nested list item must be a `dict` (`assert isinstance(row, dict)`, as that file does); strings go through `as_str(value, where)`, booleans through `as_bool`, `nth` through `as_int` and defaults to 1 when absent; the `clauses` rows are passed to `build_case` as they are. `test_reference_table_has_rows` asserts at least 10 cases.
+  - **Files:** `src/clause_tracer/links/tests/test_reference_table.py`.
+  - **Tests first:** the two tests above. Run them before any fix to see which rows fail. If a row fails, fix the code, never the table; if the code is right and the row looks wrong, stop and ask the owner.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_reference_table.py` passes, and `scripts/check.sh` exits 0.
+  - **Rules:** T11, T13.
+  - **Depends on:** S3-M2-T4, S3-M2-T5
+
+### M3: Defined terms and outside documents
+
+When this is done, `find_definitions`, `find_terms`, `find_outside_documents` and `find_undefined_terms` give each defined term with its definition and uses, each document that is not loaded, and the terms used but never defined, and the owner's terms and outside-documents tables pass.
+
+- [ ] **S3-M3-T1: Definitions**
+  - **Build:** Needs question 1, answered on 20 Nov 2026 as recommended. In `src/clause_tracer/links/terms.py`:
+    - `@dataclass(frozen=True, slots=True, kw_only=True) class Definition` with exactly three fields: `term: str` (the term as the quotes hold it, without a leading "the "), `quoted: Span` (the term's characters inside the quotes) and `definition: Span` (the trimmed span of the sentence that holds the match).
+    - In `_patterns.py`: `QUOTE_OPEN = "[\"\u201c\u2018']"`, `QUOTE_CLOSE = "[\"\u201d\u2019']"`, `TERM = r"[A-Z][A-Za-z0-9]*(?:[ \-][A-Za-z0-9]+){0,5}"`; `MEANS_DEFINITION = QUOTE_OPEN + r"(?:(?i:the)\s+)?(?P<term>" + TERM + r")" + QUOTE_CLOSE + r"\s+(?:means|shall\s+mean|has\s+the\s+meaning)\b"`; `BRACKET_DEFINITION = r"\(\s*(?:(?i:each|together|collectively)\s+)?(?:(?i:the|a|an)\s+)?" + QUOTE_OPEN + r"(?:(?i:the)\s+)?(?P<term>" + TERM + r")" + QUOTE_CLOSE + r"\s*\)"`.
+    - Also in `_patterns.py` (moved here from S3-M3-T4, where `find_undefined_terms` uses it): `SENTENCE_LEAD = r"[\s#*>\-_]*(?:(?:\([0-9A-Za-z]{1,4}\)|[0-9]{1,3}(?:\.[0-9]{1,3}){0,4}\.?|[A-Za-z]\)|[ivx]{1,4}\)|(?i:clause|article|schedule|annex|appendix|exhibit)[ \t]+[0-9A-Z]{1,5}\.?)[ \t]+)?"`, and `LIST_LEAD_END = r"[:;]\s*$"`.
+    - `def find_definitions(text: str, index: ClauseIndex) -> tuple[Definition, ...]`: every match of `MEANS_DEFINITION_RE` and `BRACKET_DEFINITION_RE`, with `term` the `term` group, `quoted` its span, and `definition` the trimmed span (the function `trimmed`) of `sentence = index.sentence_at(match.start())` (a match outside every sentence is skipped). A `MEANS_DEFINITION_RE` match is accepted only when it starts at the sentence's first word (`sentence.span.start + SENTENCE_LEAD_RE.match(text[sentence.span.start:sentence.span.end]).end()`), or when `LIST_LEAD_END_RE.search(text[sentence.span.start:match.start()])` finds a match. So `The word "Fee" means nothing.` is not a definition. A `BRACKET_DEFINITION_RE` match has no such check. Sorted by `quoted.start`. Each definition is kept, so a term defined twice gives two `Definition`s.
+  - **Files:** `src/clause_tracer/links/_patterns.py`, `src/clause_tracer/links/terms.py`, `src/clause_tracer/links/tests/test_terms.py`.
+  - **Tests first:** in `test_terms.py`: `test_means` (`'"Charges" means the fees.'`: term `Charges`, `quoted` is the span of `Charges`, `definition` is the whole sentence without its trailing space); `test_shall_mean` and `test_has_the_meaning` (term found); `test_curly_quotes` (`"\u201cServices\u201d means work."`: term `Services`); `test_single_quotes` (`"'Fee' means money."`: term `Fee`); `test_bracket_with_the_inside` (`'Brightline Ltd ("the Agency").'`: term `Agency`); `test_bracket_with_the_outside` (`'Brightline Ltd (the "Agency").'`: term `Agency`); `test_lower_case_is_not_a_term` (`'"fees" means money.'`: none); `test_means_without_quotes_is_not_a_term` (`"Charges means the fees."`: none); `test_defined_twice` (two sentences defining `Fee`: two definitions, in order); `test_multi_word_term` (`'"Master Agreement" means the deal.'`: term `Master Agreement`); `test_mid_sentence_means_is_not_a_definition` (`'The word "Fee" means nothing.'`: none); `test_each_a_party` (`'(each a "Party")'`: term `Party`); `test_together_the_parties` (`'(together the "Parties")'`: term `Parties`); `test_means_with_the_inside_quotes` (`'"the Buyer" means Brightline.'`: term `Buyer`).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_terms.py` reports 15 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** System design 3.4 (`DefinedTerm`), Spec 4.5.
+  - **Depends on:** S3-M2-T1, S3-M2-T2
+
+- [ ] **S3-M3-T2: Uses of defined terms**
+  - **Build:** Needs question 1, answered on 20 Nov 2026 as recommended. In `terms.py`, `def find_terms(text: str, key: MatchKey, definitions: tuple[Definition, ...]) -> tuple[DefinedTerm, ...]`. `key` is `fold_for_matching(text)`, built once by the caller. Build `quoted_set = build_span_set(...)` of the `quoted` spans of every definition. Group the term texts of the definitions by their folded text `t = fold_for_matching(term).text`: terms with the same `t` (`Fee` and `FEE`) form one group and share their uses. Process the groups in this order: by the length of `t`, longest first, then by `t`. "Longer" means a longer folded text. For each group:
+    - Find every occurrence of `t` in `key.text` with `str.find`, moving on by one character each time. An occurrence counts only when the folded character before it (if any) and the one after it (if any) are not `str.isalnum()`.
+    - Map it back: `start = key.to_canonical[i]`, `end = key.to_canonical[i + len(t)]`.
+    - Keep it only when `text[start].isupper()`, and the span `Span(start=start, end=end)` does not overlap `quoted_set` (the `quoted` span of **any** definition), and does not overlap `kept_set`, a `SpanSet` of the kept uses of the groups processed earlier. Only kept uses of an earlier group block a later one, so the overlap rule applies only between terms with different folded texts. Rebuild `kept_set` after each group.
+    - The uses of the group, sorted by start, are the uses of every definition whose term text is in the group.
+
+    Return one `DefinedTerm(term=definition.term, definition=definition.definition, uses=<the uses of its group>)` for each definition, in definition order. A term defined twice, or two terms with the same folded text, give separate `DefinedTerm`s with the same uses.
+  - **Files:** `src/clause_tracer/links/terms.py`, `src/clause_tracer/links/tests/test_terms.py`.
+  - **Tests first:** in `test_terms.py`. Each test builds its case from a clause `1` with the sentences `'"Agency" means the buyer.'`, `'"Master Agreement" means the deal.'` and `'"Agreement" means the contract.'`, plus a clause `2` holding the sentence under test, except the five tests that name their own definitions. The definitions come from `find_definitions`. `span_of(text, w, k)` is written with the occurrence number `k`:
+    - `test_uses_found` (clause 2 `"2. The Agency starts."`: `Agency` has one use, `span_of(text, "Agency", 2)`);
+    - `test_definition_is_not_a_use` (clause 2 `"2. Nothing here."`: all three terms have no use, because each quoted term and the `Agreement` inside the quotes of `Master Agreement` are not uses);
+    - `test_possessive_is_a_use` (clause 2 `"2. The Agency's request."`: `Agency` has one use, `span_of(text, "Agency", 2)`);
+    - `test_longer_word_is_not_a_use` (clause 2 `"2. Agencyship applies."`: no use);
+    - `test_lower_case_is_not_a_use` (clause 2 `"2. An agency applies."`: no use);
+    - `test_curly_apostrophe` (clause 2 `"2. The Agency\u2019s request."`: `Agency` has one use, `span_of(text, "Agency", 2)`);
+    - `test_shorter_term_inside_longer_term` (clause 2 `"2. The Master Agreement applies."`: `Master Agreement` has one use, `span_of(text, "Master Agreement", 2)`, and `Agreement` has none);
+    - `test_uses_sorted` (clause 1 `['"Fee" means money.']`, clause 2 `["The Fee and the Fee."]`: `Fee` has two uses, `span_of(text, "Fee", 2)` and `span_of(text, "Fee", 3)`, the first before the second);
+    - `test_defined_twice_share_uses` (clause 1 `['"Fee" means a.', '"Fee" means b.']`, clause 2 `["The Fee."]`: two `DefinedTerm`s, each with the one use `span_of(text, "Fee", 3)`, in the third sentence);
+    - `test_shorter_term_inside_longer_quotes` (clause 1 `['"Fee" means money.', '"Net Fee" means money after tax.']`: the `Fee` inside the quotes of `"Net Fee"` is not a use, so `Fee` and `Net Fee` both have no use);
+    - `test_overlapping_terms` (clause 1 `['"Net Fee" means a.', '"Fee Pool" means b.']`, clause 2 `["The Net Fee Pool."]`: the use goes to `Fee Pool`, the term processed first by the order above (its folded text is longer), and `Net Fee` has none there);
+    - `test_same_folded_text_shares_uses` (clause 1 `['"Fee" means a.', '"FEE" means b.']`, clause 2 `["The Fee and the FEE."]`: two `DefinedTerm`s, `Fee` and `FEE`, each with the same two uses, `span_of(text, "Fee", 2)` and `span_of(text, "FEE", 2)`, in that order; the two terms do not block each other, because they have the same folded text).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_terms.py` reports 27 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** [System design 4.2](../system-design.md#42-the-offset-chain) (`links` folds its words with `fold_for_matching`; never confirm a quote on it), D3.
+  - **Depends on:** S3-M3-T1
+
+- [ ] **S3-M3-T3: Documents that are not loaded**
+  - **Build:** Needs question 3, answered on 20 Nov 2026 as recommended. `DOCUMENT_WORDS` and `DOCUMENT_NOUN` come from S3-M2-T2. In `_patterns.py`: `OUTSIDE_DOCUMENT = r"(?<![A-Za-z])" + DOCUMENT_WORDS + DOCUMENT_NOUN + r"(?![A-Za-z])(?!\s+[A-Z][a-z])"` (a document noun followed by a capitalised word is not a document name, so `the Software Licence Fee` is not one), `DROPPED_FIRST_WORDS: Final[frozenset[str]] = frozenset({"The", "This", "That", "These", "Those", "Each", "Any", "Such", "Our", "Your", "Its", "Their", "Under", "As", "In", "Of", "For", "By", "With", "See", "If", "Where", "Unless", "Subject"})`, `THIS_BEFORE = r"(?i:\bthis)\s+$"` and `OWN_NAME_DEFINITION = r"(?i:\bthis\s+(?:agreement|contract|deed)\b)"`. Policy, Order, and Terms and Conditions on their own are not document nouns. In `src/clause_tracer/links/outside.py`, `def find_outside_documents(text: str, index: ClauseIndex, definitions: tuple[Definition, ...]) -> tuple[OutsideDocument, ...]`. For each sentence `s` of each clause, in text order, that is not a heading sentence, and for each match of `OUTSIDE_DOCUMENT_RE.finditer(text, s.span.start, trimmed(text, s.span).end)` (so no match crosses a sentence break), in text order:
+    - While its first word is in `DROPPED_FIRST_WORDS`, move the start past that word and the white space after it. When no capitalised word is left before the document noun, skip the match.
+    - Skip it when `THIS_BEFORE_RE` matches `text[max(0, start - 10):start]`, with `start` the start after the dropped words.
+    - Skip it when it overlaps the `quoted` span of any definition (check with a `SpanSet` built once per call from every `quoted` span).
+    - **The contract's own name.** Skip it when `fold_for_matching(text[start:end]).text` equals the folded term of a definition whose `definition` sentence (`text[d.definition.start:d.definition.end]`) matches `OWN_NAME_DEFINITION_RE`. The Master Agreement definition does not say "this agreement", so it stays outside.
+    - **The contract's own title.** Skip it when `fold_for_matching(text[start:end]).text` equals `fold_for_matching(heading).text`, where `heading` is the `heading` of the first clause in `index.clauses` whose `heading` is not `None`.
+    - Else give `OutsideDocument(name=text[start:end], evidence=Span(start=start, end=end))`.
+  - **Files:** `src/clause_tracer/links/_patterns.py`, `src/clause_tracer/links/outside.py`, `src/clause_tracer/links/tests/test_outside.py`.
+  - **Tests first:** in `test_outside.py`: `test_master_agreement` (`"11.1 Capped, except as set out in the Master Agreement."`: name `Master Agreement`, evidence its span); `test_this_agreement_is_not_outside` (`"This Agreement starts today."` and `"under this Agreement"`: none); `test_this_named_agreement_is_not_outside` (`"under this Services Agreement"`: none); `test_defined_term_in_its_quotes_is_skipped` (`'"Master Agreement" means the deal.'`: none); `test_lower_case_policy_is_not_outside` (`"its expenses policy at https://docs.example.com/expenses-policy"`: none); `test_the_is_dropped` (`"The Supply Contract applies."`: name `Supply Contract`); `test_heading_is_skipped` (the row `{"id": "p1", "heading": "Development Services Agreement", "sentences": ["Development Services Agreement"]}`: none); `test_statement_of_work` (`"as set out in the Project Statement of Work"`: name `Project Statement of Work`); `test_each_mention_counts` (two mentions give two entries, in order); `test_payment_terms_is_not_outside` (`"the Payment Terms apply"`: none); `test_hyphenated_name` (`"the Non-Disclosure Agreement"`: name `Non-Disclosure Agreement`); `test_dropped_words_repeat` (`"Under Services Agreement terms"`: name `Services Agreement`); `test_terms_and_conditions` (`"the Standard Terms and Conditions"`: name `Standard Terms and Conditions`); `test_name_across_a_no_break_space` (`"the Master Agreement"`, with U+00A0 between the two words: name `"Master\u00a0Agreement"`, which keeps the U+00A0 as written); `test_own_name_is_not_outside` (`'"Services Agreement" means this agreement.'` then `"under the Services Agreement"`: none); `test_noun_before_a_capital_word` (`"the Software Licence Fee is due"`: none); `test_own_title_is_not_outside` (first clause `{"id": "p1", "heading": "Development Services Agreement", "sentences": ["Development Services Agreement"]}`, then `"1. The Development Services Agreement is the whole deal."`: none).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_outside.py` reports 17 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** Spec 4.5 and Spec 5 Rule 10, [ADR 0012](../adr/0012-missing-unsure-and-evidence-failures.md).
+  - **Depends on:** S3-M3-T1, S3-M2-T2
+
+- [ ] **S3-M3-T4: Terms used but never defined**
+  - **Build:** Needs question 2, answered on 20 Nov 2026 as recommended. In `_patterns.py`: `UNDEFINED_RUN = r"(?<![A-Za-z])[A-Z][a-z]+(?: [A-Z][a-z]+){1,3}(?![A-Za-z])"`. `SENTENCE_LEAD` is built in S3-M3-T1. In `terms.py`, `def find_undefined_terms(text: str, index: ClauseIndex, excluded: SpanSet) -> tuple[Span, ...]`. The caller builds `excluded` from every use of every term, every `quoted` span and every outside-document evidence span. For each sentence `s` of each clause, skip it when it is a heading sentence or holds a `"\t"`. In the others, every match of `UNDEFINED_RUN_RE.finditer(text, s.span.start, trimmed(text, s.span).end)` (it runs on the full text, so the look-behind sees the character before the sentence) is a term used but never defined, except a run that:
+    - starts at the sentence's first word: `s.span.start + SENTENCE_LEAD_RE.match(text[s.span.start:s.span.end]).end()`;
+    - overlaps `excluded` (`excluded.overlaps(run span)`).
+
+    Return the spans of the runs, sorted by start. Two runs of the same words give two spans.
+  - **Files:** `src/clause_tracer/links/_patterns.py`, `src/clause_tracer/links/terms.py`, `src/clause_tracer/links/tests/test_undefined_terms.py`.
+  - **Tests first:** in `test_undefined_terms.py`. Unless a test names an `excluded` set, it passes `build_span_set(())`: `test_business_days` (`"6.1 Reply within 3 Business Days."`: one span, `"Business Days"`); `test_sentence_start_is_skipped` (`"6.1 Business Days count."`: none); `test_after_bracket_marker` (`"(A) The Agency builds."`: none); `test_single_word_is_skipped` (`"6.1 Pay VAT and Tax."`: none); `test_defined_term_is_skipped` (the sentence `"under the Master Agreement"` with `excluded = build_span_set([span_of(text, "Master Agreement")])`: none); `test_heading_sentence_is_skipped` (a clause with a heading and the sentence `"5. Charges And Payment"`: none); `test_table_row_is_skipped` (`"6.1 x Aa Bb\tcc"`: none, while `"6.1 x Aa Bb cc"` gives `"Aa Bb"`); `test_four_words_at_most` (`"x Aa Bb Cc Dd Ee y"` gives the run `Aa Bb Cc Dd`); `test_outside_document_is_skipped` (the sentence `"6.1 Reply within 3 Business Days."` with `excluded = build_span_set([span_of(text, "Business Days")])`: none).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_undefined_terms.py` reports 9 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** System design 15.3 ("terms used but never defined"), Spec 5.
+  - **Depends on:** S3-M3-T1 (it reads `SENTENCE_LEAD_RE` and uses `SpanSet` from S3-M2-T1)
+
+- [ ] **S3-M3-T5: The terms table (Owner)**
+  - **Build:** Owner only. Fill `src/clause_tracer/links/tests/tables/terms.toml`. Each `[[case]]` has `id`, `clauses` (the `build_case` row format, with `number` as an optional row key), `terms` (a list of `{ term = "Agency", definition = "(1).s1", uses = [{ text = "Agency", nth = 2 }] }`, in the order `find_terms` returns them; `definition` is the id of the sentence whose trimmed span is the definition; each use is the `nth` occurrence of `text` in the case text) and `undefined` (a list of `{ text = "Business Days", nth = 1 }`). Cover at least: a `means` definition, both bracket forms, curly quotes, a possessive use, a lower-case word that is not a use, a term inside a longer term, a term defined twice, and a capitalised run that is not defined. The agent does not write or change this file (Constitution T11).
+  - **Files:** `src/clause_tracer/links/tests/tables/terms.toml`.
+  - **Tests first:** None.
+  - **Done when:** The owner has written at least 8 cases and said so.
+  - **Rules:** Constitution T11.
+  - **Depends on:** S3-M1-T2
+
+- [ ] **S3-M3-T6: The outside-documents table (Owner)**
+  - **Build:** Owner only. Fill `src/clause_tracer/links/tests/tables/outside_documents.toml`. Each `[[case]]` has `id`, `clauses` (the `build_case` row format, with `number` as an optional row key) and `outside` (a list of `{ name = "Master Agreement", nth = 1 }`, where the evidence is the `nth` occurrence of `name` in the case text). Cover at least: "the Master Agreement"; "this Agreement"; a defined term in its own quotes; a lower-case policy with a web address; a heading; and two mentions. The agent does not write or change this file (Constitution T11).
+  - **Files:** `src/clause_tracer/links/tests/tables/outside_documents.toml`.
+  - **Tests first:** None.
+  - **Done when:** The owner has written at least 6 cases and said so.
+  - **Rules:** Constitution T11.
+  - **Depends on:** S3-M1-T2
+
+- [ ] **S3-M3-T7: The terms table test**
+  - **Build:** In `src/clause_tracer/links/tests/test_terms_table.py`: `CASE_KEYS = REQUIRED = frozenset({"id", "clauses", "terms", "undefined"})`. `test_terms_table(case)`, parametrised over the cases with the case id as the test id: build the case; `definitions = find_definitions(text, index)`; `terms = find_terms(text, fold_for_matching(text), definitions)`; `outside = find_outside_documents(text, index, definitions)`; `excluded = build_span_set([use for t in terms for use in t.uses] + [d.quoted for d in definitions] + [o.evidence for o in outside])`; `undefined = find_undefined_terms(text, index, excluded)`. Build a dict from sentence id to its trimmed span (`trimmed(text, s.span)`) from the case's clauses. Assert `terms` equals the expected tuple (each `definition` is the trimmed span of the named sentence, taken from that dict, each use from `span_of`) and `undefined` equals the expected spans. Load the table at module level with `load_table` and parametrise, exactly as `ingest/tests/test_clause_table.py` does. Each nested list item must be a `dict` (`assert isinstance(row, dict)`, as that file does); strings go through `as_str(value, where)`, booleans through `as_bool`, `nth` through `as_int` and defaults to 1 when absent; the `clauses` rows are passed to `build_case` as they are. `test_terms_table_has_rows` asserts at least 8 cases.
+  - **Files:** `src/clause_tracer/links/tests/test_terms_table.py`.
+  - **Tests first:** the two tests above, run before any fix. Never edit the table.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_terms_table.py` passes, and `scripts/check.sh` exits 0.
+  - **Rules:** T11, T13.
+  - **Depends on:** S3-M3-T2, S3-M3-T3, S3-M3-T4, S3-M3-T5
+
+- [ ] **S3-M3-T8: The outside-documents table test**
+  - **Build:** In `src/clause_tracer/links/tests/test_outside_table.py`: `TABLE = Path(__file__).parent / "tables" / "outside_documents.toml"`, `CASE_KEYS = REQUIRED = frozenset({"id", "clauses", "outside"})`. `test_outside_table(case)`, parametrised over the cases: build the case, run `find_outside_documents(text, index, find_definitions(text, index))`, and assert the result equals the expected tuple, each `OutsideDocument(name=name, evidence=span_of(text, name, nth))`. Load the table at module level with `load_table` and parametrise, exactly as `ingest/tests/test_clause_table.py` does. Each nested list item must be a `dict` (`assert isinstance(row, dict)`, as that file does); strings go through `as_str(value, where)`, booleans through `as_bool`, `nth` through `as_int` and defaults to 1 when absent; the `clauses` rows are passed to `build_case` as they are. `test_outside_table_has_rows` asserts at least 6 cases.
+  - **Files:** `src/clause_tracer/links/tests/test_outside_table.py`.
+  - **Tests first:** the two tests above, run before any fix. Never edit the table.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_outside_table.py` passes, and `scripts/check.sh` exits 0.
+  - **Rules:** T11, T13.
+  - **Depends on:** S3-M3-T3, S3-M3-T6
+
+### M4: Overrides
+
+When this is done, `find_overrides` gives each override with its direction, and the owner's overrides table passes.
+
+- [ ] **S3-M4-T1: Overrides that name a reference**
+  - **Build:** Needs questions 4 and 5, answered on 20 Nov 2026 as recommended. In `_patterns.py` (the patterns run as `NOTWITHSTANDING_RE`, `QUALIFIER_RE`, `GENERAL_OVERRIDE_RE` and `OVERRIDE_GAP_RE`): `NOTWITHSTANDING = r"(?<![A-Za-z])(?i:notwithstanding)(?![A-Za-z])"`; `QUALIFIER = r"(?<![A-Za-z])(?i:subject\s+to|save\s+as\s+(?:set\s+out|provided)\s+in|except\s+as\s+(?:set\s+out|provided)\s+in)(?![A-Za-z])"`; `GENERAL_OVERRIDE = r"\s+(?i:anything\s+(?:else\s+)?(?:contained\s+)?(?:to\s+the\s+contrary\s+)?in\s+this\s+agreement|any\s+other\s+(?:provisions?|terms?)\s+(?:of|in)\s+this\s+agreement)(?![A-Za-z])"`. `OVERRIDE_GAP = r"\s*(?:(?i:the)\s+(?i:provisions?|terms?|requirements?)\s+(?i:of|in)\s+)?"`. In `src/clause_tracer/links/overrides.py`, `def find_overrides(text: str, index: ClauseIndex, references: tuple[CrossReference, ...], outside: tuple[OutsideDocument, ...]) -> tuple[Override, ...]`. `outside` is the result of `find_outside_documents`; S3-M4-T2 reads it, and this task does not.
+
+    **Self references are not references here.** In `find_overrides`, a reference whose source text fully matches `THIS_REFERENCE_RE` is ignored everywhere (`THIS_REFERENCE_RE.fullmatch(text[r.source.start:r.source.end])`). In the rest of this task and of S3-M4-T2, "references" means the references left after that.
+
+    For each match `p` of `NOTWITHSTANDING_RE` or `QUALIFIER_RE`, with `c = index.clause_at(p.start())` and `s = index.sentence_at(p.start())` (skip the match when either is `None`):
+    - **Directional.** References with the same `source` form one group (a range gives several references with one `source`). Every "first", "following" and "gap" rule below works on groups. Take the groups whose `source.start` is at least `p.end()` and less than `s.span.end`, in order of `source.start`. Let `first` be the first of them. Take no group for this phrase when another `NOTWITHSTANDING_RE` or `QUALIFIER_RE` match starts after `p.end()` and before `first.source.start`. Take none too when `OVERRIDE_GAP_RE.fullmatch(text[p.end():first.source.start])` does not match. Else take `first`. After it, also take every following group whose gap from the previous taken group (`text[previous.source.end:next.source.start]`) fully matches `SEPARATOR_RE`, and stop at the first group whose gap does not. So "Notwithstanding clause 4 and clause 5" gives two overrides. Give one `Override(clause_id=c.id, target=r.target, overrides_target=<the match is NOTWITHSTANDING>, evidence=Span(start=p.start(), end=<the end of the source of the last taken group>))` for each reference `r` of each taken group whose `target` is not `None`. **An unresolved target gives no `Override`** (question 5): the reference with `target=None` gives nothing here, and `find_references` still returns it.
+    - The `GENERAL_OVERRIDE` check runs only when no group was taken for this phrase (a taken group counts even when none of its targets resolves). Then, when the match is `NOTWITHSTANDING_RE` and `GENERAL_OVERRIDE_RE` matches at `p.end()` (with `GENERAL_OVERRIDE_RE.match(text, p.end())`), and no outside document starts inside the sentence `s` (question 4, point A: an `OutsideDocument` whose `evidence.start` is at least `s.span.start` and less than `s.span.end`), give `Override(clause_id=c.id, target=None, overrides_target=True, evidence=Span(start=p.start(), end=<end of that match>))`. Only the "names nothing" forms give `target=None`.
+    - Else give nothing. So "except as set out in the Master Agreement" gives no override.
+
+    `clause_id` is always the clause that holds the evidence.
+  - **Files:** `src/clause_tracer/links/_patterns.py`, `src/clause_tracer/links/overrides.py`, `src/clause_tracer/links/tests/test_overrides.py`.
+  - **Tests first:** in `test_overrides.py`, with `references` from `find_references` and `outside` from `find_outside_documents(text, index, find_definitions(text, index))`. Every test gives its full rows. Unless a test says otherwise, the rows are `{"id": "4", "sentences": ["4. Fees."]}` and `{"id": "9", "sentences": [<the sentence under test>]}`:
+    - `test_notwithstanding_overrides_its_target` (`"9. Notwithstanding Clause 4, fees are fixed."`: `Override(clause_id="9", target="4", overrides_target=True, evidence=span of "Notwithstanding Clause 4")`, from the [testing strategy 4](../testing-strategy.md#4-what-to-test-in-each-module) row);
+    - `test_subject_to_is_qualified` (`"9. Subject to Clause 4, fees are fixed."`: `overrides_target=False`, from the same row);
+    - `test_save_as_set_out_in` (`"9. Fees are fixed, save as set out in clause 4."`: `overrides_target=False`);
+    - `test_unresolved_target_gives_no_override` (only the row `9` with `"9. Subject to clause 7."`, and no clause `7`: no override, and `find_references` still returns the reference with `target=None`);
+    - `test_range_gives_one_override_per_target` (rows `4`, `5` and `9` with `"9. Subject to clauses 4 to 5."`: two overrides);
+    - `test_reference_too_far_away` (`"9. Subject to the terms and the conditions set out at length in clause 4."`: none);
+    - `test_gap_with_other_words` (`"9. Subject to approval under clause 4."`: none);
+    - `test_gap_the_provisions_of` (`"9. Subject to the provisions of clause 4."`: one override, target `4`, `overrides_target=False`);
+    - `test_reference_in_next_sentence` (rows `4` and `9`, with row `9` holding the two sentences `"Subject to agreement."` and `"See clause 4."`: none);
+    - `test_except_master_agreement_is_no_override` (only the row `{"id": "11.1", "sentences": ["11.1 Capped at the fees, except as set out in the Master Agreement."]}`: none);
+    - `test_general_notwithstanding` (only the row `9` with `"9. Notwithstanding anything to the contrary in this Agreement, fees are fixed."`: one override with `target=None`, `overrides_target=True`, evidence ending after `Agreement`);
+    - `test_plain_notwithstanding_without_target` (only the row `9` with `"9. Notwithstanding the delay, pay."`: none);
+    - `test_two_phrases_take_the_nearest` (`"9. Notwithstanding the foregoing and subject to clause 4, fees are fixed."`: one override, `overrides_target=False`);
+    - `test_and_clause_joins` (rows `4`, `5` and `9` with `"9. Notwithstanding clause 4 and clause 5, fees are fixed."`: two overrides, both `overrides_target=True`);
+    - `test_list_then_range_group` (rows `4`, `5`, `6` and `9` with `"9. Subject to clause 4 and clauses 5 to 6."`: three overrides, targets `4`, `5` and `6`, all `overrides_target=False`);
+    - `test_general_any_other_provision_in` (only the row `9` with `"9. Notwithstanding any other provision in this Agreement, pay."`: one override, `target=None`); `test_general_with_outside_document` (only the row `9` with `"9. Notwithstanding anything to the contrary in this Agreement or the Master Agreement, fees are fixed."`, and `outside` from `find_outside_documents`: no override).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_overrides.py` reports 17 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** Spec 4.5, Spec 5 (Rule 4 note: an override never changes the label), [testing strategy 4](../testing-strategy.md#4-what-to-test-in-each-module).
+  - **Depends on:** S3-M2-T4, S3-M3-T3
+
+- [ ] **S3-M4-T2: "Prevails" sentences**
+  - **Build:** Needs questions 4 and 5, answered on 20 Nov 2026 as recommended. In `_patterns.py`: `PREVAILS = r"(?<![A-Za-z])(?i:(?:shall\s+)?(?:prevails?|takes?\s+precedence))(?![A-Za-z])"`, `SELF_NAME = r"(?<![A-Za-z])(?i:this\s+(?:agreement|clause|section|paragraph|schedule))(?![A-Za-z])"` and `WINNER_LEFTOVER = r"(?:\s|(?i:the|then|and|or|of|provisions?)(?![A-Za-z]))*"`, run as `PREVAILS_RE`, `SELF_NAME_RE` and `WINNER_LEFTOVER_RE`. In `find_overrides`, for each sentence `s` that holds a match `v` of `PREVAILS_RE` (the first match in the sentence only), with `c` the clause of `s`:
+    - The winner part runs from `w` to `v.start()`, where `w` is the later of two offsets: just after the last `","` in `text[s.span.start:v.start()]` (or `s.span.start` when there is none), and `s.span.start + SENTENCE_LEAD_RE.match(text[s.span.start:s.span.end]).end()`. So a clause number at the start of the sentence is not part of the winner part.
+    - Sentence references are the references (self references left out, see S3-M4-T1) whose `source.start` is inside `s.span`.
+    - Sentence outside documents are the entries of `outside` whose `evidence.start` is inside `s.span`.
+    - Then, in this order:
+      1. **The winner part must be plain.** Its leftover is the winner text with every `SELF_NAME_RE` match and every sentence-reference source replaced by spaces. When `WINNER_LEFTOVER_RE.fullmatch(leftover)` does not match, give nothing. When the winner part holds both a `SELF_NAME_RE` match and a sentence reference, give nothing.
+      2. **This clause or this Agreement wins.** When `SELF_NAME_RE` matches in the winner part (use its first match): the losers are the sentence references outside the winner part, with a resolved target, and not already the target of a directional override (S3-M4-T1) from the same sentence. Give `Override(clause_id=c.id, target=loser, overrides_target=True, evidence=<trimmed span of s>)` for each loser. A sentence that also holds an outside document still gives its losers. When there is no loser, give one `Override(clause_id=c.id, target=None, overrides_target=True, evidence=<trimmed span of s>)` only when all four of these hold (such an override joins every trail, Spec 4.5): (a) the last word of the `SELF_NAME_RE` match, in lower case, is `clause`, `section` or `paragraph` (not `agreement` or `schedule`); (b) the sentence holds no reference outside the winner part (resolved or not); (c) the sentence holds no outside document; (d) `text[v.end():<end of the trimmed span of s>]` holds only characters that are white space, `.`, `;` or `:`. In every other case with no loser, give nothing.
+      3. **A reference wins.** Else, when sentence references start in the winner part: for the group with the smallest `source.start`, give `Override(clause_id=c.id, target=r.target, overrides_target=False, evidence=<trimmed span of s>)` for each resolved one.
+      4. Else give nothing.
+
+    The result of `find_overrides` is sorted by `evidence.start`, then by the target (`""` for `None`), and an identical override is kept once.
+  - **Files:** `src/clause_tracer/links/_patterns.py`, `src/clause_tracer/links/overrides.py`, `src/clause_tracer/links/tests/test_overrides.py`.
+  - **Tests first:** in `test_overrides.py`. Every test gives its full rows. Every schedule clause row gives `number` (`S1` has `"Schedule 1"`). A test that gives only a sentence follows the short-case rule of section 5. These four tests keep the results written beside them (the build above makes them pass): `test_agreement_prevails_over_schedule` (`(14.2, S1, True)`), `test_schedule_prevails` (`(14.2, S1, False)`), `test_this_clause_prevails_over_named_clause` (`(9, 4, True)`) and `test_conflict_naming_nothing` (`(9, None, True)`), each as `(clause_id, target, overrides_target)`. `test_this_clause_prevails_over_named_clause` and `test_takes_precedence` put the clause number at the start of the sentence, so the start of the winner part (step 1 above) is what makes them pass:
+    - `test_agreement_prevails_over_schedule` (clause `S1` (number `"Schedule 1"`) and `"14.2 If this Agreement and Schedule 1 conflict, this Agreement prevails."` in clause `14.2`: one `Override(clause_id="14.2", target="S1", overrides_target=True)`, evidence the trimmed sentence);
+    - `test_schedule_prevails` (the same rows with `"14.2 If this Agreement and Schedule 1 conflict, Schedule 1 prevails."`: `target="S1"`, `overrides_target=False`);
+    - `test_this_clause_prevails_over_named_clause` (clauses `4` and `9` with `"9. This Clause prevails over clause 4."`: `target="4"`, `overrides_target=True`);
+    - `test_conflict_naming_nothing` (clause `9` with `"9. In case of conflict, this Section prevails."`: one override, `target=None`, `overrides_target=True`);
+    - `test_takes_precedence` (clause `S1` (number `"Schedule 1"`) and clause `14.2` with `"14.2 this Agreement takes precedence over Schedule 1"`: one override, `target="S1"`, `overrides_target=True`, evidence equal to the trimmed span of its own sentence);
+    - `test_prevails_with_no_winner` (clause `9` with `"9. The higher figure prevails."`: none);
+    - `test_prevails_in_ordinary_sentence` (clause `9` with `"9. The law that governs this Agreement prevails."`: none);
+    - `test_take_precedence_over_set_off` (clause `9` with `"9. Amounts due under this Agreement take precedence over any set-off."`: none, because the winner part holds words that are not only the self name, step 1);
+    - `test_unresolved_loser_is_no_override` (clause `9` with `"9. this Agreement prevails over clause 99"`, and no clause `99`: none, because the only reference outside the winner part has `target=None`, so there is no loser, and the winner is `this Agreement`);
+    - `test_subject_to_then_prevails` (clauses `3` (`["3. Fees."]`), `S1` (number `"Schedule 1"`) and `9` (`["9. Subject to clause 3, this Agreement prevails over Schedule 1."]`): two overrides, in this order, as `(clause_id, target, overrides_target)`: `(9, S1, True)` with evidence the trimmed sentence (which starts at `9.`), then `(9, 3, False)` with evidence `"Subject to clause 3"`);
+    - `test_self_and_reference_in_winner` (clauses `S1` (number `"Schedule 1"`) and `14.2` with `"14.2 Schedule 1 and this Agreement prevails."`: none);
+    - `test_agreement_prevails_naming_nothing_is_nothing` (`"For the avoidance of doubt, this Agreement prevails."`: none);
+    - `test_prevails_over_outside_document` (`"If there is a conflict between this Agreement and the Master Agreement, this Agreement prevails."`: none);
+    - `test_clause_prevails_over_any_terms` (`"This Clause prevails over any other terms."`: none, because words follow the verb);
+    - `test_conflict_this_clause_prevails` (`"If any term conflicts, then this Clause prevails."`: one override, `target=None`, `overrides_target=True`);
+    - `test_sorted_by_evidence` (clauses `4` and `9`, with clause `9` holding the two sentences `"Subject to clause 4."` and `"Subject to clause 4."`: two overrides with different evidence, sorted by start).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_overrides.py` reports 33 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** Spec 4.5 ("Overrides that name nothing join every trail"), Spec 5.
+  - **Depends on:** S3-M3-T1, S3-M4-T1
+
+- [ ] **S3-M4-T3: The overrides table (Owner)**
+  - **Build:** Owner only. Fill `src/clause_tracer/links/tests/tables/overrides.toml`. Each `[[case]]` has `id`, `clauses` (the `build_case` row format, with `number` as an optional row key) and `overrides` (a list of `{ clause = "9", target = "4", overrides_target = true, evidence = "exact text", nth = 1 }`; `target = ""` means none), in the order `find_overrides` returns them. Cover at least: "Notwithstanding Clause 4"; "Subject to Clause 4"; an unresolved target; "this Agreement prevails" over a schedule; a schedule that prevails; a conflict sentence that names nothing; "except as set out in" an outside document (no override); and the carve-out "Clause 8.1 does not apply to …" (question 4 says whether it is an override). The agent does not write or change this file (Constitution T11).
+  - **Files:** `src/clause_tracer/links/tests/tables/overrides.toml`.
+  - **Tests first:** None.
+  - **Done when:** The owner has written at least 8 cases and said so.
+  - **Rules:** Constitution T11.
+  - **Depends on:** S3-M1-T2
+
+- [ ] **S3-M4-T4: The overrides table test**
+  - **Build:** In `src/clause_tracer/links/tests/test_override_table.py`: `TABLE = Path(__file__).parent / "tables" / "overrides.toml"`, `CASE_KEYS = REQUIRED = frozenset({"id", "clauses", "overrides"})`. `test_override_table(case)`, parametrised over the cases with the case id as the test id: build the case, run `find_overrides(text, index, find_references(text, index), find_outside_documents(text, index, find_definitions(text, index)))`, and assert the result equals the expected tuple (`ClauseId(clause)`, `ClauseId(target)` or `None`, `overrides_target`, and the evidence from `span_of(text, evidence, nth)`). Load the table at module level with `load_table` and parametrise, exactly as `ingest/tests/test_clause_table.py` does. Each nested list item must be a `dict` (`assert isinstance(row, dict)`, as that file does); strings go through `as_str(value, where)`, booleans through `as_bool`, `nth` through `as_int` and defaults to 1 when absent; the `clauses` rows are passed to `build_case` as they are. `test_override_table_has_rows` asserts at least 8 cases.
+  - **Files:** `src/clause_tracer/links/tests/test_override_table.py`.
+  - **Tests first:** the two tests above, run before any fix. Never edit the table. If the code is right and a row looks wrong, stop and ask the owner.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_override_table.py` passes, and `scripts/check.sh` exits 0.
+  - **Rules:** T11, T13.
+  - **Depends on:** S3-M4-T2, S3-M4-T3
+
+### M5: The link map and the sample
+
+When this is done, `map_links` is the module's public call, `python -m clause_tracer.links` prints the sample's link map, the golden file and the owner's sample table pass, and the stage is closed.
+
+- [ ] **S3-M5-T1: `map_links`**
+  - **Build:** In `src/clause_tracer/links/mapping.py`, `def map_links(document: Document, clauses: tuple[Clause, ...]) -> LinkMap`, with this contract note (I11): "Input: a document and its clauses, as `ingest` returns them. Output: the link map; every span points into `document.text`, and an unresolved target is `None`. Raises `ValueError` when a clause span lies outside the text, which is a bug in the caller, and when `build_index` refuses the clauses (`"clauses are not in text order"` or `"clause {id} has a later parent"`). Effects: none." Steps: check every clause span (`ValueError(f"clause {clause.id} lies outside the text")`, raised when `clause.span.start < 0`, `clause.span.end < clause.span.start` or `clause.span.end > len(document.text)`; `Span` does not check itself); `index = build_index(clauses)`; `references = find_references(text, index)`; `definitions = find_definitions(text, index)`; `terms = find_terms(text, fold_for_matching(text), definitions)`; `outside = find_outside_documents(text, index, definitions)`; `overrides = find_overrides(text, index, references, outside)`; `excluded = build_span_set([use for t in terms for use in t.uses] + [d.quoted for d in definitions] + [o.evidence for o in outside])`; `undefined = find_undefined_terms(text, index, excluded)`; return `LinkMap(references=references, terms=terms, overrides=overrides, outside_documents=outside, undefined_terms=undefined)`. Export `map_links` from `__init__.py`. In `src/clause_tracer/links/tests/test_architecture.py`, copy `test_public_names` and `test_module_has_its_parts` from `ingest/tests/test_architecture.py`, with the public names `{"SampleInput", "dump_clause_fixture", "load_clause_fixture", "map_links"}`. The file holds only these two tests. S3-M5-T3 adds `render_link_map` to `test_public_names`, and S3-M5-T10 adds `test_readme_names_every_public_name`.
+  - **Files:** `src/clause_tracer/links/mapping.py`, `src/clause_tracer/links/__init__.py`, `src/clause_tracer/links/tests/test_mapping.py`, `src/clause_tracer/links/tests/test_architecture.py`.
+  - **Tests first:** in `test_mapping.py`:
+    - `test_empty_document` (`build_case([])`: every tuple of the link map is empty);
+    - `test_all_parts_together` (rows `{"id": "4", "sentences": ["4. Fees."]}` and `{"id": "9", "sentences": ['9. "Fee" means the price.', "Subject to Clause 4, the Master Agreement applies within 3 Business Days."]}`: one reference (`Clause 4` to `4`), one term (`Fee`), one override (clause `9`, target `4`, qualified), one outside document (`Master Agreement`) and one undefined run (`Business Days`));
+    - `test_span_outside_text_raises` (a clause `1` with span 0 to 99 over a 10-character text raises `ValueError("clause 1 lies outside the text")`; build it with `dataclasses.replace` on a clause of a `build_case` case whose text has 10 characters);
+    - `test_same_input_same_output` (the `test_all_parts_together` case, two calls, equal link maps);
+    - `test_sample_has_no_override_without_target` (the sample: no `Override` with `target=None`, so Rule 10 cannot spread to every label);
+    - `test_sample_has_one_outside_document` (the sample fixture: `outside_documents` holds exactly one entry; the name and the clause are checked by the owner's sample table, not here).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_mapping.py src/clause_tracer/links/tests/test_architecture.py` reports 8 passed (6 in `test_mapping.py` and 2 in `test_architecture.py`), and `scripts/check.sh` exits 0.
+  - **Rules:** I3, I4, I11, B5 (one deep public call), T1, Spec 5 Rule 10.
+  - **Depends on:** S3-M3-T2, S3-M3-T4, S3-M4-T2, S3-M3-T3, S3-M1-T4
+
+- [ ] **S3-M5-T2: Property tests of the link map**
+  - **Build:** In `src/clause_tracer/links/tests/strategies.py`, `FRAGMENTS: tuple[str, ...]` holding exactly: `"see clause 1"`, `"clauses 1 to 3"`, `"Subject to Clause 2"`, `"Notwithstanding clause 9"`, `'"Fee" means money'`, `'Brightline ("the Buyer")'`, `"the Master Agreement"`, `"this Clause"`, `"Business Days"`, `"2.5 days"`, `"Schedule 1"`, `"this Agreement prevails"`; and a composite strategy `link_cases()` that draws 1 to 6 clauses with ids `"1"`, `"2"`, … in order, each with 1 to 3 sentences, each sentence the join with `" "` of 1 to 4 items, each item drawn with `st.one_of(st.sampled_from(FRAGMENTS), st.text(alphabet=st.sampled_from(SENTENCE_HAZARDS), min_size=1, max_size=8))`, where `SENTENCE_HAZARDS: tuple[str, ...] = tuple(c for c in HAZARD_ALPHABET if c != "\n")` (`HAZARD_ALPHABET` imported from `clause_tracer.core.tests.strategies`; `build_case` refuses a line break inside a sentence), and returns `build_case(rows)`. In `src/clause_tracer/links/tests/test_link_properties.py`, with `@settings(deadline=None)`: `test_spans_are_inside_the_text` (every span in the link map has `0 <= start <= end <= len(text)`); `test_targets_are_known_or_none` (every reference and override target is `None` or the id of a clause); `test_result_is_sorted` (references by `source.start`, terms by `definition.start`, overrides and outside documents by `evidence.start`, undefined terms by `start`); `test_same_input_same_output`; `test_term_uses_match_the_term` (every use folds to the same text as its term: `fold_for_matching(text[use.start:use.end]).text == fold_for_matching(term.term).text`).
+  - **Files:** `src/clause_tracer/links/tests/strategies.py`, `src/clause_tracer/links/tests/test_link_properties.py`.
+  - **Tests first:** the five property tests above. Every failing example Hypothesis finds becomes an `@example` before the fix (T6).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_link_properties.py` reports 5 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** [Testing strategy 5](../testing-strategy.md#5-the-offset-chain-seven-invariants) (Hypothesis and the hazard alphabet), T6. Property tests are layer 1 of [testing strategy 3](../testing-strategy.md#3-five-layers).
+  - **Depends on:** S3-M5-T1
+
+- [ ] **S3-M5-T3: The printed link map**
+  - **Build:** In `src/clause_tracer/links/render.py`, `def render_link_map(document: Document, clauses: tuple[Clause, ...], link_map: LinkMap) -> str`. It returns lines joined with `"\n"` and one final `"\n"`. Every field is separated by a tab. A text field has each `"\t"`, `"\r"` and `"\n"` replaced by one space. The clause of a span is `build_index(clauses).clause_at(span.start).id`, or `-` when there is none. Lines, in this order:
+    - `source\t<document.source.name>\t<len(document.text)>`;
+    - `counts\treferences <n>\tterms <n>\toverrides <n>\toutside <n>\tundefined <n>`;
+    - one line per reference: `reference\t<clause of source>\t<start>-<end>\t<target or ->\t<source text>`;
+    - one line per term: `term\t<term>\t<clause of definition>\t<start>-<end>\tuses <n>` (`<start>-<end>` is the `definition` span, and the clause is the clause at `definition.start`);
+    - one line per override: `override\t<clause_id>\t<target or ->\t<overrides or qualified>\t<start>-<end>\t<evidence text>` (`overrides` when `overrides_target` is true);
+    - one line per outside document: `outside\t<name>\t<clause of evidence>\t<start>-<end>`;
+    - one line per undefined term: `undefined\t<clause of span>\t<start>-<end>\t<text>`.
+
+    Export `render_link_map` from `__init__.py`, and add it to the public names in `test_architecture.py`.
+  - **Files:** `src/clause_tracer/links/render.py`, `src/clause_tracer/links/__init__.py`, `src/clause_tracer/links/tests/test_render.py`, `src/clause_tracer/links/tests/test_architecture.py`.
+  - **Tests first:** in `test_render.py`: `test_empty_map` (`build_case([])` gives exactly `"source\tcase.txt\t0\ncounts\treferences 0\tterms 0\toverrides 0\toutside 0\tundefined 0\n"`); `test_reference_line` (clauses `4` and `9` with `"9. See clause 4."`: the line `reference\t9\t<start>-<end>\t4\tclause 4`, with the start and end of `span_of(text, "clause 4")`); `test_unresolved_shows_dash` (`"9. See clause 7."` with no clause `7`: the line ends `\t-\tclause 7`); `test_override_line` (a "Subject to Clause 4" case gives `override\t9\t4\tqualified\t…`); `test_tab_in_text_is_a_space` (the case `"9. See\tclause 4."`: the reference line shows `clause 4`, and the render holds no tab inside a field, so every line splits on `"\t"` into the documented number of fields: 3 for `source`, 6 for `counts`, 5 for `reference`, 5 for `term`, 6 for `override`, 4 for `outside` and 4 for `undefined`; an undefined run cannot test this, because a sentence with a tab is skipped as a table row).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_render.py src/clause_tracer/links/tests/test_architecture.py` reports 7 passed (5 in `test_render.py` and 2 in `test_architecture.py`), and `scripts/check.sh` exits 0.
+  - **Rules:** S1 (an output a person can open and read), I12.
+  - **Depends on:** S3-M5-T1
+
+- [ ] **S3-M5-T4: Run `links` alone**
+  - **Build:** Replace `src/clause_tracer/links/__main__.py`, copying the shape of `ingest/__main__.py`: module docstring "Run the links module alone: python -m clause_tracer.links. Reads the sample clause fixture, or another one given with --input, and prints its link map. This is the only place in `links` that reads a file (Constitution S1, S2)."; `DEFAULT_INPUT = Path(__file__).parent / "samples" / "developer-agreement.clauses.json"`; `EXIT_INPUT_FILE = 3`; `def main(argv: list[str] | None = None) -> int` with one option, `--input` (`type=Path`, default `DEFAULT_INPUT`). It reads the file with `path.read_text(encoding="utf-8")`. On `OSError` while reading, it prints `clause_tracer.links: cannot read {path}` to standard error and returns 3. On a `ValueError` (which also catches `UnicodeDecodeError`) from the read or from `load_clause_fixture`, it prints `clause_tracer.links: {error}` to standard error and returns 3. Else it prints `render_link_map(sample.document, sample.clauses, map_links(sample.document, sample.clauses))` with `end=""` and returns 0. Replace `tests/test_smoke.py`.
+  - **Files:** `src/clause_tracer/links/__main__.py`, `src/clause_tracer/links/tests/test_smoke.py`.
+  - **Tests first:** in `test_smoke.py`: `test_main_returns_zero` (`main([]) == 0`); `test_default_run_prints_the_sample` (the first line starts with `source\tdeveloper-agreement.txt\t`, and a line starts with `outside\tMaster Agreement\t11.1\t`); `test_missing_file_exits_3` (standard error holds `cannot read`, standard output is empty); `test_bad_fixture_exits_3` (a file holding `{` gives standard error `clause_tracer.links: links sample: not JSON\n`); `test_not_utf8_exits_3` (a file holding the bytes `b"caf\xe9"`: exit 3); `test_input_option` (a fixture written with `dump_clause_fixture` from a `build_case` case into `tmp_path` prints its `source` line).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_smoke.py` reports 6 passed, `.venv/bin/uv run python -m clause_tracer.links` prints the sample's link map, and `scripts/check.sh` exits 0.
+  - **Rules:** S1, I7, I12, T2 (the file read stays at the edge).
+  - **Depends on:** S3-M5-T3, S3-M1-T4
+
+- [ ] **S3-M5-T5: The golden file**
+  - **Build:** In `src/clause_tracer/links/tests/test_goldens.py`, `test_link_map_matches_its_golden(check_golden)`: load `DEFAULT_INPUT` with `load_clause_fixture`, render its link map, and call `check_golden(GOLDENS / "developer-agreement.links.txt", actual)` with `GOLDENS = Path(__file__).parent / "goldens"`. Write the golden file with `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_goldens.py --update-goldens`, in a commit of its own with the test, and read it against the sample by hand: one `outside` line for `Master Agreement` in `11.1`; `term` lines for `Agency`, `Developer`, `Charges`, `Deliverables`, `Master Agreement`, `Milestone` and `Services`; one `override` line for `14.2` to `S1`. If one is missing, stop and fix the code before the commit.
+  - **Files:** `src/clause_tracer/links/tests/test_goldens.py`, `src/clause_tracer/links/tests/goldens/developer-agreement.links.txt`.
+  - **Tests first:** the test above, which fails before the golden file exists, with the message that names `--update-goldens`.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_goldens.py` passes without `--update-goldens`, and `scripts/check.sh` exits 0.
+  - **Rules:** T11, [testing strategy 3 and 10](../testing-strategy.md#10-keeping-agent-written-tests-honest) (golden files only through the named command).
+  - **Depends on:** S3-M5-T4
+
+- [ ] **S3-M5-T6: Read the golden files (Owner)**
+  - **Build:** Owner only. Read `src/clause_tracer/links/tests/goldens/developer-agreement.links.txt` and `src/clause_tracer/links/samples/developer-agreement.clauses.json` against the sample contract, and say whether they are right.
+  - **Files:** None.
+  - **Tests first:** None.
+  - **Done when:** The owner says the golden files are right. If not, the agent fixes the code, regenerates the files with `--update-goldens` in a commit of their own, and asks again.
+  - **Rules:** T11.
+  - **Depends on:** S3-M5-T5
+
+- [ ] **S3-M5-T7: The sample table (Owner)**
+  - **Build:** Owner only. Fill `src/clause_tracer/links/tests/tables/sample.toml` with one section, `[sample]`, and no `[[case]]` rows. Its keys: `terms` (a list of term strings, in the order `map_links` returns them); `outside` (a list of `{ name = "Master Agreement", clause = "11.1" }`); `overrides` (a list of `{ clause = "14.2", target = "S1", overrides_target = true }`, with `target = ""` for none); `references` (a list of `{ clause = "2.1", written = "clause 12", target = "12" }`, where `clause` is the clause that holds the source and `written` its text); and `undefined` (a list of strings, the text of each span). Each list is the whole expected list for the sample, in order. Each inline table must sit on one line (TOML 1.0), and `terms` are in text order, not alphabetical. The agent does not write or change this file (Constitution T11).
+  - **Files:** `src/clause_tracer/links/tests/tables/sample.toml`.
+  - **Tests first:** None.
+  - **Done when:** The owner has written the section and said so.
+  - **Rules:** Constitution T11, [system design 15.3](../system-design.md#153-stage-3-links) "Done when".
+  - **Depends on:** S3-M1-T2
+
+- [ ] **S3-M5-T8: The sample table test**
+  - **Build:** In `src/clause_tracer/links/tests/test_sample_table.py`: load the table with `load_table(TABLE, case_keys=frozenset(), required=frozenset(), sections=frozenset({"sample"}))`; load the sample fixture from `DEFAULT_INPUT` (imported from `clause_tracer.links.__main__`) with `load_clause_fixture`; run `map_links`. Read `table.sections["sample"]` through a helper `_sample_section() -> Mapping[str, object]` in the test file. The helper raises `OwnerTableError("sample.toml: missing section sample")` when the section is absent, `OwnerTableError(f"sample.toml: missing key {key}")` for each of the five keys (`terms`, `outside`, `overrides`, `references`, `undefined`) that is absent, and `OwnerTableError(f"sample.toml: unknown key {key}")` for any other key. Five tests, one per key: `test_sample_terms`, `test_sample_outside`, `test_sample_overrides`, `test_sample_references`, `test_sample_undefined`. Each builds the actual list in the table's form (the clause of a span is `clause_at(span.start).id`; `written` is the source text) and asserts it equals the table's list. Each nested list item must be a `dict` (`assert isinstance(row, dict)`, as `ingest/tests/test_clause_table.py` does); strings go through `as_str(value, where)`, booleans through `as_bool`, `nth` through `as_int` and defaults to 1 when absent.
+  - **Files:** `src/clause_tracer/links/tests/test_sample_table.py`.
+  - **Tests first:** the five tests above, run before any fix. Never edit the table.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_sample_table.py` reports 5 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** T11, T13, system design 15.3 "Done when".
+  - **Depends on:** S3-M5-T1, S3-M5-T4, S3-M5-T7, S3-M1-T4
+
+- [ ] **S3-M5-T9: The sample from text to link map**
+  - **Build:** In `tests/test_links_sample.py`, add `test_text_to_link_map`: read `SAMPLE_TEXT` through `read_text_file` and `split_clauses`, run `map_links`, and assert the result equals `map_links` on the loaded fixture. This proves the fixture route and the real route give the same link map.
+  - **Files:** `tests/test_links_sample.py`.
+  - **Tests first:** the test above.
+  - **Done when:** `.venv/bin/uv run pytest tests/test_links_sample.py` reports 3 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** T4 (one end-to-end test with a tiny sample), S4 (data passes by function calls; `cli` will wire it in stage 6). This is the one end-to-end test of testing strategy 3 layer 4 for `links`: it proves the fixture route and the real route agree.
+  - **Depends on:** S3-M5-T1, S3-M1-T4
+
+- [ ] **S3-M5-T10: The `links` README**
+  - **Build:** Rewrite `src/clause_tracer/links/README.md` in the shape of `src/clause_tracer/ingest/README.md`, with these headings, in this order: `## Purpose`, `## Spec`, `## Public calls`, `## Input shape`, `## Output shape`, `## What it reads`, `## The sample fixture`, `## Known limits`, `## Depends on`, `## Run alone`. Purpose; Spec (6.1 step 5, 4.5); Public calls (`map_links` with its contract note, `render_link_map`, `dump_clause_fixture`, `load_clause_fixture` and `SampleInput`); Input shape (`Document` and its `Clause` tuple from `core`); Output shape (`LinkMap` and its five tuples, with what each field means here: `Override.clause_id` is the clause that holds the evidence; `overrides_target` true means that clause wins; no target means the override joins every trail; an unresolved reference has `target=None`; the order of each tuple); What it reads (one part per finder with the exact words it reads: copy the patterns' meaning in plain words, not the regular expressions); The sample fixture and how it is regenerated; Known limits (section 2, "Leaves to later stages", the reference styles not read, a duplicated number never resolved, "X prevails over Y" read only when X is this clause or this Agreement, and names and places that show up as terms used but never defined, and also each of these: lower-case document mentions are not outside documents, so a lower-case name does not stop a "this Clause prevails" override with no target (question 4, point B); references broken by a zero-width or bidi character are not found, because stage 5 flags those characters as hidden text; `ITEM_ARTICLE` reads `I V X L C` only; `ITEM_SCHEDULE` reads an upper-case designation only, so `annex a` is not read; `paragraph (a)` and `clause 4 (a)`, with a space before the bracket, are not read as a whole; subject overrides are left to stage 8 (question 8); plurals are not uses; `Annex 1` and `Appendix 1` share the id `A1` in `ingest`, so both stay unresolved; each mention of an outside document is one entry, so a screen lists names once; a name written in capitals (`THE MASTER AGREEMENT`) is not read; `Standard Form Agreement`, `Agency Agreement` and every other generic name that the pattern accepts are listed as outside documents; a name longer than four capitalised words is cut to its last four); Depends on (`core` only); Run alone.
+  - **Files:** `src/clause_tracer/links/README.md`, `src/clause_tracer/links/tests/test_architecture.py`.
+  - **Tests first:** add `test_readme_names_every_public_name` to `test_architecture.py`, copied from `ingest/tests/test_architecture.py`. Run it before the rewrite.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_architecture.py` reports 3 passed, `.venv/bin/uv run python scripts/copy_lint.py` exits 0, and `scripts/check.sh` exits 0.
+  - **Rules:** S3, I11, [WRITING_DOCS.md](../../WRITING_DOCS.md).
+  - **Depends on:** S3-M5-T4
+
+- [ ] **S3-M5-T11: Close the stage**
+  - **Build:** Run the "Done when" checks in section 7. Write section 9 with four headings, in this order: "What was built", "What differs from the outline", "For stage 4 (`privacy`)" and "For later stages" (the stage 2 plan's section 9 has the first three). Under "For later stages", the notes must say: stage 8 matches Rule 10 on spans, never on whole clauses (clause 1.1 holds the Master Agreement definition, skipped on purpose); a target-less override whose own sentence names an outside document would spread Rule 10; stage 11 compares per-clause reference targets before and after a rewrite; `ClauseIndex.clause_at` is internal to `links`, so stage 8 and stage 11 map a span to its clause with their own code or ask for a public call; headings count as term uses (`find_terms` does not skip heading sentences). Update: [AGENTS.md](../../AGENTS.md) "Where the project stands" (stage 3 done, stage 4 `privacy` next); the status line in [README.md](../../README.md); [testing strategy 13](../testing-strategy.md#13-gaps-today-and-the-order-to-close-them), the row "No samples or golden files in any module" (`ingest` and `links` closed, with the date); [system design 15.3](../system-design.md#153-stage-3-links), a line "The task plan is [the stage 3 plan](plans/stage-03-links.md)."; and check that each answer in section 6 links to its home. Write the status lines in the style of the stage 2 close (commit `53ec58f`). Set this plan's status to Done only after the owner confirms.
+  - **Files:** `docs/plans/stage-03-links.md`, `AGENTS.md`, `README.md`, `docs/testing-strategy.md`, `docs/system-design.md`.
+  - **Tests first:** None.
+  - **Done when:** `scripts/check.sh` exits 0, and the owner confirms the stage is Done.
+  - **Rules:** [The plans README](README.md), "When the stage is done", [WRITING_DOCS.md](../../WRITING_DOCS.md) section 9.
+  - **Depends on:** every other task.
+
+## 6. Open questions
+
+The owner answered all eight questions on 20 Nov 2026, each as recommended, with two points on question 4. Each answer is recorded in its home. Each question needs the owner's answer before the tasks that need it. The tasks are written to the recommendation. If the answer differs, the planner rewrites those tasks before they start, and records the change in section 8. When the owner answers, the planner records each answer in its home (system design 15.3, or a decision record) on the `docs/` branch that carries this plan, before milestone 1.
+
+| # | Question | Needed by task | Recommendation (if any) | Owner's answer |
+| --- | --- | --- | --- | --- |
+| 1 | **What text does a defined term hold, and which uses count?** `DefinedTerm.term` feeds the `privacy` allow-list in stage 4. The sample writes `("the Agency")`, with "the" inside the quotes. `fold_for_matching` ignores case, so "an agency" would match "Agency". | S3-M3-T1, S3-M3-T2 | The term is the quoted words without a leading "the" (`Agency`). A use is a whole-word match of the folded term in the match key whose first letter is a capital in the contract, outside the term's own quotes and outside a use of a longer term. "Agency's" counts; "agency" and "Agencyship" do not. A term defined twice gives two entries with the same uses. Stage 4 keeps "the Agency" because "Agency" is on the allow-list. || As recommended: [system design 15.3](../system-design.md#153-stage-3-links) (20 Nov 2026) |
+| 2 | **Which capitalised words count as "used but never defined"?** No doc gives a rule, and no screen shows the list yet. In the sample, "Business Days" (6.1) is capitalised and never defined. | S3-M3-T4 | Runs of 2 to 4 capitalised words in the middle of a sentence that are not a defined term, not a use, not inside a term's quotes and not a document that is not loaded. Single words are left out, because they are most often names and places ("Leeds", "VAT"). Heading sentences and table rows are left out. On the sample this lists "Harbour Street", "Rue Didouche Mourad", "Business Days" and "Ms Jones": names and addresses will show up until `privacy` runs, so stage 8 decides how the list is used. || As recommended: [system design 15.3](../system-design.md#153-stage-3-links) (20 Nov 2026) |
+| 3 | **What counts as a document that is not loaded?** Spec 4.5 gives one example, "the Master Agreement". Clause 5.5 points to "its expenses policy at https://…". "Master Agreement" is also a defined term in 1.1. | S3-M3-T3 | One to four capitalised words (a hyphenated word counts as one), separated by any white space (`\s+`), followed by a document noun (Agreement, Contract, Deed, Addendum, Licence, License, Statement of Work, Terms and Conditions). Policy, Order, and Terms and Conditions on their own are not nouns. Not after "this", not the term inside its own definition quotes, not in a heading, and not the contract's own name (a defined term whose definition sentence says "this agreement", "this contract" or "this deed"). Leading words from a fixed set (The, This, That, These, Those, Each, Any, Such, Our, Your, Its, Their, Under, As, In, Of, For, By, With, See, If, Where, Unless, Subject) are dropped from the name, while the first word is in the set. Each mention is one entry. A name written in capitals (`THE MASTER AGREEMENT`) is not read. Lower-case words like "its expenses policy" are not a document: the link warning of Spec 4.3 covers the web address. On the sample this gives one entry, "Master Agreement" in 11.1, which keeps Rule 10 on position 10 only (Spec 14.5). || As recommended: [system design 15.3](../system-design.md#153-stage-3-links) (20 Nov 2026) |
+| 4 | **Which wording is an override, and which override names nothing?** Spec 4.5 says overrides that name nothing join every trail, so a wrong one could make every label unsure under Rule 10 once stage 8 builds the trail. Clause 8.2 ("Clause 8.1 does not apply to …") is a carve-out. | S3-M4-T1, S3-M4-T2, S3-M4-T3 | "Notwithstanding" before a reference: this clause overrides the target. "Subject to", "save as set out in", "save as provided in", "except as set out in" and "except as provided in" before a reference: the target qualifies this clause. Between the phrase and the reference there may be only spaces, or "the provisions of" (also "terms" or "requirements", with "of" or "in"), so "Subject to approval under clause 4" gives nothing. References that one match gives ("clauses 5 to 6") form one group, and every rule about the first reference, the next one and the gap between them works on groups. A phrase takes the nearest group after it: another phrase between them takes it instead. A list joined by "and", "or" or a comma ("Notwithstanding clause 4 and clause 5") gives one override for each target. A reference to "this Clause" or "this Agreement" is never the target. With no reference, the phrases give nothing, except "Notwithstanding anything (else) (contained) (to the contrary) in this Agreement" and "Notwithstanding any other provision(s) or term(s) of or in this Agreement", which still name nothing and join every trail, so stage 8 must treat such a clause with care. A sentence with "prevails" or "takes precedence": the words before it, after the last comma and after any clause number at the start of the sentence, say who wins, and they must be plain (only "the", "then", "and", "or", "of", "provision" and the references or "this ..." names). "This Agreement" or "this Clause" wins over every other reference in the sentence that resolves; a reference that wins qualifies this clause. An override that names nothing is given only when "this Clause", "this Section" or "this Paragraph" wins, the sentence holds no other reference and no document that is not loaded, and only spaces, a full stop, a semicolon or a colon follow the verb ("If any term conflicts, then this Clause prevails."). "This Agreement prevails" on its own gives nothing. A carve-out like 8.2 is a cross-reference only, not an override. On the sample this gives one override: 14.2 over Schedule 1.  Two points for the owner. First, "Notwithstanding anything in this Agreement" still gives an override with no target when the same sentence names an outside document ("… in this Agreement or the Master Agreement"); the other way is to give nothing then, as the "prevails" rule does. Second, a lower-case document name ("the master services agreement") is not seen, so it does not stop a "this Clause prevails" override with no target. || As recommended, with point A (no override that names nothing when the sentence names a document that is not loaded) and point B (a known limit): [system design 15.3](../system-design.md#153-stage-3-links) (20 Nov 2026) |
+| 5 | **May an override point at a target that does not resolve?** `Override.target=None` means "names nothing" and joins every trail (Spec 4.5). An override that names a clause the text does not have would then make every label unsure under Rule 10 once stage 8 builds the trail. | S3-M4-T1, S3-M4-T2 | No `Override` for an unresolved target; the `CrossReference` stays, with `target=None`, so the miss is still visible. The other way is a new field on `Override`, which changes system design 3.4. || As recommended: [system design 15.3](../system-design.md#153-stage-3-links) (20 Nov 2026) |
+| 6 | **How does a reference written inside a schedule resolve?** A schedule keeps its own numbers, so `Schedule 1` holds clauses with the ids `S1.1`, `S1.2`. A bare "clause 1" or "paragraph 2" written inside it can point at the body or at the schedule. | S3-M2-T2 | With `s` the schedule that holds the reference: for "paragraph", a key resolves only as `s.id + "." + key`, never against the body. For every other keyword, when both `s.id + "." + key` and the bare key resolve, the target is `None` (never guessed); else whichever one resolves; else `None`. Outside a schedule, a key resolves against the body. || As recommended: [system design 15.3](../system-design.md#153-stage-3-links) (20 Nov 2026) |
+| 7 | **How does stage 4 treat a short party name?** A bracket definition can name a party by a short name (`Brightline Studio Ltd ("Brightline")`), and `DefinedTerm` has no flag for it. Stage 4 builds its allow-list from `LinkMap.terms`. | The stage 4 plan, not stage 3 | Stage 4 drops from the allow-list any term that a typed-party finder or a name finder also matches, so a name is never kept. Recorded here so the stage 4 plan starts from it. || As recommended: [system design 15.4](../system-design.md#154-stage-4-privacy-code-finders-and-placeholders) (20 Nov 2026) |
+| 8 | **Does a subject override join a trail?** Spec 4.5 says an override joins a trail when it names a label's subject ("the payment terms prevail"). This plan reads only clause references, this Agreement and this Clause. | S3-M5-T10 | Leave subject overrides to stage 8, which knows the positions' topics; list it as a known limit in the `links` README. || As recommended: [system design 15.8](../system-design.md#158-stage-8-checking-and-the-message-templates) (20 Nov 2026) |
+
+## 7. Done when
+
+- [ ] Every task above is ticked.
+- [ ] `scripts/check.sh` passes with no errors, including the 85% branch-coverage floor for `links`.
+- [ ] Each touched module's README records its shapes (Constitution S3).
+- [ ] Every promise the stage touches has its test (Constitution T13): an unresolved target is kept (S3-M2-T2), override direction (S3-M4-T1), and no override without a target on the sample (S3-M5-T1).
+- [ ] The lines that state the project's status are updated (see the README, "When the stage is done").
+- [ ] The owner has been told what was built, and what the next stage should know.
+- [ ] `python -m clause_tracer.links` prints the sample's link map, which shows the Master Agreement reference and the defined roles `Agency` and `Developer` (system design 15.3), and the golden file and the sample table match.
+
+## 8. Change log
+
+| Date | Change | Why |
+| --- | --- | --- |
+| | None yet. | |
+
+## 9. Notes for the next stage
+
+Filled in when the stage is done.
