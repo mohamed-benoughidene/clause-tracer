@@ -433,14 +433,6 @@ When this is done, `python -m clause_tracer.ingest` prints the clauses and sente
   - **Rules:** T11, [testing strategy 3](../testing-strategy.md#3-five-layers) (layer 2).
   - **Depends on:** S2-M4-T4
 
-- [ ] **S2-M4-T6: Read the golden files (Owner)**
-  - **Build:** Owner only. Read `developer-agreement.outline.txt` and `plain-paragraphs.outline.txt` against the two samples. Each clause should start where a reader would start it, and each sentence break should be one a reader would accept or a missed break, never a break inside a word or a number. Say whether they are right. A wrong split is a splitter bug or a new row for the clause-splitter table, never a hand edit of a golden file. The owner read the first files on 20 Nov 2026 and found the three limits that S2-M4-T7 to S2-M4-T12 fix. Read the files again after S2-M4-T12. To see whole sentences, run `.venv/bin/uv run python -m clause_tracer.ingest --full` (S2-M4-T10), because the golden files still cut each preview at 60 characters.
-  - **Files:** None.
-  - **Tests first:** None.
-  - **Done when:** The owner has read both files again after S2-M4-T12 and said so.
-  - **Rules:** T11.
-  - **Depends on:** S2-M4-T4, S2-M4-T10, S2-M4-T12
-
 - [x] **S2-M4-T7: Signature rows and the new clause count (Owner)**
   - **Build:** Owner only. The rows below are the planner's draft of what the owner decided on 20 Nov 2026 (question 13). Every row is made of real lines of `developer-agreement.txt` (lines 65 to 71), and rows 2, 3 and 5 change only the first word or words of the signature line: a line that opens with `Signed`, `Executed` or `In witness whereof`, with a blank line before it, starts a clause of its own whatever its length. Read them, change any value that is wrong, and add them to the end of `src/clause_tracer/ingest/tests/tables/clause_split.toml`. The block is indented by 4 spaces here: remove those 4 spaces from every line when you copy it, or the `text` values get leading spaces. In the same step, in `src/clause_tracer/ingest/tests/test_smoke.py`, rename `test_sample_has_64_clauses` to `test_sample_has_65_clauses` and change `== 64` to `== 65`: the sample then has one clause more, because the signature line of Brightline Studio Ltd (73 characters) becomes the clause `p4` and `Signed by Karim Benali` becomes `p5`. A trial of the rules gave 65 clauses and 75 sentences (it was 64 and 74).
 
@@ -573,6 +565,14 @@ When this is done, `python -m clause_tracer.ingest` prints the clauses and sente
   - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_strategies.py` reports 5 passed, `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_clause_properties.py` passes, and `scripts/check.sh` exits 0 except for the red tests named in the M4 introduction.
   - **Rules:** T1, T5, [testing strategy 5](../testing-strategy.md#5-the-offset-chain-seven-invariants) (invariant 4).
   - **Depends on:** S2-M3-T10
+
+- [ ] **S2-M4-T6: Read the golden files (Owner)**
+  - **Build:** Owner only. Read `developer-agreement.outline.txt` and `plain-paragraphs.outline.txt` against the two samples. Each clause should start where a reader would start it, and each sentence break should be one a reader would accept or a missed break, never a break inside a word or a number. Say whether they are right. A wrong split is a splitter bug or a new row for the clause-splitter table, never a hand edit of a golden file. The owner read the first files on 20 Nov 2026 and found the three limits that S2-M4-T7 to S2-M4-T12 fix. Read the files again after S2-M4-T12. To see whole sentences, run `.venv/bin/uv run python -m clause_tracer.ingest --full` (S2-M4-T10), because the golden files still cut each preview at 60 characters.
+  - **Files:** None.
+  - **Tests first:** None.
+  - **Done when:** The owner has read both files again after S2-M4-T12 and said so.
+  - **Rules:** T11.
+  - **Depends on:** S2-M4-T4, S2-M4-T10, S2-M4-T12
 
 ### M5: The match key, the language warning and the close
 
