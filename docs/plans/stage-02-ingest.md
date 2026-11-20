@@ -678,7 +678,7 @@ When this is done, `python -m clause_tracer.ingest` prints the clauses and sente
   - **Rules:** T11, [testing strategy 10](../testing-strategy.md#10-keeping-agent-written-tests-honest) (golden files only by the named command, in a commit of their own).
   - **Depends on:** S2-M4-T13, S2-M4-T14
 
-- [ ] **S2-M4-T16: Read the golden files (Owner)**
+- [x] **S2-M4-T16: Read the golden files (Owner)**
   - **Build:** Owner only. Read `developer-agreement.outline.txt` and `plain-paragraphs.outline.txt` against the two samples. Each clause should start where a reader would start it, and each sentence break should be one a reader would accept or a missed break, never a break inside a word or a number. Say whether they are right. A wrong split is a splitter bug or a new row for the clause-splitter table, never a hand edit of a golden file. The owner read the first files on 20 Nov 2026 and found the three limits that S2-M4-T6 to S2-M4-T11 fix, and read them again the same day and found the two limits that S2-M4-T12 to S2-M4-T15 fix. Read the files again after S2-M4-T15. To see whole sentences, run `.venv/bin/uv run python -m clause_tracer.ingest --full` (S2-M4-T9), because the golden files still cut each preview at 60 characters.
   - **Files:** None.
   - **Tests first:** None.
