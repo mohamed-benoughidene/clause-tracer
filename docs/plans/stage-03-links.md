@@ -363,7 +363,7 @@ When this is done, `find_references` finds every cross-reference with its source
   - **Rules:** Constitution T11.
   - **Depends on:** S3-M1-T2
 
-- [ ] **S3-M2-T6: The cross-references table test**
+- [x] **S3-M2-T6: The cross-references table test**
   - **Build:** In `src/clause_tracer/links/tests/test_reference_table.py`: `TABLE = Path(__file__).parent / "tables" / "references.toml"`, `CASE_KEYS = REQUIRED = frozenset({"id", "clauses", "references"})`. `test_reference_table(case)`, parametrised over the cases with the case id as the test id: build the case, run `find_references(sample.document.text, build_index(sample.clauses))`, and assert the result equals the expected tuple, built with `span_of` and `ClauseId(target)` or `None`. Load the table at module level with `load_table` and parametrise the test over its cases, exactly as `ingest/tests/test_clause_table.py` does. Each nested list item must be a `dict` (`assert isinstance(row, dict)`, as that file does); strings go through `as_str(value, where)`, booleans through `as_bool`, `nth` through `as_int` and defaults to 1 when absent; the `clauses` rows are passed to `build_case` as they are. `test_reference_table_has_rows` asserts at least 10 cases.
   - **Files:** `src/clause_tracer/links/tests/test_reference_table.py`.
   - **Tests first:** the two tests above. Run them before any fix to see which rows fail. If a row fails, fix the code, never the table; if the code is right and the row looks wrong, stop and ask the owner.
