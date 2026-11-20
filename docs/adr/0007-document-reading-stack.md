@@ -87,7 +87,7 @@ Gaps carried over: not verified that the bundled PDFium build includes every fun
 3. [ ] Set the limits (member count, expanded size, ratio, page count, time, memory) and test each one. Values are `[Assumption]` until measured.
 4. [ ] Add the pdfplumber cross-check as a test-only dependency.
 5. [x] Add the hidden-layer licence decision to Spec 13 (done 12 Nov 2026).
-6. [ ] Update `src/clause_tracer/ingest/README.md` when `ingest` is built.
+6. [x] Update `src/clause_tracer/ingest/README.md` when `ingest` is built: done for text, Markdown and pasted text in stage 2 (20 Nov 2026). Word and PDF add to it in stage 5.
 
 ## Amendment (12 Nov 2026): PDFium checked, and what bundling pikepdf needs
 

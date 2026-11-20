@@ -165,6 +165,16 @@
           </div>
         </div>
 
+        <div class="notice warn" role="note" data-state="too-many-words">
+          <svg class="icon"><use href="#i-warn"/></svg>
+          <div class="notice-body">
+            <p>This file has 63,200 words. The limit is 50,000 words. Paste only the pages you want reviewed.</p>
+            <div class="notice-actions">
+              <button class="btn btn-sm" type="button" data-pick-file><svg class="icon"><use href="#i-doc"/></svg>Choose another file</button>
+            </div>
+          </div>
+        </div>
+
         <div class="notice warn" role="note" data-state="empty">
           <svg class="icon"><use href="#i-warn"/></svg>
           <div class="notice-body">
@@ -228,10 +238,11 @@
             <span class="file-badge" data-file-badge data-state-hide="not-text">PDF</span><span class="file-badge" data-state="not-text">TXT</span>
             <div class="file-name">
               <strong data-state-hide="old-word not-text">Brightline_Developer_Agreement.pdf</strong><strong data-state="old-word">Brightline_Developer_Agreement.doc</strong><strong data-state="not-text">Brightline_Developer_Agreement.txt</strong>
-              <span class="small muted" data-state-hide="mixed scanned too-large empty not-text not-english old-word">PDF · 5 pages · 929 words · real text</span>
+              <span class="small muted" data-state-hide="mixed scanned too-large too-many-words empty not-text not-english old-word">PDF · 5 pages · 929 words · real text</span>
               <span class="small muted" data-state="mixed">PDF · 9 pages · 929 words · pages 7 and 8 scanned</span>
               <span class="small muted" data-state="scanned">PDF · 5 pages · scanned images, no text</span>
               <span class="small muted" data-state="too-large">PDF · 48 MB</span>
+              <span class="small muted" data-state="too-many-words">PDF · 31 pages · 63,200 words</span>
               <span class="small muted" data-state="empty">PDF · 0 pages · no text</span>
               <span class="small muted" data-state="not-text">TXT · 12 KB · can't be read</span>
               <span class="small muted" data-state="not-english">PDF · 5 pages · not English</span>
@@ -241,7 +252,7 @@
             <button class="btn btn-ghost btn-sm" type="button" data-pick-file>Replace</button>
           </div>
 
-          <div class="preview" data-state-hide="scanned too-large empty not-text old-word">
+          <div class="preview" data-state-hide="scanned too-large too-many-words empty not-text old-word">
             <div class="thumb" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
             <div>
               <p class="small"><strong class="muted">First page · is this the right contract?</strong></p>
@@ -342,8 +353,8 @@
 <footer class="flow-foot">
   <span class="row small muted"><svg class="icon"><use href="#i-check"/></svg>Saved as a draft</span>
   <span class="spacer"></span>
-  <a class="btn btn-primary" href="contract-check.html" data-state-hide="scanned too-large empty not-text old-word playbook-deleted no-file">Continue<svg class="icon"><use href="#i-arrow-right"/></svg></a>
-  <button class="btn btn-primary" type="button" disabled data-state="scanned too-large empty not-text old-word playbook-deleted no-file">Continue<svg class="icon"><use href="#i-arrow-right"/></svg></button>
+  <a class="btn btn-primary" href="contract-check.html" data-state-hide="scanned too-large too-many-words empty not-text old-word playbook-deleted no-file">Continue<svg class="icon"><use href="#i-arrow-right"/></svg></a>
+  <button class="btn btn-primary" type="button" disabled data-state="scanned too-large too-many-words empty not-text old-word playbook-deleted no-file">Continue<svg class="icon"><use href="#i-arrow-right"/></svg></button>
   <a class="btn btn-primary" href="contract-check.html" data-paste-cont="on" hidden>Continue<svg class="icon"><use href="#i-arrow-right"/></svg></a>
   <button class="btn btn-primary" type="button" disabled data-paste-cont="off" hidden>Continue<svg class="icon"><use href="#i-arrow-right"/></svg></button>
 </footer>
@@ -383,7 +394,7 @@
         <svg class="icon load-done-icon"><use href="#i-check"/></svg>
         <div class="file-name" role="status">
           <strong data-load-name>Brightline_Developer_Agreement.pdf</strong>
-          <span class="small muted">Contract loaded · 5 pages · 64 clauses found</span>
+          <span class="small muted">Contract loaded · 5 pages · 65 clauses found</span>
         </div>
         <span class="spacer"></span>
         <button class="btn btn-ghost btn-sm" type="button" data-pick-file>Replace</button>
@@ -447,7 +458,7 @@
     var foot = document.getElementById('load-foot');
     var STATE = new URLSearchParams(location.search).get('state') || '';
     var PAGES = 5, timer = null, done = null;
-    var FILE_STATES = ['scanned', 'mixed', 'too-large', 'empty', 'not-text', 'old-word', 'tracked-changes', 'not-english', 'no-file'];
+    var FILE_STATES = ['scanned', 'mixed', 'too-large', 'too-many-words', 'empty', 'not-text', 'old-word', 'tracked-changes', 'not-english', 'no-file'];
 
     // Paste text mode: Continue stays off until the textarea holds text; the file-state buttons step aside.
     var pasteBox = document.getElementById('paste-inline');

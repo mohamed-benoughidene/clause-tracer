@@ -1,0 +1,149 @@
+source	text	6212	587ff8bcf8116bf4ef7855d7bee25caff597d20a2859e727199fedde8e82d617
+numbering	numbers
+warnings	-
+p1	-	level 1	-	0-72	Development Services Agreement
+  p1.s1	0-31	Development Services Agreement
+  p1.s2	31-72	This Agreement is dated 5 November 2026.
+p2	-	level 1	-	72-80	Parties
+  p2.s1	72-80	Parties
+(1)	(1)	level 1	-	80-258	-
+  (1).s1	80-258	(1) Brightline Studio Ltd, a company registered in England a
+(2)	(2)	level 1	-	258-344	-
+  (2).s1	258-344	(2) Karim Benali of 27 Rue Didouche Mourad, Algiers 16000, A
+p3	-	level 1	-	344-355	Background
+  p3.s1	344-355	Background
+(A)	(A)	level 1	-	355-511	-
+  (A).s1	355-511	(A) The Agency designs and builds websites for its own custo
+(B)	(B)	level 1	-	511-625	-
+  (B).s1	511-625	(B) The Developer is an independent contractor and agrees to
+1	1	level 1	-	625-659	Definitions and interpretation
+  1.s1	625-659	1. Definitions and interpretation
+1.1	1.1	level 2	1	659-1114	-
+  1.1.s1	659-722	1.1 In this Agreement the following words have these meaning
+  1.1.s2	722-770	"Charges" means the fees set out in Schedule 1.
+  1.1.s3	770-895	"Deliverables" means everything the Developer hands over as 
+  1.1.s4	895-987	"Master Agreement" means the agreement between the Agency an
+  1.1.s5	987-1051	"Milestone" means a stage of the Services listed in Schedule
+  1.1.s6	1051-1114	"Services" means the development work described in Schedule 
+1.2	1.2	level 2	1	1114-1214	-
+  1.2.s1	1114-1172	1.2 Headings do not affect the meaning of this Agreement.
+  1.2.s2	1172-1214	Words in the singular include the plural.
+2	2	level 1	-	1214-1232	Start and term
+  2.s1	1214-1232	2. Start and term
+2.1	2.1	level 2	2	1232-1368	-
+  2.1.s1	1232-1368	2.1 This Agreement starts on the date at the top and continu
+2.2	2.2	level 2	2	1368-1525	-
+  2.2.s1	1368-1525	2.2 This Agreement renews automatically for further 12-month
+3	3	level 1	-	1525-1541	The Services
+  3.s1	1525-1541	3. The Services
+3.1	3.1	level 2	3	1541-1657	-
+  3.1.s1	1541-1657	3.1 The Developer will provide the Services with reasonable 
+3.2	3.2	level 2	3	1657-1751	-
+  3.2.s1	1657-1751	3.2 The Developer will make reasonable revisions to the Deli
+3.3	3.3	level 2	3	1751-1868	-
+  3.3.s1	1751-1840	3.3 The Developer will use reasonable efforts to meet the Mi
+  3.3.s2	1840-1868	Time is not of the essence.
+3.4	3.4	level 2	3	1868-1974	-
+  3.4.s1	1868-1974	3.4 The Developer may decide how and where the Services are 
+4	4	level 1	-	1974-2000	Changes and extra work
+  4.s1	1974-2000	4. Changes and extra work
+4.1	4.1	level 2	4	2000-2098	-
+  4.1.s1	2000-2098	4.1 Work outside Schedule 1 must be agreed in writing and wi
+4.2	4.2	level 2	4	2098-2219	-
+  4.2.s1	2098-2153	4.2 Either party may ask for a change to the Services.
+  4.2.s2	2153-2219	A change only takes effect when both parties agree it in wri
+5	5	level 1	-	2219-2242	Charges and payment
+  5.s1	2219-2242	5. Charges and payment
+5.1	5.1	level 2	5	2242-2338	-
+  5.1.s1	2242-2338	5.1 The total Charges for the Services are £9,600, split by 
+5.2	5.2	level 2	5	2338-2414	-
+  5.2.s1	2338-2414	5.2 The Agency will pay 25% of the total Charges on signing 
+5.3	5.3	level 2	5	2414-2521	-
+  5.3.s1	2414-2521	5.3 The Developer will invoice the Agency at accounts@bright
+5.4	5.4	level 2	5	2521-2583	-
+  5.4.s1	2521-2583	5.4 Invoices will be paid within 60 days of the invoice date
+5.5	5.5	level 2	5	2583-2766	-
+  5.5.s1	2583-2766	5.5 The Agency will repay reasonable expenses that it has ap
+5.6	5.6	level 2	5	2766-2842	-
+  5.6.s1	2766-2842	5.6 All Charges are exclusive of VAT, which will be added wh
+6	6	level 1	-	2842-2870	The Agency's obligations
+  6.s1	2842-2870	6. The Agency's obligations
+6.1	6.1	level 2	6	2870-3016	-
+  6.1.s1	2870-3016	6.1 The Agency will provide the content, logins and approval
+7	7	level 1	-	3016-3041	Ownership of the work
+  7.s1	3016-3041	7. Ownership of the work
+7.1	7.1	level 2	7	3041-3164	-
+  7.1.s1	3041-3164	7.1 All work created under this Agreement is a work made for
+7.2	7.2	level 2	7	3164-3249	-
+  7.2.s1	3164-3249	7.2 The Developer waives any moral rights in the Deliverable
+7.3	7.3	level 2	7	3249-3426	-
+  7.3.s1	3249-3352	7.3 Tools, code libraries and know-how the Developer owned b
+  7.3.s2	3352-3426	The Agency may use any that are part of the Deliverables for
+8	8	level 1	-	3426-3445	Confidentiality
+  8.s1	3426-3445	8. Confidentiality
+8.1	8.1	level 2	8	3445-3551	-
+  8.1.s1	3445-3551	8.1 Each party will keep the other's confidential informatio
+8.2	8.2	level 2	8	3551-3689	-
+  8.2.s1	3551-3689	8.2 Clause 8.1 does not apply to information that is public,
+9	9	level 1	-	3689-3725	Non-compete and non-solicitation
+  9.s1	3689-3725	9. Non-compete and non-solicitation
+9.1	9.1	level 2	9	3725-3849	-
+  9.1.s1	3725-3849	9.1 For 12 months after this Agreement ends, the Developer w
+9.2	9.2	level 2	9	3849-3944	-
+  9.2.s1	3849-3944	9.2 For 12 months after this Agreement ends, neither party w
+10	10	level 1	-	3944-3959	Warranties
+  10.s1	3944-3959	10. Warranties
+10.1	10.1	level 2	10	3959-4094	-
+  10.1.s1	3959-4094	10.1 The Developer confirms the Deliverables will be their o
+10.2	10.2	level 2	10	4094-4186	-
+  10.2.s1	4094-4186	10.2 No other promises are given about the Services except t
+11	11	level 1	-	4186-4200	Liability
+  11.s1	4186-4200	11. Liability
+11.1	11.1	level 2	11	4200-4329	-
+  11.1.s1	4200-4329	11.1 The Developer's total liability is capped at the fees p
+11.2	11.2	level 2	11	4329-4399	-
+  11.2.s1	4329-4399	11.2 Neither party is liable for loss of profit or any indir
+12	12	level 1	-	4399-4425	Ending this Agreement
+  12.s1	4399-4425	12. Ending this Agreement
+12.1	12.1	level 2	12	4425-4496	-
+  12.1.s1	4425-4496	12.1 Either party may end this Agreement with 14 days' writt
+12.2	12.2	level 2	12	4496-4576	-
+  12.2.s1	4496-4576	12.2 If the Agency ends this Agreement, no payment is due fo
+12.3	12.3	level 2	12	4576-4738	-
+  12.3.s1	4576-4738	12.3 Either party may end this Agreement at once by written 
+12.4	12.4	level 2	12	4738-4844	-
+  12.4.s1	4738-4844	12.4 When this Agreement ends, each party will return the ot
+13	13	level 1	-	4844-4864	Data protection
+  13.s1	4844-4864	13. Data protection
+13.1	13.1	level 2	13	4864-4967	-
+  13.1.s1	4864-4967	13.1 Each party will comply with data protection law when ha
+14	14	level 1	-	4967-4979	General
+  14.s1	4967-4979	14. General
+14.1	14.1	level 2	14	4979-5062	-
+  14.1.s1	4979-5062	14.1 This Agreement is the whole agreement between the parti
+14.2	14.2	level 2	14	5062-5135	-
+  14.2.s1	5062-5135	14.2 If this Agreement and Schedule 1 conflict, this Agreeme
+14.3	14.3	level 2	14	5135-5251	-
+  14.3.s1	5135-5251	14.3 The Developer will not work for a direct competitor of 
+14.4	14.4	level 2	14	5251-5350	-
+  14.4.s1	5251-5350	14.4 Neither party may transfer this Agreement to anyone els
+14.5	14.5	level 2	14	5350-5497	-
+  14.5.s1	5350-5497	14.5 Notices must be in writing and sent by email to the add
+14.6	14.6	level 2	14	5497-5564	-
+  14.6.s1	5497-5564	14.6 This Agreement is governed by the laws of England and W
+p4	-	level 1	-	5564-5640	Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director
+  p4.s1	5564-5640	Signed for and on behalf of Brightline Studio Ltd by Sarah J
+p5	-	level 1	-	5640-5663	Signed by Karim Benali
+  p5.s1	5640-5663	Signed by Karim Benali
+S1	Schedule 1	level 1	-	5663-5697	Services and Charges
+  S1.s1	5663-5697	Schedule 1 · Services and Charges
+S1.1	1	level 2	S1	5697-6093	-
+  S1.1.s1	5697-5836	1. The Developer will build the front end and content manage
+  S1.1.s2	5836-5866	Milestone Work Target Charges
+  S1.1.s3	5866-5923	1 Discovery Review designs, plan the build Week 2 £1,600
+  S1.1.s4	5923-5970	2 Build Templates and components Week 6 £3,200
+  S1.1.s5	5970-6027	3 Integration Content management and forms Week 9 £3,200
+  S1.1.s6	6027-6078	4 Launch Testing, fixes and go-live Week 11 £1,600
+  S1.1.s7	6078-6093	Total £9,600
+S1.2	2	level 2	S1	6093-6204	-
+  S1.2.s1	6093-6204	2. Hosting, domain names and third-party licences are provid

@@ -128,7 +128,7 @@ This Agreement is dated 5 November 2026.
 1.1 This Agreement starts on the date at the top."""
 numbering = "numbers"
 clauses = [
-  { id = "p1", number = "", level = 1, parent = "", heading = "", starts_with = "Development Services Agreeme" },
+  { id = "p1", number = "", level = 1, parent = "", heading = "Development Services Agreement", starts_with = "Development Services Agreeme" },
   { id = "1", number = "1", level = 1, parent = "", heading = "Start and term", starts_with = "1. Start and term" },
   { id = "1.1", number = "1.1", level = 2, parent = "1", heading = "", starts_with = "1.1 This Agreement starts on" },
 ]
@@ -283,7 +283,7 @@ Background
 1. Definitions and interpretation"""
 numbering = "numbers"
 clauses = [
-  { id = "p1", number = "", level = 1, parent = "", heading = "", starts_with = "Parties" },
+  { id = "p1", number = "", level = 1, parent = "", heading = "Parties", starts_with = "Parties" },
   { id = "(1)", number = "(1)", level = 1, parent = "", heading = "", starts_with = "(1) Brightline Studio Ltd of" },
   { id = "(2)", number = "(2)", level = 1, parent = "", heading = "", starts_with = "(2) Karim Benali of 27 Rue D" },
   { id = "p2", number = "", level = 1, parent = "", heading = "Background", starts_with = "Background" },
@@ -431,7 +431,7 @@ Algiers 16000, Algeria ("the Developer").
 1.1 Words in the singular include the plural."""
 numbering = "numbers"
 clauses = [
-  { id = "p1", number = "", level = 1, parent = "", heading = "", starts_with = "Karim Benali" },
+  { id = "p1", number = "", level = 1, parent = "", heading = "Karim Benali", starts_with = "Karim Benali" },
   { id = "1", number = "1", level = 1, parent = "", heading = "Definitions", starts_with = "1. Definitions" },
   { id = "1.1", number = "1.1", level = 2, parent = "1", heading = "", starts_with = "1.1 Words in the singular in" },
 ]
@@ -453,4 +453,87 @@ clauses = [
   { id = "p1", number = "", level = 1, parent = "", heading = "Background", starts_with = "Background" },
   { id = "(A)", number = "(A)", level = 1, parent = "", heading = "", starts_with = "(A) The Agency designs and b" },
   { id = "(B)", number = "(B)", level = 1, parent = "", heading = "", starts_with = "(B) The Developer is an inde" },
+]
+
+# Lines 65 to 71 of developer-agreement.txt: a signature line opens a clause whatever its length (question 13, 20 Nov 2026).
+[[case]]
+id = "signature-line-over-60-characters-starts-a-clause"
+text = """
+14.5 Notices must be in writing and sent by email to the addresses each party gives the other, with a copy to Ms Jones at the Developer's address.
+14.6 This Agreement is governed by the laws of England and Wales.
+
+Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director
+
+Signed by Karim Benali
+Schedule 1 · Services and Charges"""
+numbering = "numbers"
+clauses = [
+  { id = "14.5", number = "14.5", level = 1, parent = "", heading = "", starts_with = "14.5 Notices must be in w" },
+  { id = "14.6", number = "14.6", level = 1, parent = "", heading = "", starts_with = "14.6 This Agreement is gov" },
+  { id = "p1", number = "", level = 1, parent = "", heading = "Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director", starts_with = "Signed for and on behalf of" },
+  { id = "p2", number = "", level = 1, parent = "", heading = "Signed by Karim Benali", starts_with = "Signed by Karim Benali" },
+  { id = "S1", number = "Schedule 1", level = 1, parent = "", heading = "Services and Charges", starts_with = "Schedule 1 · Services" },
+]
+
+# The sample's signature line with its first word changed to Executed.
+[[case]]
+id = "executed-line-starts-a-clause"
+text = """
+14.6 This Agreement is governed by the laws of England and Wales.
+
+Executed as a deed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director"""
+numbering = "numbers"
+clauses = [
+  { id = "14.6", number = "14.6", level = 1, parent = "", heading = "", starts_with = "14.6 This Agreement is gov" },
+  { id = "p1", number = "", level = 1, parent = "", heading = "Executed as a deed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director", starts_with = "Executed as a deed for and" },
+]
+
+# The sample's signature line with its first words changed to In witness whereof.
+[[case]]
+id = "in-witness-whereof-line-starts-a-clause"
+text = """
+14.6 This Agreement is governed by the laws of England and Wales.
+
+In witness whereof, for and on behalf of Brightline Studio Ltd by Sarah Jones, Director"""
+numbering = "numbers"
+clauses = [
+  { id = "14.6", number = "14.6", level = 1, parent = "", heading = "", starts_with = "14.6 This Agreement is gov" },
+  { id = "p1", number = "", level = 1, parent = "", heading = "In witness whereof, for and on behalf of Brightline Studio Ltd by Sarah Jones, Director", starts_with = "In witness whereof, for and" },
+]
+
+# The sample's own lines with the blank line between them removed: with text right before it, the long Signed line is not a heading.
+[[case]]
+id = "signed-line-with-no-blank-line-before-it-stays-in-the-clause"
+text = """
+14.6 This Agreement is governed by the laws of England and Wales.
+Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director"""
+numbering = "numbers"
+clauses = [
+  { id = "14.6", number = "14.6", level = 1, parent = "", heading = "", starts_with = "14.6 This Agreement is gov" },
+]
+
+# The sample's signature line with its first word changed to Signedness, which is not the word Signed.
+[[case]]
+id = "a-word-that-only-starts-like-signed-is-text"
+text = """
+14.6 This Agreement is governed by the laws of England and Wales.
+
+Signedness for and on behalf of Brightline Studio Ltd by Sarah Jones, Director"""
+numbering = "numbers"
+clauses = [
+  { id = "14.6", number = "14.6", level = 1, parent = "", heading = "", starts_with = "14.6 This Agreement is gov" },
+]
+
+# Lines 2 to 4 of developer-agreement.txt: a first line that ends like a sentence is not a heading (question 15, 20 Nov 2026).
+[[case]]
+id = "first-line-that-ends-like-a-sentence-is-not-a-heading"
+text = """
+This Agreement is dated 5 November 2026.
+Parties
+(1) Brightline Studio Ltd, a company registered in England and Wales with company number 09876543, whose registered office is at 14 Harbour Street, Leeds LS1 4AB ("the Agency")."""
+numbering = "numbers"
+clauses = [
+  { id = "p1", number = "", level = 1, parent = "", heading = "", starts_with = "This Agreement is dated 5 N" },
+  { id = "p2", number = "", level = 1, parent = "", heading = "Parties", starts_with = "Parties" },
+  { id = "(1)", number = "(1)", level = 1, parent = "", heading = "", starts_with = "(1) Brightline Studio Ltd, a" },
 ]

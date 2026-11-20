@@ -200,48 +200,48 @@
         <div id="log">
           <ol class="log" id="live-log" data-state-hide="wrong-key no-credit no-internet no-private-model done rate-limit rate-limit-no-wait">
             <li><time>0:04</time><span>Read 5 pages.</span></li>
-            <li class="running" aria-current="step"><time>0:09</time><span>Found 64 clauses.</span></li>
+            <li class="running" aria-current="step"><time>0:09</time><span>Found 65 clauses.</span></li>
           </ol>
           <ol class="log" data-state="wrong-key">
             <li><time>0:04</time><span>Read 5 pages.</span></li>
-            <li><time>0:09</time><span>Found 64 clauses.</span></li>
+            <li><time>0:09</time><span>Found 65 clauses.</span></li>
             <li class="stop"><time>0:12</time><span>Stopped at step 2. OpenRouter turned down the key.</span></li>
           </ol>
           <ol class="log" data-state="no-internet">
             <li><time>0:04</time><span>Read 5 pages.</span></li>
-            <li><time>0:09</time><span>Found 64 clauses.</span></li>
-            <li><time>0:21</time><span>Matched 12 of 64 clauses to positions.</span></li>
+            <li><time>0:09</time><span>Found 65 clauses.</span></li>
+            <li><time>0:21</time><span>Matched 12 of 65 clauses to positions.</span></li>
             <li class="stop"><time>0:24</time><span>Stopped at step 2. The internet dropped.</span></li>
           </ol>
           <ol class="log" data-state="rate-limit">
             <li><time>0:04</time><span>Read 5 pages.</span></li>
-            <li><time>0:09</time><span>Found 64 clauses.</span></li>
-            <li><time>0:21</time><span>Matched 12 of 64 clauses to positions.</span></li>
+            <li><time>0:09</time><span>Found 65 clauses.</span></li>
+            <li><time>0:21</time><span>Matched 12 of 65 clauses to positions.</span></li>
             <li class="stop"><time>0:24</time><span>Stopped at step 2. The AI service asked for a wait of 30 seconds.</span></li>
           </ol>
           <ol class="log" data-state="rate-limit-no-wait">
             <li><time>0:04</time><span>Read 5 pages.</span></li>
-            <li><time>0:09</time><span>Found 64 clauses.</span></li>
-            <li><time>0:21</time><span>Matched 12 of 64 clauses to positions.</span></li>
+            <li><time>0:09</time><span>Found 65 clauses.</span></li>
+            <li><time>0:21</time><span>Matched 12 of 65 clauses to positions.</span></li>
             <li class="stop"><time>0:24</time><span>Stopped at step 2. The AI service is busy.</span></li>
           </ol>
           <ol class="log" data-state="no-credit">
             <li><time>0:04</time><span>Read 5 pages.</span></li>
-            <li><time>0:09</time><span>Found 64 clauses.</span></li>
-            <li><time>0:31</time><span>Matched all 64 clauses to 11 positions.</span></li>
+            <li><time>0:09</time><span>Found 65 clauses.</span></li>
+            <li><time>0:31</time><span>Matched all 65 clauses to 11 positions.</span></li>
             <li><time>1:40</time><span>Judged 6 of 11 positions.</span></li>
             <li class="stop"><time>1:52</time><span>Stopped at step 3. Credit ran out.</span></li>
           </ol>
           <ol class="log" data-state="no-private-model">
             <li><time>0:04</time><span>Read 5 pages.</span></li>
-            <li><time>0:09</time><span>Found 64 clauses.</span></li>
-            <li><time>0:31</time><span>Matched all 64 clauses to 11 positions.</span></li>
+            <li><time>0:09</time><span>Found 65 clauses.</span></li>
+            <li><time>0:31</time><span>Matched all 65 clauses to 11 positions.</span></li>
             <li class="stop"><time>0:58</time><span>Stopped at step 3. No private-mode model was available.</span></li>
           </ol>
           <ol class="log" data-state="done">
             <li><time>0:04</time><span>Read 5 pages.</span></li>
-            <li><time>0:09</time><span>Found 64 clauses.</span></li>
-            <li><time>0:31</time><span>Matched all 64 clauses to 11 positions.</span></li>
+            <li><time>0:09</time><span>Found 65 clauses.</span></li>
+            <li><time>0:31</time><span>Matched all 65 clauses to 11 positions.</span></li>
             <li><time>2:40</time><span>Judged the labels for 11 positions.</span></li>
             <li><time>3:52</time><span>Wrote the explanations and sorted the not-covered parts.</span></li>
             <li><time>4:05</time><span>Finished.</span></li>
@@ -339,8 +339,8 @@
     var BEFORE = [0, 1, 4, 6];   // small steps finished before each stage; the pie counts 8 in all
     // [step, time, log line, replaces the running line?, spent, time left, small step inside the stage]
     var FRAMES = [
-      [2, '0:21', 'Matched 12 of 64 clauses to positions.', false, '$0.08', 'About 3 min left', 0],
-      [2, '0:31', 'Matched all 64 clauses to 11 positions.', true, '$0.12', 'About 3 min left', 2],
+      [2, '0:21', 'Matched 12 of 65 clauses to positions.', false, '$0.08', 'About 3 min left', 0],
+      [2, '0:31', 'Matched all 65 clauses to 11 positions.', true, '$0.12', 'About 3 min left', 2],
       [3, '1:40', 'Judged 6 of 11 positions.', false, '$0.21', 'About 2 min left', 1],
       [3, '2:40', 'Judged the labels for 11 positions.', true, '$0.30', 'About 1 min left', 1],
       [4, '3:52', 'Wrote the explanations and sorted the not-covered parts.', false, '$0.39', 'Under a minute left', 1]

@@ -7,6 +7,8 @@ from clause_tracer.ingest._markers import (
     MarkerKind,
     find_marker,
     is_heading_line,
+    is_short_heading_line,
+    is_title_line,
 )
 
 
@@ -109,7 +111,73 @@ def test_find_marker(line: str, expected: Marker | None) -> None:
         ("", False),
         ("A" * 61, False),
         ("One two three four five six seven eight nine", False),
+        (
+            "Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director",
+            True,
+        ),
+        (
+            "Executed as a deed by Brightline Studio Ltd acting by a director in the "
+            "presence of a witness",
+            True,
+        ),
+        (
+            "In witness whereof the parties have signed this Agreement on the date at the top",
+            True,
+        ),
+        (
+            "**Signed** by Karim Benali and returned to the Agency by post within three days",
+            True,
+        ),
+        (
+            "SIGNED BY BOTH PARTIES ON THE DATE AT THE TOP OF THIS AGREEMENT IN TWO COPIES",
+            True,
+        ),
+        (
+            "Signedness of the copies is checked by the Agency in person at the office",
+            False,
+        ),
+        (
+            "The signed copy is kept by the Agency in person at the office of the Developer",
+            False,
+        ),
+        ("Signed\tby\tKarim Benali", False),
     ],
 )
 def test_is_heading_line(line: str, expected: bool) -> None:
     assert is_heading_line(line) is expected
+
+
+@pytest.mark.parametrize(
+    ("line", "expected"),
+    [
+        ("Background", True),
+        ("Signed by Karim Benali", True),
+        (
+            "Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director",
+            False,
+        ),
+        ("Note:", False),
+        ("Milestone\tCharges", False),
+    ],
+)
+def test_is_short_heading_line(line: str, expected: bool) -> None:
+    assert is_short_heading_line(line) is expected
+
+
+@pytest.mark.parametrize(
+    ("line", "expected"),
+    [
+        ("Development Services Agreement", True),
+        ("Terms and Conditions", True),
+        ("Page 1 of 5", True),
+        ("CONFIDENTIAL", True),
+        ("**Master Services Agreement**", True),
+        ("Karim Benali", True),
+        ("This Agreement is made on", False),
+        ("and Then", False),
+        ("", False),
+        ("   ", False),
+    ],
+)
+def test_is_title_line(line: str, expected: bool) -> None:
+    assert is_title_line(line) is expected

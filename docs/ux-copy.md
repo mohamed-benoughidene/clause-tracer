@@ -207,18 +207,19 @@ The card shows one view at a time: Welcome, then Key. “Check your own contract
 | No key | Add your OpenRouter key to run a review. What you've done here is kept. [Add key] |
 | Offline | You're offline. You can prepare this draft, but sending it for review needs the internet. |
 | Section 1 | Load the contract · [Load file] [Paste text] |
-| Load file dialog | Load the contract · Drop the contract here · [Choose a file] · PDF, Word, text or Markdown · up to 20 MB · read on this computer · Reading page 3 of 5 · [Cancel] · Contract loaded · 5 pages · 64 clauses found · [Replace] · First page · is this the right contract? · [Done] · [Close] (icon label). A file that can't be read shows its own message (Empty, Not text, Too large, Scanned and Old Word below) inside the dialog. |
+| Load file dialog | Load the contract · Drop the contract here · [Choose a file] · PDF, Word, text or Markdown · up to 20 MB · read on this computer · Reading page 3 of 5 · [Cancel] · Contract loaded · 5 pages · 65 clauses found · [Replace] · First page · is this the right contract? · [Done] · [Close] (icon label). A file that can't be read shows its own message (Empty, Not text, Too large, Scanned and Old Word below) inside the dialog. |
 | No file loaded (`?state=no-file`) | Drop the contract here · [Choose a file] · PDF, Word, text or Markdown · up to 20 MB · read on this computer. Continue is off. |
 | File card | [file name] · PDF · 5 pages · 929 words · real text · [Replace] |
 | Preview | First page · is this the right contract? |
 | Preview hint | Wrong file? Click Replace, or drop another file on this card. |
-| File card, other states | Mixed: PDF · 9 pages · 929 words · pages 7 and 8 scanned · Scanned: PDF · 5 pages · scanned images, no text · Too large: PDF · 48 MB · Empty: PDF · 0 pages · no text · Binary: TXT · 12 KB · can't be read · Not English: PDF · 5 pages · not English · Old Word: Word 97–2003 (.doc) · can't be read |
+| File card, other states | Mixed: PDF · 9 pages · 929 words · pages 7 and 8 scanned · Scanned: PDF · 5 pages · scanned images, no text · Too large: PDF · 48 MB · Too many words: PDF · 31 pages · 63,200 words · Empty: PDF · 0 pages · no text · Binary: TXT · 12 KB · can't be read · Not English: PDF · 5 pages · not English · Old Word: Word 97–2003 (.doc) · can't be read |
 | Buttons on a blocking or warning notice | Paste text · Replace file · Paste their text · Choose another file |
 | Paste field | Contract text · Keep the clause numbers and headings. Paste only the pages you want reviewed. |
 | Review name | Review name · Pick a name you'll recognise later. |
 | Scanned (blocks) | This PDF is pictures of pages, so its text can't be read. Load a Word version, or paste the text. |
 | Mixed (warns, owner 15 Nov 2026) | Pages 7 and 8 are pictures, not text. They're skipped unless you paste their text. |
 | Too large (blocks) | This file is 48 MB. The limit is 20 MB. Paste only the pages you want reviewed. |
+| Too many words (blocks, owner 20 Nov 2026) | This file has 63,200 words. The limit is 50,000 words. Paste only the pages you want reviewed. |
 | Empty (blocks) | This file has no text. Choose another file, or paste the text. |
 | Not text (blocks, owner 19 Nov 2026) | This file doesn't look like text. Choose another file, or paste the text. |
 | Old Word (blocks) | This is an old Word file. Open it in Word, save it as .docx, then load that. |
@@ -243,7 +244,7 @@ The card shows one view at a time: Welcome, then Key. “Check your own contract
 | Side card | Check the split |
 | Guidance | Each box should hold one section. Merge or split if a sentence is cut or two sections share a box. |
 | Drag hint | Drag [drag handle icon] onto the next box to join them, or click inside a box to split it. · Dismiss (icon label) |
-| Facts | Clauses: 64, split by section numbers · Schedules: Schedule 1 · 1 table kept · Pages: 5, all with real text |
+| Facts | Clauses: 65, split by section numbers · Schedules: Schedule 1 · 1 table kept · Pages: 5, all with real text |
 | Paragraph split note (new) | This contract has no section numbers, so it was split by paragraph. |
 | Hidden text | Found 1 piece of hidden text in 2.2: white text a reader can't see. It's kept and marked so you can see it. Any label that rests on it becomes unsure. [Show me] |
 | Unreadable text (warns) | Parts of pages 3 and 4 couldn't be read as text. The letters are stored in a way the app can't decode, so it can't check them. · Any result that rests on those parts will be marked unsure. Read pages 3 and 4 yourself before you rely on the review. |
@@ -284,9 +285,9 @@ The card shows one view at a time: Welcome, then Key. “Check your own contract
 | Stages | 1 Reading the pages · 2 Matching clauses · 3 Judging the labels · 4 Writing the notes. A status pie beside the title fills as the review runs. Under the title, the small step that is running: Reading the pages: Linking references and defined terms · Matching clauses: Matching clauses to positions, Pulling out the quotes and values, Checking each quote against the contract · Judging the labels: Picking labels from the numbers, Judging the wording · Writing the notes: Writing the explanations, Sorting the not-covered parts. (The stepper in the bar shows Contract, Contract check and Privacy check done, and Review current.) |
 | Progress | Step 1 of 4 · Reading the pages · Spent so far $0.05 of about $0.42 · About 4 min left · footer: Credit left: $3.10 |
 | Progress, later steps | Step [n] of 4 · [stage] · Spent so far [amount] of about $0.42 · About [n] min left · last minute: Under a minute left. The prototype plays one review through the four steps and then shows Done; `?state=step-1` holds it still. |
-| Log lines | Read 5 pages. · Found 64 clauses. · Matched all 64 clauses to 11 positions. · Judged the labels for 11 positions. · Wrote the explanations and sorted the not-covered parts. · Finished. |
+| Log lines | Read 5 pages. · Found 65 clauses. · Matched all 65 clauses to 11 positions. · Judged the labels for 11 positions. · Wrote the explanations and sorted the not-covered parts. · Finished. |
 | Private mode (footer) | There is no switch on this screen (owner, 15 Nov 2026). Footer, on: Private mode is on. Providers don't keep your contract if you've turned off Safety Retention in OpenRouter, except for legally required safety screening. Footer, off: Private mode is off. The contract goes to AI models that may keep it. · [Turn private mode off…] in the No private model state · Change models in Settings |
-| Reading log | Reading log · Hide finished lines · Show finished lines · other stop lines: Matched 12 of 64 clauses to positions. · Judged 6 of 11 positions. · Stopped at step 3. Credit ran out. · Stopped at step 3. No private-mode model was available. |
+| Reading log | Reading log · Hide finished lines · Show finished lines · other stop lines: Matched 12 of 65 clauses to positions. · Judged 6 of 11 positions. · Stopped at step 3. Credit ran out. · Stopped at step 3. No private-mode model was available. |
 | Leave note | You can leave this screen. Closing the app pauses the review, and Resume picks up from the first unfinished step. There is no “Run in background” button: Home and the window tabs already leave the screen. |
 | Wrong key | Interrupted at step 2 of 4 · Matching clauses · OpenRouter turned down your key. Check it in Settings, then resume. · [Open key settings] [Resume] · log: Stopped at step 2. OpenRouter turned down the key. |
 | Interrupted progress | Interrupted at step [n] of 4 · [stage] · Spent so far $0.02 of about $0.42 · Paused · footer: Paused · credit left: $3.10 (no credit: Credit left: $0.00 · paused) |

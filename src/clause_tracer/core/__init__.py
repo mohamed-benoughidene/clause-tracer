@@ -136,6 +136,7 @@ from clause_tracer.core.link_map import (
     OutsideDocument,
     Override,
 )
+from clause_tracer.core.match_fold import fold_for_matching
 from clause_tracer.core.placeholders import (
     Party,
     PiiSuggestion,
@@ -351,6 +352,7 @@ __all__: list[str] = [
     "estimate_calls",
     "estimate_cost",
     "evidence_reasons",
+    "fold_for_matching",
     "fold_for_quote_check",
     "in_warning_window",
     "is_better",

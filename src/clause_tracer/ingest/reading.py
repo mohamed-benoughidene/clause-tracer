@@ -13,10 +13,12 @@ from clause_tracer.core import (
     EmptyInputError,
     FileKind,
     InputTooLargeError,
+    InputWarning,
     NotTextError,
     NotUtf8Error,
     SourceFile,
 )
+from clause_tracer.ingest.language import WARNING_NOT_ENGLISH, looks_not_english
 from clause_tracer.ingest.limits import MAX_FILE_BYTES, MAX_WORDS, count_words
 
 DOCUMENT_SCHEMA_VERSION: Final[int] = 1
@@ -80,6 +82,9 @@ def _build_document(data: bytes, text: str, *, kind: FileKind, name: str) -> Doc
     words = count_words(text)
     if words > MAX_WORDS:
         raise InputTooLargeError({"words": words, "limit_words": MAX_WORDS})
+    warnings = (
+        (InputWarning(code=WARNING_NOT_ENGLISH, page=None),) if looks_not_english(text) else ()
+    )
     return Document(
         schema_version=DOCUMENT_SCHEMA_VERSION,
         source=SourceFile(
@@ -96,5 +101,5 @@ def _build_document(data: bytes, text: str, *, kind: FileKind, name: str) -> Doc
         hidden=(),
         undecodable=(),
         tracked_changes=(),
-        warnings=(),
+        warnings=warnings,
     )

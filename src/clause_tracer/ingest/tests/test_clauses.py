@@ -299,6 +299,32 @@ def test_paragraph_sentences() -> None:
     )
 
 
+def test_signature_line_starts_its_own_clause() -> None:
+    text = (
+        "14.6 Governed by English law.\n"
+        "\n"
+        "Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director\n"
+        "\n"
+        "Signed by Karim Benali"
+    )
+
+    clauses = clauses_of(text)
+
+    assert tuple(str(clause.id) for clause in clauses) == ("14.6", "p1", "p2")
+    assert clauses[1].heading == (
+        "Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director"
+    )
+
+
+def test_signed_line_after_a_text_line_stays_in_the_clause() -> None:
+    text = (
+        "9.1 The parties agree.\n"
+        "Signed by both parties on the date at the top of this Agreement, in two copies."
+    )
+
+    assert ids(text) == ("9.1",)
+
+
 def test_numbered_heading_line_has_a_heading() -> None:
     clauses = clauses_of(
         "5. Charges and payment\n5.1 The Agency pays 25%.\n5.2 Invoices are paid in 60 days.\n"
@@ -386,6 +412,29 @@ def test_sentence_ids_count_from_one_in_each_clause() -> None:
     assert tuple(str(sentence.id) for sentence in clauses[1].sentences) == ("1.2.s1",)
 
 
+def test_colon_line_splits_the_lead_in_from_the_list() -> None:
+    text = (
+        "1.1 In this Agreement the following words have these meanings:\n"
+        '"Charges" means the fees.\n'
+        '"Services" means the work.'
+    )
+
+    clauses = clauses_of(text)
+
+    assert len(clauses) == 1
+    sentences = clauses[0].sentences
+    assert tuple(str(sentence.id) for sentence in sentences) == (
+        "1.1.s1",
+        "1.1.s2",
+        "1.1.s3",
+    )
+    assert tuple(sentence.span for sentence in sentences) == (
+        Span(start=0, end=63),
+        Span(start=63, end=89),
+        Span(start=89, end=115),
+    )
+
+
 def test_wrapped_schedule_words_mid_clause_are_text() -> None:
     text = (
         "1. Payment\n"
@@ -418,3 +467,141 @@ def test_number_keeps_its_written_digits_and_id_is_normalised() -> None:
 
     assert clause.number == "01.2"
     assert clause.id == "1.2"
+
+
+def test_first_line_title_is_a_heading() -> None:
+    text = "Services Agreement\nThis Agreement is dated 5 November 2026.\n1. Start\n1.1 Now."
+
+    clauses = clauses_of(text)
+
+    assert ids(text) == ("p1", "1", "1.1")
+    assert clauses[0].heading == "Services Agreement"
+    assert tuple(sentence.span for sentence in clauses[0].sentences) == (
+        Span(start=0, end=19),
+        Span(start=19, end=60),
+    )
+
+
+def test_first_line_that_ends_like_a_sentence_is_not_a_heading() -> None:
+    text = "This Agreement is dated 5 November 2026.\n1. Start\n1.1 Now."
+
+    clauses = clauses_of(text)
+
+    assert clauses[0].heading is None
+    assert tuple(sentence.span for sentence in clauses[0].sentences) == (Span(start=0, end=41),)
+
+
+def test_first_line_heading_before_a_marker() -> None:
+    text = "Parties\n\n(1) Brightline Studio Ltd."
+
+    clauses = clauses_of(text)
+
+    assert ids(text) == ("p1", "(1)")
+    assert clauses[0].heading == "Parties"
+    assert tuple(sentence.span for sentence in clauses[0].sentences) == (Span(start=0, end=9),)
+
+
+def test_heading_line_ends_a_sentence() -> None:
+    text = "1. Start\n1.1 Now.\n\nBackground\nThe Agency builds sites.\n\n2. Payment"
+
+    clauses = clauses_of(text)
+
+    assert clauses[2].id == "p1"
+    assert tuple(str(sentence.id) for sentence in clauses[2].sentences) == (
+        "p1.s1",
+        "p1.s2",
+    )
+    assert tuple(sentence.span for sentence in clauses[2].sentences) == (
+        Span(start=19, end=30),
+        Span(start=30, end=56),
+    )
+
+
+def test_break_after_a_heading_is_at_the_start_of_the_next_line() -> None:
+    text = "1. Start\n1.1 Now.\n\nBackground\n  The Agency builds sites.\n\n2. Payment"
+
+    clauses = clauses_of(text)
+
+    assert tuple(sentence.span for sentence in clauses[2].sentences) == (
+        Span(start=19, end=30),
+        Span(start=30, end=58),
+    )
+
+
+def test_long_signature_heading_does_not_end_a_sentence() -> None:
+    text = (
+        "1.1 Governed by English law.\n\n"
+        "IN WITNESS WHEREOF the parties have signed this Agreement on the\n"
+        "date written above.\n"
+    )
+
+    clauses = clauses_of(text)
+
+    assert ids(text) == ("1.1", "p1")
+    assert tuple(sentence.span for sentence in clauses[1].sentences) == (Span(start=30, end=115),)
+
+
+def test_table_rows_are_sentences() -> None:
+    text = (
+        "Schedule 1 · Services and Charges\n"
+        "1. The Developer will build the site.\n"
+        "Milestone\tWork\tCharges\n"
+        "1 Discovery\tReview designs\t£1,600\n"
+        "\tTotal\t£1,600\n"
+        "2. Hosting is not part of the Services."
+    )
+
+    clauses = clauses_of(text)
+
+    assert ids(text) == ("S1", "S1.1", "S1.2")
+    assert tuple(sentence.span for sentence in clauses[1].sentences) == (
+        Span(start=34, end=72),
+        Span(start=72, end=95),
+        Span(start=95, end=129),
+        Span(start=129, end=143),
+    )
+    assert tuple(sentence.span for sentence in clauses[2].sentences) == (Span(start=143, end=182),)
+
+
+def test_hanging_indent_stays_one_sentence() -> None:
+    text = (
+        "1.1\tThe Agency will pay the fees within 30 days of\n"
+        "\treceiving a valid invoice, by bank\n"
+        "\ttransfer."
+    )
+
+    clauses = clauses_of(text)
+
+    assert tuple(sentence.span for sentence in clauses[0].sentences) == (Span(start=0, end=97),)
+
+
+def test_blank_sentence_joins_the_next() -> None:
+    text = "1.1 The Charges are below.\n\tTotal\t£9,600\n"
+
+    clauses = clauses_of(text)
+
+    assert tuple(sentence.span for sentence in clauses[0].sentences) == (
+        Span(start=0, end=27),
+        Span(start=27, end=41),
+    )
+
+
+def test_wrapped_first_line_is_not_a_heading() -> None:
+    clauses = clauses_of(
+        "This Agreement is made on\n5 November 2026 between the parties.\n1. Start\n1.1 Now."
+    )
+    assert tuple(clause.id for clause in clauses) == ("p1", "1", "1.1")
+    assert clauses[0].heading is None
+    assert tuple(sentence.span for sentence in clauses[0].sentences) == (Span(start=0, end=63),)
+
+
+def test_first_line_not_in_title_case_before_a_marker_is_a_heading() -> None:
+    clauses = clauses_of("Parties and recitals\n(1) Brightline Studio Ltd.")
+    assert tuple(clause.id for clause in clauses) == ("p1", "(1)")
+    assert clauses[0].heading == "Parties and recitals"
+
+
+def test_heading_after_blank_line_does_not_need_title_case() -> None:
+    clauses = clauses_of("1. Start\n1.1 Now.\n\nSigned by the parties\nKarim Benali\n")
+    assert clauses[2].id == "p1"
+    assert clauses[2].heading == "Signed by the parties"

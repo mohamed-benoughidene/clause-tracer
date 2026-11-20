@@ -9,6 +9,7 @@ from clause_tracer.core import (
     EmptyInputError,
     FileKind,
     InputTooLargeError,
+    InputWarning,
     NotTextError,
     NotUtf8Error,
 )
@@ -194,3 +195,17 @@ def test_pasted_over_the_byte_limit_raises() -> None:
 def test_pasted_over_the_word_limit_raises() -> None:
     with pytest.raises(InputTooLargeError):
         read_pasted_text("a " * 50_001)
+
+
+def test_not_english_text_carries_the_warning() -> None:
+    document = read_pasted_text(
+        "Les factures sont payées dans un délai de soixante jours à compter de la date de facture."
+    )
+
+    assert document.warnings == (InputWarning(code="not_english", page=None),)
+
+
+def test_english_text_has_no_warning() -> None:
+    document = read_pasted_text("Invoices will be paid within 60 days of the invoice date.")
+
+    assert document.warnings == ()
