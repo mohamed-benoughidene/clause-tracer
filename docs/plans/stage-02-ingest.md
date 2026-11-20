@@ -566,7 +566,7 @@ When this is done, `python -m clause_tracer.ingest` prints the clauses and sente
   - **Rules:** T11, [testing strategy 10](../testing-strategy.md#10-keeping-agent-written-tests-honest) (golden files only by the named command, in a commit of their own).
   - **Depends on:** S2-M4-T7, S2-M4-T8
 
-- [ ] **S2-M4-T12: Title rows (Owner)**
+- [x] **S2-M4-T12: Title rows (Owner)**
   - **Build:** Owner only. The values below are the planner's draft of what the owner decided on 20 Nov 2026 (question 15): the first line of a text is a heading when it passes the heading test, as if a blank line stood before it. In `src/clause_tracer/ingest/tests/tables/clause_split.toml`, change the `heading` of `p1` in three rows. Change nothing else in them.
     - Row `text-before-the-first-number`: `heading = ""` becomes `heading = "Development Services Agreement"`.
     - Row `parties-and-recitals`: `heading = ""` becomes `heading = "Parties"`.

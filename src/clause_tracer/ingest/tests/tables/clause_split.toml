@@ -128,7 +128,7 @@ This Agreement is dated 5 November 2026.
 1.1 This Agreement starts on the date at the top."""
 numbering = "numbers"
 clauses = [
-  { id = "p1", number = "", level = 1, parent = "", heading = "", starts_with = "Development Services Agreeme" },
+  { id = "p1", number = "", level = 1, parent = "", heading = "Development Services Agreement", starts_with = "Development Services Agreeme" },
   { id = "1", number = "1", level = 1, parent = "", heading = "Start and term", starts_with = "1. Start and term" },
   { id = "1.1", number = "1.1", level = 2, parent = "1", heading = "", starts_with = "1.1 This Agreement starts on" },
 ]
@@ -283,7 +283,7 @@ Background
 1. Definitions and interpretation"""
 numbering = "numbers"
 clauses = [
-  { id = "p1", number = "", level = 1, parent = "", heading = "", starts_with = "Parties" },
+  { id = "p1", number = "", level = 1, parent = "", heading = "Parties", starts_with = "Parties" },
   { id = "(1)", number = "(1)", level = 1, parent = "", heading = "", starts_with = "(1) Brightline Studio Ltd of" },
   { id = "(2)", number = "(2)", level = 1, parent = "", heading = "", starts_with = "(2) Karim Benali of 27 Rue D" },
   { id = "p2", number = "", level = 1, parent = "", heading = "Background", starts_with = "Background" },
@@ -431,7 +431,7 @@ Algiers 16000, Algeria ("the Developer").
 1.1 Words in the singular include the plural."""
 numbering = "numbers"
 clauses = [
-  { id = "p1", number = "", level = 1, parent = "", heading = "", starts_with = "Karim Benali" },
+  { id = "p1", number = "", level = 1, parent = "", heading = "Karim Benali", starts_with = "Karim Benali" },
   { id = "1", number = "1", level = 1, parent = "", heading = "Definitions", starts_with = "1. Definitions" },
   { id = "1.1", number = "1.1", level = 2, parent = "1", heading = "", starts_with = "1.1 Words in the singular in" },
 ]
@@ -522,4 +522,18 @@ Signedness for and on behalf of Brightline Studio Ltd by Sarah Jones, Director""
 numbering = "numbers"
 clauses = [
   { id = "14.6", number = "14.6", level = 1, parent = "", heading = "", starts_with = "14.6 This Agreement is gov" },
+]
+
+# Lines 2 to 4 of developer-agreement.txt: a first line that ends like a sentence is not a heading (question 15, 20 Nov 2026).
+[[case]]
+id = "first-line-that-ends-like-a-sentence-is-not-a-heading"
+text = """
+This Agreement is dated 5 November 2026.
+Parties
+(1) Brightline Studio Ltd, a company registered in England and Wales with company number 09876543, whose registered office is at 14 Harbour Street, Leeds LS1 4AB ("the Agency")."""
+numbering = "numbers"
+clauses = [
+  { id = "p1", number = "", level = 1, parent = "", heading = "", starts_with = "This Agreement is dated 5 N" },
+  { id = "p2", number = "", level = 1, parent = "", heading = "Parties", starts_with = "Parties" },
+  { id = "(1)", number = "(1)", level = 1, parent = "", heading = "", starts_with = "(1) Brightline Studio Ltd, a" },
 ]
