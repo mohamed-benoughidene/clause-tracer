@@ -140,8 +140,19 @@ DROPPED_FIRST_WORDS: Final[frozenset[str]] = frozenset(
 )
 THIS_BEFORE: Final[str] = r"(?i:\bthis)\s+$"
 THIS_BEFORE_RE: Final[re.Pattern[str]] = re.compile(THIS_BEFORE)
-OWN_NAME_DEFINITION: Final[str] = r"(?i:\bthis\s+(?:agreement|contract|deed)\b)"
-OWN_NAME_DEFINITION_RE: Final[re.Pattern[str]] = re.compile(OWN_NAME_DEFINITION)
+OWN_NAME_MEANS: Final[str] = (
+    QUOTE_CLOSE
+    + r"\s+(?:means|shall\s+mean|has\s+the\s+meaning)\s+(?i:this\s+(?:agreement|contract|deed))"
+    + r"(?![A-Za-z])"
+)
+OWN_NAME_MEANS_RE: Final[re.Pattern[str]] = re.compile(OWN_NAME_MEANS)
+OWN_NAME_BRACKET: Final[str] = (
+    r"(?i:\bthis\s+(?:[A-Za-z]+\s+){0,3}(?:agreement|contract|deed))"
+    + r"\s*\(\s*(?:(?i:each|together|collectively)\s+)?(?:(?i:the|a|an)\s+)?"
+    + QUOTE_OPEN
+    + r"(?:(?i:the)\s+)?$"
+)
+OWN_NAME_BRACKET_RE: Final[re.Pattern[str]] = re.compile(OWN_NAME_BRACKET)
 
 UNDEFINED_RUN: Final[str] = r"(?<![A-Za-z])[A-Z][a-z]+(?: [A-Z][a-z]+){1,3}(?![A-Za-z])"
 UNDEFINED_RUN_RE: Final[re.Pattern[str]] = re.compile(UNDEFINED_RUN)

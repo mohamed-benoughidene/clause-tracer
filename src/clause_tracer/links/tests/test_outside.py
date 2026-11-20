@@ -201,3 +201,33 @@ def test_own_title_is_not_outside() -> None:
         ]
     )
     assert outside == ()
+
+
+def test_definition_that_mentions_this_agreement_stays_outside() -> None:
+    text, outside = _outside(
+        [
+            {
+                "id": "1",
+                "sentences": [
+                    '1. "Data Processing Agreement" means the agreement made under this Agreement.'
+                ],
+            },
+            {"id": "2", "sentences": ["2. The Data Processing Agreement applies."]},
+        ]
+    )
+    assert outside == (
+        OutsideDocument(
+            name="Data Processing Agreement",
+            evidence=span_of(text, "Data Processing Agreement", 2),
+        ),
+    )
+
+
+def test_own_name_by_bracket_is_not_outside() -> None:
+    _, outside = _outside(
+        [
+            {"id": "1", "sentences": ['1. This Agreement (the "Services Agreement") is signed.']},
+            {"id": "2", "sentences": ["2. Work under the Services Agreement continues."]},
+        ]
+    )
+    assert outside == ()

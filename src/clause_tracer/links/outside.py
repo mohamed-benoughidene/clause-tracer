@@ -11,7 +11,8 @@ from clause_tracer.links._patterns import (
     DROPPED_FIRST_WORDS,
     OUTSIDE_DOCUMENT_RE,
     OUTSIDE_NAME_RE,
-    OWN_NAME_DEFINITION_RE,
+    OWN_NAME_BRACKET_RE,
+    OWN_NAME_MEANS_RE,
     THIS_BEFORE_RE,
 )
 from clause_tracer.links._spans import build_span_set, trimmed
@@ -37,9 +38,7 @@ def find_outside_documents(
     own_terms = frozenset(
         fold_for_matching(definition.term).text
         for definition in definitions
-        if OWN_NAME_DEFINITION_RE.search(
-            text[definition.definition.start : definition.definition.end]
-        )
+        if _is_own_name(text, definition)
     )
     own_title = _own_title(index)
     found: list[OutsideDocument] = []
@@ -64,6 +63,14 @@ def find_outside_documents(
                     continue
                 found.append(OutsideDocument(name=text[start : match.end()], evidence=evidence))
     return tuple(found)
+
+
+def _is_own_name(text: str, definition: Definition) -> bool:
+    says_it_means_this_agreement = OWN_NAME_MEANS_RE.match(text, definition.quoted.end) is not None
+    before_the_term = text[definition.definition.start : definition.quoted.start]
+    is_named_by_bracket = OWN_NAME_BRACKET_RE.search(before_the_term) is not None
+    is_own_name = says_it_means_this_agreement or is_named_by_bracket
+    return is_own_name
 
 
 def _start_after_dropped_words(text: str, start: int, end: int) -> int | None:
