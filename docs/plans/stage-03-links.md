@@ -3,9 +3,9 @@
 | | |
 | --- | --- |
 | Stage | 3, `links` |
-| Status | Draft |
+| Status | Accepted |
 | Branch | One branch for each milestone, cut from `main`: `feat/links-m1-foundations`, `feat/links-m2-cross-references`, `feat/links-m3-terms-and-outside-documents`, `feat/links-m4-overrides`, `feat/links-m5-link-map-and-sample`. See [the README](README.md), "Branches and pull requests" |
-| Accepted on | Not yet |
+| Accepted on | 20 Nov 2026 |
 | Stage outline | [System design section 15.3](../system-design.md#153-stage-3-links) |
 
 ## 1. Goal
@@ -54,7 +54,7 @@
 
 ## 4. Checks before starting
 
-- [ ] **The plan is Accepted.** Questions 1 to 6 in section 6 are answered, and the tasks follow the answers. Question 8 is answered before S3-M5-T10. Question 7 is for the stage 4 plan.
+- [x] **The plan is Accepted.** Questions 1 to 6 in section 6 are answered, and the tasks follow the answers. Question 8 is answered before S3-M5-T10. Question 7 is for the stage 4 plan.
 - [ ] **The skeleton passes.** Run `.venv/bin/uv sync`, then `scripts/check.sh`. It must exit 0 before any change.
 - [ ] **The sample outline is as this plan assumes.** Run `.venv/bin/uv run python -m clause_tracer.ingest --full`. It must print 65 clauses; the schedule heading has the id `S1` and the number `Schedule 1`; the party lines are `(1)` and `(2)`; the definitions are sentences `1.1.s2` to `1.1.s6`; clause `11.1` is one sentence holding "Master Agreement"; clause `14.2` is the sentence "14.2 If this Agreement and Schedule 1 conflict, this Agreement prevails."; and the signature lines `p4` and `p5` have a heading. The planner checked this on 20 Nov 2026. If one fails, stop and bring it to the owner.
 - [ ] **The docs are on `main`.** The `docs/` branch that holds this plan, with any spec or system design change the answers need, is merged. Milestone 1 is cut from that `main`.
