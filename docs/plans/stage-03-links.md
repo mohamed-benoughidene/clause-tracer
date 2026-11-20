@@ -202,6 +202,43 @@ When this is done, `links` has a coverage floor, empty owner tables, a committed
   - **Rules:** T3, S2.
   - **Depends on:** S3-M1-T5
 
+- [ ] **S3-M1-T9: Check the clauses in one pass, and test the writer for the structure checks**
+  - **Why:** A review of S3-M1-T6 found two gaps. `_check_clauses` makes seven passes over the clauses, so each new rule needs another loop. And the writer shares the level, overlap and sentence-id checks with the loader, but only the loader has tests for them. The order of errors, rule by rule, came from S3-M1-T6. This task changes it to clause by clause, which is the order T3 states ("the checks run in JSON order"). It changes the first error only for a fixture with two or more faults.
+  - **Build:** In `src/clause_tracer/links/sample_clauses.py`, rewrite the body of `_check_clauses(text: str, clauses: Sequence[Clause]) -> None`, with the same signature, messages and checks as in T6. It makes one pass over `clauses`, and for each clause it runs these checks in this order, raising on the first failure:
+    1. the clause span is inside the text;
+    2. each sentence span of the clause is inside the text;
+    3. the clause id is not one an earlier clause has;
+    4. the clause has no `parent_id`, or its `parent_id` names an earlier clause;
+    5. each sentence span is inside the clause span;
+    6. the level is 1 or more, and then it is 1 with no parent, or the parent's level plus 1;
+    7. the clause starts at or after the end of the previous clause (no check for the first clause);
+    8. each sentence id is not one that an earlier sentence in the document has.
+
+    The pass keeps `by_id: dict[ClauseId, Clause]`, `previous: Clause | None` and `seen_sentences: set[SentenceId]`. Remove the old loops. Change no message and no signature. In `src/clause_tracer/links/README.md`, change the numbered list under "The writer and the loader share one structure check" to this order, and say "for each clause, in order".
+  - **Files:** `src/clause_tracer/links/sample_clauses.py`, `src/clause_tracer/links/tests/test_sample_clauses.py`, `src/clause_tracer/links/README.md`.
+  - **Tests first:** in `test_sample_clauses.py`, with the helper and the two clauses of T3, and `dataclasses.replace` to change one field (the 25 tests stay and must pass):
+    - `test_dump_refuses_a_bad_level` (clause `1.1` with `level=3` raises `links sample: level of 1.1 does not fit its parent`);
+    - `test_dump_refuses_an_overlap` (clause `1.1` with `span=Span(start=5, end=21)` and its sentence `1.1.s1` with `span=Span(start=5, end=21)` raises `links sample: span of 1.1 overlaps an earlier clause`);
+    - `test_dump_refuses_a_duplicate_sentence_id` (the sentence of clause `1.1` with id `SentenceId("1.s1")` raises `links sample: duplicate sentence id 1.s1`);
+    - `test_first_error_follows_clause_order` (clause `1` with `level=2`, and clause `1.1` with id `ClauseId("1")`: `dump_clause_fixture` raises `links sample: level of 1 does not fit its parent`, not `duplicate clause id 1`). This test fails before the change.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_sample_clauses.py` reports 29 passed, `.venv/bin/uv run pytest tests/test_links_sample.py` reports 2 passed, and `scripts/check.sh` exits 0. See `test_first_error_follows_clause_order` fail first; the other three tests pass before the change, as guards.
+  - **Rules:** D4 and I9, T1, S3. Do not change the fixture file.
+  - **Depends on:** S3-M1-T6
+
+- [ ] **S3-M1-T10: Make the test-case builder refuse a paragraph id with a number, and type its id honestly**
+  - **Why:** A review of S3-M1-T7 found two gaps. A row with a paragraph id and a `number` key loses the number without an error (T7 set that order). And `cast(str, _string(row, "id"))` hides a `None` from mypy. `ingest` gives a paragraph clause (`p1`) the number `None` and never a number, so a test row with both is a shape that real input does not have.
+  - **Build:** In `src/clause_tracer/links/tests/case_builder.py`:
+    - In `_parse_rows`, after the check of the sentence text (the last check of the T5 error order), add: when `_is_paragraph_id(clause_id)` and the row has the key `number`, raise `ValueError(f"paragraph id {clause_id} cannot have a number")`. No existing error changes order. A row with a paragraph id and no `number` key still gets the number `None`.
+    - Add `def _required_string(row: Mapping[str, object], key: str) -> str`. It reads `row[key]` and raises `ValueError(f"{key} must be a string")` when the value is not a `str`. It assumes the key is present: the checks `missing key id` and `missing key sentences` stay where they are, before it. Replace `cast(str, _string(row, "id"))` with `_required_string(row, "id")`. `_string` stays for `parent`, `heading` and `number`.
+    - The order of errors of T5 does not change.
+  - **Files:** `src/clause_tracer/links/tests/case_builder.py`, `src/clause_tracer/links/tests/test_case_builder.py`.
+  - **Tests first:** in `test_case_builder.py` (the 17 tests stay and must pass):
+    - `test_paragraph_id_with_number_raises` (rows `[{"id": "p1", "number": "1", "sentences": ["x."]}]` raise `ValueError("paragraph id p1 cannot have a number")`);
+    - `test_wrong_type_id_still_reports_missing_sentences` (rows `[{"id": 3}]` raise `ValueError("missing key sentences")`), which guards the order of T5.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_case_builder.py` reports 19 passed, and `scripts/check.sh` exits 0. See `test_paragraph_id_with_number_raises` fail first; the other new test passes before the change, as a guard.
+  - **Rules:** T3, S2.
+  - **Depends on:** S3-M1-T7
+
 ### M2: Cross-references
 
 When this is done, `find_references` finds every cross-reference with its source span and target, and the owner's references table passes.
@@ -659,6 +696,7 @@ The owner answered all eight questions on 20 Nov 2026, each as recommended, with
 | --- | --- | --- |
 | 20 Nov 2026 | The five owner tables were filled before milestone 1, on the plan's `docs/` branch, instead of first as empty files. S3-M1-T2 is done by that commit, and S3-M2-T5, S3-M3-T5, S3-M3-T6, S3-M4-T3 and S3-M5-T7 are ticked. S3-M5-T6 (read the golden files) is still open | The owner asked the agent to draft the tables, confirmed the cases that need a product judgement (names and addresses in the undefined list, the Master Agreement as a document that is not loaded, the 8.2 carve-out, and the two "prevails" forms) in chat, and said the tables are done. The other cases follow the answers to questions 1 to 5 |
 | 20 Nov 2026 | Added S3-M1-T6 and S3-M1-T7 to milestone 1. The owner accepted both tasks in chat on 20 Nov 2026, and confirmed the level rule of S3-M1-T6. They harden the fixture writer and loader, and align the test-case builder with how `ingest` names clauses. Milestone 2 waits for the milestone 1 pull request, as the README rule says | A code review of S3-M1-T3 to T5 found gaps that the plan text itself allowed: no check of levels, sentence ids or overlap, a writer that accepts what the loader refuses, a `p`-prefix guess for paragraph ids, and `\r` in a sentence. T3 to T5 stay ticked and unchanged. The review also named the two fixed counts of the drift test (S3-M1-T4) as a gap; they stay, because they are the owner's tripwire for a change in the `ingest` outline |
+| 20 Nov 2026 | Added S3-M1-T9 and S3-M1-T10 to milestone 1: one pass in `_check_clauses` and writer tests for the structure checks (T9), and a refusal of a paragraph id with a number and an honest type for the row id (T10). The owner chose the clause order of errors in T9 and accepted both tasks in chat on 20 Nov 2026 | A second code review, of S3-M1-T6 and S3-M1-T7, found four gaps. T6 and T7 stay ticked and unchanged. The owner asked for all four to be fixed |
 
 ## 9. Notes for the next stage
 
