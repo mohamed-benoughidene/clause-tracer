@@ -620,7 +620,7 @@ When this is done, `find_overrides` gives each override with its direction, and 
   - **Rules:** Constitution T11.
   - **Depends on:** S3-M1-T2
 
-- [ ] **S3-M4-T4: The overrides table test**
+- [x] **S3-M4-T4: The overrides table test**
   - **Build:** In `src/clause_tracer/links/tests/test_override_table.py`: `TABLE = Path(__file__).parent / "tables" / "overrides.toml"`, `CASE_KEYS = REQUIRED = frozenset({"id", "clauses", "overrides"})`. `test_override_table(case)`, parametrised over the cases with the case id as the test id: build the case, run `find_overrides(text, index, find_references(text, index), find_outside_documents(text, index, find_definitions(text, index)))`, and assert the result equals the expected tuple (`ClauseId(clause)`, `ClauseId(target)` or `None`, `overrides_target`, and the evidence from `span_of(text, evidence, nth)`). Load the table at module level with `load_table` and parametrise, exactly as `ingest/tests/test_clause_table.py` does. Each nested list item must be a `dict` (`assert isinstance(row, dict)`, as that file does); strings go through `as_str(value, where)`, booleans through `as_bool`, `nth` through `as_int` and defaults to 1 when absent; the `clauses` rows are passed to `build_case` as they are. `test_override_table_has_rows` asserts at least 8 cases.
   - **Files:** `src/clause_tracer/links/tests/test_override_table.py`.
   - **Tests first:** the two tests above, run before any fix. Never edit the table. If the code is right and a row looks wrong, stop and ask the owner.
