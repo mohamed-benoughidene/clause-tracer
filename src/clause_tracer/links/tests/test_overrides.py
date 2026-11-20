@@ -606,3 +606,32 @@ def test_directional_override_in_another_sentence_hides_no_loser() -> None:
             evidence=span_of(text, "This Clause prevails over clause 4."),
         ),
     )
+
+
+def test_heading_sentence_gives_no_directional_override() -> None:
+    _, overrides = _overrides(
+        [
+            {"id": "4", "sentences": ["4. Fees."]},
+            {
+                "id": "9",
+                "heading": "Subject to Clause 4",
+                "sentences": ["Subject to Clause 4", "9. Pay."],
+            },
+        ]
+    )
+    assert overrides == ()
+
+
+def test_heading_sentence_gives_no_prevails_override() -> None:
+    _, overrides = _overrides(
+        [
+            {"id": "4", "sentences": ["4. Fees."]},
+            {"id": "5", "sentences": ["5. Payment."]},
+            {
+                "id": "9",
+                "heading": "Clause 4 prevails over clause 5",
+                "sentences": ["Clause 4 prevails over clause 5", "9. Pay."],
+            },
+        ]
+    )
+    assert overrides == ()

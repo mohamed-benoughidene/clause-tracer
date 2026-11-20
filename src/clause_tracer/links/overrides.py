@@ -85,6 +85,9 @@ def _directional_overrides(
         sentence = index.sentence_at(phrase.start())
         if clause is None or sentence is None:
             continue
+        is_heading_sentence = clause.heading is not None and sentence == clause.sentences[0]
+        if is_heading_sentence:
+            continue
         taken = _taken_groups(text, phrase, sentence, groups, phrases)
         if taken:
             evidence_end = taken[-1][0].end
@@ -195,6 +198,9 @@ def _prevails_for_sentence(
 ) -> tuple[Override, ...]:
     verb = PREVAILS_RE.search(text, sentence.span.start, sentence.span.end)
     if verb is None:
+        return ()
+    is_heading_sentence = clause.heading is not None and sentence == clause.sentences[0]
+    if is_heading_sentence:
         return ()
     sentence_references = tuple(
         reference

@@ -628,7 +628,7 @@ When this is done, `find_overrides` gives each override with its direction, and 
   - **Rules:** T11, T13.
   - **Depends on:** S3-M4-T2, S3-M4-T3
 
-- [ ] **S3-M4-T5: Heading sentences give no override**
+- [x] **S3-M4-T5: Heading sentences give no override**
   - **Why:** A code review of milestone 4 found that `find_overrides` reads heading sentences as contract wording. A clause headed `Subject to Clause 4` gives `(9, 4, False)` with the heading as evidence. M3 skips heading sentences (a heading sentence is defined in the rules for every task). The owner chose to skip them here too on 20 Nov 2026.
   - **Build:** In `src/clause_tracer/links/overrides.py`, skip a heading sentence in both rules:
     - In `_directional_overrides`, after `clause` and `sentence` are known, `continue` when `is_heading_sentence` is true, where `is_heading_sentence = clause.heading is not None and sentence == clause.sentences[0]`.
