@@ -572,7 +572,7 @@ When this is done, `find_overrides` gives each override with its direction, and 
   - **Rules:** Spec 4.5, Spec 5 (Rule 4 note: an override never changes the label), [testing strategy 4](../testing-strategy.md#4-what-to-test-in-each-module).
   - **Depends on:** S3-M2-T4, S3-M3-T3
 
-- [ ] **S3-M4-T2: "Prevails" sentences**
+- [x] **S3-M4-T2: "Prevails" sentences**
   - **Build:** Needs questions 4 and 5, answered on 20 Nov 2026 as recommended. In `_patterns.py`: `PREVAILS = r"(?<![A-Za-z])(?i:(?:shall\s+)?(?:prevails?|takes?\s+precedence))(?![A-Za-z])"`, `SELF_NAME = r"(?<![A-Za-z])(?i:this\s+(?:agreement|clause|section|paragraph|schedule))(?![A-Za-z])"` and `WINNER_LEFTOVER = r"(?:\s|(?i:the|then|and|or|of|provisions?)(?![A-Za-z]))*"`, run as `PREVAILS_RE`, `SELF_NAME_RE` and `WINNER_LEFTOVER_RE`. In `find_overrides`, for each sentence `s` of each clause `c` (in text order) with `v = PREVAILS_RE.search(text, s.span.start, s.span.end)` not `None` (the first match in the sentence only):
     - The winner part runs from `w` to `v.start()`, where `w` is the later of two offsets, `comma_end` and `lead_end`. Work them out after the sentence references (next point) are known:
       - `comma_end` is just after the last `","` in `text[s.span.start:v.start()]` that does not lie inside the source of any sentence reference (`reference.source.start <= position < reference.source.end`), or `s.span.start` when there is none. So the comma in `Clauses 4, 5 prevail over clause 6.` does not start the winner part.

@@ -176,3 +176,14 @@ OVERRIDE_GAP: Final[str] = (
     r"\s*(?:(?i:the)\s+(?i:provisions?|terms?|requirements?)\s+(?i:of|in)\s+)?"
 )
 OVERRIDE_GAP_RE: Final[re.Pattern[str]] = re.compile(OVERRIDE_GAP)
+
+PREVAILS: Final[str] = (
+    r"(?<![A-Za-z])(?i:(?:shall\s+)?(?:prevails?|takes?\s+precedence))(?![A-Za-z])"
+)
+PREVAILS_RE: Final[re.Pattern[str]] = re.compile(PREVAILS)
+SELF_NAME: Final[str] = (
+    r"(?<![A-Za-z])(?i:this\s+(?:agreement|clause|section|paragraph|schedule))(?![A-Za-z])"
+)
+SELF_NAME_RE: Final[re.Pattern[str]] = re.compile(SELF_NAME)
+WINNER_LEFTOVER: Final[str] = r"(?:\s|(?i:the|then|and|or|of|provisions?)(?![A-Za-z]))*"
+WINNER_LEFTOVER_RE: Final[re.Pattern[str]] = re.compile(WINNER_LEFTOVER)

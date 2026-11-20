@@ -277,3 +277,332 @@ def test_general_with_outside_document() -> None:
         ]
     )
     assert overrides == ()
+
+
+def test_agreement_prevails_over_schedule() -> None:
+    text, overrides = _overrides(
+        [
+            {
+                "id": "14.2",
+                "sentences": [
+                    "14.2 If this Agreement and Schedule 1 conflict, this Agreement prevails."
+                ],
+            },
+            {
+                "id": "S1",
+                "number": "Schedule 1",
+                "heading": "Fees",
+                "sentences": ["Schedule 1 · Fees"],
+            },
+        ]
+    )
+    assert overrides == (
+        Override(
+            clause_id=ClauseId("14.2"),
+            target=ClauseId("S1"),
+            overrides_target=True,
+            evidence=span_of(
+                text, "14.2 If this Agreement and Schedule 1 conflict, this Agreement prevails."
+            ),
+        ),
+    )
+
+
+def test_schedule_prevails() -> None:
+    text, overrides = _overrides(
+        [
+            {
+                "id": "14.2",
+                "sentences": [
+                    "14.2 If this Agreement and Schedule 1 conflict, Schedule 1 prevails."
+                ],
+            },
+            {
+                "id": "S1",
+                "number": "Schedule 1",
+                "heading": "Fees",
+                "sentences": ["Schedule 1 · Fees"],
+            },
+        ]
+    )
+    assert overrides == (
+        Override(
+            clause_id=ClauseId("14.2"),
+            target=ClauseId("S1"),
+            overrides_target=False,
+            evidence=span_of(
+                text, "14.2 If this Agreement and Schedule 1 conflict, Schedule 1 prevails."
+            ),
+        ),
+    )
+
+
+def test_this_clause_prevails_over_named_clause() -> None:
+    text, overrides = _overrides(
+        [
+            {"id": "4", "sentences": ["4. Fees."]},
+            {"id": "9", "sentences": ["9. This Clause prevails over clause 4."]},
+        ]
+    )
+    assert overrides == (
+        Override(
+            clause_id=ClauseId("9"),
+            target=ClauseId("4"),
+            overrides_target=True,
+            evidence=span_of(text, "9. This Clause prevails over clause 4."),
+        ),
+    )
+
+
+def test_conflict_naming_nothing() -> None:
+    text, overrides = _overrides(
+        [{"id": "9", "sentences": ["9. In case of conflict, this Section prevails."]}]
+    )
+    assert overrides == (
+        Override(
+            clause_id=ClauseId("9"),
+            target=None,
+            overrides_target=True,
+            evidence=span_of(text, "9. In case of conflict, this Section prevails."),
+        ),
+    )
+
+
+def test_takes_precedence() -> None:
+    text, overrides = _overrides(
+        [
+            {
+                "id": "S1",
+                "number": "Schedule 1",
+                "heading": "Fees",
+                "sentences": ["Schedule 1 · Fees"],
+            },
+            {"id": "14.2", "sentences": ["14.2 this Agreement takes precedence over Schedule 1"]},
+        ]
+    )
+    assert overrides == (
+        Override(
+            clause_id=ClauseId("14.2"),
+            target=ClauseId("S1"),
+            overrides_target=True,
+            evidence=span_of(text, "14.2 this Agreement takes precedence over Schedule 1"),
+        ),
+    )
+
+
+def test_prevails_with_no_winner() -> None:
+    _, overrides = _overrides([{"id": "9", "sentences": ["9. The higher figure prevails."]}])
+    assert overrides == ()
+
+
+def test_prevails_in_ordinary_sentence() -> None:
+    _, overrides = _overrides(
+        [{"id": "9", "sentences": ["9. The law that governs this Agreement prevails."]}]
+    )
+    assert overrides == ()
+
+
+def test_take_precedence_over_set_off() -> None:
+    _, overrides = _overrides(
+        [
+            {
+                "id": "9",
+                "sentences": [
+                    "9. Amounts due under this Agreement take precedence over any set-off."
+                ],
+            }
+        ]
+    )
+    assert overrides == ()
+
+
+def test_unresolved_loser_is_no_override() -> None:
+    _, overrides = _overrides(
+        [{"id": "9", "sentences": ["9. this Agreement prevails over clause 99"]}]
+    )
+    assert overrides == ()
+
+
+def test_subject_to_then_prevails() -> None:
+    text, overrides = _overrides(
+        [
+            {"id": "3", "sentences": ["3. Fees."]},
+            {
+                "id": "S1",
+                "number": "Schedule 1",
+                "heading": "Fees",
+                "sentences": ["Schedule 1 · Fees"],
+            },
+            {
+                "id": "9",
+                "sentences": ["9. Subject to clause 3, this Agreement prevails over Schedule 1."],
+            },
+        ]
+    )
+    assert overrides == (
+        Override(
+            clause_id=ClauseId("9"),
+            target=ClauseId("S1"),
+            overrides_target=True,
+            evidence=span_of(
+                text, "9. Subject to clause 3, this Agreement prevails over Schedule 1."
+            ),
+        ),
+        Override(
+            clause_id=ClauseId("9"),
+            target=ClauseId("3"),
+            overrides_target=False,
+            evidence=span_of(text, "Subject to clause 3"),
+        ),
+    )
+
+
+def test_self_and_reference_in_winner() -> None:
+    _, overrides = _overrides(
+        [
+            {
+                "id": "S1",
+                "number": "Schedule 1",
+                "heading": "Fees",
+                "sentences": ["Schedule 1 · Fees"],
+            },
+            {"id": "14.2", "sentences": ["14.2 Schedule 1 and this Agreement prevails."]},
+        ]
+    )
+    assert overrides == ()
+
+
+def test_agreement_prevails_naming_nothing_is_nothing() -> None:
+    _, overrides = _overrides(
+        [{"id": "9", "sentences": ["9. For the avoidance of doubt, this Agreement prevails."]}]
+    )
+    assert overrides == ()
+
+
+def test_prevails_over_outside_document() -> None:
+    _, overrides = _overrides(
+        [
+            {
+                "id": "9",
+                "sentences": [
+                    "9. If there is a conflict between this Agreement and the Master Agreement, "
+                    "this Agreement prevails."
+                ],
+            }
+        ]
+    )
+    assert overrides == ()
+
+
+def test_clause_prevails_over_any_terms() -> None:
+    _, overrides = _overrides(
+        [{"id": "9", "sentences": ["9. This Clause prevails over any other terms."]}]
+    )
+    assert overrides == ()
+
+
+def test_conflict_this_clause_prevails() -> None:
+    text, overrides = _overrides(
+        [{"id": "9", "sentences": ["9. If any term conflicts, then this Clause prevails."]}]
+    )
+    assert overrides == (
+        Override(
+            clause_id=ClauseId("9"),
+            target=None,
+            overrides_target=True,
+            evidence=span_of(text, "9. If any term conflicts, then this Clause prevails."),
+        ),
+    )
+
+
+def test_sorted_by_evidence() -> None:
+    text, overrides = _overrides(
+        [
+            {"id": "4", "sentences": ["4. Fees."]},
+            {"id": "9", "sentences": ["Subject to clause 4.", "Subject to clause 4."]},
+        ]
+    )
+    assert overrides == (
+        Override(
+            clause_id=ClauseId("9"),
+            target=ClauseId("4"),
+            overrides_target=False,
+            evidence=span_of(text, "Subject to clause 4", 1),
+        ),
+        Override(
+            clause_id=ClauseId("9"),
+            target=ClauseId("4"),
+            overrides_target=False,
+            evidence=span_of(text, "Subject to clause 4", 2),
+        ),
+    )
+
+
+def test_sentence_without_a_number_prefix() -> None:
+    text, overrides = _overrides(
+        [
+            {"id": "4", "sentences": ["4. Fees."]},
+            {"id": "5", "sentences": ["5. Payment."]},
+            {"id": "9", "sentences": ["9. Fees.", "Clause 4 prevails over clause 5."]},
+        ]
+    )
+    assert overrides == (
+        Override(
+            clause_id=ClauseId("9"),
+            target=ClauseId("4"),
+            overrides_target=False,
+            evidence=span_of(text, "Clause 4 prevails over clause 5."),
+        ),
+    )
+
+
+def test_comma_inside_a_list_winner() -> None:
+    text, overrides = _overrides(
+        [
+            {"id": "4", "sentences": ["4. Fees."]},
+            {"id": "5", "sentences": ["5. Payment."]},
+            {"id": "6", "sentences": ["6. Expenses."]},
+            {"id": "9", "sentences": ["9. Clauses 4, 5 prevail over clause 6."]},
+        ]
+    )
+    evidence = span_of(text, "9. Clauses 4, 5 prevail over clause 6.")
+    assert overrides == (
+        Override(
+            clause_id=ClauseId("9"),
+            target=ClauseId("4"),
+            overrides_target=False,
+            evidence=evidence,
+        ),
+        Override(
+            clause_id=ClauseId("9"),
+            target=ClauseId("5"),
+            overrides_target=False,
+            evidence=evidence,
+        ),
+    )
+
+
+def test_directional_override_in_another_sentence_hides_no_loser() -> None:
+    text, overrides = _overrides(
+        [
+            {"id": "4", "sentences": ["4. Fees."]},
+            {
+                "id": "9",
+                "sentences": ["9. Subject to clause 4.", "This Clause prevails over clause 4."],
+            },
+        ]
+    )
+    assert overrides == (
+        Override(
+            clause_id=ClauseId("9"),
+            target=ClauseId("4"),
+            overrides_target=False,
+            evidence=span_of(text, "Subject to clause 4"),
+        ),
+        Override(
+            clause_id=ClauseId("9"),
+            target=ClauseId("4"),
+            overrides_target=True,
+            evidence=span_of(text, "This Clause prevails over clause 4."),
+        ),
+    )
