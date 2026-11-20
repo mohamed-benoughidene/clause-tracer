@@ -33,9 +33,12 @@ class SpanSet:
 
 
 def build_span_set(spans: Iterable[Span]) -> SpanSet:
-    """Sort the spans by start, then keep the largest end so far at each place."""
+    """Drop empty spans, sort the rest by start, and keep the largest end so far."""
 
-    ordered = sorted(spans, key=lambda span: (span.start, span.end))
+    ordered = sorted(
+        (span for span in spans if span.start != span.end),
+        key=lambda span: (span.start, span.end),
+    )
     starts = tuple(span.start for span in ordered)
     max_ends: list[int] = []
     running = -1

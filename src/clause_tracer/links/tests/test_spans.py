@@ -34,3 +34,10 @@ def test_empty_span_overlaps_nothing() -> None:
 
 def test_empty_set() -> None:
     assert build_span_set(()).overlaps(_span(0, 5)) is False
+
+
+def test_empty_span_in_the_set_overlaps_nothing() -> None:
+    assert build_span_set([_span(5, 5)]).overlaps(_span(3, 8)) is False
+    span_set = build_span_set([_span(5, 5), _span(10, 12)])
+    assert span_set.overlaps(_span(3, 8)) is False
+    assert span_set.overlaps(_span(11, 20)) is True

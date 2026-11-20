@@ -371,7 +371,7 @@ When this is done, `find_references` finds every cross-reference with its source
   - **Rules:** T11, T13.
   - **Depends on:** S3-M2-T4, S3-M2-T5
 
-- [ ] **S3-M2-T7: A set of spans ignores empty spans**
+- [x] **S3-M2-T7: A set of spans ignores empty spans**
   - **Why:** A code review of S3-M2-T1 found that `build_span_set` keeps an empty span (`start == end`). An empty span shares no character with any span, and `overlaps` already says so for the span it is asked about. But the set `{(5, 5)}` with the span `(3, 8)` gives `True`, because `max_ends` counts the empty span. No M3 or M5 task builds an empty span today. The set must still hold the rule that T1 states for the query.
   - **Build:** In `src/clause_tracer/links/_spans.py`, change `build_span_set` so that it drops every span with `start == end` before it sorts. The other rules of S3-M2-T1 stay: sort by `(start, end)`, `starts` holds the sorted starts, and `max_ends[i]` is the largest `end` among the first `i + 1` sorted spans. `overlaps` does not change.
   - **Files:** `src/clause_tracer/links/_spans.py`, `src/clause_tracer/links/tests/test_spans.py`.
