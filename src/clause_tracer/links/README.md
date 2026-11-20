@@ -27,16 +27,16 @@ Cross-references, defined terms, override clauses and references to other docume
   - Output: a `SampleInput`. The non-text fields of its `Document` are empty.
   - Raises `ValueError` with a message that starts `links sample: ` when the text fails one of these checks: it is not JSON; the top level is not an object; `format` or `version` is wrong; a key is unknown or missing; a value has the wrong type; a source kind is not a text kind; a clause or sentence span lies outside the text; a clause id is repeated; a parent id is unknown; a sentence span lies outside its clause; a level is below 1; a level does not fit its parent; a clause overlaps an earlier clause; a sentence id is repeated.
 
-The writer and the loader share one structure check, which raises on the first failure:
+The writer and the loader share one structure check. For each clause, in order, it raises on the first failure:
 
-1. Every clause span and sentence span lies inside the text.
-2. Clause ids are unique.
-3. A parent id names an earlier clause.
-4. Every sentence span lies inside its clause span.
-5. A level is 1 or more.
-6. A clause with no parent has level 1, and a clause with a parent has its parent's level plus 1.
-7. A clause starts at or after the end of the clause before it.
-8. Sentence ids are unique across the document.
+1. The clause span lies inside the text.
+2. Every sentence span of the clause lies inside the text.
+3. The clause id is not one an earlier clause has.
+4. The clause has no `parent_id`, or its `parent_id` names an earlier clause.
+5. Every sentence span of the clause lies inside the clause span.
+6. The level is 1 or more, and then it is 1 with no parent, or the parent's level plus 1.
+7. The clause starts at or after the end of the clause before it.
+8. Every sentence id of the clause is not one an earlier sentence in the document has.
 
 Fixture format: `format` is `clause-tracer-links-sample` and `version` is `1`. The layout is:
 

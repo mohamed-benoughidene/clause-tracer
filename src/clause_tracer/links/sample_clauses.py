@@ -361,45 +361,41 @@ def _check_span(span: Span, text: str, item_id: ClauseId | SentenceId) -> None:
 def _check_clauses(text: str, clauses: Sequence[Clause]) -> None:
     """Check the spans and structure of every clause, raising on the first failure."""
 
+    by_id: dict[ClauseId, Clause] = {}
+    previous: Clause | None = None
+    seen_sentences: set[SentenceId] = set()
+
     for clause in clauses:
         _check_span(clause.span, text, clause.id)
         for sentence in clause.sentences:
             _check_span(sentence.span, text, sentence.id)
 
-    seen_ids: set[ClauseId] = set()
-    for clause in clauses:
-        if clause.id in seen_ids:
+        if clause.id in by_id:
             raise ValueError(f"links sample: duplicate clause id {clause.id}")
-        seen_ids.add(clause.id)
 
-    by_id: dict[ClauseId, Clause] = {}
-    for clause in clauses:
-        if clause.parent_id is not None and clause.parent_id not in by_id:
+        parent = None if clause.parent_id is None else by_id.get(clause.parent_id)
+        if clause.parent_id is not None and parent is None:
             raise ValueError(f"links sample: unknown parent {clause.parent_id}")
-        by_id[clause.id] = clause
 
-    for clause in clauses:
         for sentence in clause.sentences:
             if sentence.span.start < clause.span.start or sentence.span.end > clause.span.end:
                 raise ValueError(f"links sample: span of {sentence.id} is outside its clause")
 
-    for clause in clauses:
-        parent_id = clause.parent_id
         if clause.level < 1:
             raise ValueError(f"links sample: level of {clause.id} is not 1 or more")
-        if parent_id is None:
+        if parent is None:
             if clause.level != 1:
                 raise ValueError(f"links sample: level of {clause.id} does not fit its parent")
-        elif clause.level != by_id[parent_id].level + 1:
+        elif clause.level != parent.level + 1:
             raise ValueError(f"links sample: level of {clause.id} does not fit its parent")
 
-    for previous, clause in zip(clauses, clauses[1:], strict=False):
-        if clause.span.start < previous.span.end:
+        if previous is not None and clause.span.start < previous.span.end:
             raise ValueError(f"links sample: span of {clause.id} overlaps an earlier clause")
 
-    seen_sentences: set[SentenceId] = set()
-    for clause in clauses:
         for sentence in clause.sentences:
             if sentence.id in seen_sentences:
                 raise ValueError(f"links sample: duplicate sentence id {sentence.id}")
             seen_sentences.add(sentence.id)
+
+        by_id[clause.id] = clause
+        previous = clause

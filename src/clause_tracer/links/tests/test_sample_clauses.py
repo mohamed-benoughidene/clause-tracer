@@ -346,3 +346,51 @@ def test_dump_refuses_a_duplicate_clause_id() -> None:
         dump_clause_fixture(_document(TEXT), (first, duplicate))
 
     assert _message(error) == "links sample: duplicate clause id 1"
+
+
+def test_dump_refuses_a_bad_level() -> None:
+    first, second = _clauses()
+    bad = replace(second, level=3)
+
+    with pytest.raises(ValueError) as error:
+        dump_clause_fixture(_document(TEXT), (first, bad))
+
+    assert _message(error) == "links sample: level of 1.1 does not fit its parent"
+
+
+def test_dump_refuses_an_overlap() -> None:
+    first, second = _clauses()
+    moved = replace(
+        second,
+        span=Span(start=5, end=21),
+        sentences=(replace(second.sentences[0], span=Span(start=5, end=21)),),
+    )
+
+    with pytest.raises(ValueError) as error:
+        dump_clause_fixture(_document(TEXT), (first, moved))
+
+    assert _message(error) == "links sample: span of 1.1 overlaps an earlier clause"
+
+
+def test_dump_refuses_a_duplicate_sentence_id() -> None:
+    first, second = _clauses()
+    duplicate = replace(
+        second,
+        sentences=(replace(second.sentences[0], id=SentenceId("1.s1")),),
+    )
+
+    with pytest.raises(ValueError) as error:
+        dump_clause_fixture(_document(TEXT), (first, duplicate))
+
+    assert _message(error) == "links sample: duplicate sentence id 1.s1"
+
+
+def test_first_error_follows_clause_order() -> None:
+    first, second = _clauses()
+    bad_level = replace(first, level=2)
+    duplicate = replace(second, id=ClauseId("1"))
+
+    with pytest.raises(ValueError) as error:
+        dump_clause_fixture(_document(TEXT), (bad_level, duplicate))
+
+    assert _message(error) == "links sample: level of 1 does not fit its parent"

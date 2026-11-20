@@ -202,7 +202,7 @@ When this is done, `links` has a coverage floor, empty owner tables, a committed
   - **Rules:** T3, S2.
   - **Depends on:** S3-M1-T5
 
-- [ ] **S3-M1-T9: Check the clauses in one pass, and test the writer for the structure checks**
+- [x] **S3-M1-T9: Check the clauses in one pass, and test the writer for the structure checks**
   - **Why:** A review of S3-M1-T6 found two gaps. `_check_clauses` makes seven passes over the clauses, so each new rule needs another loop. And the writer shares the level, overlap and sentence-id checks with the loader, but only the loader has tests for them. The order of errors, rule by rule, came from S3-M1-T6. This task changes it to clause by clause, which is the order T3 states ("the checks run in JSON order"). It changes the first error only for a fixture with two or more faults.
   - **Build:** In `src/clause_tracer/links/sample_clauses.py`, rewrite the body of `_check_clauses(text: str, clauses: Sequence[Clause]) -> None`, with the same signature, messages and checks as in T6. It makes one pass over `clauses`, and for each clause it runs these checks in this order, raising on the first failure:
     1. the clause span is inside the text;
