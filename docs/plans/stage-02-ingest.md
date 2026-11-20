@@ -3,7 +3,7 @@
 | | |
 | --- | --- |
 | Stage | 2, `ingest` (text, Markdown and pasted text) |
-| Status | In progress |
+| Status | Done |
 | Branch | One branch for each milestone, cut from `main`: `feat/ingest-m1-foundations`, `feat/ingest-m2-reading`, `feat/ingest-m3-clauses-and-sentences`, `feat/ingest-m4-samples-and-goldens`, `feat/ingest-m5-match-key-and-language`. See [the README](README.md), "Branches and pull requests" |
 | Accepted on | 19 Nov 2026 |
 | Stage outline | [System design section 15.2](../system-design.md#152-stage-2-ingest-for-text-markdown-and-pasted-text) |
@@ -424,6 +424,7 @@ When this is done, `python -m clause_tracer.ingest` prints the clauses and sente
   - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_smoke.py` reports 7 passed, `.venv/bin/uv run python -m clause_tracer.ingest` prints the outline and exits 0, and `scripts/check.sh` exits 0.
   - **Rules:** S1, S2, T2 (the file is read only at the edge), I12, [system design 6.2](../system-design.md#62-the-command-line).
   - **Depends on:** S2-M4-T1, S2-M4-T2
+  - **Later change:** Changed later by S2-M5-T8: a `.markdown` suffix is read as Markdown too, in any case (`MARKDOWN_SUFFIXES`).
 
 - [x] **S2-M4-T4: The first golden files**
   - **Build:** Write the test file of S2-M4-T5 in your working copy, but do not commit it in this task. Run `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_goldens.py` and see both tests fail with "is missing. Run pytest with --update-goldens". Then run the named command, `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_goldens.py --update-goldens`. It writes `src/clause_tracer/ingest/tests/goldens/developer-agreement.outline.txt` and `src/clause_tracer/ingest/tests/goldens/plain-paragraphs.outline.txt`. Commit only those two files and the plan tick, and say in the commit body that `--update-goldens` made them.
@@ -541,6 +542,7 @@ When this is done, `python -m clause_tracer.ingest` prints the clauses and sente
   - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_markers.py` reports 62 passed, `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_clauses.py` reports 48 passed, `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_clause_table.py src/clause_tracer/ingest/tests/test_smoke.py` passes, and `scripts/check.sh` exits 0 except for `test_goldens.py` and `test_sample_has_65_clauses`, which fail until S2-M4-T11.
   - **Rules:** T1, T11 (the rows of S2-M4-T6 were written first), S3, [Spec 5](../spec.md#5-labelling-rules) (never guess: a signature block is not part of the clause before it), [system design 4.2](../system-design.md#42-the-offset-chain).
   - **Depends on:** S2-M4-T6, S2-M4-T7
+  - **Later change:** Changed later by S2-M5-T8: `is_signature_line` calls a helper `_opens_with(words, opener)` with named booleans. What it returns did not change.
 
 - [x] **S2-M4-T9: Show whole sentences with `--full`**
   - **Build:** Decided by the owner on 20 Nov 2026 (question 14). In `src/clause_tracer/ingest/outline.py`, change the signature to `def render_outline(document: Document, clauses: tuple[Clause, ...], *, full: bool = False) -> str` and `_preview` to `def _preview(text: str, start: int, end: int, *, full: bool) -> str`. When `full` is true the preview is the whole `" ".join(text[start:end].split())`, with no cut at 60 characters. The default keeps the cut, so the golden files do not change. In `src/clause_tracer/ingest/__main__.py`, add `parser.add_argument("--full", action="store_true", help="print each sentence in full")` and call `render_outline(document, split_clauses(document), full=args.full)`. The flag writes to standard output only. In the README, in the "Run alone" part, add the `--full` flag and "The golden files always use the cut preview."
@@ -631,6 +633,7 @@ When this is done, `python -m clause_tracer.ingest` prints the clauses and sente
   - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_markers.py` reports 67 passed, `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_clauses.py` reports 54 passed, `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_clause_table.py` reports 34 passed, and `scripts/check.sh` exits 0 except for `test_goldens.py`, which fails until S2-M4-T15.
   - **Rules:** T1, T11 (the rows of S2-M4-T12 were written first), S3, [Spec 5](../spec.md#5-labelling-rules), [system design 4.2](../system-design.md#42-the-offset-chain).
   - **Depends on:** S2-M4-T12
+  - **Later change:** Changed later. S2-M5-T6: the first line is a heading only when it is in title case (`is_title_line`) or a marker line follows it. S2-M5-T8: `is_heading_line` checks only for a tab before its two tests, and `_build_clauses` reads `_ClauseStart.breaks_sentence`, set when the heading is found, instead of testing the heading line again.
 
 - [x] **S2-M4-T14: A table row is a sentence, and no sentence is blank**
   - **Build:** Decided by the owner on 20 Nov 2026 (question 16).
@@ -664,6 +667,7 @@ When this is done, `python -m clause_tracer.ingest` prints the clauses and sente
   - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_sentences.py` reports 24 passed, `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_clauses.py` reports 57 passed, and `scripts/check.sh` exits 0 except for `test_goldens.py`, which fails until S2-M4-T15.
   - **Rules:** B4, I4, T1, S3, [Spec 5](../spec.md#5-labelling-rules) (a missed break only makes a sentence longer; this rule removes one kind of missed break and never makes a blank sentence), [system design 4.2](../system-design.md#42-the-offset-chain).
   - **Depends on:** S2-M4-T7, S2-M4-T13 (the test counts above include the tests of S2-M4-T13, and the line it changes in `_sentences_for` comes from S2-M4-T13)
+  - **Later change:** Changed later by S2-M5-T8: `tab_line_starts` strips `_ROW_EDGE` (space, tab, no-break space and byte-order mark), so a hanging indent after a no-break space is not a row.
 
 - [x] **S2-M4-T15: Regenerate the developer-agreement golden file again**
   - **Build:** Run `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_goldens.py` and see the developer-agreement test fail and the plain-paragraphs test pass. Then run the named command, `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_goldens.py --update-goldens`. Commit only `src/clause_tracer/ingest/tests/goldens/developer-agreement.outline.txt` and the plan tick, and say in the commit body that `--update-goldens` made it. The diff must be exactly these changes, which a trial of the rules gave on 20 Nov 2026:
@@ -709,6 +713,7 @@ When this is done, `core` builds match keys, invariant 2 holds, a contract that 
   - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/core/tests/test_match_fold.py` passes with at least 17 tests, and `scripts/check.sh` exits 0 (the 95% floor for `core` holds).
   - **Rules:** T1, T6, T11, T13, [system design 4.2](../system-design.md#42-the-offset-chain), [testing strategy 5](../testing-strategy.md#5-the-offset-chain-seven-invariants) (invariant 2, and the `ß` trap).
   - **Depends on:** S2-M5-T1
+  - **Later change:** Changed later by S2-M5-T7: pass 1 folds each character together with the combining marks after it, and maps every folded character to the index of that first character.
 
 - [x] **S2-M5-T3: Not-English table (Owner)**
   - **Build:** Owner only. Needs question 1. Fill `src/clause_tracer/ingest/tests/tables/not_english.toml`. Each `[[case]]` has `id`, `text` and `warned` (a boolean). Cover at least: an English contract paragraph; a French one; an Arabic one; a short English sentence; a short French sentence; a text under 10 words; an English contract with a French schedule about a third of its length; a table with few words. The answers are what a reader expects under the rule of S2-M5-T4, not Lingua's output.
@@ -779,7 +784,7 @@ When this is done, `core` builds match keys, invariant 2 holds, a contract that 
   - **Rules:** T11.
   - **Depends on:** S2-M4-T16
 
-- [ ] **S2-M5-T10: Close the stage**
+- [x] **S2-M5-T10: Close the stage**
   - **Build:** Run the "Done when" checks of section 7. Write section 9 of this plan. Update the status lines: [AGENTS.md](../../AGENTS.md) "Where the project stands" (stage 2 done, stage 3 `links` next), the status line in [README.md](../../README.md), and [testing strategy 13](../testing-strategy.md#13-gaps-today-and-the-order-to-close-them) (the "No samples or golden files" row: `ingest` closed, with the date). Set this plan's status to Done. Then give the owner a short report: what was built, what differs from the outline, the open limits of the splitter, and the action items to tick.
   - **Files:** `docs/plans/stage-02-ingest.md`, `AGENTS.md`, `README.md`, `docs/testing-strategy.md`.
   - **Tests first:** None.
@@ -812,17 +817,17 @@ The owner answered questions 1 to 9 on 17 Nov 2026, questions 10 and 11 on 19 No
 
 ## 7. Done when
 
-- [ ] Every task above is ticked.
-- [ ] `scripts/check.sh` passes with no errors.
-- [ ] Each touched module's README records its shapes (Constitution S3): `ingest` and `core`.
-- [ ] Every promise the stage touches has its test (Constitution T13): the sentence-id part of "every evidence link scrolls to the right place" (S2-M3-T10, S2-M5-T2) and the not-English warning (S2-M5-T4).
-- [ ] The lines that state the project's status are updated (see the README, "When the stage is done").
-- [ ] The owner has been told what was built, and what the next stage should know.
-- [ ] `python -m clause_tracer.ingest` reads the sample contract, prints its clauses and sentences, and exits 0.
-- [ ] The two golden files match, and the owner has read them (S2-M4-T16).
-- [ ] The three owner tables have their rows, and their tests pass.
-- [ ] Branch coverage of `ingest` is at least 85%, and of `core` at least 95%.
-- [ ] Importing `clause_tracer.core` still loads only the standard library (the stage 1 architecture test passes with `match_fold.py` in place).
+- [x] Every task above is ticked.
+- [x] `scripts/check.sh` passes with no errors.
+- [x] Each touched module's README records its shapes (Constitution S3): `ingest` and `core`.
+- [x] Every promise the stage touches has its test (Constitution T13): the sentence-id part of "every evidence link scrolls to the right place" (S2-M3-T10, S2-M5-T2) and the not-English warning (S2-M5-T4).
+- [x] The lines that state the project's status are updated (see the README, "When the stage is done").
+- [x] The owner has been told what was built, and what the next stage should know.
+- [x] `python -m clause_tracer.ingest` reads the sample contract, prints its clauses and sentences, and exits 0.
+- [x] The two golden files match, and the owner has read them (S2-M4-T16).
+- [x] The three owner tables have their rows, and their tests pass.
+- [x] Branch coverage of `ingest` is at least 85%, and of `core` at least 95%.
+- [x] Importing `clause_tracer.core` still loads only the standard library (the stage 1 architecture test passes with `match_fold.py` in place).
 
 ## 8. Change log
 
@@ -843,7 +848,47 @@ The owner answered questions 1 to 9 on 17 Nov 2026, questions 10 and 11 on 19 No
 | 20 Nov 2026 | The sample contract now gives 65 clauses, because a signature line starts a clause (S2-M4-T8). The count changed in system design 4.2, the copy deck and the prototype pages `new-review.html`, `running.html`, `states.html` and `contract-check.html`. Question 6 and the 19 Nov 2026 row that give 64 keep it, because they record the count of that day. | The owner's read of the golden files. |
 | 20 Nov 2026 | A code review of the branch found eight points, and the owner approved a fix for each (S2-M5-T6 to S2-M5-T9, before the close, which is now S2-M5-T10). A first line is a heading only in title case, so a wrapped first sentence keeps its sentence whole. The match fold keeps combining marks with their character, so a decomposed accent matches a composed one. A tab row ignores no-break spaces and byte-order marks at its edges. A `.markdown` file is read as Markdown. Three clean-ups change no output. The golden files and the owner tables do not change. | The owner's answers to the code review. |
 | 20 Nov 2026 | Commit `113ead1` added the code of the outline and the first golden files in one commit, which T11 asks to keep apart. The pushed history stays as it is. The owner read both golden files later (S2-M4-T16), and every regeneration since (`1e6356a`, `12b19bc`) is a commit of its own. | The code review (S2-M5-T9). |
+| 20 Nov 2026 | The stage was closed (S2-M5-T10). Section 9 was written, the status lines were updated, and every box of section 7 was ticked with its evidence: `scripts/check.sh` exit 0 with 1,446 tests, branch coverage 99% for `ingest` and 97% for `core`, 65 clauses and 81 sentences on the sample. | The close of the stage. |
 
 ## 9. Notes for the next stage
 
-None yet. Filled in when the stage is done.
+Written on 20 Nov 2026, when the stage closed.
+
+**What was built.** `ingest` reads a text file, a Markdown file or pasted text into a `Document` with no glyphs (`read_text_file`, `read_pasted_text`). It keeps the text unchanged: a byte-order mark, `\r\n` and Markdown symbols stay. It enforces the Spec 9 limits (20 MB and 50,000 words) and raises `InputTooLargeError`, `NotUtf8Error`, `NotTextError` and `EmptyInputError`. `split_clauses` returns clauses with ids, numbers, headings, levels, parents and spans, and each clause holds sentences with ids that join up to the whole clause. A text with no accepted marker is split by paragraph. A text that Lingua does not call English carries the warning `not_english`. `core` gained `fold_for_matching`, the wide fold that builds a `MatchKey` with its index map, and two errors, `EmptyInputError` and `NotTextError`. `python -m clause_tracer.ingest` prints the outline of the sample contract (65 clauses and 81 sentences), with `--input` and `--full`. Two golden files guard the outline, and `pytest --update-goldens` is the only command that rewrites them. Three owner tables hold the expected answers: `clause_split.toml` (33 cases), `not_english.toml` (8) and `match_fold.toml` (11). The final check ran 1,446 tests. Branch coverage is 99% for `ingest` (floor 85%) and 97% for `core` (floor 95%).
+
+**What differs from the outline.** Each difference is in section 6 or the change log (section 8).
+- The not-English warning uses Lingua, not a word count ([ADR 0017](../adr/0017-language-detection-with-lingua.md), question 1). Lingua is pinned to 2.2.0 and NUPunkt to 0.8.0.
+- The match key is built in `core`, not in `ingest`, because `links`, `privacy` and `checking` cannot import `ingest`. There are two folds: the narrow one confirms a quote, and the wide one finds names, terms and keywords. The wide fold treats a character and its combining marks as one cluster (question 2, S2-M5-T7).
+- The splitter reads more styles than the outline asked for: `Clause 5` and `Article IV`, `a)` items, a bare `3 Payment`, unnumbered headings, and the Markdown symbols before a number (questions 7 and 8).
+- The clauses cover the whole text, so the sample gives 65 clauses, not the 45 of the prototype (questions 6 and 13). The copy deck, the system design and the prototype say 65.
+- Sentence breaks that NUPunkt does not make were added: after a colon line, at a table row, and after a short heading line (questions 12, 15 and 16). A line that opens with `Signed`, `Executed` or `In witness whereof` is a heading whatever its length (question 13).
+- A first line is a heading only in title case (S2-M5-T6).
+- Two input errors were added to `core`: `EmptyInputError` and `NotTextError` (questions 4 and 10).
+- A paste has the same limit as a file (question 11).
+- `--full` prints whole sentences, and a `.markdown` suffix is read as Markdown (question 14, S2-M5-T8).
+- Commit `113ead1` holds the outline code and the first golden files together. The pushed history stays, and the change log records it.
+
+**Open limits of the splitter.** The ingest README, section 2 and section 6 name each one. Each can be fixed by hand at the contract check (stages 6 and 12), and none drops text.
+- A number that skips a value does not start a clause: the text after the gap stays in the clause before it.
+- A numbered list inside a clause becomes clauses of its own.
+- Styles it does not read: `A)` and `1)` without an opening bracket; `Section 5` and other keywords; a keyword with a decimal number (`Clause 5.1`); Roman numbers without a keyword.
+- An unnumbered heading of more than 8 words or 60 characters is not read, except a line that opens with `Signed`, `Executed` or `In witness whereof`.
+- A short line after a blank line is a heading clause, so a line such as `Signature` becomes a clause of its own.
+- A sentence that opens with `Executed` or `Signed` after a blank line, such as `Executed copies must be kept by both parties.`, also becomes a clause.
+- A short first line in title case that is not a title also becomes a heading: a name at the top of an address, `CONFIDENTIAL`, `Page 1 of 5`, or the first line of a title wrapped over two lines.
+- A hard-wrapped line that ends in a colon in the middle of a sentence also breaks there.
+- Prose right after a table joins the last row, and a Markdown table (with `|`) stays one sentence.
+- NUPunkt can miss a break. A missed break only makes a sentence longer, and the quote check tolerates it.
+- Invariant 2 assumes that neither cut falls on a combining mark, because a slice that starts inside a cluster folds the mark alone.
+
+**For stage 3 (`links`).**
+- Clause ids come from the number and the order: `5.1`, `7.1(a)(i)`, `S1`, `S1.2`, `p1` for a clause with no number, `5.1~2` when a number appears twice, and `4` for `Article IV`. Sentence ids add `.s1`, `.s2` (`5.1.s3`). `Clause.number` holds the number as the text writes it (`Article IV`, `Schedule 1`, `05`), and the id is built from it (`Article IV` has the id `4`).
+- Every span is half-open, counts code points and points into `Document.text`. Clauses and sentences cover the text with no gap, so the number of a clause is always inside its first sentence.
+- `Document.text` is the file text character for character, with Markdown symbols, `\r\n` and any byte-order mark. A `MatchKey` is built with `clause_tracer.core.fold_for_matching(text)`: `links` imports it from `core`, never from `ingest`. Its `to_canonical` has one entry for each folded character and a last entry equal to `len(text)`. Never confirm a quote on the wide fold.
+- A schedule clause (`S1`) restarts the numbering, so `S1.1` is a different clause from `1.1`. A heading clause has `number=None` and an id such as `p1`; in the sample, the title line is `p1`.
+- A paragraph split (`numbering_source == "paragraphs"`) has no numbers, so no cross-reference can resolve in it. Keep such a reference as unresolved, as the design says.
+- A table row of a schedule is a sentence. The sample names the Master Agreement in the definition inside clause `1.1` and in clause `11.1`.
+- `Document.hidden`, `undecodable`, `furniture` and `tracked_changes` are always `()` in stage 2, and `InputWarning` holds only `not_english`. Stage 5 fills the rest.
+- Start the stage 3 sample from `src/clause_tracer/ingest/samples/developer-agreement.txt`, and do not edit it.
+- The word-limit message is still missing from the copy deck (question 5). The owner adds it before stage 6 turns the error codes into words.
+- Decision-record action items this stage lets the owner tick: [ADR 0007](../adr/0007-document-reading-stack.md) action item 6 (the `ingest` README, for the text part; the Word and PDF part waits for stage 5) and [ADR 0017](../adr/0017-language-detection-with-lingua.md) action item 1 (the pinned dependency, S2-M1-T6). ADR 0017 action item 2 stays open until stage 12.

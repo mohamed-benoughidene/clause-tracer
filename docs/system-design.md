@@ -2,7 +2,7 @@
 
 11 Nov 2026 · status: **accepted** on 12 Nov 2026
 
-This is the design of the whole of version 1: the Python engine, the desktop shell around it, storage, packaging and release. It says how the parts fit, what each one promises, and which choices are still open. Nothing here is built yet. The code is an empty skeleton.
+This is the design of the whole of version 1: the Python engine, the desktop shell around it, storage, packaging and release. It says how the parts fit, what each one promises, and which choices are still open. Build stages 1 (`core`) and 2 (`ingest`) are built; the other modules are empty skeletons.
 
 **How to read it.** [`spec.md`](spec.md) says what the app does, and wins if this file disagrees with it. Each choice below that is hard to undo has a decision record (ADR) with its runner-up. The project owner accepted them all on 12 Nov 2026 (section 13). The evidence is in [the v1 design decisions report](../reports/Clause%20Tracer%20v1%20design%20decisions.md). How to test all of it is in [`testing-strategy.md`](testing-strategy.md). The rules the code must follow are in the [Constitution](../Constitution.md), cited here by ID. The order in which it is built is section 15.
 
