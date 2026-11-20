@@ -20,3 +20,10 @@ def test_public_names() -> None:
 def test_module_has_its_parts() -> None:
     for name in ("README.md", "tests", "samples", "__main__.py"):
         assert (MODULE / name).exists(), name
+
+
+def test_readme_names_every_public_name() -> None:
+    readme = (MODULE / "README.md").read_text(encoding="utf-8")
+
+    for name in clause_tracer.links.__all__:
+        assert name in readme, name
