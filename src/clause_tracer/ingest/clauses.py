@@ -143,6 +143,20 @@ def _start_after_heading(text: str, heading_end: int, span_end: int) -> int | No
     return None
 
 
+def _join_blank_sentences(boundaries: list[int], end: int, text: str) -> list[int]:
+    """Join each sentence of only spaces, tabs and line breaks to the one after it."""
+
+    kept: list[int] = []
+    for boundary in boundaries:
+        previous_is_blank = bool(kept) and is_blank_text(text[kept[-1] : boundary])
+        if not previous_is_blank:
+            kept.append(boundary)
+    last_is_blank = len(kept) > 1 and is_blank_text(text[kept[-1] : end])
+    if last_is_blank:
+        kept.pop()
+    return kept
+
+
 def _sentences_for(
     clause_id: str,
     span: Span,
@@ -159,7 +173,7 @@ def _sentences_for(
         next_start = _start_after_heading(text, heading_end, span.end)
         if next_start is not None:
             boundaries.append(next_start)
-    boundaries = sorted(set(boundaries))
+    boundaries = _join_blank_sentences(sorted(set(boundaries)), span.end, text)
 
     sentences: list[Sentence] = []
     for index, boundary in enumerate(boundaries):

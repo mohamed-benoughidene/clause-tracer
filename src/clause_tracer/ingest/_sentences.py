@@ -1,10 +1,12 @@
-"""Sentence starts from NUPunkt and from colon lines (S2-M3-T4, S2-M4-T7).
+"""Sentence starts from NUPunkt, colon lines and table rows (S2-M3-T4, S2-M4-T7,
+S2-M4-T14).
 
 The sentence library is hidden in this file (B4). Callers get only the
 code-point offsets where sentences start; a missed break only makes one
 sentence longer, and the quote checks tolerate that (ADR 0007).
 
-The sentence starts are the NUPunkt starts plus the starts after colon lines.
+The sentence starts are the NUPunkt starts plus the starts after colon lines
+and at table rows.
 """
 
 from typing import Final
@@ -38,8 +40,26 @@ def colon_line_starts(text: str) -> tuple[int, ...]:
     return tuple(starts)
 
 
+def tab_line_starts(text: str) -> tuple[int, ...]:
+    """The start of each table row: a line with a tab between two cells.
+
+    Input:   one text, usually a clause's body.
+    Output:  the start of each line with a tab that is not only at its start or
+             its end, in order, as code-point offsets. The first line of the
+             text gives no start, because a sentence already starts there.
+    Effects: none.
+    """
+
+    starts: list[int] = []
+    for index, line in enumerate(split_lines(text)):
+        is_table_row = "\t" in line.text.strip(" \t")
+        if index > 0 and is_table_row:
+            starts.append(line.start)
+    return tuple(starts)
+
+
 def sentence_starts(text: str) -> tuple[int, ...]:
-    """The start offset of every sentence, from NUPunkt and from colon lines.
+    """The start offset of every sentence, from NUPunkt, colon lines and rows.
 
     Input:   one text, usually a clause's body.
     Output:  the start of each sentence in order, as code-point offsets into
@@ -48,4 +68,5 @@ def sentence_starts(text: str) -> tuple[int, ...]:
     """
 
     library_starts = tuple(start for start, _end in nupunkt.sentence_spans(text))
-    return tuple(sorted(set(library_starts) | set(colon_line_starts(text))))
+    line_starts = set(colon_line_starts(text)) | set(tab_line_starts(text))
+    return tuple(sorted(set(library_starts) | line_starts))

@@ -632,7 +632,7 @@ When this is done, `python -m clause_tracer.ingest` prints the clauses and sente
   - **Rules:** T1, T11 (the rows of S2-M4-T12 were written first), S3, [Spec 5](../spec.md#5-labelling-rules), [system design 4.2](../system-design.md#42-the-offset-chain).
   - **Depends on:** S2-M4-T12
 
-- [ ] **S2-M4-T14: A table row is a sentence, and no sentence is blank**
+- [x] **S2-M4-T14: A table row is a sentence, and no sentence is blank**
   - **Build:** Decided by the owner on 20 Nov 2026 (question 16).
     - In `src/clause_tracer/ingest/_sentences.py`, add `def tab_line_starts(text: str) -> tuple[int, ...]` below `colon_line_starts`, with the docstring "The start of each table row: a line with a tab between two cells." and an Input, Output, Effects block. For each `index, line` in `enumerate(split_lines(text))`: `is_table_row = "\t" in line.text.strip(" \t")`, and when `index > 0 and is_table_row`, `line.start` is a start (the first line already starts a sentence). It returns the starts in order as a tuple. A tab only at the start or the end of a line makes no start, so a hanging indent and a trailing tab do not break a sentence. The line after a row gets no start of its own. Change the end of `sentence_starts` to `line_starts = set(colon_line_starts(text)) | set(tab_line_starts(text))` and `return tuple(sorted(set(library_starts) | line_starts))`. Update the module docstring: the sentence starts are the NUPunkt starts plus the starts after colon lines and at table rows. The file stays the only one that imports `nupunkt` (B4).
     - In `src/clause_tracer/ingest/clauses.py`, add, above `_sentences_for`:

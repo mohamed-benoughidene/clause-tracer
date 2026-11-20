@@ -6,7 +6,7 @@ import pytest
 from hypothesis import given
 
 from clause_tracer.core.tests.strategies import hazard_text
-from clause_tracer.ingest._sentences import colon_line_starts, sentence_starts
+from clause_tracer.ingest._sentences import colon_line_starts, sentence_starts, tab_line_starts
 
 PACKAGE = Path(__file__).parents[2]
 
@@ -53,6 +53,33 @@ def test_colon_line_is_a_sentence_start() -> None:
 
 def test_colon_start_joins_the_library_starts() -> None:
     assert sentence_starts("One. Two:\nThree.") == (0, 5, 10)
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("Intro.\nA\tB\nC\tD\nAfter", (7, 11)),
+        ("A\tB\nC", ()),
+        ("A\tB\n\nC", ()),
+        ("No tabs\nhere", ()),
+        ("A\tB", ()),
+        ("Intro.\n\tTotal\t£9,600", (7,)),
+        ("Intro\n\tindented line", ()),
+        ("Intro\ntrailing\t", ()),
+    ],
+)
+def test_tab_line_starts(text: str, expected: tuple[int, ...]) -> None:
+    assert tab_line_starts(text) == expected
+
+
+def test_tab_lines_join_the_other_starts() -> None:
+    text = (
+        "The Developer will build the site.\n"
+        "Milestone\tWork\tCharges\n"
+        "1 Discovery\tReview designs\t£1,600"
+    )
+
+    assert sentence_starts(text) == (0, 35, 58)
 
 
 def test_only_this_file_imports_nupunkt() -> None:

@@ -73,6 +73,13 @@ A line that ends in a colon ends a sentence, so a lead-in line such as
 of its own. A hard-wrapped line that ends in a colon in the middle of a sentence
 also breaks there: a known limit.
 
+A line with a tab between two cells, such as a row of a table, starts a
+sentence. A tab only at the start or the end of a line does not, so a hanging
+indent stays one sentence. A sentence of only spaces, tabs and line breaks joins
+the sentence after it. A line of prose right after a table joins the last row,
+and a Markdown table, which uses `|` and not tabs, stays one sentence: known
+limits.
+
 ## What the splitter reads, and what it does not
 At the start of a line it reads:
 

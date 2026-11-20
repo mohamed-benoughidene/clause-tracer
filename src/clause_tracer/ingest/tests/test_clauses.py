@@ -539,3 +539,48 @@ def test_long_signature_heading_does_not_end_a_sentence() -> None:
 
     assert ids(text) == ("1.1", "p1")
     assert tuple(sentence.span for sentence in clauses[1].sentences) == (Span(start=30, end=115),)
+
+
+def test_table_rows_are_sentences() -> None:
+    text = (
+        "Schedule 1 · Services and Charges\n"
+        "1. The Developer will build the site.\n"
+        "Milestone\tWork\tCharges\n"
+        "1 Discovery\tReview designs\t£1,600\n"
+        "\tTotal\t£1,600\n"
+        "2. Hosting is not part of the Services."
+    )
+
+    clauses = clauses_of(text)
+
+    assert ids(text) == ("S1", "S1.1", "S1.2")
+    assert tuple(sentence.span for sentence in clauses[1].sentences) == (
+        Span(start=34, end=72),
+        Span(start=72, end=95),
+        Span(start=95, end=129),
+        Span(start=129, end=143),
+    )
+    assert tuple(sentence.span for sentence in clauses[2].sentences) == (Span(start=143, end=182),)
+
+
+def test_hanging_indent_stays_one_sentence() -> None:
+    text = (
+        "1.1\tThe Agency will pay the fees within 30 days of\n"
+        "\treceiving a valid invoice, by bank\n"
+        "\ttransfer."
+    )
+
+    clauses = clauses_of(text)
+
+    assert tuple(sentence.span for sentence in clauses[0].sentences) == (Span(start=0, end=97),)
+
+
+def test_blank_sentence_joins_the_next() -> None:
+    text = "1.1 The Charges are below.\n\tTotal\t£9,600\n"
+
+    clauses = clauses_of(text)
+
+    assert tuple(sentence.span for sentence in clauses[0].sentences) == (
+        Span(start=0, end=27),
+        Span(start=27, end=41),
+    )
