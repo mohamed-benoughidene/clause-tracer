@@ -1,0 +1,156 @@
+# Expected answers. Only the owner edits this file. Constitution T11.
+# Format: docs/plans/stage-03-links.md, task S3-M2-T5.
+
+# Testing strategy 4: "Notwithstanding Clause 4" is a reference to 4.
+[[case]]
+id = "notwithstanding-clause-4"
+clauses = [
+  { id = "4", sentences = ["4. Fees are fixed."] },
+  { id = "9", sentences = ["9. Notwithstanding Clause 4, the Agency may change the fees."] },
+]
+references = [
+  { source = "Clause 4", target = "4" },
+]
+
+# Testing strategy 4: "Subject to Clause 4" is a reference to 4.
+[[case]]
+id = "subject-to-clause-4"
+clauses = [
+  { id = "4", sentences = ["4. Fees are fixed."] },
+  { id = "9", sentences = ["9. Subject to Clause 4, the Agency may change the fees."] },
+]
+references = [
+  { source = "Clause 4", target = "4" },
+]
+
+# The keyword in lower case is still a reference.
+[[case]]
+id = "lower-case-clause-12"
+clauses = [
+  { id = "12", sentences = ["12. Ending this Agreement."] },
+  { id = "2", sentences = ["2. This Agreement ends earlier under clause 12."] },
+]
+references = [
+  { source = "clause 12", target = "12" },
+]
+
+# A range gives one reference for each clause in it, all with the same source.
+[[case]]
+id = "range"
+clauses = [
+  { id = "4", sentences = ["4. Fees."] },
+  { id = "5", sentences = ["5. Payment."] },
+  { id = "6", sentences = ["6. Expenses."] },
+  { id = "9", sentences = ["9. Clauses 4 to 6 apply."] },
+]
+references = [
+  { source = "Clauses 4 to 6", target = "4" },
+  { source = "Clauses 4 to 6", target = "5" },
+  { source = "Clauses 4 to 6", target = "6" },
+]
+
+# A list names only its members: clause 5 is not in it.
+[[case]]
+id = "list"
+clauses = [
+  { id = "4", sentences = ["4. Fees."] },
+  { id = "5", sentences = ["5. Payment."] },
+  { id = "6", sentences = ["6. Expenses."] },
+  { id = "9", sentences = ["9. See clauses 4 and 6."] },
+]
+references = [
+  { source = "clauses 4 and 6", target = "4" },
+  { source = "clauses 4 and 6", target = "6" },
+]
+
+# A range member that does not exist is kept, with no target. Never guess (Spec 5).
+[[case]]
+id = "range-with-a-missing-member"
+clauses = [
+  { id = "4", sentences = ["4. Fees."] },
+  { id = "5", sentences = ["5. Payment."] },
+  { id = "9", sentences = ["9. See clauses 4 to 6."] },
+]
+references = [
+  { source = "clauses 4 to 6", target = "4" },
+  { source = "clauses 4 to 6", target = "5" },
+  { source = "clauses 4 to 6", target = "" },
+]
+
+# "This Clause" points to the clause that holds it. "this Agreement" is not a reference.
+[[case]]
+id = "this-clause"
+clauses = [
+  { id = "5.1", sentences = ["5.1 This Clause survives the end of this Agreement."] },
+]
+references = [
+  { source = "This Clause", target = "5.1" },
+]
+
+# Testing strategy 4: "2.5 days" is a period, not a clause number. Only "clause 4" is a reference.
+[[case]]
+id = "two-point-five-days"
+clauses = [
+  { id = "4", sentences = ["4. Fees."] },
+  { id = "5.6", sentences = ["5.6 Payment under clause 4 is due within 2.5 days of the invoice."] },
+]
+references = [
+  { source = "clause 4", target = "4" },
+]
+
+# A text split by paragraphs has no clause numbers, so "clause 3" has no target.
+[[case]]
+id = "paragraph-split-text"
+clauses = [
+  { id = "p1", sentences = ["The Agency pays the fees."] },
+  { id = "p2", sentences = ["The fees are set out in clause 3."] },
+]
+references = [
+  { source = "clause 3", target = "" },
+]
+
+# A schedule reference points to the schedule. The schedule's own heading is not a reference.
+[[case]]
+id = "schedule-reference"
+clauses = [
+  { id = "1", sentences = ["1. The fees are set out in Schedule 1."] },
+  { id = "S1", number = "Schedule 1", heading = "Fees", sentences = ["Schedule 1 · Fees"] },
+]
+references = [
+  { source = "Schedule 1", target = "S1" },
+]
+
+# Inside a schedule, "paragraph 2" is the schedule's own paragraph 2, not clause 2.
+[[case]]
+id = "paragraph-inside-a-schedule"
+clauses = [
+  { id = "2", sentences = ["2. Hosting is extra."] },
+  { id = "S1", number = "Schedule 1", heading = "Services", sentences = ["Schedule 1 · Services"] },
+  { id = "S1.1", parent = "S1", number = "1", sentences = ["1. The build follows paragraph 2."] },
+  { id = "S1.2", parent = "S1", number = "2", sentences = ["2. Hosting is not included."] },
+]
+references = [
+  { source = "paragraph 2", target = "S1.2" },
+]
+
+# A section of another document is not a section of this one, so it has no target.
+[[case]]
+id = "section-of-another-document"
+clauses = [
+  { id = "3", sentences = ["3. Fees."] },
+  { id = "9", sentences = ["9. The cap in Section 3 of the Master Agreement applies."] },
+]
+references = [
+  { source = "Section 3", target = "" },
+]
+
+# Question 4: a carve-out is a cross-reference only.
+[[case]]
+id = "carve-out-is-a-reference"
+clauses = [
+  { id = "8.1", sentences = ["8.1 Each party keeps the other's information private."] },
+  { id = "8.2", sentences = ["8.2 Clause 8.1 does not apply to public information."] },
+]
+references = [
+  { source = "Clause 8.1", target = "8.1" },
+]

@@ -3,7 +3,7 @@
 | | |
 | --- | --- |
 | Stage | 3, `links` |
-| Status | Accepted |
+| Status | In progress |
 | Branch | One branch for each milestone, cut from `main`: `feat/links-m1-foundations`, `feat/links-m2-cross-references`, `feat/links-m3-terms-and-outside-documents`, `feat/links-m4-overrides`, `feat/links-m5-link-map-and-sample`. See [the README](README.md), "Branches and pull requests" |
 | Accepted on | 20 Nov 2026 |
 | Stage outline | [System design section 15.3](../system-design.md#153-stage-3-links) |
@@ -88,7 +88,7 @@ When this is done, `links` has a coverage floor, empty owner tables, a committed
   - **Rules:** [Testing strategy 11](../testing-strategy.md#11-coverage-targets).
   - **Depends on:** None
 
-- [ ] **S3-M1-T2: Create the five empty owner tables**
+- [x] **S3-M1-T2: Create the five empty owner tables**
   - **Build:** Create these files, each holding exactly two lines: the `HEADER` line of `clause_tracer.core.tests.owner_tables`, then `# Format: docs/plans/stage-03-links.md, task <id>.` with the id of the owner task that fills it: `src/clause_tracer/links/tests/tables/references.toml` (S3-M2-T5), `src/clause_tracer/links/tests/tables/terms.toml` (S3-M3-T5), `src/clause_tracer/links/tests/tables/overrides.toml` (S3-M4-T3), `src/clause_tracer/links/tests/tables/outside_documents.toml` (S3-M3-T6), `src/clause_tracer/links/tests/tables/sample.toml` (S3-M5-T7). This commit holds these five files and the plan tick, and no code.
   - **Files:** the five files above.
   - **Tests first:** None. The loader test of S1-M3-T1 covers a header-only file.
@@ -278,7 +278,7 @@ When this is done, `find_references` finds every cross-reference with its source
   - **Rules:** System design 15.3 ("this Clause"), Spec 5.
   - **Depends on:** S3-M2-T3
 
-- [ ] **S3-M2-T5: The cross-references table (Owner)**
+- [x] **S3-M2-T5: The cross-references table (Owner)**
   - **Build:** Owner only. Fill `src/clause_tracer/links/tests/tables/references.toml`. Each `[[case]]` has `id` (`str`), `clauses` (a list of inline tables in the `build_case` row format: `id`, `sentences`, and the optional keys `parent`, `heading` and `number`) and `references` (a list of `{ source = "exact text", nth = 1, target = "4" }`; `nth` is optional and defaults to 1; `target = ""` means unresolved), in the order `find_references` returns them. Cover at least: "Notwithstanding Clause 4" and "Subject to Clause 4" (both give a reference to `4`); a lower-case `clause 12`; a range; a list; a range with a missing member; "this Clause"; `2.5 days`; a reference in a paragraph-split text; and a schedule reference. The agent does not write or change this file (Constitution T11) and ticks the task after the owner says so.
   - **Files:** `src/clause_tracer/links/tests/tables/references.toml`.
   - **Tests first:** None. The owner's values are the expected answers.
@@ -362,7 +362,7 @@ When this is done, `find_definitions`, `find_terms`, `find_outside_documents` an
   - **Rules:** System design 15.3 ("terms used but never defined"), Spec 5.
   - **Depends on:** S3-M3-T1 (it reads `SENTENCE_LEAD_RE` and uses `SpanSet` from S3-M2-T1)
 
-- [ ] **S3-M3-T5: The terms table (Owner)**
+- [x] **S3-M3-T5: The terms table (Owner)**
   - **Build:** Owner only. Fill `src/clause_tracer/links/tests/tables/terms.toml`. Each `[[case]]` has `id`, `clauses` (the `build_case` row format, with `number` as an optional row key), `terms` (a list of `{ term = "Agency", definition = "(1).s1", uses = [{ text = "Agency", nth = 2 }] }`, in the order `find_terms` returns them; `definition` is the id of the sentence whose trimmed span is the definition; each use is the `nth` occurrence of `text` in the case text) and `undefined` (a list of `{ text = "Business Days", nth = 1 }`). Cover at least: a `means` definition, both bracket forms, curly quotes, a possessive use, a lower-case word that is not a use, a term inside a longer term, a term defined twice, and a capitalised run that is not defined. The agent does not write or change this file (Constitution T11).
   - **Files:** `src/clause_tracer/links/tests/tables/terms.toml`.
   - **Tests first:** None.
@@ -370,7 +370,7 @@ When this is done, `find_definitions`, `find_terms`, `find_outside_documents` an
   - **Rules:** Constitution T11.
   - **Depends on:** S3-M1-T2
 
-- [ ] **S3-M3-T6: The outside-documents table (Owner)**
+- [x] **S3-M3-T6: The outside-documents table (Owner)**
   - **Build:** Owner only. Fill `src/clause_tracer/links/tests/tables/outside_documents.toml`. Each `[[case]]` has `id`, `clauses` (the `build_case` row format, with `number` as an optional row key) and `outside` (a list of `{ name = "Master Agreement", nth = 1 }`, where the evidence is the `nth` occurrence of `name` in the case text). Cover at least: "the Master Agreement"; "this Agreement"; a defined term in its own quotes; a lower-case policy with a web address; a heading; and two mentions. The agent does not write or change this file (Constitution T11).
   - **Files:** `src/clause_tracer/links/tests/tables/outside_documents.toml`.
   - **Tests first:** None.
@@ -465,7 +465,7 @@ When this is done, `find_overrides` gives each override with its direction, and 
   - **Rules:** Spec 4.5 ("Overrides that name nothing join every trail"), Spec 5.
   - **Depends on:** S3-M3-T1, S3-M4-T1
 
-- [ ] **S3-M4-T3: The overrides table (Owner)**
+- [x] **S3-M4-T3: The overrides table (Owner)**
   - **Build:** Owner only. Fill `src/clause_tracer/links/tests/tables/overrides.toml`. Each `[[case]]` has `id`, `clauses` (the `build_case` row format, with `number` as an optional row key) and `overrides` (a list of `{ clause = "9", target = "4", overrides_target = true, evidence = "exact text", nth = 1 }`; `target = ""` means none), in the order `find_overrides` returns them. Cover at least: "Notwithstanding Clause 4"; "Subject to Clause 4"; an unresolved target; "this Agreement prevails" over a schedule; a schedule that prevails; a conflict sentence that names nothing; "except as set out in" an outside document (no override); and the carve-out "Clause 8.1 does not apply to …" (question 4 says whether it is an override). The agent does not write or change this file (Constitution T11).
   - **Files:** `src/clause_tracer/links/tests/tables/overrides.toml`.
   - **Tests first:** None.
@@ -548,7 +548,7 @@ When this is done, `map_links` is the module's public call, `python -m clause_tr
   - **Rules:** T11.
   - **Depends on:** S3-M5-T5
 
-- [ ] **S3-M5-T7: The sample table (Owner)**
+- [x] **S3-M5-T7: The sample table (Owner)**
   - **Build:** Owner only. Fill `src/clause_tracer/links/tests/tables/sample.toml` with one section, `[sample]`, and no `[[case]]` rows. Its keys: `terms` (a list of term strings, in the order `map_links` returns them); `outside` (a list of `{ name = "Master Agreement", clause = "11.1" }`); `overrides` (a list of `{ clause = "14.2", target = "S1", overrides_target = true }`, with `target = ""` for none); `references` (a list of `{ clause = "2.1", written = "clause 12", target = "12" }`, where `clause` is the clause that holds the source and `written` its text); and `undefined` (a list of strings, the text of each span). Each list is the whole expected list for the sample, in order. Each inline table must sit on one line (TOML 1.0), and `terms` are in text order, not alphabetical. The agent does not write or change this file (Constitution T11).
   - **Files:** `src/clause_tracer/links/tests/tables/sample.toml`.
   - **Tests first:** None.
@@ -617,7 +617,7 @@ The owner answered all eight questions on 20 Nov 2026, each as recommended, with
 
 | Date | Change | Why |
 | --- | --- | --- |
-| | None yet. | |
+| 20 Nov 2026 | The five owner tables were filled before milestone 1, on the plan's `docs/` branch, instead of first as empty files. S3-M1-T2 is done by that commit, and S3-M2-T5, S3-M3-T5, S3-M3-T6, S3-M4-T3 and S3-M5-T7 are ticked. S3-M5-T6 (read the golden files) is still open | The owner asked the agent to draft the tables, confirmed the cases that need a product judgement (names and addresses in the undefined list, the Master Agreement as a document that is not loaded, the 8.2 carve-out, and the two "prevails" forms) in chat, and said the tables are done. The other cases follow the answers to questions 1 to 5 |
 
 ## 9. Notes for the next stage
 

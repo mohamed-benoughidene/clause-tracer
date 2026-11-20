@@ -1,0 +1,36 @@
+# Expected answers. Only the owner edits this file. Constitution T11.
+# Format: docs/plans/stage-03-links.md, task S3-M5-T7.
+
+# The link map of the Spec 14.5 sample, src/clause_tracer/ingest/samples/developer-agreement.txt.
+[sample]
+
+# The seven defined terms, in text order: the two bracket definitions of the parties, then the five "means" lines of 1.1.
+terms = ["Agency", "Developer", "Charges", "Deliverables", "Master Agreement", "Milestone", "Services"]
+
+# Rule 10: the Master Agreement is named but not loaded. The mention in its own definition (1.1) is not counted.
+outside = [
+  { name = "Master Agreement", clause = "11.1" },
+]
+
+# 14.2: this Agreement wins over Schedule 1. 11.1 ("except as set out in the Master Agreement")
+# and 8.2 (a carve-out) give no override.
+overrides = [
+  { clause = "14.2", target = "S1", overrides_target = true },
+]
+
+# Every cross-reference, in text order. The heading "Schedule 1 · Services and Charges" is not one.
+references = [
+  { clause = "1.1", written = "Schedule 1", target = "S1" },
+  { clause = "1.1", written = "Schedule 1", target = "S1" },
+  { clause = "1.1", written = "Schedule 1", target = "S1" },
+  { clause = "2.1", written = "clause 12", target = "12" },
+  { clause = "3.3", written = "Schedule 1", target = "S1" },
+  { clause = "4.1", written = "Schedule 1", target = "S1" },
+  { clause = "5.1", written = "Schedule 1", target = "S1" },
+  { clause = "8.2", written = "Clause 8.1", target = "8.1" },
+  { clause = "14.2", written = "Schedule 1", target = "S1" },
+]
+
+# Capitalised runs that no definition covers. Party names that start a sentence are not flagged.
+# The signature lines and the schedule's table rows are skipped.
+undefined = ["Harbour Street", "Rue Didouche Mourad", "Business Days", "Ms Jones"]

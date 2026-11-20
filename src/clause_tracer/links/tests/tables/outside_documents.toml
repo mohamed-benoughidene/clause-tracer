@@ -1,0 +1,79 @@
+# Expected answers. Only the owner edits this file. Constitution T11.
+# Format: docs/plans/stage-03-links.md, task S3-M3-T6.
+
+# The sample's own case: "the Master Agreement" is a document that is not loaded.
+[[case]]
+id = "master-agreement"
+clauses = [
+  { id = "11.1", sentences = ["11.1 The cap applies, except as set out in the Master Agreement."] },
+]
+outside = [
+  { name = "Master Agreement" },
+]
+
+# "This Agreement" and "this Agreement" are the contract itself.
+[[case]]
+id = "this-agreement"
+clauses = [
+  { id = "1", sentences = ["1. This Agreement starts today and runs under this Agreement until ended."] },
+]
+outside = []
+
+# A defined term inside its own quotes is skipped. A later mention is still outside, because its definition is not "this agreement".
+[[case]]
+id = "defined-term-in-its-quotes"
+clauses = [
+  { id = "1", sentences = ["1. \"Master Agreement\" means the deal between the Agency and its customer.", "The Master Agreement sets the launch date."] },
+]
+outside = [
+  { name = "Master Agreement", nth = 2 },
+]
+
+# Question 3: a policy in lower case, with a web address, is not a document name.
+[[case]]
+id = "lower-case-policy-with-a-web-address"
+clauses = [
+  { id = "5.5", sentences = ["5.5 Expenses follow its expenses policy at https://docs.example.com/expenses-policy."] },
+]
+outside = []
+
+# The title is a heading, so it is skipped.
+[[case]]
+id = "heading"
+clauses = [
+  { id = "p1", heading = "Development Services Agreement", sentences = ["Development Services Agreement"] },
+  { id = "p2", sentences = ["This Agreement is dated 5 November 2026."] },
+]
+outside = []
+
+# Each mention counts, in text order.
+[[case]]
+id = "two-mentions"
+clauses = [
+  { id = "11.1", sentences = ["11.1 Liability follows the Master Agreement."] },
+  { id = "11.2", sentences = ["11.2 The Master Agreement also caps losses."] },
+]
+outside = [
+  { name = "Master Agreement", nth = 1 },
+  { name = "Master Agreement", nth = 2 },
+]
+
+# A hyphenated name and a statement of work in one sentence.
+[[case]]
+id = "two-documents-in-one-sentence"
+clauses = [
+  { id = "7", sentences = ["7. The Developer signs the Non-Disclosure Agreement and the Project Statement of Work."] },
+]
+outside = [
+  { name = "Non-Disclosure Agreement" },
+  { name = "Project Statement of Work" },
+]
+
+# The contract's own title in a sentence is the contract itself.
+[[case]]
+id = "own-title-in-a-sentence"
+clauses = [
+  { id = "p1", heading = "Development Services Agreement", sentences = ["Development Services Agreement"] },
+  { id = "1", sentences = ["1. The Development Services Agreement is the whole deal."] },
+]
+outside = []
