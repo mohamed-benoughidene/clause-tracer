@@ -1,0 +1,126 @@
+# Expected answers. Only the owner edits this file. Constitution T11.
+# Format: docs/plans/stage-03-links.md, task S3-M3-T5.
+
+# A "means" definition. The term inside its own quotes is not a use.
+[[case]]
+id = "means-definition"
+clauses = [
+  { id = "1", sentences = ["\"Charges\" means the fees in the price list.", "The Charges are due monthly."] },
+]
+terms = [
+  { term = "Charges", definition = "1.s1", uses = [{ text = "Charges", nth = 2 }] },
+]
+undefined = []
+
+# A bracket definition with "the" inside the quotes. The party's full name starts the sentence, so it is not flagged.
+[[case]]
+id = "bracket-the-inside"
+clauses = [
+  { id = "1", sentences = ["1. Brightline Studio Ltd (\"the Agency\") builds websites."] },
+  { id = "2", sentences = ["2. The Agency pays on time."] },
+]
+terms = [
+  { term = "Agency", definition = "1.s1", uses = [{ text = "Agency", nth = 2 }] },
+]
+undefined = []
+
+# A bracket definition with "the" outside the quotes. A possessive is a use.
+[[case]]
+id = "bracket-the-outside-and-possessive"
+clauses = [
+  { id = "1", sentences = ["1. Karim Benali (the \"Developer\") writes the code."] },
+  { id = "2", sentences = ["2. The Developer's work is original."] },
+]
+terms = [
+  { term = "Developer", definition = "1.s1", uses = [{ text = "Developer", nth = 2 }] },
+]
+undefined = []
+
+# Curly quotes define a term like straight ones.
+[[case]]
+id = "curly-quotes"
+clauses = [
+  { id = "1", sentences = ["“Services” means the build work.", "The Services start in May."] },
+]
+terms = [
+  { term = "Services", definition = "1.s1", uses = [{ text = "Services", nth = 2 }] },
+]
+undefined = []
+
+# A lower-case word is not a use. A capital at the start of a sentence is.
+[[case]]
+id = "lower-case-is-not-a-use"
+clauses = [
+  { id = "1", sentences = ["\"Charges\" means the fees in the price list."] },
+  { id = "2", sentences = ["2. No charges apply to repairs.", "Charges are paid monthly."] },
+]
+terms = [
+  { term = "Charges", definition = "1.s1", uses = [{ text = "Charges", nth = 2 }] },
+]
+undefined = []
+
+# A term inside a longer term: "Master Agreement" takes its words, so "Agreement" has only the use in "this Agreement".
+[[case]]
+id = "term-inside-a-longer-term"
+clauses = [
+  { id = "1", sentences = ["\"Agreement\" means this contract.", "\"Master Agreement\" means the deal with the customer."] },
+  { id = "2", sentences = ["2. The Master Agreement and this Agreement both apply."] },
+]
+terms = [
+  { term = "Agreement", definition = "1.s1", uses = [{ text = "Agreement", nth = 4 }] },
+  { term = "Master Agreement", definition = "1.s2", uses = [{ text = "Master Agreement", nth = 2 }] },
+]
+undefined = []
+
+# A term defined twice gives two entries with the same uses.
+[[case]]
+id = "defined-twice"
+clauses = [
+  { id = "1", sentences = ["\"Fee\" means the base price."] },
+  { id = "2", sentences = ["\"Fee\" means the price after discount.", "The Fee is due on signing."] },
+]
+terms = [
+  { term = "Fee", definition = "1.s1", uses = [{ text = "Fee", nth = 3 }] },
+  { term = "Fee", definition = "2.s1", uses = [{ text = "Fee", nth = 3 }] },
+]
+undefined = []
+
+# A capitalised run that no definition covers is used but never defined.
+[[case]]
+id = "business-days-not-defined"
+clauses = [
+  { id = "1", sentences = ["\"Agency\" means the buyer."] },
+  { id = "2", sentences = ["2. The Agency replies within 3 Business Days."] },
+]
+terms = [
+  { term = "Agency", definition = "1.s1", uses = [{ text = "Agency", nth = 2 }] },
+]
+undefined = [
+  { text = "Business Days" },
+]
+
+# A run in a heading or at the start of a sentence is not flagged. The same run later in a sentence is.
+[[case]]
+id = "run-at-a-start-is-skipped"
+clauses = [
+  { id = "6", heading = "Payment Terms", sentences = ["6. Payment Terms"] },
+  { id = "6.1", parent = "6", sentences = ["6.1 Business Days exclude bank holidays.", "Replies come within 3 Business Days."] },
+]
+terms = []
+undefined = [
+  { text = "Business Days", nth = 2 },
+]
+
+# "together the" before the quotes. The second party's name is mid-sentence, so it is flagged.
+[[case]]
+id = "together-the-parties"
+clauses = [
+  { id = "1", sentences = ["1. Brightline Studio Ltd and Karim Benali (together the \"Parties\") sign below."] },
+  { id = "2", sentences = ["2. The Parties agree."] },
+]
+terms = [
+  { term = "Parties", definition = "1.s1", uses = [{ text = "Parties", nth = 2 }] },
+]
+undefined = [
+  { text = "Karim Benali" },
+]
