@@ -5,6 +5,7 @@ the clause and sentence spans tile the text with no gap (S2, T3).
 """
 
 import hashlib
+import re
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Final, cast
@@ -22,7 +23,6 @@ from clause_tracer.core import (
 from clause_tracer.links.sample_clauses import SampleInput
 
 _ALLOWED_KEYS: Final[frozenset[str]] = frozenset({"id", "sentences", "parent", "heading", "number"})
-_OPTIONAL_STRING_KEYS: Final[tuple[str, ...]] = ("parent", "heading", "number")
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -49,9 +49,9 @@ def build_case(rows: Sequence[Mapping[str, object]]) -> SampleInput:
     parsed = _parse_rows(rows)
     clause_texts = [" ".join(row.sentences) for row in parsed]
     text = "\n".join(clause_texts)
-    numbering_source = (
-        "paragraphs" if all(str(row.id).startswith("p") for row in parsed) else "numbers"
-    )
+    has_rows = bool(parsed)
+    every_id_is_a_paragraph = all(_is_paragraph_id(str(row.id)) for row in parsed)
+    numbering_source = "paragraphs" if has_rows and every_id_is_a_paragraph else "numbers"
     clauses = _build_clauses(parsed, numbering_source=numbering_source)
     document = Document(
         schema_version=1,
@@ -97,19 +97,18 @@ def _parse_rows(rows: Sequence[Mapping[str, object]]) -> list[_Row]:
             raise ValueError("missing key id")
         if "sentences" not in row:
             raise ValueError("missing key sentences")
-        clause_id = _required_string(row, "id")
+        clause_id = cast(str, _string(row, "id"))
         sentences = _sentences(row["sentences"])
-        for key in _OPTIONAL_STRING_KEYS:
-            if key in row and not isinstance(row[key], str):
-                raise ValueError(f"{key} must be a string")
+        parent = _string(row, "parent")
+        heading = _string(row, "heading")
+        written_number = _string(row, "number")
         if clause_id in seen:
             raise ValueError(f"duplicate id {clause_id}")
         seen.add(clause_id)
         for sentence in sentences:
-            if sentence == "" or "\n" in sentence:
+            if sentence == "" or "\n" in sentence or "\r" in sentence:
                 raise ValueError("a sentence must be non-empty and hold no line break")
 
-        parent = _optional_string(row, "parent")
         parent_id = None if parent is None else ClauseId(parent)
         if parent_id is None:
             level = 1
@@ -117,8 +116,12 @@ def _parse_rows(rows: Sequence[Mapping[str, object]]) -> list[_Row]:
             if parent_id not in levels:
                 raise ValueError(f"unknown parent {parent}")
             level = levels[parent_id] + 1
-        heading = _optional_string(row, "heading")
-        number = _number(row, clause_id)
+        if _is_paragraph_id(clause_id):
+            number = None
+        elif written_number is not None:
+            number = written_number
+        else:
+            number = clause_id
         parsed.append(
             _Row(
                 id=ClauseId(clause_id),
@@ -133,17 +136,13 @@ def _parse_rows(rows: Sequence[Mapping[str, object]]) -> list[_Row]:
     return parsed
 
 
-def _required_string(row: Mapping[str, object], key: str) -> str:
+def _string(row: Mapping[str, object], key: str) -> str | None:
+    if key not in row:
+        return None
     value = row[key]
     if not isinstance(value, str):
         raise ValueError(f"{key} must be a string")
     return value
-
-
-def _optional_string(row: Mapping[str, object], key: str) -> str | None:
-    if key not in row:
-        return None
-    return cast(str, row[key])
 
 
 def _sentences(value: object) -> tuple[str, ...]:
@@ -156,12 +155,8 @@ def _sentences(value: object) -> tuple[str, ...]:
     return tuple(cast(list[str], value))
 
 
-def _number(row: Mapping[str, object], clause_id: str) -> str | None:
-    if "number" in row:
-        return cast(str, row["number"])
-    if clause_id.startswith("p"):
-        return None
-    return clause_id
+def _is_paragraph_id(clause_id: str) -> bool:
+    return re.fullmatch(r"p[0-9]+(~[0-9]+)?", clause_id) is not None
 
 
 def _build_clauses(rows: list[_Row], *, numbering_source: str) -> tuple[Clause, ...]:

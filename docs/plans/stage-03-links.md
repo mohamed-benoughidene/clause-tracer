@@ -186,7 +186,7 @@ When this is done, `links` has a coverage floor, empty owner tables, a committed
   - **Rules:** D4 and I9 (validated once at the door), T1, S3. Do not change the fixture file.
   - **Depends on:** S3-M1-T3, S3-M1-T4
 
-- [ ] **S3-M1-T7: Make the test-case builder match how `ingest` names and splits clauses**
+- [x] **S3-M1-T7: Make the test-case builder match how `ingest` names and splits clauses**
   - **Why:** A review of S3-M1-T5 found that a clause id such as `payment` counts as a paragraph clause, that `build_case([])` reports `paragraphs`, and that `\r` in a sentence breaks the match with `ingest`. `ingest` names a paragraph clause `p` plus digits (`p1`, `p2`).
   - **Build:** In `src/clause_tracer/links/tests/case_builder.py`:
     - A clause id is a paragraph id when `re.fullmatch(r"p[0-9]+(~[0-9]+)?", id)` matches (`ingest` makes `p1`, and `p1~2` when `p1` is taken). Use this test in place of "starts with `p`" in both places: `number` is `None` for a paragraph id, else the row's `number`, else the id; `numbering_source` is `"paragraphs"` when there is at least one row and every id is a paragraph id, else `"numbers"`. So `build_case([])` has no clauses and its source word does not matter, and a row `{"id": "payment", ...}` has the number `"payment"`.

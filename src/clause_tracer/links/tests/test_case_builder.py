@@ -108,6 +108,36 @@ def test_sentence_spaces_are_kept() -> None:
     )
 
 
+def test_word_starting_with_p_is_not_a_paragraph() -> None:
+    sample = build_case([{"id": "payment", "sentences": ["x."]}])
+
+    assert sample.clauses[0].numbering_source == "numbers"
+    assert sample.clauses[0].number == "payment"
+
+
+def test_mixed_ids_are_numbers() -> None:
+    sample = build_case(
+        [
+            {"id": "p1", "sentences": ["x."]},
+            {"id": "1", "sentences": ["y."]},
+        ]
+    )
+
+    assert sample.clauses[0].numbering_source == "numbers"
+    assert sample.clauses[1].numbering_source == "numbers"
+    assert sample.clauses[0].number is None
+
+
+def test_carriage_return_raises() -> None:
+    with pytest.raises(ValueError, match="a sentence must be non-empty and hold no line break"):
+        build_case([{"id": "1", "sentences": ["a\rb"]}])
+
+
+def test_heading_must_be_a_string() -> None:
+    with pytest.raises(ValueError, match="heading must be a string"):
+        build_case([{"id": "1", "heading": 3, "sentences": ["x."]}])
+
+
 def test_span_of_nth() -> None:
     assert span_of("a x a", "a", 2) == Span(start=4, end=5)
 
