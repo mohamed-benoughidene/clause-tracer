@@ -401,7 +401,7 @@ When this is done, `find_references` finds every cross-reference with its source
     - `test_own_number_of_a_duplicated_schedule` (rows `S1` with `number` `"Schedule 1"` and `["Schedule 1 Fees."]`, and `S1~2` with `number` `"Schedule 1"` and `["Schedule 1 Again."]`: no reference);
     - `test_reference_in_another_clause_to_a_duplicated_id_stays` (rows `2` `["2. Pay."]`, `2~2` `["2. Again."]` and `3` `["3. See clause 2."]`: one reference, source `"clause 2"`, target `None`);
     - `test_later_reference_in_a_duplicated_clause_stays` (rows `2` `["2. Pay."]` and `2~2` `["Section 2 Again, see clause 2."]`: one reference, source `"clause 2"`, target `None`).
-    See the first two fail first. The last two are guards and pass before the change.
+    See the first two fail first. `test_reference_in_another_clause_to_a_duplicated_id_stays` is a guard and passes before the change. `test_later_reference_in_a_duplicated_clause_stays` fails before the change (two references, because the heading `Section 2` is read too) and passes after it.
   - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_references.py src/clause_tracer/links/tests/test_reference_table.py` passes with 46 tests in `test_references.py`, and `scripts/check.sh` exits 0. `references.toml` is unchanged. If a table row fails, fix the code, never the table; if the code is right and the row looks wrong, stop and ask the owner (T11).
   - **Rules:** T1, T11, Spec 5 ("never guess"), S3-M2-T2 (this task refines its own-number rule).
   - **Depends on:** S3-M2-T8
