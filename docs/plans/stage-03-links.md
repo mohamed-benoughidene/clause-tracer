@@ -380,7 +380,7 @@ When this is done, `find_references` finds every cross-reference with its source
   - **Rules:** T1, Spec 5.
   - **Depends on:** S3-M2-T1
 
-- [ ] **S3-M2-T8: Read the separators of a reference once and by name**
+- [x] **S3-M2-T8: Read the separators of a reference once and by name**
   - **Why:** A code review of S3-M2-T2 and S3-M2-T3 found two gaps in `references.py`. `_split_items` builds the pattern `f"({SEPARATOR})"` again for every match, although section 5 says that a pattern is compiled once in `_patterns.py`. And `_is_range_separator` finds a range with a substring test (`"to" in separator`), so a new list word that holds `to` (for example `together with`) would turn a list into a range with no test failing. This task changes no behaviour.
   - **Build:**
     - In `src/clause_tracer/links/_patterns.py`, add `SEPARATOR_SPLIT_RE: Final[re.Pattern[str]] = re.compile(f"({SEPARATOR})")`. It has the capturing group that `re.split` needs, so `SEPARATOR_RE` cannot replace it. `SEPARATOR` and `SEPARATOR_RE` do not change.

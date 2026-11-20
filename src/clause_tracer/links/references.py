@@ -17,13 +17,14 @@ from clause_tracer.links._patterns import (
     NUMBER_REFERENCE,
     OF_DOCUMENT_RE,
     SCHEDULE_REFERENCE,
-    SEPARATOR,
+    SEPARATOR_SPLIT_RE,
     THIS_REFERENCE_RE,
 )
 
 _ARTICLE_BASE_RE: Final[re.Pattern[str]] = re.compile(r"[0-9]{1,3}|[IVXLC]{1,7}")
 _SCHEDULE_BASE_RE: Final[re.Pattern[str]] = re.compile(r"[0-9]{1,3}|[A-Z]")
 _OWN_NUMBER_CHARS: Final[frozenset[str]] = frozenset({" ", "\t", "#", "*", ">", "-", "_"})
+_RANGE_MARKERS: Final[frozenset[str]] = frozenset({"to", "-", "\u2013", "\u2014"})
 
 
 class _Family(Enum):
@@ -114,7 +115,7 @@ def _references_for_match(
 
 
 def _split_items(raw: str) -> tuple[tuple[str, ...], tuple[str, ...]]:
-    parts = re.split(f"({SEPARATOR})", raw)
+    parts = SEPARATOR_SPLIT_RE.split(raw)
     return tuple(parts[0::2]), tuple(parts[1::2])
 
 
@@ -133,7 +134,7 @@ def _expand_keys(
 
 
 def _is_range_separator(separator: str) -> bool:
-    return any(marker in separator for marker in ("to", "-", "\u2013", "\u2014"))
+    return separator.strip() in _RANGE_MARKERS
 
 
 def _expand_pair(first: _Key, second: _Key, family: _Family) -> tuple[_Key, ...]:

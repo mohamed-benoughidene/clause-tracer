@@ -34,6 +34,7 @@ SEPARATOR: Final[str] = (
     r"(?:\s*,\s*(?:(?:and|or)\s+)?|\s+(?:and|or)\s+|\s+to\s+|\s*[-\u2013\u2014]\s*)"
 )
 SEPARATOR_RE: Final[re.Pattern[str]] = re.compile(SEPARATOR)
+SEPARATOR_SPLIT_RE: Final[re.Pattern[str]] = re.compile(f"({SEPARATOR})")
 
 UNIT_AFTER: Final[str] = (
     r"(?!\s*(?:%|(?i:per\s?cent|percent|days?|weeks?|months?|years?|hours?|"
