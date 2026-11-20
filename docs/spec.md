@@ -515,7 +515,7 @@ The brief for whoever designs the prototype. Read sections 1 to 13 first, plus t
 | Home | Interrupted with "Resume." Failed with "Retry." |
 | Home, New review | Offline: saved reviews open, drafts can be prepared, sending explains internet is needed. |
 | New review | No key saved: "Add your OpenRouter key to run a review," with a button to the guide. Progress kept. |
-| New review | Scanned PDF, too large, empty, not text (the file holds a NUL character; owner, 19 Nov 2026), or an old Word file (.doc), each blocking Continue. A mixed file (it names its scanned pages, which are skipped unless the user pastes their text) and a contract that isn't English: a warning, and Continue still works (owner, 15 Nov 2026). |
+| New review | Scanned PDF, too large (over 20 MB), too many words (over 50,000; owner, 20 Nov 2026), empty, not text (the file holds a NUL character; owner, 19 Nov 2026), or an old Word file (.doc), each blocking Continue. A mixed file (it names its scanned pages, which are skipped unless the user pastes their text) and a contract that isn't English: a warning, and Continue still works (owner, 15 Nov 2026). |
 | New review | A Word file with tracked changes: a notice, and Continue still works. |
 | New review | Draft whose playbook was deleted: "Pick a playbook." |
 | New review | First review: no playbook yet, a copy of the starter already picked, with "Make the limits yours." |

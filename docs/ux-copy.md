@@ -212,13 +212,14 @@ The card shows one view at a time: Welcome, then Key. “Check your own contract
 | File card | [file name] · PDF · 5 pages · 929 words · real text · [Replace] |
 | Preview | First page · is this the right contract? |
 | Preview hint | Wrong file? Click Replace, or drop another file on this card. |
-| File card, other states | Mixed: PDF · 9 pages · 929 words · pages 7 and 8 scanned · Scanned: PDF · 5 pages · scanned images, no text · Too large: PDF · 48 MB · Empty: PDF · 0 pages · no text · Binary: TXT · 12 KB · can't be read · Not English: PDF · 5 pages · not English · Old Word: Word 97–2003 (.doc) · can't be read |
+| File card, other states | Mixed: PDF · 9 pages · 929 words · pages 7 and 8 scanned · Scanned: PDF · 5 pages · scanned images, no text · Too large: PDF · 48 MB · Too many words: PDF · 31 pages · 63,200 words · Empty: PDF · 0 pages · no text · Binary: TXT · 12 KB · can't be read · Not English: PDF · 5 pages · not English · Old Word: Word 97–2003 (.doc) · can't be read |
 | Buttons on a blocking or warning notice | Paste text · Replace file · Paste their text · Choose another file |
 | Paste field | Contract text · Keep the clause numbers and headings. Paste only the pages you want reviewed. |
 | Review name | Review name · Pick a name you'll recognise later. |
 | Scanned (blocks) | This PDF is pictures of pages, so its text can't be read. Load a Word version, or paste the text. |
 | Mixed (warns, owner 15 Nov 2026) | Pages 7 and 8 are pictures, not text. They're skipped unless you paste their text. |
 | Too large (blocks) | This file is 48 MB. The limit is 20 MB. Paste only the pages you want reviewed. |
+| Too many words (blocks, owner 20 Nov 2026) | This file has 63,200 words. The limit is 50,000 words. Paste only the pages you want reviewed. |
 | Empty (blocks) | This file has no text. Choose another file, or paste the text. |
 | Not text (blocks, owner 19 Nov 2026) | This file doesn't look like text. Choose another file, or paste the text. |
 | Old Word (blocks) | This is an old Word file. Open it in Word, save it as .docx, then load that. |
