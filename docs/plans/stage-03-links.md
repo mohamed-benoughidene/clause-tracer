@@ -80,7 +80,7 @@
 
 When this is done, `links` has a coverage floor, empty owner tables, a committed clause fixture of the sample that a root test keeps in step with `ingest`, and a test helper that builds small cases without `ingest`.
 
-- [ ] **S3-M1-T1: An 85% coverage floor for `links`**
+- [x] **S3-M1-T1: An 85% coverage floor for `links`**
   - **Build:** In `scripts/check.sh`, add one last line: `run coverage report --include='src/clause_tracer/links/*' --fail-under=85`. In `scripts/README.md`, change the `check.sh` row to say "a 95% branch-coverage floor for `core` and an 85% floor for `ingest` and `links`".
   - **Files:** `scripts/check.sh`, `scripts/README.md`.
   - **Tests first:** None. The check is the script itself.
