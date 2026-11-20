@@ -108,7 +108,7 @@ def _references_for_match(
     references: list[CrossReference] = []
     for key in keys:
         target = _target(text, index, match, keyword, key)
-        if _is_own_number(text, index, match, items, target):
+        if _is_own_number(text, index, match, items, key, target):
             continue
         references.append(CrossReference(source=source, target=target))
     return tuple(references)
@@ -252,12 +252,27 @@ def _is_own_number(
     index: ClauseIndex,
     match: re.Match[str],
     items: tuple[str, ...],
+    key: _Key,
     target: ClauseId | None,
 ) -> bool:
-    if len(items) != 1 or target is None:
+    resolution = key.resolution
+    if len(items) != 1 or resolution is None:
         return False
     clause = index.clause_at(match.start())
-    if clause is None or target != clause.id:
+    if clause is None:
         return False
     before = text[clause.span.start : match.start()]
-    return all(character in _OWN_NUMBER_CHARS for character in before)
+    only_markup_before = all(character in _OWN_NUMBER_CHARS for character in before)
+    if not only_markup_before:
+        return False
+    same_clause = target == clause.id
+    if same_clause:
+        return True
+    if target is not None:
+        return False
+    base = str(clause.id).split("~", 1)[0]
+    schedule = index.in_schedule(clause)
+    candidates = {resolution}
+    if schedule is not None:
+        candidates.add(schedule.id + "." + resolution)
+    return base in candidates

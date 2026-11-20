@@ -423,3 +423,44 @@ def test_this_clause_in_paragraphs() -> None:
         ]
     )
     assert references == (CrossReference(source=span_of(text, "This Clause"), target=None),)
+
+
+def test_own_number_of_duplicated_ids() -> None:
+    _, references = _run(
+        [
+            {"id": "2", "sentences": ["Section 2 Term."]},
+            {"id": "2~2", "sentences": ["Section 2 Again."]},
+        ]
+    )
+    assert references == ()
+
+
+def test_own_number_of_a_duplicated_schedule() -> None:
+    _, references = _run(
+        [
+            {"id": "S1", "number": "Schedule 1", "sentences": ["Schedule 1 Fees."]},
+            {"id": "S1~2", "number": "Schedule 1", "sentences": ["Schedule 1 Again."]},
+        ]
+    )
+    assert references == ()
+
+
+def test_reference_in_another_clause_to_a_duplicated_id_stays() -> None:
+    text, references = _run(
+        [
+            {"id": "2", "sentences": ["2. Pay."]},
+            {"id": "2~2", "sentences": ["2. Again."]},
+            {"id": "3", "sentences": ["3. See clause 2."]},
+        ]
+    )
+    assert references == (CrossReference(source=span_of(text, "clause 2"), target=None),)
+
+
+def test_later_reference_in_a_duplicated_clause_stays() -> None:
+    text, references = _run(
+        [
+            {"id": "2", "sentences": ["2. Pay."]},
+            {"id": "2~2", "sentences": ["Section 2 Again, see clause 2."]},
+        ]
+    )
+    assert references == (CrossReference(source=span_of(text, "clause 2"), target=None),)
