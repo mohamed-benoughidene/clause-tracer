@@ -6,7 +6,7 @@ the format once at the door (D4, I9).
 """
 
 import json
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Final, cast
 
@@ -43,7 +43,8 @@ def dump_clause_fixture(document: Document, clauses: tuple[Clause, ...]) -> str:
     Input:   a Document without glyphs, and its clauses.
     Output:  the fixture text, ending in one newline.
     Raises:  ValueError when the document holds glyphs, pages or other
-             non-text fields (a caller bug).
+             non-text fields, when its source kind is not a text kind, or
+             when the clauses fail the structure checks (a caller bug).
     Effects: none (T1).
     """
 
@@ -57,6 +58,9 @@ def dump_clause_fixture(document: Document, clauses: tuple[Clause, ...]) -> str:
         or document.tracked_changes
     ):
         raise ValueError("links sample: text documents only")
+    if document.source.kind not in _TEXT_KINDS:
+        raise ValueError(f"links sample: kind {document.source.kind.value} is not a text kind")
+    _check_clauses(document.text, clauses)
     obj = {
         "format": FIXTURE_FORMAT,
         "version": FIXTURE_VERSION,
@@ -165,13 +169,11 @@ def load_clause_fixture(text: str) -> SampleInput:
         row = cast(dict[str, object], row_value)
         clause_id = ClauseId(_string_field(row, "id"))
         span = _span(row)
-        _check_span(span, text_value, clause_id)
         sentences: list[Sentence] = []
         for sentence_value in cast(list[object], row["sentences"]):
             sentence_row = cast(dict[str, object], sentence_value)
             sentence_id = SentenceId(_string_field(sentence_row, "id"))
             sentence_span = _span(sentence_row)
-            _check_span(sentence_span, text_value, sentence_id)
             sentences.append(Sentence(id=sentence_id, span=sentence_span))
         clauses.append(
             Clause(
@@ -186,9 +188,7 @@ def load_clause_fixture(text: str) -> SampleInput:
             )
         )
 
-    _check_clause_ids(clauses)
-    _check_parents(clauses)
-    _check_sentence_spans(clauses)
+    _check_clauses(text_value, clauses)
     return SampleInput(document=document, clauses=tuple(clauses))
 
 
@@ -358,24 +358,48 @@ def _check_span(span: Span, text: str, item_id: ClauseId | SentenceId) -> None:
         raise ValueError(f"links sample: span of {item_id} is outside the text")
 
 
-def _check_clause_ids(clauses: list[Clause]) -> None:
-    seen: set[ClauseId] = set()
+def _check_clauses(text: str, clauses: Sequence[Clause]) -> None:
+    """Check the spans and structure of every clause, raising on the first failure."""
+
     for clause in clauses:
-        if clause.id in seen:
+        _check_span(clause.span, text, clause.id)
+        for sentence in clause.sentences:
+            _check_span(sentence.span, text, sentence.id)
+
+    seen_ids: set[ClauseId] = set()
+    for clause in clauses:
+        if clause.id in seen_ids:
             raise ValueError(f"links sample: duplicate clause id {clause.id}")
-        seen.add(clause.id)
+        seen_ids.add(clause.id)
 
-
-def _check_parents(clauses: list[Clause]) -> None:
-    seen: set[ClauseId] = set()
+    by_id: dict[ClauseId, Clause] = {}
     for clause in clauses:
-        if clause.parent_id is not None and clause.parent_id not in seen:
+        if clause.parent_id is not None and clause.parent_id not in by_id:
             raise ValueError(f"links sample: unknown parent {clause.parent_id}")
-        seen.add(clause.id)
+        by_id[clause.id] = clause
 
-
-def _check_sentence_spans(clauses: list[Clause]) -> None:
     for clause in clauses:
         for sentence in clause.sentences:
             if sentence.span.start < clause.span.start or sentence.span.end > clause.span.end:
                 raise ValueError(f"links sample: span of {sentence.id} is outside its clause")
+
+    for clause in clauses:
+        parent_id = clause.parent_id
+        if clause.level < 1:
+            raise ValueError(f"links sample: level of {clause.id} is not 1 or more")
+        if parent_id is None:
+            if clause.level != 1:
+                raise ValueError(f"links sample: level of {clause.id} does not fit its parent")
+        elif clause.level != by_id[parent_id].level + 1:
+            raise ValueError(f"links sample: level of {clause.id} does not fit its parent")
+
+    for previous, clause in zip(clauses, clauses[1:], strict=False):
+        if clause.span.start < previous.span.end:
+            raise ValueError(f"links sample: span of {clause.id} overlaps an earlier clause")
+
+    seen_sentences: set[SentenceId] = set()
+    for clause in clauses:
+        for sentence in clause.sentences:
+            if sentence.id in seen_sentences:
+                raise ValueError(f"links sample: duplicate sentence id {sentence.id}")
+            seen_sentences.add(sentence.id)

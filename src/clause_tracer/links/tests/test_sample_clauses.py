@@ -258,3 +258,91 @@ def test_sentence_outside_its_clause() -> None:
 
     with pytest.raises(ValueError):
         _load(data)
+
+
+def test_level_below_one() -> None:
+    data = _fixture()
+    _clause_rows(data)[0]["level"] = 0
+
+    with pytest.raises(ValueError) as error:
+        _load(data)
+
+    assert _message(error) == "links sample: level of 1 is not 1 or more"
+
+
+def test_level_does_not_fit_parent() -> None:
+    data = _fixture()
+    _clause_rows(data)[1]["level"] = 3
+
+    with pytest.raises(ValueError) as error:
+        _load(data)
+
+    assert _message(error) == "links sample: level of 1.1 does not fit its parent"
+
+
+def test_root_level_must_be_one() -> None:
+    data = _fixture()
+    _clause_rows(data)[0]["level"] = 2
+
+    with pytest.raises(ValueError) as error:
+        _load(data)
+
+    assert _message(error) == "links sample: level of 1 does not fit its parent"
+
+
+def test_clause_overlap() -> None:
+    data = _fixture()
+    _clause_rows(data)[1]["start"] = 5
+    _sentence_rows(_clause_rows(data)[1])[0]["start"] = 5
+
+    with pytest.raises(ValueError) as error:
+        _load(data)
+
+    assert _message(error) == "links sample: span of 1.1 overlaps an earlier clause"
+
+
+def test_duplicate_sentence_id() -> None:
+    data = _fixture()
+    _sentence_rows(_clause_rows(data)[1])[0]["id"] = "1.s1"
+
+    with pytest.raises(ValueError) as error:
+        _load(data)
+
+    assert _message(error) == "links sample: duplicate sentence id 1.s1"
+
+
+def test_dump_refuses_a_pdf_kind() -> None:
+    document = replace(
+        _document(TEXT),
+        source=SourceFile(
+            name="t.pdf",
+            kind=FileKind.PDF,
+            sha256="0" * 64,
+            size=len(TEXT.encode()),
+        ),
+    )
+
+    with pytest.raises(ValueError) as error:
+        dump_clause_fixture(document, _clauses())
+
+    assert _message(error) == "links sample: kind pdf is not a text kind"
+
+
+def test_dump_refuses_a_span_outside_the_text() -> None:
+    first, second = _clauses()
+    bad = replace(first, span=Span(start=0, end=999))
+
+    with pytest.raises(ValueError) as error:
+        dump_clause_fixture(_document(TEXT), (bad, second))
+
+    assert _message(error) == "links sample: span of 1 is outside the text"
+
+
+def test_dump_refuses_a_duplicate_clause_id() -> None:
+    first, second = _clauses()
+    duplicate = replace(second, id=ClauseId("1"))
+
+    with pytest.raises(ValueError) as error:
+        dump_clause_fixture(_document(TEXT), (first, duplicate))
+
+    assert _message(error) == "links sample: duplicate clause id 1"

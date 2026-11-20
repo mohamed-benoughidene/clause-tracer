@@ -162,7 +162,7 @@ When this is done, `links` has a coverage floor, empty owner tables, a committed
   - **Rules:** T3 (a simple working stand-in for `ingest`), S2 (the tests run without other modules).
   - **Depends on:** S3-M1-T3
 
-- [ ] **S3-M1-T6: Make the fixture writer and loader check the whole structure**
+- [x] **S3-M1-T6: Make the fixture writer and loader check the whole structure**
   - **Why:** A review of S3-M1-T3 found that the loader accepts structure the later milestones cannot use, and that the writer accepts input the loader then refuses. This task closes both gaps. The T3 text stays as it was built. The level rule below is the rule `ingest` itself uses (`level = 1` with no parent, else the parent's level plus 1, `ingest/clauses.py`). System design 3.4 does not state it, so the owner confirms it when accepting this task.
   - **Build:** In `src/clause_tracer/links/sample_clauses.py`:
     - Add these checks to `load_clause_fixture`, after the three structure checks of T3, with the same `ValueError` and the same `links sample: ` prefix, in this order:
