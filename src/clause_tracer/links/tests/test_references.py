@@ -374,3 +374,52 @@ def test_range_with_bad_roman() -> None:
         CrossReference(source=source, target=None),
         CrossReference(source=source, target=ClauseId("5")),
     )
+
+
+def test_this_clause() -> None:
+    text, references = _run([{"id": "5.1", "sentences": ["5.1 This Clause applies."]}])
+    assert references == (
+        CrossReference(source=span_of(text, "This Clause"), target=ClauseId("5.1")),
+    )
+
+
+def test_this_schedule() -> None:
+    text, references = _run(
+        [
+            {"id": "S1", "number": "Schedule 1", "sentences": ["Schedule 1 · Fees"]},
+            {"id": "S1.1", "parent": "S1", "sentences": ["1. This Schedule lists fees."]},
+        ]
+    )
+    assert references == (
+        CrossReference(source=span_of(text, "This Schedule"), target=ClauseId("S1")),
+    )
+
+
+def test_this_schedule_outside_a_schedule() -> None:
+    text, references = _run([{"id": "3", "sentences": ["3. This Schedule lists fees."]}])
+    assert references == (CrossReference(source=span_of(text, "This Schedule"), target=None),)
+
+
+def test_this_clause_with_number_is_one_reference() -> None:
+    text, references = _run(
+        [
+            {"id": "4", "sentences": ["4. Fees."]},
+            {"id": "9", "sentences": ["9. this Clause 4 applies."]},
+        ]
+    )
+    assert references == (CrossReference(source=span_of(text, "Clause 4"), target=ClauseId("4")),)
+
+
+def test_this_agreement_is_not_a_reference() -> None:
+    _, references = _run([{"id": "5.1", "sentences": ["5.1 This Agreement ends."]}])
+    assert references == ()
+
+
+def test_this_clause_in_paragraphs() -> None:
+    text, references = _run(
+        [
+            {"id": "p1", "sentences": ["The Agency pays."]},
+            {"id": "p2", "sentences": ["This Clause applies."]},
+        ]
+    )
+    assert references == (CrossReference(source=span_of(text, "This Clause"), target=None),)

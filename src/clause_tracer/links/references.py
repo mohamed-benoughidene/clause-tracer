@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Final
 
-from clause_tracer.core import ClauseId, CrossReference, Span
+from clause_tracer.core import Clause, ClauseId, CrossReference, Span
 from clause_tracer.links._index import ClauseIndex
 from clause_tracer.links._numbers import expand_range, normalise_number, roman_to_int
 from clause_tracer.links._patterns import (
@@ -18,6 +18,7 @@ from clause_tracer.links._patterns import (
     OF_DOCUMENT_RE,
     SCHEDULE_REFERENCE,
     SEPARATOR,
+    THIS_REFERENCE_RE,
 )
 
 _ARTICLE_BASE_RE: Final[re.Pattern[str]] = re.compile(r"[0-9]{1,3}|[IVXLC]{1,7}")
@@ -59,8 +60,37 @@ def find_references(text: str, index: ClauseIndex) -> tuple[CrossReference, ...]
     ):
         for match in pattern.finditer(text):
             found.extend(_references_for_match(text, index, match, family))
+    found.extend(_this_references(text, index))
     found.sort(key=lambda reference: reference.source.start)
     return tuple(found)
+
+
+def _this_references(text: str, index: ClauseIndex) -> tuple[CrossReference, ...]:
+    references: list[CrossReference] = []
+    for match in THIS_REFERENCE_RE.finditer(text):
+        clause = index.clause_at(match.start())
+        target = _this_target(index, match, clause)
+        references.append(
+            CrossReference(
+                source=Span(start=match.start(), end=match.end()),
+                target=target,
+            )
+        )
+    return tuple(references)
+
+
+def _this_target(
+    index: ClauseIndex,
+    match: re.Match[str],
+    clause: Clause | None,
+) -> ClauseId | None:
+    if clause is None or clause.number is None or clause.numbering_source == "paragraphs":
+        return None
+    keyword = match.group("kw").casefold()
+    if keyword in ("clause", "section", "paragraph", "sub-clause", "subclause"):
+        return clause.id
+    schedule = index.in_schedule(clause)
+    return None if schedule is None else schedule.id
 
 
 def _references_for_match(

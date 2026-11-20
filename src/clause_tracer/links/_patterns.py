@@ -61,3 +61,11 @@ ARTICLE_REFERENCE: Final[re.Pattern[str]] = _reference_pattern("articles?", ITEM
 SCHEDULE_REFERENCE: Final[re.Pattern[str]] = _reference_pattern(
     "schedules?|annex(?:es)?|appendix|appendices|exhibits?", ITEM_SCHEDULE
 )
+
+THIS_REFERENCE: Final[str] = (
+    r"(?<![A-Za-z])(?i:this)\s+"
+    r"(?P<kw>(?i:clause|section|paragraph|sub-clause|subclause|schedule|annex|"
+    r"appendix|exhibit))"
+    r"(?![A-Za-z])(?!\s*[0-9])(?!\s+[IVXLC]+(?![A-Za-z]))(?!\s+[A-Z](?![A-Za-z]))"
+)
+THIS_REFERENCE_RE: Final[re.Pattern[str]] = re.compile(THIS_REFERENCE)
