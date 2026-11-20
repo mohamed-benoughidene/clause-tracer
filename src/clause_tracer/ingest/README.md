@@ -72,6 +72,11 @@ Sentence ids add `.s1`, `.s2` and so on to the clause id (`5.1.s3`). A clause's
 sentences cover the whole clause: each starts where the one before ends. The
 clause number stays in the first sentence.
 
+A line that ends in a colon ends a sentence, so a lead-in line such as
+`1.1 In this Agreement the following words have these meanings:` is a sentence
+of its own. A hard-wrapped line that ends in a colon in the middle of a sentence
+also breaks there: a known limit.
+
 ## Output shape
 A `Document` with no glyphs: `glyphs`, `char_map`, `pages`, `furniture`, `hidden`,
 `undecodable` and `tracked_changes` are empty in stage 2.

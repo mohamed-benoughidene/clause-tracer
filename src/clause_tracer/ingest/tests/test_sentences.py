@@ -1,11 +1,12 @@
-"""Tests for sentence starts from NUPunkt (S2-M3-T4)."""
+"""Tests for sentence starts from NUPunkt and colon lines (S2-M3-T4, S2-M4-T7)."""
 
 from pathlib import Path
 
+import pytest
 from hypothesis import given
 
 from clause_tracer.core.tests.strategies import hazard_text
-from clause_tracer.ingest._sentences import sentence_starts
+from clause_tracer.ingest._sentences import colon_line_starts, sentence_starts
 
 PACKAGE = Path(__file__).parents[2]
 
@@ -21,6 +22,37 @@ def test_starts_of_three_sentences() -> None:
 
 def test_empty_text() -> None:
     assert sentence_starts("") == ()
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("Meanings:\nCharges means fees.", (10,)),
+        ("Meanings: \t\nCharges.", (12,)),
+        ("Meanings\uff1a\nNext", (10,)),
+        ("Meanings:\r\nNext", (11,)),
+        ("Meanings:\u00a0\nNext", (11,)),
+        ("**Terms:**\nNext", (11,)),
+        ("Meanings:\n\nNext", ()),
+        ("Meanings:\n", ()),
+        ("Note: this\nstays", ()),
+    ],
+)
+def test_colon_line_starts(text: str, expected: tuple[int, ...]) -> None:
+    assert colon_line_starts(text) == expected
+
+
+def test_colon_line_is_a_sentence_start() -> None:
+    text = (
+        "In this Agreement the following words have these meanings:\n"
+        '"Charges" means the fees set out in Schedule 1.'
+    )
+
+    assert sentence_starts(text) == (0, 59)
+
+
+def test_colon_start_joins_the_library_starts() -> None:
+    assert sentence_starts("One. Two:\nThree.") == (0, 5, 10)
 
 
 def test_only_this_file_imports_nupunkt() -> None:

@@ -386,6 +386,29 @@ def test_sentence_ids_count_from_one_in_each_clause() -> None:
     assert tuple(str(sentence.id) for sentence in clauses[1].sentences) == ("1.2.s1",)
 
 
+def test_colon_line_splits_the_lead_in_from_the_list() -> None:
+    text = (
+        "1.1 In this Agreement the following words have these meanings:\n"
+        '"Charges" means the fees.\n'
+        '"Services" means the work.'
+    )
+
+    clauses = clauses_of(text)
+
+    assert len(clauses) == 1
+    sentences = clauses[0].sentences
+    assert tuple(str(sentence.id) for sentence in sentences) == (
+        "1.1.s1",
+        "1.1.s2",
+        "1.1.s3",
+    )
+    assert tuple(sentence.span for sentence in sentences) == (
+        Span(start=0, end=63),
+        Span(start=63, end=89),
+        Span(start=89, end=115),
+    )
+
+
 def test_wrapped_schedule_words_mid_clause_are_text() -> None:
     text = (
         "1. Payment\n"

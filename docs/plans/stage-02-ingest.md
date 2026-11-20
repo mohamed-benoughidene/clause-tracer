@@ -514,7 +514,7 @@ When this is done, `python -m clause_tracer.ingest` prints the clauses and sente
   - **Rules:** T11.
   - **Depends on:** S2-M4-T5
 
-- [ ] **S2-M4-T7: A colon line ends a sentence**
+- [x] **S2-M4-T7: A colon line ends a sentence**
   - **Build:** Decided by the owner on 20 Nov 2026 (question 12). In `src/clause_tracer/ingest/_sentences.py`, add `def colon_line_starts(text: str) -> tuple[int, ...]` and change `sentence_starts` to return `tuple(sorted(set(library_starts) | set(colon_line_starts(text))))`, where `library_starts` is what the NUPunkt call returned before. The file stays the only one that imports `nupunkt` (B4).
     - `colon_line_starts` takes `lines = split_lines(text)` (from `clause_tracer.ingest._lines`). For each index `i` from 0 to `len(lines) - 2`: the line is a colon line when `lines[i].text.rstrip(" \t\u00a0\ufeff*_")` ends with `":"` or `"："` (U+FF1A). Write the characters as these escapes in the code, not as pasted characters. When it is a colon line and `lines[i + 1]` is not blank (`is_blank`), `lines[i + 1].start` is a start. It returns the starts in order. A colon line with no line after it, or with a blank line after it, gives no start. A colon in the middle of a line gives no start.
     - Update the module docstring: sentence starts are the NUPunkt starts plus the starts after colon lines.
