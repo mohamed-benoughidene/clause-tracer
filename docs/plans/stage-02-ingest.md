@@ -550,7 +550,7 @@ When this is done, `python -m clause_tracer.ingest` prints the clauses and sente
   - **Rules:** [AGENTS.md](../../AGENTS.md) ("The deck, the page and the spec must match"), [WRITING_DOCS.md](../../WRITING_DOCS.md) section 9.
   - **Depends on:** S2-M4-T8
 
-- [ ] **S2-M4-T11: Regenerate the developer-agreement golden file**
+- [x] **S2-M4-T11: Regenerate the developer-agreement golden file**
   - **Build:** Run `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_goldens.py` and see the developer-agreement test fail and the plain-paragraphs test pass. Then run the named command, `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_goldens.py --update-goldens`. Commit only `src/clause_tracer/ingest/tests/goldens/developer-agreement.outline.txt` and the plan tick, and say in the commit body that `--update-goldens` made it. The diff must hold exactly these changes, and nothing else: (1) clause `1.1` gains a sentence: `1.1.s1` runs 659-722 (the lead-in line), the new `1.1.s2` runs 722-770 and starts `"Charges" means`, and the old `1.1.s2` to `1.1.s5` become `1.1.s3` to `1.1.s6` with the same spans; (2) clause `14.6` keeps only `14.6.s1`, 5497-5564; (3) a new clause `p4`, level 1, span 5564-5640, with the heading `Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director` and one sentence `p4.s1`, 5564-5640; (4) the old clause `p4` becomes `p5`, span 5640-5663, with `p5.s1`. The file then holds 65 clauses and 75 sentences. If the diff holds anything else, stop and bring it to the owner. The plain-paragraphs file does not change.
   - **Files:** `src/clause_tracer/ingest/tests/goldens/developer-agreement.outline.txt`.
   - **Tests first:** None. The red test above is the check.
