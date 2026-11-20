@@ -586,7 +586,7 @@ When this is done, `core` builds match keys, invariant 2 holds, a contract that 
   - **Rules:** T11.
   - **Depends on:** S2-M1-T4
 
-- [ ] **S2-M5-T2: The match key**
+- [x] **S2-M5-T2: The match key**
   - **Build:** Needs question 2. In a new `src/clause_tracer/core/match_fold.py`: `def fold_for_matching(text: str) -> MatchKey`, exported from `core`. It uses only the standard library (`unicodedata`).
     - **Pass 1,** for each character `c` at index `i`: when `c` is one of the dropped characters (U+00AD, U+200B, U+200C, U+200D, U+2060, U+FEFF, U+202A to U+202E, U+2066 to U+2069), emit nothing. Otherwise take `unicodedata.normalize("NFKC", c).casefold()` and, for each character `d` of it: `‘ ’ ‚ ‛` become `'`; `“ ” „ ‟` become `"`; U+2010 to U+2015 and U+2212 become `-`; emit `(d, i)`.
     - **Pass 2,** over the emitted pairs: a run of pairs whose character has `isspace()` true becomes one `" "` with the index of the run's first pair. Every other pair is kept.
