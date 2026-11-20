@@ -13,6 +13,7 @@ def test_public_names() -> None:
         "dump_clause_fixture",
         "load_clause_fixture",
         "map_links",
+        "render_link_map",
     }
 
 

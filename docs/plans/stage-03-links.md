@@ -684,7 +684,7 @@ When this is done, `map_links` is the module's public call, `python -m clause_tr
   - **Rules:** [Testing strategy 5](../testing-strategy.md#5-the-offset-chain-seven-invariants) (Hypothesis and the hazard alphabet), T6. Property tests are layer 1 of [testing strategy 3](../testing-strategy.md#3-five-layers).
   - **Depends on:** S3-M5-T1
 
-- [ ] **S3-M5-T3: The printed link map**
+- [x] **S3-M5-T3: The printed link map**
   - **Build:** In `src/clause_tracer/links/render.py`, `def render_link_map(document: Document, clauses: tuple[Clause, ...], link_map: LinkMap) -> str`. It returns lines joined with `"\n"` and one final `"\n"`. Every field is separated by a tab. A text field has each `"\t"`, `"\r"` and `"\n"` replaced by one space. The clause of a span is `build_index(clauses).clause_at(span.start).id`, or `-` when there is none. Lines, in this order:
     - `source\t<document.source.name>\t<len(document.text)>`;
     - `counts\treferences <n>\tterms <n>\toverrides <n>\toutside <n>\tundefined <n>`;
