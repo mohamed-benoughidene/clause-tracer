@@ -52,5 +52,5 @@ Option B is smaller now. Option A costs about 290 MB, but avoids a second change
 - The not-English owner table (`ingest/tests/tables/not_english.toml`) holds the answers a reader expects, not Lingua's output. A row that Lingua gets wrong is a finding for the owner, not a row to change.
 
 ## Action Items
-1. [ ] Stage 2, task S2-M1-T6: add the pinned dependency.
+1. [x] Stage 2, task S2-M1-T6: add the pinned dependency (`lingua-language-detector==2.2.0`, done 20 Nov 2026).
 2. [ ] Stage 12: check the installer size with Lingua inside, and whether limiting the languages built in shrinks it.
