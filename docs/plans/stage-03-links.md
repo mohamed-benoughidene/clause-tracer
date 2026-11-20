@@ -537,7 +537,7 @@ When this is done, `find_definitions`, `find_terms`, `find_outside_documents` an
 
 When this is done, `find_overrides` gives each override with its direction, and the owner's overrides table passes.
 
-- [ ] **S3-M4-T1: Overrides that name a reference**
+- [x] **S3-M4-T1: Overrides that name a reference**
   - **Build:** Needs questions 4 and 5, answered on 20 Nov 2026 as recommended. In `_patterns.py` (the patterns run as `NOTWITHSTANDING_RE`, `QUALIFIER_RE`, `GENERAL_OVERRIDE_RE` and `OVERRIDE_GAP_RE`): `NOTWITHSTANDING = r"(?<![A-Za-z])(?i:notwithstanding)(?![A-Za-z])"`; `QUALIFIER = r"(?<![A-Za-z])(?i:subject\s+to|save\s+as\s+(?:set\s+out|provided)\s+in|except\s+as\s+(?:set\s+out|provided)\s+in)(?![A-Za-z])"`; `GENERAL_OVERRIDE = r"\s+(?i:anything\s+(?:else\s+)?(?:contained\s+)?(?:to\s+the\s+contrary\s+)?in\s+this\s+agreement|any\s+other\s+(?:provisions?|terms?)\s+(?:of|in)\s+this\s+agreement)(?![A-Za-z])"`. `OVERRIDE_GAP = r"\s*(?:(?i:the)\s+(?i:provisions?|terms?|requirements?)\s+(?i:of|in)\s+)?"`. In `src/clause_tracer/links/overrides.py`, `def find_overrides(text: str, index: ClauseIndex, references: tuple[CrossReference, ...], outside: tuple[OutsideDocument, ...]) -> tuple[Override, ...]`. `outside` is the result of `find_outside_documents`; S3-M4-T2 reads it, and this task does not.
 
     **Self references are not references here.** In `find_overrides`, a reference whose source text fully matches `THIS_REFERENCE_RE` is ignored everywhere (`THIS_REFERENCE_RE.fullmatch(text[r.source.start:r.source.end])`). In the rest of this task and of S3-M4-T2, "references" means the references left after that.

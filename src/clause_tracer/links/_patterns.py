@@ -158,3 +158,21 @@ OWN_NAME_BRACKET_RE: Final[re.Pattern[str]] = re.compile(OWN_NAME_BRACKET)
 
 UNDEFINED_RUN: Final[str] = r"(?<![A-Za-z])[A-Z][a-z]+(?: [A-Z][a-z]+){1,3}(?![A-Za-z])"
 UNDEFINED_RUN_RE: Final[re.Pattern[str]] = re.compile(UNDEFINED_RUN)
+
+NOTWITHSTANDING: Final[str] = r"(?<![A-Za-z])(?i:notwithstanding)(?![A-Za-z])"
+NOTWITHSTANDING_RE: Final[re.Pattern[str]] = re.compile(NOTWITHSTANDING)
+QUALIFIER: Final[str] = (
+    r"(?<![A-Za-z])(?i:subject\s+to|save\s+as\s+(?:set\s+out|provided)\s+in|"
+    r"except\s+as\s+(?:set\s+out|provided)\s+in)(?![A-Za-z])"
+)
+QUALIFIER_RE: Final[re.Pattern[str]] = re.compile(QUALIFIER)
+GENERAL_OVERRIDE: Final[str] = (
+    r"\s+(?i:anything\s+(?:else\s+)?(?:contained\s+)?(?:to\s+the\s+contrary\s+)?in\s+"
+    r"this\s+agreement|any\s+other\s+(?:provisions?|terms?)\s+(?:of|in)\s+this\s+agreement)"
+    r"(?![A-Za-z])"
+)
+GENERAL_OVERRIDE_RE: Final[re.Pattern[str]] = re.compile(GENERAL_OVERRIDE)
+OVERRIDE_GAP: Final[str] = (
+    r"\s*(?:(?i:the)\s+(?i:provisions?|terms?|requirements?)\s+(?i:of|in)\s+)?"
+)
+OVERRIDE_GAP_RE: Final[re.Pattern[str]] = re.compile(OVERRIDE_GAP)
