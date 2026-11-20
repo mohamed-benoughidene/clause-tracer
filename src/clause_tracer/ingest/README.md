@@ -107,9 +107,9 @@ line, or it is the first line of the text and in title case: every word starts
 with a capital letter, except the joining words a, an, and, by, for, in, of,
 on, or, the, to and with after the first word. So a first line such as
 `This Agreement is made on`, wrapped in the middle of a sentence, is not a
-heading. A line that opens with `Signed`,
-`Executed` or `In witness whereof` is a heading whatever its length. The clause
-of text before the first clause has no heading.
+heading. A line that opens with `Signed`, `Executed` or `In witness whereof` is
+a heading whatever its length. The clause of text before the first clause has
+no heading.
 
 The line of a short unnumbered heading ends a sentence: the next sentence starts
 at the next non-blank line. A long signature line does not end a sentence. A
