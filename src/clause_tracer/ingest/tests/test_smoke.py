@@ -29,12 +29,12 @@ def test_markdown_input(capsys: pytest.CaptureFixture[str]) -> None:
     assert "numbering\tparagraphs" in capsys.readouterr().out.splitlines()
 
 
-def test_sample_has_64_clauses() -> None:
+def test_sample_has_65_clauses() -> None:
     document = read_text_file(
         DEFAULT_INPUT.read_bytes(), kind=FileKind.TEXT, name=DEFAULT_INPUT.name
     )
 
-    assert len(split_clauses(document)) == 64
+    assert len(split_clauses(document)) == 65
 
 
 def test_missing_file_exits_3(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:

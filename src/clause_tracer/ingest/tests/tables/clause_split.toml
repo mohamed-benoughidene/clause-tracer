@@ -454,3 +454,72 @@ clauses = [
   { id = "(A)", number = "(A)", level = 1, parent = "", heading = "", starts_with = "(A) The Agency designs and b" },
   { id = "(B)", number = "(B)", level = 1, parent = "", heading = "", starts_with = "(B) The Developer is an inde" },
 ]
+
+# Lines 65 to 71 of developer-agreement.txt: a signature line opens a clause whatever its length (question 13, 20 Nov 2026).
+[[case]]
+id = "signature-line-over-60-characters-starts-a-clause"
+text = """
+14.5 Notices must be in writing and sent by email to the addresses each party gives the other, with a copy to Ms Jones at the Developer's address.
+14.6 This Agreement is governed by the laws of England and Wales.
+
+Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director
+
+Signed by Karim Benali
+Schedule 1 · Services and Charges"""
+numbering = "numbers"
+clauses = [
+  { id = "14.5", number = "14.5", level = 1, parent = "", heading = "", starts_with = "14.5 Notices must be in w" },
+  { id = "14.6", number = "14.6", level = 1, parent = "", heading = "", starts_with = "14.6 This Agreement is gov" },
+  { id = "p1", number = "", level = 1, parent = "", heading = "Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director", starts_with = "Signed for and on behalf of" },
+  { id = "p2", number = "", level = 1, parent = "", heading = "Signed by Karim Benali", starts_with = "Signed by Karim Benali" },
+  { id = "S1", number = "Schedule 1", level = 1, parent = "", heading = "Services and Charges", starts_with = "Schedule 1 · Services" },
+]
+
+# The sample's signature line with its first word changed to Executed.
+[[case]]
+id = "executed-line-starts-a-clause"
+text = """
+14.6 This Agreement is governed by the laws of England and Wales.
+
+Executed as a deed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director"""
+numbering = "numbers"
+clauses = [
+  { id = "14.6", number = "14.6", level = 1, parent = "", heading = "", starts_with = "14.6 This Agreement is gov" },
+  { id = "p1", number = "", level = 1, parent = "", heading = "Executed as a deed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director", starts_with = "Executed as a deed for and" },
+]
+
+# The sample's signature line with its first words changed to In witness whereof.
+[[case]]
+id = "in-witness-whereof-line-starts-a-clause"
+text = """
+14.6 This Agreement is governed by the laws of England and Wales.
+
+In witness whereof, for and on behalf of Brightline Studio Ltd by Sarah Jones, Director"""
+numbering = "numbers"
+clauses = [
+  { id = "14.6", number = "14.6", level = 1, parent = "", heading = "", starts_with = "14.6 This Agreement is gov" },
+  { id = "p1", number = "", level = 1, parent = "", heading = "In witness whereof, for and on behalf of Brightline Studio Ltd by Sarah Jones, Director", starts_with = "In witness whereof, for and" },
+]
+
+# The sample's own lines with the blank line between them removed: with text right before it, the long Signed line is not a heading.
+[[case]]
+id = "signed-line-with-no-blank-line-before-it-stays-in-the-clause"
+text = """
+14.6 This Agreement is governed by the laws of England and Wales.
+Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director"""
+numbering = "numbers"
+clauses = [
+  { id = "14.6", number = "14.6", level = 1, parent = "", heading = "", starts_with = "14.6 This Agreement is gov" },
+]
+
+# The sample's signature line with its first word changed to Signedness, which is not the word Signed.
+[[case]]
+id = "a-word-that-only-starts-like-signed-is-text"
+text = """
+14.6 This Agreement is governed by the laws of England and Wales.
+
+Signedness for and on behalf of Brightline Studio Ltd by Sarah Jones, Director"""
+numbering = "numbers"
+clauses = [
+  { id = "14.6", number = "14.6", level = 1, parent = "", heading = "", starts_with = "14.6 This Agreement is gov" },
+]
