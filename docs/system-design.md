@@ -328,7 +328,7 @@ Every position in the app points into **one canonical text**, built from the pag
 
 **Two folds, both in `core`** (decided 17 Nov 2026). `fold_for_quote_check` is the narrow Spec 2 fold, and the only one that confirms a quote. `fold_for_matching` builds the `MatchKey`, which finds names, terms and keywords. It applies NFKC and case-folding to each character, so `ß` becomes `ss`. It drops soft hyphens and zero-width and bidi characters, makes curly quotes straight and every dash one hyphen, and collapses runs of spaces. `links`, `privacy` and `checking` fold their own words with the same function.
 
-**Clauses cover the whole text** (decided 17 Nov 2026). No word of the contract falls outside a clause, because text in no clause would never be matched or sent (Spec 5, "never guess"). A numbered heading is a clause of its own and the parent of its sub-clauses. Text before the first number is a clause. A line that starts nothing belongs to the clause before it. On the sample contract this gives 64 clauses. The splitter reads, at the start of a line:
+**Clauses cover the whole text** (decided 17 Nov 2026). No word of the contract falls outside a clause, because text in no clause would never be matched or sent (Spec 5, "never guess"). A numbered heading is a clause of its own and the parent of its sub-clauses. Text before the first number is a clause. A line that starts nothing belongs to the clause before it. On the sample contract this gives 65 clauses. The splitter reads, at the start of a line:
 - `5.`, `5.1` to `5.1.2.3.4`;
 - `(a)`, `(i)`, `(A)` and `(1)`, and also `a)` and `i)`;
 - `Clause 5` and `Article IV`, with ids in Arabic numbers;
