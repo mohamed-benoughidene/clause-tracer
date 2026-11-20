@@ -741,7 +741,7 @@ When this is done, `map_links` is the module's public call, `python -m clause_tr
   - **Rules:** T11, T13, system design 15.3 "Done when".
   - **Depends on:** S3-M5-T1, S3-M5-T4, S3-M5-T7, S3-M1-T4
 
-- [ ] **S3-M5-T9: The sample from text to link map**
+- [x] **S3-M5-T9: The sample from text to link map**
   - **Build:** In `tests/test_links_sample.py`, add `test_text_to_link_map`: read `SAMPLE_TEXT` through `read_text_file` and `split_clauses`, run `map_links`, and assert the result equals `map_links` on the loaded fixture. This proves the fixture route and the real route give the same link map.
   - **Files:** `tests/test_links_sample.py`.
   - **Tests first:** the test above.
