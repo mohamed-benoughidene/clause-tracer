@@ -96,7 +96,7 @@ When this is done, `links` has a coverage floor, empty owner tables, a committed
   - **Rules:** T11.
   - **Depends on:** None
 
-- [ ] **S3-M1-T3: The clause fixture format, its writer and its loader**
+- [x] **S3-M1-T3: The clause fixture format, its writer and its loader**
   - **Build:** In `src/clause_tracer/links/sample_clauses.py`:
     - `FIXTURE_FORMAT: Final[str] = "clause-tracer-links-sample"` and `FIXTURE_VERSION: Final[int] = 1`.
     - `@dataclass(frozen=True, slots=True, kw_only=True) class SampleInput` with exactly two fields: `document: Document` and `clauses: tuple[Clause, ...]`.
