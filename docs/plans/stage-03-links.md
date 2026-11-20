@@ -243,7 +243,7 @@ When this is done, `links` has a coverage floor, empty owner tables, a committed
 
 When this is done, `find_references` finds every cross-reference with its source span and target, and the owner's references table passes.
 
-- [ ] **S3-M2-T1: Clause numbers and the clause index**
+- [x] **S3-M2-T1: Clause numbers and the clause index**
   - **Build:**
     - In `src/clause_tracer/links/_patterns.py` (created here; S3-M2-T2 adds to it): `ITEM_NUMBER: Final[str] = r"[0-9]{1,3}(?:\.[0-9]{1,3}){0,4}(?:\([0-9A-Za-z]{1,4}\)){0,3}"`, `WRITTEN_NUMBER_RE: Final[re.Pattern[str]] = re.compile(ITEM_NUMBER)` and `ROMAN_RE: Final[re.Pattern[str]] = re.compile(r"M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})")`.
     - In `src/clause_tracer/links/_numbers.py`:
