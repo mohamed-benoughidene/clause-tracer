@@ -18,6 +18,7 @@ from clause_tracer.ingest._markers import (
     MarkerKind,
     find_marker,
     is_heading_line,
+    is_short_heading_line,
 )
 from clause_tracer.ingest._numbering import (
     ParenStyle,
@@ -86,12 +87,11 @@ def _is_heading_at(
     markers: list[Marker | None],
     index: int,
 ) -> bool:
-    if index == 0:
-        return False
     line = lines[index]
     if not is_heading_line(line.text):
         return False
-    return is_blank(lines[index - 1]) or _has_marker_after(lines, markers, index)
+    is_first_line = index == 0
+    return is_first_line or is_blank(lines[index - 1]) or _has_marker_after(lines, markers, index)
 
 
 def _marker_clause_start(
@@ -134,17 +134,32 @@ def _heading_for(record: _ClauseStart, text: str, span_end: int) -> str | None:
     return title
 
 
+def _start_after_heading(text: str, heading_end: int, span_end: int) -> int | None:
+    """The start of the first non-blank line after a heading line, or None."""
+
+    for line in split_lines(text[heading_end:span_end])[1:]:
+        if not is_blank(line):
+            return heading_end + line.start
+    return None
+
+
 def _sentences_for(
     clause_id: str,
     span: Span,
     body_start: int,
     text: str,
+    heading_end: int | None,
 ) -> tuple[Sentence, ...]:
     """Split one clause into sentences, with the number in the first one."""
 
     boundaries = [span.start]
     starts = sentence_starts(text[body_start : span.end])
     boundaries.extend(body_start + start for start in starts[1:])
+    if heading_end is not None:
+        next_start = _start_after_heading(text, heading_end, span.end)
+        if next_start is not None:
+            boundaries.append(next_start)
+    boundaries = sorted(set(boundaries))
 
     sentences: list[Sentence] = []
     for index, boundary in enumerate(boundaries):
@@ -377,6 +392,11 @@ def _build_clauses(text: str, starts: list[_ClauseStart]) -> tuple[Clause, ...]:
         assert record.id is not None
         span = Span(start=record.start, end=end)
         body_start = record.body_start if record.number is not None else span.start
+        is_unnumbered_heading = record.number is None and record.heading_source is not None
+        breaks_after_heading = is_unnumbered_heading and is_short_heading_line(
+            record.heading_source or ""
+        )
+        heading_end = record.line_end if breaks_after_heading else None
         clauses.append(
             Clause(
                 id=ClauseId(record.id),
@@ -386,7 +406,7 @@ def _build_clauses(text: str, starts: list[_ClauseStart]) -> tuple[Clause, ...]:
                 parent_id=(ClauseId(record.parent_id) if record.parent_id is not None else None),
                 span=span,
                 numbering_source=record.numbering_source,
-                sentences=_sentences_for(record.id, span, body_start, text),
+                sentences=_sentences_for(record.id, span, body_start, text, heading_end),
             )
         )
     return tuple(clauses)
@@ -449,7 +469,7 @@ def _split_paragraphs(text: str) -> tuple[Clause, ...]:
                 parent_id=None,
                 span=span,
                 numbering_source=NUMBERING_PARAGRAPHS,
-                sentences=_sentences_for(clause_id, span, span.start, text),
+                sentences=_sentences_for(clause_id, span, span.start, text, None),
             )
         )
     return tuple(clauses)

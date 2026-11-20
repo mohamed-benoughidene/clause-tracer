@@ -95,10 +95,16 @@ A numbered clause has a heading when its marker is a decimal number, a keyword,
 a schedule or a bare number, the rest of its line is short, does not end like a
 sentence, and every later line in the clause is blank. A bracketed item such as
 `(a)` never has a heading. An unnumbered heading clause takes its own line as
-the heading, and only when a marker follows it or the line comes after a blank
-line. A line that opens with `Signed`, `Executed` or `In witness whereof` is a
-heading whatever its length. The clause of text before the first clause has no
-heading.
+the heading, and only when a marker follows it, the line comes after a blank
+line, or it is the first line of the text. A line that opens with `Signed`,
+`Executed` or `In witness whereof` is a heading whatever its length. The clause
+of text before the first clause has no heading.
+
+The line of a short unnumbered heading ends a sentence: the next sentence starts
+at the next non-blank line. A long signature line does not end a sentence. A
+short first line that is not a title also becomes a heading, such as a name at
+the top of an address, a label such as `CONFIDENTIAL` or `Page 1 of 5`, or the
+first line of a title wrapped over two lines: a known limit.
 
 In the paragraph case, a blank line between two non-blank lines starts a new
 paragraph; when the text has no such blank line, every non-blank line is a

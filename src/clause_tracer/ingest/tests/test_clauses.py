@@ -467,3 +467,75 @@ def test_number_keeps_its_written_digits_and_id_is_normalised() -> None:
 
     assert clause.number == "01.2"
     assert clause.id == "1.2"
+
+
+def test_first_line_title_is_a_heading() -> None:
+    text = "Services Agreement\nThis Agreement is dated 5 November 2026.\n1. Start\n1.1 Now."
+
+    clauses = clauses_of(text)
+
+    assert ids(text) == ("p1", "1", "1.1")
+    assert clauses[0].heading == "Services Agreement"
+    assert tuple(sentence.span for sentence in clauses[0].sentences) == (
+        Span(start=0, end=19),
+        Span(start=19, end=60),
+    )
+
+
+def test_first_line_that_ends_like_a_sentence_is_not_a_heading() -> None:
+    text = "This Agreement is dated 5 November 2026.\n1. Start\n1.1 Now."
+
+    clauses = clauses_of(text)
+
+    assert clauses[0].heading is None
+    assert tuple(sentence.span for sentence in clauses[0].sentences) == (Span(start=0, end=41),)
+
+
+def test_first_line_heading_before_a_marker() -> None:
+    text = "Parties\n\n(1) Brightline Studio Ltd."
+
+    clauses = clauses_of(text)
+
+    assert ids(text) == ("p1", "(1)")
+    assert clauses[0].heading == "Parties"
+    assert tuple(sentence.span for sentence in clauses[0].sentences) == (Span(start=0, end=9),)
+
+
+def test_heading_line_ends_a_sentence() -> None:
+    text = "1. Start\n1.1 Now.\n\nBackground\nThe Agency builds sites.\n\n2. Payment"
+
+    clauses = clauses_of(text)
+
+    assert clauses[2].id == "p1"
+    assert tuple(str(sentence.id) for sentence in clauses[2].sentences) == (
+        "p1.s1",
+        "p1.s2",
+    )
+    assert tuple(sentence.span for sentence in clauses[2].sentences) == (
+        Span(start=19, end=30),
+        Span(start=30, end=56),
+    )
+
+
+def test_break_after_a_heading_is_at_the_start_of_the_next_line() -> None:
+    text = "1. Start\n1.1 Now.\n\nBackground\n  The Agency builds sites.\n\n2. Payment"
+
+    clauses = clauses_of(text)
+
+    assert tuple(sentence.span for sentence in clauses[2].sentences) == (
+        Span(start=19, end=30),
+        Span(start=30, end=58),
+    )
+
+
+def test_long_signature_heading_does_not_end_a_sentence() -> None:
+    text = (
+        "1.1 Governed by English law.\n\n"
+        "IN WITNESS WHEREOF the parties have signed this Agreement on the\n"
+        "date written above.\n"
+    )
+
+    clauses = clauses_of(text)
+
+    assert ids(text) == ("1.1", "p1")
+    assert tuple(sentence.span for sentence in clauses[1].sentences) == (Span(start=30, end=115),)

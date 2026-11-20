@@ -597,7 +597,7 @@ When this is done, `python -m clause_tracer.ingest` prints the clauses and sente
   - **Rules:** T11.
   - **Depends on:** S2-M4-T11
 
-- [ ] **S2-M4-T13: The first line can be a heading, and a short heading line ends a sentence**
+- [x] **S2-M4-T13: The first line can be a heading, and a short heading line ends a sentence**
   - **Build:** Decided by the owner on 20 Nov 2026 (question 15).
     - In `src/clause_tracer/ingest/_markers.py`, split `is_heading_line` in two, with no change to what it returns. Add `def is_short_heading_line(line_text: str) -> bool` above it, with the docstring "True when one line passes the short-line heading test." and an Input, Output, Effects block (Output: "true for a line of at most 60 characters and 8 words, with no tab, that starts with a capital letter and does not end like a sentence."). Its body: `stripped = line_text.strip(EMPHASIS_STRIP)`; `if stripped == "" or "\t" in line_text: return False`; then return the four tests that end `is_heading_line` now (`len(stripped) <= 60`, `len(stripped.split()) <= 8`, `stripped[-1] not in ".,;:"`, `stripped[0].isupper()`). Then the body of `is_heading_line` becomes: `stripped = line_text.strip(EMPHASIS_STRIP)`; `if stripped == "" or "\t" in line_text: return False`; `return is_signature_line(line_text) or is_short_heading_line(line_text)`. Keep its docstring.
     - In `src/clause_tracer/ingest/clauses.py`, import `is_short_heading_line` with the other names from `_markers`. In `_is_heading_at`, remove the two lines `if index == 0:` and `return False`. After the `is_heading_line` check, write `is_first_line = index == 0` and `return is_first_line or is_blank(lines[index - 1]) or _has_marker_after(lines, markers, index)`.

@@ -7,6 +7,7 @@ from clause_tracer.ingest._markers import (
     MarkerKind,
     find_marker,
     is_heading_line,
+    is_short_heading_line,
 )
 
 
@@ -143,3 +144,20 @@ def test_find_marker(line: str, expected: Marker | None) -> None:
 )
 def test_is_heading_line(line: str, expected: bool) -> None:
     assert is_heading_line(line) is expected
+
+
+@pytest.mark.parametrize(
+    ("line", "expected"),
+    [
+        ("Background", True),
+        ("Signed by Karim Benali", True),
+        (
+            "Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director",
+            False,
+        ),
+        ("Note:", False),
+        ("Milestone\tCharges", False),
+    ],
+)
+def test_is_short_heading_line(line: str, expected: bool) -> None:
+    assert is_short_heading_line(line) is expected

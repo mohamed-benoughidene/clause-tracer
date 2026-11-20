@@ -280,6 +280,27 @@ def is_signature_line(line_text: str) -> bool:
     )
 
 
+def is_short_heading_line(line_text: str) -> bool:
+    """True when one line passes the short-line heading test.
+
+    Input:   one line of the document text, without its line break.
+    Output:  true for a line of at most 60 characters and 8 words, with no tab,
+             that starts with a capital letter and does not end like a
+             sentence.
+    Effects: none.
+    """
+
+    stripped = line_text.strip(EMPHASIS_STRIP)
+    if stripped == "" or "\t" in line_text:
+        return False
+    return (
+        len(stripped) <= 60
+        and len(stripped.split()) <= 8
+        and stripped[-1] not in ".,;:"
+        and stripped[0].isupper()
+    )
+
+
 def is_heading_line(line_text: str) -> bool:
     """True when one line looks like an unnumbered heading on its own.
 
@@ -291,15 +312,6 @@ def is_heading_line(line_text: str) -> bool:
     """
 
     stripped = line_text.strip(EMPHASIS_STRIP)
-    if stripped == "":
+    if stripped == "" or "\t" in line_text:
         return False
-    if "\t" in line_text:
-        return False
-    if is_signature_line(line_text):
-        return True
-    return (
-        len(stripped) <= 60
-        and len(stripped.split()) <= 8
-        and stripped[-1] not in ".,;:"
-        and stripped[0].isupper()
-    )
+    return is_signature_line(line_text) or is_short_heading_line(line_text)
