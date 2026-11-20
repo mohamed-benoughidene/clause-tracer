@@ -243,7 +243,7 @@ When this is done, `links` has a coverage floor, empty owner tables, a committed
 
 When this is done, `find_references` finds every cross-reference with its source span and target, and the owner's references table passes.
 
-- [ ] **S3-M2-T1: Clause numbers and the clause index**
+- [x] **S3-M2-T1: Clause numbers and the clause index**
   - **Build:**
     - In `src/clause_tracer/links/_patterns.py` (created here; S3-M2-T2 adds to it): `ITEM_NUMBER: Final[str] = r"[0-9]{1,3}(?:\.[0-9]{1,3}){0,4}(?:\([0-9A-Za-z]{1,4}\)){0,3}"`, `WRITTEN_NUMBER_RE: Final[re.Pattern[str]] = re.compile(ITEM_NUMBER)` and `ROMAN_RE: Final[re.Pattern[str]] = re.compile(r"M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})")`.
     - In `src/clause_tracer/links/_numbers.py`:
@@ -271,7 +271,7 @@ When this is done, `find_references` finds every cross-reference with its source
   - **Rules:** T1, I4 (always the same return type), Spec 5 ("never guess").
   - **Depends on:** S3-M1-T5
 
-- [ ] **S3-M2-T2: Single cross-references**
+- [x] **S3-M2-T2: Single cross-references**
   - **Build:** In `src/clause_tracer/links/references.py`, `def find_references(text: str, index: ClauseIndex) -> tuple[CrossReference, ...]`, with these module-level patterns (in `src/clause_tracer/links/_patterns.py`):
     - `ITEM_NUMBER` is already in `_patterns.py` (S3-M2-T1). Add `ITEM_ARTICLE = r"(?:[0-9]{1,3}|[IVXLC]{1,7})(?:\.[0-9]{1,3}){0,4}(?:\([0-9A-Za-z]{1,4}\)){0,3}"` and `ITEM_SCHEDULE = r"(?:[0-9]{1,3}|[A-Z])(?:\.[0-9]{1,3}){0,4}(?:\([0-9A-Za-z]{1,4}\)){0,3}"`. `ITEM_SCHEDULE` stays upper-case only, because `ingest` reads a schedule designation in upper case (so `annex a` is not read). An article or schedule item can carry a `.` part or a bracket after its base; the key rules below give such an item the key `None`.
     - `DOCUMENT_WORDS = r"(?:[A-Z][a-z]+(?:-[A-Z][a-z]+)?\s+){1,4}"` and `DOCUMENT_NOUN = r"(?:Agreement|Contract|Deed|Addendum|Licence|License|Statement\s+of\s+Work|Terms\s+and\s+Conditions)"`. S3-M3-T3 builds `OUTSIDE_DOCUMENT` from them.
@@ -325,7 +325,7 @@ When this is done, `find_references` finds every cross-reference with its source
   - **Rules:** Spec 4.5, [testing strategy 4](../testing-strategy.md#4-what-to-test-in-each-module) ("an unresolved target is kept, not dropped"), Spec 5 ("never guess").
   - **Depends on:** S3-M2-T1
 
-- [ ] **S3-M2-T3: Lists and ranges**
+- [x] **S3-M2-T3: Lists and ranges**
   - **Build:** In `_patterns.py`, add `UNIT_AFTER = r"(?!\s*(?:%|(?i:per\s?cent|percent|days?|weeks?|months?|years?|hours?|business|working|calendar)(?![A-Za-z])|(?:January|February|March|April|May|June|July|August|September|October|November|December)(?![A-Za-z])))"`, and change `_reference_pattern` so that it writes `(?:{item}){UNIT_AFTER}` for every item, in the first place and in the places after each separator. Month names are capitalised and case-sensitive, so the word `may` is not a unit. So a number followed by a unit is not an item: `clause 4, 30 days` ends before `, 30`. Then in `find_references`, read every item and separator of a match with the `re.split` of S3-M2-T2. A separator that holds `to`, `-`, `\u2013` or `\u2014` makes a range between the key before it and the key after it: replace the two with `expand_range(before, after)` for the number family and the article family (Roman keys converted first); a range with a `None` end (a Roman key that failed) keeps both ends without expanding; for the schedule family, expand only when both designations are digits with no leading zero (`expand_range` on the two designations, then the keyword letter put back on each), else keep both keys as written. In a chained range (`1 to 3 to 5`), each range separator pairs the keys on either side of it, left to right: `1` with `3`, then `3` with `5`. Any other separator (a comma, `and`, `or`) makes a list. Every key gives one `CrossReference` with the source span of the whole match, from the keyword to the end of the last item, and the target rules of S3-M2-T2. Keys are kept in order. A key repeated inside one match is kept once (by key, not by target). A Roman item that `roman_to_int` rejects uses its written text (`IIII`) as its key for this rule, and still gives `target=None`. An article or schedule item with a tail does the same. Two different keys that both resolve to `None` give two references.
   - **Files:** `src/clause_tracer/links/references.py`, `src/clause_tracer/links/tests/test_references.py`.
   - **Tests first:** in `test_references.py`, with clauses `4`, `5`, `6` and `9` (and no clause `7`), except where a test names its own clauses:
@@ -347,7 +347,7 @@ When this is done, `find_references` finds every cross-reference with its source
   - **Rules:** [System design 15.3](../system-design.md#153-stage-3-links) ("including ranges"), Spec 5.
   - **Depends on:** S3-M2-T2
 
-- [ ] **S3-M2-T4: "this Clause"**
+- [x] **S3-M2-T4: "this Clause"**
   - **Build:** In `_patterns.py`, `THIS_REFERENCE = r"(?<![A-Za-z])(?i:this)\s+(?P<kw>(?i:clause|section|paragraph|sub-clause|subclause|schedule|annex|appendix|exhibit))(?![A-Za-z])(?!\s*[0-9])(?!\s+[IVXLC]+(?![A-Za-z]))(?!\s+[A-Z](?![A-Za-z]))"`, run as `THIS_REFERENCE_RE`. The "this" references join the same result as the other references, sorted by `source.start`, with the same dedupe. A "this" reference in a heading sentence counts like any other. In `find_references`, for each match of `THIS_REFERENCE_RE`, with `c = index.clause_at(match.start())`: when `c` is `None`, `c.number is None` or `c.numbering_source == "paragraphs"`, the target is `None`. Else, for `clause`, `section`, `paragraph`, `sub-clause` and `subclause`, the target is `c.id`; for `schedule`, `annex`, `appendix` and `exhibit`, the target is `t.id` where `t = index.top_ancestor(c)`, when `t.number` starts with a schedule word (case ignored); else `None`. The source is the match span. "this Agreement" is never a reference.
   - **Files:** `src/clause_tracer/links/_patterns.py`, `src/clause_tracer/links/references.py`, `src/clause_tracer/links/tests/test_references.py`.
   - **Tests first:** `test_this_clause` (clause `5.1` `["5.1 This Clause applies."]`: target `5.1`, source `"This Clause"`); `test_this_schedule` (clauses `S1` (number `"Schedule 1"`) and `S1.1` (parent `S1`, `["1. This Schedule lists fees."]`): target `S1`); `test_this_schedule_outside_a_schedule` (in clause `3`: target `None`); `test_this_clause_with_number_is_one_reference` (`"this Clause 4"` with clause `4`: one reference, source `"Clause 4"`, target `4`); `test_this_agreement_is_not_a_reference` (`"5.1 This Agreement ends."`: no reference); `test_this_clause_in_paragraphs` (in `p2`: target `None`).
@@ -363,13 +363,48 @@ When this is done, `find_references` finds every cross-reference with its source
   - **Rules:** Constitution T11.
   - **Depends on:** S3-M1-T2
 
-- [ ] **S3-M2-T6: The cross-references table test**
+- [x] **S3-M2-T6: The cross-references table test**
   - **Build:** In `src/clause_tracer/links/tests/test_reference_table.py`: `TABLE = Path(__file__).parent / "tables" / "references.toml"`, `CASE_KEYS = REQUIRED = frozenset({"id", "clauses", "references"})`. `test_reference_table(case)`, parametrised over the cases with the case id as the test id: build the case, run `find_references(sample.document.text, build_index(sample.clauses))`, and assert the result equals the expected tuple, built with `span_of` and `ClauseId(target)` or `None`. Load the table at module level with `load_table` and parametrise the test over its cases, exactly as `ingest/tests/test_clause_table.py` does. Each nested list item must be a `dict` (`assert isinstance(row, dict)`, as that file does); strings go through `as_str(value, where)`, booleans through `as_bool`, `nth` through `as_int` and defaults to 1 when absent; the `clauses` rows are passed to `build_case` as they are. `test_reference_table_has_rows` asserts at least 10 cases.
   - **Files:** `src/clause_tracer/links/tests/test_reference_table.py`.
   - **Tests first:** the two tests above. Run them before any fix to see which rows fail. If a row fails, fix the code, never the table; if the code is right and the row looks wrong, stop and ask the owner.
   - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_reference_table.py` passes, and `scripts/check.sh` exits 0.
   - **Rules:** T11, T13.
   - **Depends on:** S3-M2-T4, S3-M2-T5
+
+- [x] **S3-M2-T7: A set of spans ignores empty spans**
+  - **Why:** A code review of S3-M2-T1 found that `build_span_set` keeps an empty span (`start == end`). An empty span shares no character with any span, and `overlaps` already says so for the span it is asked about. But the set `{(5, 5)}` with the span `(3, 8)` gives `True`, because `max_ends` counts the empty span. No M3 or M5 task builds an empty span today. The set must still hold the rule that T1 states for the query.
+  - **Build:** In `src/clause_tracer/links/_spans.py`, change `build_span_set` so that it drops every span with `start == end` before it sorts. The other rules of S3-M2-T1 stay: sort by `(start, end)`, `starts` holds the sorted starts, and `max_ends[i]` is the largest `end` among the first `i + 1` sorted spans. `overlaps` does not change.
+  - **Files:** `src/clause_tracer/links/_spans.py`, `src/clause_tracer/links/tests/test_spans.py`.
+  - **Tests first:** in `test_spans.py` (the 6 tests of T1 stay and must pass): `test_empty_span_in_the_set_overlaps_nothing` (the set `{(5, 5)}` and the span `(3, 8)`: `False`; the set `{(5, 5), (10, 12)}` and the span `(3, 8)`: `False`; the same set and the span `(11, 20)`: `True`). See the first two checks fail first.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_spans.py` reports 7 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** T1, Spec 5.
+  - **Depends on:** S3-M2-T1
+
+- [x] **S3-M2-T8: Read the separators of a reference once and by name**
+  - **Why:** A code review of S3-M2-T2 and S3-M2-T3 found two gaps in `references.py`. `_split_items` builds the pattern `f"({SEPARATOR})"` again for every match, although section 5 says that a pattern is compiled once in `_patterns.py`. And `_is_range_separator` finds a range with a substring test (`"to" in separator`), so a new list word that holds `to` (for example `together with`) would turn a list into a range with no test failing. This task changes no behaviour.
+  - **Build:**
+    - In `src/clause_tracer/links/_patterns.py`, add `SEPARATOR_SPLIT_RE: Final[re.Pattern[str]] = re.compile(f"({SEPARATOR})")`. It has the capturing group that `re.split` needs, so `SEPARATOR_RE` cannot replace it. `SEPARATOR` and `SEPARATOR_RE` do not change.
+    - In `src/clause_tracer/links/references.py`, `_split_items` returns the same pair as now, but splits with `SEPARATOR_SPLIT_RE.split(raw)`. Remove the import of `SEPARATOR` and the `re.split` call.
+    - In `references.py`, add `_RANGE_MARKERS: Final[frozenset[str]] = frozenset({"to", "-", "–", "—"})`, and change `_is_range_separator(separator: str) -> bool` to return `separator.strip() in _RANGE_MARKERS`. A separator that holds a comma, `and` or `or` is never in the set, so it is a list separator.
+  - **Files:** `src/clause_tracer/links/_patterns.py`, `src/clause_tracer/links/references.py`, `src/clause_tracer/links/tests/test_references.py`.
+  - **Tests first:** None new, because the behaviour does not change. Run `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_references.py src/clause_tracer/links/tests/test_reference_table.py` before the change and after it. Both runs must pass with no change to any test and no change to `references.toml` (T11).
+  - **Done when:** The same command reports the same number of passed tests as before (42 in `test_references.py`), and `scripts/check.sh` exits 0.
+  - **Rules:** Section 5 (patterns are compiled once), T1, T11.
+  - **Depends on:** S3-M2-T3
+
+- [x] **S3-M2-T9: A heading with a duplicated id is still its own number**
+  - **Why:** A code review of S3-M2-T2 found a gap in the rule "the clause's own number is not a reference". The rule tests `target == c.id`. When the id is duplicated (clauses `2` and `2~2`), `index.resolve` gives `None`, so the test fails, and the heading `Section 2 Term` becomes a false unresolved reference. The owner chose to strip the `~N` suffix. Note that `blocked` in `build_index` also makes the first clause `2` unresolvable, so both clauses are affected.
+  - **Build:** In `src/clause_tracer/links/references.py`, change `_is_own_number` to `def _is_own_number(text: str, index: ClauseIndex, match: re.Match[str], items: tuple[str, ...], key: _Key, target: ClauseId | None) -> bool`, and change its call in `_references_for_match` to pass `key`. It returns `False` when `len(items) != 1`, or `key.resolution is None`, or `index.clause_at(match.start())` is `None` (call this clause `c`), or a character of `text[c.span.start:match.start()]` is not in `_OWN_NUMBER_CHARS`. Else it returns `True` when `target == c.id`. Else it returns `False` when `target is not None`. Else (the target is `None`) let `base = str(c.id).split("~", 1)[0]` (the id up to the first `~`), let `schedule = index.in_schedule(c)`, and let `candidates` be the set of `key.resolution` and, when `schedule is not None`, `schedule.id + "." + key.resolution`. It returns `base in candidates`. Write the `_OWN_NUMBER_CHARS` test and the id rule as named boolean variables. `find_references` and every other function stay as they are.
+  - **Files:** `src/clause_tracer/links/references.py`, `src/clause_tracer/links/tests/test_references.py`.
+  - **Tests first:** in `test_references.py` (the 42 tests stay and must pass), with `build_case` rows:
+    - `test_own_number_of_duplicated_ids` (rows `2` `["Section 2 Term."]` and `2~2` `["Section 2 Again."]`: no reference);
+    - `test_own_number_of_a_duplicated_schedule` (rows `S1` with `number` `"Schedule 1"` and `["Schedule 1 Fees."]`, and `S1~2` with `number` `"Schedule 1"` and `["Schedule 1 Again."]`: no reference);
+    - `test_reference_in_another_clause_to_a_duplicated_id_stays` (rows `2` `["2. Pay."]`, `2~2` `["2. Again."]` and `3` `["3. See clause 2."]`: one reference, source `"clause 2"`, target `None`);
+    - `test_later_reference_in_a_duplicated_clause_stays` (rows `2` `["2. Pay."]` and `2~2` `["Section 2 Again, see clause 2."]`: one reference, source `"clause 2"`, target `None`).
+    See the first two fail first. `test_reference_in_another_clause_to_a_duplicated_id_stays` is a guard and passes before the change. `test_later_reference_in_a_duplicated_clause_stays` fails before the change (two references, because the heading `Section 2` is read too) and passes after it.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_references.py src/clause_tracer/links/tests/test_reference_table.py` passes with 46 tests in `test_references.py`, and `scripts/check.sh` exits 0. `references.toml` is unchanged. If a table row fails, fix the code, never the table; if the code is right and the row looks wrong, stop and ask the owner (T11).
+  - **Rules:** T1, T11, Spec 5 ("never guess"), S3-M2-T2 (this task refines its own-number rule).
+  - **Depends on:** S3-M2-T8
 
 ### M3: Defined terms and outside documents
 
@@ -679,6 +714,7 @@ The owner answered all eight questions on 20 Nov 2026, each as recommended, with
 | 6 | **How does a reference written inside a schedule resolve?** A schedule keeps its own numbers, so `Schedule 1` holds clauses with the ids `S1.1`, `S1.2`. A bare "clause 1" or "paragraph 2" written inside it can point at the body or at the schedule. | S3-M2-T2 | With `s` the schedule that holds the reference: for "paragraph", a key resolves only as `s.id + "." + key`, never against the body. For every other keyword, when both `s.id + "." + key` and the bare key resolve, the target is `None` (never guessed); else whichever one resolves; else `None`. Outside a schedule, a key resolves against the body. || As recommended: [system design 15.3](../system-design.md#153-stage-3-links) (20 Nov 2026) |
 | 7 | **How does stage 4 treat a short party name?** A bracket definition can name a party by a short name (`Brightline Studio Ltd ("Brightline")`), and `DefinedTerm` has no flag for it. Stage 4 builds its allow-list from `LinkMap.terms`. | The stage 4 plan, not stage 3 | Stage 4 drops from the allow-list any term that a typed-party finder or a name finder also matches, so a name is never kept. Recorded here so the stage 4 plan starts from it. || As recommended: [system design 15.4](../system-design.md#154-stage-4-privacy-code-finders-and-placeholders) (20 Nov 2026) |
 | 8 | **Does a subject override join a trail?** Spec 4.5 says an override joins a trail when it names a label's subject ("the payment terms prevail"). This plan reads only clause references, this Agreement and this Clause. | S3-M5-T10 | Leave subject overrides to stage 8, which knows the positions' topics; list it as a known limit in the `links` README. || As recommended: [system design 15.8](../system-design.md#158-stage-8-checking-and-the-message-templates) (20 Nov 2026) |
+| 9 | **Does `Article 5.1` resolve to clause `5.1`?** An article item with a `.` part or a bracket gets the key `None` (S3-M2-T2), so the reference is kept with no target. | S3-M2-T2 (already built) | Keep it: a missed link is visible and safe, a wrong link is not (Spec 5, "never guess"). List it as a known limit in the `links` README (S3-M5-T10). | Keep it, as recommended (20 Nov 2026) |
 
 ## 7. Done when
 
@@ -697,6 +733,7 @@ The owner answered all eight questions on 20 Nov 2026, each as recommended, with
 | 20 Nov 2026 | The five owner tables were filled before milestone 1, on the plan's `docs/` branch, instead of first as empty files. S3-M1-T2 is done by that commit, and S3-M2-T5, S3-M3-T5, S3-M3-T6, S3-M4-T3 and S3-M5-T7 are ticked. S3-M5-T6 (read the golden files) is still open | The owner asked the agent to draft the tables, confirmed the cases that need a product judgement (names and addresses in the undefined list, the Master Agreement as a document that is not loaded, the 8.2 carve-out, and the two "prevails" forms) in chat, and said the tables are done. The other cases follow the answers to questions 1 to 5 |
 | 20 Nov 2026 | Added S3-M1-T6 and S3-M1-T7 to milestone 1. The owner accepted both tasks in chat on 20 Nov 2026, and confirmed the level rule of S3-M1-T6. They harden the fixture writer and loader, and align the test-case builder with how `ingest` names clauses. Milestone 2 waits for the milestone 1 pull request, as the README rule says | A code review of S3-M1-T3 to T5 found gaps that the plan text itself allowed: no check of levels, sentence ids or overlap, a writer that accepts what the loader refuses, a `p`-prefix guess for paragraph ids, and `\r` in a sentence. T3 to T5 stay ticked and unchanged. The review also named the two fixed counts of the drift test (S3-M1-T4) as a gap; they stay, because they are the owner's tripwire for a change in the `ingest` outline |
 | 20 Nov 2026 | Added S3-M1-T9 and S3-M1-T10 to milestone 1: one pass in `_check_clauses` and writer tests for the structure checks (T9), and a refusal of a paragraph id with a number and an honest type for the row id (T10). The owner chose the clause order of errors in T9 and accepted both tasks in chat on 20 Nov 2026 | A second code review, of S3-M1-T6 and S3-M1-T7, found four gaps. T6 and T7 stay ticked and unchanged. The owner asked for all four to be fixed |
+| 20 Nov 2026 | Added S3-M2-T7, S3-M2-T8 and S3-M2-T9 to milestone 2: a set of spans ignores empty spans (T7), the separators of a reference are read once and by name (T8), and a heading with a duplicated id is still its own number (T9). The owner chose to strip the `~N` suffix in T9 | A code review of milestone 2 found these gaps. Two other findings need no task: the early helpers are planned for M3 to M5, and dotted articles that stay unresolved are what the plan says (open question 9: the owner chose to keep it) |
 
 ## 9. Notes for the next stage
 
