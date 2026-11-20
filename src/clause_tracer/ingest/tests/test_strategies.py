@@ -1,4 +1,4 @@
-"""Tests for the ingest test strategies (S2-M4-T12)."""
+"""Tests for the ingest test strategies (S2-M3-T11)."""
 
 import pytest
 
