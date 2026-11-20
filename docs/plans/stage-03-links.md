@@ -162,6 +162,46 @@ When this is done, `links` has a coverage floor, empty owner tables, a committed
   - **Rules:** T3 (a simple working stand-in for `ingest`), S2 (the tests run without other modules).
   - **Depends on:** S3-M1-T3
 
+- [ ] **S3-M1-T6: Make the fixture writer and loader check the whole structure**
+  - **Why:** A review of S3-M1-T3 found that the loader accepts structure the later milestones cannot use, and that the writer accepts input the loader then refuses. This task closes both gaps. The T3 text stays as it was built. The level rule below is the rule `ingest` itself uses (`level = 1` with no parent, else the parent's level plus 1, `ingest/clauses.py`). System design 3.4 does not state it, so the owner confirms it when accepting this task.
+  - **Build:** In `src/clause_tracer/links/sample_clauses.py`:
+    - Add these checks to `load_clause_fixture`, after the three structure checks of T3, with the same `ValueError` and the same `links sample: ` prefix, in this order:
+      - a clause with `level < 1` (`links sample: level of <id> is not 1 or more`);
+      - a clause whose level is not 1 with no parent, or not the parent's level plus 1 with a parent (`links sample: level of <id> does not fit its parent`);
+      - a clause that starts before the end of the clause before it (`links sample: span of <id> overlaps an earlier clause`);
+      - a sentence id that an earlier sentence in the document already has (`links sample: duplicate sentence id <id>`).
+    - Make `dump_clause_fixture` run the same checks, so the writer refuses what the loader would refuse. After the text-only check of T3, it raises `ValueError(f"links sample: kind {kind} is not a text kind")` when `document.source.kind` is not `TEXT`, `MARKDOWN` or `PASTED` (`kind` is the FileKind value). It then runs the span, duplicate-id, parent, sentence-span, level, overlap and duplicate-sentence-id checks on its arguments, in the order above, with the same messages. Put the checks in one function, `def _check_clauses(text: str, clauses: Sequence[Clause]) -> None`, which raises on the first failure and runs, in order: for each clause, its span (`_check_span`) and then its sentence spans; the duplicate-id check; the parent check; the sentence-inside-clause check; the level check; the overlap check; the duplicate-sentence-id check. `dump_clause_fixture` calls it on its arguments, and `load_clause_fixture` calls it on the clauses it has built. Remove the checks that the loader ran one by one, and the checks `_check_clause_ids`, `_check_parents` and `_check_sentence_spans`, because `_check_clauses` now holds them. Do not rewrite the validators of the JSON keys and types, and do not change any message, key order or format of T3.
+  - **Files:** `src/clause_tracer/links/sample_clauses.py`, `src/clause_tracer/links/tests/test_sample_clauses.py`, `src/clause_tracer/links/README.md`.
+  - **Tests first:** in `test_sample_clauses.py`, with the helper and the two clauses of T3 (the tests of T3 stay and must still pass). Each loader test changes the dict as in T3:
+    - `test_level_below_one` (`"level": 0` on clause `1` raises, message `links sample: level of 1 is not 1 or more`);
+    - `test_level_does_not_fit_parent` (`"level": 3` on clause `1.1` raises, message `links sample: level of 1.1 does not fit its parent`);
+    - `test_root_level_must_be_one` (`"level": 2` on clause `1` raises, message `links sample: level of 1 does not fit its parent`);
+    - `test_clause_overlap` (`start` of clause `1.1` and `start` of its sentence `1.1.s1` both set to `5` raise, message `links sample: span of 1.1 overlaps an earlier clause`);
+    - `test_duplicate_sentence_id` (the sentence id of clause `1.1` set to `"1.s1"` raises, message `links sample: duplicate sentence id 1.s1`);
+    - `test_dump_refuses_a_pdf_kind` (a document whose source kind is `FileKind.PDF`, with no glyphs, raises `links sample: kind pdf is not a text kind`);
+    - `test_dump_refuses_a_span_outside_the_text` (a clause with `end` 999 raises `links sample: span of 1 is outside the text`);
+    - `test_dump_refuses_a_duplicate_clause_id` (the two clauses given the id `1` raise `links sample: duplicate clause id 1`).
+  - **Also:** In `src/clause_tracer/links/README.md`, add the four loader checks and the dump checks to the "Sample clause fixture" section (Constitution S3).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_sample_clauses.py` reports 25 passed, `.venv/bin/uv run pytest tests/test_links_sample.py` still reports 2 passed (the sample fixture meets the new checks), and `scripts/check.sh` exits 0.
+  - **Rules:** D4 and I9 (validated once at the door), T1, S3. Do not change the fixture file.
+  - **Depends on:** S3-M1-T3, S3-M1-T4
+
+- [ ] **S3-M1-T7: Make the test-case builder match how `ingest` names and splits clauses**
+  - **Why:** A review of S3-M1-T5 found that a clause id such as `payment` counts as a paragraph clause, that `build_case([])` reports `paragraphs`, and that `\r` in a sentence breaks the match with `ingest`. `ingest` names a paragraph clause `p` plus digits (`p1`, `p2`).
+  - **Build:** In `src/clause_tracer/links/tests/case_builder.py`:
+    - A clause id is a paragraph id when `re.fullmatch(r"p[0-9]+(~[0-9]+)?", id)` matches (`ingest` makes `p1`, and `p1~2` when `p1` is taken). Use this test in place of "starts with `p`" in both places: `number` is `None` for a paragraph id, else the row's `number`, else the id; `numbering_source` is `"paragraphs"` when there is at least one row and every id is a paragraph id, else `"numbers"`. So `build_case([])` has no clauses and its source word does not matter, and a row `{"id": "payment", ...}` has the number `"payment"`.
+    - A sentence that holds `"\r"` raises the same `ValueError("a sentence must be non-empty and hold no line break")`.
+    - Check each key's type once. A helper `_string(row, key) -> str | None` returns `None` when the key is absent and raises `ValueError(f"{key} must be a string")` when the value is not a `str`. `id`, `parent`, `heading` and `number` all use it, and the order of errors stays as in T5 (unknown key, missing key, type, duplicate id, sentence text).
+  - **Files:** `src/clause_tracer/links/tests/case_builder.py`, `src/clause_tracer/links/tests/test_case_builder.py`.
+  - **Tests first:** in `test_case_builder.py` (the 13 tests of T5 stay):
+    - `test_word_starting_with_p_is_not_a_paragraph` (rows `[{"id": "payment", "sentences": ["x."]}]`: `numbering_source == "numbers"` and number `"payment"`);
+    - `test_mixed_ids_are_numbers` (rows `p1` and `1`: `numbering_source == "numbers"`, number of `p1` is `None`);
+    - `test_carriage_return_raises` (rows `[{"id": "1", "sentences": ["a\rb"]}]` raise `ValueError("a sentence must be non-empty and hold no line break")`);
+    - `test_heading_must_be_a_string` (a guard: it passes before the change too; rows `[{"id": "1", "heading": 3, "sentences": ["x."]}]` raise `ValueError("heading must be a string")`).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_case_builder.py` reports 17 passed, and `scripts/check.sh` exits 0. See `test_word_starting_with_p_is_not_a_paragraph`, `test_mixed_ids_are_numbers` and `test_carriage_return_raises` fail first.
+  - **Rules:** T3, S2.
+  - **Depends on:** S3-M1-T5
+
 ### M2: Cross-references
 
 When this is done, `find_references` finds every cross-reference with its source span and target, and the owner's references table passes.
@@ -618,6 +658,7 @@ The owner answered all eight questions on 20 Nov 2026, each as recommended, with
 | Date | Change | Why |
 | --- | --- | --- |
 | 20 Nov 2026 | The five owner tables were filled before milestone 1, on the plan's `docs/` branch, instead of first as empty files. S3-M1-T2 is done by that commit, and S3-M2-T5, S3-M3-T5, S3-M3-T6, S3-M4-T3 and S3-M5-T7 are ticked. S3-M5-T6 (read the golden files) is still open | The owner asked the agent to draft the tables, confirmed the cases that need a product judgement (names and addresses in the undefined list, the Master Agreement as a document that is not loaded, the 8.2 carve-out, and the two "prevails" forms) in chat, and said the tables are done. The other cases follow the answers to questions 1 to 5 |
+| 20 Nov 2026 | Added S3-M1-T6 and S3-M1-T7 to milestone 1. The owner accepted both tasks in chat on 20 Nov 2026, and confirmed the level rule of S3-M1-T6. They harden the fixture writer and loader, and align the test-case builder with how `ingest` names clauses. Milestone 2 waits for the milestone 1 pull request, as the README rule says | A code review of S3-M1-T3 to T5 found gaps that the plan text itself allowed: no check of levels, sentence ids or overlap, a writer that accepts what the loader refuses, a `p`-prefix guess for paragraph ids, and `\r` in a sentence. T3 to T5 stay ticked and unchanged. The review also named the two fixed counts of the drift test (S3-M1-T4) as a gap; they stay, because they are the owner's tripwire for a change in the `ingest` outline |
 
 ## 9. Notes for the next stage
 
