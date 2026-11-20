@@ -5,6 +5,15 @@ from hypothesis import strategies as st
 from hypothesis.strategies import composite
 
 from clause_tracer.core.tests.strategies import hazard_text
+from clause_tracer.ingest._lines import is_blank_text
+
+
+def is_usable_text(text: str) -> bool:
+    """True when a generated text is not blank. A text of only a byte-order mark
+    is blank, as `read_pasted_text` treats it."""
+
+    return not is_blank_text(text)
+
 
 MARKER_PREFIXES: tuple[str, ...] = (
     "",
@@ -58,5 +67,5 @@ def contract_like_text(draw: st.DrawFn) -> str:
             parts.append(separators[index - 1])
         parts.append(prefix + body)
     text = "".join(parts)
-    assume(text.strip() != "")
+    assume(is_usable_text(text))
     return text

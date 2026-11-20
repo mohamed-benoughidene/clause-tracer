@@ -558,7 +558,7 @@ When this is done, `python -m clause_tracer.ingest` prints the clauses and sente
   - **Rules:** T11, [testing strategy 10](../testing-strategy.md#10-keeping-agent-written-tests-honest) (golden files only by the named command, in a commit of their own).
   - **Depends on:** S2-M4-T7, S2-M4-T8
 
-- [ ] **S2-M4-T12: A blank text is never a usable contract-like text**
+- [x] **S2-M4-T12: A blank text is never a usable contract-like text**
   - **Build:** In `src/clause_tracer/ingest/tests/strategies.py`, add `from clause_tracer.ingest._lines import is_blank_text` and `def is_usable_text(text: str) -> bool`, which returns `not is_blank_text(text)`. In `contract_like_text`, replace `assume(text.strip() != "")` with `assume(is_usable_text(text))`. The old guard let a text of only a byte-order mark through, because `str.strip()` keeps U+FEFF, and `read_pasted_text` then raised `EmptyInputError`. A run of 1,500 Hypothesis examples hit it twice (`test_invariant_4_sentences_join_up_to_the_clause` and `test_invariant_4_ids_are_the_same_on_a_second_read`); the default 100 examples did not. The nightly 2,000-example profile of stage 5 would. No other file changes.
   - **Files:** `src/clause_tracer/ingest/tests/strategies.py`, `src/clause_tracer/ingest/tests/test_strategies.py`.
   - **Tests first:** in a new `test_strategies.py`: `test_is_usable_text`, parametrised over (`text`, `expected`): `("\ufeff", False)`, `("  \n", False)`, `("", False)`, `("a", True)`, `("\ufeff1. Start", True)`. See the first row fail before the change: write the test first, with `is_usable_text` defined as `return text.strip() != ""`, and see the byte-order-mark row fail; then change it to the final form.
