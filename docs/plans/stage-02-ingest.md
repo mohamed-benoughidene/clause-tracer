@@ -665,7 +665,7 @@ When this is done, `python -m clause_tracer.ingest` prints the clauses and sente
   - **Rules:** B4, I4, T1, S3, [Spec 5](../spec.md#5-labelling-rules) (a missed break only makes a sentence longer; this rule removes one kind of missed break and never makes a blank sentence), [system design 4.2](../system-design.md#42-the-offset-chain).
   - **Depends on:** S2-M4-T7, S2-M4-T13 (the test counts above include the tests of S2-M4-T13, and the line it changes in `_sentences_for` comes from S2-M4-T13)
 
-- [ ] **S2-M4-T15: Regenerate the developer-agreement golden file again**
+- [x] **S2-M4-T15: Regenerate the developer-agreement golden file again**
   - **Build:** Run `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_goldens.py` and see the developer-agreement test fail and the plain-paragraphs test pass. Then run the named command, `.venv/bin/uv run pytest src/clause_tracer/ingest/tests/test_goldens.py --update-goldens`. Commit only `src/clause_tracer/ingest/tests/goldens/developer-agreement.outline.txt` and the plan tick, and say in the commit body that `--update-goldens` made it. The diff must be exactly these changes, which a trial of the rules gave on 20 Nov 2026:
     - The line of `p1` ends in `Development Services Agreement` instead of `-`.
     - `p1.s1` becomes `0-31` (`Development Services Agreement`), and a new line `p1.s2` is `31-72` (`This Agreement is dated 5 November 2026.`).

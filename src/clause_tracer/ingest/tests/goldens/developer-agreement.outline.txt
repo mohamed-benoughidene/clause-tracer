@@ -1,8 +1,9 @@
 source	text	6212	587ff8bcf8116bf4ef7855d7bee25caff597d20a2859e727199fedde8e82d617
 numbering	numbers
 warnings	-
-p1	-	level 1	-	0-72	-
-  p1.s1	0-72	Development Services Agreement This Agreement is dated 5 Nov
+p1	-	level 1	-	0-72	Development Services Agreement
+  p1.s1	0-31	Development Services Agreement
+  p1.s2	31-72	This Agreement is dated 5 November 2026.
 p2	-	level 1	-	72-80	Parties
   p2.s1	72-80	Parties
 (1)	(1)	level 1	-	80-258	-
@@ -138,6 +139,11 @@ S1	Schedule 1	level 1	-	5663-5697	Services and Charges
   S1.s1	5663-5697	Schedule 1 · Services and Charges
 S1.1	1	level 2	S1	5697-6093	-
   S1.1.s1	5697-5836	1. The Developer will build the front end and content manage
-  S1.1.s2	5836-6093	Milestone Work Target Charges 1 Discovery Review designs, pl
+  S1.1.s2	5836-5866	Milestone Work Target Charges
+  S1.1.s3	5866-5923	1 Discovery Review designs, plan the build Week 2 £1,600
+  S1.1.s4	5923-5970	2 Build Templates and components Week 6 £3,200
+  S1.1.s5	5970-6027	3 Integration Content management and forms Week 9 £3,200
+  S1.1.s6	6027-6078	4 Launch Testing, fixes and go-live Week 11 £1,600
+  S1.1.s7	6078-6093	Total £9,600
 S1.2	2	level 2	S1	6093-6204	-
   S1.2.s1	6093-6204	2. Hosting, domain names and third-party licences are provid
