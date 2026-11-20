@@ -1,0 +1,24 @@
+source	developer-agreement.txt	6204
+counts	references 9	terms 7	overrides 1	outside 1	undefined 4
+reference	1.1	758-768	S1	Schedule 1
+reference	1.1	1039-1049	S1	Schedule 1
+reference	1.1	1102-1112	S1	Schedule 1
+reference	2.1	1357-1366	12	clause 12
+reference	3.3	1828-1838	S1	Schedule 1
+reference	4.1	2017-2027	S1	Schedule 1
+reference	5.1	2326-2336	S1	Schedule 1
+reference	8.2	3555-3565	8.1	Clause 8.1
+reference	14.2	5089-5099	S1	Schedule 1
+term	Agency	(1)	80-257	uses 16
+term	Developer	(2)	258-343	uses 18
+term	Charges	1.1	722-769	uses 6
+term	Deliverables	1.1	770-894	uses 4
+term	Master Agreement	1.1	895-986	uses 1
+term	Milestone	1.1	987-1050	uses 4
+term	Services	1.1	1051-1113	uses 14
+override	14.2	S1	overrides	5062-5134	14.2 If this Agreement and Schedule 1 conflict, this Agreement prevails.
+outside	Master Agreement	11.1	4311-4327
+undefined	(1)	212-226	Harbour Street
+undefined	(2)	281-300	Rue Didouche Mourad
+undefined	6.1	3001-3014	Business Days
+undefined	14.5	5460-5468	Ms Jones

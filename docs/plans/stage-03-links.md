@@ -709,7 +709,7 @@ When this is done, `map_links` is the module's public call, `python -m clause_tr
   - **Rules:** S1, I7, I12, T2 (the file read stays at the edge).
   - **Depends on:** S3-M5-T3, S3-M1-T4
 
-- [ ] **S3-M5-T5: The golden file**
+- [x] **S3-M5-T5: The golden file**
   - **Build:** In `src/clause_tracer/links/tests/test_goldens.py`, `test_link_map_matches_its_golden(check_golden)`: load `DEFAULT_INPUT` with `load_clause_fixture`, render its link map, and call `check_golden(GOLDENS / "developer-agreement.links.txt", actual)` with `GOLDENS = Path(__file__).parent / "goldens"`. Write the golden file with `.venv/bin/uv run pytest src/clause_tracer/links/tests/test_goldens.py --update-goldens`, in a commit of its own with the test, and read it against the sample by hand: one `outside` line for `Master Agreement` in `11.1`; `term` lines for `Agency`, `Developer`, `Charges`, `Deliverables`, `Master Agreement`, `Milestone` and `Services`; one `override` line for `14.2` to `S1`. If one is missing, stop and fix the code before the commit.
   - **Files:** `src/clause_tracer/links/tests/test_goldens.py`, `src/clause_tracer/links/tests/goldens/developer-agreement.links.txt`.
   - **Tests first:** the test above, which fails before the golden file exists, with the message that names `--update-goldens`.
