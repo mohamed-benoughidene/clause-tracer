@@ -63,3 +63,20 @@ def test_empty_file_exits_3(tmp_path: Path, capsys: pytest.CaptureFixture[str]) 
     assert main(["--input", str(path)]) == 3
 
     assert capsys.readouterr().err == "clause_tracer.ingest: empty_input\n"
+
+
+def test_full_flag_prints_whole_sentences(capsys: pytest.CaptureFixture[str]) -> None:
+    assert main(["--full"]) == 0
+
+    output = capsys.readouterr().out
+    assert (
+        "5.5 The Agency will repay reasonable expenses that it has approved in writing "
+        "before they are incurred, as set out in its expenses policy at "
+        "https://docs.example.com/expenses-policy."
+    ) in output
+
+
+def test_without_the_flag_the_preview_is_cut(capsys: pytest.CaptureFixture[str]) -> None:
+    assert main([]) == 0
+
+    assert "expenses-policy" not in capsys.readouterr().out

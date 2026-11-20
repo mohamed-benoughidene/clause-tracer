@@ -11,17 +11,25 @@ from clause_tracer.core import Clause, Document
 PREVIEW_CHARACTERS: Final[int] = 60
 
 
-def _preview(text: str, start: int, end: int) -> str:
-    """The words of one span, cut to their first 60 characters."""
+def _preview(text: str, start: int, end: int, *, full: bool) -> str:
+    """The words of one span, cut to their first 60 characters unless full."""
 
     words = " ".join(text[start:end].split())
+    if full:
+        return words
     return words[:PREVIEW_CHARACTERS]
 
 
-def render_outline(document: Document, clauses: tuple[Clause, ...]) -> str:
+def render_outline(
+    document: Document,
+    clauses: tuple[Clause, ...],
+    *,
+    full: bool = False,
+) -> str:
     """Return the document's source, numbering, warnings, clauses and sentences.
 
-    Input:   one document and its clauses, in text order.
+    Input:   one document and its clauses, in text order. `full` prints each
+             sentence in full instead of its first 60 characters.
     Output:  one line per fact, ending with "\\n": three header lines, then a
              line for each clause and a line for each of its sentences.
     Effects: none.
@@ -57,7 +65,12 @@ def render_outline(document: Document, clauses: tuple[Clause, ...]) -> str:
                     (
                         f"  {sentence.id}",
                         f"{sentence.span.start}-{sentence.span.end}",
-                        _preview(document.text, sentence.span.start, sentence.span.end),
+                        _preview(
+                            document.text,
+                            sentence.span.start,
+                            sentence.span.end,
+                            full=full,
+                        ),
                     )
                 )
             )

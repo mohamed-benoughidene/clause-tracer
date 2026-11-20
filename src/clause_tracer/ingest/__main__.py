@@ -21,6 +21,7 @@ EXIT_INPUT_FILE = 3  # "input file", system design 6.2
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m clause_tracer.ingest")
     parser.add_argument("--input", type=Path, default=DEFAULT_INPUT)
+    parser.add_argument("--full", action="store_true", help="print each sentence in full")
     args = parser.parse_args(argv)
     path: Path = args.input
 
@@ -37,7 +38,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"clause_tracer.ingest: {error.code}", file=sys.stderr)
         return EXIT_INPUT_FILE
 
-    print(render_outline(document, split_clauses(document)), end="")
+    print(render_outline(document, split_clauses(document), full=args.full), end="")
     return 0
 
 

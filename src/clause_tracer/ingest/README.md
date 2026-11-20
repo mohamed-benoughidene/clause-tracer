@@ -94,6 +94,10 @@ core only.
 reads another text or Markdown file. A `.md` suffix is read as Markdown; every
 other suffix is read as text.
 
+`.venv/bin/uv run python -m clause_tracer.ingest --full` prints each sentence in
+full instead of its first 60 characters. The flag writes to standard output only.
+The golden files always use the cut preview.
+
 Exit 0 prints the outline and ends. Exit 3 means the file could not be read, or
 it failed an input check; the message names the error code (`not_utf8`, for
 example). The outline has one line for the source, the numbering and the

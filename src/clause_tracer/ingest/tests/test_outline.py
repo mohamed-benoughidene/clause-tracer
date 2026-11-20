@@ -33,3 +33,10 @@ def test_outline_with_no_clauses() -> None:
     document = read_pasted_text("x")
 
     assert "numbering\t-" in render_outline(document, ()).splitlines()
+
+
+def test_full_outline_does_not_cut_the_preview() -> None:
+    document = read_pasted_text("a" * 200)
+    outline = render_outline(document, split_clauses(document), full=True)
+
+    assert outline.splitlines()[-1] == "  p1.s1\t0-200\t" + "a" * 200
