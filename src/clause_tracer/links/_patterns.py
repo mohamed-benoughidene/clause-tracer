@@ -102,8 +102,10 @@ SENTENCE_LEAD: Final[str] = (
     r"[ \t]+[0-9A-Z]{1,5}\.?)[ \t]+)?"
 )
 SENTENCE_LEAD_RE: Final[re.Pattern[str]] = re.compile(SENTENCE_LEAD)
-LIST_LEAD_END: Final[str] = r"[:;]\s*$"
+LIST_LEAD_END: Final[str] = r"[:;,]\s*$"
 LIST_LEAD_END_RE: Final[re.Pattern[str]] = re.compile(LIST_LEAD_END)
+AND_LEAD_END: Final[str] = r"\s(?i:and|or)\s+$"
+AND_LEAD_END_RE: Final[re.Pattern[str]] = re.compile(AND_LEAD_END)
 
 OUTSIDE_DOCUMENT: Final[str] = (
     r"(?<![A-Za-z])" + DOCUMENT_WORDS + DOCUMENT_NOUN + r"(?![A-Za-z])(?!\s+[A-Z][a-z])"

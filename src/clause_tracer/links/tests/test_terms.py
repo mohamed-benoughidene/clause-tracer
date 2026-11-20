@@ -124,6 +124,43 @@ def test_means_with_the_inside_quotes() -> None:
     assert [definition.term for definition in definitions] == ["Buyer"]
 
 
+def test_comma_lead_in() -> None:
+    _, definitions = _in_one_clause('In this Agreement, "Business Day" means a day.')
+    assert [definition.term for definition in definitions] == ["Business Day"]
+
+
+def test_two_definitions_joined_by_and() -> None:
+    text, definitions = _in_one_clause('"Fee" means money and "Tax" means tax.')
+    whole_sentence = Span(start=0, end=len(text))
+    assert definitions == (
+        Definition(
+            term="Fee",
+            quoted=span_of(text, "Fee"),
+            definition=whole_sentence,
+        ),
+        Definition(
+            term="Tax",
+            quoted=span_of(text, "Tax"),
+            definition=whole_sentence,
+        ),
+    )
+
+
+def test_three_definitions_joined_by_and() -> None:
+    _, definitions = _in_one_clause('"Fee" means a and "Tax" means b and "Levy" means c.')
+    assert [definition.term for definition in definitions] == ["Fee", "Tax", "Levy"]
+
+
+def test_and_without_an_earlier_definition_is_not_a_definition() -> None:
+    _, definitions = _in_one_clause('The word "Fee" and "Tax" means nothing.')
+    assert definitions == ()
+
+
+def test_and_after_a_rejected_definition_is_not_a_definition() -> None:
+    _, definitions = _in_one_clause('The word "Fee" means money and "Tax" means tax.')
+    assert definitions == ()
+
+
 _DEFINED_ROWS: list[Mapping[str, object]] = [
     {
         "id": "1",

@@ -19,6 +19,7 @@ from clause_tracer.core import (
 )
 from clause_tracer.links._index import ClauseIndex
 from clause_tracer.links._patterns import (
+    AND_LEAD_END_RE,
     BRACKET_DEFINITION_RE,
     LIST_LEAD_END_RE,
     MEANS_DEFINITION_RE,
@@ -47,11 +48,24 @@ def find_definitions(text: str, index: ClauseIndex) -> tuple[Definition, ...]:
     """
 
     found: list[Definition] = []
+    previous: re.Match[str] | None = None
     for match in MEANS_DEFINITION_RE.finditer(text):
-        if _starts_its_sentence_or_follows_a_lead_in(text, index, match.start()):
+        sentence = index.sentence_at(match.start())
+        follows_lead_in = _starts_its_sentence_or_follows_a_lead_in(text, index, match.start())
+        has_earlier_accepted_match = (
+            previous is not None
+            and sentence is not None
+            and index.sentence_at(previous.start()) == sentence
+        )
+        joins_previous = False
+        if has_earlier_accepted_match and previous is not None:
+            gap = text[previous.end() : match.start()]
+            joins_previous = AND_LEAD_END_RE.search(gap) is not None
+        if follows_lead_in or joins_previous:
             definition = _definition_from(text, index, match)
             if definition is not None:
                 found.append(definition)
+                previous = match
     for match in BRACKET_DEFINITION_RE.finditer(text):
         definition = _definition_from(text, index, match)
         if definition is not None:
