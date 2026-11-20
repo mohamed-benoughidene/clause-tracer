@@ -1,9 +1,10 @@
 """The wide match fold, with its index map (S2-M5-T2, question 2)."""
 
+import unicodedata
 from collections.abc import Mapping
 
 import pytest
-from hypothesis import given
+from hypothesis import assume, given
 from hypothesis import strategies as st
 
 from clause_tracer.core import MatchKey, fold_for_matching
@@ -42,6 +43,21 @@ def test_soft_hyphen_is_dropped() -> None:
 
 def test_quotes_and_spaces() -> None:
     assert fold_for_matching("“Hi”  \n there").text == '"hi" there'
+
+
+def test_decomposed_accent_matches_composed() -> None:
+    composed = fold_for_matching("Caf\u00e9")
+    decomposed = fold_for_matching("Cafe\u0301")
+
+    assert composed.text == decomposed.text == "caf\u00e9"
+    assert decomposed.to_canonical == (0, 1, 2, 3, 5)
+
+
+def test_mark_after_dropped_character_is_its_own_cluster() -> None:
+    key = fold_for_matching("e\u200b\u0301")
+
+    assert key.text == "e\u0301"
+    assert key.to_canonical == (0, 2, 3)
 
 
 def test_empty_text() -> None:
@@ -96,6 +112,10 @@ def test_invariant_2_folding_a_slice_equals_slicing_the_fold(
     end = second % (len(text) + 1)
     if start > end:
         start, end = end, start
+    cuts_are_outside_clusters = all(
+        cut == len(text) or unicodedata.combining(text[cut]) == 0 for cut in (start, end)
+    )
+    assume(cuts_are_outside_clusters)
 
     key = fold_for_matching(text)
     start_folded = _first_at_or_after(key.to_canonical, start)

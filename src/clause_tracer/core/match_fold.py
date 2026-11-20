@@ -1,11 +1,12 @@
-"""The wide match fold, with its index map (system design 4.2; S2-M5-T2).
+"""The wide match fold, with its index map (system design 4.2; S2-M5-T2, S2-M5-T7).
 
 `fold_for_quote_check` is the narrow Spec 2 fold, and the only one that
 confirms a quote. This fold is the wide one that finds names, terms and
-keywords: it normalises each character (NFKC), case-folds it, makes quotes
-straight and every dash one hyphen, and drops the characters that could hide
-a word. Folding can change the length (`ß` becomes `ss`), so a folded span is
-found through the map, never by arithmetic on offsets.
+keywords: it normalises each character together with the combining marks
+after it (NFKC), case-folds it, makes quotes straight and every dash one
+hyphen, and drops the characters that could hide a word. Folding can change
+the length (`ß` becomes `ss`), so a folded span is found through the map, never
+by arithmetic on offsets.
 """
 
 import unicodedata
@@ -38,11 +39,11 @@ _DOUBLE_QUOTES: Final[str] = "\u201c\u201d\u201e\u201f"
 _DASHES: Final[str] = "\u2010\u2011\u2012\u2013\u2014\u2015\u2212"
 
 
-def _fold_one(character: str) -> str:
-    """NFKC and case-fold one character, then make its quotes and dashes plain."""
+def _fold_one(cluster: str) -> str:
+    """NFKC and case-fold one cluster, then make its quotes and dashes plain."""
 
     pieces: list[str] = []
-    for folded in unicodedata.normalize("NFKC", character).casefold():
+    for folded in unicodedata.normalize("NFKC", cluster).casefold():
         if folded in _SINGLE_QUOTES:
             pieces.append("'")
         elif folded in _DOUBLE_QUOTES:
@@ -61,16 +62,28 @@ def fold_for_matching(text: str) -> MatchKey:
              for.
     Output:  the folded text and its index map: one entry per folded character,
              the index of the character it came from, plus a last entry equal
-             to len(text).
+             to len(text). A combining mark maps to the index of the character
+             it follows.
     Effects: none.
     """
 
     emitted: list[tuple[str, int]] = []
-    for index, character in enumerate(text):
-        if character in _DROPPED:
+    index = 0
+    while index < len(text):
+        if text[index] in _DROPPED:
+            index += 1
             continue
-        for folded in _fold_one(character):
+        cluster_end = index + 1
+        while cluster_end < len(text):
+            is_attached_mark = (
+                text[cluster_end] not in _DROPPED and unicodedata.combining(text[cluster_end]) != 0
+            )
+            if not is_attached_mark:
+                break
+            cluster_end += 1
+        for folded in _fold_one(text[index:cluster_end]):
             emitted.append((folded, index))
+        index = cluster_end
 
     folded_characters: list[str] = []
     to_canonical: list[int] = []
