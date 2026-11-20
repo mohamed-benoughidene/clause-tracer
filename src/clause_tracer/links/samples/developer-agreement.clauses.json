@@ -1,0 +1,1202 @@
+{
+  "format": "clause-tracer-links-sample",
+  "version": 1,
+  "document": {
+    "schema_version": 1,
+    "source": {
+      "name": "developer-agreement.txt",
+      "kind": "text",
+      "sha256": "587ff8bcf8116bf4ef7855d7bee25caff597d20a2859e727199fedde8e82d617",
+      "size": 6212
+    },
+    "text": "Development Services Agreement\nThis Agreement is dated 5 November 2026.\nParties\n(1) Brightline Studio Ltd, a company registered in England and Wales with company number 09876543, whose registered office is at 14 Harbour Street, Leeds LS1 4AB (\"the Agency\").\n(2) Karim Benali of 27 Rue Didouche Mourad, Algiers 16000, Algeria (\"the Developer\").\nBackground\n(A) The Agency designs and builds websites for its own customers and wishes to engage the Developer to carry out development work on one of those projects.\n(B) The Developer is an independent contractor and agrees to provide the Services on the terms of this Agreement.\n1. Definitions and interpretation\n1.1 In this Agreement the following words have these meanings:\n\"Charges\" means the fees set out in Schedule 1.\n\"Deliverables\" means everything the Developer hands over as part of the Services, including code, designs and documentation.\n\"Master Agreement\" means the agreement between the Agency and its customer for the project.\n\"Milestone\" means a stage of the Services listed in Schedule 1.\n\"Services\" means the development work described in Schedule 1.\n1.2 Headings do not affect the meaning of this Agreement. Words in the singular include the plural.\n2. Start and term\n2.1 This Agreement starts on the date at the top and continues until the Services are complete, unless it ends earlier under clause 12.\n2.2 This Agreement renews automatically for further 12-month periods unless either party gives 30 days' written notice before the end of the current period.\n3. The Services\n3.1 The Developer will provide the Services with reasonable skill and care and in line with good industry practice.\n3.2 The Developer will make reasonable revisions to the Deliverables at the Agency's request.\n3.3 The Developer will use reasonable efforts to meet the Milestone dates in Schedule 1. Time is not of the essence.\n3.4 The Developer may decide how and where the Services are carried out, and may use their own equipment.\n4. Changes and extra work\n4.1 Work outside Schedule 1 must be agreed in writing and will be paid at the hourly rate of £45.\n4.2 Either party may ask for a change to the Services. A change only takes effect when both parties agree it in writing.\n5. Charges and payment\n5.1 The total Charges for the Services are £9,600, split by Milestone as set out in Schedule 1.\n5.2 The Agency will pay 25% of the total Charges on signing this Agreement.\n5.3 The Developer will invoice the Agency at accounts@brightline.example when each Milestone is delivered.\n5.4 Invoices will be paid within 60 days of the invoice date.\n5.5 The Agency will repay reasonable expenses that it has approved in writing before they are incurred, as set out in its expenses policy at https://docs.example.com/expenses-policy.\n5.6 All Charges are exclusive of VAT, which will be added where it applies.\n6. The Agency's obligations\n6.1 The Agency will provide the content, logins and approvals the Developer reasonably needs, and will reply to questions within 3 Business Days.\n7. Ownership of the work\n7.1 All work created under this Agreement is a work made for hire and belongs to the Agency from the moment it is created.\n7.2 The Developer waives any moral rights in the Deliverables to the extent allowed.\n7.3 Tools, code libraries and know-how the Developer owned before this Agreement stay the Developer's. The Agency may use any that are part of the Deliverables for the project.\n8. Confidentiality\n8.1 Each party will keep the other's confidential information private and use it only for this Agreement.\n8.2 Clause 8.1 does not apply to information that is public, that the receiving party already knew, or that the law requires it to share.\n9. Non-compete and non-solicitation\n9.1 For 12 months after this Agreement ends, the Developer will not provide similar services to any customer of the Agency.\n9.2 For 12 months after this Agreement ends, neither party will try to hire the other's staff.\n10. Warranties\n10.1 The Developer confirms the Deliverables will be their own original work, except for third-party material the Agency has approved.\n10.2 No other promises are given about the Services except those written in this Agreement.\n11. Liability\n11.1 The Developer's total liability is capped at the fees paid under this Agreement, except as set out in the Master Agreement.\n11.2 Neither party is liable for loss of profit or any indirect loss.\n12. Ending this Agreement\n12.1 Either party may end this Agreement with 14 days' written notice.\n12.2 If the Agency ends this Agreement, no payment is due for work in progress.\n12.3 Either party may end this Agreement at once by written notice if the other seriously breaks it and does not fix the breach within 14 days of being asked to.\n12.4 When this Agreement ends, each party will return the other's materials and confidential information.\n13. Data protection\n13.1 Each party will comply with data protection law when handling personal data under this Agreement.\n14. General\n14.1 This Agreement is the whole agreement between the parties about the Services.\n14.2 If this Agreement and Schedule 1 conflict, this Agreement prevails.\n14.3 The Developer will not work for a direct competitor of the Agency for 6 to 9 months after this Agreement ends.\n14.4 Neither party may transfer this Agreement to anyone else without the other's written consent.\n14.5 Notices must be in writing and sent by email to the addresses each party gives the other, with a copy to Ms Jones at the Developer's address.\n14.6 This Agreement is governed by the laws of England and Wales.\n\nSigned for and on behalf of Brightline Studio Ltd by Sarah Jones, Director\n\nSigned by Karim Benali\nSchedule 1 · Services and Charges\n1. The Developer will build the front end and content management integration for the Agency's customer website, from the approved designs.\nMilestone\tWork\tTarget\tCharges\n1 Discovery\tReview designs, plan the build\tWeek 2\t£1,600\n2 Build\tTemplates and components\tWeek 6\t£3,200\n3 Integration\tContent management and forms\tWeek 9\t£3,200\n4 Launch\tTesting, fixes and go-live\tWeek 11\t£1,600\n\tTotal\t\t£9,600\n2. Hosting, domain names and third-party licences are provided by the Agency and are not part of the Services.\n",
+    "warnings": []
+  },
+  "clauses": [
+    {
+      "id": "p1",
+      "number": null,
+      "heading": "Development Services Agreement",
+      "level": 1,
+      "parent_id": null,
+      "start": 0,
+      "end": 72,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "p1.s1",
+          "start": 0,
+          "end": 31
+        },
+        {
+          "id": "p1.s2",
+          "start": 31,
+          "end": 72
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "number": null,
+      "heading": "Parties",
+      "level": 1,
+      "parent_id": null,
+      "start": 72,
+      "end": 80,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "p2.s1",
+          "start": 72,
+          "end": 80
+        }
+      ]
+    },
+    {
+      "id": "(1)",
+      "number": "(1)",
+      "heading": null,
+      "level": 1,
+      "parent_id": null,
+      "start": 80,
+      "end": 258,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "(1).s1",
+          "start": 80,
+          "end": 258
+        }
+      ]
+    },
+    {
+      "id": "(2)",
+      "number": "(2)",
+      "heading": null,
+      "level": 1,
+      "parent_id": null,
+      "start": 258,
+      "end": 344,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "(2).s1",
+          "start": 258,
+          "end": 344
+        }
+      ]
+    },
+    {
+      "id": "p3",
+      "number": null,
+      "heading": "Background",
+      "level": 1,
+      "parent_id": null,
+      "start": 344,
+      "end": 355,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "p3.s1",
+          "start": 344,
+          "end": 355
+        }
+      ]
+    },
+    {
+      "id": "(A)",
+      "number": "(A)",
+      "heading": null,
+      "level": 1,
+      "parent_id": null,
+      "start": 355,
+      "end": 511,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "(A).s1",
+          "start": 355,
+          "end": 511
+        }
+      ]
+    },
+    {
+      "id": "(B)",
+      "number": "(B)",
+      "heading": null,
+      "level": 1,
+      "parent_id": null,
+      "start": 511,
+      "end": 625,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "(B).s1",
+          "start": 511,
+          "end": 625
+        }
+      ]
+    },
+    {
+      "id": "1",
+      "number": "1",
+      "heading": "Definitions and interpretation",
+      "level": 1,
+      "parent_id": null,
+      "start": 625,
+      "end": 659,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "1.s1",
+          "start": 625,
+          "end": 659
+        }
+      ]
+    },
+    {
+      "id": "1.1",
+      "number": "1.1",
+      "heading": null,
+      "level": 2,
+      "parent_id": "1",
+      "start": 659,
+      "end": 1114,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "1.1.s1",
+          "start": 659,
+          "end": 722
+        },
+        {
+          "id": "1.1.s2",
+          "start": 722,
+          "end": 770
+        },
+        {
+          "id": "1.1.s3",
+          "start": 770,
+          "end": 895
+        },
+        {
+          "id": "1.1.s4",
+          "start": 895,
+          "end": 987
+        },
+        {
+          "id": "1.1.s5",
+          "start": 987,
+          "end": 1051
+        },
+        {
+          "id": "1.1.s6",
+          "start": 1051,
+          "end": 1114
+        }
+      ]
+    },
+    {
+      "id": "1.2",
+      "number": "1.2",
+      "heading": null,
+      "level": 2,
+      "parent_id": "1",
+      "start": 1114,
+      "end": 1214,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "1.2.s1",
+          "start": 1114,
+          "end": 1172
+        },
+        {
+          "id": "1.2.s2",
+          "start": 1172,
+          "end": 1214
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "number": "2",
+      "heading": "Start and term",
+      "level": 1,
+      "parent_id": null,
+      "start": 1214,
+      "end": 1232,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "2.s1",
+          "start": 1214,
+          "end": 1232
+        }
+      ]
+    },
+    {
+      "id": "2.1",
+      "number": "2.1",
+      "heading": null,
+      "level": 2,
+      "parent_id": "2",
+      "start": 1232,
+      "end": 1368,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "2.1.s1",
+          "start": 1232,
+          "end": 1368
+        }
+      ]
+    },
+    {
+      "id": "2.2",
+      "number": "2.2",
+      "heading": null,
+      "level": 2,
+      "parent_id": "2",
+      "start": 1368,
+      "end": 1525,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "2.2.s1",
+          "start": 1368,
+          "end": 1525
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "number": "3",
+      "heading": "The Services",
+      "level": 1,
+      "parent_id": null,
+      "start": 1525,
+      "end": 1541,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "3.s1",
+          "start": 1525,
+          "end": 1541
+        }
+      ]
+    },
+    {
+      "id": "3.1",
+      "number": "3.1",
+      "heading": null,
+      "level": 2,
+      "parent_id": "3",
+      "start": 1541,
+      "end": 1657,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "3.1.s1",
+          "start": 1541,
+          "end": 1657
+        }
+      ]
+    },
+    {
+      "id": "3.2",
+      "number": "3.2",
+      "heading": null,
+      "level": 2,
+      "parent_id": "3",
+      "start": 1657,
+      "end": 1751,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "3.2.s1",
+          "start": 1657,
+          "end": 1751
+        }
+      ]
+    },
+    {
+      "id": "3.3",
+      "number": "3.3",
+      "heading": null,
+      "level": 2,
+      "parent_id": "3",
+      "start": 1751,
+      "end": 1868,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "3.3.s1",
+          "start": 1751,
+          "end": 1840
+        },
+        {
+          "id": "3.3.s2",
+          "start": 1840,
+          "end": 1868
+        }
+      ]
+    },
+    {
+      "id": "3.4",
+      "number": "3.4",
+      "heading": null,
+      "level": 2,
+      "parent_id": "3",
+      "start": 1868,
+      "end": 1974,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "3.4.s1",
+          "start": 1868,
+          "end": 1974
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "number": "4",
+      "heading": "Changes and extra work",
+      "level": 1,
+      "parent_id": null,
+      "start": 1974,
+      "end": 2000,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "4.s1",
+          "start": 1974,
+          "end": 2000
+        }
+      ]
+    },
+    {
+      "id": "4.1",
+      "number": "4.1",
+      "heading": null,
+      "level": 2,
+      "parent_id": "4",
+      "start": 2000,
+      "end": 2098,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "4.1.s1",
+          "start": 2000,
+          "end": 2098
+        }
+      ]
+    },
+    {
+      "id": "4.2",
+      "number": "4.2",
+      "heading": null,
+      "level": 2,
+      "parent_id": "4",
+      "start": 2098,
+      "end": 2219,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "4.2.s1",
+          "start": 2098,
+          "end": 2153
+        },
+        {
+          "id": "4.2.s2",
+          "start": 2153,
+          "end": 2219
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "number": "5",
+      "heading": "Charges and payment",
+      "level": 1,
+      "parent_id": null,
+      "start": 2219,
+      "end": 2242,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "5.s1",
+          "start": 2219,
+          "end": 2242
+        }
+      ]
+    },
+    {
+      "id": "5.1",
+      "number": "5.1",
+      "heading": null,
+      "level": 2,
+      "parent_id": "5",
+      "start": 2242,
+      "end": 2338,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "5.1.s1",
+          "start": 2242,
+          "end": 2338
+        }
+      ]
+    },
+    {
+      "id": "5.2",
+      "number": "5.2",
+      "heading": null,
+      "level": 2,
+      "parent_id": "5",
+      "start": 2338,
+      "end": 2414,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "5.2.s1",
+          "start": 2338,
+          "end": 2414
+        }
+      ]
+    },
+    {
+      "id": "5.3",
+      "number": "5.3",
+      "heading": null,
+      "level": 2,
+      "parent_id": "5",
+      "start": 2414,
+      "end": 2521,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "5.3.s1",
+          "start": 2414,
+          "end": 2521
+        }
+      ]
+    },
+    {
+      "id": "5.4",
+      "number": "5.4",
+      "heading": null,
+      "level": 2,
+      "parent_id": "5",
+      "start": 2521,
+      "end": 2583,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "5.4.s1",
+          "start": 2521,
+          "end": 2583
+        }
+      ]
+    },
+    {
+      "id": "5.5",
+      "number": "5.5",
+      "heading": null,
+      "level": 2,
+      "parent_id": "5",
+      "start": 2583,
+      "end": 2766,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "5.5.s1",
+          "start": 2583,
+          "end": 2766
+        }
+      ]
+    },
+    {
+      "id": "5.6",
+      "number": "5.6",
+      "heading": null,
+      "level": 2,
+      "parent_id": "5",
+      "start": 2766,
+      "end": 2842,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "5.6.s1",
+          "start": 2766,
+          "end": 2842
+        }
+      ]
+    },
+    {
+      "id": "6",
+      "number": "6",
+      "heading": "The Agency's obligations",
+      "level": 1,
+      "parent_id": null,
+      "start": 2842,
+      "end": 2870,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "6.s1",
+          "start": 2842,
+          "end": 2870
+        }
+      ]
+    },
+    {
+      "id": "6.1",
+      "number": "6.1",
+      "heading": null,
+      "level": 2,
+      "parent_id": "6",
+      "start": 2870,
+      "end": 3016,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "6.1.s1",
+          "start": 2870,
+          "end": 3016
+        }
+      ]
+    },
+    {
+      "id": "7",
+      "number": "7",
+      "heading": "Ownership of the work",
+      "level": 1,
+      "parent_id": null,
+      "start": 3016,
+      "end": 3041,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "7.s1",
+          "start": 3016,
+          "end": 3041
+        }
+      ]
+    },
+    {
+      "id": "7.1",
+      "number": "7.1",
+      "heading": null,
+      "level": 2,
+      "parent_id": "7",
+      "start": 3041,
+      "end": 3164,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "7.1.s1",
+          "start": 3041,
+          "end": 3164
+        }
+      ]
+    },
+    {
+      "id": "7.2",
+      "number": "7.2",
+      "heading": null,
+      "level": 2,
+      "parent_id": "7",
+      "start": 3164,
+      "end": 3249,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "7.2.s1",
+          "start": 3164,
+          "end": 3249
+        }
+      ]
+    },
+    {
+      "id": "7.3",
+      "number": "7.3",
+      "heading": null,
+      "level": 2,
+      "parent_id": "7",
+      "start": 3249,
+      "end": 3426,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "7.3.s1",
+          "start": 3249,
+          "end": 3352
+        },
+        {
+          "id": "7.3.s2",
+          "start": 3352,
+          "end": 3426
+        }
+      ]
+    },
+    {
+      "id": "8",
+      "number": "8",
+      "heading": "Confidentiality",
+      "level": 1,
+      "parent_id": null,
+      "start": 3426,
+      "end": 3445,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "8.s1",
+          "start": 3426,
+          "end": 3445
+        }
+      ]
+    },
+    {
+      "id": "8.1",
+      "number": "8.1",
+      "heading": null,
+      "level": 2,
+      "parent_id": "8",
+      "start": 3445,
+      "end": 3551,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "8.1.s1",
+          "start": 3445,
+          "end": 3551
+        }
+      ]
+    },
+    {
+      "id": "8.2",
+      "number": "8.2",
+      "heading": null,
+      "level": 2,
+      "parent_id": "8",
+      "start": 3551,
+      "end": 3689,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "8.2.s1",
+          "start": 3551,
+          "end": 3689
+        }
+      ]
+    },
+    {
+      "id": "9",
+      "number": "9",
+      "heading": "Non-compete and non-solicitation",
+      "level": 1,
+      "parent_id": null,
+      "start": 3689,
+      "end": 3725,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "9.s1",
+          "start": 3689,
+          "end": 3725
+        }
+      ]
+    },
+    {
+      "id": "9.1",
+      "number": "9.1",
+      "heading": null,
+      "level": 2,
+      "parent_id": "9",
+      "start": 3725,
+      "end": 3849,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "9.1.s1",
+          "start": 3725,
+          "end": 3849
+        }
+      ]
+    },
+    {
+      "id": "9.2",
+      "number": "9.2",
+      "heading": null,
+      "level": 2,
+      "parent_id": "9",
+      "start": 3849,
+      "end": 3944,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "9.2.s1",
+          "start": 3849,
+          "end": 3944
+        }
+      ]
+    },
+    {
+      "id": "10",
+      "number": "10",
+      "heading": "Warranties",
+      "level": 1,
+      "parent_id": null,
+      "start": 3944,
+      "end": 3959,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "10.s1",
+          "start": 3944,
+          "end": 3959
+        }
+      ]
+    },
+    {
+      "id": "10.1",
+      "number": "10.1",
+      "heading": null,
+      "level": 2,
+      "parent_id": "10",
+      "start": 3959,
+      "end": 4094,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "10.1.s1",
+          "start": 3959,
+          "end": 4094
+        }
+      ]
+    },
+    {
+      "id": "10.2",
+      "number": "10.2",
+      "heading": null,
+      "level": 2,
+      "parent_id": "10",
+      "start": 4094,
+      "end": 4186,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "10.2.s1",
+          "start": 4094,
+          "end": 4186
+        }
+      ]
+    },
+    {
+      "id": "11",
+      "number": "11",
+      "heading": "Liability",
+      "level": 1,
+      "parent_id": null,
+      "start": 4186,
+      "end": 4200,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "11.s1",
+          "start": 4186,
+          "end": 4200
+        }
+      ]
+    },
+    {
+      "id": "11.1",
+      "number": "11.1",
+      "heading": null,
+      "level": 2,
+      "parent_id": "11",
+      "start": 4200,
+      "end": 4329,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "11.1.s1",
+          "start": 4200,
+          "end": 4329
+        }
+      ]
+    },
+    {
+      "id": "11.2",
+      "number": "11.2",
+      "heading": null,
+      "level": 2,
+      "parent_id": "11",
+      "start": 4329,
+      "end": 4399,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "11.2.s1",
+          "start": 4329,
+          "end": 4399
+        }
+      ]
+    },
+    {
+      "id": "12",
+      "number": "12",
+      "heading": "Ending this Agreement",
+      "level": 1,
+      "parent_id": null,
+      "start": 4399,
+      "end": 4425,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "12.s1",
+          "start": 4399,
+          "end": 4425
+        }
+      ]
+    },
+    {
+      "id": "12.1",
+      "number": "12.1",
+      "heading": null,
+      "level": 2,
+      "parent_id": "12",
+      "start": 4425,
+      "end": 4496,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "12.1.s1",
+          "start": 4425,
+          "end": 4496
+        }
+      ]
+    },
+    {
+      "id": "12.2",
+      "number": "12.2",
+      "heading": null,
+      "level": 2,
+      "parent_id": "12",
+      "start": 4496,
+      "end": 4576,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "12.2.s1",
+          "start": 4496,
+          "end": 4576
+        }
+      ]
+    },
+    {
+      "id": "12.3",
+      "number": "12.3",
+      "heading": null,
+      "level": 2,
+      "parent_id": "12",
+      "start": 4576,
+      "end": 4738,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "12.3.s1",
+          "start": 4576,
+          "end": 4738
+        }
+      ]
+    },
+    {
+      "id": "12.4",
+      "number": "12.4",
+      "heading": null,
+      "level": 2,
+      "parent_id": "12",
+      "start": 4738,
+      "end": 4844,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "12.4.s1",
+          "start": 4738,
+          "end": 4844
+        }
+      ]
+    },
+    {
+      "id": "13",
+      "number": "13",
+      "heading": "Data protection",
+      "level": 1,
+      "parent_id": null,
+      "start": 4844,
+      "end": 4864,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "13.s1",
+          "start": 4844,
+          "end": 4864
+        }
+      ]
+    },
+    {
+      "id": "13.1",
+      "number": "13.1",
+      "heading": null,
+      "level": 2,
+      "parent_id": "13",
+      "start": 4864,
+      "end": 4967,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "13.1.s1",
+          "start": 4864,
+          "end": 4967
+        }
+      ]
+    },
+    {
+      "id": "14",
+      "number": "14",
+      "heading": "General",
+      "level": 1,
+      "parent_id": null,
+      "start": 4967,
+      "end": 4979,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "14.s1",
+          "start": 4967,
+          "end": 4979
+        }
+      ]
+    },
+    {
+      "id": "14.1",
+      "number": "14.1",
+      "heading": null,
+      "level": 2,
+      "parent_id": "14",
+      "start": 4979,
+      "end": 5062,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "14.1.s1",
+          "start": 4979,
+          "end": 5062
+        }
+      ]
+    },
+    {
+      "id": "14.2",
+      "number": "14.2",
+      "heading": null,
+      "level": 2,
+      "parent_id": "14",
+      "start": 5062,
+      "end": 5135,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "14.2.s1",
+          "start": 5062,
+          "end": 5135
+        }
+      ]
+    },
+    {
+      "id": "14.3",
+      "number": "14.3",
+      "heading": null,
+      "level": 2,
+      "parent_id": "14",
+      "start": 5135,
+      "end": 5251,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "14.3.s1",
+          "start": 5135,
+          "end": 5251
+        }
+      ]
+    },
+    {
+      "id": "14.4",
+      "number": "14.4",
+      "heading": null,
+      "level": 2,
+      "parent_id": "14",
+      "start": 5251,
+      "end": 5350,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "14.4.s1",
+          "start": 5251,
+          "end": 5350
+        }
+      ]
+    },
+    {
+      "id": "14.5",
+      "number": "14.5",
+      "heading": null,
+      "level": 2,
+      "parent_id": "14",
+      "start": 5350,
+      "end": 5497,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "14.5.s1",
+          "start": 5350,
+          "end": 5497
+        }
+      ]
+    },
+    {
+      "id": "14.6",
+      "number": "14.6",
+      "heading": null,
+      "level": 2,
+      "parent_id": "14",
+      "start": 5497,
+      "end": 5564,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "14.6.s1",
+          "start": 5497,
+          "end": 5564
+        }
+      ]
+    },
+    {
+      "id": "p4",
+      "number": null,
+      "heading": "Signed for and on behalf of Brightline Studio Ltd by Sarah Jones, Director",
+      "level": 1,
+      "parent_id": null,
+      "start": 5564,
+      "end": 5640,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "p4.s1",
+          "start": 5564,
+          "end": 5640
+        }
+      ]
+    },
+    {
+      "id": "p5",
+      "number": null,
+      "heading": "Signed by Karim Benali",
+      "level": 1,
+      "parent_id": null,
+      "start": 5640,
+      "end": 5663,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "p5.s1",
+          "start": 5640,
+          "end": 5663
+        }
+      ]
+    },
+    {
+      "id": "S1",
+      "number": "Schedule 1",
+      "heading": "Services and Charges",
+      "level": 1,
+      "parent_id": null,
+      "start": 5663,
+      "end": 5697,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "S1.s1",
+          "start": 5663,
+          "end": 5697
+        }
+      ]
+    },
+    {
+      "id": "S1.1",
+      "number": "1",
+      "heading": null,
+      "level": 2,
+      "parent_id": "S1",
+      "start": 5697,
+      "end": 6093,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "S1.1.s1",
+          "start": 5697,
+          "end": 5836
+        },
+        {
+          "id": "S1.1.s2",
+          "start": 5836,
+          "end": 5866
+        },
+        {
+          "id": "S1.1.s3",
+          "start": 5866,
+          "end": 5923
+        },
+        {
+          "id": "S1.1.s4",
+          "start": 5923,
+          "end": 5970
+        },
+        {
+          "id": "S1.1.s5",
+          "start": 5970,
+          "end": 6027
+        },
+        {
+          "id": "S1.1.s6",
+          "start": 6027,
+          "end": 6078
+        },
+        {
+          "id": "S1.1.s7",
+          "start": 6078,
+          "end": 6093
+        }
+      ]
+    },
+    {
+      "id": "S1.2",
+      "number": "2",
+      "heading": null,
+      "level": 2,
+      "parent_id": "S1",
+      "start": 6093,
+      "end": 6204,
+      "numbering_source": "numbers",
+      "sentences": [
+        {
+          "id": "S1.2.s1",
+          "start": 6093,
+          "end": 6204
+        }
+      ]
+    }
+  ]
+}

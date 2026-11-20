@@ -10,4 +10,5 @@ Unit tests live beside each module, in `src/clause_tracer/<module>/tests/`.
 | `test_copy_lint.py` | The copy lint in `scripts/copy_lint.py`, with small inline strings. A tooling test, not an app test |
 | `test_golden_helper.py` | The golden-file helper in the root `conftest.py`, including the missing-file message and line endings |
 | `test_check_owner_tables.py` | The owner-table guard in `scripts/check_owner_tables.py`, including its git behaviour |
+| `test_links_sample.py` | The `links` clause fixture against `ingest`, and the sample from text to link map |
 | `fixtures/` | Sample contracts and saved AI replies for the tests above. Empty so far; see its README |
