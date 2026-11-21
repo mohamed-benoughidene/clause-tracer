@@ -5,7 +5,7 @@ from pathlib import Path
 
 from clause_tracer.core import FileKind
 from clause_tracer.ingest import read_text_file, split_clauses
-from clause_tracer.links import dump_clause_fixture, load_clause_fixture
+from clause_tracer.links import dump_clause_fixture, load_clause_fixture, map_links
 
 SAMPLE_TEXT = (
     Path(__file__).parent.parent
@@ -37,3 +37,13 @@ def test_fixture_loads_to_65_clauses() -> None:
 
     assert len(sample.clauses) == 65
     assert sample.clauses[-1].id == "S1.2"
+
+
+def test_text_to_link_map() -> None:
+    data = SAMPLE_TEXT.read_bytes()
+    document = read_text_file(data, kind=FileKind.TEXT, name="developer-agreement.txt")
+    sample = load_clause_fixture(FIXTURE.read_text(encoding="utf-8"))
+
+    assert map_links(document, split_clauses(document)) == map_links(
+        sample.document, sample.clauses
+    )
