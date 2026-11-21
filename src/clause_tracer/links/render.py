@@ -11,7 +11,9 @@ def render_link_map(document: Document, clauses: tuple[Clause, ...], link_map: L
 
     Input:   the document, its clauses and the link map of that document.
     Output:  the lines, joined by one newline and ending in one newline.
-    Raises:  nothing.
+    Raises:  ValueError when `build_index` refuses the clauses ("clauses are
+             not in text order" or "clause {id} has a later parent"), as
+             `map_links` does.
     Effects: none (T1).
     """
 

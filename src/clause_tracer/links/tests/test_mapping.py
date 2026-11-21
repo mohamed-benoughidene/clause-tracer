@@ -83,6 +83,20 @@ def test_span_outside_text_raises() -> None:
         map_links(case.document, (clause,))
 
 
+def test_sentence_outside_its_clause_raises() -> None:
+    case = build_case(
+        [
+            {"id": "1", "sentences": ["1. Pay."]},
+            {"id": "2", "sentences": ["2. Fees."]},
+        ]
+    )
+    sentence = dataclasses.replace(case.clauses[0].sentences[0], span=Span(start=0, end=99))
+    clause = dataclasses.replace(case.clauses[0], sentences=(sentence,))
+
+    with pytest.raises(ValueError, match="sentence 1.s1 lies outside clause 1"):
+        map_links(case.document, (clause, case.clauses[1]))
+
+
 def test_same_input_same_output() -> None:
     case = build_case(
         [

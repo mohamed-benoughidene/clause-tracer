@@ -16,9 +16,10 @@ span it came from, and a target that cannot be certain is kept with no target.
 
 Input: a document and its clauses, as `ingest` returns them. Output: the link
 map; every span points into `document.text`, and an unresolved target is `None`.
-Raises `ValueError` when a clause span lies outside the text, which is a bug in
-the caller, and when `build_index` refuses the clauses (`clauses are not in text
-order` or `clause {id} has a later parent`). Effects: none.
+Raises `ValueError` when a clause span lies outside the text, when a sentence
+span lies outside its clause, and when `build_index` refuses the clauses
+(`clauses are not in text order` or `clause {id} has a later parent`). Effects:
+none.
 
 ### `render_link_map`
 
@@ -28,7 +29,8 @@ Returns the link map as tab-separated lines, joined by one newline and ending in
 one newline. The first line is the source, the second the counts, and each later
 line is one reference, term, override, outside document or undefined term. A text
 field replaces each tab and line break with one space. A dash (`-`) stands for no
-clause or no target. No errors and no side effects.
+clause or no target. Raises `ValueError` when `build_index` refuses the clauses,
+with the same two messages as `map_links`. No side effects.
 
 ### `SampleInput`, `dump_clause_fixture`, `load_clause_fixture`
 

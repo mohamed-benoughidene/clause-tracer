@@ -20,10 +20,10 @@ def map_links(document: Document, clauses: tuple[Clause, ...]) -> LinkMap:
     Input:   a document and its clauses, as `ingest` returns them.
     Output:  the link map; every span points into `document.text`, and an
              unresolved target is `None`.
-    Raises:  ValueError when a clause span lies outside the text, which is a
-             bug in the caller, and when `build_index` refuses the clauses
-             ("clauses are not in text order" or "clause {id} has a later
-             parent").
+    Raises:  ValueError when a clause span lies outside the text, when a
+             sentence span lies outside its clause, and when `build_index`
+             refuses the clauses ("clauses are not in text order" or "clause
+             {id} has a later parent").
     Effects: none (T1).
     """
 
@@ -35,6 +35,12 @@ def map_links(document: Document, clauses: tuple[Clause, ...]) -> LinkMap:
             or clause.span.end > len(text)
         ):
             raise ValueError(f"clause {clause.id} lies outside the text")
+        for sentence in clause.sentences:
+            sentence_is_inside_its_clause = (
+                clause.span.start <= sentence.span.start <= sentence.span.end <= clause.span.end
+            )
+            if not sentence_is_inside_its_clause:
+                raise ValueError(f"sentence {sentence.id} lies outside clause {clause.id}")
     index = build_index(clauses)
     references = find_references(text, index)
     definitions = find_definitions(text, index)
