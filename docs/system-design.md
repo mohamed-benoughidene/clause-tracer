@@ -2,7 +2,7 @@
 
 11 Nov 2026 · status: **accepted** on 12 Nov 2026
 
-This is the design of the whole of version 1: the Python engine, the desktop shell around it, storage, packaging and release. It says how the parts fit, what each one promises, and which choices are still open. Build stages 1 (`core`) and 2 (`ingest`) are built; the other modules are empty skeletons.
+This is the design of the whole of version 1: the Python engine, the desktop shell around it, storage, packaging and release. It says how the parts fit, what each one promises, and which choices are still open. Build stages 1 (`core`), 2 (`ingest`) and 3 (`links`) are built; the other modules are empty skeletons.
 
 **How to read it.** [`spec.md`](spec.md) says what the app does, and wins if this file disagrees with it. Each choice below that is hard to undo has a decision record (ADR) with its runner-up. The project owner accepted them all on 12 Nov 2026 (section 13). The evidence is in [the v1 design decisions report](../reports/Clause%20Tracer%20v1%20design%20decisions.md). How to test all of it is in [`testing-strategy.md`](testing-strategy.md). The rules the code must follow are in the [Constitution](../Constitution.md), cited here by ID. The order in which it is built is section 15.
 
@@ -666,6 +666,7 @@ The task plan of each stage is written in `docs/plans/` just before the stage is
 - **Governed by.** ADR 0004. The run order puts `links` before `privacy` (section 4.1).
 - **Done when** `LinkMap` for the sample shows the Master Agreement reference and the defined roles that `privacy` will keep.
 - **Tests, in the testing strategy.** Section 4 (the `links` row).
+- **Task plan.** The task plan is [the stage 3 plan](plans/stage-03-links.md).
 - **Decided 20 Nov 2026** (questions 1 to 6 of [the stage 3 plan](plans/stage-03-links.md), all as recommended):
   - **Defined terms** (question 1). A term is stored without a leading "the" (`Agency`). A use is a whole word that starts with a capital letter in the contract: "the Agency's" counts, "an agency" does not.
   - **Terms used but never defined** (question 2). Runs of 2 to 4 capitalised words in the middle of a sentence that are not a defined term, a heading or a table row. Single words are not listed. Names and addresses also show up, so stage 8 decides how the list is used.

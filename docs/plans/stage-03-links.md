@@ -3,7 +3,7 @@
 | | |
 | --- | --- |
 | Stage | 3, `links` |
-| Status | In progress |
+| Status | Done |
 | Branch | One branch for each milestone, cut from `main`: `feat/links-m1-foundations`, `feat/links-m2-cross-references`, `feat/links-m3-terms-and-outside-documents`, `feat/links-m4-overrides`, `feat/links-m5-link-map-and-sample`. See [the README](README.md), "Branches and pull requests" |
 | Accepted on | 20 Nov 2026 |
 | Stage outline | [System design section 15.3](../system-design.md#153-stage-3-links) |
@@ -55,9 +55,9 @@
 ## 4. Checks before starting
 
 - [x] **The plan is Accepted.** Questions 1 to 6 in section 6 are answered, and the tasks follow the answers. Question 8 is answered before S3-M5-T10. Question 7 is for the stage 4 plan.
-- [ ] **The skeleton passes.** Run `.venv/bin/uv sync`, then `scripts/check.sh`. It must exit 0 before any change.
-- [ ] **The sample outline is as this plan assumes.** Run `.venv/bin/uv run python -m clause_tracer.ingest --full`. It must print 65 clauses; the schedule heading has the id `S1` and the number `Schedule 1`; the party lines are `(1)` and `(2)`; the definitions are sentences `1.1.s2` to `1.1.s6`; clause `11.1` is one sentence holding "Master Agreement"; clause `14.2` is the sentence "14.2 If this Agreement and Schedule 1 conflict, this Agreement prevails."; and the signature lines `p4` and `p5` have a heading. The planner checked this on 20 Nov 2026. If one fails, stop and bring it to the owner.
-- [ ] **The docs are on `main`.** The `docs/` branch that holds this plan, with any spec or system design change the answers need, is merged. Milestone 1 is cut from that `main`.
+- [x] **The skeleton passes.** Run `.venv/bin/uv sync`, then `scripts/check.sh`. It must exit 0 before any change.
+- [x] **The sample outline is as this plan assumes.** Run `.venv/bin/uv run python -m clause_tracer.ingest --full`. It must print 65 clauses; the schedule heading has the id `S1` and the number `Schedule 1`; the party lines are `(1)` and `(2)`; the definitions are sentences `1.1.s2` to `1.1.s6`; clause `11.1` is one sentence holding "Master Agreement"; clause `14.2` is the sentence "14.2 If this Agreement and Schedule 1 conflict, this Agreement prevails."; and the signature lines `p4` and `p5` have a heading. The planner checked this on 20 Nov 2026. If one fails, stop and bring it to the owner.
+- [x] **The docs are on `main`.** The `docs/` branch that holds this plan, with any spec or system design change the answers need, is merged. Milestone 1 is cut from that `main`.
 
 ## 5. Milestones and tasks
 
@@ -797,7 +797,7 @@ When this is done, `map_links` is the module's public call, `python -m clause_tr
   - **Rules:** T1, T6, [testing strategy 5](../testing-strategy.md#5-the-offset-chain-seven-invariants).
   - **Depends on:** S3-M5-T5
 
-- [ ] **S3-M5-T11: Close the stage**
+- [x] **S3-M5-T11: Close the stage**
   - **Build:** Run the "Done when" checks in section 7. Write section 9 with four headings, in this order: "What was built", "What differs from the outline", "For stage 4 (`privacy`)" and "For later stages" (the stage 2 plan's section 9 has the first three). Under "For later stages", the notes must say: stage 8 matches Rule 10 on spans, never on whole clauses (clause 1.1 holds the Master Agreement definition, skipped on purpose); a target-less override whose own sentence names an outside document would spread Rule 10; stage 11 compares per-clause reference targets before and after a rewrite; `ClauseIndex.clause_at` is internal to `links`, so stage 8 and stage 11 map a span to its clause with their own code or ask for a public call; headings count as term uses (`find_terms` does not skip heading sentences); one sentence can give two overrides with no target and different evidence (`Notwithstanding anything to the contrary in this Agreement, this Clause prevails.` gives one from each rule), and both join every trail. Update: [AGENTS.md](../../AGENTS.md) "Where the project stands" (stage 3 done, stage 4 `privacy` next); the status line in [README.md](../../README.md); [testing strategy 13](../testing-strategy.md#13-gaps-today-and-the-order-to-close-them), the row "No samples or golden files in any module" (`ingest` and `links` closed, with the date); [system design 15.3](../system-design.md#153-stage-3-links), a line "The task plan is [the stage 3 plan](plans/stage-03-links.md)."; and check that each answer in section 6 links to its home. Write the status lines in the style of the stage 2 close (commit `53ec58f`). Set this plan's status to Done only after the owner confirms.
   - **Files:** `docs/plans/stage-03-links.md`, `AGENTS.md`, `README.md`, `docs/testing-strategy.md`, `docs/system-design.md`.
   - **Tests first:** None.
@@ -819,17 +819,17 @@ The owner answered all eight questions on 20 Nov 2026, each as recommended, with
 | 6 | **How does a reference written inside a schedule resolve?** A schedule keeps its own numbers, so `Schedule 1` holds clauses with the ids `S1.1`, `S1.2`. A bare "clause 1" or "paragraph 2" written inside it can point at the body or at the schedule. | S3-M2-T2 | With `s` the schedule that holds the reference: for "paragraph", a key resolves only as `s.id + "." + key`, never against the body. For every other keyword, when both `s.id + "." + key` and the bare key resolve, the target is `None` (never guessed); else whichever one resolves; else `None`. Outside a schedule, a key resolves against the body. || As recommended: [system design 15.3](../system-design.md#153-stage-3-links) (20 Nov 2026) |
 | 7 | **How does stage 4 treat a short party name?** A bracket definition can name a party by a short name (`Brightline Studio Ltd ("Brightline")`), and `DefinedTerm` has no flag for it. Stage 4 builds its allow-list from `LinkMap.terms`. | The stage 4 plan, not stage 3 | Stage 4 drops from the allow-list any term that a typed-party finder or a name finder also matches, so a name is never kept. Recorded here so the stage 4 plan starts from it. || As recommended: [system design 15.4](../system-design.md#154-stage-4-privacy-code-finders-and-placeholders) (20 Nov 2026) |
 | 8 | **Does a subject override join a trail?** Spec 4.5 says an override joins a trail when it names a label's subject ("the payment terms prevail"). This plan reads only clause references, this Agreement and this Clause. | S3-M5-T10 | Leave subject overrides to stage 8, which knows the positions' topics; list it as a known limit in the `links` README. || As recommended: [system design 15.8](../system-design.md#158-stage-8-checking-and-the-message-templates) (20 Nov 2026) |
-| 9 | **Does `Article 5.1` resolve to clause `5.1`?** An article item with a `.` part or a bracket gets the key `None` (S3-M2-T2), so the reference is kept with no target. | S3-M2-T2 (already built) | Keep it: a missed link is visible and safe, a wrong link is not (Spec 5, "never guess"). List it as a known limit in the `links` README (S3-M5-T10). | Keep it, as recommended (20 Nov 2026) |
+| 9 | **Does `Article 5.1` resolve to clause `5.1`?** An article item with a `.` part or a bracket gets the key `None` (S3-M2-T2), so the reference is kept with no target. | S3-M2-T2 (already built) | Keep it: a missed link is visible and safe, a wrong link is not (Spec 5, "never guess"). List it as a known limit in the `links` README (S3-M5-T10). | Keep it, as recommended (20 Nov 2026). Listed as a known limit in the [`links` README](../../src/clause_tracer/links/README.md#known-limits) |
 
 ## 7. Done when
 
-- [ ] Every task above is ticked.
-- [ ] `scripts/check.sh` passes with no errors, including the 85% branch-coverage floor for `links`.
-- [ ] Each touched module's README records its shapes (Constitution S3).
-- [ ] Every promise the stage touches has its test (Constitution T13): an unresolved target is kept (S3-M2-T2), override direction (S3-M4-T1), and no override without a target on the sample (S3-M5-T1).
-- [ ] The lines that state the project's status are updated (see the README, "When the stage is done").
-- [ ] The owner has been told what was built, and what the next stage should know.
-- [ ] `python -m clause_tracer.links` prints the sample's link map, which shows the Master Agreement reference and the defined roles `Agency` and `Developer` (system design 15.3), and the golden file and the sample table match.
+- [x] Every task above is ticked.
+- [x] `scripts/check.sh` passes with no errors, including the 85% branch-coverage floor for `links`.
+- [x] Each touched module's README records its shapes (Constitution S3).
+- [x] Every promise the stage touches has its test (Constitution T13): an unresolved target is kept (S3-M2-T2), override direction (S3-M4-T1), and no override without a target on the sample (S3-M5-T1).
+- [x] The lines that state the project's status are updated (see the README, "When the stage is done").
+- [x] The owner has been told what was built, and what the next stage should know.
+- [x] `python -m clause_tracer.links` prints the sample's link map, which shows the Master Agreement reference and the defined roles `Agency` and `Developer` (system design 15.3), and the golden file and the sample table match.
 
 ## 8. Change log
 
@@ -852,7 +852,43 @@ The owner answered all eight questions on 20 Nov 2026, each as recommended, with
 | 21 Nov 2026 | Added S3-M5-T15 to milestone 5: one Hypothesis profile without a deadline in the root `conftest.py` (T15). The owner chose a shared profile over per-test settings | `scripts/check.sh` failed once on the milestone 5 branch from a timing flake in an `ingest` property test. The same default deadline applies to 30 property tests in `ingest` and `core`. I ran the profile in a throwaway copy first: it reaches the tests under `src/clause_tracer/`, and ruff, format and mypy accept it |
 | 21 Nov 2026 | Recorded where the build of S3-M5-T12 to T15 differs from the plan text, and fixed the plan text. (1) S3-M5-T12: the sentence test fails first with an `IndexError` from `trimmed`, not with a missing `ValueError`; the contract note drops "which is a bug in the caller". (2) S3-M5-T13: the reachability test asserts its condition on each case that `find` returns. (3) S3-M5-T14: the table has two columns, `Line` and `Fields after the first word`, and the old prose that listed the line order and the dash is replaced by the table. (4) S3-M5-T15: the `@settings(deadline=None)` lines in `links` stay, and are now redundant. (5) `scripts/check.sh` failed once after T13 on `ruff format --check` for `strategies.py`; the agent formatted the file and the rerun exited 0 | The agent reported these after building. None changes a result or an expected value |
 | 21 Nov 2026 | Ticked S3-M5-T6. The owner read the sample link map in a review page (the sample text with every link marked in it, and the clause ids of the fixture beside the text) and said in chat that the results are right | The golden file `developer-agreement.links.txt` is read and accepted. The review page was a throwaway aid in the scratchpad, not part of the repo |
+| 21 Nov 2026 | Closed the stage: ticked S3-M5-T11 and the checks of sections 4 and 7, wrote section 9, set the status to Done, and updated the status lines (AGENTS.md, README.md, testing strategy 13, system design intro and 15.3, and the module map in `src/clause_tracer/README.md`). The owner confirmed in chat that the stage is Done | The stage closed on `main` at the merge of the milestone 5 pull request, with `scripts/check.sh` at exit 0 (1750 tests; `links` coverage 98%) |
 
 ## 9. Notes for the next stage
 
-Filled in when the stage is done.
+Written on 21 Nov 2026, when the stage closed.
+
+**What was built.** `links` reads a `Document` and its clauses, and `map_links` returns one `LinkMap` with five lists. Each link keeps the span it came from, and an unresolved target is kept with `target=None`.
+- **References** (`find_references`). `clause`, `section`, `paragraph`, `sub-clause`, `article`, `schedule`, `annex`, `appendix` and `exhibit`, with lists, ranges, and "this Clause". A heading's own number is not a reference. A duplicated number, `Annex 1` and `Appendix 1`, and `Article 5.1` stay unresolved.
+- **Defined terms** (`find_definitions`, `find_terms`). Quoted `means`, `shall mean` and `has the meaning`, and both bracket forms. A definition is read at the start of a sentence, after a colon, a semicolon or a comma, and after `and` or `or` when an earlier definition of the sentence was read. Uses are found on the wide match key and mapped back to the text.
+- **Documents that are not loaded** (`find_outside_documents`). One entry for each mention. The contract's own name is read from the definition verb, and its own title is skipped.
+- **Overrides** (`find_overrides`). `Notwithstanding`, `Subject to`, `save as set out in` and `except as set out in` before a reference, and "prevails" and "takes precedence" sentences. An unresolved target gives no override, and a heading sentence gives none.
+- **Terms used but never defined** (`find_undefined_terms`).
+
+`render_link_map` prints the link map as tab-separated lines. `python -m clause_tracer.links` prints the link map of the sample: 9 references, 7 terms, 1 override (clause `14.2`: this Agreement wins over `S1`), 1 outside document (the Master Agreement in `11.1`) and 4 undefined terms. The clause fixture of the sample is written and read by `dump_clause_fixture` and `load_clause_fixture`. The owner wrote five tables (references, terms, outside documents, overrides and the sample) and read the golden file. The full run has 1750 tests, and `links` has 98% branch coverage against the floor of 85%. The README records every shape and the known limits.
+
+**What differs from the outline.** Each difference is in section 6 or the change log (section 8).
+- The outline asked for the Master Agreement reference and the defined roles. The build also lists terms used but never defined, and every document mention.
+- An override whose target does not exist is not kept, because an override with no target joins every trail (question 5). `Article 5.1` stays unresolved (question 9). Subject overrides are left to stage 8 (question 8).
+- Four code reviews, one for each of milestones 2 to 5, added tasks beyond the first plan: S3-M2-T7 to T9, S3-M3-T9 and T10, S3-M4-T5 and T6, and S3-M5-T12 to T15. They changed these behaviours: a heading with a duplicated id is still its own number; a definition is read after a comma and after `and`; the contract's own name is read from the definition verb; a heading sentence gives no override; `map_links` checks sentence spans.
+- The root `conftest.py` now loads a Hypothesis profile with no deadline for every property test (S3-M5-T15), after a timing flake in an `ingest` property test failed `scripts/check.sh` once.
+- The build differed from the plan text in small ways in every milestone. The change log records each one, and the task text was corrected.
+
+**For stage 4 (`privacy`).**
+- Build the allow-list from `LinkMap.terms`. `term` is the quoted words without a leading "the". A term defined twice gives two entries with the same uses. Every span points into `Document.text`.
+- On the sample the terms are `Agency`, `Developer`, `Charges`, `Deliverables`, `Master Agreement`, `Milestone` and `Services`. Drop any term that a typed-party finder or a name finder also matches, so a party's short name is never kept (question 7).
+- `LinkMap.undefined_terms` on the sample holds `Harbour Street`, `Rue Didouche Mourad` and `Ms Jones`: an address, a street and a person's name. `links` does not remove them. `privacy` finds them.
+- `links` runs before `privacy` and imports only `core`. It reads all of `Document.text`, including any text that stage 5 flags as hidden. Stage 5 decides whether `links` skips `Document.hidden` spans.
+- `map_links` raises `ValueError` when a clause span or a sentence span lies outside the text or its clause, and when clauses are not in text order or a parent comes later. Clauses from `ingest` are built to pass these checks.
+
+**For later stages.**
+- Stage 8 matches Rule 10 on spans, never on whole clauses. Clause `1.1` holds the Master Agreement definition, and `links` skips it on purpose.
+- A target-less override whose own sentence names an outside document would spread Rule 10. `links` gives none in that case.
+- One sentence can give two overrides with no target and different evidence. `Notwithstanding anything to the contrary in this Agreement, this Clause prevails.` gives one from each rule. Both join every trail.
+- Stage 11 compares per-clause reference targets before and after a rewrite.
+- `ClauseIndex.clause_at` is internal to `links`. Stage 8 and stage 11 map a span to its clause with their own code, or ask for a public call.
+- Headings count as term uses, because `find_terms` does not skip heading sentences. The title `Development Services Agreement` counts as a use of `Services` on the sample.
+- Stage 6 stores the link map as a derived record, with its cache key and a version constant.
+- Stage 8 decides how the list of terms used but never defined is used, and how a subject override joins a trail.
+- The known limits are in the `links` README. The ones most likely to matter: only the first `prevails` verb of a sentence is read, a capitalised run at the start of a sentence is never reported as undefined, and lower-case document mentions are not outside documents.
+- A golden file or the sample fixture is written only with `--update-goldens`, in a commit of its own, and the owner reads the diff.
