@@ -1,6 +1,6 @@
 """Property tests of the link map (S3-M5-T2)."""
 
-from hypothesis import given, settings
+from hypothesis import find, given, settings
 
 from clause_tracer.core import LinkMap, Span, fold_for_matching
 from clause_tracer.links import map_links
@@ -76,3 +76,31 @@ def test_term_uses_match_the_term(case: SampleInput) -> None:
             assert fold_for_matching(text[use.start : use.end]).text == (
                 fold_for_matching(term.term).text
             )
+
+
+def test_link_cases_reach_every_row_kind() -> None:
+    heading_case = find(
+        link_cases(),
+        lambda case: any(clause.heading is not None for clause in case.clauses),
+        settings=settings(max_examples=1000),
+    )
+    child_case = find(
+        link_cases(),
+        lambda case: any(clause.parent_id is not None for clause in case.clauses),
+        settings=settings(max_examples=1000),
+    )
+    duplicate_case = find(
+        link_cases(),
+        lambda case: any("~" in str(clause.id) for clause in case.clauses),
+        settings=settings(max_examples=1000),
+    )
+    schedule_case = find(
+        link_cases(),
+        lambda case: any(str(clause.id) == "S1" for clause in case.clauses),
+        settings=settings(max_examples=1000),
+    )
+
+    assert any(clause.heading is not None for clause in heading_case.clauses)
+    assert any(clause.parent_id is not None for clause in child_case.clauses)
+    assert any("~" in str(clause.id) for clause in duplicate_case.clauses)
+    assert any(str(clause.id) == "S1" for clause in schedule_case.clauses)

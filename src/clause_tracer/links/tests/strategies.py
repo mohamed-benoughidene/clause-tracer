@@ -2,7 +2,8 @@
 
 Not exported from `links`. Each case is drawn from the fragments `links`
 reads, mixed with the hazard alphabet, so a property test meets the same
-odd characters that `ingest` meets.
+odd characters that `ingest` meets. A case may also hold a heading, a
+child clause, a duplicated id and a schedule.
 """
 
 from typing import Final
@@ -29,6 +30,8 @@ FRAGMENTS: tuple[str, ...] = (
     "this Agreement prevails",
 )
 
+HEADINGS: tuple[str, ...] = ("Subject to Clause 2", "Master Agreement", "Fees And Payment")
+
 SENTENCE_HAZARDS: tuple[str, ...] = tuple(
     character for character in HAZARD_ALPHABET if character != "\n"
 )
@@ -41,7 +44,7 @@ _ITEMS: Final[SearchStrategy[str]] = st.one_of(
 
 @composite
 def link_cases(draw: st.DrawFn) -> SampleInput:
-    """Draw a small case of 1 to 6 clauses, each with 1 to 3 sentences."""
+    """Draw 1 to 6 clauses with headings, children, a duplicate id and a schedule."""
 
     clause_count = draw(st.integers(min_value=1, max_value=6))
     rows: list[dict[str, object]] = []
@@ -52,5 +55,28 @@ def link_cases(draw: st.DrawFn) -> SampleInput:
             item_count = draw(st.integers(min_value=1, max_value=4))
             items = [draw(_ITEMS) for _ in range(item_count)]
             sentences.append(" ".join(items))
-        rows.append({"id": str(number), "sentences": sentences})
+        if draw(st.booleans()):
+            heading = draw(st.sampled_from(HEADINGS))
+            rows.append({"id": str(number), "heading": heading, "sentences": [heading, *sentences]})
+        else:
+            rows.append({"id": str(number), "sentences": sentences})
+        if draw(st.booleans()):
+            rows.append(
+                {
+                    "id": f"{number}.1",
+                    "parent": str(number),
+                    "sentences": [" ".join(draw(_ITEMS) for _ in range(2))],
+                }
+            )
+    if draw(st.booleans()):
+        rows.append({"id": "1~2", "sentences": [draw(st.sampled_from(FRAGMENTS))]})
+    if draw(st.booleans()):
+        rows.append(
+            {
+                "id": "S1",
+                "number": "Schedule 1",
+                "heading": "Fees",
+                "sentences": ["Schedule 1 \u00b7 Fees", draw(st.sampled_from(FRAGMENTS))],
+            }
+        )
     return build_case(rows)
