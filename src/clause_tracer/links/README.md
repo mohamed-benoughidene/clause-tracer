@@ -26,11 +26,24 @@ none.
 `render_link_map(document: Document, clauses: tuple[Clause, ...], link_map: LinkMap) -> str`
 
 Returns the link map as tab-separated lines, joined by one newline and ending in
-one newline. The first line is the source, the second the counts, and each later
-line is one reference, term, override, outside document or undefined term. A text
-field replaces each tab and line break with one space. A dash (`-`) stands for no
-clause or no target. Raises `ValueError` when `build_index` refuses the clauses,
-with the same two messages as `map_links`. No side effects.
+one newline. Each line holds these fields, in this order:
+
+| Line | Fields after the first word |
+| --- | --- |
+| `source` | the source name, the number of characters of the text |
+| `counts` | `references n`, `terms n`, `overrides n`, `outside n`, `undefined n` |
+| `reference` | the clause that holds the source, the source span as `start-end`, the target (`-` when none), the source text |
+| `term` | the term, the clause that holds the definition, the definition span, `uses n` |
+| `override` | the clause id, the target (`-` when none), `overrides` (this clause wins) or `qualified` (the target qualifies this clause), the evidence span, the evidence text |
+| `outside` | the name, the clause that holds the evidence, the evidence span |
+| `undefined` | the clause that holds the span, the span, the text |
+
+The clause of a span is the clause that holds its start, or `-` when there is
+none. Every free-text field has each tab, carriage return and line break replaced
+by one space.
+
+Raises `ValueError` when `build_index` refuses the clauses, with the same two
+messages as `map_links`. No side effects.
 
 ### `SampleInput`, `dump_clause_fixture`, `load_clause_fixture`
 
