@@ -4,6 +4,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 import pytest
+from hypothesis import settings
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:
@@ -50,3 +51,7 @@ def check_golden(request: pytest.FixtureRequest) -> Callable[[Path, str], None]:
         )
 
     return check
+
+
+settings.register_profile("clause_tracer", deadline=None)
+settings.load_profile("clause_tracer")

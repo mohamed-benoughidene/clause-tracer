@@ -788,7 +788,7 @@ When this is done, `map_links` is the module's public call, `python -m clause_tr
   - **Rules:** S3, I11, [WRITING_DOCS.md](../../WRITING_DOCS.md).
   - **Depends on:** S3-M5-T12
 
-- [ ] **S3-M5-T15: One Hypothesis profile without a deadline**
+- [x] **S3-M5-T15: One Hypothesis profile without a deadline**
   - **Why:** `scripts/check.sh` failed once on the milestone 5 branch, from `src/clause_tracer/ingest/tests/test_clause_properties.py::test_clauses_cover_the_text`: the first call took 473 ms against the default deadline of 200 ms, and the repeat took 3 ms. The code under test had not changed, and two later runs passed. The same default deadline applies to 7 property tests in `ingest` and 23 in `core`, so any of them can fail a run in the same way and block CI. The `links` property tests already set `deadline=None`. The owner chose one shared profile on 21 Nov 2026, not an edit of each test.
   - **Build:** In the root `conftest.py`, add `from hypothesis import settings` after `import pytest`, and at the end of the file add `settings.register_profile("clause_tracer", deadline=None)` and `settings.load_profile("clause_tracer")`. Nothing else changes. Do not edit any property test; the `@settings(deadline=None)` lines in `links` stay.
   - **Files:** `conftest.py`, `tests/test_hypothesis_profile.py`.
