@@ -7,7 +7,7 @@ Each module has one purpose, a README with its input and output shapes, its own 
 | `core` | Pure rules and shapes: every shape, port, error and fake; label picking, playbook checks, output scans, the last check before drawing, auto-delete dates and the cost estimate (Spec 4.1, 5, 6.1 step 8, 6.2, 9). |
 | `ingest` | Read text, Markdown and pasted text; split into clauses and sentences (6.1 steps 1-2). Word and PDF come in stage 5. |
 | `privacy` | Find personal data, make placeholders (steps 3-4). |
-| `links` | Cross-references, defined terms, override clauses (step 5). |
+| `links` | Cross-references, defined terms, override clauses and documents that are not loaded, as one link map (step 5). |
 | `checking` | Match, extract, quote check, judge, explain, sort not-covered parts (steps 6a–7 and 9–11). Calls `core` to pick labels (step 8). |
 | `writing` | Rewrite a clause (step 12). |
 | `outputs` | The message and the report (steps 13-14). |

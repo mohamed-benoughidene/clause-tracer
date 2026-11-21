@@ -82,7 +82,7 @@ The product is named after its evidence trail, so the chain from an AI quote to 
 6. **Span to boxes.** Every non-generated character has a box inside its page.
 7. **End to end.** The last check before drawing agrees, by a different code path.
 
-**Tool: Hypothesis.** Use its built-in `ci` profile on every change, and a larger profile (2,000 examples) at night. The default text generator rarely produces the characters that break PDFs, so the tests use a custom "hazard" alphabet: ligatures, soft hyphens, curly quotes, zero-width characters, bidi controls and the `⟦` escape. Two traps to cover on purpose: folding can change a string's length (`ß` becomes `ss`), and offsets must count code points, not UTF-16 units. Every bug found becomes a committed `@example` (T6).
+**Tool: Hypothesis.** Use its built-in `ci` profile on every change, and a larger profile (2,000 examples) at night. The root `conftest.py` loads one profile, `clause_tracer`, on top of the profile Hypothesis has loaded (the `ci` profile in CI), with no deadline, so a slow first example fails neither a local run nor CI. The default text generator rarely produces the characters that break PDFs, so the tests use a custom "hazard" alphabet: ligatures, soft hyphens, curly quotes, zero-width characters, bidi controls and the `⟦` escape. Two traps to cover on purpose: folding can change a string's length (`ß` becomes `ss`), and offsets must count code points, not UTF-16 units. Every bug found becomes a committed `@example` (T6).
 
 **Pictures too.** Number tests built on a wrong formula pass happily. So a script writes test PDFs with known glyph positions (ligatures, two columns, headers and footers, rotated and cropped pages, white text, duplicate glyphs), and a visual test renders each highlighted page and compares it with a saved picture. To keep this stable: pin the renderer in `uv.lock`, turn anti-aliasing off, render in greyscale at a fixed scale, and compare only a mask of highlight-coloured pixels. Run it on Linux only. A saved picture is never updated in the same change as coordinate code without a person looking at it.
 
@@ -307,7 +307,7 @@ These are the project's own targets, anchored on a common industry guide (60% ac
 | No coverage measurement; no guard on owner tables | 1: closed 16 Nov 2026 |
 | No suite-wide socket block (`pytest-socket`) | 6, with the first adapters |
 | No nightly job (Hypothesis at 2,000 examples, file fuzzing) | 5, with the hostile-file fuzzing |
-| No samples or golden files in any module | 2 to 5, with each module: `ingest` closed 20 Nov 2026 |
+| No samples or golden files in any module | 2 to 5, with each module: `ingest` closed 20 Nov 2026, `links` closed 21 Nov 2026 |
 | No hostile-file fixtures or test PDFs | 5 (`ingest`) |
 | No storage, deletion or leak tests | 6 (storage and runner) |
 | No planted-entity set | 7 (Presidio adapter) |
