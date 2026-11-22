@@ -111,3 +111,11 @@ def test_keyword_values_are_not_phones() -> None:
         ("12-34-56", 10, 18, BANK),
         ("09876543", 38, 46, ID),
     ]
+
+
+def test_email_with_non_ascii_letters() -> None:
+    assert found("Contact bob@exämple.com now") == [("bob@exämple.com", 8, 23, EMAIL)]
+
+
+def test_email_with_an_underscore() -> None:
+    assert found("Mail john_smith@acme.com.") == [("john_smith@acme.com", 5, 24, EMAIL)]

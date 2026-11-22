@@ -202,3 +202,27 @@ def test_layer4_is_off() -> None:
         ("Brown", 14, 19),
         ("Brown", 29, 34),
     ]
+
+
+def test_non_ascii_surname_after_an_honorific() -> None:
+    assert found("Mr Müller signs.") == [
+        ("Mr Müller", 0, 9),
+        ("Müller", 3, 9),
+    ]
+
+
+def test_non_ascii_name_in_a_signature() -> None:
+    assert found("Signed by Élodie Dupont for the Client.") == [
+        ("Élodie", 10, 16),
+        ("Élodie Dupont", 10, 23),
+        ("Dupont", 17, 23),
+    ]
+
+
+def test_non_ascii_letter_does_not_cut_a_name() -> None:
+    assert found("Mrs Zoë Smith signs.") == [
+        ("Mrs Zoë Smith", 0, 13),
+        ("Zoë", 4, 7),
+        ("Zoë Smith", 4, 13),
+        ("Smith", 8, 13),
+    ]

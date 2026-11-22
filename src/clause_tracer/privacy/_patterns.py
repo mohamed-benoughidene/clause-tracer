@@ -12,7 +12,7 @@ SENTENCE_MARK_RE: Final[re.Pattern[str]] = re.compile(SENTENCE_MARK)
 HEADING_WORD: Final[str] = r"[^\W\d_][\w'’-]*"
 HEADING_WORD_RE: Final[re.Pattern[str]] = re.compile(HEADING_WORD)
 
-EMAIL: Final[str] = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+"
+EMAIL: Final[str] = r"[\w.%+-]+@[\w-]+(?:\.[\w-]+)+"
 EMAIL_RE: Final[re.Pattern[str]] = re.compile(EMAIL)
 PHONE: Final[str] = (
     r"(?<![\w+])(?:\+\d{1,3}[ -]?(?:\(0\))?\d[\d -]{6,14}\d"
@@ -55,6 +55,8 @@ CARD_CUE_WINDOW: Final[int] = 40
 CARD_FIRST_DIGITS: Final[str] = "3456"
 GB_VAT_WEIGHTS: Final[tuple[int, ...]] = (8, 7, 6, 5, 4, 3, 2, 10, 1)
 H: Final[str] = r"[ \t]"
+UPPER: Final[str] = "A-ZÀ-ÖØ-Þ"
+LOWER: Final[str] = "a-zß-öø-ÿ"
 WORD: Final[str] = r"[A-ZÀ-ÖØ-Þ](?:[^\W_]|['’&-])*"
 SUFFIX_WORDS: Final[str] = (
     r"(?:Ltd|Plc|PLC|LLC|LLP|LP|Inc|Corp|Corporation|Incorporated|GmbH|AG|SARL|SAS|BV|NV"
@@ -71,7 +73,7 @@ CONNECTOR: Final[str] = (
 )
 COMPANY: Final[str] = rf"(?<![\w]){WORD}(?:{H}+{CONNECTOR}){{0,5}}{H}+{SUFFIX}"
 COMPANY_RE: Final[re.Pattern[str]] = re.compile(COMPANY)
-CAP: Final[str] = r"(?:[A-Z][a-z'’-]+|UK|USA|UAE)"
+CAP: Final[str] = rf"(?:[{UPPER}][{LOWER}'’-]+|UK|USA|UAE)"
 STREET_PLAIN: Final[str] = r"(?:Street|St|Road|Rd|Avenue|Ave|Lane|Terrace|Gardens|Boulevard)"
 STREET_AMBIG: Final[str] = r"(?:Way|Place|Court|Row|Hill|Close|Drive|Square)"
 LEAD_WORD: Final[str] = r"(?:Rue|Avenue|Boulevard|Via|Calle|Strasse|Chemin|Allée)"
@@ -121,12 +123,13 @@ ABBREVIATION_END: Final[str] = r"\b(?:St|Rd|Ave|Dr|Ln|Ct|Sq|Mt)$"
 ABBREVIATION_END_RE: Final[re.Pattern[str]] = re.compile(ABBREVIATION_END)
 PARTICLE: Final[str] = r"(?:van|von|der|den|de|la|le|da|di|del|bin|ibn|bint|ben|ould|dos|du|al|el)"
 TOK: Final[str] = (
-    r"(?:[A-Z](?:['’][A-Z])?[a-z]+(?:[A-Z][a-z]+)*(?:-[A-Z]?[a-z]+)*|(?:al|el)-[A-Z][a-z]+)"
+    rf"(?:[{UPPER}](?:['’][{UPPER}])?[{LOWER}]+(?:[{UPPER}][{LOWER}]+)*(?:-[{UPPER}]?[{LOWER}]+)*"
+    rf"|(?:al|el)-[{UPPER}][{LOWER}]+)"
 )
-INIT: Final[str] = r"(?:[A-Z]\.)"
+INIT: Final[str] = rf"(?:[{UPPER}]\.)"
 NAME_RUN: Final[str] = rf"{TOK}(?:{H}+(?:{INIT}{H}+|{PARTICLE}{H}+)*{TOK}){{1,3}}"
 ONE_OR_TWO: Final[str] = rf"{TOK}(?:{H}+(?:{INIT}{H}+|{PARTICLE}{H}+)*{TOK})?"
-CAPS_TOK: Final[str] = r"[A-Z]{2,}(?:['’-][A-Z]+)*"
+CAPS_TOK: Final[str] = rf"[{UPPER}]{{2,}}(?:['’-][{UPPER}]+)*"
 CAPS_RUN: Final[str] = rf"{CAPS_TOK}(?:{H}+{CAPS_TOK}){{1,2}}"
 CAPS_ONE_OR_TWO: Final[str] = rf"{CAPS_TOK}(?:{H}+{CAPS_TOK})?"
 TITLE_WORDS: Final[str] = (

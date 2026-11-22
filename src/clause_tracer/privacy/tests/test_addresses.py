@@ -134,3 +134,7 @@ def test_address_chain_over_120_characters_keeps_the_nearest_segments() -> None:
 
 def test_nearest_segment_over_120_characters_gives_the_postcode_alone() -> None:
     assert texts("Mail 1 Aaaa, " + "Bbbb " * 25 + "Leeds LS1 4AB") == ["LS1 4AB"]
+
+
+def test_non_ascii_capital_in_a_street() -> None:
+    assert spans("5 Müller Street, Köln") == [(0, 21)]

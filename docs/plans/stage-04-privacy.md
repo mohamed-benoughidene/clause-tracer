@@ -932,7 +932,7 @@ When this is done, `privacy` finds typed party details with their variants, emai
   - **Rules:** T1 (pure functions), T11 (the owner's row is not edited; the six values are the planner's, to confirm).
   - **Depends on:** S4-M2-T5
 
-- [ ] **S4-M2-T14: Non-ASCII letters in person names, street words and emails**
+- [x] **S4-M2-T14: Non-ASCII letters in person names, street words and emails**
   - **Build:** The M2 code review of 22 Nov 2026 found three places that still read only ASCII letters, the same cause as S4-M2-T13: `Mrs Zoë Smith signs.` gave the span `Mrs Zo` (cut mid-word, so `ë Smith` stayed readable), `Mr Müller signs.` gave nothing, `5 Müller Street, Köln` gave no address, and `bob@exämple.com` gave nothing. `john_smith@acme.com` gave only `smith@acme.com`. In `src/clause_tracer/privacy/_patterns.py` make exactly these five changes and no other:
     1. Replace the `EMAIL` line with:
        ```python
