@@ -794,7 +794,7 @@ When this is done, `privacy` finds typed party details with their variants, emai
   - **Rules:** Constitution T11, Spec 4.2 (the kept place), question 14.
   - **Depends on:** None
 
-- [ ] **S4-M2-T12: Bare identifiers: NINO, card, GB VAT, company prefix**
+- [x] **S4-M2-T12: Bare identifiers: NINO, card, GB VAT, company prefix**
   - **Build:** The owner decided on 22 Nov 2026 (question 24) that stage 4 also finds four identifiers that need no keyword. Each covers the whole match (there is no keyword to leave out, so the whole identifier is the value), has the source `PATTERN`, and is added to `find_patterns` before `unique_sorted`. A UK National Insurance number (NINO), a GB VAT number and a UK company number with a prefix give kind `ID`. A card number gives kind `BANK` (Spec 4.2, "bank numbers"; question 26 asks the owner to confirm it). A pattern that a checksum or a fixed prefix already makes strong has no cue gate (owner decision of 22 Nov 2026). Only the card number has a gate (below).
     In `src/clause_tracer/privacy/_patterns.py`, after `IBAN`, add these constants. `NINO`, `GB_VAT`, `COMPANY_PREFIX`, `CARD` and `CARD_CUE` are patterns: each also gets a `_RE` compiled as the rules say. `CARD_CUE_WINDOW`, `CARD_FIRST_DIGITS` and `GB_VAT_WEIGHTS` are plain values and get none:
     ```python

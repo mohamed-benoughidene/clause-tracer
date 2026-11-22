@@ -11,9 +11,17 @@ from typing import Final
 from clause_tracer.core import PiiSource, PiiSuggestion, PlaceholderKind, Span
 from clause_tracer.privacy._patterns import (
     ACCOUNT_NUMBER_RE,
+    CARD_CUE_RE,
+    CARD_CUE_WINDOW,
+    CARD_FIRST_DIGITS,
+    CARD_RE,
+    COMPANY_PREFIX_RE,
     EMAIL_RE,
+    GB_VAT_RE,
+    GB_VAT_WEIGHTS,
     IBAN_RE,
     ID_KEYWORD_RE,
+    NINO_RE,
     PHONE_RE,
     SORT_CODE_RE,
 )
@@ -48,6 +56,53 @@ def iban_is_valid(candidate: str) -> bool:
     return int(digits) % 97 == 1
 
 
+def luhn_is_valid(digits: str) -> bool:
+    """Say whether a string of digits passes the Luhn check."""
+
+    if not digits or not digits.isdecimal():
+        return False
+    total = 0
+    for index, character in enumerate(reversed(digits)):
+        value = int(character)
+        if index % 2 == 1:
+            value *= 2
+            if value > 9:
+                value -= 9
+        total += value
+    return total % 10 == 0
+
+
+def gb_vat_is_valid(candidate: str) -> bool:
+    """Say whether a candidate GB VAT number passes its checksum."""
+
+    digits = "".join(character for character in candidate if character.isdecimal())
+    if len(digits) not in (9, 12):
+        return False
+    weighted = zip(GB_VAT_WEIGHTS, digits[:9], strict=True)
+    remainder = sum(weight * int(digit) for weight, digit in weighted) % 97
+    has_high_start = int(digits[:3]) >= 100
+    return remainder == 0 or (has_high_start and remainder in (42, 55))
+
+
+def has_card_cue(text: str, start: int) -> bool:
+    """Say whether a card cue word lies in the 40 characters before `start`."""
+
+    return CARD_CUE_RE.search(text, max(0, start - CARD_CUE_WINDOW), start) is not None
+
+
+def card_is_valid(text: str, match: re.Match[str]) -> bool:
+    """Say whether a card candidate passes the length, Luhn and gate rules."""
+
+    digits = "".join(character for character in match.group() if character.isdecimal())
+    has_card_length = 13 <= len(digits) <= 19
+    has_issuer_digit = digits[0] in CARD_FIRST_DIGITS
+    return (
+        has_card_length
+        and luhn_is_valid(digits)
+        and (has_issuer_digit or has_card_cue(text, match.start()))
+    )
+
+
 def find_patterns(text: str) -> tuple[PiiSuggestion, ...]:
     """Find emails, phones and keyword-gated ID and bank values.
 
@@ -70,6 +125,40 @@ def find_patterns(text: str) -> tuple[PiiSuggestion, ...]:
             )
     for match in IBAN_RE.finditer(text):
         if iban_is_valid(match.group()):
+            suggestions.append(
+                PiiSuggestion(
+                    span=Span(start=match.start(), end=match.end()),
+                    kind=PlaceholderKind.BANK,
+                    source=PiiSource.PATTERN,
+                )
+            )
+    for match in NINO_RE.finditer(text):
+        suggestions.append(
+            PiiSuggestion(
+                span=Span(start=match.start(), end=match.end()),
+                kind=PlaceholderKind.ID,
+                source=PiiSource.PATTERN,
+            )
+        )
+    for match in COMPANY_PREFIX_RE.finditer(text):
+        suggestions.append(
+            PiiSuggestion(
+                span=Span(start=match.start(), end=match.end()),
+                kind=PlaceholderKind.ID,
+                source=PiiSource.PATTERN,
+            )
+        )
+    for match in GB_VAT_RE.finditer(text):
+        if gb_vat_is_valid(match.group()):
+            suggestions.append(
+                PiiSuggestion(
+                    span=Span(start=match.start(), end=match.end()),
+                    kind=PlaceholderKind.ID,
+                    source=PiiSource.PATTERN,
+                )
+            )
+    for match in CARD_RE.finditer(text):
+        if card_is_valid(text, match):
             suggestions.append(
                 PiiSuggestion(
                     span=Span(start=match.start(), end=match.end()),

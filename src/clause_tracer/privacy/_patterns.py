@@ -36,6 +36,24 @@ IBAN: Final[str] = (
     r"(?<![A-Za-z0-9])[A-Z]{2}\d{2}(?:[ ]?[A-Z0-9]{4}){2,7}(?:[ ]?[A-Z0-9]{1,3})?(?![A-Za-z0-9])"
 )
 IBAN_RE: Final[re.Pattern[str]] = re.compile(IBAN)
+NINO: Final[str] = (
+    r"\b(?!BG|GB|NK|KN|NT|TN|ZZ)[A-CEGHJ-PR-TW-Z][A-CEGHJ-NPR-TW-Z]"
+    r"(?:[ ]?\d{2}){3}[ ]?[A-D]\b"
+)
+NINO_RE: Final[re.Pattern[str]] = re.compile(NINO)
+GB_VAT: Final[str] = r"(?<![A-Za-z0-9])GB[ ]?\d{3}[ ]?\d{4}[ ]?\d{2}(?:[ ]?\d{3})?(?![A-Za-z0-9])"
+GB_VAT_RE: Final[re.Pattern[str]] = re.compile(GB_VAT)
+COMPANY_PREFIX: Final[str] = (
+    r"(?<![A-Za-z0-9])(?:SC|NI|OC|SO|NC|LP|SL|NL|FC|R0|IP|SP|RS|CE|NP)\d{6}(?![A-Za-z0-9])"
+)
+COMPANY_PREFIX_RE: Final[re.Pattern[str]] = re.compile(COMPANY_PREFIX)
+CARD: Final[str] = r"(?<![\d-])\d{4}(?:[ -]?\d{4}){2}[ -]?\d{1,7}(?![\d-])"
+CARD_RE: Final[re.Pattern[str]] = re.compile(CARD)
+CARD_CUE: Final[str] = r"(?i:\b(?:card|visa|mastercard|amex)\b)"
+CARD_CUE_RE: Final[re.Pattern[str]] = re.compile(CARD_CUE)
+CARD_CUE_WINDOW: Final[int] = 40
+CARD_FIRST_DIGITS: Final[str] = "3456"
+GB_VAT_WEIGHTS: Final[tuple[int, ...]] = (8, 7, 6, 5, 4, 3, 2, 10, 1)
 H: Final[str] = r"[ \t]"
 WORD: Final[str] = r"[A-Z][A-Za-z0-9'’&-]*"
 SUFFIX_WORDS: Final[str] = (
