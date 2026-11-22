@@ -4,12 +4,13 @@ The detector's output is checked once, where it enters (D4, I9). Every later
 step keeps the rule that a flagged span is cut and never dropped whole.
 """
 
-from bisect import bisect_left
+from bisect import bisect_left, bisect_right
 from collections.abc import Iterable, Mapping, Sequence
 from types import MappingProxyType
 from typing import Final
 
 from clause_tracer.core import (
+    Clause,
     DefinedTerm,
     PiiSource,
     PiiSuggestion,
@@ -21,6 +22,7 @@ from clause_tracer.privacy._spans import (
     overlaps,
     subtract_spans,
     trimmed_span,
+    unique_sorted,
 )
 from clause_tracer.privacy.names import (
     EXTENDED_COMPANY_SUFFIXES,
@@ -283,3 +285,37 @@ def resolve_overlaps(text: str, suggestions: Iterable[PiiSuggestion]) -> tuple[P
             kept.insert(position, added)
             starts.insert(position, trimmed.start)
     return tuple(sorted(kept, key=lambda item: (item.span.start, item.span.end)))
+
+
+def sentence_starts(clauses: Sequence[Clause]) -> tuple[int, ...]:
+    """The sorted, distinct start of every sentence in every clause."""
+
+    return tuple(
+        sorted({sentence.span.start for clause in clauses for sentence in clause.sentences})
+    )
+
+
+def split_at_sentences(
+    text: str,
+    suggestions: Iterable[PiiSuggestion],
+    starts: Sequence[int],
+) -> tuple[PiiSuggestion, ...]:
+    """Cut every suggestion at each sentence start strictly inside its span."""
+
+    pieces: list[PiiSuggestion] = []
+    for suggestion in suggestions:
+        span = suggestion.span
+        index = bisect_right(starts, span.start)
+        cuts = [span.start]
+        while index < len(starts) and starts[index] < span.end:
+            cuts.append(starts[index])
+            index += 1
+        cuts.append(span.end)
+        for start, end in zip(cuts, cuts[1:], strict=False):
+            trimmed = trimmed_span(text, Span(start=start, end=end))
+            if trimmed is None:
+                continue
+            pieces.append(
+                PiiSuggestion(span=trimmed, kind=suggestion.kind, source=suggestion.source)
+            )
+    return unique_sorted(pieces)
