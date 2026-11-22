@@ -6,6 +6,7 @@ is the job of `resolve_overlaps` (S4-M3-T4).
 """
 
 import re
+from collections.abc import Callable
 from typing import Final
 
 from clause_tracer.core import PiiSource, PiiSuggestion, PlaceholderKind, Span
@@ -33,7 +34,13 @@ _PATTERNS: Final[tuple[tuple[re.Pattern[str], PlaceholderKind], ...]] = (
     (ID_KEYWORD_RE, PlaceholderKind.ID),
     (SORT_CODE_RE, PlaceholderKind.BANK),
     (ACCOUNT_NUMBER_RE, PlaceholderKind.BANK),
+    (NINO_RE, PlaceholderKind.ID),
+    (COMPANY_PREFIX_RE, PlaceholderKind.ID),
 )
+
+
+def _suggestion(start: int, end: int, kind: PlaceholderKind) -> PiiSuggestion:
+    return PiiSuggestion(span=Span(start=start, end=end), kind=kind, source=PiiSource.PATTERN)
 
 
 def iban_is_valid(candidate: str) -> bool:
@@ -103,6 +110,15 @@ def card_is_valid(text: str, match: re.Match[str]) -> bool:
     )
 
 
+_CHECKED: Final[
+    tuple[tuple[re.Pattern[str], PlaceholderKind, Callable[[str, re.Match[str]], bool]], ...]
+] = (
+    (IBAN_RE, PlaceholderKind.BANK, lambda text, match: iban_is_valid(match.group())),
+    (GB_VAT_RE, PlaceholderKind.ID, lambda text, match: gb_vat_is_valid(match.group())),
+    (CARD_RE, PlaceholderKind.BANK, card_is_valid),
+)
+
+
 def find_patterns(text: str) -> tuple[PiiSuggestion, ...]:
     """Find emails, phones and keyword-gated ID and bank values.
 
@@ -116,54 +132,9 @@ def find_patterns(text: str) -> tuple[PiiSuggestion, ...]:
     for pattern, kind in _PATTERNS:
         for match in pattern.finditer(text):
             start, end = match.span("v") if "v" in pattern.groupindex else match.span()
-            suggestions.append(
-                PiiSuggestion(
-                    span=Span(start=start, end=end),
-                    kind=kind,
-                    source=PiiSource.PATTERN,
-                )
-            )
-    for match in IBAN_RE.finditer(text):
-        if iban_is_valid(match.group()):
-            suggestions.append(
-                PiiSuggestion(
-                    span=Span(start=match.start(), end=match.end()),
-                    kind=PlaceholderKind.BANK,
-                    source=PiiSource.PATTERN,
-                )
-            )
-    for match in NINO_RE.finditer(text):
-        suggestions.append(
-            PiiSuggestion(
-                span=Span(start=match.start(), end=match.end()),
-                kind=PlaceholderKind.ID,
-                source=PiiSource.PATTERN,
-            )
-        )
-    for match in COMPANY_PREFIX_RE.finditer(text):
-        suggestions.append(
-            PiiSuggestion(
-                span=Span(start=match.start(), end=match.end()),
-                kind=PlaceholderKind.ID,
-                source=PiiSource.PATTERN,
-            )
-        )
-    for match in GB_VAT_RE.finditer(text):
-        if gb_vat_is_valid(match.group()):
-            suggestions.append(
-                PiiSuggestion(
-                    span=Span(start=match.start(), end=match.end()),
-                    kind=PlaceholderKind.ID,
-                    source=PiiSource.PATTERN,
-                )
-            )
-    for match in CARD_RE.finditer(text):
-        if card_is_valid(text, match):
-            suggestions.append(
-                PiiSuggestion(
-                    span=Span(start=match.start(), end=match.end()),
-                    kind=PlaceholderKind.BANK,
-                    source=PiiSource.PATTERN,
-                )
-            )
+            suggestions.append(_suggestion(start, end, kind))
+    for pattern, kind, is_valid in _CHECKED:
+        for match in pattern.finditer(text):
+            if is_valid(text, match):
+                suggestions.append(_suggestion(match.start(), match.end(), kind))
     return unique_sorted(suggestions)

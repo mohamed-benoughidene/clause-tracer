@@ -1,7 +1,8 @@
 """People by honorific, signature and job title (S4-M2-T7)."""
 
-from clause_tracer.core import PiiSource, PlaceholderKind
-from clause_tracer.privacy.people import find_people
+from clause_tracer.core import PiiSource, PlaceholderKind, fold_for_matching
+from clause_tracer.privacy.companies import COMPANY_ROLE_WORDS
+from clause_tracer.privacy.people import LEGAL_STOP_WORDS, find_people
 
 
 def found(text: str) -> list[tuple[str, int, int]]:
@@ -230,3 +231,14 @@ def test_non_ascii_letter_does_not_cut_a_name() -> None:
 
 def test_one_word_before_a_title_is_not_a_name() -> None:
     assert found("Signed by Smith Director today.") == []
+
+
+def test_a_given_key_gives_the_same_result() -> None:
+    text = "Ms Jones at home. Jones left."
+
+    assert find_people(text, key=fold_for_matching(text)) == find_people(text)
+
+
+def test_legal_stop_words_hold_every_role_word() -> None:
+    assert COMPANY_ROLE_WORDS <= LEGAL_STOP_WORDS
+    assert len(LEGAL_STOP_WORDS) == 51

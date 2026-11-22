@@ -981,7 +981,7 @@ When this is done, `privacy` finds typed party details with their variants, emai
   - **Rules:** T11 (the values are the planner's, to confirm).
   - **Depends on:** S4-M2-T14
 
-- [ ] **S4-M2-T16: Clean-up of the finders (the behaviour does not change, except for one underscore)**
+- [x] **S4-M2-T16: Clean-up of the finders (the behaviour does not change, except for one underscore)**
   - **Build:** The M2 code review of 22 Nov 2026 found six places that are harder to read than they need to be. Make exactly these changes. Every test that exists before this task must pass with no edit.
     1. `party.py`, `_short_names`: replace the `if (...)` condition with named booleans:
        ```python

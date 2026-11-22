@@ -9,6 +9,7 @@ import re
 from typing import Final
 
 from clause_tracer.core import (
+    MatchKey,
     PiiSource,
     PiiSuggestion,
     PlaceholderKind,
@@ -24,7 +25,7 @@ from clause_tracer.privacy._patterns import (
     SIGNED_BY_RE,
 )
 from clause_tracer.privacy._spans import unique_sorted
-from clause_tracer.privacy.companies import COMPANY_LEAD_WORDS
+from clause_tracer.privacy.companies import COMPANY_LEAD_WORDS, COMPANY_ROLE_WORDS
 from clause_tracer.privacy.names import (
     COMMON_WORD_NAMES,
     NAME_STOP_WORDS,
@@ -33,59 +34,41 @@ from clause_tracer.privacy.names import (
     name_forms,
 )
 
-LEGAL_STOP_WORDS: Final[frozenset[str]] = frozenset(
+LEGAL_STOP_WORDS: Final[frozenset[str]] = COMPANY_ROLE_WORDS | frozenset(
     {
         "agreement",
-        "party",
-        "parties",
-        "schedule",
-        "clause",
-        "section",
         "annex",
         "appendix",
-        "exhibit",
-        "services",
-        "service",
-        "client",
-        "customer",
-        "supplier",
-        "contractor",
-        "consultant",
-        "developer",
-        "agency",
-        "company",
-        "employer",
-        "employee",
-        "licensor",
-        "licensee",
-        "buyer",
-        "seller",
-        "landlord",
-        "tenant",
         "charges",
-        "deliverables",
-        "milestone",
-        "effective",
-        "date",
-        "term",
+        "clause",
         "confidential",
+        "date",
+        "deliverables",
+        "director",
+        "effective",
+        "exhibit",
+        "fees",
+        "force",
+        "governing",
         "information",
         "intellectual",
-        "property",
-        "governing",
         "law",
-        "force",
         "majeure",
-        "termination",
-        "payment",
-        "fees",
+        "manager",
+        "milestone",
         "notice",
         "notices",
-        "director",
-        "manager",
-        "partner",
         "owner",
+        "partner",
+        "payment",
+        "property",
+        "schedule",
         "secretary",
+        "section",
+        "service",
+        "services",
+        "term",
+        "termination",
     }
 )
 TRAILING_TITLE_WORDS: Final[frozenset[str]] = frozenset(
@@ -138,8 +121,6 @@ def _clean_seed(match: re.Match[str], honorific: bool) -> tuple[int, int, str] |
         tokens = tokens[:-1]
     if not tokens:
         return None
-    if all(key(token) in LEGAL_STOP_WORDS for token in tokens):
-        return None
     if not honorific and len(tokens) < 2:
         return None
     if is_company_seed(" ".join(token[2] for token in tokens)):
@@ -148,7 +129,7 @@ def _clean_seed(match: re.Match[str], honorific: bool) -> tuple[int, int, str] |
     return (match.start() if honorific else first), last, match.string[first:last]
 
 
-def find_people(text: str) -> tuple[PiiSuggestion, ...]:
+def find_people(text: str, *, key: MatchKey | None = None) -> tuple[PiiSuggestion, ...]:
     """Find people by honorific, signature and job title, with their variants.
 
     Input:   the contract text.
@@ -157,7 +138,7 @@ def find_people(text: str) -> tuple[PiiSuggestion, ...]:
     Effects: none (T1).
     """
 
-    key = fold_for_matching(text)
+    key = fold_for_matching(text) if key is None else key
     suggestions: list[PiiSuggestion] = []
     seeds: list[str] = []
     seen: set[str] = set()

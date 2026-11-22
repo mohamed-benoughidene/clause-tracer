@@ -151,3 +151,7 @@ def test_lower_case_non_ascii_start_is_not_a_name() -> None:
 
 def test_capital_outside_latin_1_is_a_known_limit() -> None:
     assert found("Łukasz Ltd") == []
+
+
+def test_underscore_inside_a_word() -> None:
+    assert found("Foo_Bar Ltd pays.") == [("Foo_Bar Ltd", 0, 11)]

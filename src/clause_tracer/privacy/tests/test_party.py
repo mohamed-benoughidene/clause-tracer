@@ -8,6 +8,7 @@ from clause_tracer.core import (
     PiiSource,
     PlaceholderKind,
     Span,
+    fold_for_matching,
 )
 from clause_tracer.privacy.party import find_party_details
 
@@ -165,3 +166,11 @@ def test_hard_list_unchanged_will_price() -> None:
 
 def test_a_company_name_that_is_only_a_suffix_gives_nothing() -> None:
     assert spans("Ltd pays.", (Party(name="Ltd", address=None, yours=False),)) == []
+
+
+def test_a_given_key_gives_the_same_result() -> None:
+    text = "Brightline Studio Ltd and brightline studio limited."
+
+    assert find_party_details(
+        text, (BRIGHTLINE,), (), key=fold_for_matching(text)
+    ) == find_party_details(text, (BRIGHTLINE,), ())

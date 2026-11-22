@@ -57,7 +57,7 @@ GB_VAT_WEIGHTS: Final[tuple[int, ...]] = (8, 7, 6, 5, 4, 3, 2, 10, 1)
 H: Final[str] = r"[ \t]"
 UPPER: Final[str] = "A-ZÀ-ÖØ-Þ"
 LOWER: Final[str] = "a-zß-öø-ÿ"
-WORD: Final[str] = r"[A-ZÀ-ÖØ-Þ](?:[^\W_]|['’&-])*"
+WORD: Final[str] = rf"[{UPPER}][\w'’&-]*"
 SUFFIX_WORDS: Final[str] = (
     r"(?:Ltd|Plc|PLC|LLC|LLP|LP|Inc|Corp|Corporation|Incorporated|GmbH|AG|SARL|SAS|BV|NV"
     r"|Pty|SRL|SpA|Oy|KG|UG|Pte|Co)"

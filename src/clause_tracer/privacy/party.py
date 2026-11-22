@@ -10,6 +10,7 @@ from collections.abc import Sequence
 
 from clause_tracer.core import (
     DefinedTerm,
+    MatchKey,
     Party,
     PiiSource,
     PiiSuggestion,
@@ -33,6 +34,8 @@ def find_party_details(
     text: str,
     parties: Sequence[Party],
     terms: Sequence[DefinedTerm],
+    *,
+    key: MatchKey | None = None,
 ) -> tuple[PiiSuggestion, ...]:
     """Find every copy of each typed party's name, variants and address.
 
@@ -42,7 +45,7 @@ def find_party_details(
     Effects: none (T1).
     """
 
-    key = fold_for_matching(text)
+    key = fold_for_matching(text) if key is None else key
     suggestions: list[PiiSuggestion] = []
     for party in parties:
         if not party.name.strip():
@@ -96,11 +99,9 @@ def _short_names(
         words.discard("")
         folded_term = fold_text(term.term)
         defining_text = fold_text(text[term.definition.start : term.definition.end])
-        if (
-            words
-            and words <= core_words
-            and folded_term not in forms
-            and any(form in defining_text for form in full_forms)
-        ):
+        words_belong_to_party = bool(words) and words <= core_words
+        is_a_new_form = folded_term not in forms
+        defining_sentence_names_party = any(form in defining_text for form in full_forms)
+        if words_belong_to_party and is_a_new_form and defining_sentence_names_party:
             short_names.append(folded_term)
     return short_names
