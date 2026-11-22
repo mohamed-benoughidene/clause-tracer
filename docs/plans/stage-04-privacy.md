@@ -3,9 +3,9 @@
 | | |
 | --- | --- |
 | Stage | 4, `privacy` |
-| Status | Draft |
+| Status | Accepted |
 | Branch | One branch for each milestone, cut from `main`: `feat/privacy-m1-foundations`, `feat/privacy-m2-code-finders`, `feat/privacy-m3-resolve-and-group`, `feat/privacy-m4-placeholder-text`, `feat/privacy-m5-public-calls-and-sample`, and `docs/close-stage-4-privacy` for the close of the stage. See [the README](README.md), "Branches and pull requests" |
-| Accepted on | Not yet |
+| Accepted on | 22 Nov 2026 |
 | Stage outline | [System design section 15.4](../system-design.md#154-stage-4-privacy-code-finders-and-placeholders) |
 
 ## 1. Goal
