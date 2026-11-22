@@ -262,7 +262,7 @@ When this is done, `privacy` has a coverage floor, five empty owner tables, a co
   - **Rules:** T1, B2 (own helpers; no import from `links`), system design 4.2 (the span is found through the map).
   - **Depends on:** None
 
-- [ ] **S4-M1-T7: Close the error-path test gaps of the fixture loader (added after the M1 review)**
+- [x] **S4-M1-T7: Close the error-path test gaps of the fixture loader (added after the M1 review)**
   - **Why:** The M1 code review found eight lines of `sample_input.py` with no test (the wrong-type paths and the unknown file kind), an unused test helper, and a test import from `clause_tracer.core.link_map` where every other core name comes from `clause_tracer.core`. The owner chose on 22 Nov 2026 to clean up. This task changes no behaviour and no message of `sample_input.py`.
   - **Build:** In `test_sample_input.py` only: delete the unused helper `_sentence_rows`, and import `DefinedTerm` from `clause_tracer.core`. Do not edit `sample_input.py`.
   - **Files:** `src/clause_tracer/privacy/tests/test_sample_input.py`.

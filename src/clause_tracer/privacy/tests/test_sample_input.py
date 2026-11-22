@@ -9,6 +9,7 @@ import pytest
 from clause_tracer.core import (
     Clause,
     ClauseId,
+    DefinedTerm,
     Document,
     FileKind,
     InputWarning,
@@ -19,7 +20,6 @@ from clause_tracer.core import (
     SourceFile,
     Span,
 )
-from clause_tracer.core.link_map import DefinedTerm
 from clause_tracer.privacy.sample_input import (
     PrivacyInput,
     dump_privacy_fixture,
@@ -104,16 +104,6 @@ def _clause_rows(data: dict[str, object]) -> list[dict[str, object]]:
     for row in clauses:
         assert isinstance(row, dict)
     return cast(list[dict[str, object]], clauses)
-
-
-def _sentence_rows(row: dict[str, object]) -> list[dict[str, object]]:
-    sentences = row["sentences"]
-    assert isinstance(sentences, list)
-    rows: list[dict[str, object]] = []
-    for sentence in sentences:
-        assert isinstance(sentence, dict)
-        rows.append(sentence)
-    return rows
 
 
 def _party_rows(data: dict[str, object]) -> list[dict[str, object]]:
@@ -422,3 +412,62 @@ def test_dump_refuses_what_load_refuses() -> None:
         dump_privacy_fixture(replace(case, clauses=(bad,)))
 
     assert _message(error) == "privacy sample: level of 1 is not 1 or more"
+
+
+def test_top_level_is_not_an_object() -> None:
+    with pytest.raises(ValueError, match="privacy sample: top level is not an object"):
+        load_privacy_fixture("[]")
+
+
+def test_document_is_not_an_object() -> None:
+    data = cast(dict[str, object], json.loads(dump_privacy_fixture(_case())))
+    data["document"] = []
+
+    with pytest.raises(ValueError, match="privacy sample: document has the wrong type"):
+        load_privacy_fixture(json.dumps(data))
+
+
+def test_clauses_is_not_a_list() -> None:
+    data = cast(dict[str, object], json.loads(dump_privacy_fixture(_case())))
+    data["clauses"] = "x"
+
+    with pytest.raises(ValueError, match="privacy sample: clauses has the wrong type"):
+        load_privacy_fixture(json.dumps(data))
+
+
+def test_clause_id_has_the_wrong_type() -> None:
+    data = cast(dict[str, object], json.loads(dump_privacy_fixture(_case())))
+    _clause_rows(data)[0]["id"] = 5
+
+    with pytest.raises(ValueError, match="privacy sample: id has the wrong type"):
+        load_privacy_fixture(json.dumps(data))
+
+
+def test_party_yours_has_the_wrong_type() -> None:
+    data = cast(dict[str, object], json.loads(dump_privacy_fixture(_case())))
+    _party_rows(data)[0]["yours"] = "yes"
+
+    with pytest.raises(ValueError, match="privacy sample: yours has the wrong type"):
+        load_privacy_fixture(json.dumps(data))
+
+
+def test_warning_page_has_the_wrong_type() -> None:
+    data = cast(dict[str, object], json.loads(dump_privacy_fixture(_case())))
+    document = _document_row(data)
+    document["warnings"] = [{"code": "not_english", "page": None}]
+    warnings = document["warnings"]
+    assert isinstance(warnings, list)
+    warning = warnings[0]
+    assert isinstance(warning, dict)
+    warning["page"] = "1"
+
+    with pytest.raises(ValueError, match="privacy sample: page has the wrong type"):
+        load_privacy_fixture(json.dumps(data))
+
+
+def test_source_kind_is_unknown() -> None:
+    data = cast(dict[str, object], json.loads(dump_privacy_fixture(_case())))
+    _source_row(data)["kind"] = "bogus"
+
+    with pytest.raises(ValueError, match="privacy sample: kind bogus is not a text kind"):
+        load_privacy_fixture(json.dumps(data))
