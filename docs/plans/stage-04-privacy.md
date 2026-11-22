@@ -3,7 +3,7 @@
 | | |
 | --- | --- |
 | Stage | 4, `privacy` |
-| Status | Accepted |
+| Status | In progress |
 | Branch | One branch for each milestone, cut from `main`: `feat/privacy-m1-foundations`, `feat/privacy-m2-code-finders`, `feat/privacy-m3-resolve-and-group`, `feat/privacy-m4-placeholder-text`, `feat/privacy-m5-public-calls-and-sample`, and `docs/close-stage-4-privacy` for the close of the stage. See [the README](README.md), "Branches and pull requests" |
 | Accepted on | 22 Nov 2026 |
 | Stage outline | [System design section 15.4](../system-design.md#154-stage-4-privacy-code-finders-and-placeholders) |
@@ -96,7 +96,7 @@ When this is done, `privacy` has a coverage floor, five empty owner tables, a co
   - **Depends on:** None
 
 - [x] **S4-M1-T2: Create the five empty owner tables**
-  - **Build:** The five owner tables were committed, filled, together with this plan (commit `5bbc2b4`). When a file already exists, do not create or edit it: tick this task only, in a commit that holds the plan tick and no table file. (Built that way in M1.) Otherwise create these files, each holding exactly two lines: the `HEADER` line of `clause_tracer.core.tests.owner_tables`, then `# Format: docs/plans/stage-04-privacy.md, task <id>.` with the id of the owner task that fills it: `src/clause_tracer/privacy/tests/tables/finders.toml` (S4-M2-T8), `src/clause_tracer/privacy/tests/tables/party_details.toml` (S4-M2-T9), `src/clause_tracer/privacy/tests/tables/pipeline.toml` (S4-M3-T8), `src/clause_tracer/privacy/tests/tables/entities.toml` (S4-M3-T9), `src/clause_tracer/privacy/tests/tables/sample.toml` (S4-M5-T5). This commit holds these five files and the plan tick, and no code.
+  - **Build:** The five owner tables were committed, filled, together with this plan (commit `5bbc2b4`). When a file already exists, do not create or edit it: tick this task only, in a commit that holds the plan tick and no table file. (Built that way in M1.) The five committed tables lacked the `HEADER` line, so `load_table` refused them; the owner added it as line 1 of each, in commit `99a76f0` (22 Nov 2026), a commit of the five tables and no code. Otherwise create these files, each holding exactly two lines: the `HEADER` line of `clause_tracer.core.tests.owner_tables`, then `# Format: docs/plans/stage-04-privacy.md, task <id>.` with the id of the owner task that fills it: `src/clause_tracer/privacy/tests/tables/finders.toml` (S4-M2-T8), `src/clause_tracer/privacy/tests/tables/party_details.toml` (S4-M2-T9), `src/clause_tracer/privacy/tests/tables/pipeline.toml` (S4-M3-T8), `src/clause_tracer/privacy/tests/tables/entities.toml` (S4-M3-T9), `src/clause_tracer/privacy/tests/tables/sample.toml` (S4-M5-T5). This commit holds these five files and the plan tick, and no code.
   - **Files:** the five files above.
   - **Tests first:** None. The loader test of S1-M3-T1 covers a header-only file.
   - **Done when:** `.venv/bin/uv run python scripts/check_owner_tables.py` exits 0 before the commit, and `scripts/check.sh` exits 0.
@@ -283,7 +283,7 @@ When this is done, `privacy` has a coverage floor, five empty owner tables, a co
 
 When this is done, `privacy` finds typed party details with their variants, emails, phones, IDs, bank details, the four bare identifiers (NINO, GB VAT, company prefix, card number), companies, addresses and people by code alone, the owner's tables fix what each finder returns, and the owner's list of governing-law places is in place.
 
-- [ ] **S4-M2-T1: Name and address forms**
+- [x] **S4-M2-T1: Name and address forms**
   - **Build:** In `src/clause_tracer/privacy/names.py`:
     - `HONORIFICS: Final[tuple[str, ...]] = ("mr", "mrs", "ms", "miss", "mx", "dr")`.
     - `COMPANY_SUFFIXES: Final[frozenset[str]] = frozenset({"ltd", "limited", "llc", "llp", "plc", "inc", "corp", "gmbh", "ag", "sarl", "sas", "bv", "nv", "pty", "co"})`.
@@ -318,7 +318,7 @@ When this is done, `privacy` finds typed party details with their variants, emai
   - **Rules:** T1, system design 4.2 (the folds), Spec 4.2 (name variants).
   - **Depends on:** None
 
-- [ ] **S4-M2-T2: Patterns for email, phone, ID and bank details**
+- [x] **S4-M2-T2: Patterns for email, phone, ID and bank details**
   - **Build:** In `src/clause_tracer/privacy/_patterns.py`, add these constants (each as `Final[str]`, with its `_RE` compiled as the rules say):
     ```python
     EMAIL = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+"
@@ -358,8 +358,9 @@ When this is done, `privacy` finds typed party details with their variants, emai
   - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/privacy/tests/test_patterns.py` reports 19 passed, and `scripts/check.sh` exits 0.
   - **Rules:** T1, ADR 0008 (pattern recognisers sit in the code layer), Spec 4.2.
   - **Depends on:** S4-M1-T6
+  - **Changed later:** S4-M2-T14 replaces the `EMAIL` line (letters and digits of any script). S4-M2-T16 changes the body of `find_patterns` (a table of checked patterns; NINO and company prefix join `_PATTERNS`).
 
-- [ ] **S4-M2-T3: IBAN with the mod-97 check**
+- [x] **S4-M2-T3: IBAN with the mod-97 check**
   - **Build:** In `_patterns.py`, add `IBAN = r"(?<![A-Za-z0-9])[A-Z]{2}\d{2}(?:[ ]?[A-Z0-9]{4}){2,7}(?:[ ]?[A-Z0-9]{1,3})?(?![A-Za-z0-9])"`. In `patterns.py`, add `def iban_is_valid(candidate: str) -> bool`: remove the spaces; return `False` unless the result has 15 to 34 characters, all `str.isalnum()` and ASCII, and its first two characters are letters; move the first four characters to the end; replace each character with `str(int(character, 36))`; return `int("".join(...)) % 97 == 1`. Change `find_patterns` so that it also adds, for each `IBAN_RE` match for which `iban_is_valid(match.group())` is true, a `PiiSuggestion` of kind `BANK` and source `PATTERN`. A match that fails the check gives nothing.
   - **Files:** `src/clause_tracer/privacy/_patterns.py`, `src/clause_tracer/privacy/patterns.py`, `src/clause_tracer/privacy/tests/test_iban.py`.
   - **Tests first:** in `test_iban.py`: `test_valid_iban` (`iban_is_valid("GB82 WEST 1234 5698 7654 32")` is true); `test_compact_iban_is_valid` (`"GB82WEST12345698765432"`); `test_german_iban_is_valid` (`"DE89 3704 0044 0532 0130 00"`); `test_changed_digit_is_invalid` (`"GB83 WEST 1234 5698 7654 32"` is false); `test_too_short_is_invalid` (`"GB82"` is false); `test_find_patterns_keeps_only_valid_ibans` (`"Pay to GB82 WEST 1234 5698 7654 32 or GB83 WEST 1234 5698 7654 32."` gives one `BANK` span, 7 to 34).
@@ -367,7 +368,7 @@ When this is done, `privacy` finds typed party details with their variants, emai
   - **Rules:** T1, ADR 0008 (checksum patterns for bank numbers).
   - **Depends on:** S4-M2-T2
 
-- [ ] **S4-M2-T4: Typed party details and their variants**
+- [x] **S4-M2-T4: Typed party details and their variants**
   - **Build:** In `src/clause_tracer/privacy/party.py`: `def find_party_details(text: str, parties: Sequence[Party], terms: Sequence[DefinedTerm]) -> tuple[PiiSuggestion, ...]`. It folds `text` once (`fold_for_matching`) and, for each party in order:
     - A party whose `name.strip()` is empty raises `ValueError("privacy: party name is empty")`.
     - `kind` is `COMPANY` when `is_company_name(party.name)`, else `PERSON`. `forms` is `list(name_forms(party.name, kind))`.
@@ -397,8 +398,9 @@ When this is done, `privacy` finds typed party details with their variants, emai
   - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/privacy/tests/test_party.py` reports 16 passed, and `scripts/check.sh` exits 0.
   - **Rules:** T1, ADR 0008 (typed party details come first), Spec 4.2 (every copy of a party's name and address), [system design 15.4](../system-design.md#154-stage-4-privacy-code-finders-and-placeholders) (the 20 Nov decision on short names), questions 4 and 17 (layers 2 and 3).
   - **Depends on:** S4-M1-T6, S4-M2-T1
+  - **Changed later:** S4-M2-T16 names the three parts of the short-name condition and adds the keyword-only parameter `key` to `find_party_details`.
 
-- [ ] **S4-M2-T5: Company names by suffix**
+- [x] **S4-M2-T5: Company names by suffix**
   - **Build:** In `_patterns.py`, add these constants (`H`, `WORD`, `SUFFIX_WORDS`, `SUFFIX` and `CONNECTOR` are fragments, with no `_RE`; `COMPANY` is compiled as the rules say):
     ```python
     H = r"[ \t]"
@@ -442,8 +444,9 @@ When this is done, `privacy` finds typed party details with their variants, emai
   - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/privacy/tests/test_companies.py` reports 21 passed, and `scripts/check.sh` exits 0.
   - **Rules:** T1, ADR 0008 ("company-suffix rules").
   - **Depends on:** S4-M1-T6
+  - **Changed later:** S4-M2-T13 replaced the `WORD` line, and S4-M2-T16 replaced it again with `rf"[{UPPER}][\w'’&-]*"`; the block above shows the first version.
 
-- [ ] **S4-M2-T6: Addresses**
+- [x] **S4-M2-T6: Addresses**
   - **Build:** In `_patterns.py`, add these constants (`CAP`, `STREET_PLAIN`, `STREET_AMBIG`, `LEAD_WORD`, `POST`, `PART` and `MONTHS` are fragments, with no `_RE`; the others are compiled as the rules say). The address has two parts: a street-anchored pattern, and a chain that is built backwards from a postcode.
     ```python
     CAP = r"(?:[A-Z][a-z'’-]+|UK|USA|UAE)"
@@ -607,8 +610,9 @@ When this is done, `privacy` finds typed party details with their variants, emai
   - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/privacy/tests/test_addresses.py` reports 26 passed, and `scripts/check.sh` exits 0.
   - **Rules:** T1, ADR 0008 ("address rules").
   - **Depends on:** S4-M2-T5
+  - **Changed later:** S4-M2-T14 replaces the `CAP` line (Latin-1 capitals and letters). `US_ZIP` is unchanged by the owner's decision of 22 Nov 2026: a state code that is also a word, such as `ID 12345`, is still read as a ZIP.
 
-- [ ] **S4-M2-T7: People by honorific, signature and job title**
+- [x] **S4-M2-T7: People by honorific, signature and job title**
   - **Build:** In `_patterns.py`, add these constants (`PARTICLE`, `TOK`, `INIT`, `NAME_RUN`, `ONE_OR_TWO`, `CAPS_TOK`, `CAPS_RUN`, `CAPS_ONE_OR_TWO` and `TITLE_WORDS` are fragments, with no `_RE`; the other five are compiled as the rules say). `TOK` is one name token: it keeps `O'Brien`, `McDonald`, `Smith-Jones` and `al-Rahman` whole. `NAME_RUN` is 2 to 4 tokens, with initials (`J.`) and particles (`de`, `ben`) allowed between them.
     ```python
     PARTICLE = r"(?:van|von|der|den|de|la|le|da|di|del|bin|ibn|bint|ben|ould|dos|du|al|el)"
@@ -690,6 +694,7 @@ When this is done, `privacy` finds typed party details with their variants, emai
   - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/privacy/tests/test_people.py` reports 26 passed, and `scripts/check.sh` exits 0.
   - **Rules:** T1, ADR 0008, Spec 4.2 ("Ms. Jones" and "Sarah" are variants), questions 1 and 17.
   - **Depends on:** S4-M1-T6, S4-M2-T1, S4-M2-T5
+  - **Changed later:** S4-M2-T14 replaces `TOK`, `INIT` and `CAPS_TOK` (Latin-1 capitals and letters). S4-M2-T16 builds `LEGAL_STOP_WORDS` from `COMPANY_ROLE_WORDS` (same 51 words), removes the all-legal-words check of `_clean_seed` (it can never run), and adds the keyword-only parameter `key` to `find_people`.
 
 - [x] **S4-M2-T8: The finders table (Owner)**
   - **Build:** Owner only. The owner fills `src/clause_tracer/privacy/tests/tables/finders.toml` with rows in this format (the agent does not write or change them, Constitution T11):
@@ -727,11 +732,11 @@ When this is done, `privacy` finds typed party details with their variants, emai
   - **Rules:** Constitution T11.
   - **Depends on:** None
 
-- [ ] **S4-M2-T10: Table tests for the finders and the party details**
+- [x] **S4-M2-T10: Table tests for the finders and the party details**
   - **Build:** In `src/clause_tracer/privacy/tests/test_finder_tables.py`, read `finders.toml` and `party_details.toml` with `load_table` (allowed and required keys for `finders.toml`: `id`, `finder`, `text`, `found`; for `party_details.toml`, allowed `id`, `parties`, `terms`, `text`, `found` and required `id`, `parties`, `text`, `found`). The module-level maps are `FINDERS: Final[Mapping[str, Callable[[str], tuple[PiiSuggestion, ...]]]] = {"patterns": find_patterns, "companies": find_companies, "addresses": find_addresses, "people": find_people}` and `SOURCES = {"patterns": PiiSource.PATTERN, "companies": PiiSource.RULE, "addresses": PiiSource.RULE, "people": PiiSource.RULE}`. An expected row `{text, kind, nth}` becomes `PiiSuggestion(span=span_of(case_text, text, nth), kind=as_enum(PlaceholderKind, kind, "kind"), source=<the source>)`. A `finder` name that is not a key of `FINDERS` raises `ValueError`.
   - **Files:** `src/clause_tracer/privacy/tests/test_finder_tables.py`.
   - **Tests first:** `test_finder_table` (parametrised over the rows of `finders.toml`, by `id`: the finder's result equals the expected tuple); `test_finder_table_has_rows` (at least 24 rows, and at least 4 for each of the four finder names); `test_party_table` (parametrised over `party_details.toml`: `find_party_details(text, parties, terms)` equals the expected tuple with source `PARTY_DETAILS`; each party is built as `Party(name=..., address=... or None, yours=...)`, and each term row as `DefinedTerm(term=row, definition=Span(start=0, end=len(text)), uses=())` when it is a string, or `DefinedTerm(term=row["term"], definition=span_of(text, row["definition"]), uses=())` when it is a table); `test_party_table_has_rows` (at least 10 rows).
-  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/privacy/tests/test_finder_tables.py` shows no failed test and the two has-rows tests pass, and `scripts/check.sh` exits 0. With zero rows, the has-rows tests fail and the parametrised tests skip, so this task is done only when the owner tables of S4-M2-T8 and S4-M2-T9 hold rows; until then it waits (plans README rule: continue with tasks that do not depend on it). If a row fails, the code or the row is wrong: bring it to the owner, and never edit the table.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/privacy/tests/test_finder_tables.py` shows no failed test and the two has-rows tests pass, and `scripts/check.sh` exits 0. With zero rows, the has-rows tests fail and the parametrised tests skip, so this task is done only when the owner tables of S4-M2-T8 and S4-M2-T9 hold rows; until then it waits (plans README rule: continue with tasks that do not depend on it). If a row fails, the code or the row is wrong: bring it to the owner, and never edit the table. The row `company-with-a-foreign-suffix` passes after S4-M2-T13; build T13 before you commit or tick this task.
   - **Rules:** Constitution T11, testing strategy 10.
   - **Depends on:** S4-M1-T5, S4-M2-T3, S4-M2-T4, S4-M2-T5, S4-M2-T6, S4-M2-T7, S4-M2-T8, S4-M2-T9
 
@@ -794,7 +799,7 @@ When this is done, `privacy` finds typed party details with their variants, emai
   - **Rules:** Constitution T11, Spec 4.2 (the kept place), question 14.
   - **Depends on:** None
 
-- [ ] **S4-M2-T12: Bare identifiers: NINO, card, GB VAT, company prefix**
+- [x] **S4-M2-T12: Bare identifiers: NINO, card, GB VAT, company prefix**
   - **Build:** The owner decided on 22 Nov 2026 (question 24) that stage 4 also finds four identifiers that need no keyword. Each covers the whole match (there is no keyword to leave out, so the whole identifier is the value), has the source `PATTERN`, and is added to `find_patterns` before `unique_sorted`. A UK National Insurance number (NINO), a GB VAT number and a UK company number with a prefix give kind `ID`. A card number gives kind `BANK` (Spec 4.2, "bank numbers"; question 26 asks the owner to confirm it). A pattern that a checksum or a fixed prefix already makes strong has no cue gate (owner decision of 22 Nov 2026). Only the card number has a gate (below).
     In `src/clause_tracer/privacy/_patterns.py`, after `IBAN`, add these constants. `NINO`, `GB_VAT`, `COMPANY_PREFIX`, `CARD` and `CARD_CUE` are patterns: each also gets a `_RE` compiled as the rules say. `CARD_CUE_WINDOW`, `CARD_FIRST_DIGITS` and `GB_VAT_WEIGHTS` are plain values and get none:
     ```python
@@ -905,9 +910,134 @@ When this is done, `privacy` finds typed party details with their variants, emai
     - `test_card_and_phone_overlap_both_come_back` (`"Card 4000 0566 5566 5556"` gives `("4000 0566 5566 5556", 5, 24, BANK)` and `("0566 5566 5556", 10, 24, PHONE)`);
     - `test_nino_and_keyword_id_overlap_both_come_back` (`"registered number AB123456C"` gives `("AB123456", 18, 26, ID)` and `("AB123456C", 18, 27, ID)`);
     - `test_long_vat_and_keyword_id_overlap_both_come_back` (`"VAT number GB 333 2894 54 000"` gives `("GB 333 2894 54 00", 11, 28, ID)` and `("GB 333 2894 54 000", 11, 29, ID)`);
-  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/privacy/tests/test_bare_ids.py` reports 35 passed. The same command on `test_bare_ids.py`, `test_patterns.py` and `test_iban.py` together reports 60 passed (the 19 tests of S4-M2-T2 and the 6 of S4-M2-T3 do not change, and none of their values changes), and `scripts/check.sh` exits 0. The reference run of the sample is unchanged: 7 entities, 10 spans, and `id-1` at 169 to 177.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/privacy/tests/test_bare_ids.py` reports 35 passed. The same command on `test_bare_ids.py`, `test_patterns.py` and `test_iban.py` together reports 60 passed (the 19 tests of S4-M2-T2 and the 6 of S4-M2-T3 do not change, and none of their values changes), and `scripts/check.sh` exits 0. The reference run of the sample (7 entities, 10 spans, and `id-1` at 169 to 177) needs `find_personal_data`, so it is checked in S4-M5-T7, not here.
   - **Rules:** T1 (pure functions), T11 (the values are the planner's, to confirm), ADR 0008 (checksum and prefix patterns sit in the code layer), the [report](../../reports/Privacy%20finder%20design%20choices.md), Q15 (d) and the row "Card and phone vetoes with checksums" of "Ideas from nearby fields", Spec 4.2, questions 24 and 26.
   - **Depends on:** S4-M2-T3
+
+- [x] **S4-M2-T13: Company names with non-ASCII letters**
+  - **Build:** The owner chose on 22 Nov 2026 to fix the company pattern now: the row `company-with-a-foreign-suffix` of `finders.toml` (`Müller GmbH delivers.` gives `Müller GmbH`) failed because `WORD` reads only `A` to `Z`. In `src/clause_tracer/privacy/_patterns.py`, replace the `WORD` line of S4-M2-T5 with this line, and change nothing else in the file:
+    ```python
+    WORD: Final[str] = r"[A-ZÀ-ÖØ-Þ](?:[^\W_]|['’&-])*"
+    ```
+    The first letter is `A` to `Z` or a Latin-1 capital (`À` to `Ö`, `Ø` to `Þ`; the signs `×` and `÷` are not in the ranges). The rest of the word is any letter or digit (`[^\W_]`, which excludes the underscore) or one of `'`, `’`, `&`, `-`, as before. `WORD` is used only in `COMPANY` and `CONNECTOR`. `companies.py` does not change. A capital outside Latin-1 (for example `Ł`, `Ś`, a Greek or a Cyrillic capital) is still not found: this is a known limit (see S4-M5-T4). Do not edit any table: the owner's row is the expected answer.
+  - **Files:** `src/clause_tracer/privacy/_patterns.py`, `src/clause_tracer/privacy/tests/test_companies.py`.
+  - **Tests first:** Add these 6 tests to `test_companies.py`, with the `found` helper of the file. The planner ran each case on 22 Nov 2026. The 21 tests of S4-M2-T5 stay as they are, and none of their values changes:
+    - `test_non_ascii_capital_first_letter` (`"Müller GmbH delivers."` gives `[("Müller GmbH", 0, 11)]`);
+    - `test_non_ascii_capital_in_a_later_word` (`"Élan Studio Ltd signs"` gives `[("Élan Studio Ltd", 0, 15)]`);
+    - `test_non_ascii_letters_inside_words` (`"Zoë Café Limited pays"` gives `[("Zoë Café Limited", 0, 16)]`);
+    - `test_connector_with_a_non_ascii_word` (`"The Müller & Söhne GmbH pays."` gives `[("Müller & Söhne GmbH", 4, 23)]`);
+    - `test_lower_case_non_ascii_start_is_not_a_name` (`"élan Ltd"` gives `[]`, and `"× Ltd"` gives `[]`);
+    - `test_capital_outside_latin_1_is_a_known_limit` (`"Łukasz Ltd"` gives `[]`).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/privacy/tests/test_companies.py` reports 27 passed, `.venv/bin/uv run pytest src/clause_tracer/privacy/tests/test_finder_tables.py` shows no failed test, and `scripts/check.sh` exits 0. The planner checked that the company spans of the sample contract (`ingest/samples/developer-agreement.txt`, source length 6204: 84 to 105 and 5592 to 5613) do not change.
+  - **Rules:** T1 (pure functions), T11 (the owner's row is not edited; the six values are the planner's, to confirm).
+  - **Depends on:** S4-M2-T5
+
+- [x] **S4-M2-T14: Non-ASCII letters in person names, street words and emails**
+  - **Build:** The M2 code review of 22 Nov 2026 found three places that still read only ASCII letters, the same cause as S4-M2-T13: `Mrs Zoë Smith signs.` gave the span `Mrs Zo` (cut mid-word, so `ë Smith` stayed readable), `Mr Müller signs.` gave nothing, `5 Müller Street, Köln` gave no address, and `bob@exämple.com` gave nothing. In `src/clause_tracer/privacy/_patterns.py` make exactly these five changes and no other:
+    1. Replace the `EMAIL` line with:
+       ```python
+       EMAIL: Final[str] = r"[\w.%+-]+@[\w-]+(?:\.[\w-]+)+"
+       ```
+    2. Directly after the `H` line, add:
+       ```python
+       UPPER: Final[str] = "A-ZÀ-ÖØ-Þ"
+       LOWER: Final[str] = "a-zß-öø-ÿ"
+       ```
+       (the Latin-1 capitals and lower-case letters; `×` and `÷` are in neither range).
+    3. Replace the `CAP` line with:
+       ```python
+       CAP: Final[str] = rf"(?:[{UPPER}][{LOWER}'’-]+|UK|USA|UAE)"
+       ```
+    4. Replace the `TOK` and `INIT` lines with:
+       ```python
+       TOK: Final[str] = (
+           rf"(?:[{UPPER}](?:['’][{UPPER}])?[{LOWER}]+(?:[{UPPER}][{LOWER}]+)*(?:-[{UPPER}]?[{LOWER}]+)*"
+           rf"|(?:al|el)-[{UPPER}][{LOWER}]+)"
+       )
+       INIT: Final[str] = rf"(?:[{UPPER}]\.)"
+       ```
+    5. Replace the `CAPS_TOK` line with:
+       ```python
+       CAPS_TOK: Final[str] = rf"[{UPPER}]{{2,}}(?:['’-][{UPPER}]+)*"
+       ```
+    A capital outside Latin-1 (`Ł`, a Greek or a Cyrillic capital) is still not read: a known limit (S4-M5-T4). `US_ZIP` does not change: the owner chose on 22 Nov 2026 to keep a state code such as `ID` or `OK` read as a ZIP, because a missed address is worse than a hidden number. Do not edit any table.
+  - **Files:** `src/clause_tracer/privacy/_patterns.py`, `src/clause_tracer/privacy/tests/test_people.py`, `src/clause_tracer/privacy/tests/test_addresses.py`, `src/clause_tracer/privacy/tests/test_patterns.py`.
+  - **Tests first:** Add these 6 tests, each with the `found` or `spans` helper of its file. The planner ran each case on 22 Nov 2026. The tests of S4-M2-T2, T6 and T7 stay as they are, and none of their values changes:
+    - `test_people.py`: `test_non_ascii_surname_after_an_honorific` (`"Mr Müller signs."` gives `[("Mr Müller", 0, 9), ("Müller", 3, 9)]`); `test_non_ascii_name_in_a_signature` (`"Signed by Élodie Dupont for the Client."` gives `[("Élodie", 10, 16), ("Élodie Dupont", 10, 23), ("Dupont", 17, 23)]`); `test_non_ascii_letter_does_not_cut_a_name` (`"Mrs Zoë Smith signs."` gives `[("Mrs Zoë Smith", 0, 13), ("Zoë", 4, 7), ("Zoë Smith", 4, 13), ("Smith", 8, 13)]`);
+    - `test_addresses.py`: `test_non_ascii_capital_in_a_street` (`spans("5 Müller Street, Köln")` is `[(0, 21)]`);
+    - `test_patterns.py`: `test_email_with_non_ascii_letters` (`"Contact bob@exämple.com now"` gives `[("bob@exämple.com", 8, 23, EMAIL)]`); `test_email_with_an_underscore` (`"Mail john_smith@acme.com."` gives `[("john_smith@acme.com", 5, 24, EMAIL)]`; it already passes before the change, because the old pattern read `_`, and it pins that).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/privacy/tests/test_people.py` reports 29 passed, the same command on `test_addresses.py` reports 27 passed and on `test_patterns.py` 21 passed, and `scripts/check.sh` exits 0. The planner checked that `find_companies`, `find_addresses`, `find_people`, `find_patterns` and `find_party_details` give the same results on the sample contract (`ingest/samples/developer-agreement.txt`, with the fixture's parties and terms) before and after this change.
+  - **Rules:** T1 (pure functions), T11 (the six values are the planner's, to confirm).
+  - **Depends on:** S4-M2-T13
+
+- [x] **S4-M2-T15: Tests for three untested paths (tests only)**
+  - **Build:** None. This task adds tests and changes no code. The M2 code review found three paths that no test ran: the hard-stop rule of a truncated address chain (`addresses.py`, lines 79 and 80), the rule that a one-word name before a job title is not a name (`people.py`, line 144), and the early return of `_short_names` for a company name that is only a suffix (`party.py`, line 89).
+  - **Files:** `src/clause_tracer/privacy/tests/test_addresses.py`, `src/clause_tracer/privacy/tests/test_people.py`, `src/clause_tracer/privacy/tests/test_party.py`.
+  - **Tests first:** Add these 4 tests. The planner ran each case on 22 Nov 2026 against the code of S4-M2-T14. All four must pass with no code change:
+    - `test_addresses.py`: `test_truncated_chain_stops_at_a_hard_stop` (`spans("Done; Mail 1 Aaaa, Bbbb, Cccc, Dddd, Eeee, Ffff, Leeds LS1 4AB")` is `[(25, 62)]`); `test_hard_stop_between_the_start_and_the_postcode_gives_the_postcode_alone` (`spans("Mail 1 Aaaa, Bbbb; Cccc, Dddd, Eeee, Ffff, Gggg, Leeds LS1 4AB")` is `[(55, 62)]`);
+    - `test_people.py`: `test_one_word_before_a_title_is_not_a_name` (`found("Signed by Smith Director today.")` is `[]`);
+    - `test_party.py`: `test_a_company_name_that_is_only_a_suffix_gives_nothing` (`spans("Ltd pays.", (Party(name="Ltd", address=None, yours=False),))` is `[]`).
+  - **Done when:** `test_addresses.py` reports 29 passed, `test_people.py` 30 passed and `test_party.py` 17 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** T11 (the values are the planner's, to confirm).
+  - **Depends on:** S4-M2-T14
+
+- [x] **S4-M2-T16: Clean-up of the finders (the behaviour does not change, except for one underscore)**
+  - **Build:** The M2 code review of 22 Nov 2026 found six places that are harder to read than they need to be. Make exactly these changes. Every test that exists before this task must pass with no edit.
+    1. `party.py`, `_short_names`: replace the `if (...)` condition with named booleans:
+       ```python
+       words_belong_to_party = bool(words) and words <= core_words
+       is_a_new_form = folded_term not in forms
+       defining_sentence_names_party = any(form in defining_text for form in full_forms)
+       if words_belong_to_party and is_a_new_form and defining_sentence_names_party:
+           short_names.append(folded_term)
+       ```
+    2. `patterns.py`, `find_patterns`: add `from collections.abc import Callable`. Add `(NINO_RE, PlaceholderKind.ID)` and `(COMPANY_PREFIX_RE, PlaceholderKind.ID)` at the end of `_PATTERNS` (neither pattern has a `v` group, so the loop already covers them). Add this helper after `_PATTERNS`:
+       ```python
+       def _suggestion(start: int, end: int, kind: PlaceholderKind) -> PiiSuggestion:
+           return PiiSuggestion(span=Span(start=start, end=end), kind=kind, source=PiiSource.PATTERN)
+       ```
+       Add this table directly before `find_patterns`:
+       ```python
+       _CHECKED: Final[
+           tuple[tuple[re.Pattern[str], PlaceholderKind, Callable[[str, re.Match[str]], bool]], ...]
+       ] = (
+           (IBAN_RE, PlaceholderKind.BANK, lambda text, match: iban_is_valid(match.group())),
+           (GB_VAT_RE, PlaceholderKind.ID, lambda text, match: gb_vat_is_valid(match.group())),
+           (CARD_RE, PlaceholderKind.BANK, card_is_valid),
+       )
+       ```
+       Then the body of `find_patterns` is the `_PATTERNS` loop, which appends `_suggestion(start, end, kind)`, then this loop, then `return unique_sorted(suggestions)`:
+       ```python
+       for pattern, kind, is_valid in _CHECKED:
+           for match in pattern.finditer(text):
+               if is_valid(text, match):
+                   suggestions.append(_suggestion(match.start(), match.end(), kind))
+       ```
+       Delete the five separate loops for the IBAN, the NINO, the company prefix, the GB VAT number and the card.
+    3. `people.py`: change the import to `from clause_tracer.privacy.companies import COMPANY_LEAD_WORDS, COMPANY_ROLE_WORDS` and define the legal words from the role words. The role words are the 18 words of `COMPANY_ROLE_WORDS`; the 33 other words stay in the literal, so the set keeps its 51 words and the owner's list does not change:
+       ```python
+       LEGAL_STOP_WORDS: Final[frozenset[str]] = COMPANY_ROLE_WORDS | frozenset(
+           {
+               "agreement", "annex", "appendix", "charges", "clause", "confidential", "date",
+               "deliverables", "director", "effective", "exhibit", "fees", "force", "governing",
+               "information", "intellectual", "law", "majeure", "manager", "milestone", "notice",
+               "notices", "owner", "partner", "payment", "property", "schedule", "secretary",
+               "section", "service", "services", "term", "termination",
+           }
+       )
+       ```
+       (Write one word on each line, as `ruff format` does.) The job-title lists `TITLE_WORDS` and `TRAILING_TITLE_WORDS` stay as they are: one is a pattern and one is a set of different words.
+    4. `people.py`, `_clean_seed`: delete the check `if all(key(token) in LEGAL_STOP_WORDS for token in tokens): return None`. It can never run: the loop before it removes legal words from the end, so the last token is never a legal word. A seed made only of legal words still gives nothing, through `if not tokens`.
+    5. Fold once. In `party.py`, add `MatchKey` to the import from `clause_tracer.core`, add the keyword-only parameter `*, key: MatchKey | None = None` after `terms`, and replace `key = fold_for_matching(text)` with `key = fold_for_matching(text) if key is None else key`. In `people.py` do the same: `def find_people(text: str, *, key: MatchKey | None = None)`. S4-M3-T6 folds once and passes `key=key` to both.
+    6. `_patterns.py`: replace the `WORD` line with `WORD: Final[str] = rf"[{UPPER}][\w'’&-]*"`. This is the one change of behaviour: an underscore inside a word is now allowed (`Foo_Bar Ltd`).
+  - **Files:** `src/clause_tracer/privacy/party.py`, `src/clause_tracer/privacy/patterns.py`, `src/clause_tracer/privacy/people.py`, `src/clause_tracer/privacy/_patterns.py`, `src/clause_tracer/privacy/tests/test_companies.py`, `src/clause_tracer/privacy/tests/test_people.py`, `src/clause_tracer/privacy/tests/test_party.py`.
+  - **Tests first:** Add these 4 tests. The planner ran each case on 22 Nov 2026. In `test_people.py` add the imports `fold_for_matching` (from `clause_tracer.core`), `COMPANY_ROLE_WORDS` (from `clause_tracer.privacy.companies`) and `LEGAL_STOP_WORDS` (from `clause_tracer.privacy.people`); in `test_party.py` add `fold_for_matching` to the import from `clause_tracer.core`:
+    - `test_companies.py`: `test_underscore_inside_a_word` (`found("Foo_Bar Ltd pays.")` is `[("Foo_Bar Ltd", 0, 11)]`; fails before step 6);
+    - `test_people.py`: `test_a_given_key_gives_the_same_result` (with `text = "Ms Jones at home. Jones left."`, `find_people(text, key=fold_for_matching(text)) == find_people(text)`); `test_legal_stop_words_hold_every_role_word` (`COMPANY_ROLE_WORDS <= LEGAL_STOP_WORDS` and `len(LEGAL_STOP_WORDS) == 51`);
+    - `test_party.py`: `test_a_given_key_gives_the_same_result` (with `text = "Brightline Studio Ltd and brightline studio limited."`, `find_party_details(text, (BRIGHTLINE,), (), key=fold_for_matching(text)) == find_party_details(text, (BRIGHTLINE,), ())`).
+  - **Done when:** `test_companies.py` reports 28 passed, `test_people.py` 32 passed, `test_party.py` 18 passed, `test_addresses.py` 29 passed and `test_patterns.py` 21 passed. `scripts/check.sh` exits 0 with 2058 tests passed in all. No test that exists before this task is edited. The planner ran steps 1 to 6 on 22 Nov 2026 with these results.
+  - **Rules:** T1 (pure functions), S3 (the shapes do not change), T11 (the four values are the planner's, to confirm).
+  - **Depends on:** S4-M2-T15
 
 ### M3: Resolve and group
 
@@ -1093,7 +1223,7 @@ When this is done, `find_personal_data` turns a `PrivacyInput` and a detector in
   - **Depends on:** S4-M3-T1, S4-M1-T5
 
 - [ ] **S4-M3-T6: `find_personal_data`, the step 3 call**
-  - **Build:** In `src/clause_tracer/privacy/finding.py`: `def find_personal_data(case: PrivacyInput, detector: PiiDetector) -> tuple[PiiSuggestion, ...]`. With `text = case.document.text`, it runs these steps in order. (1) `raw` is `find_party_details(text, case.parties, case.terms)`, `find_patterns(text)`, `find_companies(text)`, `find_addresses(text)`, `find_people(text)` and `detector.find(text)`, joined in that order (the detector is called once, on the whole text: question 7). (2) `checked = trim_suggestions(text, raw)`. (3) `allowed = allowed_term_texts(text, case.terms, checked)`, then `kept = drop_allowed(text, checked, allowed)`. (4) `kept = cut_in_places(text, kept, governing_law_places(text))`. (5) `resolved = resolve_overlaps(text, kept)` (the `NER` union runs first inside it). (6) Return `split_at_sentences(text, resolved, sentence_starts(case.clauses))`. It raises `ValueError` only as its parts do. It reads no file and keeps no state. It never catches an error from `detector.find`: the port's docstring says "Raises: None", but a detector that fails must stop the run, so that a failure is never read as "nothing found" (fail closed; the stage 7 adapter gives a named error type, section 9).
+  - **Build:** In `src/clause_tracer/privacy/finding.py`: `def find_personal_data(case: PrivacyInput, detector: PiiDetector) -> tuple[PiiSuggestion, ...]`. With `text = case.document.text` and `key = fold_for_matching(text)` (folded once), it runs these steps in order. (1) `raw` is `find_party_details(text, case.parties, case.terms, key=key)`, `find_patterns(text)`, `find_companies(text)`, `find_addresses(text)`, `find_people(text, key=key)` and `detector.find(text)`, joined in that order (the detector is called once, on the whole text: question 7). (2) `checked = trim_suggestions(text, raw)`. (3) `allowed = allowed_term_texts(text, case.terms, checked)`, then `kept = drop_allowed(text, checked, allowed)`. (4) `kept = cut_in_places(text, kept, governing_law_places(text))`. (5) `resolved = resolve_overlaps(text, kept)` (the `NER` union runs first inside it). (6) Return `split_at_sentences(text, resolved, sentence_starts(case.clauses))`. It raises `ValueError` only as its parts do. It reads no file and keeps no state. It never catches an error from `detector.find`: the port's docstring says "Raises: None", but a detector that fails must stop the run, so that a failure is never read as "nothing found" (fail closed; the stage 7 adapter gives a named error type, section 9).
   - **Files:** `src/clause_tracer/privacy/finding.py`, `src/clause_tracer/privacy/tests/test_finding.py`.
   - **Tests first:** in `test_finding.py`, with `make_case` and `FakePiiDetector({text: planted})` (the fake is keyed by the exact text), and results read as `(text[span.start:span.end], span.start, span.end, kind, source)`:
     - `test_code_finders_run_with_an_empty_detector` (sentences `["Signed by Tom Jones, Director.", "Mail a@b.com."]`, no parties, `FakePiiDetector({})`: `("Tom Jones", 10, 19, PERSON, RULE)` and `("a@b.com", 36, 43, EMAIL, PATTERN)`);
@@ -1413,7 +1543,7 @@ When this is done, `python -m clause_tracer.privacy` prints the entities and the
   - **Depends on:** S4-M5-T2
 
 - [ ] **S4-M5-T4: Public names, contract notes and the README**
-  - **Build:** In `src/clause_tracer/privacy/__init__.py`, set `__all__` to exactly these ten names, imported from their files: `PrivacyInput`, `anonymise`, `dump_privacy_fixture`, `find_personal_data`, `group_entities`, `load_privacy_fixture`, `map_to_original`, `render_privacy_report`, `restore_reply`, `restore_text`. Create `src/clause_tracer/privacy/tests/test_architecture.py` with the three tests of [`links/tests/test_architecture.py`](../../src/clause_tracer/links/tests/test_architecture.py) for `privacy`: `test_public_names`, `test_module_has_its_parts` (`README.md`, `tests`, `samples`, `__main__.py`) and `test_readme_names_every_public_name`. Rewrite `src/clause_tracer/privacy/README.md` with these parts, in this order: **Purpose** (one sentence); **Spec** (sections 4.2, 6.1 steps 3 and 4, 8); **Input shape** (`PrivacyInput`, and the detector port); **Output shape** (`PiiSuggestion`, `PlaceholderEntity`, `PlaceholderText` with its three segment kinds); **Public calls**, with a contract note for each of the ten names (input, output, errors raised with their messages, side effects: none; Constitution I11); **Rules** (the source priority and the cut rule, the allow-list and the question 11 reading, the governing-law place, the sentence cut, variant grouping and the ambiguous short form, token form and numbering, the escape form, which variant `restore_reply` returns, how `map_to_original` snaps an edge, and that the entities and the map hold real names, so they must stay out of logs); **The printed report** (a table with the columns `Line` and `Fields after the first word`, one row for each of `source`, `counts`, `entity`, `span`, `text`, in order, and the sentence "Every free-text field has each tab, carriage return and line break replaced by one space."); **Sample fixture** (kept from S4-M1-T3); **Known limits** (see below); **Depends on** (core only; the detector is passed in by `cli`); **Run alone** (the command and `--input`). The known limits are: a person who is not a typed party and has no honorific, signature or job title is found only by the detector; a name or an address that wraps over a line break is found by the typed party finder only; a lower-priority suggestion is cut, so the part outside a kept span may be a fragment; punctuation-only fragments are dropped; an NER match does not remove a defined term from the allow-list; only `Ltd` and `Limited` swap; the address rule reads UK, US, Canadian and street-word styles, and an address chain longer than 5 comma segments or 120 characters keeps its last part hidden (the nearest segments before the postcode, at most 5 and at most 120 characters) and its earlier part readable, and a chain whose nearest segment alone passes 120 characters gives the postcode alone; IBAN length per country is not checked; a company name that starts with a non-ASCII capital, such as `Müller GmbH`, is not found by the company rule (its pattern reads capitals as A to Z; the owner kept the row `company-with-a-foreign-suffix` of the finders table as the right answer, so that row fails until the pattern changes, owner decision of 22 Nov 2026); an honorific before a company name stays inside the company span (`Mr Brightline Studio Ltd`); non-UK bank formats and national ID numbers other than the NINO are left to the detector; a bare 8-digit company number needs a keyword, and only the 15 prefixes of `COMPANY_PREFIX` are found; a GB VAT number is found bare only with the `GB` prefix; a cue-less number that passes the Luhn check and starts with 3, 4, 5 or 6 is replaced as a card, and a card in 4-6-5 spacing is not found; a NINO in lower case is not found; the governing-law rule keeps only the places of a closed list that the owner writes, and two wordings of the clause; a phone shape with no cue gate also replaces a reference such as `ref 0123 456 7890`; a keyword ID value can run into a following number (`1234567 5`); a common-word name (layer 3) at the start of a sentence stays readable when no honorific, `'s` or earlier use shows it is a name; a defined term that only the detector flags, with no finder naming the full name, stays readable (it is allowed); only `NER` spans are joined when they overlap.
+  - **Build:** In `src/clause_tracer/privacy/__init__.py`, set `__all__` to exactly these ten names, imported from their files: `PrivacyInput`, `anonymise`, `dump_privacy_fixture`, `find_personal_data`, `group_entities`, `load_privacy_fixture`, `map_to_original`, `render_privacy_report`, `restore_reply`, `restore_text`. Create `src/clause_tracer/privacy/tests/test_architecture.py` with the three tests of [`links/tests/test_architecture.py`](../../src/clause_tracer/links/tests/test_architecture.py) for `privacy`: `test_public_names`, `test_module_has_its_parts` (`README.md`, `tests`, `samples`, `__main__.py`) and `test_readme_names_every_public_name`. Rewrite `src/clause_tracer/privacy/README.md` with these parts, in this order: **Purpose** (one sentence); **Spec** (sections 4.2, 6.1 steps 3 and 4, 8); **Input shape** (`PrivacyInput`, and the detector port); **Output shape** (`PiiSuggestion`, `PlaceholderEntity`, `PlaceholderText` with its three segment kinds); **Public calls**, with a contract note for each of the ten names (input, output, errors raised with their messages, side effects: none; Constitution I11); **Rules** (the source priority and the cut rule, the allow-list and the question 11 reading, the governing-law place, the sentence cut, variant grouping and the ambiguous short form, token form and numbering, the escape form, which variant `restore_reply` returns, how `map_to_original` snaps an edge, and that the entities and the map hold real names, so they must stay out of logs); **The printed report** (a table with the columns `Line` and `Fields after the first word`, one row for each of `source`, `counts`, `entity`, `span`, `text`, in order, and the sentence "Every free-text field has each tab, carriage return and line break replaced by one space."); **Sample fixture** (kept from S4-M1-T3); **Known limits** (see below); **Depends on** (core only; the detector is passed in by `cli`); **Run alone** (the command and `--input`). The known limits are: a person who is not a typed party and has no honorific, signature or job title is found only by the detector; a name or an address that wraps over a line break is found by the typed party finder only; a lower-priority suggestion is cut, so the part outside a kept span may be a fragment; punctuation-only fragments are dropped; an NER match does not remove a defined term from the allow-list; only `Ltd` and `Limited` swap; the address rule reads UK, US, Canadian and street-word styles, and an address chain longer than 5 comma segments or 120 characters keeps its last part hidden (the nearest segments before the postcode, at most 5 and at most 120 characters) and its earlier part readable, and a chain whose nearest segment alone passes 120 characters gives the postcode alone; IBAN length per country is not checked; a company name, a person name or a street word that starts with a capital outside Latin-1, such as `Łukasz` or a Greek or Cyrillic name, is not found (the patterns read A to Z and the Latin-1 capitals, S4-M2-T13 and S4-M2-T14); a US state code that is also a word (`ID`, `OK`, `OR`, `IN`, `ME`, `HI`, `LA`, `DE`) before five digits is replaced as a ZIP, so `Employee ID 12345` becomes an address (owner decision of 22 Nov 2026); an honorific before a company name stays inside the company span (`Mr Brightline Studio Ltd`); non-UK bank formats and national ID numbers other than the NINO are left to the detector; a bare 8-digit company number needs a keyword, and only the 15 prefixes of `COMPANY_PREFIX` are found; a GB VAT number is found bare only with the `GB` prefix; a cue-less number that passes the Luhn check and starts with 3, 4, 5 or 6 is replaced as a card, and a card in 4-6-5 spacing is not found; a NINO in lower case is not found; the governing-law rule keeps only the places of a closed list that the owner writes, and two wordings of the clause; a phone shape with no cue gate also replaces a reference such as `ref 0123 456 7890`; a keyword ID value can run into a following number (`1234567 5`); a common-word name (layer 3) at the start of a sentence stays readable when no honorific, `'s` or earlier use shows it is a name; a defined term that only the detector flags, with no finder naming the full name, stays readable (it is allowed); only `NER` spans are joined when they overlap.
   - **Files:** `src/clause_tracer/privacy/__init__.py`, `src/clause_tracer/privacy/README.md`, `src/clause_tracer/privacy/tests/test_architecture.py`.
   - **Tests first:** `test_public_names` (the set equals the ten names), `test_module_has_its_parts`, `test_readme_names_every_public_name`.
   - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/privacy/tests/test_architecture.py` reports 3 passed, `.venv/bin/uv run python scripts/copy_lint.py` exits 0, and `scripts/check.sh` exits 0. Every line kind of the golden file matches a row of the report table.
@@ -1542,6 +1672,9 @@ The docs do not settle these points. Each needs the owner's answer before the ta
 | 22 Nov 2026 | Question 23 answered by the owner the other way: an address chain longer than 5 comma segments or 120 characters keeps a truncated chain (the last part before the postcode, at most 5 segments and 120 characters) in place of the postcode alone. Changed: S4-M2-T6 (Build text, the code block with the new `_truncated_start`, and the tests: `test_address_chain_with_7_segments_gives_the_postcode_alone` is renamed `test_address_chain_with_7_segments_keeps_the_last_5_segments` and now gives `Cccc, Dddd, Eeee, Ffff, Leeds LS1 4AB`; two tests added, 24 to 26), question 3 (the limit), question 23 (the answer), and the known limits of S4-M5-T4. The task count stays 43. Values taken from `ref4.py` of the reference folder. Status stays Draft. | The owner's decision in chat, 22 Nov 2026 |
 | 22 Nov 2026 | Recorded where the milestone 1 build differs from the plan text, and fixed the plan text. (1) S4-M1-T2: the five owner tables were already on `main` and filled, so the task is a tick only, and the T2 commit holds only the plan tick. (2) S4-M1-T1: the negative check used 101, which `coverage` rejects as invalid before it compares a total; the text now says 100. (3) S4-M1-T3: the `SourceFile.size` of the test document is `len(text.encode())` (23 for the plan's text), and the text now says how child objects and list elements are ordered and named. (4) The build order was T3, T2, T4, T5, T6, T1, because the privacy total was 50% before the new code and the T1 floor would have failed; the final checks match the plan. (5) Helpers and constants the plan does not name: the `_validate_*`, `_require_*` and `_*_field` helpers and the key tuples in `sample_input.py`; `_word`, `_form`, `_spans` in `test_match.py`; `_suggestion` in `test_spans.py`. (6) Docstrings and a longer `privacy/samples/README.md` and README section than the plan lists. (7) Four small fixes after the first write: three tests failed with `DID NOT RAISE` because the helper `_clause_rows` returned a copy (the helper was fixed, no loader change), two import orders and two formatting changes for ruff, and the type of the `seen` set in `unique_sorted`. (8) `test_sample_input.py` has an unused helper `_sentence_rows` and imports `DefinedTerm` from `clause_tracer.core.link_map`; S4-M1-T7 removes both | The agent reported these after building, and the planner checked the commit list, the T2 commit, the 101 run, the unused helper and the document size in the code. No expected value, name, signature or message changed |
 | 22 Nov 2026 | Code review of milestone 1 (five findings). Added S4-M1-T7 (seven error-path tests, and the unused helper and the import fixed; tests only). Added a draft for the owner, with no task id, for names with an apostrophe or a hyphen (the owner chose to try a code fix first, and the known limit is written only if it fails). The owner asked also for the cleanup of the double check in `sample_input.py`; it is not a task yet, because `links/sample_clauses.py` has the same two-pass shape and the stage 3 plan told its loader task not to rewrite those validators, so a one-sided rewrite would make `privacy` differ from `links`. The owner decides whether to rewrite both or neither. Skipped, as the owner accepted: the loader does not check `sha256` and `size` against the text or that `parent_id` names a clause (the T3 plan lists exactly eight checks, and the drift test catches an old fixture), and the unused pattern strings in `_patterns.py` (harmless; later finders may use them) | The owner's answers in chat, 22 Nov 2026 |
+| 22 Nov 2026 | Milestone 2 build record. (1) The five owner tables had no `HEADER` line, so S4-M2-T10 could not load them; the owner added it in `99a76f0` and S4-M1-T2 now says so. (2) S4-M2-T12: the check of the sample reference run moved to S4-M5-T7, because it needs `find_personal_data`. (3) S4-M2-T10: the known failing row `company-with-a-foreign-suffix` is named in Done when, and the implementer stops there. (4) Status set to In progress. Build differences with the same behaviour, accepted: S4-M2-T1 uses `isdisjoint` (ruff SIM300) and a private `_last_token` helper; S4-M2-T2, T3 and T12 hold the keyword patterns in a `_PATTERNS` tuple; S4-M2-T4 has a private `_short_names`; S4-M2-T5 has a module `_CONNECTORS` set; the unknown-finder message in T10 is `unknown finder <name>`. | The implementer's report and the owner's decision in chat, 22 Nov 2026 |
+| 22 Nov 2026 | Owner chose to fix the company pattern for the row `company-with-a-foreign-suffix`, not to mark it as an expected failure. Task added: S4-M2-T13 (`WORD` reads a Latin-1 capital and Unicode letters; 6 tests, values run on 22 Nov 2026; the 287 privacy tests and `scripts/check.sh` pass with the change). Changed: S4-M2-T10 (the known-failing-row text removed), the known-limits text in S4-M5-T4 (a capital outside Latin-1 stays a limit). | The owner's decision in chat, 22 Nov 2026 |
+| 22 Nov 2026 | M2 code review (ten findings). Tasks added: S4-M2-T14 (Latin-1 letters in `TOK`, `INIT`, `CAPS_TOK`, `CAP`, and `EMAIL` with any letter; 6 tests), S4-M2-T15 (4 tests of paths no test ran), S4-M2-T16 (named booleans, a table in `find_patterns`, shared role words, one unreachable check removed, `key` parameter, simpler `WORD`; 4 tests). Total 2058 tests pass with all three in a trial run. Finding 2 skipped by the owner. Changed: pointers in S4-M2-T2, T4, T5, T6, T7, S4-M3-T6 (folds once and passes `key`), the known limits in S4-M5-T4, section 9. The five finders give the same results on the sample before and after. | The owner's decision in chat, 22 Nov 2026 |
 
 ## 9. Notes for the next stage
 
@@ -1549,6 +1682,7 @@ Not yet written. The planner fills this in when the stage is done.
 
 Known already:
 
+- M2 code review (22 Nov 2026, ten findings): findings 1 and 3 (non-ASCII names, street words and emails), 4 to 7, 9 and 10 are built in S4-M2-T14 to T16. Finding 2 (`ID 12345` read as an address) was skipped by the owner, because a missed address is worse than a hidden number; it is in the known limits. The job-title half of finding 8 was not changed: `TITLE_WORDS` (a pattern) and `TRAILING_TITLE_WORDS` (a set) hold different words.
 - Open cleanup, to decide before stage 4 closes (S4-M6-T1): the loaders `privacy/sample_input.py` and `links/sample_clauses.py` check every JSON value twice (a `_validate_*` pass, then `_*_field` casts). The M1 review (22 Nov 2026) found it; the owner wanted it cleaned up, but a rewrite of one module makes the two differ, and the stage 3 plan told its loader task not to rewrite those validators. Decide: rewrite both in one task, or neither. The planner recommends neither unless a later change to the fixture format makes the double check cost real work. Also open: names with an apostrophe or a hyphen (the draft after M1), closed only by the real-contract check.
 - Doubts come later. The shape exists in core (S1-M6-T8). The code that fills it is built where the user first sees suggestions: stage 6 settles how the command-line tool does the privacy check (system design 15.6), and stage 12 builds the screen. Owner chose B on 21 Nov 2026.
 - Stage 8 prompt rule ([system design 15.8](../system-design.md#158-stage-8-checking-and-the-message-templates), the prompt rules; not stage 4 work): every prompt that carries placeholders tells the model to write each placeholder exactly as it appears in the text, and never to change, translate or invent one (owner decision 2 of 21 Nov 2026; report, questions 6 and 10).
