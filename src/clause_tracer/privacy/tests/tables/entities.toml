@@ -1,0 +1,170 @@
+[[case]]
+id = "ms-jones-joins-sarah-jones"
+text = "Sarah Jones then Ms Jones."
+suggestions = [
+  { text = "Sarah Jones", kind = "person" },
+  { text = "Ms Jones", kind = "person" },
+]
+entities = [
+  { id = "person-1", spans = [ { text = "Sarah Jones" }, { text = "Ms Jones" }, ] },
+]
+
+[[case]]
+id = "spec-ms-jones-sarah-and-sarah-jones-share-one"
+text = "Ms. Jones, Sarah and Sarah Jones."
+suggestions = [
+  { text = "Ms. Jones", kind = "person" },
+  { text = "Sarah", kind = "person" },
+  { text = "Sarah Jones", kind = "person" },
+]
+entities = [
+  { id = "person-1", spans = [ { text = "Ms. Jones" }, { text = "Sarah" }, { text = "Sarah Jones" }, ] },
+]
+
+[[case]]
+id = "a-surname-shared-by-two-people-stands-alone"
+text = "Sarah Jones and Tom Jones met Jones."
+suggestions = [
+  { text = "Sarah Jones", kind = "person" },
+  { text = "Tom Jones", kind = "person" },
+  { text = "Jones", kind = "person", nth = 3 },
+]
+entities = [
+  { id = "person-1", spans = [ { text = "Sarah Jones" }, ] },
+  { id = "person-2", spans = [ { text = "Tom Jones" }, ] },
+  { id = "person-3", spans = [ { text = "Jones", nth = 3 }, ] },
+]
+
+[[case]]
+id = "a-company-with-ltd-and-limited"
+text = "Acme Ltd and Acme Limited."
+suggestions = [
+  { text = "Acme Ltd", kind = "company" },
+  { text = "Acme Limited", kind = "company" },
+]
+entities = [
+  { id = "company-1", spans = [ { text = "Acme Ltd" }, { text = "Acme Limited" }, ] },
+]
+
+[[case]]
+id = "a-company-name-without-its-suffix"
+text = "Acme Ltd, then Acme."
+suggestions = [
+  { text = "Acme Ltd", kind = "company" },
+  { text = "Acme", kind = "company", nth = 2 },
+]
+entities = [
+  { id = "company-1", spans = [ { text = "Acme Ltd" }, { text = "Acme", nth = 2 }, ] },
+]
+
+[[case]]
+id = "an-address-and-its-first-line"
+text = "14 Harbour Street, Leeds LS1 4AB. Also 14 Harbour Street."
+suggestions = [
+  { text = "14 Harbour Street, Leeds LS1 4AB", kind = "address" },
+  { text = "14 Harbour Street", kind = "address", nth = 2 },
+]
+entities = [
+  { id = "address-1", spans = [ { text = "14 Harbour Street, Leeds LS1 4AB" }, { text = "14 Harbour Street", nth = 2 }, ] },
+]
+
+[[case]]
+id = "an-email-in-two-cases"
+text = "Write A@B.com or a@b.com."
+suggestions = [
+  { text = "A@B.com", kind = "email" },
+  { text = "a@b.com", kind = "email" },
+]
+entities = [
+  { id = "email-1", spans = [ { text = "A@B.com" }, { text = "a@b.com" }, ] },
+]
+
+[[case]]
+id = "a-phone-in-two-layouts"
+text = "Call 020 7946 0958 or 020-7946-0958."
+suggestions = [
+  { text = "020 7946 0958", kind = "phone" },
+  { text = "020-7946-0958", kind = "phone" },
+]
+entities = [
+  { id = "phone-1", spans = [ { text = "020 7946 0958" }, { text = "020-7946-0958" }, ] },
+]
+
+[[case]]
+id = "two-different-phones-stay-apart"
+text = "Call 020 7946 0958 or 020 7946 0959."
+suggestions = [
+  { text = "020 7946 0958", kind = "phone" },
+  { text = "020 7946 0959", kind = "phone" },
+]
+entities = [
+  { id = "phone-1", spans = [ { text = "020 7946 0958" }, ] },
+  { id = "phone-2", spans = [ { text = "020 7946 0959" }, ] },
+]
+
+[[case]]
+id = "numbering-runs-by-kind-in-order-of-first-appearance"
+text = "Acme Ltd, Sarah Jones, a@b.com and Beta Ltd."
+suggestions = [
+  { text = "Acme Ltd", kind = "company" },
+  { text = "Sarah Jones", kind = "person" },
+  { text = "a@b.com", kind = "email" },
+  { text = "Beta Ltd", kind = "company" },
+]
+entities = [
+  { id = "company-1", spans = [ { text = "Acme Ltd" }, ] },
+  { id = "person-1", spans = [ { text = "Sarah Jones" }, ] },
+  { id = "email-1", spans = [ { text = "a@b.com" }, ] },
+  { id = "company-2", spans = [ { text = "Beta Ltd" }, ] },
+]
+
+[[case]]
+id = "a-name-in-three-places"
+text = "Jones, Sarah Jones, then Ms Jones."
+suggestions = [
+  { text = "Jones", kind = "person" },
+  { text = "Sarah Jones", kind = "person" },
+  { text = "Ms Jones", kind = "person" },
+]
+entities = [
+  { id = "person-1", spans = [ { text = "Jones" }, { text = "Sarah Jones" }, { text = "Ms Jones" }, ] },
+]
+
+[[case]]
+id = "two-companies-sharing-a-first-word-stay-apart"
+text = "Acme Alpha Ltd, Acme Beta Ltd and Acme."
+suggestions = [
+  { text = "Acme Alpha Ltd", kind = "company" },
+  { text = "Acme Beta Ltd", kind = "company" },
+  { text = "Acme", kind = "company", nth = 3 },
+]
+entities = [
+  { id = "company-1", spans = [ { text = "Acme Alpha Ltd" }, ] },
+  { id = "company-2", spans = [ { text = "Acme Beta Ltd" }, ] },
+  { id = "company-3", spans = [ { text = "Acme", nth = 3 }, ] },
+]
+
+[[case]]
+id = "id-and-bank-numbers-count-by-kind"
+text = "Company number 09876543, sort code 12-34-56, account 12345678."
+suggestions = [
+  { text = "09876543", kind = "id" },
+  { text = "12-34-56", kind = "bank" },
+  { text = "12345678", kind = "bank" },
+]
+entities = [
+  { id = "id-1", spans = [ { text = "09876543" }, ] },
+  { id = "bank-1", spans = [ { text = "12-34-56" }, ] },
+  { id = "bank-2", spans = [ { text = "12345678" }, ] },
+]
+
+[[case]]
+id = "the-honorific-dot-does-not-split-a-name"
+text = "Ms. Jones and Ms Jones agree."
+suggestions = [
+  { text = "Ms. Jones", kind = "person" },
+  { text = "Ms Jones", kind = "person" },
+]
+entities = [
+  { id = "person-1", spans = [ { text = "Ms. Jones" }, { text = "Ms Jones" }, ] },
+]

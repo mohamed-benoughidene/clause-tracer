@@ -1,0 +1,230 @@
+[[case]]
+id = "longer-code-span-cuts-a-detector-span"
+sentences = [
+  "Brightline Studio Ltd, Leeds is here.",
+]
+parties = [
+  { name = "Brightline Studio Ltd", yours = false },
+]
+detector = [
+  { text = "Studio Ltd, Leeds", kind = "address", source = "ner" },
+]
+found = [
+  { text = "Brightline Studio Ltd", kind = "company", source = "party_details" },
+  { text = ", Leeds", kind = "address", source = "ner" },
+]
+
+[[case]]
+id = "pattern-cuts-a-detector-span"
+sentences = [
+  "Call 020 7946 0958 now.",
+]
+detector = [
+  { text = "Call 020 7946 0958", kind = "person", source = "ner" },
+]
+found = [
+  { text = "Call", kind = "person", source = "ner" },
+  { text = "020 7946 0958", kind = "phone", source = "pattern" },
+]
+
+[[case]]
+id = "rule-beats-ner-on-equal-spans"
+sentences = [
+  "Pay Acme Ltd now.",
+]
+detector = [
+  { text = "Acme Ltd", kind = "company", source = "ner" },
+]
+found = [
+  { text = "Acme Ltd", kind = "company", source = "rule" },
+]
+
+[[case]]
+id = "party-details-beats-rule-on-equal-spans"
+sentences = [
+  "Pay Acme Ltd now.",
+]
+parties = [
+  { name = "Acme Ltd", yours = false },
+]
+found = [
+  { text = "Acme Ltd", kind = "company", source = "party_details" },
+]
+
+[[case]]
+id = "two-overlapping-detector-spans-join"
+sentences = [
+  "Visit alpha beta gamma now.",
+]
+detector = [
+  { text = "alpha beta", kind = "address", source = "ner" },
+  { text = "beta gamma", kind = "address", source = "ner" },
+]
+found = [
+  { text = "alpha beta gamma", kind = "address", source = "ner" },
+]
+
+[[case]]
+id = "a-detector-span-cut-on-both-sides"
+sentences = [
+  "The firm Brightline Studio Ltd of Leeds signs.",
+]
+parties = [
+  { name = "Brightline Studio Ltd", yours = false },
+]
+detector = [
+  { text = "firm Brightline Studio Ltd of", kind = "person", source = "ner" },
+]
+found = [
+  { text = "firm", kind = "person", source = "ner" },
+  { text = "Brightline Studio Ltd", kind = "company", source = "party_details" },
+  { text = "of", kind = "person", source = "ner" },
+]
+
+[[case]]
+id = "a-role-on-the-allow-list-is-dropped"
+sentences = [
+  "The Agency pays.",
+]
+terms = [
+  "Agency",
+]
+detector = [
+  { text = "Agency", kind = "person", source = "ner" },
+]
+found = []
+
+[[case]]
+id = "a-role-that-is-also-a-party-short-name-is-found"
+sentences = [
+  "Brightline Studio Ltd (the \"Studio\") pays. Studio signs.",
+]
+parties = [
+  { name = "Brightline Studio Ltd", yours = false },
+]
+terms = [
+  { term = "Studio", definition = "Brightline Studio Ltd (the \"Studio\") pays." },
+]
+detector = [
+  { text = "Studio", kind = "person", source = "ner" },
+]
+found = [
+  { text = "Brightline Studio Ltd", kind = "company", source = "party_details" },
+  { text = "Studio", kind = "company", source = "party_details", nth = 2 },
+  { text = "Studio", kind = "company", source = "party_details", nth = 3 },
+]
+
+[[case]]
+id = "the-governing-law-place-stays-readable"
+sentences = [
+  "This Agreement is governed by the laws of England and Wales.",
+]
+detector = [
+  { text = "England and Wales", kind = "address", source = "ner" },
+]
+found = []
+
+[[case]]
+id = "an-address-is-cut-at-the-place"
+sentences = [
+  "Governed by the laws of England and Wales.",
+]
+detector = [
+  { text = "laws of England and Wales", kind = "address", source = "ner" },
+]
+found = [
+  { text = "laws of", kind = "address", source = "ner" },
+]
+
+[[case]]
+id = "a-name-that-touches-the-place-stays-whole"
+sentences = [
+  "Governed by the laws of England and Wales Hughes agreed.",
+]
+detector = [
+  { text = "Wales Hughes", kind = "person", source = "ner" },
+]
+found = [
+  { text = "Wales Hughes", kind = "person", source = "ner" },
+]
+
+[[case]]
+id = "a-span-across-two-sentences-is-split"
+sentences = [
+  "Ask Smith.",
+  "Jones signs.",
+]
+detector = [
+  { text = "Smith. Jones", kind = "person", source = "ner" },
+]
+found = [
+  { text = "Smith.", kind = "person", source = "ner" },
+  { text = "Jones", kind = "person", source = "ner" },
+]
+
+[[case]]
+id = "a-span-across-three-sentences-is-split"
+sentences = [
+  "Ask Smith.",
+  "Then Jones.",
+  "Then Brown signs.",
+]
+detector = [
+  { text = "Smith. Then Jones. Then Brown", kind = "person", source = "ner" },
+]
+found = [
+  { text = "Smith.", kind = "person", source = "ner" },
+  { text = "Then Jones.", kind = "person", source = "ner" },
+  { text = "Then Brown", kind = "person", source = "ner" },
+]
+
+[[case]]
+id = "a-white-space-only-detector-span-is-dropped"
+sentences = [
+  "One two three.",
+]
+detector = [
+  { text = " ", kind = "person", source = "ner" },
+]
+found = []
+
+[[case]]
+id = "an-email-beats-a-detector-address"
+sentences = [
+  "Write to a@b.com for help.",
+]
+detector = [
+  { text = "Write to a@b.com", kind = "address", source = "ner" },
+]
+found = [
+  { text = "Write to", kind = "address", source = "ner" },
+  { text = "a@b.com", kind = "email", source = "pattern" },
+]
+
+[[case]]
+id = "a-detector-span-with-no-letter-left-is-dropped"
+sentences = [
+  "Brightline Studio Ltd, pays.",
+]
+parties = [
+  { name = "Brightline Studio Ltd", yours = false },
+]
+detector = [
+  { text = "Studio Ltd,", kind = "address", source = "ner" },
+]
+found = [
+  { text = "Brightline Studio Ltd", kind = "company", source = "party_details" },
+]
+
+[[case]]
+id = "a-detector-span-keeps-only-its-lead-word"
+sentences = [
+  "Signed by Sarah Jones.",
+]
+detector = [
+  { text = "by Sarah Jones", kind = "person", source = "ner" },
+]
+found = [
+  { text = "by", kind = "person", source = "ner" },
+  { text = "Sarah Jones", kind = "person", source = "rule" },
+]
