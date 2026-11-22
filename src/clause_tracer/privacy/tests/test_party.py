@@ -161,3 +161,7 @@ def test_hard_list_unchanged_will_price() -> None:
     party = Party(name="Will Price", address=None, yours=False)
 
     assert spans("Will pay. Will Price signs. Price is 5. Contact Will.", (party,)) == [(10, 20)]
+
+
+def test_a_company_name_that_is_only_a_suffix_gives_nothing() -> None:
+    assert spans("Ltd pays.", (Party(name="Ltd", address=None, yours=False),)) == []

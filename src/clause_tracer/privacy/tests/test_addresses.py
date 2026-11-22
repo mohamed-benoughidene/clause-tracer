@@ -138,3 +138,11 @@ def test_nearest_segment_over_120_characters_gives_the_postcode_alone() -> None:
 
 def test_non_ascii_capital_in_a_street() -> None:
     assert spans("5 Müller Street, Köln") == [(0, 21)]
+
+
+def test_truncated_chain_stops_at_a_hard_stop() -> None:
+    assert spans("Done; Mail 1 Aaaa, Bbbb, Cccc, Dddd, Eeee, Ffff, Leeds LS1 4AB") == [(25, 62)]
+
+
+def test_hard_stop_between_the_start_and_the_postcode_gives_the_postcode_alone() -> None:
+    assert spans("Mail 1 Aaaa, Bbbb; Cccc, Dddd, Eeee, Ffff, Gggg, Leeds LS1 4AB") == [(55, 62)]

@@ -226,3 +226,7 @@ def test_non_ascii_letter_does_not_cut_a_name() -> None:
         ("Zoë Smith", 4, 13),
         ("Smith", 8, 13),
     ]
+
+
+def test_one_word_before_a_title_is_not_a_name() -> None:
+    assert found("Signed by Smith Director today.") == []

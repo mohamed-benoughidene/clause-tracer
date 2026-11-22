@@ -970,7 +970,7 @@ When this is done, `privacy` finds typed party details with their variants, emai
   - **Rules:** T1 (pure functions), T11 (the six values are the planner's, to confirm).
   - **Depends on:** S4-M2-T13
 
-- [ ] **S4-M2-T15: Tests for three untested paths (tests only)**
+- [x] **S4-M2-T15: Tests for three untested paths (tests only)**
   - **Build:** None. This task adds tests and changes no code. The M2 code review found three paths that no test ran: the hard-stop rule of a truncated address chain (`addresses.py`, lines 79 and 80), the rule that a one-word name before a job title is not a name (`people.py`, line 144), and the early return of `_short_names` for a company name that is only a suffix (`party.py`, line 89).
   - **Files:** `src/clause_tracer/privacy/tests/test_addresses.py`, `src/clause_tracer/privacy/tests/test_people.py`, `src/clause_tracer/privacy/tests/test_party.py`.
   - **Tests first:** Add these 4 tests. The planner ran each case on 22 Nov 2026 against the code of S4-M2-T14. All four must pass with no code change:
