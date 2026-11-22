@@ -1089,7 +1089,7 @@ When this is done, `find_personal_data` turns a `PrivacyInput` and a detector in
   - **Rules:** Spec 4.2 (roles the contract defines are kept), [system design 15.4](../system-design.md#154-stage-4-privacy-code-finders-and-placeholders) (the 20 Nov decision), question 11.
   - **Depends on:** S4-M3-T1, S4-M2-T1
 
-- [ ] **S4-M3-T3: The governing-law place is kept**
+- [x] **S4-M3-T3: The governing-law place is kept**
   - **Build:** Spec 4.2 keeps the place named in the governing-law clause only when it is a country, a nation of the United Kingdom ("England and Wales" counts as one), a US state, a Canadian province or an Australian state (owner decision of 21 Nov 2026). Any other place is not kept: a finder's flag on it stays, and the text is replaced. Code cannot be unsure here, so there is no "unsure" mark in stage 4.
     - In `_patterns.py`, add two strings (fragments, with no `_RE`):
       ```python

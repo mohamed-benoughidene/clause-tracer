@@ -11,8 +11,9 @@ from clause_tracer.core import (
     PiiSource,
     PiiSuggestion,
     PlaceholderKind,
+    Span,
 )
-from clause_tracer.privacy._spans import trimmed_span
+from clause_tracer.privacy._spans import overlaps, subtract_spans, trimmed_span
 from clause_tracer.privacy.names import (
     EXTENDED_COMPANY_SUFFIXES,
     HONORIFICS,
@@ -145,4 +146,33 @@ def drop_allowed(
         span_text = text[suggestion.span.start : suggestion.span.end]
         if normalised_text(span_text) not in allowed:
             kept.append(suggestion)
+    return tuple(kept)
+
+
+def cut_in_places(
+    text: str,
+    suggestions: Sequence[PiiSuggestion],
+    places: Sequence[Span],
+) -> tuple[PiiSuggestion, ...]:
+    """Keep the governing-law place, cutting every span that runs into it."""
+
+    kept: list[PiiSuggestion] = []
+    for suggestion in suggestions:
+        if suggestion.source in (PiiSource.USER, PiiSource.PARTY_DETAILS):
+            kept.append(suggestion)
+            continue
+        hits = [place for place in places if overlaps(place, suggestion.span)]
+        if not hits:
+            kept.append(suggestion)
+            continue
+        if suggestion.kind in (PlaceholderKind.PERSON, PlaceholderKind.COMPANY):
+            kept.append(suggestion)
+            continue
+        for piece in subtract_spans(suggestion.span, hits):
+            trimmed = trimmed_span(text, piece)
+            if trimmed is None:
+                continue
+            if not any(character.isalnum() for character in text[trimmed.start : trimmed.end]):
+                continue
+            kept.append(PiiSuggestion(span=trimmed, kind=suggestion.kind, source=suggestion.source))
     return tuple(kept)
