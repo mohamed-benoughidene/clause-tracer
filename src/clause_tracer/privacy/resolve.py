@@ -164,7 +164,8 @@ def cut_in_places(
     suggestions: Sequence[PiiSuggestion],
     places: Sequence[Span],
 ) -> tuple[PiiSuggestion, ...]:
-    """Keep the governing-law place, cutting every span that runs into it."""
+    """Keep the governing-law place. Cut every span that runs into it, except a
+    PERSON or COMPANY span, which stays whole (question 25)."""
 
     kept: list[PiiSuggestion] = []
     for suggestion in suggestions:

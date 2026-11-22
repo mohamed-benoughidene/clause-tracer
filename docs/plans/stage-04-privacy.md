@@ -1464,7 +1464,7 @@ When this is done, `find_personal_data` turns a `PrivacyInput` and a detector in
   - **Rules:** T1, Spec 4.2 (variants share one placeholder), question 12.
   - **Depends on:** S4-M3-T7
 
-- [ ] **S4-M3-T13: The docstring of `cut_in_places` says what the code does (code review of M3, finding 4)**
+- [x] **S4-M3-T13: The docstring of `cut_in_places` says what the code does (code review of M3, finding 4)**
   - **Build:** In `src/clause_tracer/privacy/resolve.py`, replace the docstring of `cut_in_places` with this text and change no other line: `"""Keep the governing-law place. Cut every span that runs into it, except a PERSON or COMPANY span, which stays whole (question 25)."""`. The code is right (S4-M3-T3 and its `*_stays_whole_*` tests); only the old docstring, "cutting every span that runs into it", was wrong.
   - **Files:** `src/clause_tracer/privacy/resolve.py`.
   - **Tests first:** None (a docstring has no behaviour).
