@@ -1246,7 +1246,7 @@ When this is done, `find_personal_data` turns a `PrivacyInput` and a detector in
   - **Rules:** I3 (one input object), I11 (the contract note is written in S4-M5-T4), P3 (a fixed series of steps), T2 (the detector is passed in), fail closed (the `PiiDetector` docstring "Raises: None" does not license catching an error).
   - **Depends on:** S4-M1-T3, S4-M1-T5, S4-M2-T3, S4-M2-T4, S4-M2-T5, S4-M2-T6, S4-M2-T7, S4-M2-T12, S4-M3-T2, S4-M3-T3, S4-M3-T4, S4-M3-T5
 
-- [ ] **S4-M3-T7: Group variants into numbered entities**
+- [x] **S4-M3-T7: Group variants into numbered entities**
   - **Build:** In `src/clause_tracer/privacy/entities.py`: `def group_entities(document: Document, suggestions: Sequence[PiiSuggestion]) -> tuple[PlaceholderEntity, ...]`.
     - Sort the suggestions by `(span.start, span.end)`. Then, for each suggestion in that order: a span with `start < 0` or an `end` after `len(document.text)` raises `ValueError("privacy: suggestion span is outside the text")`, and then a span that overlaps the one before it (`overlaps` of `_spans`) raises `ValueError("privacy: suggestions overlap")`.
     - `_word_set(kind: PlaceholderKind, text: str) -> frozenset[str]`: `folded = fold_text(text).strip()`. `PERSON`: `words = strip_honorific(folded.split())`. `COMPANY`: `words = folded.split()`, and when `len(words) > 1` and `words[-1].strip(".,")` is in `COMPANY_SUFFIXES`, drop the last word. `ADDRESS`: the non-empty parts of `re.split(r"[\s,]+", folded)`. `PHONE`: one word, the digits of `folded`. `ID` and `BANK`: one word, the characters of `folded` for which `str.isalnum()` is true. `EMAIL`: one word, `folded`. Then strip `".,;:"` from each word and drop empty words. When no word is left, the set is `frozenset({"\0" + folded})`.
