@@ -1532,7 +1532,7 @@ When this is done, `anonymise` builds the `PlaceholderText` with its segment map
   - **Rules:** Testing strategy 5 (invariant 3), 8 and 14, Constitution T6 and T13.
   - **Depends on:** S4-M3-T6, S4-M3-T7, S4-M3-T11, S4-M4-T3, S4-M4-T4, S4-M4-T5
 
-- [ ] **S4-M4-T7: A stray open marker does not swallow a token**
+- [x] **S4-M4-T7: A stray open marker does not swallow a token**
   - **Build:** In `placeholder.py`, change `TOKEN_RE` to `re.compile(re.escape(PLACEHOLDER_OPEN) + "[^" + re.escape(PLACEHOLDER_OPEN) + re.escape(PLACEHOLDER_CLOSE) + "]*" + re.escape(PLACEHOLDER_CLOSE))`, so a match holds no `⟦` after its first character. Nothing else changes: the type stays `Final[re.Pattern[str]]`, and `restore_reply` keeps its code. A lone `⟦` before a real token is left as it is, and the token after it comes back. Owner decision of 22 Nov 2026, from the M4 code review (finding 1).
   - **Files:** `src/clause_tracer/privacy/placeholder.py`, `src/clause_tracer/privacy/tests/test_restore_reply.py`.
   - **Tests first:** in `test_restore_reply.py`, over the same text and entities as the other tests of this file, add `test_a_lone_open_marker_before_a_token_is_left` (`"a ⟦ b ⟦Person 1⟧ c"` gives `"a ⟦ b Sarah Jones c"`). The test fails before the change, because the whole run `⟦ b ⟦Person 1⟧` is one unknown token and raises.

@@ -85,3 +85,9 @@ def test_a_lone_open_marker_is_left() -> None:
     placeholder, document = _placeholder()
 
     assert restore_reply(placeholder, document, "a ⟦ b") == "a ⟦ b"
+
+
+def test_a_lone_open_marker_before_a_token_is_left() -> None:
+    placeholder, document = _placeholder()
+
+    assert restore_reply(placeholder, document, "a ⟦ b ⟦Person 1⟧ c") == ("a ⟦ b Sarah Jones c")

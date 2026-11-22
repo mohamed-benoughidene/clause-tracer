@@ -27,6 +27,7 @@ from clause_tracer.privacy._tokens import ESCAPES, placeholder_token
 TOKEN_RE: Final[re.Pattern[str]] = re.compile(
     re.escape(PLACEHOLDER_OPEN)
     + "[^"
+    + re.escape(PLACEHOLDER_OPEN)
     + re.escape(PLACEHOLDER_CLOSE)
     + "]*"
     + re.escape(PLACEHOLDER_CLOSE)
