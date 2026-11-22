@@ -15,7 +15,7 @@ from clause_tracer.core import (
     PlaceholderKind,
 )
 from clause_tracer.privacy._spans import overlaps
-from clause_tracer.privacy.names import COMPANY_SUFFIXES, fold_text, strip_honorific
+from clause_tracer.privacy.names import EXTENDED_COMPANY_SUFFIXES, fold_text, strip_honorific
 
 
 def _word_set(kind: PlaceholderKind, text: str) -> frozenset[str]:
@@ -27,7 +27,7 @@ def _word_set(kind: PlaceholderKind, text: str) -> frozenset[str]:
         words = list(strip_honorific(folded.split()))
     elif kind == PlaceholderKind.COMPANY:
         words = folded.split()
-        if len(words) > 1 and words[-1].strip(".,") in COMPANY_SUFFIXES:
+        if len(words) > 1 and words[-1].strip(".,") in EXTENDED_COMPANY_SUFFIXES:
             words = words[:-1]
     elif kind == PlaceholderKind.ADDRESS:
         words = [part for part in re.split(r"[\s,]+", folded) if part]

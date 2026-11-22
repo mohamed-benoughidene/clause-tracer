@@ -1454,7 +1454,7 @@ When this is done, `find_personal_data` turns a `PrivacyInput` and a detector in
   - **Rules:** Testing strategy 5 (the hazard alphabet) and 14, Constitution T6.
   - **Depends on:** S4-M3-T6, S4-M1-T5, S4-M3-T1, S4-M3-T3, S4-M3-T4, S4-M3-T5
 
-- [ ] **S4-M3-T12: Entity grouping drops the extended company suffixes (code review of M3, finding 1)**
+- [x] **S4-M3-T12: Entity grouping drops the extended company suffixes (code review of M3, finding 1)**
   - **Build:** The allow-list (`core_words` in `resolve.py`) drops a suffix of `EXTENDED_COMPANY_SUFFIXES`, but `_word_set` in `entities.py` drops only a suffix of `COMPANY_SUFFIXES`. So `Acme LP` and `Acme Corporation` become two entities, and the allow-list reads them as one name. The owner decided on 22 Nov 2026 that grouping uses the extended list too. In `src/clause_tracer/privacy/entities.py`, import `EXTENDED_COMPANY_SUFFIXES` from `clause_tracer.privacy.names` in place of `COMPANY_SUFFIXES`, and in the `COMPANY` branch of `_word_set` test `words[-1].strip(".,") in EXTENDED_COMPANY_SUFFIXES`. Change nothing else. The owner table `entities.toml` has no row with an extended suffix, so no expected value changes.
   - **Files:** `src/clause_tracer/privacy/entities.py`, `src/clause_tracer/privacy/tests/test_entities.py`.
   - **Tests first:** in `test_entities.py`, read as in S4-M3-T7:

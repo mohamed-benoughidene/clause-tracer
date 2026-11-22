@@ -207,3 +207,28 @@ def test_an_honorific_alone_groups_by_its_text() -> None:
     )
 
     assert _read(document, group_entities(document, suggestions)) == [("person-1", ["Ms", "Ms"])]
+
+
+def test_an_extended_suffix_is_ignored() -> None:
+    text = "Acme LP and Acme Corporation and Acme."
+    document = make_case([text]).document
+    suggestions = (
+        suggestion(text, "Acme LP", COMPANY, RULE),
+        suggestion(text, "Acme Corporation", COMPANY, RULE),
+        suggestion(text, "Acme", COMPANY, RULE, 3),
+    )
+
+    assert _read(document, group_entities(document, suggestions)) == [
+        ("company-1", ["Acme LP", "Acme Corporation", "Acme"])
+    ]
+
+
+def test_an_extended_suffix_alone_is_a_name() -> None:
+    text = "LP and LP"
+    document = make_case([text]).document
+    suggestions = (
+        suggestion(text, "LP", COMPANY, RULE),
+        suggestion(text, "LP", COMPANY, RULE, 2),
+    )
+
+    assert _read(document, group_entities(document, suggestions)) == [("company-1", ["LP", "LP"])]
