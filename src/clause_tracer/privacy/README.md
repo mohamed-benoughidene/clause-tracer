@@ -134,6 +134,10 @@ The line kinds come in this order: `source`, `counts`, each `entity`, each
 Every free-text field has each tab, carriage return and line break replaced by
 one space.
 
+The `span` lines hold the original text of each name, so the report of a real
+contract holds real names. The report is for the developer and for the invented
+sample. Do not send it to a log.
+
 ## Sample fixture
 `sample_input.py` holds the input of `find_personal_data` for the sample: the
 document, its clauses, the typed parties and the defined terms. `privacy` may not

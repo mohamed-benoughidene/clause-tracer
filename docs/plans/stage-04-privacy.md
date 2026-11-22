@@ -1638,7 +1638,7 @@ When this is done, `python -m clause_tracer.privacy` prints the entities and the
   - **Rules:** T11.
   - **Depends on:** S4-M5-T3
 
-- [ ] **S4-M5-T8: The report holds real names, and the README says so**
+- [x] **S4-M5-T8: The report holds real names, and the README says so**
   - **Build:** In `src/clause_tracer/privacy/README.md`, in the section "The printed report", add this paragraph after the sentence "Every free-text field has each tab, carriage return and line break replaced by one space.": "The `span` lines hold the original text of each name, so the report of a real contract holds real names. The report is for the developer and for the invented sample. Do not send it to a log." Change nothing else. Owner decision of 22 Nov 2026, from the M5 code review (finding 2).
   - **Files:** `src/clause_tracer/privacy/README.md`.
   - **Tests first:** None. `test_readme_names_every_public_name` must still pass.
