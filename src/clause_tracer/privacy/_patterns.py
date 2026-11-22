@@ -36,3 +36,20 @@ IBAN: Final[str] = (
     r"(?<![A-Za-z0-9])[A-Z]{2}\d{2}(?:[ ]?[A-Z0-9]{4}){2,7}(?:[ ]?[A-Z0-9]{1,3})?(?![A-Za-z0-9])"
 )
 IBAN_RE: Final[re.Pattern[str]] = re.compile(IBAN)
+H: Final[str] = r"[ \t]"
+WORD: Final[str] = r"[A-Z][A-Za-z0-9'’&-]*"
+SUFFIX_WORDS: Final[str] = (
+    r"(?:Ltd|Plc|PLC|LLC|LLP|LP|Inc|Corp|Corporation|Incorporated|GmbH|AG|SARL|SAS|BV|NV"
+    r"|Pty|SRL|SpA|Oy|KG|UG|Pte|Co)"
+)
+SUFFIX: Final[str] = (
+    r"(?:S\.A\.R\.L\.|L\.L\.C\.|L\.L\.P\.|P\.L\.C\.|S\.A\.|N\.V\.|B\.V\."
+    rf"|Co\.?{H}+KG(?![-\w])|Pte{H}+Ltd(?![-\w])"
+    rf"|Limited(?![-\w])(?!{H}+(?:Liability|Warranty|Partnership|Licen[cs]e))"
+    rf"|{SUFFIX_WORDS}(?![-\w]))"
+)
+CONNECTOR: Final[str] = (
+    rf"(?:GmbH(?={H}+&{H}+Co\b)|(?!(?:{SUFFIX_WORDS}|Limited)(?![-\w])){WORD}|&|of|and)"
+)
+COMPANY: Final[str] = rf"(?<![\w]){WORD}(?:{H}+{CONNECTOR}){{0,5}}{H}+{SUFFIX}"
+COMPANY_RE: Final[re.Pattern[str]] = re.compile(COMPANY)

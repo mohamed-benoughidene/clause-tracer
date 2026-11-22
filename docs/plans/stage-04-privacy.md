@@ -398,7 +398,7 @@ When this is done, `privacy` finds typed party details with their variants, emai
   - **Rules:** T1, ADR 0008 (typed party details come first), Spec 4.2 (every copy of a party's name and address), [system design 15.4](../system-design.md#154-stage-4-privacy-code-finders-and-placeholders) (the 20 Nov decision on short names), questions 4 and 17 (layers 2 and 3).
   - **Depends on:** S4-M1-T6, S4-M2-T1
 
-- [ ] **S4-M2-T5: Company names by suffix**
+- [x] **S4-M2-T5: Company names by suffix**
   - **Build:** In `_patterns.py`, add these constants (`H`, `WORD`, `SUFFIX_WORDS`, `SUFFIX` and `CONNECTOR` are fragments, with no `_RE`; `COMPANY` is compiled as the rules say):
     ```python
     H = r"[ \t]"
