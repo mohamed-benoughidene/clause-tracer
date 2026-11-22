@@ -683,6 +683,14 @@ The task plan of each stage is written in `docs/plans/` just before the stage is
 - **Tests, in the testing strategy.** Section 4 (the `privacy` row), section 5 (invariant 3), section 14.
 - **Task plan.** The task plan is [the stage 4 plan](plans/stage-04-privacy.md).
 - **Decided 20 Nov 2026** (question 7 of [the stage 3 plan](plans/stage-03-links.md)): a defined term that the typed party details or a name finder also match is dropped from the allow-list, so a party's short name (`Brightline Studio Ltd ("Brightline")`) is always replaced.
+- **Decided 21 and 22 Nov 2026** (questions 1 to 26 of [the stage 4 plan](plans/stage-04-privacy.md); the rules for the governing-law place are also in Spec 4.2):
+  - **Finders** (questions 1 to 4, 15 to 17, 22 to 24, 26). A person who is not a typed party is found by an honorific, a signature phrase or a job title. A typed party is a company when its last word is on a list of 15 suffixes. An address is a street pattern or a chain built backwards from a postcode, at most 5 comma segments and 120 characters, and a longer chain keeps its last part. A one-word form counts only with a capital, and a common word needs evidence of a name. Patterns cover email, phone, keyword IDs and bank values, IBAN, and four bare identifiers (NINO, GB VAT number, UK company prefix, Luhn-checked card number, kind `BANK`).
+  - **Value only** (question 5). An ID or bank span covers the value. The words "company number" stay in the text.
+  - **Detector and overlaps** (questions 7 to 9, 11, 21). The detector runs once over the whole text, and its result is checked once. A span that crosses a sentence start is cut, never dropped. Overlaps resolve by source (`USER`, `PARTY_DETAILS`, `PATTERN`, `RULE`, `NER`), then length, and the lower span is cut. Only same-kind `NER` spans join. A detector match never removes a defined term from the allow-list.
+  - **Governing-law place** (questions 14, 19, 20, 25). It is kept only when it is on the owner's closed list. A US state counts only as `State of X`. A `PERSON` or `COMPANY` span that touches the place stays whole, and every other kind is cut.
+  - **Grouping** (questions 12, 13). A short form that fits two or more full names gets its own placeholder. Replacing known names in position text and in rewrite instructions is stage 8 work.
+  - **Escape and restore** (questions 6, 10). The token form is `⟦Person 1⟧`. Each `⟦` and `⟧` of the contract is its own `escape` segment and is sent as `[` and `]`. Restore has three jobs: the whole text, the tokens of an AI reply, and a span of the sent text.
+  - **Doubts** (decided 21 Nov 2026). Stage 4 produces none. Stage 6 and stage 12 build the code that fills the doubt list.
 
 ### 15.5 Stage 5: `ingest` for Word and PDF
 
