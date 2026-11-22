@@ -32,3 +32,7 @@ SORT_CODE: Final[str] = r"(?i:sort[ ]code)[ \t]*:?[ \t]*(?P<v>\d{2}-?\d{2}-?\d{2
 SORT_CODE_RE: Final[re.Pattern[str]] = re.compile(SORT_CODE)
 ACCOUNT_NUMBER: Final[str] = r"(?i:account[ ](?:number|no\.?))[ \t]*:?[ \t]*(?P<v>\d{8})(?!\d)"
 ACCOUNT_NUMBER_RE: Final[re.Pattern[str]] = re.compile(ACCOUNT_NUMBER)
+IBAN: Final[str] = (
+    r"(?<![A-Za-z0-9])[A-Z]{2}\d{2}(?:[ ]?[A-Z0-9]{4}){2,7}(?:[ ]?[A-Z0-9]{1,3})?(?![A-Za-z0-9])"
+)
+IBAN_RE: Final[re.Pattern[str]] = re.compile(IBAN)

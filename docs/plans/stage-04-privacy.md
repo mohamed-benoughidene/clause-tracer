@@ -359,7 +359,7 @@ When this is done, `privacy` finds typed party details with their variants, emai
   - **Rules:** T1, ADR 0008 (pattern recognisers sit in the code layer), Spec 4.2.
   - **Depends on:** S4-M1-T6
 
-- [ ] **S4-M2-T3: IBAN with the mod-97 check**
+- [x] **S4-M2-T3: IBAN with the mod-97 check**
   - **Build:** In `_patterns.py`, add `IBAN = r"(?<![A-Za-z0-9])[A-Z]{2}\d{2}(?:[ ]?[A-Z0-9]{4}){2,7}(?:[ ]?[A-Z0-9]{1,3})?(?![A-Za-z0-9])"`. In `patterns.py`, add `def iban_is_valid(candidate: str) -> bool`: remove the spaces; return `False` unless the result has 15 to 34 characters, all `str.isalnum()` and ASCII, and its first two characters are letters; move the first four characters to the end; replace each character with `str(int(character, 36))`; return `int("".join(...)) % 97 == 1`. Change `find_patterns` so that it also adds, for each `IBAN_RE` match for which `iban_is_valid(match.group())` is true, a `PiiSuggestion` of kind `BANK` and source `PATTERN`. A match that fails the check gives nothing.
   - **Files:** `src/clause_tracer/privacy/_patterns.py`, `src/clause_tracer/privacy/patterns.py`, `src/clause_tracer/privacy/tests/test_iban.py`.
   - **Tests first:** in `test_iban.py`: `test_valid_iban` (`iban_is_valid("GB82 WEST 1234 5698 7654 32")` is true); `test_compact_iban_is_valid` (`"GB82WEST12345698765432"`); `test_german_iban_is_valid` (`"DE89 3704 0044 0532 0130 00"`); `test_changed_digit_is_invalid` (`"GB83 WEST 1234 5698 7654 32"` is false); `test_too_short_is_invalid` (`"GB82"` is false); `test_find_patterns_keeps_only_valid_ibans` (`"Pay to GB82 WEST 1234 5698 7654 32 or GB83 WEST 1234 5698 7654 32."` gives one `BANK` span, 7 to 34).
