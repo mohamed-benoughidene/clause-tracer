@@ -41,3 +41,16 @@ def test_a_bad_fixture_returns_3(tmp_path: Path, capsys: pytest.CaptureFixture[s
     assert main(["--input", str(path)]) == 3
 
     assert capsys.readouterr().err == "clause_tracer.privacy: privacy sample: not JSON\n"
+
+
+def test_a_file_that_is_not_utf8_returns_3(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    path = tmp_path / "latin.json"
+    path.write_bytes(b"\xff\xfe\x00")
+
+    assert main(["--input", str(path)]) == 3
+
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err.startswith("clause_tracer.privacy: cannot read")

@@ -1646,7 +1646,7 @@ When this is done, `python -m clause_tracer.privacy` prints the entities and the
   - **Rules:** Constitution S3 (the README states the contract), the Real names rule of the README.
   - **Depends on:** S4-M5-T4
 
-- [ ] **S4-M5-T9: A file that is not UTF-8 returns 3**
+- [x] **S4-M5-T9: A file that is not UTF-8 returns 3**
   - **Build:** No code change. In `src/clause_tracer/privacy/tests/test_main.py`, add `test_a_file_that_is_not_utf8_returns_3`: write the bytes `b"\xff\xfe\x00"` to a file in `tmp_path` with `write_bytes`, call `main(["--input", str(path)])`, and assert that it returns 3, that standard output is empty, and that standard error starts with `clause_tracer.privacy: cannot read`. If the test fails, stop and tell the owner: the code does not match S4-M5-T2. Owner decision of 22 Nov 2026, from the M5 code review (finding 3).
   - **Files:** `src/clause_tracer/privacy/tests/test_main.py`.
   - **Tests first:** `test_a_file_that_is_not_utf8_returns_3`.
