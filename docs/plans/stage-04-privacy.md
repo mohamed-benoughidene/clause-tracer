@@ -1321,7 +1321,7 @@ When this is done, `find_personal_data` turns a `PrivacyInput` and a detector in
   - **Rules:** Constitution T11, testing strategy 10.
   - **Depends on:** S4-M3-T6, S4-M3-T7, S4-M3-T8, S4-M3-T9
 
-- [ ] **S4-M3-T11: The planted-case strategy and the properties of the resolve step and of `find_personal_data`**
+- [x] **S4-M3-T11: The planted-case strategy and the properties of the resolve step and of `find_personal_data`**
   - **Build:** In `src/clause_tracer/privacy/tests/strategies.py` (test code, not exported):
     - The file starts with these imports. The four kind names are aliases of `PlaceholderKind` members, so that the pool below runs as written:
       ```python
