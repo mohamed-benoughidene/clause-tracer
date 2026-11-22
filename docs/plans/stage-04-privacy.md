@@ -1548,7 +1548,7 @@ When this is done, `anonymise` builds the `PlaceholderText` with its segment map
   - **Rules:** S4-M4-T2, S4-M4-T4, the M4 code review (section 8).
   - **Depends on:** S4-M4-T7
 
-- [ ] **S4-M4-T9: One raise in `_check_segments`**
+- [x] **S4-M4-T9: One raise in `_check_segments`**
   - **Build:** In `placeholder.py`, rewrite `_check_segments` with the same name, the same signature and the same message `privacy: segments do not tile the texts`, so that it has one `raise` and no other. Two private helpers hold the conditions: `_segments_run_on(placeholder: PlaceholderText, document: Document) -> bool` is true when the sent spans run one after another from 0 to `len(placeholder.text)`, the original spans run one after another from 0 to `len(document.text)`, and no span has an end before its start; `_lengths_fit(segment: Segment) -> bool` is true when a `COPY` segment has equal lengths on both sides, an `ESCAPE` segment has length 1 on both sides, and an `ENTITY` segment has an original span of length 1 or more. `_check_segments` raises when `not _segments_run_on(placeholder, document)` or when `not all(_lengths_fit(segment) for segment in placeholder.segments)`; each condition is held in a named boolean first. No behaviour changes. Owner decision of 22 Nov 2026, from the M4 code review (finding 3).
   - **Files:** `src/clause_tracer/privacy/placeholder.py`.
   - **Tests first:** none new. The seven tests of `test_restore_text.py` and the seven properties of `test_placeholder_properties.py` must pass as before, with the same messages.

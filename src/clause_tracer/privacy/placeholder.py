@@ -160,29 +160,42 @@ def anonymise(document: Document, entities: Sequence[PlaceholderEntity]) -> Plac
     return PlaceholderText(text="".join(pieces), entities=tuple(entities), segments=tuple(segments))
 
 
-def _check_segments(placeholder: PlaceholderText, document: Document) -> None:
-    """Raise unless the segments tile both texts and each kind has its lengths."""
+def _segments_run_on(placeholder: PlaceholderText, document: Document) -> bool:
+    """Say whether the spans run on from 0 to the end of each text."""
 
     sent = 0
     original = 0
     for segment in placeholder.segments:
         if segment.sent.start != sent or segment.original.start != original:
-            raise ValueError("privacy: segments do not tile the texts")
+            return False
         if segment.sent.end < segment.sent.start or segment.original.end < segment.original.start:
-            raise ValueError("privacy: segments do not tile the texts")
+            return False
         sent = segment.sent.end
         original = segment.original.end
-    if sent != len(placeholder.text) or original != len(document.text):
+    return sent == len(placeholder.text) and original == len(document.text)
+
+
+def _lengths_fit(segment: Segment) -> bool:
+    """Say whether the two lengths of one segment suit its kind."""
+
+    sent_length = segment.sent.end - segment.sent.start
+    original_length = segment.original.end - segment.original.start
+    if segment.kind is SegmentKind.COPY:
+        return sent_length == original_length
+    if segment.kind is SegmentKind.ESCAPE:
+        return sent_length == 1 and original_length == 1
+    if segment.kind is SegmentKind.ENTITY:
+        return original_length >= 1
+    return False
+
+
+def _check_segments(placeholder: PlaceholderText, document: Document) -> None:
+    """Raise unless the segments tile both texts and each kind has its lengths."""
+
+    segments_run_on = _segments_run_on(placeholder, document)
+    lengths_fit = all(_lengths_fit(segment) for segment in placeholder.segments)
+    if not segments_run_on or not lengths_fit:
         raise ValueError("privacy: segments do not tile the texts")
-    for segment in placeholder.segments:
-        sent_length = segment.sent.end - segment.sent.start
-        original_length = segment.original.end - segment.original.start
-        if segment.kind is SegmentKind.COPY and sent_length != original_length:
-            raise ValueError("privacy: segments do not tile the texts")
-        if segment.kind is SegmentKind.ESCAPE and (sent_length != 1 or original_length != 1):
-            raise ValueError("privacy: segments do not tile the texts")
-        if segment.kind is SegmentKind.ENTITY and original_length < 1:
-            raise ValueError("privacy: segments do not tile the texts")
 
 
 def restore_text(placeholder: PlaceholderText, document: Document) -> str:
