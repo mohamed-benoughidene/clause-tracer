@@ -3,4 +3,14 @@
 Implements Spec section 6.1 steps 3-4; 8.
 """
 
-__all__: list[str] = []
+from clause_tracer.privacy.sample_input import (
+    PrivacyInput,
+    dump_privacy_fixture,
+    load_privacy_fixture,
+)
+
+__all__: list[str] = [
+    "PrivacyInput",
+    "dump_privacy_fixture",
+    "load_privacy_fixture",
+]
