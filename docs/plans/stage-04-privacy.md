@@ -367,7 +367,7 @@ When this is done, `privacy` finds typed party details with their variants, emai
   - **Rules:** T1, ADR 0008 (checksum patterns for bank numbers).
   - **Depends on:** S4-M2-T2
 
-- [ ] **S4-M2-T4: Typed party details and their variants**
+- [x] **S4-M2-T4: Typed party details and their variants**
   - **Build:** In `src/clause_tracer/privacy/party.py`: `def find_party_details(text: str, parties: Sequence[Party], terms: Sequence[DefinedTerm]) -> tuple[PiiSuggestion, ...]`. It folds `text` once (`fold_for_matching`) and, for each party in order:
     - A party whose `name.strip()` is empty raises `ValueError("privacy: party name is empty")`.
     - `kind` is `COMPANY` when `is_company_name(party.name)`, else `PERSON`. `forms` is `list(name_forms(party.name, kind))`.
