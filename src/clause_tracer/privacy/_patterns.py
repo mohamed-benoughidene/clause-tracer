@@ -146,3 +146,9 @@ SIGNED_BY_CAPS: Final[str] = rf"(?i:signed|executed)\b[^.\n]*?\b(?i:by){H}+({CAP
 SIGNED_BY_CAPS_RE: Final[re.Pattern[str]] = re.compile(SIGNED_BY_CAPS)
 NAME_BEFORE_TITLE: Final[str] = rf"({NAME_RUN}){H}*,{H}*{TITLE_WORDS}\b"
 NAME_BEFORE_TITLE_RE: Final[re.Pattern[str]] = re.compile(NAME_BEFORE_TITLE)
+
+GOVERNING_LAW_CUE: Final[str] = (
+    r"(?i:governed by,?(?: and construed in accordance with,?)? the laws? of)[ \t]+"
+    r"(?:the[ \t]+)?"
+)
+PLACE_END: Final[str] = r"(?![A-Za-z])"
