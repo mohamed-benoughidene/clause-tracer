@@ -55,7 +55,7 @@ CARD_CUE_WINDOW: Final[int] = 40
 CARD_FIRST_DIGITS: Final[str] = "3456"
 GB_VAT_WEIGHTS: Final[tuple[int, ...]] = (8, 7, 6, 5, 4, 3, 2, 10, 1)
 H: Final[str] = r"[ \t]"
-WORD: Final[str] = r"[A-Z][A-Za-z0-9'’&-]*"
+WORD: Final[str] = r"[A-ZÀ-ÖØ-Þ](?:[^\W_]|['’&-])*"
 SUFFIX_WORDS: Final[str] = (
     r"(?:Ltd|Plc|PLC|LLC|LLP|LP|Inc|Corp|Corporation|Incorporated|GmbH|AG|SARL|SAS|BV|NV"
     r"|Pty|SRL|SpA|Oy|KG|UG|Pte|Co)"

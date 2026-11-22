@@ -909,7 +909,7 @@ When this is done, `privacy` finds typed party details with their variants, emai
   - **Rules:** T1 (pure functions), T11 (the values are the planner's, to confirm), ADR 0008 (checksum and prefix patterns sit in the code layer), the [report](../../reports/Privacy%20finder%20design%20choices.md), Q15 (d) and the row "Card and phone vetoes with checksums" of "Ideas from nearby fields", Spec 4.2, questions 24 and 26.
   - **Depends on:** S4-M2-T3
 
-- [ ] **S4-M2-T13: Company names with non-ASCII letters**
+- [x] **S4-M2-T13: Company names with non-ASCII letters**
   - **Build:** The owner chose on 22 Nov 2026 to fix the company pattern now: the row `company-with-a-foreign-suffix` of `finders.toml` (`Müller GmbH delivers.` gives `Müller GmbH`) failed because `WORD` reads only `A` to `Z`. In `src/clause_tracer/privacy/_patterns.py`, replace the `WORD` line of S4-M2-T5 with this line, and change nothing else in the file:
     ```python
     WORD: Final[str] = r"[A-ZÀ-ÖØ-Þ](?:[^\W_]|['’&-])*"

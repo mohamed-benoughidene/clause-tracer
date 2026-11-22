@@ -126,3 +126,28 @@ def test_company_group_holdings_are_not_suffixes() -> None:
 
 def test_comma_after_limited() -> None:
     assert found("Acme Limited, a company, signs.") == [("Acme Limited", 0, 12)]
+
+
+def test_non_ascii_capital_first_letter() -> None:
+    assert found("Müller GmbH delivers.") == [("Müller GmbH", 0, 11)]
+
+
+def test_non_ascii_capital_in_a_later_word() -> None:
+    assert found("Élan Studio Ltd signs") == [("Élan Studio Ltd", 0, 15)]
+
+
+def test_non_ascii_letters_inside_words() -> None:
+    assert found("Zoë Café Limited pays") == [("Zoë Café Limited", 0, 16)]
+
+
+def test_connector_with_a_non_ascii_word() -> None:
+    assert found("The Müller & Söhne GmbH pays.") == [("Müller & Söhne GmbH", 4, 23)]
+
+
+def test_lower_case_non_ascii_start_is_not_a_name() -> None:
+    assert found("élan Ltd") == []
+    assert found("× Ltd") == []
+
+
+def test_capital_outside_latin_1_is_a_known_limit() -> None:
+    assert found("Łukasz Ltd") == []
