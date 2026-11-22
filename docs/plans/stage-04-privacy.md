@@ -1630,7 +1630,7 @@ When this is done, `python -m clause_tracer.privacy` prints the entities and the
   - **Rules:** Constitution T11 and T13 (the promises of Spec 4.2 have tests), testing strategy 8 (positive and negative controls), Spec 14.5.
   - **Depends on:** S4-M5-T2, S4-M5-T4, S4-M5-T5, S4-M1-T4
 
-- [ ] **S4-M5-T7: Read the golden files (Owner)**
+- [x] **S4-M5-T7: Read the golden files (Owner)**
   - **Build:** Owner only. Read `src/clause_tracer/privacy/tests/goldens/developer-agreement.privacy.txt` and `src/clause_tracer/privacy/samples/developer-agreement.privacy.json` against the sample contract, and say whether they are right. The `text` lines of the golden file are the contract as the AI would see it: read them for a name or an address that is still there.
   - **Files:** None.
   - **Tests first:** None.
@@ -1738,6 +1738,7 @@ The docs do not settle these points. Each needs the owner's answer before the ta
 | 22 Nov 2026 | Milestone 4 build record. T1 to T6 are built; the six test files report 6, 14, 7, 7, 8 and 7 passed, and `scripts/check.sh` exits 0. Places where the build differs from the plan text, with no change of behaviour: (1) `placeholder.py` holds three private helpers that the plan does not name: `_check_entities` (the ordered checks of T2), `_copy_gap` (the copy and escape segments of one gap) and `_check_segments` (the tiling checks of T3); (2) `TOKEN_RE` is typed `Final[re.Pattern[str]]`; (3) `_check_segments` also rejects a span whose `end` is before its `start`. No expected value, message, name or signature changed. | The implementer's report, 22 Nov 2026 |
 | 22 Nov 2026 | M4 code review (high effort, three findings). Owner chose to fix all three: S4-M4-T7 (`TOKEN_RE` excludes `⟦` inside a token, so a stray `⟦` no longer swallows a real token), S4-M4-T8 (`restore_reply` checks the entities it reads), S4-M4-T9 (`_check_segments` has one raise). The T4 text has a pointer line and a changed test count. | Owner's answer in chat, 22 Nov 2026, after the M4 review |
 | 22 Nov 2026 | M5 code review (high effort, three findings, no bug). Owner chose to fix findings 2 and 3: S4-M5-T8 (the README says the report holds real names) and S4-M5-T9 (a test for a file that is not UTF-8). Finding 1 is skipped and noted in section 9. The T2 text has a changed test count. | Owner's answer in chat, 22 Nov 2026, after the M5 review |
+| 22 Nov 2026 | S4-M5-T7 done. The owner read the golden file and the fixture in a local viewer (7 entities, 10 spans, the `id-1` line, the capital words left in the sent text, the side-by-side text) and found no problem. The figures marked "owner to confirm" in S4-M5-T3 are confirmed. | The owner's answer in chat, 22 Nov 2026 |
 
 ## 9. Notes for the next stage
 
