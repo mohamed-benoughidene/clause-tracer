@@ -38,6 +38,9 @@ sentence out of order, or an empty party name.
 
 The caller reads and writes the fixture. `privacy` code reads no file (T1).
 
+`tests/goldens/` holds the expected report of the sample, written only by
+`--update-goldens`.
+
 ## Depends on
 core only. The Presidio detector is passed in by cli.
 

@@ -1576,7 +1576,7 @@ When this is done, `python -m clause_tracer.privacy` prints the entities and the
   - **Rules:** S1 and S2 (a module runs alone), I12 (clear flag names, exit codes, errors to standard error), system design 6.2 (exit code 3, "input file").
   - **Depends on:** S4-M5-T1, S4-M1-T4, S4-M3-T6, S4-M3-T7
 
-- [ ] **S4-M5-T3: The golden file**
+- [x] **S4-M5-T3: The golden file**
   - **Build:** Create `src/clause_tracer/privacy/tests/test_goldens.py`: `GOLDENS = Path(__file__).parent / "goldens"` and `test_report_matches_its_golden(check_golden)`, which loads `DEFAULT_INPUT` with `load_privacy_fixture`, runs the same three calls as `main`, and calls `check_golden(GOLDENS / "developer-agreement.privacy.txt", render_privacy_report(...))`. Generate the golden with `.venv/bin/uv run pytest src/clause_tracer/privacy/tests/test_goldens.py --update-goldens` in one commit that holds the test and the golden file and no other file, and read it against the sample by hand (Constitution T11): the report must show the seven entities and the ten spans named below. The owner reads it in S4-M5-T7. Add `goldens/` to the module's README as "written only by `--update-goldens`".
   - **Files:** `src/clause_tracer/privacy/tests/test_goldens.py`, `src/clause_tracer/privacy/tests/goldens/developer-agreement.privacy.txt`.
   - **Tests first:** `test_report_matches_its_golden`.
