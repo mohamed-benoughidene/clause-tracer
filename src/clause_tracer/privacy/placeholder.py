@@ -6,6 +6,7 @@ every other run of characters is copied as it is (question 10).
 """
 
 import re
+from bisect import bisect_right
 from collections.abc import Sequence
 from typing import Final
 
@@ -224,3 +225,32 @@ def restore_reply(placeholder: PlaceholderText, document: Document, reply: str) 
         return first_text[token]
 
     return TOKEN_RE.sub(put_back, reply)
+
+
+def map_to_original(placeholder: PlaceholderText, span: Span) -> Span:
+    """Map one span of the sent text back to a span of the contract text.
+
+    Input:   the placeholder text and a non-empty span of its sent text.
+    Output:  the matching span of the contract, with an edge inside a
+             placeholder snapped out to the whole name.
+    Raises:  ValueError for a span outside the text or an empty span.
+    Effects: none (T1).
+    """
+
+    if span.start < 0 or span.end > len(placeholder.text):
+        raise ValueError("privacy: span is outside the placeholder text")
+    if span.start >= span.end:
+        raise ValueError("privacy: an empty span has no place")
+
+    sent_starts = [segment.sent.start for segment in placeholder.segments]
+    first = placeholder.segments[bisect_right(sent_starts, span.start) - 1]
+    last = placeholder.segments[bisect_right(sent_starts, span.end - 1) - 1]
+    if first.kind is SegmentKind.ENTITY:
+        original_start = first.original.start
+    else:
+        original_start = first.original.start + (span.start - first.sent.start)
+    if last.kind is SegmentKind.ENTITY:
+        original_end = last.original.end
+    else:
+        original_end = last.original.start + (span.end - last.sent.start)
+    return Span(start=original_start, end=original_end)
