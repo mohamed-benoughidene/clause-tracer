@@ -178,7 +178,7 @@ When this is done, `privacy` has a coverage floor, five empty owner tables, a co
   - **Rules:** T3 (a simple working stand-in for `ingest`), S2 (the tests run without other modules).
   - **Depends on:** S4-M1-T3
 
-- [ ] **S4-M1-T6: Span helpers and the whole-word search**
+- [x] **S4-M1-T6: Span helpers and the whole-word search**
   - **Build:** Three files.
     - `src/clause_tracer/privacy/_spans.py`:
       - `KINDS: Final[tuple[PlaceholderKind, ...]] = tuple(PlaceholderKind)`.
