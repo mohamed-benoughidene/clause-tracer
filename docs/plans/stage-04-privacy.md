@@ -608,7 +608,7 @@ When this is done, `privacy` finds typed party details with their variants, emai
   - **Rules:** T1, ADR 0008 ("address rules").
   - **Depends on:** S4-M2-T5
 
-- [ ] **S4-M2-T7: People by honorific, signature and job title**
+- [x] **S4-M2-T7: People by honorific, signature and job title**
   - **Build:** In `_patterns.py`, add these constants (`PARTICLE`, `TOK`, `INIT`, `NAME_RUN`, `ONE_OR_TWO`, `CAPS_TOK`, `CAPS_RUN`, `CAPS_ONE_OR_TWO` and `TITLE_WORDS` are fragments, with no `_RE`; the other five are compiled as the rules say). `TOK` is one name token: it keeps `O'Brien`, `McDonald`, `Smith-Jones` and `al-Rahman` whole. `NAME_RUN` is 2 to 4 tokens, with initials (`J.`) and particles (`de`, `ben`) allowed between them.
     ```python
     PARTICLE = r"(?:van|von|der|den|de|la|le|da|di|del|bin|ibn|bint|ben|ould|dos|du|al|el)"

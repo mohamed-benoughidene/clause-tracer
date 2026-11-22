@@ -101,3 +101,27 @@ HARD_STOP: Final[str] = r"[;:()\[\]\"“”\n]|[.!?](?=\s+[A-Z0-9])"
 HARD_STOP_RE: Final[re.Pattern[str]] = re.compile(HARD_STOP)
 ABBREVIATION_END: Final[str] = r"\b(?:St|Rd|Ave|Dr|Ln|Ct|Sq|Mt)$"
 ABBREVIATION_END_RE: Final[re.Pattern[str]] = re.compile(ABBREVIATION_END)
+PARTICLE: Final[str] = r"(?:van|von|der|den|de|la|le|da|di|del|bin|ibn|bint|ben|ould|dos|du|al|el)"
+TOK: Final[str] = (
+    r"(?:[A-Z](?:['’][A-Z])?[a-z]+(?:[A-Z][a-z]+)*(?:-[A-Z]?[a-z]+)*|(?:al|el)-[A-Z][a-z]+)"
+)
+INIT: Final[str] = r"(?:[A-Z]\.)"
+NAME_RUN: Final[str] = rf"{TOK}(?:{H}+(?:{INIT}{H}+|{PARTICLE}{H}+)*{TOK}){{1,3}}"
+ONE_OR_TWO: Final[str] = rf"{TOK}(?:{H}+(?:{INIT}{H}+|{PARTICLE}{H}+)*{TOK})?"
+CAPS_TOK: Final[str] = r"[A-Z]{2,}(?:['’-][A-Z]+)*"
+CAPS_RUN: Final[str] = rf"{CAPS_TOK}(?:{H}+{CAPS_TOK}){{1,2}}"
+CAPS_ONE_OR_TWO: Final[str] = rf"{CAPS_TOK}(?:{H}+{CAPS_TOK})?"
+TITLE_WORDS: Final[str] = (
+    r"(?:Managing Director|Director|Manager|Partner|Owner|Secretary|Chief Executive Officer"
+    r"|CEO|CFO|Chairman|President)"
+)
+HONORIFIC_PERSON: Final[str] = rf"\b(?:Mr|Mrs|Ms|Miss|Mx|Dr)\.?{H}+({ONE_OR_TWO})"
+HONORIFIC_PERSON_RE: Final[re.Pattern[str]] = re.compile(HONORIFIC_PERSON)
+HONORIFIC_PERSON_CAPS: Final[str] = rf"\b(?:MR|MRS|MS|MISS|MX|DR)\.?{H}+({CAPS_ONE_OR_TWO})"
+HONORIFIC_PERSON_CAPS_RE: Final[re.Pattern[str]] = re.compile(HONORIFIC_PERSON_CAPS)
+SIGNED_BY: Final[str] = rf"\b(?:Signed|Executed)\b[^.\n]*?\bby{H}+({NAME_RUN})"
+SIGNED_BY_RE: Final[re.Pattern[str]] = re.compile(SIGNED_BY)
+SIGNED_BY_CAPS: Final[str] = rf"(?i:signed|executed)\b[^.\n]*?\b(?i:by){H}+({CAPS_RUN})"
+SIGNED_BY_CAPS_RE: Final[re.Pattern[str]] = re.compile(SIGNED_BY_CAPS)
+NAME_BEFORE_TITLE: Final[str] = rf"({NAME_RUN}){H}*,{H}*{TITLE_WORDS}\b"
+NAME_BEFORE_TITLE_RE: Final[re.Pattern[str]] = re.compile(NAME_BEFORE_TITLE)
