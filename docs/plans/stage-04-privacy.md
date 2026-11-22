@@ -1476,7 +1476,7 @@ When this is done, `find_personal_data` turns a `PrivacyInput` and a detector in
 
 When this is done, `anonymise` builds the `PlaceholderText` with its segment map, and the three restore calls work on it: the whole text, the tokens in an AI reply, and a span in the sent text.
 
-- [ ] **S4-M4-T1: Placeholder tokens and escapes**
+- [x] **S4-M4-T1: Placeholder tokens and escapes**
   - **Build:** In `src/clause_tracer/privacy/_tokens.py`: `LABELS: Final[Mapping[PlaceholderKind, str]] = MappingProxyType({PERSON: "Person", COMPANY: "Company", ADDRESS: "Address", EMAIL: "Email", PHONE: "Phone", ID: "ID", BANK: "Bank"})`; `ESCAPES: Final[Mapping[str, str]] = MappingProxyType({PLACEHOLDER_OPEN: "[", PLACEHOLDER_CLOSE: "]"})`; and `def placeholder_token(kind: PlaceholderKind, number: int) -> str`, which returns `f"{PLACEHOLDER_OPEN}{LABELS[kind]} {number}{PLACEHOLDER_CLOSE}"` and raises `ValueError("privacy: a placeholder number starts at 1")` when `number < 1`. The token has the form that the scan of `core` reads (`PLACEHOLDER_PATTERN` in `core/scans.py`), so `⟦Person 1⟧` is a known placeholder there.
   - **Files:** `src/clause_tracer/privacy/_tokens.py`, `src/clause_tracer/privacy/tests/test_tokens.py`.
   - **Tests first:** in `test_tokens.py`: `test_person_token` (`placeholder_token(PlaceholderKind.PERSON, 1) == "⟦Person 1⟧"`); `test_id_token` (`placeholder_token(PlaceholderKind.ID, 12) == "⟦ID 12⟧"`); `test_number_zero_raises` (`ValueError`); `test_every_kind_has_a_label` (`set(LABELS) == set(PlaceholderKind)`); `test_token_is_one_marker_group` (one test with a loop over every kind: `re.fullmatch("⟦[^⟧]*⟧", placeholder_token(kind, 3))` matches); `test_escapes` (`ESCAPES == {"⟦": "[", "⟧": "]"}`).
