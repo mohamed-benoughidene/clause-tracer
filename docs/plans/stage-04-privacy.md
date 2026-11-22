@@ -283,7 +283,7 @@ When this is done, `privacy` has a coverage floor, five empty owner tables, a co
 
 When this is done, `privacy` finds typed party details with their variants, emails, phones, IDs, bank details, the four bare identifiers (NINO, GB VAT, company prefix, card number), companies, addresses and people by code alone, the owner's tables fix what each finder returns, and the owner's list of governing-law places is in place.
 
-- [ ] **S4-M2-T1: Name and address forms**
+- [x] **S4-M2-T1: Name and address forms**
   - **Build:** In `src/clause_tracer/privacy/names.py`:
     - `HONORIFICS: Final[tuple[str, ...]] = ("mr", "mrs", "ms", "miss", "mx", "dr")`.
     - `COMPANY_SUFFIXES: Final[frozenset[str]] = frozenset({"ltd", "limited", "llc", "llp", "plc", "inc", "corp", "gmbh", "ag", "sarl", "sas", "bv", "nv", "pty", "co"})`.
