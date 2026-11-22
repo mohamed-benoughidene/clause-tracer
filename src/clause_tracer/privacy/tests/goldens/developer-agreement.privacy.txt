@@ -1,0 +1,99 @@
+source	developer-agreement.txt	6204
+counts	entities 7	spans 10	segments 21
+entity	company-1	Company 1	places 2
+entity	id-1	ID 1	places 1
+entity	address-1	Address 1	places 1
+entity	person-1	Person 1	places 2
+entity	address-2	Address 2	places 1
+entity	email-1	Email 1	places 1
+entity	person-2	Person 2	places 2
+span	company-1	84-105	Brightline Studio Ltd
+span	company-1	5592-5613	Brightline Studio Ltd
+span	id-1	169-177	09876543
+span	address-1	209-241	14 Harbour Street, Leeds LS1 4AB
+span	person-1	262-274	Karim Benali
+span	person-1	5650-5662	Karim Benali
+span	address-2	278-324	27 Rue Didouche Mourad, Algiers 16000, Algeria
+span	email-1	2459-2486	accounts@brightline.example
+span	person-2	5460-5468	Ms Jones
+span	person-2	5617-5628	Sarah Jones
+text	Development Services Agreement
+text	This Agreement is dated 5 November 2026.
+text	Parties
+text	(1) ⟦Company 1⟧, a company registered in England and Wales with company number ⟦ID 1⟧, whose registered office is at ⟦Address 1⟧ ("the Agency").
+text	(2) ⟦Person 1⟧ of ⟦Address 2⟧ ("the Developer").
+text	Background
+text	(A) The Agency designs and builds websites for its own customers and wishes to engage the Developer to carry out development work on one of those projects.
+text	(B) The Developer is an independent contractor and agrees to provide the Services on the terms of this Agreement.
+text	1. Definitions and interpretation
+text	1.1 In this Agreement the following words have these meanings:
+text	"Charges" means the fees set out in Schedule 1.
+text	"Deliverables" means everything the Developer hands over as part of the Services, including code, designs and documentation.
+text	"Master Agreement" means the agreement between the Agency and its customer for the project.
+text	"Milestone" means a stage of the Services listed in Schedule 1.
+text	"Services" means the development work described in Schedule 1.
+text	1.2 Headings do not affect the meaning of this Agreement. Words in the singular include the plural.
+text	2. Start and term
+text	2.1 This Agreement starts on the date at the top and continues until the Services are complete, unless it ends earlier under clause 12.
+text	2.2 This Agreement renews automatically for further 12-month periods unless either party gives 30 days' written notice before the end of the current period.
+text	3. The Services
+text	3.1 The Developer will provide the Services with reasonable skill and care and in line with good industry practice.
+text	3.2 The Developer will make reasonable revisions to the Deliverables at the Agency's request.
+text	3.3 The Developer will use reasonable efforts to meet the Milestone dates in Schedule 1. Time is not of the essence.
+text	3.4 The Developer may decide how and where the Services are carried out, and may use their own equipment.
+text	4. Changes and extra work
+text	4.1 Work outside Schedule 1 must be agreed in writing and will be paid at the hourly rate of £45.
+text	4.2 Either party may ask for a change to the Services. A change only takes effect when both parties agree it in writing.
+text	5. Charges and payment
+text	5.1 The total Charges for the Services are £9,600, split by Milestone as set out in Schedule 1.
+text	5.2 The Agency will pay 25% of the total Charges on signing this Agreement.
+text	5.3 The Developer will invoice the Agency at ⟦Email 1⟧ when each Milestone is delivered.
+text	5.4 Invoices will be paid within 60 days of the invoice date.
+text	5.5 The Agency will repay reasonable expenses that it has approved in writing before they are incurred, as set out in its expenses policy at https://docs.example.com/expenses-policy.
+text	5.6 All Charges are exclusive of VAT, which will be added where it applies.
+text	6. The Agency's obligations
+text	6.1 The Agency will provide the content, logins and approvals the Developer reasonably needs, and will reply to questions within 3 Business Days.
+text	7. Ownership of the work
+text	7.1 All work created under this Agreement is a work made for hire and belongs to the Agency from the moment it is created.
+text	7.2 The Developer waives any moral rights in the Deliverables to the extent allowed.
+text	7.3 Tools, code libraries and know-how the Developer owned before this Agreement stay the Developer's. The Agency may use any that are part of the Deliverables for the project.
+text	8. Confidentiality
+text	8.1 Each party will keep the other's confidential information private and use it only for this Agreement.
+text	8.2 Clause 8.1 does not apply to information that is public, that the receiving party already knew, or that the law requires it to share.
+text	9. Non-compete and non-solicitation
+text	9.1 For 12 months after this Agreement ends, the Developer will not provide similar services to any customer of the Agency.
+text	9.2 For 12 months after this Agreement ends, neither party will try to hire the other's staff.
+text	10. Warranties
+text	10.1 The Developer confirms the Deliverables will be their own original work, except for third-party material the Agency has approved.
+text	10.2 No other promises are given about the Services except those written in this Agreement.
+text	11. Liability
+text	11.1 The Developer's total liability is capped at the fees paid under this Agreement, except as set out in the Master Agreement.
+text	11.2 Neither party is liable for loss of profit or any indirect loss.
+text	12. Ending this Agreement
+text	12.1 Either party may end this Agreement with 14 days' written notice.
+text	12.2 If the Agency ends this Agreement, no payment is due for work in progress.
+text	12.3 Either party may end this Agreement at once by written notice if the other seriously breaks it and does not fix the breach within 14 days of being asked to.
+text	12.4 When this Agreement ends, each party will return the other's materials and confidential information.
+text	13. Data protection
+text	13.1 Each party will comply with data protection law when handling personal data under this Agreement.
+text	14. General
+text	14.1 This Agreement is the whole agreement between the parties about the Services.
+text	14.2 If this Agreement and Schedule 1 conflict, this Agreement prevails.
+text	14.3 The Developer will not work for a direct competitor of the Agency for 6 to 9 months after this Agreement ends.
+text	14.4 Neither party may transfer this Agreement to anyone else without the other's written consent.
+text	14.5 Notices must be in writing and sent by email to the addresses each party gives the other, with a copy to ⟦Person 2⟧ at the Developer's address.
+text	14.6 This Agreement is governed by the laws of England and Wales.
+text	
+text	Signed for and on behalf of ⟦Company 1⟧ by ⟦Person 2⟧, Director
+text	
+text	Signed by ⟦Person 1⟧
+text	Schedule 1 · Services and Charges
+text	1. The Developer will build the front end and content management integration for the Agency's customer website, from the approved designs.
+text	Milestone Work Target Charges
+text	1 Discovery Review designs, plan the build Week 2 £1,600
+text	2 Build Templates and components Week 6 £3,200
+text	3 Integration Content management and forms Week 9 £3,200
+text	4 Launch Testing, fixes and go-live Week 11 £1,600
+text	 Total  £9,600
+text	2. Hosting, domain names and third-party licences are provided by the Agency and are not part of the Services.
+text	
