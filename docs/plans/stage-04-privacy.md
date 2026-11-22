@@ -1249,7 +1249,7 @@ When this is done, `find_personal_data` turns a `PrivacyInput` and a detector in
 - [x] **S4-M3-T7: Group variants into numbered entities**
   - **Build:** In `src/clause_tracer/privacy/entities.py`: `def group_entities(document: Document, suggestions: Sequence[PiiSuggestion]) -> tuple[PlaceholderEntity, ...]`.
     - Sort the suggestions by `(span.start, span.end)`. Then, for each suggestion in that order: a span with `start < 0` or an `end` after `len(document.text)` raises `ValueError("privacy: suggestion span is outside the text")`, and then a span that overlaps the one before it (`overlaps` of `_spans`) raises `ValueError("privacy: suggestions overlap")`.
-    - `_word_set(kind: PlaceholderKind, text: str) -> frozenset[str]`: `folded = fold_text(text).strip()`. `PERSON`: `words = strip_honorific(folded.split())`. `COMPANY`: `words = folded.split()`, and when `len(words) > 1` and `words[-1].strip(".,")` is in `COMPANY_SUFFIXES`, drop the last word. `ADDRESS`: the non-empty parts of `re.split(r"[\s,]+", folded)`. `PHONE`: one word, the digits of `folded`. `ID` and `BANK`: one word, the characters of `folded` for which `str.isalnum()` is true. `EMAIL`: one word, `folded`. Then strip `".,;:"` from each word and drop empty words. When no word is left, the set is `frozenset({"\0" + folded})`.
+    - `_word_set(kind: PlaceholderKind, text: str) -> frozenset[str]`: `folded = fold_text(text).strip()`. `PERSON`: `words = strip_honorific(folded.split())`. `COMPANY`: `words = folded.split()`, and when `len(words) > 1` and `words[-1].strip(".,")` is in `COMPANY_SUFFIXES`, drop the last word. (Changed later: S4-M3-T12 uses `EXTENDED_COMPANY_SUFFIXES`.) `ADDRESS`: the non-empty parts of `re.split(r"[\s,]+", folded)`. `PHONE`: one word, the digits of `folded`. `ID` and `BANK`: one word, the characters of `folded` for which `str.isalnum()` is true. `EMAIL`: one word, `folded`. Then strip `".,;:"` from each word and drop empty words. When no word is left, the set is `frozenset({"\0" + folded})`.
     - Work on one kind at a time, in the order of `PlaceholderKind`. The distinct word sets of the kind come in order of first appearance. A set `S` has a bigger set when another distinct set strictly contains it. A set with no bigger set is a head. The cluster of a head is itself. The cluster of a set that has bigger sets is the one head that contains it, and when two or more heads contain it, the set is its own cluster (question 12). A suggestion belongs to the cluster of its word set.
     - Number the clusters of a kind 1, 2, … in the order of the earliest span start in each. An entity has `id=f"{kind.value}-{number}"`, `kind`, `number`, and `spans` sorted by start. Return all entities of all kinds sorted by the start of their first span.
   - **Files:** `src/clause_tracer/privacy/entities.py`, `src/clause_tracer/privacy/tests/test_entities.py`.
@@ -1267,7 +1267,7 @@ When this is done, `find_personal_data` turns a `PrivacyInput` and a detector in
     - `test_a_span_outside_the_text_raises` (a span ending at 99 over `"abc"`, and a span with `start=-1`: `ValueError` each);
     - `test_no_suggestions` (`group_entities(document, ())` is `()`);
     - `test_an_honorific_alone_groups_by_its_text` (text `"Ms and Ms"`, two `PERSON` suggestions over `Ms`: one entity `person-1` with two spans).
-  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/privacy/tests/test_entities.py` reports 13 passed, and `scripts/check.sh` exits 0.
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/privacy/tests/test_entities.py` reports 13 passed (15 after S4-M3-T12), and `scripts/check.sh` exits 0.
   - **Rules:** T1, Spec 4.2 (numbering by kind, variants share one placeholder), system design 3.4 (`PlaceholderEntity`), D2 (the order and the ids are the same on every run).
   - **Depends on:** S4-M1-T5, S4-M1-T6, S4-M2-T1
 
@@ -1453,6 +1453,24 @@ When this is done, `find_personal_data` turns a `PrivacyInput` and a detector in
   - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/privacy/tests/test_finding_properties.py src/clause_tracer/privacy/tests/test_resolve_properties.py` reports 16 passed, and `scripts/check.sh` exits 0. Every bug that a property finds becomes a committed `@example` (Constitution T6).
   - **Rules:** Testing strategy 5 (the hazard alphabet) and 14, Constitution T6.
   - **Depends on:** S4-M3-T6, S4-M1-T5, S4-M3-T1, S4-M3-T3, S4-M3-T4, S4-M3-T5
+
+- [ ] **S4-M3-T12: Entity grouping drops the extended company suffixes (code review of M3, finding 1)**
+  - **Build:** The allow-list (`core_words` in `resolve.py`) drops a suffix of `EXTENDED_COMPANY_SUFFIXES`, but `_word_set` in `entities.py` drops only a suffix of `COMPANY_SUFFIXES`. So `Acme LP` and `Acme Corporation` become two entities, and the allow-list reads them as one name. The owner decided on 22 Nov 2026 that grouping uses the extended list too. In `src/clause_tracer/privacy/entities.py`, import `EXTENDED_COMPANY_SUFFIXES` from `clause_tracer.privacy.names` in place of `COMPANY_SUFFIXES`, and in the `COMPANY` branch of `_word_set` test `words[-1].strip(".,") in EXTENDED_COMPANY_SUFFIXES`. Change nothing else. The owner table `entities.toml` has no row with an extended suffix, so no expected value changes.
+  - **Files:** `src/clause_tracer/privacy/entities.py`, `src/clause_tracer/privacy/tests/test_entities.py`.
+  - **Tests first:** in `test_entities.py`, read as in S4-M3-T7:
+    - `test_an_extended_suffix_is_ignored` (text `"Acme LP and Acme Corporation and Acme."`, `COMPANY` suggestions over `Acme LP`, `Acme Corporation` and the last `Acme`: one entity `company-1` with the three spans);
+    - `test_an_extended_suffix_alone_is_a_name` (text `"LP and LP"`, two `COMPANY` suggestions over `LP`: one entity `company-1` with two spans).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/privacy/tests/test_entities.py` reports 15 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** T1, Spec 4.2 (variants share one placeholder), question 12.
+  - **Depends on:** S4-M3-T7
+
+- [ ] **S4-M3-T13: The docstring of `cut_in_places` says what the code does (code review of M3, finding 4)**
+  - **Build:** In `src/clause_tracer/privacy/resolve.py`, replace the docstring of `cut_in_places` with this text and change no other line: `"""Keep the governing-law place. Cut every span that runs into it, except a PERSON or COMPANY span, which stays whole (question 25)."""`. The code is right (S4-M3-T3 and its `*_stays_whole_*` tests); only the old docstring, "cutting every span that runs into it", was wrong.
+  - **Files:** `src/clause_tracer/privacy/resolve.py`.
+  - **Tests first:** None (a docstring has no behaviour).
+  - **Done when:** `.venv/bin/uv run pytest src/clause_tracer/privacy/tests/test_places.py` still reports 46 passed, and `scripts/check.sh` exits 0.
+  - **Rules:** T1, question 25.
+  - **Depends on:** S4-M3-T3
 
 ### M4: Placeholder text
 
@@ -1675,6 +1693,7 @@ The docs do not settle these points. Each needs the owner's answer before the ta
 | 22 Nov 2026 | Milestone 2 build record. (1) The five owner tables had no `HEADER` line, so S4-M2-T10 could not load them; the owner added it in `99a76f0` and S4-M1-T2 now says so. (2) S4-M2-T12: the check of the sample reference run moved to S4-M5-T7, because it needs `find_personal_data`. (3) S4-M2-T10: the known failing row `company-with-a-foreign-suffix` is named in Done when, and the implementer stops there. (4) Status set to In progress. Build differences with the same behaviour, accepted: S4-M2-T1 uses `isdisjoint` (ruff SIM300) and a private `_last_token` helper; S4-M2-T2, T3 and T12 hold the keyword patterns in a `_PATTERNS` tuple; S4-M2-T4 has a private `_short_names`; S4-M2-T5 has a module `_CONNECTORS` set; the unknown-finder message in T10 is `unknown finder <name>`. | The implementer's report and the owner's decision in chat, 22 Nov 2026 |
 | 22 Nov 2026 | Owner chose to fix the company pattern for the row `company-with-a-foreign-suffix`, not to mark it as an expected failure. Task added: S4-M2-T13 (`WORD` reads a Latin-1 capital and Unicode letters; 6 tests, values run on 22 Nov 2026; the 287 privacy tests and `scripts/check.sh` pass with the change). Changed: S4-M2-T10 (the known-failing-row text removed), the known-limits text in S4-M5-T4 (a capital outside Latin-1 stays a limit). | The owner's decision in chat, 22 Nov 2026 |
 | 22 Nov 2026 | M2 code review (ten findings). Tasks added: S4-M2-T14 (Latin-1 letters in `TOK`, `INIT`, `CAPS_TOK`, `CAP`, and `EMAIL` with any letter; 6 tests), S4-M2-T15 (4 tests of paths no test ran), S4-M2-T16 (named booleans, a table in `find_patterns`, shared role words, one unreachable check removed, `key` parameter, simpler `WORD`; 4 tests). Total 2058 tests pass with all three in a trial run. Finding 2 skipped by the owner. Changed: pointers in S4-M2-T2, T4, T5, T6, T7, S4-M3-T6 (folds once and passes `key`), the known limits in S4-M5-T4, section 9. The five finders give the same results on the sample before and after. | The owner's decision in chat, 22 Nov 2026 |
+| 22 Nov 2026 | M3 code review (seven findings). Task added: S4-M3-T12 (entity grouping drops the extended company suffixes, as the allow-list does; owner said yes; 2 tests). Task added: S4-M3-T13 (the docstring of `cut_in_places`). Changed: S4-M3-T7 (pointer and test count). No change, as the owner decided before: finding 2 (the two place switches stay off, question 19) and finding 5 (a piece with no letter or digit is dropped only after an overlap, S4-M3-T4). Findings 3, 6 and 7 (a shared honorific rule, a faster `group_entities`, a faster allow-list) are not built until the owner answers. | The owner's answers in chat, 22 Nov 2026 |
 
 ## 9. Notes for the next stage
 
