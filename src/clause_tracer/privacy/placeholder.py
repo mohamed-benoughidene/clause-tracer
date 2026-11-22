@@ -144,3 +144,47 @@ def anonymise(document: Document, entities: Sequence[PlaceholderEntity]) -> Plac
     pieces.append(tail_text)
     segments.extend(tail_segments)
     return PlaceholderText(text="".join(pieces), entities=tuple(entities), segments=tuple(segments))
+
+
+def _check_segments(placeholder: PlaceholderText, document: Document) -> None:
+    """Raise unless the segments tile both texts and each kind has its lengths."""
+
+    sent = 0
+    original = 0
+    for segment in placeholder.segments:
+        if segment.sent.start != sent or segment.original.start != original:
+            raise ValueError("privacy: segments do not tile the texts")
+        if segment.sent.end < segment.sent.start or segment.original.end < segment.original.start:
+            raise ValueError("privacy: segments do not tile the texts")
+        sent = segment.sent.end
+        original = segment.original.end
+    if sent != len(placeholder.text) or original != len(document.text):
+        raise ValueError("privacy: segments do not tile the texts")
+    for segment in placeholder.segments:
+        sent_length = segment.sent.end - segment.sent.start
+        original_length = segment.original.end - segment.original.start
+        if segment.kind is SegmentKind.COPY and sent_length != original_length:
+            raise ValueError("privacy: segments do not tile the texts")
+        if segment.kind is SegmentKind.ESCAPE and (sent_length != 1 or original_length != 1):
+            raise ValueError("privacy: segments do not tile the texts")
+        if segment.kind is SegmentKind.ENTITY and original_length < 1:
+            raise ValueError("privacy: segments do not tile the texts")
+
+
+def restore_text(placeholder: PlaceholderText, document: Document) -> str:
+    """Rebuild the whole contract text from the placeholder text and the document.
+
+    Input:   the placeholder text and the document that it came from.
+    Output:  the contract text, with each copied part taken from the sent text.
+    Raises:  ValueError when the segments do not tile both texts.
+    Effects: none (T1).
+    """
+
+    _check_segments(placeholder, document)
+    pieces: list[str] = []
+    for segment in placeholder.segments:
+        if segment.kind is SegmentKind.COPY:
+            pieces.append(placeholder.text[segment.sent.start : segment.sent.end])
+        else:
+            pieces.append(document.text[segment.original.start : segment.original.end])
+    return "".join(pieces)
