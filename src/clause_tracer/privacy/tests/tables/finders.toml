@@ -174,11 +174,11 @@ found = [
 ]
 
 [[case]]
-id = "honorific-before-a-company-is-not-part-of-it"
+id = "honorific-before-a-company-is-part-of-its-span"
 finder = "companies"
 text = "Mr Brightline Studio Ltd signs."
 found = [
-  { text = "Brightline Studio Ltd", kind = "company" },
+  { text = "Mr Brightline Studio Ltd", kind = "company" },
 ]
 
 [[case]]
