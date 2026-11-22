@@ -4,7 +4,10 @@ The detector's output is checked once, where it enters (D4, I9). Every later
 step keeps the rule that a flagged span is cut and never dropped whole.
 """
 
-from collections.abc import Iterable, Sequence
+from bisect import bisect_left
+from collections.abc import Iterable, Mapping, Sequence
+from types import MappingProxyType
+from typing import Final
 
 from clause_tracer.core import (
     DefinedTerm,
@@ -13,7 +16,12 @@ from clause_tracer.core import (
     PlaceholderKind,
     Span,
 )
-from clause_tracer.privacy._spans import overlaps, subtract_spans, trimmed_span
+from clause_tracer.privacy._spans import (
+    KINDS,
+    overlaps,
+    subtract_spans,
+    trimmed_span,
+)
 from clause_tracer.privacy.names import (
     EXTENDED_COMPANY_SUFFIXES,
     HONORIFICS,
@@ -176,3 +184,102 @@ def cut_in_places(
                 continue
             kept.append(PiiSuggestion(span=trimmed, kind=suggestion.kind, source=suggestion.source))
     return tuple(kept)
+
+
+SOURCE_PRIORITY: Final[Mapping[PiiSource, int]] = MappingProxyType(
+    {
+        PiiSource.USER: 0,
+        PiiSource.PARTY_DETAILS: 1,
+        PiiSource.PATTERN: 2,
+        PiiSource.RULE: 3,
+        PiiSource.NER: 4,
+    }
+)
+TIE_RANK: Final[Mapping[PlaceholderKind, int]] = MappingProxyType(
+    {
+        PlaceholderKind.BANK: 0,
+        PlaceholderKind.ID: 1,
+        PlaceholderKind.PERSON: 2,
+        PlaceholderKind.COMPANY: 3,
+        PlaceholderKind.ADDRESS: 4,
+        PlaceholderKind.EMAIL: 5,
+        PlaceholderKind.PHONE: 6,
+    }
+)
+
+
+def union_ner(suggestions: Iterable[PiiSuggestion]) -> tuple[PiiSuggestion, ...]:
+    """Join overlapping detector spans of one kind (owner decision, 21 Nov 2026)."""
+
+    items = tuple(suggestions)
+    joined: list[PiiSuggestion] = []
+    for kind in KINDS:
+        same_kind = sorted(
+            (item for item in items if item.source == PiiSource.NER and item.kind == kind),
+            key=lambda item: (item.span.start, item.span.end),
+        )
+        if not same_kind:
+            continue
+        run_start = same_kind[0].span.start
+        run_end = same_kind[0].span.end
+        for item in same_kind[1:]:
+            if item.span.start < run_end and run_start < item.span.end:
+                run_end = max(run_end, item.span.end)
+                continue
+            joined.append(
+                PiiSuggestion(
+                    span=Span(start=run_start, end=run_end),
+                    kind=kind,
+                    source=PiiSource.NER,
+                )
+            )
+            run_start = item.span.start
+            run_end = item.span.end
+        joined.append(
+            PiiSuggestion(span=Span(start=run_start, end=run_end), kind=kind, source=PiiSource.NER)
+        )
+    others = [item for item in items if item.source != PiiSource.NER]
+    return (*others, *joined)
+
+
+def resolve_overlaps(text: str, suggestions: Iterable[PiiSuggestion]) -> tuple[PiiSuggestion, ...]:
+    """Resolve overlaps by source, then length, then start, then kind."""
+
+    ordered = sorted(
+        union_ner(suggestions),
+        key=lambda item: (
+            SOURCE_PRIORITY[item.source],
+            -(item.span.end - item.span.start),
+            item.span.start,
+            TIE_RANK[item.kind],
+        ),
+    )
+    kept: list[PiiSuggestion] = []
+    starts: list[int] = []
+    for suggestion in ordered:
+        left = bisect_left(starts, suggestion.span.start)
+        if left > 0 and kept[left - 1].span.end > suggestion.span.start:
+            left -= 1
+        hits: list[PiiSuggestion] = []
+        index = left
+        while index < len(kept) and kept[index].span.start < suggestion.span.end:
+            if kept[index].span.end > suggestion.span.start:
+                hits.append(kept[index])
+            index += 1
+        if hits:
+            pieces = subtract_spans(suggestion.span, (hit.span for hit in hits))
+        else:
+            pieces = (suggestion.span,)
+        for piece in pieces:
+            trimmed = trimmed_span(text, piece)
+            if trimmed is None:
+                continue
+            if hits and not any(
+                character.isalnum() for character in text[trimmed.start : trimmed.end]
+            ):
+                continue
+            added = PiiSuggestion(span=trimmed, kind=suggestion.kind, source=suggestion.source)
+            position = bisect_left(starts, trimmed.start)
+            kept.insert(position, added)
+            starts.insert(position, trimmed.start)
+    return tuple(sorted(kept, key=lambda item: (item.span.start, item.span.end)))

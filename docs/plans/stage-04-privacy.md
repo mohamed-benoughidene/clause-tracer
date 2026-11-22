@@ -1178,7 +1178,7 @@ When this is done, `find_personal_data` turns a `PrivacyInput` and a detector in
   - **Rules:** Spec 4.2 ("the place named in the governing-law clause" is kept, closed list), Constitution T11 (the list is the owner's) and T13 (a promise has a test), question 14.
   - **Depends on:** S4-M3-T1, S4-M2-T11, S4-M1-T6
 
-- [ ] **S4-M3-T4: Resolve overlaps by source**
+- [x] **S4-M3-T4: Resolve overlaps by source**
   - **Build:** In `resolve.py`:
     - `SOURCE_PRIORITY: Final[Mapping[PiiSource, int]] = MappingProxyType({PiiSource.USER: 0, PiiSource.PARTY_DETAILS: 1, PiiSource.PATTERN: 2, PiiSource.RULE: 3, PiiSource.NER: 4})`.
     - `TIE_RANK: Final[Mapping[PlaceholderKind, int]] = MappingProxyType({PlaceholderKind.BANK: 0, PlaceholderKind.ID: 1, PlaceholderKind.PERSON: 2, PlaceholderKind.COMPANY: 3, PlaceholderKind.ADDRESS: 4, PlaceholderKind.EMAIL: 5, PlaceholderKind.PHONE: 6})`. It breaks a tie between two suggestions of the same source, the same length and the same start. Why it is here and not in `core`: with value-only spans (question 5), a keyword-gated ID or BANK value and a bare phone shape can cover exactly the same digits (`company number 07700900123`), and `PlaceholderKind` puts `PHONE` before `ID` and `BANK`, so the phone would win. A keyword gate or a checksum is stronger evidence than a bare shape, so `BANK` and then `ID` rank first. The other five kinds keep their relative order, so `test_equal_spans_keep_the_first_kind` still holds. `PlaceholderKind` in `core` is not reordered (an accepted shape).
