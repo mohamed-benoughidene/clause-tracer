@@ -103,7 +103,7 @@ When this is done, `privacy` has a coverage floor, five empty owner tables, a co
   - **Rules:** T11.
   - **Depends on:** None
 
-- [ ] **S4-M1-T3: The privacy fixture format, its writer and its loader**
+- [x] **S4-M1-T3: The privacy fixture format, its writer and its loader**
   - **Build:** In `src/clause_tracer/privacy/sample_input.py`:
     - `FIXTURE_FORMAT: Final[str] = "clause-tracer-privacy-sample"` and `FIXTURE_VERSION: Final[int] = 1`.
     - `@dataclass(frozen=True, slots=True, kw_only=True) class PrivacyInput` with exactly four fields in this order: `document: Document`, `clauses: tuple[Clause, ...]`, `parties: tuple[Party, ...]`, `terms: tuple[DefinedTerm, ...]`. It is the input of `find_personal_data` (S4-M3-T6). Add no method.
