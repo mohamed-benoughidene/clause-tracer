@@ -182,6 +182,10 @@ The caller reads and writes the fixture. `privacy` code reads no file (T1).
   characters) and its earlier part readable. A chain whose nearest segment
   alone passes 120 characters gives the postcode alone.
 - IBAN length per country is not checked.
+- A name with an apostrophe or a hyphen (`O'Neil`, `Anne-Marie`) can be found in
+  part: a one-word form such as `Neil` or `Anne` matches the word on one side of
+  the mark, and the rest of the name stays readable. Only the check on real
+  contracts closes this limit.
 - A company name, a person name or a street word that starts with a capital
   outside Latin-1, such as `Łukasz` or a Greek or Cyrillic name, is not found:
   the patterns read A to Z and the Latin-1 capitals.
