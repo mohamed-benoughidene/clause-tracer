@@ -1,0 +1,184 @@
+[[case]]
+id = "company-and-its-short-name"
+parties = [
+  { name = "Brightline Studio Ltd", yours = false },
+]
+terms = [
+  "Studio",
+]
+text = "Brightline Studio Ltd pays."
+found = [
+  { text = "Brightline Studio", kind = "company" },
+  { text = "Brightline Studio Ltd", kind = "company" },
+  { text = "Studio", kind = "company" },
+]
+
+[[case]]
+id = "company-in-its-other-suffix-spelling"
+parties = [
+  { name = "Brightline Studio Ltd", yours = false },
+]
+text = "Brightline Studio Limited signs."
+found = [
+  { text = "Brightline Studio", kind = "company" },
+  { text = "Brightline Studio Limited", kind = "company" },
+]
+
+[[case]]
+id = "a-month-is-no-name-by-itself"
+parties = [
+  { name = "May Jones", yours = false },
+]
+text = "May Jones signs in May."
+found = [
+  { text = "May Jones", kind = "person" },
+  { text = "Jones", kind = "person" },
+]
+
+[[case]]
+id = "a-common-word-first-name-is-not-found-alone"
+parties = [
+  { name = "Will Price", yours = false },
+]
+text = "Will pay. Will Price signs. Price is 5. Contact Will."
+found = [
+  { text = "Will Price", kind = "person" },
+]
+
+[[case]]
+id = "term-defined-where-the-name-is-not"
+parties = [
+  { name = "Brightline Studio Ltd", yours = false },
+]
+terms = [
+  { term = "Studio", definition = "\"Studio\" means the work." },
+]
+text = "Brightline Studio Ltd signs. In this Agreement \"Studio\" means the work."
+found = [
+  { text = "Brightline Studio", kind = "company" },
+  { text = "Brightline Studio Ltd", kind = "company" },
+]
+
+[[case]]
+id = "term-defined-with-the-full-name"
+parties = [
+  { name = "Brightline Studio Ltd", yours = false },
+]
+terms = [
+  { term = "Studio", definition = "Brightline Studio Ltd (the \"Studio\") agrees." },
+]
+text = "Brightline Studio Ltd (the \"Studio\") agrees. The Studio pays."
+found = [
+  { text = "Brightline Studio", kind = "company" },
+  { text = "Brightline Studio Ltd", kind = "company" },
+  { text = "Studio", kind = "company" },
+  { text = "Studio", kind = "company", nth = 2 },
+  { text = "Studio", kind = "company", nth = 3 },
+]
+
+[[case]]
+id = "person-and-their-honorific-form"
+parties = [
+  { name = "Karim Benali", yours = true },
+]
+text = "Mr Benali and Karim agree. Karim Benali signs."
+found = [
+  { text = "Mr Benali", kind = "person" },
+  { text = "Benali", kind = "person" },
+  { text = "Karim", kind = "person" },
+  { text = "Karim", kind = "person", nth = 2 },
+  { text = "Karim Benali", kind = "person" },
+  { text = "Benali", kind = "person", nth = 2 },
+]
+
+[[case]]
+id = "one-word-name"
+parties = [
+  { name = "Mercury", yours = false },
+]
+text = "Mercury pays on time. Mercury signs."
+found = [
+  { text = "Mercury", kind = "person" },
+  { text = "Mercury", kind = "person", nth = 2 },
+]
+
+[[case]]
+id = "short-name-from-a-defined-term"
+parties = [
+  { name = "Brightline Studio Ltd", yours = false },
+]
+terms = [
+  { term = "Brightline", definition = "Brightline Studio Ltd (\"Brightline\") pays." },
+]
+text = "Brightline Studio Ltd (\"Brightline\") pays. Brightline signs."
+found = [
+  { text = "Brightline", kind = "company" },
+  { text = "Brightline Studio", kind = "company" },
+  { text = "Brightline Studio Ltd", kind = "company" },
+  { text = "Brightline", kind = "company", nth = 2 },
+  { text = "Brightline", kind = "company", nth = 3 },
+]
+
+[[case]]
+id = "role-is-not-a-short-name"
+parties = [
+  { name = "Karim Benali", yours = true },
+]
+terms = [
+  "Developer",
+]
+text = "Karim Benali (\"the Developer\") agrees. The Developer pays."
+found = [
+  { text = "Karim", kind = "person" },
+  { text = "Karim Benali", kind = "person" },
+  { text = "Benali", kind = "person" },
+]
+
+[[case]]
+id = "address-and-its-first-line"
+parties = [
+  { name = "Brightline Studio Ltd", address = "14 Harbour Street, Leeds LS1 4AB", yours = false },
+]
+text = "Send to 14 Harbour Street, Leeds LS1 4AB. Or 14 Harbour Street."
+found = [
+  { text = "14 Harbour Street", kind = "address" },
+  { text = "14 Harbour Street, Leeds LS1 4AB", kind = "address" },
+  { text = "14 Harbour Street", kind = "address", nth = 2 },
+]
+
+[[case]]
+id = "party-with-no-address"
+parties = [
+  { name = "Brightline Studio Ltd", yours = false },
+]
+text = "Brightline Studio Ltd, 14 Harbour Street, Leeds, pays."
+found = [
+  { text = "Brightline Studio", kind = "company" },
+  { text = "Brightline Studio Ltd", kind = "company" },
+]
+
+[[case]]
+id = "name-that-wraps-over-a-line-break"
+parties = [
+  { name = "Brightline Studio Ltd", yours = false },
+]
+text = "Brightline Studio\nLtd signs."
+found = [
+  { text = "Brightline Studio", kind = "company" },
+  { text = "Brightline Studio\nLtd", kind = "company" },
+]
+
+[[case]]
+id = "company-and-person-together"
+parties = [
+  { name = "Brightline Studio Ltd", yours = false },
+  { name = "Karim Benali", yours = true },
+]
+text = "Brightline Studio Ltd pays Karim Benali."
+found = [
+  { text = "Brightline Studio", kind = "company" },
+  { text = "Brightline Studio Ltd", kind = "company" },
+  { text = "Karim", kind = "person" },
+  { text = "Karim Benali", kind = "person" },
+  { text = "Benali", kind = "person" },
+]

@@ -99,3 +99,16 @@ The project owner decided on 13 Nov 2026:
 - This does not change the bundle chosen above. It widens the text that the deterministic layer's replacement list is applied to.
 
 Spec sections 4.2, 4.6, 6.1, 6.2 and 13 say the same, and so does [the system design](../system-design.md) section 4.1.
+
+## Amendment (22 Nov 2026): rules that the stage 4 plan settled
+
+The project owner decided on 21 and 22 Nov 2026, in answer to the open questions of the [stage 4 plan](../plans/stage-04-privacy.md) and the [research report](../../reports/Privacy%20finder%20design%20choices.md):
+
+- **The kept place.** The place named in the governing-law clause is kept only when it is a country, a nation of the United Kingdom ("England and Wales" counts as one), a US state, a Canadian province or an Australian state. Any other place in that clause, such as a city, is replaced if a finder marks it. [Spec 4.2](../spec.md#42-privacy-check) says the same.
+- **A name next to the place.** When a person's or company's name that a finder marks touches the kept place, the whole marked name is replaced and the place words that touch it go with it. Every other kind of span is cut at the place. The reason: cutting a name could leave one word of it readable.
+- **ID and bank spans hold the value only.** "Company number" stays readable and only `09876543` becomes `ID 1`.
+- **Four more deterministic patterns** are built in stage 4 and not left to stage 7: UK National Insurance numbers, Luhn-checked card numbers, bare GB VAT numbers with their checksum, and UK company-number prefixes. A bare number that a checksum does not support is not replaced by these patterns.
+- **The placeholder marker stays `⟦ ⟧`.** A paid check on real Claude models found no difference in survival between the marker forms. The prompts carry the rule "write each placeholder exactly as it appears" ([system design 15.8](../system-design.md#158-stage-8-checking-and-the-message-templates)).
+- **Doubts come later.** The shape exists in `core` (task S1-M6-T8 of the stage 1 plan). The code that fills it is built where the user first sees suggestions.
+
+None of this changes the bundle chosen above. It narrows what the deterministic layer keeps and widens what it finds.

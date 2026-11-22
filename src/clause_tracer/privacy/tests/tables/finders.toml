@@ -1,0 +1,302 @@
+[[case]]
+id = "email-before-a-full-stop"
+finder = "patterns"
+text = "Mail a@b.com."
+found = [
+  { text = "a@b.com", kind = "email" },
+]
+
+[[case]]
+id = "email-with-plus-and-subdomain"
+finder = "patterns"
+text = "Write to first.last+tag@mail.example.co.uk today."
+found = [
+  { text = "first.last+tag@mail.example.co.uk", kind = "email" },
+]
+
+[[case]]
+id = "phone-international"
+finder = "patterns"
+text = "Call +44 20 7946 0958 now."
+found = [
+  { text = "+44 20 7946 0958", kind = "phone" },
+]
+
+[[case]]
+id = "phone-national-in-brackets"
+finder = "patterns"
+text = "Tel: (0121) 496 0123."
+found = [
+  { text = "(0121) 496 0123", kind = "phone" },
+]
+
+[[case]]
+id = "phone-like-dates-are-not-phones"
+finder = "patterns"
+text = "Due 01-02-2026 and 2026-11-21 under clause 12.3.4."
+found = []
+
+[[case]]
+id = "number-inside-a-word-is-not-a-phone"
+finder = "patterns"
+text = "Part X07700900123Z shipped."
+found = []
+
+[[case]]
+id = "amounts-are-not-phones"
+finder = "patterns"
+text = "Fees are £1,600,000 and 1 234 567 8901."
+found = []
+
+[[case]]
+id = "id-after-company-number"
+finder = "patterns"
+text = "A company with company number 09876543 pays."
+found = [
+  { text = "09876543", kind = "id" },
+]
+
+[[case]]
+id = "id-bare-company-prefix"
+finder = "patterns"
+text = "Registered as SC123456 in Scotland."
+found = [
+  { text = "SC123456", kind = "id" },
+]
+
+[[case]]
+id = "bank-sort-code-and-account"
+finder = "patterns"
+text = "Pay to sort code 12-34-56, account number 12345678."
+found = [
+  { text = "12-34-56", kind = "bank" },
+  { text = "12345678", kind = "bank" },
+]
+
+[[case]]
+id = "bank-iban"
+finder = "patterns"
+text = "IBAN GB29 NWBK 6016 1331 9268 19 for refunds."
+found = [
+  { text = "GB29 NWBK 6016 1331 9268 19", kind = "bank" },
+]
+
+[[case]]
+id = "id-nino-bare"
+finder = "patterns"
+text = "National Insurance number AB 12 34 56 C is on file."
+found = [
+  { text = "AB 12 34 56 C", kind = "id" },
+]
+
+[[case]]
+id = "bank-card-with-cue-word"
+finder = "patterns"
+text = "Card 4111 1111 1111 1111 expires soon."
+found = [
+  { text = "4111 1111 1111 1111", kind = "bank" },
+]
+
+[[case]]
+id = "card-that-fails-luhn-is-not-found"
+finder = "patterns"
+text = "Card 4111 1111 1111 1112 expires soon."
+found = []
+
+[[case]]
+id = "id-bare-gb-vat-with-checksum"
+finder = "patterns"
+text = "VAT GB 123 4567 82 applies."
+found = [
+  { text = "GB 123 4567 82", kind = "id" },
+]
+
+[[case]]
+id = "two-emails-in-order"
+finder = "patterns"
+text = "Send a@b.com or c@d.org."
+found = [
+  { text = "a@b.com", kind = "email" },
+  { text = "c@d.org", kind = "email" },
+]
+
+[[case]]
+id = "company-with-suffix"
+finder = "companies"
+text = "Pay Acme Holdings Ltd now."
+found = [
+  { text = "Acme Holdings Ltd", kind = "company" },
+]
+
+[[case]]
+id = "company-without-suffix-is-not-found"
+finder = "companies"
+text = "Pay Acme Holdings now."
+found = []
+
+[[case]]
+id = "company-with-and-connector"
+finder = "companies"
+text = "Smith and Sons Ltd delivers."
+found = [
+  { text = "Smith and Sons Ltd", kind = "company" },
+]
+
+[[case]]
+id = "limited-warranty-is-no-company"
+finder = "companies"
+text = "Provider Limited Warranty applies."
+found = []
+
+[[case]]
+id = "two-companies"
+finder = "companies"
+text = "Acme Ltd and Beta Limited sign."
+found = [
+  { text = "Acme Ltd", kind = "company" },
+  { text = "Beta Limited", kind = "company" },
+]
+
+[[case]]
+id = "company-with-a-foreign-suffix"
+finder = "companies"
+text = "Müller GmbH delivers."
+found = [
+  { text = "Müller GmbH", kind = "company" },
+]
+
+[[case]]
+id = "company-with-a-foreign-suffix-ascii"
+finder = "companies"
+text = "Schmidt GmbH delivers."
+found = [
+  { text = "Schmidt GmbH", kind = "company" },
+]
+
+[[case]]
+id = "honorific-before-a-company-is-part-of-its-span"
+finder = "companies"
+text = "Mr Brightline Studio Ltd signs."
+found = [
+  { text = "Mr Brightline Studio Ltd", kind = "company" },
+]
+
+[[case]]
+id = "role-word-before-a-suffix-looks-like-a-company"
+finder = "companies"
+text = "The Agency Limited is a role in this text."
+found = [
+  { text = "Agency Limited", kind = "company" },
+]
+
+[[case]]
+id = "address-with-postcode"
+finder = "addresses"
+text = "Office at 14 Harbour Street, Leeds LS1 4AB today."
+found = [
+  { text = "14 Harbour Street, Leeds LS1 4AB", kind = "address" },
+]
+
+[[case]]
+id = "address-with-no-postcode"
+finder = "addresses"
+text = "Office at 14 Harbour Street, Leeds today."
+found = [
+  { text = "14 Harbour Street, Leeds", kind = "address" },
+]
+
+[[case]]
+id = "street-word-first-address"
+finder = "addresses"
+text = "27 Rue Didouche Mourad, Algiers 16000, Algeria"
+found = [
+  { text = "27 Rue Didouche Mourad, Algiers 16000, Algeria", kind = "address" },
+]
+
+[[case]]
+id = "us-address-with-zip"
+finder = "addresses"
+text = "Send to 100 Main Street, Springfield, IL 62701 please."
+found = [
+  { text = "100 Main Street, Springfield, IL 62701", kind = "address" },
+]
+
+[[case]]
+id = "a-bracket-ends-the-address"
+finder = "addresses"
+text = "14 Harbour Street, Leeds LS1 4AB (\"the Agency\")"
+found = [
+  { text = "14 Harbour Street, Leeds LS1 4AB", kind = "address" },
+]
+
+[[case]]
+id = "plain-numbers-are-no-address"
+finder = "addresses"
+text = "Pay within 14 days of clause 12 or 3 Business Days."
+found = []
+
+[[case]]
+id = "person-by-honorific"
+finder = "people"
+text = "Contact Ms Jones today."
+found = [
+  { text = "Ms Jones", kind = "person" },
+  { text = "Jones", kind = "person" },
+]
+
+[[case]]
+id = "person-by-signature"
+finder = "people"
+text = "Signed by Sarah Jones."
+found = [
+  { text = "Sarah", kind = "person" },
+  { text = "Sarah Jones", kind = "person" },
+  { text = "Jones", kind = "person" },
+]
+
+[[case]]
+id = "person-by-job-title"
+finder = "people"
+text = "Sarah Jones, Director, signed."
+found = [
+  { text = "Sarah", kind = "person" },
+  { text = "Sarah Jones", kind = "person" },
+  { text = "Jones", kind = "person" },
+]
+
+[[case]]
+id = "signed-by-a-company-gives-no-person"
+finder = "people"
+text = "Signed by Acme Holdings Limited."
+found = []
+
+[[case]]
+id = "name-with-a-particle"
+finder = "people"
+text = "Signed by Jan de Vries."
+found = [
+  { text = "Jan", kind = "person" },
+  { text = "Jan de Vries", kind = "person" },
+  { text = "Vries", kind = "person" },
+]
+
+[[case]]
+id = "common-word-name-at-a-sentence-start"
+finder = "people"
+text = "Pat Kelly, Managing Director, signed."
+found = [
+  { text = "Pat Kelly", kind = "person" },
+  { text = "Kelly", kind = "person" },
+]
+
+[[case]]
+id = "name-split-by-a-line-break"
+finder = "people"
+text = "Signed by Sarah\nJones."
+found = []
+
+[[case]]
+id = "a-job-title-alone-is-no-name"
+finder = "people"
+text = "The Managing Director will sign."
+found = []

@@ -67,7 +67,7 @@ A footer is a `Token: value` line after the body, with one blank line before it.
 | `BREAKING CHANGE: <what breaks>` | A change that breaks a module's input or output shape, or a public command. Add `!` after the scope as well: `feat(core)!:`. Say what callers must change. Saved data never breaks: a change to its shape ships a migration, as D5 (add fields rather than rename) and D6 (migrations and a schema version) require. |
 | `Refs: #12` | The issue or pull request the commit relates to. |
 | `Task: S1-M2-T3` | The task of a build-stage plan that the commit completes ([docs/plans/README.md](docs/plans/README.md)). |
-| `Co-Authored-By: Name <email>` | Credit for a co-author. Agents add their own attribution line. |
+| `Co-Authored-By: Name <email>` | Credit for a co-author. Add it only when the owner asks for it. Agents do not add their own attribution line unprompted. |
 
 ### One change per commit
 
@@ -126,7 +126,6 @@ are still saved, as D8 (save the AI's exact reply) requires.
 BREAKING CHANGE: checking.extract() now takes the sentence map from
 ingest. The cli passes it in; other callers must do the same.
 Refs: #12
-Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 ```
 
 ## 5. Checklist

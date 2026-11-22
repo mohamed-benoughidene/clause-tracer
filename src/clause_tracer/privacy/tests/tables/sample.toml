@@ -1,0 +1,244 @@
+[[case]]
+id = "company-1"
+kind = "entity"
+entity_kind = "company"
+number = 1
+spans = [
+  { text = "Brightline Studio Ltd", nth = 1 },
+  { text = "Brightline Studio Ltd", nth = 2 },
+]
+
+[[case]]
+id = "person-1"
+kind = "entity"
+entity_kind = "person"
+number = 1
+spans = [
+  { text = "Karim Benali", nth = 1 },
+  { text = "Karim Benali", nth = 2 },
+]
+
+[[case]]
+id = "person-2"
+kind = "entity"
+entity_kind = "person"
+number = 2
+spans = [
+  { text = "Ms Jones", nth = 1 },
+  { text = "Sarah Jones", nth = 1 },
+]
+
+[[case]]
+id = "address-1"
+kind = "entity"
+entity_kind = "address"
+number = 1
+spans = [
+  { text = "14 Harbour Street, Leeds LS1 4AB", nth = 1 },
+]
+
+[[case]]
+id = "address-2"
+kind = "entity"
+entity_kind = "address"
+number = 2
+spans = [
+  { text = "27 Rue Didouche Mourad, Algiers 16000, Algeria", nth = 1 },
+]
+
+[[case]]
+id = "id-1"
+kind = "entity"
+entity_kind = "id"
+number = 1
+spans = [
+  { text = "09876543", nth = 1 },
+]
+
+[[case]]
+id = "email-1"
+kind = "entity"
+entity_kind = "email"
+number = 1
+spans = [
+  { text = "accounts@brightline.example", nth = 1 },
+]
+
+[[case]]
+id = "gone-brightline-studio-ltd"
+kind = "gone"
+text = "Brightline Studio Ltd"
+
+[[case]]
+id = "gone-brightline"
+kind = "gone"
+text = "Brightline"
+
+[[case]]
+id = "gone-karim-benali"
+kind = "gone"
+text = "Karim Benali"
+
+[[case]]
+id = "gone-karim"
+kind = "gone"
+text = "Karim"
+
+[[case]]
+id = "gone-benali"
+kind = "gone"
+text = "Benali"
+
+[[case]]
+id = "gone-sarah-jones"
+kind = "gone"
+text = "Sarah Jones"
+
+[[case]]
+id = "gone-sarah"
+kind = "gone"
+text = "Sarah"
+
+[[case]]
+id = "gone-jones"
+kind = "gone"
+text = "Jones"
+
+[[case]]
+id = "gone-14-harbour-street"
+kind = "gone"
+text = "14 Harbour Street"
+
+[[case]]
+id = "gone-harbour-street"
+kind = "gone"
+text = "Harbour Street"
+
+[[case]]
+id = "gone-leeds"
+kind = "gone"
+text = "Leeds"
+
+[[case]]
+id = "gone-ls1-4ab"
+kind = "gone"
+text = "LS1 4AB"
+
+[[case]]
+id = "gone-27-rue-didouche-mourad"
+kind = "gone"
+text = "27 Rue Didouche Mourad"
+
+[[case]]
+id = "gone-didouche"
+kind = "gone"
+text = "Didouche"
+
+[[case]]
+id = "gone-algiers"
+kind = "gone"
+text = "Algiers"
+
+[[case]]
+id = "gone-16000"
+kind = "gone"
+text = "16000"
+
+[[case]]
+id = "gone-algeria"
+kind = "gone"
+text = "Algeria"
+
+[[case]]
+id = "gone-accounts-at-brightline-example"
+kind = "gone"
+text = "accounts@brightline.example"
+
+[[case]]
+id = "gone-09876543"
+kind = "gone"
+text = "09876543"
+
+[[case]]
+id = "kept-gbp-9600"
+kind = "kept"
+text = "£9,600"
+nth = 1
+
+[[case]]
+id = "kept-5-november-2026"
+kind = "kept"
+text = "5 November 2026"
+nth = 1
+
+[[case]]
+id = "kept-60-days"
+kind = "kept"
+text = "60 days"
+nth = 1
+
+[[case]]
+id = "kept-12-months"
+kind = "kept"
+text = "12 months"
+nth = 1
+
+[[case]]
+id = "kept-the-agency"
+kind = "kept"
+text = "the Agency"
+nth = 1
+
+[[case]]
+id = "kept-the-developer"
+kind = "kept"
+text = "the Developer"
+nth = 1
+
+[[case]]
+id = "kept-business-days"
+kind = "kept"
+text = "Business Days"
+nth = 1
+
+[[case]]
+id = "kept-england-and-wales"
+kind = "kept"
+text = "England and Wales"
+nth = 2
+
+[[case]]
+id = "kept-https--docs-example-com-expenses-policy"
+kind = "kept"
+text = "https://docs.example.com/expenses-policy"
+nth = 1
+
+[[case]]
+id = "kept-company-number"
+kind = "kept"
+text = "company number"
+nth = 1
+
+[[case]]
+id = "kept-master-agreement"
+kind = "kept"
+text = "Master Agreement"
+nth = 1
+
+[[case]]
+id = "kept-25-percent"
+kind = "kept"
+text = "25%"
+nth = 1
+
+[[case]]
+id = "kept-gbp-45"
+kind = "kept"
+text = "£45"
+nth = 1
+
+[[case]]
+id = "kept-schedule-1"
+kind = "kept"
+text = "Schedule 1"
+nth = 1

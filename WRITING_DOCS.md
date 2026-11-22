@@ -75,6 +75,7 @@ This table was checked on 14 Nov 2026. When you add a promise or find a new copy
 | Uses your own OpenRouter key | README, Spec 1 and 9, most prototype pages, ux-copy |
 | Personal data is replaced on your computer, with Presidio | README, Spec 4.2 and 6.1. SECURITY.md has it as its first item in scope |
 | Names and addresses are replaced before anything is sent, whether private mode is on or off. This includes position text and rewrite instructions | README, Spec 4.2 and 6.2, Help ("What gets sent"), the Privacy check and Review running pages, ux-copy |
+| The place named in the governing-law clause is kept, but only a country, a UK nation, a US state, a Canadian province or an Australian state | Spec 4.2, ux-copy (the Kept note), the Privacy check page, ADR 0008 (amendment of 22 Nov 2026) |
 | Everything saved is encrypted. Auto-delete after 7, 30 or 90 days | README, Spec 8.3 and 9, SECURITY.md (scope), Help, Home, Output, Settings (the auto-delete choices), ux-copy |
 | Not legal advice | README, Spec 10, First launch, Output, Settings, Help, ux-copy |
 | "Check for updates" only opens the release page in the browser. The app never contacts GitHub itself | Spec 8.1, 12 and 14.3, Settings (About), ux-copy |
