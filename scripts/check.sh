@@ -23,3 +23,4 @@ run coverage run -m pytest -q
 run coverage report --include='src/clause_tracer/core/*' --fail-under=95
 run coverage report --include='src/clause_tracer/ingest/*' --fail-under=85
 run coverage report --include='src/clause_tracer/links/*' --fail-under=85
+run coverage report --include='src/clause_tracer/privacy/*' --fail-under=85

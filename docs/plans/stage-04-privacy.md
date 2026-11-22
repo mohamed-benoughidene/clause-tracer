@@ -87,7 +87,7 @@
 
 When this is done, `privacy` has a coverage floor, five empty owner tables, a committed fixture of the sample that a root test keeps in step with `ingest` and `links`, a test helper that builds small cases without `ingest`, and the span and word helpers that every finder uses.
 
-- [ ] **S4-M1-T1: An 85% coverage floor for `privacy`**
+- [x] **S4-M1-T1: An 85% coverage floor for `privacy`**
   - **Build:** In `scripts/check.sh`, add one last line: `run coverage report --include='src/clause_tracer/privacy/*' --fail-under=85`. In `scripts/README.md`, change the `check.sh` row to say "a 95% branch-coverage floor for `core` and an 85% floor for `ingest`, `links` and `privacy`". In `docs/testing-strategy.md` section 11, change nothing: the table already holds the 85% target for pipeline modules.
   - **Files:** `scripts/check.sh`, `scripts/README.md`.
   - **Tests first:** None. The check is the script itself.
