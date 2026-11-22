@@ -1,66 +1,57 @@
 # Privacy finder design choices: what to change in the stage 4 plan
 
-**Revised 21 Nov 2026 (second): tests, nearby-field search and owner decisions added.** Six test tracks (A1 to A4, B1, B2), four nearby-field notes and five owner decisions were read against this report. What changed:
+**Revised 22 Nov 2026 (third): decisions recorded and the plan updated.** This revision records what happened after the second revision, so that the report matches the repository. What changed:
 
-- **VERDICT CHANGES, called out loudly:**
-    - **Q15, phones: CHANGED.** The first revision said to cue-gate bare phone forms and to rely on a shape check against reference numbers. A1 contradicts both. A cue gate on spaced national numbers leaks 44 letters and digits on 4 of 4 bare numbers, and the shape check does not remove `ref 0123 456 7890` (6 of 6 still match). The new recommendation is no cue gate for spaced national numbers. The unspaced 11-digit form was not measured.
-    - **Q9, union step: RECOMMENDATION NARROWED.** The first revision recommended a union of same-kind, same-source overlaps for NER, RULE and PATTERN. The owner decided NER only. A3 shows the union changes 5 of 5000 random cases for NER and 8 of 5000 for all three, so I no longer recommend RULE and PATTERN for stage 4. They stay optional and undecided.
-    - **Q5, Q10, Q14: now owner decisions** (see "Owner decisions"). The entries say "decided by the owner, plan edit not yet made".
-    - **Q17: verdict kept (CHANGE, partial), but layer 3 is now recommended** (A1: 6 of 6 false hits fall to 2 of 6 with no new leak, on a list that overlaps the test words). Layer 4 stays off.
-- **Verdicts confirmed by tests, not changed:** Q1, Q2, Q3, Q7, Q11 (A1 and A2 reproduce every defect), Q8 and Q9's cut-not-drop (A3), Q6 (B2: the explicit copy instruction removed every mutilation).
-- **New real defect found by a property test (A3, P11):** a detector span that runs into the governing-law place is dropped whole, and the part outside the place leaks. It is the same defect as Q9's second amendment.
-- **Errors in my first revision, found while reading the tests and the accepted documents, now fixed:**
-    - Q14 listed Jersey, Guernsey, Isle of Man, Hong Kong and DC. The owner's list has five categories only. They are removed and become an open question.
-    - Q1 and Q17 said a seed made of month words is vetoed even with a cue, yet accepted `Ms May`. A1 had to pick one reading. The text now says only a seed made entirely of legal words is vetoed, and a date veto handles `1 May 2026`.
-    - The phone shape regex `0[1-3]\d{2,3}` as written rejects `020 7946 0958`. A1 substituted a working form.
-    - Q9 recommended a union for all three sources, ahead of the owner's decision.
-    - Q5's kind-order fix mixed a change inside `privacy` (plan only) with a change to `PlaceholderKind` in `core` (needs the owner). They are now separate.
-    - The `split_at` ordering gap is in the reference code, not in the plan text: S4-M3-T5 already says `unique_sorted`.
-    - Task numbers were ambiguous across milestones. This revision writes full IDs (S4-M2-T7, S4-M3-T4) and the open-question numbers are renumbered.
-- **New sections:** "Owner decisions", "Test results", "Where each change belongs", "Ideas from nearby fields". **Updated:** the question entries where a measurement changes the evidence, "Links between questions", "Open owner questions", "Evidence quality and gaps", "Next steps".
-- **First revision (evidence check), kept in one line:** four evidence notes were read; no verdict changed; claims about arXiv 2610.34012, 2610.22800, 2609.11335, DeidSharp, CAMP, Staab et al., Presidio, scrubadub and the licences were verified or corrected in the entries below.
+- **The owner answered all 26 questions of section 6 of the plan** on 21 and 22 Nov 2026. "Owner decisions" is now the full record, as a table.
+- **The stage 4 plan carries the answers.** It has 43 tasks and 442 tests, and its checker reports no findings. Its status is still Draft: "Accepted on" reads "Not yet". Question 24 was reversed to this report's version, so four more patterns are built in stage 4 (S4-M2-T12). Question 25 (the hybrid at the place) and question 26 (the card kind) are new.
+- **Other files were edited** (uncommitted, as `git status` shows): Spec 4.2 and a new Spec 13 line, an ADR 0008 amendment of 22 Nov 2026, system design 15.4, 15.7 and 15.8, the testing strategy `privacy` row, the stage 1 plan (task S1-M6-T8), the plans README, the WRITING_DOCS promise table and `prototype/privacy-check.html`.
+- **Each entry Q1 to Q17 now ends with "Status (22 Nov 2026)".** The line says how it was decided and where it lives, by plan task id. Five verdicts moved because of a decision: Q9 (hybrid at the place), Q15 (four patterns built), Q14 (closed list in Spec 4.2), Q10 (keep) and Q5 (value-only). The evidence text above each status line is unchanged.
+- **"Where each change belongs" is now a done list.** "Test results" has a new subsection for the plan simulations and checks. "Open owner questions", "Evidence quality and gaps", "Links between questions" and "Next steps" match the repository.
+- **First revision (evidence check), in one line:** four evidence notes were read and no verdict changed.
+- **Second revision (21 Nov), in one line:** six test tracks, four nearby-field notes and five owner decisions were added; Q15 phones, Q9 union and Q17 layer 3 were corrected; several errors of the first revision were fixed.
 - **Where the numbers live.** The folder `research_notes/` is git-ignored (checked with `git check-ignore`). The test numbers therefore exist only in this report. Real contracts stayed outside the repo; only counts are reported, and no contract text, party name or person name from them appears here.
 
-**Scope.** This report tests the 17 open questions in section 6 of `docs/plans/stage-04-privacy.md` against five sets of research notes, four evidence-check notes, six test tracks and four nearby-field notes. It recommends. It does not decide beyond the owner decisions below, and it edits no plan, table or word list (Constitution T11: the owner writes expected answers and word lists). Nothing here is legal advice and no lawyer was consulted. The output of the privacy step is pseudonymised text with a local map, never "anonymous" (ADR 0016 working position, Spec 4.2).
+**Scope.** This report tests the 17 first questions of section 6 of `docs/plans/stage-04-privacy.md` (the plan now has 26) against five sets of research notes, four evidence-check notes, six test tracks and four nearby-field notes. It recommends. It does not decide beyond the owner decisions below, and it edits no plan, table or word list (Constitution T11: the owner writes expected answers and word lists). Nothing here is legal advice and no lawyer was consulted. The output of the privacy step is pseudonymised text with a local map, never "anonymous" (ADR 0016 working position, Spec 4.2).
 
-**Task IDs.** The plan's tasks are written in full (S4-M2-T7 is task 7 of milestone 2). The plan's own question numbers (Q1 to Q17) are the numbers of section 6 of the plan.
+**Task IDs.** The plan's tasks are written in full (S4-M2-T7 is task 7 of milestone 2). The plan's own question numbers (1 to 26) are the numbers of section 6 of the plan. For questions 1 to 17 the report number and the plan number are the same.
 
-## Owner decisions of 21 Nov 2026
+<a id="owner-decisions-of-21-nov-2026"></a>
 
-The owner decided the five points below. Each matching question entry says "decided by the owner, plan edit not yet made". Nothing here has been written into a plan, the spec or a design document.
+## Owner decisions of 21 and 22 Nov 2026
 
-| # | Decision | Question | What follows |
+The owner gave these decisions in chat. Plan questions 5, 9, 10, 14, 18, 25 and 26 were answered one by one. Questions 1, 4, 12 and 17 were answered in a batch. All other questions were answered "as recommended", which is the plan as written. The second revision of this report numbered its own open questions; four of them became plan questions: old 1 is plan 24, old 9 is plan 21, old 10 is plan 25 and old 18 is plan 23. The decision numbers 1 to 6 are the ones that the plan cites.
+
+| # | Decision | Question (report; plan) | Where it lives now |
 |---|---|---|---|
-| 1 | The governing-law place uses a closed list. The Spec 4.2 wording narrows to match: a country, UK nation, US state, Canadian province or Australian state named in the governing-law clause. A place outside the list is not kept and is shown as unsure. | Q14 | Plan edit in S4-M3-T3. Spec 4.2 edit (group B). Cost: places outside the five categories stay flagged. |
-| 2 | Keep the token form `⟦ ⟧`, with no ADR. Adopt the explicit "write placeholders exactly as they appear" instruction in the prompts of stage 6 and later. It is not stage 4 work. | Q10, Q6 | Record the rule for system design or plan section 9 (group B). |
-| 3 | The doubt list is not built inside stage 4, because a core change would break the rule that a stage works inside one module. The owner prefers to append it to the stage 1 (core) plan as new tasks after S1-M6-T7. | Q17, Q1 | Proposal below. Nothing is written into any plan. |
-| 4 | Value-only ID spans. | Q5 | Plan edit in S4-M2-T2. The prototype follows (group B); a grep found no keyword mention in Spec 4.2 or ux-copy. |
-| 5 | Union amendment for NER spans only. Union for RULE and PATTERN stays optional and undecided. | Q9 | Plan edit in S4-M3-T4. |
+| 1 | The governing-law place uses a closed list of five categories: a country, a UK nation, a US state, a Canadian province, an Australian state. "England and Wales" is one entry. A place outside the list is not kept: a finder's flag on it stays and the text is replaced. Stage 4 shows no "unsure" mark for it | Q14; plan 14, 19, 20 | Spec 4.2 (Kept line) and the new Spec 13 line; ADR 0008 amendment of 22 Nov 2026; WRITING_DOCS promise row; plan tasks S4-M3-T3 (`places.py`) and S4-M2-T11 (the owner writes `_place_list.py`; not yet written) |
+| 2 | Keep the token form `⟦ ⟧`, with no ADR. Every prompt that carries placeholders says "write each placeholder exactly as it appears". This is stage 8 work, not stage 4 work | Q10, Q6; plan 10, 6 | System design 15.8 ("Placeholders in prompts", stage 8); plan section 9; ADR 0008 amendment; the escape in S4-M4-T1 and S4-M4-T2. `core/enums.py` is unchanged |
+| 3 | Doubts come later (option B). The shape is task S1-M6-T8 of the stage 1 plan. Stage 4 produces no doubts. The code that fills the shape is built where the user first sees suggestions: stage 6 settles how the command-line tool does the privacy check (system design 15.6), and stage 12 builds the screen | Q17, Q1; no plan question (a change-log row of 21 Nov) | Stage 1 plan, S1-M6-T8 and its change-log row; stage 4 plan sections 8 and 9. The `core` code and the system design 3.4 rows are not built |
+| 4 | ID and bank spans hold the value only. "Company number" stays readable and only `09876543` becomes `ID 1` | Q5; plan 5, 22 | S4-M2-T2 (value-only spans); S4-M3-T4 (`TIE_RANK`, so ID and BANK beat PHONE on identical spans); `prototype/privacy-check.html`; ADR 0008 amendment. The run-on of an ID value is a known limit (plan 22) |
+| 5 | The union of overlapping spans is for `NER` spans only. `RULE` and `PATTERN` spans are not joined | Q9; plan 9, 21 | S4-M3-T4 (`union_ner`) |
+| 6 | Hybrid at the governing-law place: a `PERSON` or `COMPANY` span that touches the kept place stays whole, and every other kind is cut at the place. The AI cannot read the governing law in that one clause, so the label turns unsure and the user sees it. Reason: a leak is worse than an ugly output, and code cannot know whether the place word belongs to the name. In 510 real contracts no finder span touched a kept place | Q14, Q9; plan 25 | Spec 4.2 (Kept line); ADR 0008 amendment; S4-M3-T3 (`cut_in_places`, 46 tests), S4-M3-T6 (one expected span), S4-M3-T11 (property P12) |
+| 7 | `pat` stays in the layer 3 word list, and both tests that depend on it stay | Q17, Q1; plan 18 | S4-M2-T1 (`COMMON_WORD_NAMES`); S4-M2-T7 (`test_name_before_a_job_title` and `test_layer3_pat_at_a_sentence_start_is_left`) |
+| 8 | Every property test runs 1,000 examples, including the properties of S4-M4-T6 | Q9, Q7, Q8; plan sections 5 and 8 | S4-M3-T11 (the `SETTINGS` object); S4-M4-T6 uses the same object; plan section 8 rows of 21 Nov |
+| 9 | Plan questions 1, 4, 12 and 17 as recommended (one batch) | Q1, Q4, Q12, Q17; plan 1, 4, 12, 17 | S4-M2-T7; S4-M2-T1 and S4-M2-T4; S4-M3-T7; S4-M1-T6, S4-M2-T1, S4-M2-T4 and S4-M2-T7. Where this report recommended more than the plan holds, the status lines say so |
+| 10 | Every other open plan question as recommended | Q2, Q3, Q6, Q7, Q8, Q11, Q13, Q15, Q16; plan 2, 3, 6, 7, 8, 11, 13, 15, 16, 19, 20, 21, 22 | The tasks named in the third column of section 6 of the plan (plan question 23 was answered differently: row 14) |
+| 11 | Plan question 24 reversed to this report's version: four more patterns are built in stage 4 (NINO, Luhn card, bare GB VAT, company prefixes) | Q15; plan 24, 15 | S4-M2-T12 (35 tests); Spec 13 line; ADR 0008 amendment; plan section 6 rows 15 and 24, the known limits of S4-M5-T4, section 7 |
+| 12 | A card number gets the kind `BANK`. The gate is the Luhn check, 13 to 19 digits, and a cue word within 40 characters before or a first digit of 3, 4, 5 or 6 | Q15; plan 26 | S4-M2-T12 (`card_is_valid`) |
+| 13 | M3 tasks T7 to T10, M4 and M5 are not simulated by a cheap implementer, by the owner's choice | none; plan section 8 | Plan section 8 (rows of 21 Nov 2026) |
+| 14 | Over-long address: truncated chain, decided 22 Nov 2026 | Q3; plan 23 | S4-M2-T6 (`_truncated_start`) |
 
-### Proposal only: the doubt list as appended stage 1 tasks
+None of this is legal advice or a legal position. The privacy step still produces pseudonymised text with a local map (ADR 0016).
 
-The precedent is the change-log row of 16 Nov 2026 in the stage 1 plan, which appended S1-M6-T4 to S1-M6-T7 after stage 1 was Done, under the rule "add a task" in the plans README ("When the plan is wrong"). Stage 2 changed `core` inside its own plan for `NotTextError` (S2-M1-T5, 19 Nov 2026), but the owner prefers the stage 1 route here.
-
-What the appended tasks would hold. The names are my sketch, not a design, and the owner would confirm them:
-
-- **The code enum.** A `DoubtCode` enum in `core/enums.py` with five members in this order: `SHORT_NAME`, `NEAR_DUPLICATE`, `TWO_KINDS`, `SKIPPED_COMMON`, `NO_CUE_RUN`. It follows the pattern of `ReasonCode` (system design 3.4): rules return codes, never prose.
-- **The shape.** A frozen, slotted `Doubt` dataclass with a span and a `DoubtCode` (system design 3.4 rules for every shape). The earlier note also proposed a message key; codes already stand for words, so I would leave it out.
-- **The export.** Both names exported from `core`, with the core README rows (Constitution S3) and the rows in the system design 3.4 shapes table.
-- **Tests first.** Enum order, frozen and slotted, export, and the `core` import rules (testing strategy section 4 core row). The owner writes the expected values (T11).
-- **The rule it must keep.** A doubt never changes masking. It only feeds the "unsure" display.
-
-What it does to stage 4. The doubt-related stage 4 tasks would depend on the core tasks being merged first. They would be a separate pure function in `privacy` that returns doubts beside the suggestions, so the signature of `find_personal_data` (S4-M3-T6) does not change. Stage 4 then needs no core change of its own. Until the core tasks merge, stage 4 builds everything else.
+**Historical note on decision 3.** The second revision of this report sketched the doubt list as appended stage 1 tasks, with five codes (`SHORT_NAME`, `NEAR_DUPLICATE`, `TWO_KINDS`, `SKIPPED_COMMON`, `NO_CUE_RUN`). The owner chose option B, and S1-M6-T8 carries that shape. The sketch is no longer a proposal and is not repeated here.
 
 ## Executive summary
 
 The plan's architecture holds: cue-driven finding, variants found everywhere, source-priority overlaps, whole-text detector call, exact-match restore, and the `⟦ ⟧` marker with escape. Research found no reason to replace any of these. It did find **real defects in the exact rules and regexes of section 6 and of the tasks S4-M2-T1 to S4-M2-T7 and S4-M3-T1 to S4-M3-T7 that would leak or mis-label**. Track A2 reproduced all eight defects it tested (22 plan tests fail, 42 pass). Track A1 measured them on 367 invented snippets: the plan's rules cover 68.9% of reachable spans and leak 979 letters and digits, against 98.6% and 25 for the replacement rules. That corpus is an upper bound. Track B1 on 510 real contracts is a floor: party names are mostly not found by cue rules alone (Test results, "A ceiling and a floor").
 
-**Verdicts at a glance** (details in the entries):
+**Verdicts at a glance** (details in the entries; the status after the owner's answers is the last line of each entry):
 
 | # | Question | Verdict | One-line reason |
 |---|---|---|---|
 | 1 | Find a person name by code | CHANGE | `CAP` truncates real names (A1: hard-name group 26 of 97 covered, against 97 of 97); all-caps signatures, labels and contact lines are missed |
-| 9 | Overlap order, cut not drop | KEEP + 2 amendments | Source-priority-then-cut is sound (A3: properties pass). Union for NER only (decided by the owner). Cut instead of drop at the governing-law place (A3 P11: a real defect) |
+| 9 | Overlap order, cut not drop | KEEP + 2 amendments | Source-priority-then-cut is sound (A3: properties pass). Union for NER only (decided by the owner). Cut instead of drop at the governing-law place (A3 P11: a real defect); a PERSON or COMPANY span that touches the place stays whole (owner, 21 Nov) |
 | 17 | Months and common words | CHANGE (partial) | Base rule is a floor; add a legal-word veto and a strong-cue bypass; layer 3 now recommended, layer 4 off; the owner chooses the leak trade |
 | 2 | Company or person | CHANGE | Three reproduced false positives (A2) and 8 of 8 `Limited Warranty`-type hits in A1; suffix list too short |
 | 3 | How far an address runs | CHANGE | A1: plan 18 of 46 address spans covered, replacement 46 of 46; postcodes and unit prefixes leak |
@@ -74,10 +65,10 @@ The plan's architecture holds: cue-driven finding, variants found everywhere, so
 | 12 | Short form fitting two people | KEEP + clarify | Own placeholder is right; decide by "who generates this form", not by token subset. Not measured |
 | 13 | Position text is stage 8 | KEEP + note | Fine for sequencing; record the shared-replacer contract now; case rule conflicts with Q17 |
 | 14 | Governing-law place kept | DECIDED by the owner: closed list | A1: plan regex drops a person name in 6 of 12 over-capture cases; B1: 134 places kept in 128 contracts, against 22 in 22 (437 contracts have a governing-law annotation) |
-| 15 | Which patterns | CHANGE (scope, owner; phones changed) | Bracketed phones: plan 0 of 6, replacement 6 of 6. No cue gate for spaced national numbers. NINO and the others are an owner question |
+| 15 | Which patterns | CHANGE (adopted; scope widened by the owner on 22 Nov; phones changed) | Bracketed phones: plan 0 of 6, replacement 6 of 6. No cue gate for spaced national numbers. NINO, card, GB VAT and company prefixes are built in S4-M2-T12 |
 | 16 | Who owns word lists | KEEP | Small owner-owned code constants; do not vendor SSA or Census lists in stage 4 (rule conflict flagged) |
 
-**Leaks and defects found in the current plan text (most serious first).** Items 1, 2, 3, 4 (partly), 5 and 6 are reproduced in A2. Item 7 is untested.
+**Leaks and defects found in the plan text before the 21 Nov 2026 revision (most serious first; the revised plan carries a fix for each, see the status lines).** Items 1, 2, 3, 4 (partly), 5 and 6 are reproduced in A2. Item 7 is untested.
 
 1. **`drop_in_places` (S4-M3-T3) drops a whole span** that touches the kept place. A RULE address next to "England and Wales" loses its masking entirely. A3 property P11 finds it independently on random input. A2 reproduced it only with an injected span (caveat in "Test results").
 2. **`GOVERNING_LAW` (S4-M3-T3) over-captures.** `governed by the laws of England Sarah Jones signs` captures `England Sarah Jones`, and `drop_in_places` then removes the RULE person hit on "Sarah Jones" (A2: reproduced; A1: 6 of 12 such spans leak, 60 letters). It also under-captures: `the laws of the State of Delaware` gives no match.
@@ -141,11 +132,13 @@ Note on `Dr` as "Drive": the plan's order (equal priority, then longer first) al
 
 **(e) Risk if the owner picks the other option.** Keeping `CAP` leaves the tail of any apostrophe, `Mc`, hyphenated or particle name in the sent text, and misses upper-case signature blocks, which are common. This is a direct leak. Over-widening instead (adding the weak cues or a first-name list) buys recall at about the Philter precision cost and breaks checking.
 
+**Status (22 Nov 2026):** Decided as the plan carries it (plan question 1, as recommended; decision 9). S4-M2-T7 builds three cue rules: an honorific (also in capitals), `Signed` or `Executed ... by` (also in capitals), and a name before a comma and a job title. It has a name token that keeps `O'Brien`, `McDonald`, `Smith-Jones` and `al-Rahman` whole, and trims for lead words, trailing job titles and legal words (`LEGAL_STOP_WORDS`). Not in the tasks: label lines, the contact-detail and individual-party cues, `/s/`, a separate date veto, the preamble cues and the orphan run. The owner writes the expected values (S4-M2-T8). The CUAD floor stays open (see 'Open owner questions').
+
 ### Q9. Overlap order, and cutting a lower span instead of dropping it
 
 **(a) Plan's current choice (S6 row 9).** "The order is USER, PARTY_DETAILS, PATTERN, RULE, NER, then the longer span, then the earlier start. A lower span is cut to the parts outside every kept span, and a part with no letter or digit is dropped." The other way, dropping the lower span whole, "leaves such a fragment".
 
-**(b) Verdict: KEEP, with two amendments.** Amendment 1 (union) is decided by the owner for NER spans only; the plan edit is not yet made.
+**(b) Verdict: KEEP, with two amendments.** Amendment 1 (union, for NER spans only) and amendment 2 (cut at the place, hybrid for PERSON and COMPANY spans) are decided by the owner and written into the plan (see the status line).
 
 **(c) Evidence.**
 - Presidio's anonymizer offers `REMOVE_INTERSECTIONS`, which trims the lower-scored of two partly overlapping results to the part outside the higher one and drops only results trimmed to nothing. It trims only partial overlaps: a contained result is dropped earlier, before any trimming, so it never splits a container around a contained span (read in source) ([Presidio anonymizer API](https://presidio.dataprivacystack.org/api/anonymizer_python/), [source](https://github.com/microsoft/presidio/blob/main/presidio-anonymizer/presidio_anonymizer/anonymizer_engine.py)). Its default strategy merges same-type intersections (any score), then drops any result contained in another of any type, so a higher-scored contained span loses to a lower-scored container. Issue 1156 documents this, is still open, and PR 2287 (an opt-in strategy to keep a higher-scored contained entity) is open too ([issue 1156](https://github.com/data-privacy-stack/presidio/issues/1156), [anonymizer_engine.py](https://raw.githubusercontent.com/microsoft/presidio/main/presidio-anonymizer/presidio_anonymizer/anonymizer_engine.py)). The analyzer's own `remove_duplicates` compares same-type spans only, and the default `merge_entities_with_spaces` also merges same-type results separated only by spaces, so "Sarah Jones Tom Jones" would become one span. Presidio ranks by score; this app has no score on `PiiSuggestion`, so source priority is the correct replacement key (researcher's inference; I agree, scores from a checksum, a regex and an NER model are not comparable).
@@ -160,12 +153,14 @@ Note on `Dr` as "Drive": the plan's order (equal priority, then longer first) al
 
 **(d) Exact plan edit.**
 
-1. **Decided by the owner (plan edit not yet made).** S4-M3-T4 `resolve_overlaps`, add a first step before sorting: for source `NER` only, union every group of suggestions that has the same `kind` and whose spans overlap (`a.start < b.end and b.start < a.end`; touching spans stay separate). Never for `USER` or `PARTY_DETAILS`. Cross-kind and cross-source spans are untouched. The companies note argued the same for RULE address spans (street-only and postcode chain overlapping partially); that variant stays optional and undecided. My first revision recommended all three sources. A3 shows the extra step changes little (8 of 5000 cases, against 5 for NER alone), so I now recommend NER only for stage 4, and a second look if the new address chain ever leaves a split span.
-2. S4-M3-T3 `drop_in_places`: replace "drop whole" by "cut", using the same helper as `resolve_overlaps` (subtract the place spans, keep remainders that contain a letter or digit). Exception, my synthesis and not researched: if the overlapping suggestion is kind PERSON or COMPANY, keep it whole and let the place lose the overlap, because a name that touches the place is safer masked in full. A3's diagnostic cut applied to all kinds and passed P11; the PERSON and COMPANY exception was not run.
+1. **Decided by the owner and written into the plan (S4-M3-T4, `union_ner`).** S4-M3-T4 `resolve_overlaps`, add a first step before sorting: for source `NER` only, union every group of suggestions that has the same `kind` and whose spans overlap (`a.start < b.end and b.start < a.end`; touching spans stay separate). Never for `USER` or `PARTY_DETAILS`. Cross-kind and cross-source spans are untouched. The companies note argued the same for RULE address spans (street-only and postcode chain overlapping partially); that variant stays optional and undecided. My first revision recommended all three sources. A3 shows the extra step changes little (8 of 5000 cases, against 5 for NER alone), so I now recommend NER only for stage 4, and a second look if the new address chain ever leaves a split span.
+2. S4-M3-T3 `drop_in_places`: replace "drop whole" by "cut", using the same helper as `resolve_overlaps` (subtract the place spans, keep remainders that contain a letter or digit). Exception, my synthesis and not researched: if the overlapping suggestion is kind PERSON or COMPANY, keep it whole and let the place lose the overlap, because a name that touches the place is safer masked in full. A3's diagnostic cut applied to all kinds and passed P11; the PERSON and COMPANY exception was not run. **Decided by the owner on 21 Nov 2026 (hybrid, decision 6): the exception is adopted for `PERSON` and `COMPANY` spans; every other kind is cut.**
 3. Add the testable invariant to the plan: every alphanumeric character covered by any input span is covered by exactly one output span; resolution only changes which label covers it.
 4. Add the eleven Hypothesis properties of the overlaps note, written as invariants, not expected answers (disjoint and sorted; no leak; no invention; priority; idempotent; order-independent; monotone; identity on clean input; split keeps parent kind and source; validator raises exactly on bad spans; composed pipeline loses nothing). Add example cases: three sources on identical spans, three-level nesting, a chain of partial overlaps, a word-tail remainder, a combining-mark remainder, a punctuation-only user span.
 
 **(e) Risk if the owner picks the other option.** Drop-whole leaves "Sarah" in the text (the plan's own example). Longest-wins lets a long NER guess swallow and relabel a user mark. Union-everything (scrubadub) is safest for coverage but loses which party or user mark a span is, which entity grouping needs. Skipping amendment 1 yields two adjacent placeholders for one person or address. Skipping amendment 2 leaks the part of a span outside the place.
+
+**Status (22 Nov 2026):** KEEP, with both amendments decided and written into the plan. Source priority, then the cut: S4-M3-T4 (`resolve_overlaps`, `SOURCE_PRIORITY`). Union for `NER` spans only: S4-M3-T4 (`union_ner`; decision 5; plan questions 9 and 21). A union for `RULE` and `PATTERN` spans is not built. The verdict changed at the governing-law place to the hybrid: `cut_in_places` (S4-M3-T3) keeps a `PERSON` or `COMPANY` span whole where it touches the place and cuts every other kind (decision 6; plan question 25; Spec 4.2 holds the clause). The properties P11 and P12 are in S4-M3-T11; the planner ran them on the reference code at 5,000 examples with no failure.
 
 ### Q17. Months and common words are not names
 
@@ -194,11 +189,13 @@ Owner decision (apply only if the owner accepts the leak trade; after A1 I recom
 6. Layer 4. If the same folded word occurs in lower case elsewhere in the document, treat it as a common word and apply layer 3's stricter rule. Recommended default: off. It adds a pass and reduces masking. Its only support is Mikheev's document-evidence method on newswire (evaluation tables not read), not contracts.
 7. Add one `ambiguous_name_policy` constant so the owner can move a word between the hard list and the soft list without code change.
 8. Whenever a form is skipped by layers 2 to 4, the design should call the case unsure, not clean. `PiiSuggestion` has no confidence field, so how to surface it is an owner design question (stage 12 screen or a note on the privacy screen). The doubt list in 'Owner decisions' (code `SKIPPED_COMMON`) would carry the fact; it does not decide the display.
-9. Inference, not measured: move `will`, `mark`, `grant` and `bill` from the hard list to the layer 3 list. A capitalised mid-sentence `Contact Will` is then masked, and `Will the Supplier pay?` is still skipped. That would close the 25-letter leak A1 measured, at the price of masking some capitalised mid-sentence uses of the word. Open question 4.
+9. Inference, not measured: move `will`, `mark`, `grant` and `bill` from the hard list to the layer 3 list. A capitalised mid-sentence `Contact Will` is then masked, and `Will the Supplier pay?` is still skipped. That would close the 25-letter leak A1 measured, at the price of masking some capitalised mid-sentence uses of the word. The plan did not take this (see the status line).
 
 Test rows (owner writes the values): `1 May 2026 and 5 June 2026.` gives no person; `Ms May signs on 1 May 2026.` gives only `Ms May`; party `Will Price` with `The price will be paid. Will Price signs. Contact Will.`; party `Rose Hope` with `Hope is not a term.` and `Contact Hope.`; a `Price and Payment` heading; `Signed by Party Schedule`; `SIGNED BY SARAH JONES`.
 
 **(e) Risk if the owner picks the other option.** Keeping only the plan's list leaves `Rose`, `Hope`, `Frank`, `Art`, `Ray` and the legal-word collisions untreated, so months and roles can become names, which breaks the checks the Spec 4.2 keep-list exists for. Adding layers 3 and 4 fixes that at the price of leaking a surname at a sentence start. Neither is free; the choice is the owner's.
+
+**Status (22 Nov 2026):** Decided as the plan carries it (plan question 17, as recommended; question 18 for `pat`). Layer 2 (the hard list `NAME_STOP_WORDS`) and layer 3 (`COMMON_WORD_NAMES`, with evidence of a name) are built in S4-M1-T6, S4-M2-T1 and S4-M2-T4. Layer 4 is off. `LEGAL_STOP_WORDS` vetoes and trims cue-found runs (S4-M2-T7). This report's recommendation to move `will`, `mark`, `grant` and `bill` to layer 3 was not taken: they stay in the hard list, and a bare `Contact Will` stays readable as a known limit in the plan. `pat` stays in layer 3 (decision 7).
 
 ## Entries, the rest in order
 
@@ -222,7 +219,9 @@ Test rows (owner writes the values): `1 May 2026 and 5 June 2026.` gives no pers
 - Add contract verbs and nouns to `COMPANY_LEAD_WORDS`: `Pay, Payment, Notice, Invoice, Deliver, Send, Contact, Between, Agreement, Services, Client, Customer` (owner list, Q16).
 - Add two cues, RULE source, lower priority than a suffix match: `for and on behalf of X` / `on behalf of X` (capitalised run up to a comma, `(` or line end), and `X (a company registered|incorporated in ...)` / `X, a company ...`. `Name:` and `Signed by` values stay persons.
 
-**(e) Risk.** Keeping the 15-word list and the old regex mislabels "Provider Limited Warranty" and "Pay Acme Ltd". A bigger or looser list adds false companies. One further consequence for the owner: a typed party with no suffix (`Brightline Studio`) is treated as a person, so `Studio` alone becomes a person form. That over-masks, which is safe, but a `kind` on `Party` would be cleaner and changes system design 3.4 (owner question).
+**(e) Risk.** Keeping the 15-word list and the old regex mislabels "Provider Limited Warranty" and "Pay Acme Ltd". A bigger or looser list adds false companies. One further consequence for the owner: a typed party with no suffix (`Brightline Studio`) is treated as a person, so `Studio` alone becomes a person form. That over-masks, which is safe, but a `kind` on `Party` would be cleaner and changes system design 3.4 (not done: plan question 2 was answered as recommended).
+
+**Status (22 Nov 2026):** CHANGE, adopted (plan question 2, as recommended). S4-M2-T5 carries the revised company rule. A typed party is a company by the 15 suffixes of `COMPANY_SUFFIXES` only. `EXTENDED_COMPANY_SUFFIXES` (adds `lp`, `corporation`, `incorporated`, `srl`, `spa`, `oy`, `kg`, `ug`, `pte`) reads a company name that a rule found (S4-M2-T1, `is_company_seed`). A `kind` on `Party` is not added, so a typed party with no suffix stays a person and over-masks.
 
 ### Q3. How far an address runs
 
@@ -249,6 +248,8 @@ Test rows (owner writes the values): `1 May 2026 and 5 June 2026.` gives no pers
 Because both rules are RULE ADDRESS and may overlap partially, Q9 amendment 1 (union of same-kind same-source spans) should apply.
 
 **(e) Risk.** Keeping the plan regex leaves a postcode or "Flat 2" in the sent text, which is a direct identifier. The anchored chain is more code and more false hits on postcodes in non-address text, which over-masks and is safe.
+
+**Status (22 Nov 2026):** CHANGE, adopted (plan questions 3 and 23, as recommended). S4-M2-T6 builds the tightened street pattern and the chain back from a postcode, with a cap of 5 comma segments and 120 characters. This report recommended taking the whole run when the chain is too long. The owner decided on 22 Nov 2026 (plan question 23, decision 14) to keep a truncated chain instead of the postcode alone: the span starts at the earliest comma segment that keeps the chain within 5 segments and 120 characters, so the nearest part of the address is hidden; with no start token at all, or when the nearest segment alone is longer than 120 characters, the postcode alone is the span. S4-M2-T6 builds it (`_truncated_start`), and its tests carry the values.
 
 ### Q4. Exact name variants and short names from defined terms
 
@@ -277,11 +278,13 @@ Owner minor point: the 3-letter minimum leaves two-letter names (for example `Li
 
 **(e) Risk.** Keeping only the plan's forms misses `Jones, Sarah` and `S. Jones` in notice blocks. Every added form raises the chance that one short form fits two people, which feeds Q12.
 
+**Status (22 Nov 2026):** The plan's forms stand (plan question 4, as recommended; decision 9). S4-M2-T1 (`name_forms`) and S4-M2-T4 (typed parties and the short-name rule) build them. The additions of this report (initial plus last, surname first, suffix handling, hyphen parts, particles, nickname from text) are not in the tasks. The 3-letter minimum stays.
+
 ### Q5. Does an ID span include its keyword?
 
 **(a) Plan.** "Yes, as the prototype shows. The text then reads 'with ⟦ID 1⟧' and the AI never sees the words 'company number'."
 
-**(b) Verdict: DECIDED by the owner on 21 Nov 2026: value-only spans. Plan edit not yet made.** Before the decision my verdict was CHANGE as an owner decision: value-only spans are better on the evidence, but they contradict the prototype (`prototype/privacy-check.html` shows the ID value as `company number 09876543`) and need doc edits.
+**(b) Verdict: DECIDED by the owner on 21 Nov 2026: value-only spans. Written into S4-M2-T2, S4-M3-T4 and the prototype.** Before the decision my verdict was CHANGE as an owner decision: value-only spans are better on the evidence, but they contradict the prototype (`prototype/privacy-check.html` shows the ID value as `company number 09876543`) and need doc edits.
 
 **(c) Evidence.**
 - Presidio's IBAN recogniser returns the value only; context words only raise the score ([iban_recognizer.py](https://raw.githubusercontent.com/microsoft/presidio/main/presidio-analyzer/presidio_analyzer/predefined_recognizers/generic/iban_recognizer.py)); credit-card and UK NINO recognisers work the same way ([credit card](https://raw.githubusercontent.com/microsoft/presidio/main/presidio-analyzer/presidio_analyzer/predefined_recognizers/generic/credit_card_recognizer.py), [NINO](https://raw.githubusercontent.com/microsoft/presidio/main/presidio-analyzer/presidio_analyzer/predefined_recognizers/country_specific/uk/uk_nino_recognizer.py)). AWS Comprehend's example span is the 19-character number only ([AWS Comprehend](https://docs.aws.amazon.com/comprehend/latest/dg/how-pii.html)).
@@ -296,6 +299,8 @@ Owner minor point: the 3-letter minimum leaves two-letter names (for example `Li
 Also required, in two parts. (i) Inside `privacy` (group A): in S4-M3-T4 give `resolve_overlaps` a local rank so that, on identical spans from the same source, ID and BANK beat PHONE. `PiiSuggestion` carries no pattern name, so the rank can only use `kind`. It changes the plan's sort key and so changes expected values. (ii) Reordering `PlaceholderKind` in `core/enums.py` would touch an accepted shape (system design 3.4) and needs the owner (group B). I recommend (i).
 
 **(e) Risk.** Keeping keyword spans hides what kind of number it is from the AI and gives the USER-mark fragment above. Switching without the kind-order fix lets a bare PHONE label an ID.
+
+**Status (22 Nov 2026):** DECIDED, value-only spans (decision 4; plan questions 5 and 22). Written into S4-M2-T2. The kind-order trap is closed inside `privacy`: `TIE_RANK` in S4-M3-T4 puts BANK and ID before PHONE, and `PlaceholderKind` in `core` is unchanged. The prototype ID row is edited (`prototype/privacy-check.html`). The run-on of a keyword ID value (`company no. 1234567 5 days notice`) is accepted as a known limit.
 
 ### Q6. What "restore" means
 
@@ -322,6 +327,8 @@ Also required, in two parts. (i) Inside `privacy` (group A): in S4-M3-T4 give `r
 
 **(e) Risk.** Strict exact match costs retries on altered tokens, and each paid retry spends the roughly $10 budget. Any tolerance outside the markers can restore a real name where the model wrote a bare label, which is worse than an ugly token.
 
+**Status (22 Nov 2026):** KEEP, decided (plan question 6, as recommended). `restore_text`, `restore_reply` and `map_to_original` are S4-M4-T3, S4-M4-T4 and S4-M4-T5. An unknown token raises, a lone `⟦` is left as it is, and a name comes back as its first place. The copy instruction is recorded as in Q10. Rules 2 to 5 above (multiset parity, a closed id set, one retry, no re-adding) are written in no document yet and belong to stage 6 and later. The optional additions (d) (i) to (iii) are not built.
+
 ### Q7. One detector call on the whole text
 
 **(a) Plan.** "One call with the whole `Document.text`. The adapter chooses how it works through long text. The result is validated once (S4-M3-T1)."
@@ -339,6 +346,8 @@ Also required, in two parts. (i) Inside `privacy` (group A): in S4-M3-T4 give `r
 
 **(e) Risk.** Per-clause calls would put offset shifting and model limits into `privacy` and break the fake. Treating a failed detector as "nothing found" shows the user a result that looks clean and is not. The caller must show "the detector failed", never a code-finders-only result presented as complete.
 
+**Status (22 Nov 2026):** KEEP with the contract, decided (plan question 7, as recommended). S4-M3-T1 raises `ValueError` (message starting `privacy: `) for non-integer, bool, out-of-range and reversed offsets, and checks every span before it trims any. S4-M3-T6 never catches a detector error (`test_a_detector_error_is_not_caught`). The stage 7 adapter contract is in system design 15.7 and in section 9 of the plan. The change to the `PiiDetector` docstring ("Raises: None") is a stage 7 `core` task and is not done.
+
 ### Q8. A detector span across a sentence start is cut, never dropped
 
 **(a) Plan.** "Cut it at the sentence start and keep each piece. A dropped span would leak."
@@ -353,11 +362,13 @@ Also required, in two parts. (i) Inside `privacy` (group A): in S4-M3-T4 give `r
 
 **(e) Risk.** Drop leaks the whole span. Extend breaks module boundaries. A real name that crosses a boundary gets two placeholders, but that case is rare and over-masking is safe; stage 12 "Same person" is the place to merge, never the cut.
 
+**Status (22 Nov 2026):** KEEP, decided (plan question 8, as recommended). S4-M3-T5 builds `split_at_sentences`, returns through `unique_sorted`, and carries two added tests. The properties of the resolve step are in S4-M3-T11.
+
 ### Q10. The escape form (⟦ becomes [)
 
 **(a) Plan.** "Each `⟦` and each `⟧` of the contract is its own `escape` segment and is sent as `[` and `]`. Then `⟦` and `⟧` occur in the sent text only inside real placeholders... and offsets do not move."
 
-**(b) Verdict: KEEP, decided by the owner on 21 Nov 2026 (no ADR). The additions in (d) are not yet made.**
+**(b) Verdict: KEEP, decided by the owner on 21 Nov 2026 (no ADR). The status line says what the plan took from (d).**
 
 **(c) Evidence.** A local Unicode check by the researcher: U+27E6 and U+27E7 are unchanged by NFC, NFD, NFKC and NFKD and nothing else folds into them; fullwidth brackets fold to ASCII under NFKC, so they are not markers; private-use characters can appear in PDF and Word extraction, so reject them. Practitioner tools use ASCII forms (`[REDACTED_PERSON_1]`, `<PERSON_1>`, `[PERSON_1]`) ([LLM Guard](https://raw.githubusercontent.com/protectai/llm-guard/main/llm_guard/input_scanners/anonymize.py), [WSO2](https://wso2.com/api-platform/learn/pii-redaction-llm/)). The only comparison study found parser and prompt mattered more than bracket style, with confounds ([arXiv 2610.34012](https://arxiv.org/html/2610.34012v1)). Researcher's reasoning, which I find sound: contracts already hold ASCII `[insert date]`, `[●]` and `<Party>`, so an ASCII token cannot be one that "ordinary contract text can't contain" (Spec 4.2). Look-alike brackets in replies are not scanned.
 
@@ -380,6 +391,8 @@ Reading. On cost and copy rate alone `[PERSON_n]` looked better: +0.20 tokens an
 
 **(e) Risk.** If hosted models copy `⟦ ⟧` poorly, replies are broken more often. The format is one constant in `core/enums.py`, so changing it later is cheap. An ASCII token would collide with template brackets now.
 
+**Status (22 Nov 2026):** KEEP, decided (decision 2; plan question 10). `⟦ ⟧` stays with no ADR. The escape is built in S4-M4-T1 and S4-M4-T2 (tests `a ⟦b⟧ c`, `⟦Sam` and `x⟦y`). The rule "write each placeholder exactly as it appears" is recorded in system design 15.8 (stage 8) and in section 9 of the plan. It is not stage 4 work.
+
 ### Q11. Which matches remove a defined term from the allow-list
 
 **(a) Plan.** "A term is dropped only when a `PARTY_DETAILS` suggestion, or a `RULE` suggestion of kind `PERSON` or `COMPANY`, has the same text (without 'the' and ''s'). A detector match never drops a term."
@@ -392,7 +405,9 @@ Reading. On cost and copy rate alone `[PERSON_n]` looked better: +0.20 tokens an
 
 **(d) Plan edit (S4-M3-T2).** Keep the equal-text rule and add rule 2b: a defined term T is a name, not allowed, when the sentence that holds its definition also holds a PARTY_DETAILS span or a RULE PERSON/COMPANY span S, and the folded words of T (punctuation stripped, "the" removed) are a non-empty subset of the core words of S (without suffix or honorific). The detector never adds or removes a term. Test rows (invented names): `Brightline Studio Ltd (the "Agency")` keeps `Agency`; `Mercury Logistics Ltd ("Mercury")` untyped makes `Mercury` a name; `Apple Inc. ("Apple")` name; `Apple Inc. (the "Company")` keeps `Company`; `Jane Smith ("Jane")` name; a detector flag on `Agency` still leaves the term allowed; a detector hit alone decides nothing for `Mercury`; curly quotes, possessive and `The` prefix normalise to one key.
 
-**(e) Risk.** Skipping 2b leaves the Mercury leak. 2b also makes `("the Studio")` a name when the sentence holds `Brightline Studio Ltd`, which treats a possible role as a name: that is the safe direction but over-masks; the owner decides (Open question 7). A residual risk stays when no finder finds the full name at all.
+**(e) Risk.** Skipping 2b leaves the Mercury leak. 2b also makes `("the Studio")` a name when the sentence holds `Brightline Studio Ltd`, which treats a possible role as a name: that is the safe direction but over-masks; the plan takes the safe direction (plan question 11, answered as recommended). A residual risk stays when no finder finds the full name at all.
+
+**Status (22 Nov 2026):** CHANGE, adopted (plan question 11, as recommended). The Mercury rule is in S4-M3-T2: `allowed_term_texts` takes the `DefinedTerm`s, and a term that is a short form of a name found by `PARTY_DETAILS` or by a `RULE` `PERSON` or `COMPANY` is no longer allowed. A detector match never drops a term. A short form that no finder reaches stays readable, which the plan states as a limit. The role lexicon and the kept-words order of 'Ideas from nearby fields' are not built.
 
 ### Q12. A short form that fits two people gets its own placeholder
 
@@ -406,12 +421,14 @@ Reading. On cost and copy rate alone `[PERSON_n]` looked better: +0.20 tokens an
 
 **(d) Plan edit (S4-M3-T7).**
 - Decide ambiguity by form generation, not token subset: build a map from each distinct form string to the set of entities whose `name_forms` produce it. One entity: the form joins it. Two or more: the form gets its own entity. This keeps the rule correct for the Q4 forms (`S Jones`, `Smith` from `Smith-Jones`, a shared first name).
-- Recommended (owner question): one shared placeholder per distinct ambiguous short form, so every "Ms Jones" shares one Person N.
+- Recommended: one shared placeholder per distinct ambiguous short form, so every "Ms Jones" shares one Person N. The plan's word-set clusters give this (see the status line).
 - Numbering per kind in order of first appearance of the entity's earliest span; no gaps.
 - Properties: no entity id is shared by two different full names; per-kind numbers run 1 to n in order of first span start. Test: parties `Sarah Jones` and `Tom Jones`, text `Ms Jones agrees.` gives `Ms Jones` its own Person; `Jones signs. Sarah Jones and Tom Jones agree.` gives `Jones` its own Person numbered 1.
 - Note: numbers can change when the document gets a second Jones, which matters if stage 6 caches entities.
 
 **(e) Risk.** Merging on a guess changes who owes what. Never merging at all leaves clutter and more placeholders for the AI.
+
+**Status (22 Nov 2026):** KEEP, decided (plan question 12, as recommended; decision 9). S4-M3-T7 groups by word sets: a set that two or more larger sets contain becomes its own entity, and forms with the same word set share it. The form-set map, the gender guard and the generation-suffix guard of this report are not built.
 
 ### Q13. Replacing known names in position text is stage 8
 
@@ -425,11 +442,13 @@ Reading. On cost and copy rate alone `[PERSON_n]` looked better: +0.20 tokens an
 
 **(e) Risk.** Two matcher copies would leak. The free-text case rule (match one-word forms without regard to case, since typed text is unreliably capitalised) conflicts with Q17: case-insensitive `will` or `price` for a party `Will Price` would mask ordinary words, while keeping the stop list leaks `jones` style entries. It is a stage 8 decision; flag it as an owner question there.
 
+**Status (22 Nov 2026):** KEEP, decided (plan question 13, as recommended). Stage 8 builds it. The contract is in system design 15.8 ("Known names in free text": one function that `privacy` exports and `cli` passes in, or `core`; one-word forms match without regard to case there) and in section 9 of the plan. `PlaceholderEntity.spans` and `restore_reply` stay ready (S4-M4-T4). The conflict with the capital rule of Q17 is for the stage 8 plan.
+
 ### Q14. The governing-law place is kept
 
 **(a) Plan.** "Yes, as a small rule: the words after 'governed by (and construed in accordance with) the law(s) of' are a kept place, and no detector or rule suggestion may overlap it." The regex takes an unbounded run of capitalised words.
 
-**(b) Verdict: DECIDED by the owner on 21 Nov 2026: a closed list. Plan edit and Spec 4.2 edit not yet made.** Before the decision my verdict was CHANGE: keeping the place is reasonable; the plan's regex is not safe.
+**(b) Verdict: DECIDED by the owner on 21 Nov 2026: a closed list. Spec 4.2 and the stage 4 plan carry the closed list, and a person or company span that touches the place stays whole (decision 6).** Before the decision my verdict was CHANGE: keeping the place is reasonable; the plan's regex is not safe.
 
 **(c) Evidence.**
 - Keeping a bare jurisdiction is low risk. GDPR Recital 26 judges identifiability by all means reasonably likely, and pseudonymised data attributable by additional information stays personal data ([Recital 26](https://gdpr-info.eu/recitals/no-26/); [EDPB Guidelines 01/2025](https://www.edpb.europa.eu/system/files/2025-01/edpb_guidelines_202501_pseudonymisation_en.pdf)). The ICO applies a motivated-intruder test ([ICO](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/data-sharing/anonymisation/how-do-we-ensure-anonymisation-is-effective/)). The Text Anonymization Benchmark says only very general values, such as a country, may be left, depending on the other quasi-identifiers ([TAB guidelines](https://github.com/NorskRegnesentral/text-anonymization-benchmark/blob/master/guidelines.md)). The researcher's k-anonymity argument is reasoning, not a figure. So the app must keep saying "pseudonymised, replaced on this computer", never "anonymous".
@@ -440,7 +459,7 @@ Reading. On cost and copy rate alone `[PERSON_n]` looked better: +0.20 tokens an
 - Gaps: confirmed absent: no with-and-without study of name redaction on LLM contract review (arXiv 2609.11335 covers eleven general benchmarks, none legal; its MuSR figures, once taken from a vendor blog, are now confirmed in the paper: see Q6); no jurisdiction k-anonymity figure; EDPB paragraph text read in excerpt; no lawyer consulted (ADR 0016).
 
 **(d) Plan edit (S4-M3-T3, `places.py`).**
-- Replace the shape regex by a closed gazetteer constant owned by the owner (same status as other lists, Q16), with the decided categories only: countries (with common short forms such as "United States" and "United Kingdom"), UK nations ("England", "Wales", "Scotland", "Northern Ireland", and the pair "England and Wales", which the sample uses), US states (as "State of X", "Commonwealth of X" or bare), Canadian provinces and Australian states. Not in the list, so not kept: DC, US and Australian territories, Canadian territories, crown dependencies and Hong Kong. My first revision added some of these on my own. Whether to add a short list of them is open question 11.
+- Replace the shape regex by a closed gazetteer constant owned by the owner (same status as other lists, Q16), with the decided categories only: countries (with common short forms such as "United States" and "United Kingdom"), UK nations ("England", "Wales", "Scotland", "Northern Ireland", and the pair "England and Wales", which the sample uses), US states (as "State of X", "Commonwealth of X" or bare), Canadian provinces and Australian states. Not in the list, so not kept: DC, US and Australian territories, Canadian territories, crown dependencies and Hong Kong. My first revision added some of these on my own. Whether to add a short list of them is for the owner, who writes the list (S4-M2-T11).
 - Match only after `(?i:governed by(?: and construed in accordance with)? the laws? of)` plus an optional `the` and an optional `State|Commonwealth|Republic|Kingdom of`, take the longest gazetteer member (allowing a fixed ` and ` between two members), and stop at its end. Anything outside the gazetteer is not kept and the detector flag stays; the place is shown as unsure, as decided (the wording of the reason is a stage 8 display matter).
 - Apply the kept place only inside the governing-law phrase. Do not keep court cities by default ("courts of Leeds"); a city is a smaller-population quasi-identifier.
 - `drop_in_places` becomes a cut (see Q9 edit 2).
@@ -448,6 +467,8 @@ Reading. On cost and copy rate alone `[PERSON_n]` looked better: +0.20 tokens an
 - Optional paid or local test: a replay on the sample with and without the place, owner-approved with a spend cap, only after the owner agrees the budget.
 
 **(e) Risk.** Keeping the plan's regex leaks an untyped name that follows the place and breaks the check on `State of Delaware`. A closed list misses a rare jurisdiction, which is over-masking and safe; hiding the place entirely would blind the checks that read the governing law. The decided cost: a place outside the five categories stays flagged and shows as unsure.
+
+**Status (22 Nov 2026):** DECIDED, closed list (decision 1; plan questions 14, 19, 20 and 25). Spec 4.2 carries the five categories ("England and Wales" counts as one) and the hybrid clause. ADR 0008 has the amendment of 22 Nov 2026. S4-M3-T3 builds `places.py` and `cut_in_places`. The owner writes the list file, S4-M2-T11 (`_place_list.py`), which is not written yet. A US state is kept only as `State of X`: the switches `US_STATE_BARE` and `US_COMMONWEALTH` are off (plan question 19). A place outside the list is not kept and its flag stays; stage 4 shows no "unsure" mark for it. The planner's draft list also holds territories, and the owner's file decides.
 
 ### Q15. Which patterns stage 4 builds
 
@@ -469,6 +490,8 @@ My reasoning check: the plan leaves NINO, cards and similar to the detector, but
 
 **(e) Risk.** Staying with the plan's five patterns leaves identifiers that code could have caught entirely to the detector. Adding more patterns raises test rows, golden-file churn and the owner's reading load; it also raises false hits on numbers, which over-mask.
 
+**Status (22 Nov 2026):** CHANGE, adopted and widened. Phones: S4-M2-T2 has four forms (international, UK national with spaces or dashes, bracketed area code, 11 unseparated digits that start with 0) and no cue gate, so `0123 456 7890` is masked as a phone (a known limit). IBAN: S4-M2-T3. The verdict on the four extra patterns changed: the owner reversed plan question 24 on 22 Nov, so S4-M2-T12 builds a NINO, a GB VAT number with its checksum and a UK company number with a prefix (kind `ID`), and a Luhn-checked card number (kind `BANK`, plan question 26). URL, date of birth, IP address and US SSN are not built.
+
 ### Q16. Who owns the word lists
 
 **(a) Plan.** "The lists are code constants in this plan, and the owner reads them with the plan. The finders table (S4-M2-T8) fixes their effect. A change to a list is a change to code and to the table, in two commits (Constitution T11)."
@@ -485,12 +508,14 @@ My reasoning check: the plan leaves NINO, cards and similar to the detector, but
 
 **(e) Risk.** A vendored gazetteer adds an accuracy risk, a maintenance burden for a cheap implementer, a licence check and a possible rule conflict. A tiny curated list misses rare collisions; the document evidence rule (if the owner accepts it) and the detector back it up.
 
+**Status (22 Nov 2026):** KEEP, decided (plan question 16, as recommended). The lists are code constants that the owner reads with the plan: `names.py` (S4-M2-T1) and `people.py` (S4-M2-T7). The owner writes the place list (S4-M2-T11). No SSA, Census, ONS or Wikidata list is vendored. How AGENTS.md ("Keep the repo free of real data") reads for such a list stays the owner's call.
+
 ## Links between questions
 
 **Q5 and Q9: keyword in the span, and unions.**
 - Keyword-inclusive spans are longer, so they beat a bare PHONE; a USER mark on the digits cuts them and leaves `company number ` as a nonsense ID fragment.
-- Value-only spans are identical in length to a PHONE or BANK hit, so the kind index decides, and PHONE precedes ID and BANK in `PlaceholderKind`. Q5 is now decided, so Q9's sort key (a local rank inside `privacy`) or the kind order in `core` must change in the same edit. A1 never tested two kinds on the same characters.
-- Same-source overlaps: the overlaps researcher proposed a union for NER of the same kind; the companies researcher raised the same need for RULE address spans. The owner decided NER only (21 Nov 2026); RULE and PATTERN stay optional and undecided. A3 measured the difference at 3 more cases in 5000. Presidio's own union is by type only (any score, any source), so the same-source limit is a design choice. Never for USER or PARTY_DETAILS.
+- Value-only spans are identical in length to a PHONE or BANK hit, so the kind index decides, and PHONE precedes ID and BANK in `PlaceholderKind`. Q5 is decided, and the local rank is built: `TIE_RANK` in S4-M3-T4 puts BANK and ID before PHONE, and `core` is unchanged. A1 never tested two kinds on the same characters.
+- Same-source overlaps: the overlaps researcher proposed a union for NER of the same kind; the companies researcher raised the same need for RULE address spans. The owner decided NER only (21 Nov 2026) and answered plan question 21 as recommended: RULE and PATTERN are not joined. A3 measured the difference at 3 more cases in 5000. Presidio's own union is by type only (any score, any source), so the same-source limit is a design choice. Never for USER or PARTY_DETAILS.
 
 **Q1, Q4, Q11, Q17: one name system.**
 - `LEGAL_STOP` (Q17) vetoes cue-found runs and trims them. It must **not** feed forms generated from a typed party or from a defined-term short name, or a party named with a role word loses its one-word form. Conversely Q11 rule 2b makes a subset term a name, but if a stop list blocks the code finder, only the detector can mask a bare `Studio`; state this limit in the plan.
@@ -503,11 +528,11 @@ My reasoning check: the plan leaves NINO, cards and similar to the detector, but
 
 **Q4 and Q12: variants and ambiguity.** Every new form in Q4 (initial plus last, hyphen parts, first name alone) can fit two people. Ambiguity must be decided by the set of entities that generate a form (Q12 edit), not by token subset, or `S Jones` would join the wrong person. This is the exact failure 2610.34012 App. C p20 records (a landlord and a tenant merged by surname, "worse than a leak"), so the form-set rule is not a refinement but the main guard.
 
-**Q14 and Q9: drop versus cut at the place.** The plan drops a whole span that touches the place (leak); the researchers' principle is to cut. Cut for ADDRESS and similar; my synthesis, not researched, is to keep PERSON and COMPANY spans whole and let the place lose the overlap. With the closed list of Q14 true overlaps become rare, but the cut rule must still exist. A3 P11 confirms the leak on random input and passes with the cut.
+**Q14 and Q9: drop versus cut at the place.** The first plan dropped a whole span that touches the place (leak); the researchers' principle is to cut. The owner decided the hybrid (decision 6): cut every kind except PERSON and COMPANY, which stay whole and let the place lose the overlap (S4-M3-T3). With the closed list of Q14 true overlaps become rare, but the cut rule must still exist. A3 P11 confirms the leak on random input and passes with the cut.
 
-**Q7 and the stage 7 adapter contract.** Whole-text call at the port means the adapter owns windowing, offsets in code points, no silent truncation, no copied text in errors, and a named error. The stage 4 side is fail-closed validation and no exception swallowing. A flaky adapter will then stop runs, so stage 7 should give the app a way to show "the detector failed" and not a code-only result as complete.
+**Q7 and the stage 7 adapter contract.** Whole-text call at the port means the adapter owns windowing, offsets in code points, no silent truncation, no copied text in errors, and a named error. The stage 4 side is fail-closed validation and no exception swallowing (S4-M3-T1, S4-M3-T6), and the contract is in system design 15.7. A flaky adapter will then stop runs, so stage 7 should give the app a way to show "the detector failed" and not a code-only result as complete.
 
-**Q13 and Q17.** The free-text replacer is stage 8, but the capital-letter rule differs by source (contract text is capitalised, typed text is not). Stage 8 must pick a rule per source, with the same stop-list treatment.
+**Q13 and Q17.** The free-text replacer is stage 8, but the capital-letter rule differs by source (contract text is capitalised, typed text is not). System design 15.8 says one-word forms match without regard to case there; the stage 8 plan must still state the stop-list treatment.
 
 ## Test results
 
@@ -749,7 +774,29 @@ The two numbers must not be read as one range. **A1 is an upper bound.** The cor
 
 **B1 is a floor.** The test did not feed typed party details, which is the mechanism the plan relies on for the parties the user names. The measure is strict: a party answer counts only if every character is covered, and many answers carry a defined-term tail, a state of incorporation or an address that no COMPANY span covers. The contracts are mostly US SEC filings, and the rules were built for UK and EU text and not tuned on them. The tester did not split the causes of the misses (all-capitals names, a missing suffix, trailing text), so no cause is known.
 
-**What follows for Q1.** Cue rules alone will not find most parties: the replacement fully covers 16.1% of annotated party answers and 18.7% of their characters. That is not a surprise and not yet a product risk. ADR 0008 puts the promise on a deterministic layer in front (typed party details and their variants, checksum patterns, company-suffix rules and address rules), with NER as the net behind it. So the typed party details and the stage 7 detector carry the rest, and the cue rules are one part of the front layer. The unsure display matters more: code cannot reach a party that nobody typed and the detector did not flag. **I do not call the 16% a product risk until the typed-party follow-up (open question 25) has run.** Until then no CUAD figure goes into the spec or an ADR.
+**What follows for Q1.** Cue rules alone will not find most parties: the replacement fully covers 16.1% of annotated party answers and 18.7% of their characters. That is not a surprise and not yet a product risk. ADR 0008 puts the promise on a deterministic layer in front (typed party details and their variants, checksum patterns, company-suffix rules and address rules), with NER as the net behind it. So the typed party details and the stage 7 detector carry the rest, and the cue rules are one part of the front layer. The unsure display matters more: code cannot reach a party that nobody typed and the detector did not flag. **I do not call the 16% a product risk until the typed-party follow-up (see 'Open owner questions') has run.** Until then no CUAD figure goes into the spec or an ADR.
+
+### Later work: plan simulations and checks (22 Nov 2026)
+
+This work tested the plan, not the finder rules. The numbers come from the plan's change log (rows of 21 and 22 Nov) and from the reports of the agents that ran each step. I did not re-run any of them. The scratch copies are outside the repo.
+
+| Step | What ran | Result |
+|---|---|---|
+| M1 and M2 simulation | A cheap implementer built the tasks from the plan text alone, in a copy | 190 tests passing; 1 plan defect (the S4-M2-T9 example); about a dozen ambiguities closed (S4-M1-T3, S4-M1-T6, S4-M2-T1, S4-M2-T4, S4-M2-T7, S4-M2-T9, S4-M2-T10, S4-M2-T11) |
+| M3 simulation, T1 to T6 and T11 | The same method on the changed M3 tasks | 135 tests passing; lint defects in the plan's code blocks found and fixed (line length, `zip` strictness, `Final` annotations); four ambiguities closed (S4-M3-T1, S4-M3-T2, S4-M3-T11) |
+| Plan checker | A script over task ids, dependencies, define-and-use order, test counts and links | 43 tasks, 442 tests, no findings |
+| Real repo | `scripts/check.sh` after the docs edits | Exits 0 |
+| Property timing | Hypothesis at 1,000 examples | About 10 s for each property; the privacy suite took about 2 min 18 s in the copy, before M4 and before S4-M2-T12 |
+| S4-M2-T12 | A mini-simulation of the 35 new tests | 61 passed; ruff, mypy and lint-imports clean; 10 of 11 mutants caught |
+| S4-M2-T12 | A differential run of the new finders against the reference code | 0 differences on 307 real inputs (counts only, no text kept) |
+
+What these numbers do not show:
+
+- **Not simulated:** M3 tasks T7 to T10, all of M4 and all of M5 (the owner's choice), and S4-M2-T12 beyond the mini-simulation above.
+- **Old checks not repeated for T12.** The earlier 11 properties and the defect tests were not re-run after S4-M2-T12, because their scratch files were lost. The 61 passed tests are the new tests and their neighbours, not the whole suite.
+- **One mutant survived.** 10 of 11 mutants were caught. I was not told which one survived.
+- **The end-to-end run on the sample** ran once, on 21 Nov, before the M3 changes and before S4-M2-T12 (7 entities, 10 spans, an exact restore). It was not repeated.
+- **A simulation by a cheap implementer shows that the text is complete enough to build from.** It does not show that the rules find personal data in real contracts. That is the job of the tests above and of the CUAD follow-up.
 
 ### Per-question summary
 
@@ -775,47 +822,59 @@ The two numbers must not be read as one range. **A1 is an upper bound.** The cor
 
 ## Where each change belongs
 
-Each change falls in one of three groups. The plans README ("When the plan is wrong") lets a planner split, reorder or add a task alone, and requires the owner for anything that touches the spec, the system design, the testing strategy or a decision record. Group A stays inside the stage 4 plan. Group B touches an accepted document and needs the owner. Group C needs no change.
+This section was a plan of work in the second revision. It is now a record of what is done. The plans README ("When the plan is wrong") lets a planner split, reorder or add a task alone, and requires the owner for anything that touches the spec, the system design, the testing strategy or a decision record. Group A stayed inside the stage 4 plan. Group B touched accepted documents. Group C needed no change.
 
 ### Group A: plan-only changes in the stage 4 tasks
 
-| Change | Questions | Task | Note |
+All of group A is done in the plan: 43 tasks, 442 tests, and the plan checker reports no findings. Each change moved expected test values; the planner took them from the reference code and marked them "owner to confirm" (Constitution T11).
+
+| Change | Questions | Task | Status |
 |---|---|---|---|
-| Name fragments, cues, trim rules, date veto; name variants with guards | Q1, Q4 | S4-M2-T7, S4-M2-T1 | A1: 97 of 97 on the hard-name group |
-| Company and address rules | Q2, Q3 | S4-M2-T5, S4-M2-T6 | A1 and A2 reproduce the defects |
-| Closed place list (the owner's five categories) | Q14 | S4-M3-T3 | The Spec 4.2 narrowing is group B |
-| Cut instead of drop at the place | Q9, Q14 | S4-M3-T3, with the cut helper of S4-M3-T4 | A3 P11 |
-| Offset checks: `ValueError` with the `privacy:` prefix for reversed, bool and float offsets; no swallowed detector error | Q7 | S4-M3-T1, S4-M3-T6 | Stricter than the plan text |
-| `split_at` uses `unique_sorted` | Q8 | No plan edit | S4-M3-T5 already says it. Fix the reference code first |
-| Mercury subset rule | Q11 | S4-M3-T2 | A2 reproduces the leak |
-| Phone forms with no cue gate, and the working shape regex given in Q15 | Q15 | S4-M2-T2 | A1 |
-| Stop-list layer 3 with layer 4 off; legal-word veto; one policy constant | Q17 | S4-M2-T1, S4-M2-T4, S4-M2-T7 | Owner accepts the leak trade first (open question 3) |
-| Union amendment for NER spans only | Q9 | S4-M3-T4 | Decided by the owner |
-| Value-only ID spans, with a local rank so ID and BANK beat PHONE on identical spans | Q5 | S4-M2-T2, S4-M3-T4 | Decided by the owner |
-| One entity per form, by the set of entities that generate the form | Q12 | S4-M3-T7 | Not measured |
+| Name fragments, cues, trims; name variants | Q1, Q4 | S4-M2-T7, S4-M2-T1 | Done for the three cue rules, the name token and the trims. Not done: label lines, contact and individual-party cues, a date veto, and the extra forms of Q4 (initial, surname first, suffix, hyphen, nickname) |
+| Company and address rules | Q2, Q3 | S4-M2-T5, S4-M2-T6 | Done. An over-long address chain keeps a truncated chain (plan 23, decided 22 Nov 2026), not the postcode alone |
+| Closed place list (the owner's five categories) | Q14 | S4-M3-T3 | Done in the plan. The list file S4-M2-T11 is an owner task and is not written |
+| Cut instead of drop at the place; hybrid for `PERSON` and `COMPANY` | Q9, Q14 | S4-M3-T3 (`cut_in_places`), S4-M3-T11 (P11, P12) | Done |
+| Offset checks with `ValueError` and the `privacy:` prefix; no swallowed detector error | Q7 | S4-M3-T1, S4-M3-T6 | Done |
+| `split_at` returns through `unique_sorted` | Q8 | S4-M3-T5 | No plan edit was needed: the task already says so |
+| Mercury subset rule | Q11 | S4-M3-T2 | Done |
+| Phone forms with no cue gate | Q15 | S4-M2-T2 | Done (four forms, including 11 unseparated digits) |
+| Four more patterns: NINO, Luhn card, bare GB VAT, company prefixes | Q15 | S4-M2-T12 | Done (35 tests) |
+| Legal-word veto; layer 3 with layer 4 off | Q17 | S4-M2-T1, S4-M2-T4, S4-M2-T7 | Done. Not done: the one `ambiguous_name_policy` constant. Not taken: moving `will`, `mark`, `grant` and `bill` to layer 3 |
+| Union for `NER` spans only | Q9 | S4-M3-T4 (`union_ner`) | Done |
+| Value-only ID spans, with a local rank so ID and BANK beat PHONE | Q5 | S4-M2-T2, S4-M3-T4 (`TIE_RANK`) | Done |
+| One entity per form, by the set of entities that generate the form | Q12 | S4-M3-T7 | Not done as written. T7 groups by word sets and gives a short form of two heads its own entity |
 
-Each change moves expected test values, and the owner writes expected values (Constitution T11). The planner recomputes the values with the reference code and marks each one for owner confirmation. The reference `split_at` must be fixed before any value is recomputed.
+### Group B: changes to accepted documents
 
-### Group B: changes that touch accepted documents and need the owner
+| Change | Document | Status |
+|---|---|---|
+| Stage 7 adapter contract (whole text, code-point offsets, no silent truncation, fail closed, spans only) | System design 15.7; plan section 9 | Done as text. The change to the `PiiDetector` docstring ("Raises: None") is a stage 7 `core` task and is not done |
+| The doubt shape | Stage 1 plan, S1-M6-T8 (own branch `feat/core-doubt-shape`) | The task is written in the stage 1 plan. Not done: the `core` code, and the Doubt rows of system design 3.4, which come with S1-M6-T8 |
+| The "write placeholders exactly" prompt rule | System design 15.8 (stage 8) | Done |
+| The stage 8 free-text replacer and the import wall | System design 15.8; plan section 9 | Done as text. The replacer is built in stage 8 |
+| Spec 4.2: closed place list and hybrid clause | Spec 4.2 (Kept line); Spec 13 line | Done: two clauses in the Kept line and one Spec 13 line |
+| ADR 0008 amendment of 22 Nov 2026 | ADR 0008 | Done |
+| Spec 4.2 sentence for an ambiguous short form | Spec 4.2 | Not done. The report's draft was not added to the spec |
+| The `privacy` row | Testing strategy section 4 | Done: true and false rows, value-only spans, the closed list, the hybrid, properties of the resolve step, `ValueError` on a bad offset |
+| The prototype ID row | `prototype/privacy-check.html` | Done: "company number" stays outside the span |
+| The promise table | WRITING_DOCS | Done: one row for the kept place |
+| Reordering `PlaceholderKind` | `core/enums.py` | Not needed: `TIE_RANK` in `privacy` does the job |
+| New placeholder kinds (URL, date of birth) | `core/enums.py`, Spec 4.2, prototype | Not done, as recommended. A card number uses `BANK` |
+| Plan listed in the plans README; task plan line in system design 15.4 | `docs/plans/README.md`; system design 15.4 | Done |
 
-| Change | Document | Why the owner | Note |
-|---|---|---|---|
-| `PiiDetector` "Raises: None", and the stage 7 adapter contract | System design 3.4 (ports table) | The port is accepted. A failed detector must stop the run | Stage 7 gives a named error type. The contract: offsets in code points, no silent truncation, no copied text in errors |
-| The doubt list as appended stage 1 tasks | Stage 1 plan, `core` README, system design 3.4 shapes table | A new core shape. Owner decision 3 | Proposal in "Owner decisions". Stage 4's doubt tasks depend on the core tasks merging first |
-| The "write placeholders exactly as they appear" prompt rule | System design (step prompts) or section 9 of the stage 6 plan | Decided in principle (decision 2). The home and the wording are open | Draft sentence: "Copy each placeholder exactly as it appears. Never write a new one." |
-| The stage 8 free-text replacer and the import wall | Section 9 of the stage 4 plan, then the stage 8 plan | `privacy` and stage 8 modules cannot import each other, so a second matcher copy would drift | Put the replacer in `privacy` wired by `cli`, or in `core`. The case rule conflicts with Q17 |
-| Spec 4.2 narrowing for the closed place list | Spec 4.2, "Kept" line | Decided by the owner. The wording is the owner's | Draft: "...and the country, UK nation, US state, Canadian province or Australian state named in the governing-law clause. Any other place is not kept and is shown as unsure." |
-| Spec 4.2 sentence for an ambiguous short form | Spec 4.2, variants line | It adds a promise | Draft: "A short form that fits two or more people, such as "Ms Jones" when two people are called Jones, gets a placeholder of its own. Code never picks one of them." |
-| The `privacy` row | Testing strategy, section 4 | The row lists accepted invariants | Add: no entity id shared by two different full names; offsets that are reversed or not integers raise; no letter or digit lost in the resolve step. The owner writes the wording |
-| The prototype ID row | `prototype/privacy-check.html` | Follows decision 4. It is the prototype's own rule file | The ID row shows the keyword in the value today |
-| Reordering `PlaceholderKind` | `core/enums.py`, system design 3.4 | An accepted shape | Only if the local rank in group A is not wanted |
-| New placeholder kinds (URL, date of birth) | `core/enums.py`, Spec 4.2 list, prototype | A new kind touches the spec's closed list | I recommend avoiding them in stage 4 |
+The ux-copy "Kept" note names England and Wales. It is unchanged and still true, because that place is in the closed list.
 
 ### Group C: no change
 
 - **The token form `⟦ ⟧`.** Decided by the owner, with no ADR. The format stays one constant in `core/enums.py`.
-- **Spec 8.4 exact restore.** B2 shows exact match plus one retry works. Do not add a tolerant restore.
-- **CUAD numbers in the spec or an ADR.** None yet. The result is a floor until the typed-party follow-up has run. ADR 0008 stands as written.
+- **Spec 8.4 exact restore.** B2 shows exact match plus one retry works. No tolerant restore was added.
+- **CUAD numbers in the spec or an ADR.** None. The result is a floor until the typed-party follow-up has run.
+
+### Not done
+
+- The `core` code of S1-M6-T8 (`DoubtCode` and `Doubt`), and the Doubt rows of system design 3.4.
+- The `PiiDetector` docstring change, a stage 7 `core` task.
+- The seven owner tasks: the finders table (S4-M2-T8), the party details table (S4-M2-T9), the place list (S4-M2-T11), the pipeline table (S4-M3-T8), the entities table (S4-M3-T9), the sample table (S4-M5-T5) and the reading of the golden files (S4-M5-T7).
 
 ## Ideas from nearby fields
 
@@ -850,38 +909,25 @@ Four notes looked outside the privacy field: localisation and machine translatio
 
 ## Open owner questions
 
-Each is phrased for the owner with a recommended answer. None is decided here. The five points the owner decided on 21 Nov 2026 are in "Owner decisions" and are removed from this list. Questions renumbered since the first revision; the old questions 18 to 21 (free token count, CUAD run, paid copy-rate test) ran as tracks A4, B1 and B2.
+Everything the owner answered on 21 and 22 Nov 2026 is removed from this list (see "Owner decisions"). Five items are still open. Each has a recommended answer. None is decided here.
 
-1. **May stage 4 add NINO, Luhn card, bare GB VAT and UK company prefixes (Q15)?** Recommended: yes for all four, because A1 shows bare IDs leak (5 of 5 missed, 44 letters and digits), and card maps to BANK and NINO to ID. Defer IP addresses and US SSN.
-2. **Which kind for URL and date of birth (Q15)?** The kind list has neither. Recommended: avoid both in stage 4. A new kind touches `core`, the Spec 4.2 list and the prototype.
-3. **Accept the leak trade of Q17 layers 3 and 4, or mask every capitalised one-word form that matches a typed party?** Recommended: adopt layer 1, the vetoes and the hard list; adopt layer 3 for `COMMON_WORD_NAMES` only (A1: false hits 6 of 6 to 2 of 6, no new leak); leave layer 4 off; surface skipped hits as unsure.
-4. **Move `will`, `mark`, `grant` and `bill` from the hard list to the layer 3 list (Q17)?** A1 measured a 25-letter leak on a bare `Contact Will`. Layer 3 would mask a capitalised mid-sentence use and still skip a sentence start. Not measured. Recommended: yes, and run the sample by hand before the plan returns to Accepted.
-5. **How should a skipped ambiguous hit be shown, given `PiiSuggestion` has no confidence (Q17, Q1)?** Recommended: a design item for stage 12. The doubt codes would carry the fact; the display is separate.
-6. **Approve the doubt-list proposal as appended stage 1 tasks (owner decision 3)?** Recommended: yes, as sketched in "Owner decisions", after the owner confirms the names and the five codes.
-7. **Is a defined term that is a subset of a found company name always a name, even for role-like words such as "Studio" (Q11 rule 2b)?** Recommended: yes, a short-name leak is worse than a replaced role. Rule 2b may use RULE and PARTY_DETAILS spans, never NER.
-8. **Should the party card carry a kind (company or person), or does a suffix-less typed party stay a person (Q2)?** Recommended: leave as is for stage 4 and note the over-mask. A `kind` changes system design 3.4.
-9. **Also union same-kind, same-source overlapping RULE and PATTERN spans, beyond the decided NER union (Q9)?** Recommended: not in stage 4. A3 found 3 more changed cases in 5000. Look again if the new address chain leaves a split span.
-10. **When a PERSON or COMPANY span touches the kept place, keep the span whole or cut it (Q14, Q9)?** Recommended: keep whole. With the closed list this is rare, and the cut applies to every other kind.
-11. **Add a short list of special jurisdictions to the closed place list?** The decided list holds countries, UK nations, US states, Canadian provinces and Australian states. DC, US and Australian territories, Canadian territories, crown dependencies (Jersey, Guernsey, Isle of Man) and Hong Kong are outside it, so they stay flagged and show as unsure. Recommended: not now; add words if a real contract needs them.
-12. **Wording of the two Spec 4.2 edits (the closed place list, and a short form that fits two people).** Drafts are in group B. Recommended: the owner edits the drafts; the spec change goes in the same commit as the plan change.
-13. **Allow inside-marker folding in `restore_reply` (case, repeated spaces), and add the check for bare `Person 1` text (Q6)?** Recommended: yes for folding, with a Spec 8.4 wording edit; hold the bare-label check until a real reply shows the need. B2 shows a tolerant matcher by label and number would have recovered all 28 mutilated replies, but the explicit instruction and one retry already removed them. Keep exact match for anything outside the markers.
-14. **Where is the explicit-instruction rule recorded, and in which words (owner decision 2)?** Recommended: system design (the step prompts) and section 9 of the stage 6 plan, using the draft sentence in group B.
-15. **One shared placeholder per distinct ambiguous short form (Q12)?** Recommended: yes.
-16. **Include the Tier 2 preamble cues (`between X and Y`, definition bracket) and the email-local-part booster in Q1?** Recommended: include the definition-bracket cue; hold the others.
-17. **Cosmetic: mask a sentence-final full stop inside a cut piece (Q8)?** Recommended: no change; do not trim punctuation.
-18. **Over-length address chain: take the whole run to the anchor and flag it long, or cut at the cap (Q3)?** Recommended: take the whole run.
-19. **May the repo vendor SSA or Census derived name lists in a later stage (Q16)?** Recommended: not in stage 4. If wanted later, decide against the AGENTS.md rule "Keep the repo free of real data" and record provenance (an ONS-derived list also needs OGL attribution text; a Census-derived list needs a provenance line).
-20. **May a published nickname list be bundled (Q4)?** The Apache-2.0 list states a coverage bias, and bundling touches the same AGENTS.md rule. Recommended: no. Use the nickname-from-text rule, and at most about 30 owner-written pairs as a constant, outside the "real data" question because a nickname table is not personal data.
-21. **Free-text matching rule for position text (Q13, stage 8), and where the replacer lives given the import wall?** Recommended: decide in the stage 8 plan; lean to masking more; put the replacer in `privacy` wired by `cli`, or in `core`, never a second copy.
-22. **Two-letter names (Q4): accept that `Li`-type one-word forms are not masked alone?** Recommended: accept.
-23. **Adopt the orphan capitalised run option (Q1)?** Recommended: no for stage 4. If ever added, only in the first 1,500 characters and with the NO_CUE_RUN doubt. The precision cost is expected to be large.
-24. **Split the CUAD misses by cause (free, counts only)?** All-capitals names, a missing suffix, trailing text, a state of incorporation, an address. Recommended: yes. Run it outside the repo and keep text out of the output.
-25. **Run the typed-party CUAD follow-up (free)?** Feed each contract's annotated main parties in as typed `Party` values, then count what the front layer covers. Recommended: yes, with question 24 in the same pass, before any CUAD number is called a risk.
-26. **Approve more paid runs, with a spend cap?** About $1.19 of the $2.00 key is left. Recommended: not now. If one run is wanted, repeat the copy-rate test on a larger token limit with reasoning off (to remove the empty haiku replies) and add the sonnet spoof run with the instruction. Set a cap well under the key's balance in writing first, and count in-flight calls against it, because B2 went 1.2 cents over its cap that way.
+1. **The seven owner tasks.** The owner writes the finders table (S4-M2-T8), the party details table (S4-M2-T9), the place list (S4-M2-T11), the pipeline table (S4-M3-T8), the entities table (S4-M3-T9) and the sample table (S4-M5-T5), and reads the golden files (S4-M5-T7, at the end of the stage). The agent does not write them (Constitution T11). One point for the place list: the planner's draft in S4-M2-T11 also holds Canadian and Australian territories, and the owner's decision names provinces and states only. Recommended: write the file to the five categories, and add a name only if a real contract needs it.
+2. **The CUAD follow-up with typed parties (free).** Feed each contract's annotated main parties in as typed `Party` values and count what the front layer covers. Split the misses by cause in the same pass (all-capitals names, a missing suffix, trailing text, a state of incorporation, an address). Recommended: yes, outside the repo and with no text in the output, before any CUAD figure is called a risk or written into a document.
+3. **More paid runs.** About $1.19 of the $2.00 key was left, and the key is deleted. A new run needs a new key and a written spend cap, and in-flight calls count against the cap, because B2 went 1.2 cents over its cap. Recommended: not now. If one run is wanted, repeat the copy-rate test with a larger token limit and reasoning off, and add the Sonnet spoof run with the copy instruction.
+4. **Known limits of S4-M2-T12.** The new patterns do not find a lower-case NINO, the `XI`, `GD` and `HA` VAT forms, the `BR` and `OE` company prefixes, or a card number spaced 4-6-5. Recommended: leave them until a real contract shows the need, and add them as a new task, not as a change to S4-M2-T12.
+5. **Acceptance of the plan, in words.** The plan stays Draft until the owner accepts it. Only the owner accepts.
+
+Some recommendations of the entries above are in no plan task and no document. They are not questions for the owner now, and each belongs to a later stage:
+
+- how a skipped ambiguous hit is shown (stage 12, with the doubt shape of S1-M6-T8);
+- inside-marker folding in `restore_reply`, which would need a Spec 8.4 wording change (Q6);
+- the Spec 4.2 sentence for a short form that fits two people (Q12);
+- the multiset parity check and the single retry for AI replies (Q6; stage 6 and later);
+- the free-text case rule (Q13; the stage 8 plan states which rule wins).
 
 ## Evidence quality and gaps
 
-**Closed since the first revision:** the real token cost of the placeholder forms on a Claude model (B2), free tokenisation (A4, OpenAI and GPT-2 vocabularies), reproduction of the defects (A1, A2, A3) and a first measurement on real contracts (B1, party names only).
+**Closed since the first revision:** the real token cost of the placeholder forms on a Claude model (B2), free tokenisation (A4, OpenAI and GPT-2 vocabularies), reproduction of the defects (A1, A2, A3) and a first measurement on real contracts (B1, party names only). Closed since the second revision: the owner's answers to all 26 plan questions, and a build-from-text check of M1, M2 and part of M3 by a cheap implementer.
 
 **Confirmed absences** (searched again in the evidence check, across SciSpace, alphaXiv, Exa and Firecrawl; B1 and B2 narrow two of them):
 
@@ -900,6 +946,7 @@ Each is phrased for the owner with a recommended answer. None is decided here. T
 - **A3 discarded some generated inputs and the cause was not investigated.** P7, P8 and P11 were revised after a first run found mistakes in the properties themselves.
 - **B1 has no ground truth for false positives.** Densities and list counts are proxies. The causes of the misses were not split. The dotted-number test cannot say what the 449 matches without a cue are.
 - **B2 is small and partly empty.** Two Claude models (haiku and sonnet), invented text, a short writing or summary request and not a contract check. 188 of 480 haiku calls returned nothing because reasoning used the token limit. Sonnet got 112 of 216 planned copy-rate calls. Sample sizes are 12 to 15 replies per cell for sonnet and 3 to 6 per spoof cell. A result of 0 failures in n trials bounds the rate only at about 3 in n. The instruction effect is partly confounded by which haiku replies finished. The spoof styles for the ASCII forms were the tester's own choice. The run went 1.2 cents over its cap.
+- **The plan simulations are partial** (see 'Later work'). M3 T7 to T10, M4, M5 and S4-M2-T12 beyond its mini-simulation were not simulated; the old properties were not re-run after T12; one of 11 mutants survived. The counts of 43 tasks and 442 tests are the plan checker's, and I did not re-derive them. The plan is a Draft that nobody has built.
 - **No tokeniser count for Claude exists apart from B2's prompt-token counts,** and nothing for OpenAI or Google models beyond A4's vocabularies.
 
 **Now verified against primary sources** (page or section as the notes give it): the 2610.34012 claims (App. C p20, App. D pp21-22, Sec. 4.3 p10, p9, Sec. 5 p10); the 2610.22800 refusals (App. B.1 p12) and shared surrogate (p14); the 2609.11335 MuSR figures (0.73, 0.70, 0.58, 0.52; Sec. 4.2 p9, Fig. 4 p11); DeidSharp's chunk sizes, whole-word location, span union and fail-closed run (pp3 to 5, abstract p1); CAMP (Sec. III.E, IV.B to IV.F); Staab et al. (Table 2 p7, Sec. 6); TAB Table 7 and Mikheev's figures; Presidio, scrubadub and LLM Guard behaviour read in source (see Q7, Q9, Q11, Q6); Wikidata CC0; the Census figure of 162,253 names.
@@ -919,18 +966,18 @@ Each is phrased for the owner with a recommended answer. None is decided here. T
 - arXiv 2407.11770 was not re-checked and stays in the weak-source group.
 - Private AI documentation and the Google DLP pages were unreachable or second-hand. Not fetched or opened: Presidio issue 2433, the PR 1805 diff, the SSA and Census zips, the `wikidata-names` and Philter LICENSE files, the juritools function bodies.
 
-**What was run.** The testers ran A1 to A3 in scratch folders outside the repo with reference copies of the plan code. B1 ran on 510 real contracts outside the repo, and only counts left that folder. B2 ran on Claude haiku and sonnet through OpenRouter with invented text; its key and raw replies stay outside the repo. I did not re-run any track. The numbers in this report are copied from the result files and checked against them. The `research_notes/` folder is git-ignored, so the numbers live in this report. Nobody ran any rule on the full Spec 14.5 sample, so the plan's statement that the person rules find exactly three names must be re-confirmed after any edit, with expected values written by the owner (T11).
+**What was run.** The testers ran A1 to A3 in scratch folders outside the repo with reference copies of the plan code. B1 ran on 510 real contracts outside the repo, and only counts left that folder. B2 ran on Claude haiku and sonnet through OpenRouter with invented text; its key and raw replies stay outside the repo. I did not re-run any track. The numbers in this report are copied from the result files and checked against them. The `research_notes/` folder is git-ignored, so the numbers live in this report. The plan's first verification (21 Nov) ran the Spec 14.5 sample end to end with the reference code (7 entities, 10 spans, an exact restore). That run was not repeated after the later M3 changes and S4-M2-T12, so the plan's statement that the person rules find exactly three names must be re-confirmed after any edit, with expected values written by the owner (T11).
 
 **Legal.** No lawyer was consulted. The GDPR, EDPB and ICO material is cited for the pseudonymised-not-anonymous wording only, under the ADR 0016 working position. Nothing here states how the EU AI Act applies.
 
 ## Next steps
 
-If the owner accepts, the planner would, in this order and on the plan's own docs branch, with the owner writing every expected value (T11):
+In this order:
 
-1. Record each answer in its home (system design 15.4, the spec, or an ADR 0008 amendment) and in section 6 of the plan, and log the change in section 8. The owner decisions of 21 Nov 2026 go in first.
-2. Fix the reference `split_at` to use `unique_sorted`. Then rewrite the group A tasks: S4-M2-T7 (name fragments, cues, trim rule, date veto), S4-M2-T5 and S4-M2-T6 (company and address rules), S4-M2-T1 (variant forms, stop sets), S4-M2-T2 (value-only ID spans, phones with no cue gate, added patterns if accepted), S4-M3-T1 (offset checks), S4-M3-T2 (rule 2b), S4-M3-T3 (closed place list, cut at the place), S4-M3-T4 (NER union, local rank, properties) and S4-M3-T7 (form-set grouping).
-3. Recompute every changed expected value with the reference code and mark each for owner confirmation. Update the owner tables (`finders.toml`, `party_details.toml`) with rows for the owner to fill, and the word-list seeds for the owner to edit.
-4. Put the group B changes to the owner: the Spec 4.2 edits, the testing strategy row, the `PiiDetector` contract note for stage 7, the stage 8 replacer note and the stage 6 prompt rule. Make the prototype edit for value-only spans in the same change as the plan edit.
-5. If the owner approves the doubt-list proposal, append the core tasks to the stage 1 plan first. Mark the stage 4 doubt tasks as depending on them, and do not start those until the core tasks merge.
-6. Run the two free CUAD follow-ups (questions 24 and 25) outside the repo before any CUAD figure is called a risk or written into a document.
-7. Re-run the Spec 14.5 sample by hand against the new rules before the plan returns to Accepted. Start a paid run only with an approved spend cap (question 26).
+1. The owner fills the owner tables and the place list (S4-M2-T8, S4-M2-T9, S4-M2-T11, S4-M3-T8, S4-M3-T9, S4-M5-T5). S4-M5-T7, the reading of the golden files, comes at the end of the stage, after the golden files exist.
+2. The owner accepts the plan in words. The plan stays Draft until then.
+3. The agent sets the status to Accepted and fills "Accepted on", in a commit of its own.
+4. Implementation starts with milestone 1, on `feat/privacy-m1-foundations`. Each milestone has its own branch (see the plan header).
+5. Stage 1 task S1-M6-T8 (the doubt shape) goes on its own branch, `feat/core-doubt-shape`. It is separate, and stage 4 does not need it.
+6. Outside the plan, the free CUAD follow-up runs before any CUAD figure is called a risk. A paid run starts only with a new key and an approved spend cap.
+7. Before the stage closes, the owner confirms the values marked "owner to confirm" and reads the golden files (S4-M5-T7).
