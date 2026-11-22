@@ -11,3 +11,24 @@ SENTENCE_MARK: Final[str] = r"[.!?]"
 SENTENCE_MARK_RE: Final[re.Pattern[str]] = re.compile(SENTENCE_MARK)
 HEADING_WORD: Final[str] = r"[^\W\d_][\w'’-]*"
 HEADING_WORD_RE: Final[re.Pattern[str]] = re.compile(HEADING_WORD)
+
+EMAIL: Final[str] = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+"
+EMAIL_RE: Final[re.Pattern[str]] = re.compile(EMAIL)
+PHONE: Final[str] = (
+    r"(?<![\w+])(?:\+\d{1,3}[ -]?(?:\(0\))?\d[\d -]{6,14}\d"
+    r"|0\d{2,4}[ -]\d{3,4}[ -]?\d{3,4}"
+    r"|\(0\d{2,4}\)[ -]?\d{3,4}[ -]?\d{3,4}"
+    r"|0\d{10})(?!\w)"
+)
+PHONE_RE: Final[re.Pattern[str]] = re.compile(PHONE)
+ID_KEYWORD: Final[str] = (
+    r"(?i:company (?:registration )?(?:number|no\.?)|registered (?:number|no\.?)"
+    r"|registration (?:number|no\.?)"
+    r"|vat (?:registration )?(?:number|no\.?)|tax id)[ \t]*(?:is|:|of)?[ \t]*"
+    r"(?P<v>(?:GB[ ]?)?[A-Z]{0,2}\d[\d ]{3,12}\d)"
+)
+ID_KEYWORD_RE: Final[re.Pattern[str]] = re.compile(ID_KEYWORD)
+SORT_CODE: Final[str] = r"(?i:sort[ ]code)[ \t]*:?[ \t]*(?P<v>\d{2}-?\d{2}-?\d{2})(?!\d)"
+SORT_CODE_RE: Final[re.Pattern[str]] = re.compile(SORT_CODE)
+ACCOUNT_NUMBER: Final[str] = r"(?i:account[ ](?:number|no\.?))[ \t]*:?[ \t]*(?P<v>\d{8})(?!\d)"
+ACCOUNT_NUMBER_RE: Final[re.Pattern[str]] = re.compile(ACCOUNT_NUMBER)

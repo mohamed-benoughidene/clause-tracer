@@ -318,7 +318,7 @@ When this is done, `privacy` finds typed party details with their variants, emai
   - **Rules:** T1, system design 4.2 (the folds), Spec 4.2 (name variants).
   - **Depends on:** None
 
-- [ ] **S4-M2-T2: Patterns for email, phone, ID and bank details**
+- [x] **S4-M2-T2: Patterns for email, phone, ID and bank details**
   - **Build:** In `src/clause_tracer/privacy/_patterns.py`, add these constants (each as `Final[str]`, with its `_RE` compiled as the rules say):
     ```python
     EMAIL = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+"
