@@ -5,9 +5,13 @@ token, each marker character of the contract becomes its own escape, and
 every other run of characters is copied as it is (question 10).
 """
 
+import re
 from collections.abc import Sequence
+from typing import Final
 
 from clause_tracer.core import (
+    PLACEHOLDER_CLOSE,
+    PLACEHOLDER_OPEN,
     Document,
     PlaceholderEntity,
     PlaceholderKind,
@@ -18,6 +22,14 @@ from clause_tracer.core import (
 )
 from clause_tracer.privacy._spans import overlaps
 from clause_tracer.privacy._tokens import ESCAPES, placeholder_token
+
+TOKEN_RE: Final[re.Pattern[str]] = re.compile(
+    re.escape(PLACEHOLDER_OPEN)
+    + "[^"
+    + re.escape(PLACEHOLDER_CLOSE)
+    + "]*"
+    + re.escape(PLACEHOLDER_CLOSE)
+)
 
 
 def _check_entities(text: str, entities: Sequence[PlaceholderEntity]) -> None:
@@ -188,3 +200,27 @@ def restore_text(placeholder: PlaceholderText, document: Document) -> str:
         else:
             pieces.append(document.text[segment.original.start : segment.original.end])
     return "".join(pieces)
+
+
+def restore_reply(placeholder: PlaceholderText, document: Document, reply: str) -> str:
+    """Put the names back into the tokens of one AI reply.
+
+    Input:   the placeholder text, the document, and the reply to restore.
+    Output:  the reply with each token replaced by the entity's first place.
+    Raises:  ValueError for a token that no entity of the placeholder text has.
+    Effects: none (T1).
+    """
+
+    first_text: dict[str, str] = {}
+    for entity in placeholder.entities:
+        first = min(entity.spans, key=lambda span: span.start)
+        token = placeholder_token(entity.kind, entity.number)
+        first_text[token] = document.text[first.start : first.end]
+
+    def put_back(match: re.Match[str]) -> str:
+        token = match.group(0)
+        if token not in first_text:
+            raise ValueError("privacy: unknown placeholder")
+        return first_text[token]
+
+    return TOKEN_RE.sub(put_back, reply)
