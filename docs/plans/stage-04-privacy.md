@@ -674,7 +674,7 @@ When this is done, `privacy` finds typed party details with their variants, emai
   - **Rules:** T1, ADR 0008, Spec 4.2 ("Ms. Jones" and "Sarah" are variants), questions 1 and 17.
   - **Depends on:** S4-M1-T6, S4-M2-T1, S4-M2-T5
 
-- [ ] **S4-M2-T8: The finders table (Owner)**
+- [x] **S4-M2-T8: The finders table (Owner)**
   - **Build:** Owner only. The owner fills `src/clause_tracer/privacy/tests/tables/finders.toml` with rows in this format (the agent does not write or change them, Constitution T11):
     ```toml
     [[case]]
@@ -692,7 +692,7 @@ When this is done, `privacy` finds typed party details with their variants, emai
   - **Rules:** Constitution T11, testing strategy 10.
   - **Depends on:** None
 
-- [ ] **S4-M2-T9: The party details table (Owner)**
+- [x] **S4-M2-T9: The party details table (Owner)**
   - **Build:** Owner only. The owner fills `src/clause_tracer/privacy/tests/tables/party_details.toml`, in this format:
     ```toml
     [[case]]
@@ -718,7 +718,7 @@ When this is done, `privacy` finds typed party details with their variants, emai
   - **Rules:** Constitution T11, testing strategy 10.
   - **Depends on:** S4-M1-T5, S4-M2-T3, S4-M2-T4, S4-M2-T5, S4-M2-T6, S4-M2-T7, S4-M2-T8, S4-M2-T9
 
-- [ ] **S4-M2-T11: The governing-law place list (Owner)**
+- [x] **S4-M2-T11: The governing-law place list (Owner)**
   - **Build:** Owner only (Constitution T11, question 16: a word list is the owner's). The owner writes `src/clause_tracer/privacy/_place_list.py`, holding exactly these six constants, each `Final[tuple[str, ...]]`, and nothing else but the imports `from typing import Final` and a module docstring. The agent does not write or change this file, and does not add a name to it. The list is closed (owner decision of 21 Nov 2026, [report](../../reports/Privacy%20finder%20design%20choices.md#owner-decisions-of-21-and-22-nov-2026), decision 1; [Spec 4.2](../spec.md#42-privacy-check)): a place is kept only when it is a country, a nation of the United Kingdom ("England and Wales" is one entry), a US state, a Canadian province or an Australian state.
     - `COUNTRIES`: countries named by one word, and `COUNTRIES_MULTI`: countries and short forms named by more than one word, or by an abbreviation (`UK`, `USA`, `UAE`).
     - `UK_NATIONS`: `England and Wales`, `England & Wales`, `England`, `Wales`, `Scotland`, `Northern Ireland`.
@@ -1124,7 +1124,7 @@ When this is done, `find_personal_data` turns a `PrivacyInput` and a detector in
   - **Rules:** T1, Spec 4.2 (numbering by kind, variants share one placeholder), system design 3.4 (`PlaceholderEntity`), D2 (the order and the ids are the same on every run).
   - **Depends on:** S4-M1-T5, S4-M1-T6, S4-M2-T1
 
-- [ ] **S4-M3-T8: The pipeline table (Owner)**
+- [x] **S4-M3-T8: The pipeline table (Owner)**
   - **Build:** Owner only. The owner fills `src/clause_tracer/privacy/tests/tables/pipeline.toml`, in this format:
     ```toml
     [[case]]
@@ -1145,7 +1145,7 @@ When this is done, `find_personal_data` turns a `PrivacyInput` and a detector in
   - **Rules:** Constitution T11.
   - **Depends on:** None
 
-- [ ] **S4-M3-T9: The entities table (Owner)**
+- [x] **S4-M3-T9: The entities table (Owner)**
   - **Build:** Owner only. The owner fills `src/clause_tracer/privacy/tests/tables/entities.toml`, in this format:
     ```toml
     [[case]]
@@ -1403,7 +1403,7 @@ When this is done, `python -m clause_tracer.privacy` prints the entities and the
   - **Rules:** Constitution S3 (shapes in the README) and I11 (a contract note on each public call), B2.
   - **Depends on:** S4-M5-T3, S4-M4-T3, S4-M4-T4, S4-M4-T5
 
-- [ ] **S4-M5-T5: The sample table (Owner)**
+- [x] **S4-M5-T5: The sample table (Owner)**
   - **Build:** Owner only. The owner fills `src/clause_tracer/privacy/tests/tables/sample.toml`, in this format:
     ```toml
     [[case]]
