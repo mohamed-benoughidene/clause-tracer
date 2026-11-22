@@ -95,7 +95,7 @@ When this is done, `privacy` has a coverage floor, five empty owner tables, a co
   - **Rules:** [Testing strategy 11](../testing-strategy.md#11-coverage-targets).
   - **Depends on:** None
 
-- [ ] **S4-M1-T2: Create the five empty owner tables**
+- [x] **S4-M1-T2: Create the five empty owner tables**
   - **Build:** Create these files, each holding exactly two lines: the `HEADER` line of `clause_tracer.core.tests.owner_tables`, then `# Format: docs/plans/stage-04-privacy.md, task <id>.` with the id of the owner task that fills it: `src/clause_tracer/privacy/tests/tables/finders.toml` (S4-M2-T8), `src/clause_tracer/privacy/tests/tables/party_details.toml` (S4-M2-T9), `src/clause_tracer/privacy/tests/tables/pipeline.toml` (S4-M3-T8), `src/clause_tracer/privacy/tests/tables/entities.toml` (S4-M3-T9), `src/clause_tracer/privacy/tests/tables/sample.toml` (S4-M5-T5). This commit holds these five files and the plan tick, and no code.
   - **Files:** the five files above.
   - **Tests first:** None. The loader test of S1-M3-T1 covers a header-only file.
