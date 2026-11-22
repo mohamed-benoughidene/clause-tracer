@@ -1,5 +1,7 @@
 """`restore_reply`, the tokens in an AI reply (S4-M4-T4)."""
 
+import dataclasses
+
 import pytest
 
 from clause_tracer.core import Document, PlaceholderEntity, PlaceholderKind, PlaceholderText, Span
@@ -91,3 +93,29 @@ def test_a_lone_open_marker_before_a_token_is_left() -> None:
     placeholder, document = _placeholder()
 
     assert restore_reply(placeholder, document, "a ⟦ b ⟦Person 1⟧ c") == ("a ⟦ b Sarah Jones c")
+
+
+def test_an_entity_without_a_span_raises() -> None:
+    placeholder, document = _placeholder()
+    entity = PlaceholderEntity(
+        id="person-1",
+        kind=PlaceholderKind.PERSON,
+        number=1,
+        spans=(),
+    )
+
+    with pytest.raises(ValueError, match="privacy: entity has no span"):
+        restore_reply(dataclasses.replace(placeholder, entities=(entity,)), document, "⟦Person 1⟧")
+
+
+def test_an_entity_span_outside_the_text_raises() -> None:
+    placeholder, document = _placeholder()
+    entity = PlaceholderEntity(
+        id="person-1",
+        kind=PlaceholderKind.PERSON,
+        number=1,
+        spans=(Span(start=0, end=len(document.text) + 1),),
+    )
+
+    with pytest.raises(ValueError, match="privacy: entity span is outside the text"):
+        restore_reply(dataclasses.replace(placeholder, entities=(entity,)), document, "⟦Person 1⟧")

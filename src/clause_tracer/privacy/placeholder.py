@@ -209,9 +209,18 @@ def restore_reply(placeholder: PlaceholderText, document: Document, reply: str) 
 
     Input:   the placeholder text, the document, and the reply to restore.
     Output:  the reply with each token replaced by the entity's first place.
-    Raises:  ValueError for a token that no entity of the placeholder text has.
+    Raises:  ValueError for an entity with no span, a span outside the text,
+             or a token that no entity of the placeholder text has.
     Effects: none (T1).
     """
+
+    for entity in placeholder.entities:
+        if not entity.spans:
+            raise ValueError("privacy: entity has no span")
+    for entity in placeholder.entities:
+        for span in entity.spans:
+            if span.start < 0 or span.end > len(document.text):
+                raise ValueError("privacy: entity span is outside the text")
 
     first_text: dict[str, str] = {}
     for entity in placeholder.entities:

@@ -1540,7 +1540,7 @@ When this is done, `anonymise` builds the `PlaceholderText` with its segment map
   - **Rules:** Spec 8.4, S4-M4-T4, the M4 code review (section 8).
   - **Depends on:** S4-M4-T4
 
-- [ ] **S4-M4-T8: `restore_reply` checks the entities it reads**
+- [x] **S4-M4-T8: `restore_reply` checks the entities it reads**
   - **Build:** In `placeholder.py`, `restore_reply` runs two checks before it builds the map, each over all entities of `placeholder.entities` before the next check starts, in this order: an entity with no span raises `ValueError("privacy: entity has no span")`; a span with `start < 0` or `end > len(document.text)` raises `ValueError("privacy: entity span is outside the text")`. These are the messages of `anonymise` (S4-M4-T2). Nothing else changes. Owner decision of 22 Nov 2026, from the M4 code review (finding 2).
   - **Files:** `src/clause_tracer/privacy/placeholder.py`, `src/clause_tracer/privacy/tests/test_restore_reply.py`.
   - **Tests first:** in `test_restore_reply.py`, add `test_an_entity_without_a_span_raises` (the placeholder text of the other tests with `dataclasses.replace(placeholder, entities=(entity,))`, where `entity` is a `PlaceholderEntity` with `spans=()`: `restore_reply` of `"⟦Person 1⟧"` raises `ValueError` with the message `privacy: entity has no span`) and `test_an_entity_span_outside_the_text_raises` (the same, with `spans=(Span(start=0, end=len(document.text) + 1),)`: it raises `ValueError` with the message `privacy: entity span is outside the text`).
