@@ -443,7 +443,7 @@ When this is done, `privacy` finds typed party details with their variants, emai
   - **Rules:** T1, ADR 0008 ("company-suffix rules").
   - **Depends on:** S4-M1-T6
 
-- [ ] **S4-M2-T6: Addresses**
+- [x] **S4-M2-T6: Addresses**
   - **Build:** In `_patterns.py`, add these constants (`CAP`, `STREET_PLAIN`, `STREET_AMBIG`, `LEAD_WORD`, `POST`, `PART` and `MONTHS` are fragments, with no `_RE`; the others are compiled as the rules say). The address has two parts: a street-anchored pattern, and a chain that is built backwards from a postcode.
     ```python
     CAP = r"(?:[A-Z][a-z'’-]+|UK|USA|UAE)"

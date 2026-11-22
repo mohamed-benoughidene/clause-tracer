@@ -53,3 +53,51 @@ CONNECTOR: Final[str] = (
 )
 COMPANY: Final[str] = rf"(?<![\w]){WORD}(?:{H}+{CONNECTOR}){{0,5}}{H}+{SUFFIX}"
 COMPANY_RE: Final[re.Pattern[str]] = re.compile(COMPANY)
+CAP: Final[str] = r"(?:[A-Z][a-z'’-]+|UK|USA|UAE)"
+STREET_PLAIN: Final[str] = r"(?:Street|St|Road|Rd|Avenue|Ave|Lane|Terrace|Gardens|Boulevard)"
+STREET_AMBIG: Final[str] = r"(?:Way|Place|Court|Row|Hill|Close|Drive|Square)"
+LEAD_WORD: Final[str] = r"(?:Rue|Avenue|Boulevard|Via|Calle|Strasse|Chemin|Allée)"
+POST: Final[str] = r"(?:[A-Z]{1,2}\d[A-Z\d]?[ ]?\d[A-Z]{2}|\d{4,6})"
+PART: Final[str] = rf",{H}*{CAP}(?:{H}+{CAP}){{0,2}}(?:{H}+{POST})?"
+ADDRESS: Final[str] = (
+    rf"\b\d+[A-Za-z]?{H}+(?:{CAP}{H}+){{0,3}}{STREET_PLAIN}\b(?:{PART}){{0,3}}"
+    rf"|\b\d+[A-Za-z]?{H}+(?:{CAP}{H}+){{1,3}}{STREET_AMBIG}\b(?:{PART}){{0,3}}"
+    rf"|\b\d+[A-Za-z]?{H}+{LEAD_WORD}{H}+{CAP}(?:{H}+{CAP}){{0,3}}(?:{PART}){{0,3}}"
+)
+ADDRESS_RE: Final[re.Pattern[str]] = re.compile(ADDRESS)
+UK_POSTCODE: Final[str] = (
+    r"\b(?:GIR ?0AA|[A-PR-UWYZ](?:[0-9]{1,2}|[A-HK-Y][0-9]{1,2}"
+    r"|[0-9][A-HJKPSTUW]|[A-HK-Y][0-9][ABEHMNPRV-Y])[ ]?[0-9][ABD-HJLNP-UW-Z]{2})\b"
+)
+UK_POSTCODE_RE: Final[re.Pattern[str]] = re.compile(UK_POSTCODE)
+US_ZIP: Final[str] = (
+    r"\b(?:A[LKZR]|C[AOT]|DE|FL|GA|HI|I[DLNA]|K[SY]|LA|M[EDAINSOT]|N[EVHJMYCD]"
+    r"|O[HKR]|PA|RI|S[CD]|T[NX]|UT|V[AT]|W[AIVY])"
+    r"[ ]\d{5}(?:-\d{4})?\b"
+)
+US_ZIP_RE: Final[re.Pattern[str]] = re.compile(US_ZIP)
+CA_POSTCODE: Final[str] = r"\b[A-Z]\d[A-Z][ ]?\d[A-Z]\d\b"
+CA_POSTCODE_RE: Final[re.Pattern[str]] = re.compile(CA_POSTCODE)
+MONTHS: Final[str] = (
+    r"(?:January|February|March|April|May|June"
+    r"|July|August|September|October|November|December)"
+)
+START_TOKEN: Final[str] = (
+    r"(?:Flat|Unit|Suite|Floor|Room|Building)[ ]+\w+|PO Box[ ]+\d+"
+    rf"|\d+[A-Za-z]?(?:-\d+)?(?=[ ]+(?!{MONTHS}\b)[A-Z][a-z])"
+)
+START_TOKEN_RE: Final[re.Pattern[str]] = re.compile(START_TOKEN)
+CUE: Final[str] = (
+    r"(?i:registered office (?:is )?at|registered address (?:is )?at"
+    r"|address is|located at|whose address is|whose address)[ \t]+"
+)
+CUE_RE: Final[re.Pattern[str]] = re.compile(CUE)
+TAIL: Final[str] = (
+    rf",?{H}*(?:United Kingdom|UK|England|Scotland|Wales|Northern Ireland"
+    r"|USA|United States|Canada)\b"
+)
+TAIL_RE: Final[re.Pattern[str]] = re.compile(TAIL)
+HARD_STOP: Final[str] = r"[;:()\[\]\"“”\n]|[.!?](?=\s+[A-Z0-9])"
+HARD_STOP_RE: Final[re.Pattern[str]] = re.compile(HARD_STOP)
+ABBREVIATION_END: Final[str] = r"\b(?:St|Rd|Ave|Dr|Ln|Ct|Sq|Mt)$"
+ABBREVIATION_END_RE: Final[re.Pattern[str]] = re.compile(ABBREVIATION_END)
