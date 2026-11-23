@@ -105,6 +105,7 @@ A strong model writes the plan and a cheaper model implements it: leave the impl
 - [ ] Every promise the stage touches has its test (Constitution T13).
 - [ ] The lines that state the project's status are updated (see the README, "When the stage is done").
 - [ ] The owner has been told what was built, and what the next stage should know.
+- [ ] Every deviation is recorded in section 10, and "Notes for the next stage" sums them up.
 - [ ] *Stage-specific check, from the stage outline's "Done when". Add one line for each.*
 
 ## 8. Change log
@@ -117,4 +118,16 @@ A strong model writes the plan and a cheaper model implements it: leave the impl
 
 ## 9. Notes for the next stage
 
-*Filled in when the stage is done. What was built. What differs from the outline. What the next stage should know. Write "None" under a heading if there is nothing to say.*
+*Filled in when the stage is done. What was built. What differs from the outline. A short summary of the deviations in section 10. What the next stage should know. Write "None" under a heading if there is nothing to say.*
+
+## 10. Deviations from the plan
+
+*Filled in by the implementer while building. A deviation is a place where the built code differs from plan text that stays as it is: a private helper the plan does not name, an extra check, a different build order, a line split to satisfy `ruff`. Follow the plan exactly; a deviation is the exception, never the way to work.*
+
+*A deviation never changes a name, a field, a type, a signature, an error or its message, an expected value, a test, or what the code does. Any of those is a stop: ask the owner, and change the plan (see [the README](README.md), "When the plan is wrong"). A change to the plan text goes in the change log (section 8), not here.*
+
+*Add the row in the same commit as the task. Write "None" in the first row while there are none.*
+
+| Date | Task | What the build does differently | Why | Behaviour changed |
+| --- | --- | --- | --- | --- |
+| *D Mon YYYY* | *SN-M1-T1* | *What differs from the plan text, with the file and the name.* | *Why the plan text could not be followed as written.* | *No. (Yes is never allowed here: it is a stop.)* |

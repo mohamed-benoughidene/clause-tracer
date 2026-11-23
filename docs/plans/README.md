@@ -31,7 +31,7 @@ List every new plan in the table above when it is added. The status of a plan li
 
 ## How to read a plan
 
-Every plan starts with a header table. It has five rows: Stage, Status, Branch, Accepted on, and Stage outline (a link to the stage's section in the system design). After the header come nine numbered parts, in the same order every time.
+Every plan starts with a header table. It has five rows: Stage, Status, Branch, Accepted on, and Stage outline (a link to the stage's section in the system design). After the header come ten numbered parts, in the same order every time.
 
 1. **Goal.** One or two sentences: what exists when the stage is done.
 2. **Scope.** What this stage builds, and what it leaves to later stages.
@@ -41,7 +41,12 @@ Every plan starts with a header table. It has five rows: Stage, Status, Branch, 
 6. **Open questions.** Points the docs do not settle. Each one goes to the owner before the task that needs it.
 7. **Done when.** The checks that close the stage.
 8. **Change log.** Dated notes of every change made to the plan after it was accepted.
-9. **Notes for the next stage.** Filled in when the stage is done: what was built, what differs from the outline, what the next stage should know.
+9. **Notes for the next stage.** Filled in when the stage is done: what was built, what differs from the outline, a summary of the deviations, what the next stage should know.
+10. **Deviations from the plan.** Filled in by the implementer while building: each place where the built code differs from plan text that did not change, with the task id, why, and a statement that behaviour did not change.
+
+**Change log or deviation.** The change log (part 8) records changes to the plan text, made by the planner or asked for by the owner. The deviations (part 10) record where the build differs from the plan text that stays as it is. A plan text fix goes in the change log only.
+
+Plans for stages 1 to 4 were written before part 10 existed and are not changed. Stage 4 records its build differences in its change log.
 
 **Task ids.** Each task has an id of the form `S1-M2-T3`: stage 1, milestone 2, task 3. Use the id in commit messages and questions.
 
@@ -150,8 +155,9 @@ If two docs disagree, do not choose. List it as an open question.
 9. **Leave expected answers to the owner.** Never write or edit the expected values of an acceptance table (testing strategy section 10). Write the loader and the test, then stop at the owner task. Regenerate golden files only with `--update-goldens`, in a commit of their own, and ask the owner to read the diff (Constitution T11).
 10. **Stop at an open question.** Ask the owner. Do not pick an answer.
 11. **Do not design.** If a task seems to need a design choice (a name, a field, a type, a signature, a test case, a file), stop and ask. Do not choose.
-12. **Never start a paid AI run without asking**, and never without the spend cap in place (testing strategy section 7.5).
-13. **Keep tasks small.** If a task proves bigger than half a day, split it in the plan and note it in the change log.
+12. **Avoid deviations, and record each one.** Build exactly what the task says. When the code must differ from the plan text in a way that changes no behaviour (a private helper, an extra check, a different build order, a line split for `ruff`), add a row to part 10, "Deviations from the plan", in the same commit as the task. Give the date, the task id, what differs, why, and "Behaviour changed: No". A difference that changes a name, a field, a type, a signature, an error or its message, an expected value, a test, or what the code does is not a deviation: stop, ask the owner, and change the plan (see "When the plan is wrong").
+13. **Never start a paid AI run without asking**, and never without the spend cap in place (testing strategy section 7.5).
+14. **Keep tasks small.** If a task proves bigger than half a day, split it in the plan and note it in the change log.
 
 ### Branches and pull requests
 
@@ -166,8 +172,8 @@ The owner decided on 14 Nov 2026: **one pull request for each milestone.**
 
 ### When the plan is wrong
 
-Do not work around it quietly. Stop and change the plan. You may do these alone: split a task, reorder tasks, correct a file path, add a task. Ask the owner first for anything else: a change to Scope or "Done when", removing a task or a test, an owner task, a paid run, or anything that touches the spec, the system design, the testing strategy or a decision record. Either way, add a dated line to the change log saying what changed and why.
+Do not work around it quietly, and do not record it as a deviation. Stop and change the plan. You may do these alone: split a task, reorder tasks, correct a file path, add a task. Ask the owner first for anything else: a change to Scope or "Done when", removing a task or a test, an owner task, a paid run, or anything that touches the spec, the system design, the testing strategy or a decision record. Either way, add a dated line to the change log saying what changed and why.
 
 ### When the stage is done
 
-Run the "Done when" checks. Write "Notes for the next stage" in the plan: what was built, what differs from the outline, what the next stage should know. Update every line that states the project's status: [AGENTS.md](../../AGENTS.md) "Where the project stands", the status line in [README.md](../../README.md), and [testing strategy](../testing-strategy.md) section 13. Set the status to Done, then tell the owner.
+Run the "Done when" checks. Write "Notes for the next stage" in the plan: what was built, what differs from the outline, a summary of the deviations in part 10, what the next stage should know. Update every line that states the project's status: [AGENTS.md](../../AGENTS.md) "Where the project stands", the status line in [README.md](../../README.md), and [testing strategy](../testing-strategy.md) section 13. Set the status to Done, then tell the owner.
