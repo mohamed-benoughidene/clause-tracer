@@ -1,0 +1,209 @@
+# Stage 5 plan: `ingest` for Word and PDF
+
+| | |
+| --- | --- |
+| Stage | 5, `ingest` (Word and PDF) |
+| Status | Draft |
+| Branch | One branch for each milestone, cut from `main`: `feat/ingest-m1-tools-and-fixtures`, `feat/ingest-m2-limits-and-child`, `feat/ingest-m3-word`, `feat/ingest-m4-pdf-text`, `feat/ingest-m5-hidden-text`, `feat/ingest-m6-sample-and-close`. See [the README](README.md), "Branches and pull requests" |
+| Accepted on | Not yet |
+| Stage outline | [System design section 15.5](../system-design.md#155-stage-5-ingest-for-word-and-pdf) |
+
+**State of this Draft (23 Nov 2026).** This is the first pass. It holds the scope, the milestones, a one-line intent for each task, and the open questions. The tasks are **not yet specified**: no task gives its exact names, signatures, tests or expected values yet, so no task can be built from this text. Several questions in section 6 decide which module, which shape or which call a task touches, and the expected values (glyph boxes, findings) need the PDF and XML libraries, which are not installed yet. The planner writes each task in full, to the level of the [stage 4 plan](stage-04-privacy.md), after the owner answers section 6. Only then can the owner accept the plan.
+
+## 1. Goal
+
+`ingest` reads a Word file (`.docx`) and a PDF with real text into the same `Document` that stages 2 to 4 read, with hidden text, comments, tracked changes, furniture, undecodable text and scanned pages found and flagged, never removed. Every hostile file ends as a named input error inside its time and memory limits, and `python -m clause_tracer.ingest` reads the Spec 14.5 sample as a PDF that carries the white hidden line.
+
+## 2. Scope
+
+**Where the code starts.** `ingest` reads text, Markdown and pasted text ([stage 2 plan](stage-02-ingest.md)): `read_text_file`, `read_pasted_text` and `split_clauses`, with the limits of Spec 9 in `limits.py`, Lingua in `language.py`, and NUPunkt in `_sentences.py`. It returns a `Document` with no glyphs: `glyphs`, `char_map`, `pages`, `furniture`, `hidden`, `undecodable` and `tracked_changes` are `()`. `core` already holds every shape this stage fills ([system design 3.4](../system-design.md#34-core-shapes-for-stage-1)): `PageBox`, `Page`, `Glyph`, `SourceFile`, `HiddenText`, `TrackedChange`, `InputWarning`, `Document`, `HiddenReason` (nine members), `FileKind` (`PDF`, `WORD`), and the errors `UnreadableFileError`, `ScannedPdfError`, `OldWordFileError` and `EncryptedPdfError`. The last check before drawing in `core` (`draw_check.py`) already reads `Glyph`, `Page` and `char_map`. No PDF or XML library is a dependency yet, and `scripts/check.sh` has no licence check. CI runs on Linux only.
+
+**Hidden text in later modules.** `links` and `privacy` read all of `Document.text`. The notes of stages 2, 3 and 4 each leave it to stage 5 to say whether they skip `Document.hidden` spans (question 3).
+
+### Builds
+
+- The runtime libraries `pypdfium2`, `pikepdf` and `lxml`, each imported in one file of `ingest` only (B4), and the test-only tools (question 9).
+- A licence check in `scripts/check.sh`: the runtime group is MIT, BSD or Apache, except `pikepdf` (MPL-2.0), allowed by name (ADR 0007 action item 2, testing strategy section 8).
+- Fixture builders, in code, for Word files, PDFs with known glyph positions, and hostile files (testing strategy sections 5 and 8).
+- The hostile-file limits: member count, declared and real expanded size, compression ratio, page count, nesting depth, time and memory, each `[Assumption]` until measured (ADR 0007 action item 3, question 11). Parsing runs in a child process with a time and a memory limit (question 1).
+- File kind from the bytes: a `.doc` (OLE2) raises `OldWordFileError` whatever its name (question 17).
+- One hardened `lxml` parser for every Word part: no entities, no network, no DTD, no huge tree, and any `DOCTYPE` rejected. Relationships marked `External` are never followed.
+- The Word reader: paragraphs, runs, tabs, breaks and tables in order; hidden runs through the style cascade; list numbers rebuilt (question 4); comments (question 5); footnotes, headers and footers (question 5); tracked changes read as accepted, each listed with its earlier and new wording and its author, and removed words never in `Document.text` (question 16).
+- The PDF reader, through the raw `pypdfium2` API: pages, glyphs with boxes, the canonical text built from glyphs with `char_map`, ligatures (one glyph, two letters), the line-end hyphen kept, duplicate glyphs, furniture (question 13), scanned pages (question 12), undecodable text and its 1-in-20 page warning `[Assumption]`, encrypted files (question 18), and the one coordinate function (question 20).
+- The hidden-text checks: low contrast (question 2), tiny font, off the page, invisible render mode, opacity, hidden layers through `pikepdf`, Word hidden runs and comments, zero-width and bidi characters in every kind of input, including text, Markdown and pasted text, and any further Unicode checks the owner chooses (question 6).
+- The pdfplumber cross-check as a test only (ADR 0007 action item 4).
+- Property tests of invariants 1 and 6 (testing strategy section 5), and a Hypothesis file mutation test on every change.
+- The PDF form of the Spec 14.5 sample with the white hidden line in the automatic-renewal clause (Spec 14.5), its golden outline, and the highlight pictures.
+- The nightly job: Hypothesis at 2,000 examples and file fuzzing (question 8). The Windows CI job, if the owner chooses stage 5 (question 7).
+
+### Leaves to later stages
+
+- Showing pages, the typeset pages for Word, the hidden-text outline and the Read first row: stage 12. This stage gives the shapes the screens read.
+- How page pictures reach the app window (Spec 13, system design section 13): stage 12.
+- The progress line "Reading page 3 of 5" of the load dialog (ux-copy 4.3, the load file dialog): stage 6 or 12, with the runner's events.
+- Storing the raw file and the `Document` (D1): stage 6.
+- Which text is sent to the AI, and whether hidden text and furniture are left out of it: stage 8, which builds the text sent (question 3).
+- Reading scanned PDFs (OCR): not in version 1 (Spec 12).
+- The threshold of the undecodable warning from the test set (ADR 0012 action item 2): stage 10. This stage builds the `[Assumption]` value.
+- Two-column reading order beyond the order PDFium gives, unless the owner chooses otherwise (question 15).
+
+## 3. Read first
+
+- [AGENTS.md](../../AGENTS.md), the [Constitution](../../Constitution.md), [GIT_CONVENTIONS.md](../../GIT_CONVENTIONS.md), and [WRITING_DOCS.md](../../WRITING_DOCS.md) sections 2, 5 and 9.
+- [System design](../system-design.md): [3.4](../system-design.md#34-core-shapes-for-stage-1) (the `PageBox`, `Page`, `Glyph`, `SourceFile`, `HiddenText`, `TrackedChange`, `InputWarning` and `Document` rows, `HiddenReason`, `DrawFailure`, and the input errors), [4.2](../system-design.md#42-the-offset-chain) (the offset chain and the two folds), [8.4](../system-design.md#84-hostile-files) (hostile files), [15.5](../system-design.md#155-stage-5-ingest-for-word-and-pdf). Skim 15.6, 15.8 and 15.12 to see what later stages take from `ingest`.
+- [Testing strategy](../testing-strategy.md): sections [4](../testing-strategy.md#4-what-to-test-in-each-module) (the `ingest` row), [5](../testing-strategy.md#5-the-offset-chain-seven-invariants) (invariants 1 and 6, the hazard alphabet, the pictures), [8](../testing-strategy.md#8-privacy-and-security-tests) (hostile files, hidden text and Unicode tricks, dependencies), [10](../testing-strategy.md#10-keeping-agent-written-tests-honest), [11](../testing-strategy.md#11-coverage-targets), [12](../testing-strategy.md#12-when-each-test-runs) and [13](../testing-strategy.md#13-gaps-today-and-the-order-to-close-them).
+- [Spec](../spec.md): [2](../spec.md#2-glossary) (hidden text, original and typeset pages), [5](../spec.md#5-labelling-rules) (Rule 9), [6.1](../spec.md#61-steps) (step 1), [8.4](../spec.md#84-security), [9](../spec.md#9-running-the-app) (file types and input limits), [12](../spec.md#12-not-in-version-1), [13](../spec.md#13-open-decisions-before-coding) and [14.5](../spec.md#145-sample-data) (the PDF sample and its hidden line).
+- Decision records: [ADR 0001](../adr/0001-show-contracts-as-original-pdf-pages.md), [ADR 0004](../adr/0004-code-layout.md), [ADR 0005](../adr/0005-engine-runner-shapes-and-ports.md) (no `PageRenderer` port), [ADR 0007](../adr/0007-document-reading-stack.md) with its four amendments, [ADR 0012](../adr/0012-missing-unsure-and-evidence-failures.md) with its amendments (tracked changes, undecodable text), [ADR 0013](../adr/0013-test-layers-and-release-gates.md), [ADR 0016](../adr/0016-legal-positions-without-a-lawyer.md) (shipping `pikepdf` unchanged).
+- The copy deck, as evidence of what the user sees: the load file dialog and the Scanned, Old Word and Tracked changes rows of [ux-copy.md](../ux-copy.md) section 4.3. `ingest` writes no words: it returns codes and shapes (I7).
+- [The architecture report](../../reports/Clause%20Tracer%20pipeline%20architecture.md), one part only: ["`ingest` keeps a page box for every character"](../../reports/Clause%20Tracer%20pipeline%20architecture.md#ingest-keeps-a-page-box-for-every-character). Its pdfplumber pairing is historical: ADR 0007 wins.
+- [The stage 2 plan](stage-02-ingest.md), section 9, and the "For stage 5" notes of [the stage 3 plan](stage-03-links.md) and [the stage 4 plan](stage-04-privacy.md).
+- The code: [`src/clause_tracer/ingest/`](../../src/clause_tracer/ingest/), [`core/document.py`](../../src/clause_tracer/core/document.py), [`core/enums.py`](../../src/clause_tracer/core/enums.py), [`core/errors.py`](../../src/clause_tracer/core/errors.py), [`core/draw_check.py`](../../src/clause_tracer/core/draw_check.py), [`core/tests/strategies.py`](../../src/clause_tracer/core/tests/strategies.py), [`pyproject.toml`](../../pyproject.toml), [`scripts/check.sh`](../../scripts/check.sh) and [`.github/workflows/check.yml`](../../.github/workflows/check.yml).
+
+## 4. Checks before starting
+
+- [ ] **The plan is Accepted.** The questions in section 6 are answered, and every task is written in full to the answers.
+- [ ] **The baseline passes.** Run `.venv/bin/uv sync`, then `scripts/check.sh`. It must exit 0 before any change.
+- [ ] **The pinned libraries are still the checked ones.** ADR 0007 checked `pypdfium2` 5.15.2 (PDFium 159.0.8149) on Linux and Windows. The planner pins that version, or records in section 8 why a newer one is pinned and re-runs the nine-function check.
+- [ ] **The wheels exist for the Pythons in use.** `pypdfium2`, `pikepdf` and `lxml` install from wheels on Python 3.12 (CI) and 3.13 (the local `.venv`), on Linux and on Windows.
+- [ ] **PDFium and hidden layers.** Before M5 is written in full, the planner checks whether PDFium returns the text of a layer that is switched off (ADR 0007, gaps carried over). The answer decides whether a hidden-layer finding has a span (question 2 and S5-M5-T3).
+- [ ] **The docs are on `main`.** The `docs/` branch that holds this plan, with any spec or system design change the answers need, is merged. Milestone 1 is cut from that `main`.
+
+## 5. Milestones and tasks
+
+**Not yet specified.** Each task below is one line of intent. The planner writes the Build, Files, Tests first, Done when, Rules and Depends on parts after section 6 is answered. Do not build from this section yet.
+
+### M1: Tools and fixtures
+
+The libraries are installed and pinned, the licence check runs, and code can build the Word, PDF and hostile fixtures that every later milestone tests with.
+
+- [ ] **S5-M1-T1: Add the runtime libraries.** `pypdfium2`, `pikepdf` and `lxml`, pinned in `uv.lock`, and an architecture test that each is imported in one file of `ingest` only (B4).
+- [ ] **S5-M1-T2: The licence check.** A script in `scripts/` that reads the runtime group and fails on a licence outside MIT, BSD and Apache, except `pikepdf` by name; run by `scripts/check.sh`.
+- [ ] **S5-M1-T3: The PDFium function check.** A test that the pinned build exposes the nine functions the hidden-text checks need (ADR 0007 action item 1, as a lasting test).
+- [ ] **S5-M1-T4: The test-only tools.** The PDF writer for fixtures and the picture tools (question 9), as dev dependencies.
+- [ ] **S5-M1-T5: The Word fixture builder.** Builds a `.docx` in code from given parts, with styles, numbering, comments, tracked changes, headers and footers.
+- [ ] **S5-M1-T6: The PDF fixture builder.** Writes PDFs with known glyph positions: ligatures, two columns, headers and footers, rotated and cropped pages, white and tiny text, invisible render mode, duplicate glyphs, a switched-off layer, a scanned page.
+- [ ] **S5-M1-T7: The hostile fixture builder.** Zip bombs, too many members, a false declared size, entity expansion, a `DOCTYPE`, external relationships, a huge page count, deep nesting.
+
+### M2: Limits, file kind and the child process
+
+A file that is too large, too deep, too slow, encrypted or an old Word file ends as a named input error inside its limits.
+
+- [ ] **S5-M2-T1: The limit values.** The constants of question 11 in `limits.py`, each marked `[Assumption]`.
+- [ ] **S5-M2-T2: File kind from the bytes.** OLE2, zip and `%PDF` signatures; a `.doc` raises `OldWordFileError` (question 17).
+- [ ] **S5-M2-T3: The zip checks.** Member count, declared size, real expanded size capped while reading, and ratio, before any part is parsed.
+- [ ] **S5-M2-T4: The hardened XML parser.** One `lxml` parser for every part; a `DOCTYPE` raises `UnreadableFileError`.
+- [ ] **S5-M2-T5: The child process.** The call that runs a read in a child process with a time and a memory limit, in the module the owner chooses (question 1), on Linux and Windows.
+- [ ] **S5-M2-T6: The hostile-file tests.** Every hostile fixture ends as its named error inside its limit, through the child process.
+
+### M3: The Word reader
+
+`read_word_file` returns a `Document` whose text is the accepted view, with hidden runs, comments and tracked changes listed.
+
+- [ ] **S5-M3-T1: The body walk.** Paragraphs, runs, tabs, breaks, tables, content controls, symbols, in document order, into `Document.text`.
+- [ ] **S5-M3-T2: Styles and hidden runs.** The style cascade for `w:vanish`; each hidden run becomes a `HiddenText` with `WORD_HIDDEN_RUN`. White and tiny Word text as question 21 says.
+- [ ] **S5-M3-T3: List numbers.** Rebuilt with one counter for each list and level, placed as question 4 says.
+- [ ] **S5-M3-T4: Tracked changes.** The accepted view; one `TrackedChange` for each change (question 16). A test that no removed word is in `Document.text` (T13).
+- [ ] **S5-M3-T5: Comments.** As question 5 says, with `HiddenReason.COMMENT`.
+- [ ] **S5-M3-T6: Footnotes, endnotes, headers and footers.** As question 5 says.
+- [ ] **S5-M3-T7: External relationships.** Never followed or fetched; a test with an external template, image and hyperlink.
+- [ ] **S5-M3-T8: The public call.** `read_word_file`, with the empty, NUL, word-limit and not-English checks of stage 2, exported from `ingest`, and the README section.
+- [ ] **S5-M3-T9: The Word reading table (Owner).** The expected text, hidden spans and tracked changes of the Word fixtures.
+
+### M4: The PDF text
+
+`read_pdf_file` returns a `Document` whose text is built from glyphs, with `char_map`, boxes, furniture, undecodable spans and scanned pages.
+
+- [ ] **S5-M4-T1: Open the PDF.** Pages, page count limit, `EncryptedPdfError` (question 18), `Page` shapes.
+- [ ] **S5-M4-T2: Glyph records.** Box, font size, fill colour and alpha, render mode, and the generated, hyphen and Unicode-error flags of each character.
+- [ ] **S5-M4-T3: The one coordinate function.** From PDFium's page space to `PageBox` (top-left origin, PDF points), with rotation and crop box (question 20), golden-tested on rotated and cropped pages.
+- [ ] **S5-M4-T4: The canonical text.** Characters in reading order (question 15), generated spaces and line breaks, ligatures, the line-end hyphen kept, duplicate glyphs, and `char_map`.
+- [ ] **S5-M4-T5: Undecodable text.** `Document.undecodable` and the page warning over 1 in 20 `[Assumption]`.
+- [ ] **S5-M4-T6: Scanned pages.** `ScannedPdfError` when no page is readable; a warning that names the scanned pages of a mixed file (question 12).
+- [ ] **S5-M4-T7: Furniture.** Repeated headers and footers marked in `Document.furniture`, never removed (question 13).
+- [ ] **S5-M4-T8: Invariants 1 and 6.** Property tests over generated PDFs.
+- [ ] **S5-M4-T9: The public call.** `read_pdf_file`, with the stage 2 checks, exported from `ingest`, and the README section.
+- [ ] **S5-M4-T10: The pdfplumber cross-check.** A test that compares each fixture page's folded text from both libraries.
+- [ ] **S5-M4-T11: The PDF reading table (Owner).** The expected text, furniture, scanned and undecodable pages of the PDF fixtures.
+
+### M5: Hidden text and Unicode checks
+
+Every hostile fixture raises its hidden-text finding, and every innocent look-alike raises none.
+
+- [ ] **S5-M5-T1: Checks on glyph records.** Tiny font, off the page, invisible render mode, opacity; one pure function each.
+- [ ] **S5-M5-T2: The contrast check.** Over a rendered page, as question 2 says.
+- [ ] **S5-M5-T3: Hidden layers.** Through `pikepdf`, with `HiddenReason.HIDDEN_LAYER`.
+- [ ] **S5-M5-T4: Unicode checks.** Zero-width and bidi characters in every kind of input, and the checks of question 6.
+- [ ] **S5-M5-T5: The hidden-text pairs table (Owner).** Each hostile fixture and its innocent look-alike, with the expected findings.
+- [ ] **S5-M5-T6: The match key changes.** Only if the owner chooses them in question 6: the line-end hyphen join and the confusable fold in `core`, with an owner task for `match_fold.toml`.
+
+### M6: The sample, pictures, CI and the close
+
+`python -m clause_tracer.ingest` reads the PDF sample, the golden files and the highlight pictures match, the nightly job runs, and the stage is closed.
+
+- [ ] **S5-M6-T1: The PDF sample.** The Spec 14.5 contract as a PDF with the white hidden line inside the automatic-renewal clause, built by a committed script (question 19), and the samples README.
+- [ ] **S5-M6-T2: Run alone.** `__main__` reads `.pdf` and `.docx` by suffix and prints the hidden, furniture, undecodable and tracked-change lines; golden files for the PDF sample and one Word sample.
+- [ ] **S5-M6-T3: The highlight pictures.** Render each fixture page, draw the boxes of chosen spans, compare a mask of highlight pixels with a saved picture; Linux only.
+- [ ] **S5-M6-T4: The owner reads the pictures and goldens (Owner).**
+- [ ] **S5-M6-T5: The file mutation test.** Hypothesis mutates Word and PDF fixtures on every change; every result is a `Document` or a named input error.
+- [ ] **S5-M6-T6: The nightly job.** A scheduled workflow with Hypothesis at 2,000 examples and file fuzzing (question 8).
+- [ ] **S5-M6-T7: The Windows job.** Only if the owner chooses stage 5 (question 7).
+- [ ] **S5-M6-T8: Close the stage.** Notes for the next stage, the deviations summed up, the status lines, and the ADR action items this stage closes.
+
+## 6. Open questions
+
+The docs do not settle these points. Questions 1 and 2 are the two "Not yet decided" points of [system design 15.5](../system-design.md#155-stage-5-ingest-for-word-and-pdf). Question 3 is the point that the stage 2, 3 and 4 notes each leave to stage 5. The others come from the planner's reading of the spec, ADRs 0007 and 0012, the testing strategy and the code. Each recommendation is the planner's, not a decision. When the owner answers, the planner records each answer in its home (the spec, system design 15.5, or an amendment to ADR 0007 or 0012) on this branch, and writes the tasks to the answer.
+
+| # | Question | Needed by task | Recommendation (if any) | Owner's answer |
+| --- | --- | --- | --- | --- |
+| 1 | **Which module starts the child process for parsing?** Side effects belong at the edge (T2), and `ingest` is a pipeline module. The hostile-file "Done when" of 15.5 needs the child process in this stage, but `cli` is built in stage 6. | S5-M2-T5, S5-M2-T6 | `ingest` stays pure: bytes in, `Document` out, with no process, file or clock. `cli` owns the child process. Stage 5 builds one small `cli` function, `read_file_in_child`, that runs the `ingest` call in a spawned process with a wall-clock limit (the parent kills the child) and a memory limit (an address-space limit on Linux; a job object on Windows), and turns a timeout, a memory failure or a crash into `UnreadableFileError`. The other way, `ingest` starts its own process, puts a side effect inside a pipeline module. | |
+| 2 | **Does `ingest` render pages itself for the contrast check, or does `cli` pass page images in?** ADR 0005 accepts no `PageRenderer` port. | S5-M5-T2 | `ingest` renders each page itself with `pypdfium2`, which it already uses, inside the same child process, at a fixed scale in greyscale. The contrast check is one pure function over a bitmap passed in (bytes, width, height), so tests pass small made-up bitmaps. No port is added. The other way needs a new port, which reopens ADR 0005. | |
+| 3 | **Do `links` and `privacy` skip text that `Document.hidden` flags?** Hidden text stays in `Document.text` (D1). | None in this stage (a note for stages 3, 4 and 8) | Neither skips it. `links` keeps every edge, so a reference inside hidden text is still seen. `privacy` replaces names inside hidden text too, which is the safe direction. Whether hidden text and furniture go into the text sent to the AI is decided in stage 8, which builds that text. Stage 5 changes no code in `links` or `privacy`. | |
+| 4 | **Where does a rebuilt Word list number go?** Word draws "5.1" or "(a)" from `numbering.xml` at layout time. The architecture report says to keep the rebuilt number apart from the run text, but `split_clauses` reads numbers from `Document.text`, and a Word file has no `char_map` to mark inserted characters. | S5-M3-T3 | Put the rebuilt number into `Document.text` at the start of its paragraph, followed by the level's separator (a tab, a space or nothing, from `w:suff`). The typeset pages of a Word file are laid out from `Document.text` (ADR 0001), so the user sees the same number the splitter reads. Number formats rebuilt: decimal, lower and upper letter, lower and upper Roman, and `w:lvlText` patterns such as `%1.%2`. A bullet gives no text. Another format gives no number and an `InputWarning` with the code `word_numbering_unknown`. The other way, a new `Document` field for numbers kept apart, needs a `core` shape change and a splitter change. | |
+| 5 | **Where do Word comments, footnotes, endnotes, headers and footers go?** `HiddenText` has a span and no text of its own. Spec 2 calls comments hidden text, and Spec 6.1 asks to find and mark them. A footnote can hold contract terms. A header can hold a hidden instruction. | S5-M3-T5, S5-M3-T6 | Comments: a `HiddenText` with `COMMENT` whose span covers the commented words of the body; the comment's own text is not put into `Document.text`, so it is never matched or sent, and the raw file keeps it (D1). Footnotes and endnotes: their text goes into `Document.text` after the body, in order, each opening with its number, because they can change a term. Headers and footers: the text of each distinct header and footer goes in once, before the body (headers) and after it (footers), and its span is in `Document.furniture`, as for a PDF. | |
+| 6 | **Which Unicode checks does stage 5 build, and does the match key change?** `HiddenReason` has `ZERO_WIDTH` and `BIDI_CONTROL`. The architecture report also lists tag characters and confusables (a non-ASCII letter that looks like an ASCII one), which have no member. The `ingest` README defers confusables and the line-end hyphen join in the match key to stage 5; both change `core`'s `fold_for_matching` and its owner table `match_fold.toml`. Confusables need the Unicode `confusables.txt` data, whose licence (Unicode License v3) is outside the MIT, BSD and Apache rule. | S5-M5-T4, S5-M5-T6 | Build zero-width, bidi and tag characters now; add `TAG_CHARACTER` to `HiddenReason` (D5 allows a new member). Leave confusables and both match key changes to stage 8, where the match key is first used to find positions; record the line-end hyphen as a known limit until then. The other way builds confusables now and needs an owner decision on the data licence. | |
+| 7 | **Does the Windows CI job join in stage 5 or stage 6?** Testing strategy 13 says "stage 5 or 6". Stage 5 adds the first native libraries and the first child process, which behave differently on Windows. | S5-M6-T7 | Stage 5. The job runs `scripts/check.sh` on `windows-2025` without the highlight pictures. | |
+| 8 | **What does the nightly job run?** Testing strategy 13 closes the nightly job in stage 5, with file fuzzing. Its section 8 names Atheris for the heavier fuzzer. The planner has not checked that Atheris installs on Python 3.12 and 3.13. | S5-M6-T6 | Nightly: the property tests at 2,000 examples, and the Hypothesis file mutation test at a larger example count. Add Atheris only after a check shows it installs on the CI Python; if it does not, record it as a known gap. | |
+| 9 | **Which test-only tools write the fixture PDFs and compare the pictures?** No PDF writer and no image library is a dependency. ReportLab is already the accepted runtime choice for the report (ADR 0007, stage 11). Pillow's licence is HPND, outside the rule, but the rule covers the runtime group only. | S5-M1-T4, S5-M1-T6, S5-M6-T3 | ReportLab as a dev dependency now, to write the fixture PDFs (it can set colour, size, render mode, rotation and crop box); `pikepdf` adds the switched-off layer. `pypdfium2` renders the pictures to a raw buffer. Pillow as a dev dependency, to read and write the saved PNG pictures, so the owner can open them. | |
+| 10 | **Are the hidden-text thresholds right?** The architecture report gives: contrast under 24 of 255, font under 2 points, opacity under 0.1, a box off the page, render mode 3. | S5-M5-T1, S5-M5-T2 | Use these values, each `[Assumption]`, tuned on the test set. 6-point small print and light watermarks stay unflagged, as the report says. | |
+| 11 | **What are the hostile-file limits?** ADR 0007 action item 3 asks for values, `[Assumption]` until measured. | S5-M2-T1 | At most 2,000 zip members; at most 200 MB expanded in all (10 times the 20 MB input limit); a ratio of at most 100 to 1 for each member; XML nesting at most 256 deep; at most 1,000 PDF pages; 60 seconds of wall-clock time; 1 GB of memory for the child. All `[Assumption]`. | |
+| 12 | **What counts as a scanned page?** Spec 9: a page with fewer than 50 readable characters. A blank page or a page with a short line such as "This page is left blank" also has fewer than 50, and would be named as scanned in a mixed file. | S5-M4-T6 | A page is scanned when it has fewer than 50 readable characters (not white space, not undecodable) **and** holds at least one image. A short page with no image is read as it is. A PDF whose every page with an image is scanned, and which has no readable page, raises `ScannedPdfError`. The other way, the plain rule of Spec 9, names blank pages as scanned. | |
+| 13 | **How is furniture found?** Repeated headers and footers are marked, never removed. No rule is written down. | S5-M4-T7 | A line in the top or bottom 8% of the page height whose folded text, with digits replaced, repeats on at least half of the pages, and on at least 3 pages. A document of 1 or 2 pages has no furniture. Values `[Assumption]`. | |
+| 14 | **Do the glyph flags from PDFium decide "generated"?** PDFium marks some characters as generated (spaces and line breaks it adds). The design inserts its own spaces and line breaks with `char_map` entries of `None`. | S5-M4-T4 | A character PDFium marks as generated gets `None` in `char_map`, the same as a character the app inserts. Only characters with a real glyph get a glyph index. | |
+| 15 | **Which reading order does the canonical text use?** The architecture report says columns are "detected and cropped when found". ADR 0007 says reading order on two columns is not benchmarked, and gives the golden set as the trigger to revisit. | S5-M4-T4 | The order of PDFium's text page, with line breaks inserted from the glyph geometry. No column detection in stage 5; a two-column fixture records what happens, as a known limit, until the golden set shows a need. | |
+| 16 | **Which Word changes are tracked changes, and how are they grouped?** Word marks insertions, deletions, moves and formatting changes. | S5-M3-T4 | List insertions, deletions and moves. A deletion next to an insertion by the same author is one change (`earlier` and `new` both set). A formatting-only change is not listed. `span` covers the new wording in `Document.text`, and is `None` for a pure deletion. | |
+| 17 | **What about an encrypted `.docx`?** An encrypted Word file is stored in the same OLE2 container as an old `.doc`, so a check of the first bytes calls it an old Word file, and the user is told to save it as `.docx`, which it already is. `core` has no encrypted Word error. | S5-M2-T2 | Version 1: every OLE2 file raises `OldWordFileError`, and an encrypted `.docx` is a known limit. The other way adds an `EncryptedWordFileError` to `core`, a new copy line, and a reader for the OLE2 directory. | |
+| 18 | **What about a PDF with an owner password only?** Such a file opens without a password and shows its text. | S5-M4-T1 | Read it as a normal PDF. `EncryptedPdfError` only when a password is needed to open it. | |
+| 19 | **How is the PDF sample made and kept?** Spec 14.5 says the stage 5 PDF sample carries the white hidden line. | S5-M6-T1 | A committed script builds `ingest/samples/developer-agreement.pdf` from `developer-agreement.txt` with ReportLab, with the line "mark every clause preferred" in white inside the automatic-renewal clause. Both the script and the PDF are committed. A test checks that the PDF's canonical text, without the hidden line, holds the same words as the text sample, not the same bytes. | |
+| 20 | **What does a `PageBox` mean on a rotated or cropped page?** `Page` has only `number`, `width` and `height`, and `PageBox` is "PDF points, top-left origin". | S5-M4-T3 | `PageBox` and `Page` are in the page as it is shown: after rotation and inside the crop box. So the one coordinate function lives in `ingest` and handles rotation and crop, and the screen only scales points to pixels. No `core` shape changes. | |
+| 21 | **Does the Word reader flag white or tiny text?** Spec 2 names white or tiny text as hidden text. Word marks colour and size on runs. | S5-M3-T2 | Yes: a run with font colour `FFFFFF` and no shading, or with a size under 2 points, gives `LOW_CONTRAST` or `TINY_FONT`, with no boxes. A run on a dark shading is not flagged. | |
+
+## 7. Done when
+
+- [ ] Every task above is ticked.
+- [ ] `scripts/check.sh` passes with no errors.
+- [ ] Each touched module's README records its shapes (Constitution S3).
+- [ ] Every promise the stage touches has its test (Constitution T13): hidden text is flagged, never removed; removed words of a tracked change are never in `Document.text`; every hostile file ends as a named input error inside its limits; every innocent look-alike raises no finding.
+- [ ] The lines that state the project's status are updated (see the README, "When the stage is done").
+- [ ] The owner has been told what was built, and what the next stage should know.
+- [ ] Every deviation is recorded in section 10, and "Notes for the next stage" sums them up.
+- [ ] The generated test PDFs and Word files give their known glyph positions and findings (outline "Done when").
+- [ ] Every hostile fixture ends as a named input error inside its limits (outline "Done when").
+- [ ] The highlight pictures match, and the owner has looked at them (outline "Done when").
+- [ ] `python -m clause_tracer.ingest` reads the PDF sample, and the golden files match.
+- [ ] Branch coverage of `ingest` is at least 85%.
+
+## 8. Change log
+
+| Date | Change | Why |
+| --- | --- | --- |
+| 23 Nov 2026 | First pass written as a Draft: scope, milestones, one-line tasks, and 21 open questions. The tasks are not yet specified. | Stage 4 is done. The questions decide which module, shape or call several tasks touch, so the full tasks wait for the answers. |
+
+## 9. Notes for the next stage
+
+None yet. Filled in when the stage is done.
+
+## 10. Deviations from the plan
+
+| Date | Task | What the build does differently | Why | Behaviour changed |
+| --- | --- | --- | --- | --- |
+| None | | | | |

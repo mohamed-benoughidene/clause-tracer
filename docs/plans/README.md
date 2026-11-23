@@ -26,6 +26,7 @@ Levels 1 and 2 cover the whole product. Level 3 exists only for the stage being 
 | [stage-02-ingest.md](stage-02-ingest.md) | The plan for build stage 2, `ingest` for text, Markdown and pasted text |
 | [stage-03-links.md](stage-03-links.md) | The plan for build stage 3, `links` |
 | [stage-04-privacy.md](stage-04-privacy.md) | The plan for build stage 4, `privacy` |
+| [stage-05-ingest-word-pdf.md](stage-05-ingest-word-pdf.md) | The plan for build stage 5, `ingest` for Word and PDF |
 
 List every new plan in the table above when it is added. The status of a plan lives in the plan's own header, not in this table.
 
