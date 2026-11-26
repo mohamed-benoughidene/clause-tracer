@@ -730,6 +730,7 @@ The task plan of each stage is written in `docs/plans/` just before the stage is
 - **Decided 26 Nov 2026** (two points of the stage 5 plan):
   - **The count of notes.** The warning for Word notes carries no count. The count is the number of footnote and endnote entries in the side text, referenced or not, and the warning is raised even when no note is referenced.
   - **Imported content.** A Word file with a `w:altChunk` that Word would show is not read: it raises `UnreadableFileError` with the reason `word_alt_chunk`. One inside deleted content or an unread alternate branch raises nothing. The words the user sees are open.
+- **Decided 26 Nov 2026** (Word symbols): a symbol in the body that the app cannot read, or reads in a symbol font such as Wingdings, gives the warning `word_symbol_unread`. The file is still read.
 - **Not yet decided** (stage 5, the rest): the exact name, type and content of the new `Document` field; the names of the new warning codes and the new `HiddenReason`; the exact caps of question 11.
 
 ### 15.6 Stage 6: the encrypted store, secrets, the runner and the first commands
