@@ -156,6 +156,16 @@ class PiiSource(StrEnum):
     USER = "user"
 
 
+class DoubtCode(StrEnum):
+    """Why a finder was not sure. A doubt never changes what is replaced."""
+
+    SHORT_NAME = "short_name"
+    NEAR_DUPLICATE = "near_duplicate"
+    TWO_KINDS = "two_kinds"
+    SKIPPED_COMMON = "skipped_common"
+    NO_CUE_RUN = "no_cue_run"
+
+
 class TextSlot(StrEnum):
     """The kinds of text the AI may write; each has its own length cap (Spec 6.2)."""
 

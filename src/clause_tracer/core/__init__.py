@@ -48,6 +48,7 @@ from clause_tracer.core.enums import (
     UNSURE_REASONS,
     Answer,
     Direction,
+    DoubtCode,
     DrawFailure,
     FileKind,
     HiddenReason,
@@ -138,6 +139,7 @@ from clause_tracer.core.link_map import (
 )
 from clause_tracer.core.match_fold import fold_for_matching
 from clause_tracer.core.placeholders import (
+    Doubt,
     Party,
     PiiSuggestion,
     PlaceholderEntity,
@@ -229,6 +231,8 @@ __all__: list[str] = [
     "DefinedTerm",
     "Direction",
     "Document",
+    "Doubt",
+    "DoubtCode",
     "DrawAllowed",
     "DrawFailure",
     "DrawRefused",

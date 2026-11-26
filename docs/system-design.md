@@ -160,6 +160,7 @@ The values column gives the exact member names.
 | `SegmentKind` | `COPY`, `ENTITY`, `ESCAPE` | The placeholder map (section 4.2) |
 | `HiddenReason` | `LOW_CONTRAST`, `TINY_FONT`, `OFF_PAGE`, `INVISIBLE_TEXT`, `HIDDEN_LAYER`, `WORD_HIDDEN_RUN`, `COMMENT`, `ZERO_WIDTH`, `BIDI_CONTROL` | Each finding names its cause. Stage 5 adds a member for any new check (D5) |
 | `PiiSource` | `PARTY_DETAILS`, `PATTERN`, `RULE`, `NER`, `USER` | Overlaps resolve by source ([ADR 0008](adr/0008-personal-data-detection-bundle.md)) |
+| `DoubtCode` | `SHORT_NAME`, `NEAR_DUPLICATE`, `TWO_KINDS`, `SKIPPED_COMMON`, `NO_CUE_RUN` | Why a finder was not sure |
 | `TextSlot` | `REASON`, `READING`, `QUESTION`, `MESSAGE`, `REWRITE` | The kinds of text the AI may write. Each has its own length cap (Spec 6.2). `REASON` is the reason of a words label the AI judged; `READING` and `QUESTION` are one of the two readings and the question to ask, for that label or for a value unsure because of vague wording; `MESSAGE` is "Rewrite with AI"; `REWRITE` is a clause rewrite (step 12). Code writes every other sentence in a label's panel, so it has no slot (decided 14 Nov 2026, Spec 6.1 step 10) |
 | `ScanFinding` | `TOO_LONG`, `LAW_WORD`, `ADVICE`, `INJECTION_TELL`, `CONTACT_WORD`, `WEB_ADDRESS`, `EMAIL_ADDRESS`, `WRONG_LABEL_WORD`, `ACCEPTABLE_LIMIT`, `NUMBER_NOT_ALLOWED`, `UNKNOWN_PLACEHOLDER`, `PERSONAL_DATA`, `FIRST_PERSON`, `FILLER_PHRASE`, `EVALUATIVE_WORD`, `NO_ANCHOR`, `ADDED_SENTENCE`, in this order | What an output scan found. An empty tuple means the text passed (section 8.2). The last five are the style scans of Spec 6.2 (added 14 Nov 2026) |
 | `DrawFailure` | `CLAUSE_MISMATCH`, `SENTENCE_UNKNOWN`, `EMPTY_QUOTE`, `SPAN_OUTSIDE_SENTENCES`, `QUOTE_NOT_FOUND`, `QUOTE_NOT_UNIQUE`, `SPAN_MISMATCH`, `CHAR_MAP_LENGTH`, `GLYPH_MISSING`, `PAGE_UNKNOWN`, `PAGE_MISMATCH`, `BOX_OUTSIDE_PAGE` | Why the last check before drawing refused (section 4.2) |
@@ -190,6 +191,7 @@ The values column gives the exact member names.
 | `LinkMap` | `references: tuple[CrossReference, ...], terms: tuple[DefinedTerm, ...], overrides: tuple[Override, ...], outside_documents: tuple[OutsideDocument, ...], undefined_terms: tuple[Span, ...]` | What `links` returns. `cli` passes `terms` into `privacy` |
 | `Party` | `name: str, address: str \| None, yours: bool` | Typed party details: raw data, and the first privacy finder |
 | `PiiSuggestion` | `span: Span, kind: PlaceholderKind, source: PiiSource` | What the `PiiDetector` port and the code finders return |
+| `Doubt` | `span: Span, code: DoubtCode` | A place where a finder could not be sure. It never changes what is replaced |
 | `PlaceholderEntity` | `id: str, kind: PlaceholderKind, number: int, spans: tuple[Span, ...]` | One placeholder, such as Person 1, for every variant of one name |
 | `Segment` | `kind: SegmentKind, sent: Span, original: Span, entity_id: str \| None` | Tiles both texts, so a quote maps back exactly |
 | `PlaceholderText` | `text: str, entities: tuple[PlaceholderEntity, ...], segments: tuple[Segment, ...]` | The only contract text that leaves the computer |
