@@ -119,7 +119,7 @@ When this is done, the three runtime libraries are installed and pinned, a licen
   - **Rules:** ADR 0007 action item 2, testing strategy 8, Spec 13 (licence rule).
   - **Depends on:** S5-M1-T1
 
-- [ ] **S5-M1-T4: The test-only tools**
+- [x] **S5-M1-T4: The test-only tools**
   - **Build:** Run `.venv/bin/uv add --dev reportlab==5.1.2 pillow==13.0.0 pdfplumber==0.11.11`. Commit `pyproject.toml` and `uv.lock`. No dev tool goes in the runtime group. Add the test `test_reportlab_pdf_is_readable` in `src/clause_tracer/ingest/tests/test_dev_tools.py`: it builds a one-page PDF with `reportlab.pdfgen.canvas.Canvas(buffer, pagesize=(200, 200), invariant=1)` that draws `"Hello"` at (20, 100) in 12 point Helvetica, then opens it with `pypdfium2.PdfDocument(data)`, reads `page.get_textpage().get_text_range()` and asserts the result contains `"Hello"`. `test_pdfplumber_reads_it` opens the same bytes with `pdfplumber.open(io.BytesIO(data))` and asserts `pages[0].extract_text()` contains `"Hello"`. `test_pillow_writes_a_png` makes a 4 by 4 `Image.new("L", (4, 4), 255)`, saves it to `io.BytesIO` as PNG and opens it again. Add the three tools to the testing strategy only if section 8 does not name them: check, and add one line if missing.
   - **Files:** `pyproject.toml`, `uv.lock`, `src/clause_tracer/ingest/tests/test_dev_tools.py`, `src/clause_tracer/ingest/README.md` (a line under "Dependencies": test-only tools).
   - **Tests first:** the three tests above.

@@ -191,3 +191,9 @@ Runtime libraries (stage 5), each imported in one file of `ingest` only (B4):
 - `pypdfium2` 5.15.2 (PDFium 159.0.8149): `_pdfium.py`.
 - `pikepdf` 10.18.2: `_layers.py`.
 - `lxml` 6.1.3: `_xml.py`.
+
+Test-only tools (stage 5), imported only in a `tests/` folder or in `scripts/`:
+
+- `reportlab` 5.1.2: builds the PDF fixtures.
+- `pillow` 13.0.0: writes the images inside those fixtures.
+- `pdfplumber` 0.11.11: the cross-check of the PDF reader (ADR 0007 action item 4).
