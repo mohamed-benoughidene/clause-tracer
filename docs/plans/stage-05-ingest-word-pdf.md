@@ -219,7 +219,7 @@ When this is done, the three runtime libraries are installed and pinned, a licen
   - **Rules:** ADR 0007 action item 3, testing strategy 8.
   - **Depends on:** S5-M1-T5, S5-M1-T6
 
-- [ ] **S5-M1-T3: The PDFium function check**
+- [x] **S5-M1-T3: The PDFium function check**
   - **Build:** A lasting test that the pinned PDFium build has every function the stage uses, and that they read a known file as expected. In `src/clause_tracer/ingest/tests/test_pdfium_functions.py`:
     - `HIDDEN_TEXT_FUNCTIONS: Final[tuple[str, ...]]` holds the nine functions of the hidden-text checks (ADR 0007 action item 1): `FPDFText_GetUnicode`, `FPDFText_GetCharBox`, `FPDFText_GetFontSize`, `FPDFText_GetFillColor`, `FPDFText_GetMatrix`, `FPDFText_IsGenerated`, `FPDFText_IsHyphen`, `FPDFText_HasUnicodeMapError` and `FPDFTextObj_GetTextRenderMode`.
     - `FURTHER_FUNCTIONS: Final[tuple[str, ...]]` holds the others the plan names: `FPDFText_CountChars`, `FPDFText_GetTextObject`, `FPDFText_GetLooseCharBox`, `FPDF_GetPageBoundingBox`, `FPDFPage_GetRotation`, `FPDFPage_CountObjects`, `FPDFPageObj_GetType`, `FPDFFormObj_CountObjects`, `FPDF_GetLastError`, `FPDF_GetDocPermissions`, `FPDF_GetPageCount` and `FPDF_LoadMemDocument64`.
@@ -850,6 +850,7 @@ The owner left these points to the planner. Each is a value or a name that a tas
 | 26 Nov 2026 | `SideText` gains `span`, the commented words of a comment (S5-M1-T8, S5-M3-T5, T8, T9, S5-M6-T2, P2). | The owner's answer in chat: without it, two comments cannot be matched to their words. |
 | 26 Nov 2026 | The tracked change of the Word sample now goes from 60 to 30 (S5-M6-T2), so its accepted text matches the other samples. | The owner's answer in chat, with the acceptance. |
 | 26 Nov 2026 | **Accepted by the owner.** The owner went through the proposals of section 6.1 in four groups and accepted them, then accepted the plan. | The owner's words in chat. |
+| 26 Nov 2026 | S5-M1-T3 measured the character-to-object link: `FPDFText_GetTextObject` returns the text object for every drawn character, and `FPDFTextObj_GetTextRenderMode` reads 3 on the invisible line and 0 on the others. `FPDFText_GetFillColor` returns 0 for the line break PDFium inserts, so the test skips a character with no colour. The nine hidden-text functions and the twelve further functions all exist in `pypdfium2` 5.15.2. | To close the Section 4 question that question 10 depends on, as `test_pdfium_functions.py` asserts. |
 
 ## 9. Notes for the next stage
 

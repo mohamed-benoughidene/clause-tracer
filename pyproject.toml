@@ -60,7 +60,7 @@ strict = true
 files = ["src", "scripts"]
 
 [[tool.mypy.overrides]]
-module = "pypdfium2"
+module = ["pypdfium2", "pypdfium2.*"]
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
