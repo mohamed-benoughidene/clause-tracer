@@ -154,6 +154,8 @@ class HiddenReason(StrEnum):
     COMMENT = "comment"
     ZERO_WIDTH = "zero_width"
     BIDI_CONTROL = "bidi_control"
+    TAG_CHARACTER = "tag_character"
+    WORD_PART_NEVER_SHOWN = "word_part_never_shown"
 
 
 class PiiSource(StrEnum):

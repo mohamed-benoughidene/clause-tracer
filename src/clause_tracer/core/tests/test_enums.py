@@ -71,6 +71,8 @@ EXPECTED_MEMBERS: dict[type[enum.StrEnum], tuple[str, ...]] = {
         "COMMENT",
         "ZERO_WIDTH",
         "BIDI_CONTROL",
+        "TAG_CHARACTER",
+        "WORD_PART_NEVER_SHOWN",
     ),
     PiiSource: ("PARTY_DETAILS", "PATTERN", "RULE", "NER", "USER"),
     DoubtCode: ("SHORT_NAME", "NEAR_DUPLICATE", "TWO_KINDS", "SKIPPED_COMMON", "NO_CUE_RUN"),

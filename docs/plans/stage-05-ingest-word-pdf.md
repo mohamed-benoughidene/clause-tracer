@@ -144,7 +144,7 @@ When this is done, the three runtime libraries are installed and pinned, a licen
   - **Rules:** D5, D6, S3, T11 (the fixtures are regenerated with the named command and read by the owner).
   - **Depends on:** None
 
-- [ ] **S5-M1-T9: The new `HiddenReason` members (a `core` change)**
+- [x] **S5-M1-T9: The new `HiddenReason` members (a `core` change)**
   - **Build:** In `core/enums.py` add two members at the end of `HiddenReason`, after `BIDI_CONTROL`: `TAG_CHARACTER = "tag_character"` and `WORD_PART_NEVER_SHOWN = "word_part_never_shown"` (planner's proposal P3). Update the class docstring list if it names members. Left-to-right and right-to-left marks, variation selectors and the other invisible marks of question 6 use `ZERO_WIDTH`: no member is added for them. Update the `HiddenReason` row of `core/README.md` (eleven members) and the `HiddenReason` line of system design 3.4. Run `grep -rn "HiddenReason" src docs` and check that no table maps the reasons one by one to words: `ux-copy` and the copy lint do not, so no deck change is needed. If one does, stop and ask the owner.
   - **Files:** `src/clause_tracer/core/enums.py`, `src/clause_tracer/core/README.md`, `src/clause_tracer/core/tests/test_enums.py`, `docs/system-design.md`.
   - **Tests first:** in `test_enums.py` add `"TAG_CHARACTER"` and `"WORD_PART_NEVER_SHOWN"` to the `HiddenReason` member tuple, in that order, after `"BIDI_CONTROL"`.
