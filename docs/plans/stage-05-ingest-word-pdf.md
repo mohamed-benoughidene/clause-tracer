@@ -168,7 +168,7 @@ When this is done, the three runtime libraries are installed and pinned, a licen
   - **Rules:** I5, I6, D4, T1, ADR 0005, system design 15.5 (the child reply).
   - **Depends on:** S5-M1-T8
 
-- [ ] **S5-M1-T5: The Word fixture builder**
+- [x] **S5-M1-T5: The Word fixture builder**
   - **Build:** Create `src/clause_tracer/ingest/tests/builders/__init__.py` (empty) and `builders/word.py`. A test builds a Word file from XML strings, so a test states the exact XML it relies on.
     - `def build_docx(body: str, *, styles: str | None = None, numbering: str | None = None, comments: str | None = None, footnotes: str | None = None, endnotes: str | None = None, headers: Mapping[str, str] | None = None, footers: Mapping[str, str] | None = None, settings: str | None = None, document_rels: tuple[str, ...] = (), extra_parts: Mapping[str, bytes] | None = None) -> bytes`.
     - It writes a zip (`zipfile.ZipFile`, `ZIP_DEFLATED`, fixed timestamps `(1980, 1, 1, 0, 0, 0)` so two builds give the same bytes) with these members, in this order: `[Content_Types].xml`, `_rels/.rels`, `word/document.xml`, `word/_rels/document.xml.rels`, then each part that is not `None` (`word/styles.xml`, `word/numbering.xml`, `word/comments.xml`, `word/footnotes.xml`, `word/endnotes.xml`, `word/settings.xml`, each `word/<name>` of `headers` and `footers`), then each `extra_parts` entry under its own name.
