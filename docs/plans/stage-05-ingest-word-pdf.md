@@ -3,12 +3,12 @@
 | | |
 | --- | --- |
 | Stage | 5, `ingest` (Word and PDF) |
-| Status | Draft |
+| Status | Accepted |
 | Branch | One branch for each milestone, cut from `main`: `feat/ingest-m1-tools-and-fixtures`, `feat/ingest-m2-limits-and-child`, `feat/ingest-m3-word`, `feat/ingest-m4-pdf-text`, `feat/ingest-m5-hidden-text`, `feat/ingest-m6-sample-and-close`. See [the README](README.md), "Branches and pull requests" |
-| Accepted on | Not yet |
+| Accepted on | 26 Nov 2026 |
 | Stage outline | [System design section 15.5](../system-design.md#155-stage-5-ingest-for-word-and-pdf) |
 
-**State of this Draft (26 Nov 2026).** All questions in section 6 are answered. The tasks are being written in full, one milestone at a time, to the level of the [stage 4 plan](stage-04-privacy.md). **All six milestones are written in full.** The values the planner proposes are in section 6.1, and the owner confirms or changes each one when accepting the plan. Until then the status stays Draft and no task can be built.
+**State (26 Nov 2026).** The owner accepted the plan. All questions in section 6 are answered, all six milestones are written in full, and the owner confirmed the proposals of section 6.1. Work may start once the docs are on `main`.
 
 ## 1. Goal
 
@@ -64,7 +64,7 @@
 
 ## 4. Checks before starting
 
-- [ ] **The plan is Accepted.** The questions in section 6 are answered, and every task is written in full to the answers.
+- [x] **The plan is Accepted.** The questions in section 6 are answered, and every task is written in full to the answers.
 - [ ] **The baseline passes.** Run `.venv/bin/uv sync`, then `scripts/check.sh`. It must exit 0 before any change.
 - [ ] **The pinned libraries are still the checked ones.** ADR 0007 checked `pypdfium2` 5.15.2 (PDFium 159.0.8149) on Linux and Windows. The planner pins that version, or records in section 8 why a newer one is pinned and re-runs the nine-function check.
 - [ ] **The wheels exist for the Pythons in use.** `pypdfium2`, `pikepdf` and `lxml` install from wheels on Python 3.12 (CI) and 3.13 (the local `.venv`), on Linux and on Windows.
@@ -75,7 +75,7 @@
 
 ## 5. Milestones and tasks
 
-**Written in full: M1 to M6.** Every task has its Build, Files, Tests first, Done when, Rules and Depends on parts. The plan stays a Draft until the owner accepts it. Do not build before that. The values the planner proposes (names, codes, caps) are collected in section 6.1 for the owner to confirm when the plan is accepted.
+**Written in full: M1 to M6.** Every task has its Build, Files, Tests first, Done when, Rules and Depends on parts. The owner accepted the plan on 26 Nov 2026. The values the planner proposed (names, codes, caps) are collected in section 6.1, and the owner confirmed them.
 
 ### M1: Tools, core shapes and fixtures
 
@@ -743,7 +743,7 @@ Every hostile fixture raises its hidden-text finding, and every innocent look-al
   - **Depends on:** S5-M6-T2, S5-M6-T3
 
 - [ ] **S5-M6-T8: Close the stage**
-  - **Build:** (1) Write section 9 "Notes for the next stage" of this plan: what stages 6 to 12 take from `ingest`: the `Document` shape changes (`side_text`, `schema_version` 2, the new `HiddenReason` members, the warning constants and their meaning, the page-as-shown rule, ligature glyphs sharing an index, `char_map` is `()` for Word); `cli.child_runner.read_file_in_child` and its limits, and that stage 12 must make the frozen app answer `--read-child`; the `on_page` budget; what stage 6 does with `read_file_in_child` (the runner calls it, the store keeps the raw bytes); that `links` keeps every edge and `privacy` replaces names in hidden text (question 3), and that stage 8 must never send hidden-layer text and must decide whether an edge on hidden text is covered by Rule 9; the look-alike letters reminder (stage 8, system design 15.8); the warning `word_symbol_unread` and its open words (Spec 13), and that comments, notes, headers and footers are not checked for symbols; the open words for the refused Word file with imported content, reason `word_alt_chunk` (Spec 13, stage 6 or 12); the line-end hyphen and the match-key limits; the known limits (row-wise columns, reversed streams, rotated-page order, near-white and theme colours, table fills, `1)` `A.` `I.` `01.` numbers, `OCMD` layers, chapter headers, data lines in the band, white on light grey, one dark pixel beside white text); the Atheris gap; the value of the page budget and the fact that it is a clock in `cli`; the `contrast_not_checked`, `layers_not_checked` and `word_notes` warnings and who reads them; and the owner's wish to look at footnote handling again with real contracts. (2) Section 10 of the plan sums the deviations; section 9 repeats the ones the next stage must know. (3) Update the status lines: this plan's status to Done, `AGENTS.md` "Where the project stands" (stage 5 done, stage 6 next), `src/clause_tracer/README.md`, `README.md` if it lists stages, the table of `docs/plans/README.md`, `docs/system-design.md` 15.5 (replace the "Not yet decided" line by the decided values of section 6.1, and say what stage 5 built) and `docs/testing-strategy.md` 13 (the nightly job and the Windows job are in place; the gaps that remain). (4) ADR 0007: add an amendment that records action items 1 to 4 as done (the function check as a lasting test, the licence check, the limit values, the pdfplumber cross-check) with the dates. (5) `ingest/README.md` is complete: every public name (`read_file`, `read_word_file`, `read_pdf_file`, the warning constants), the limits table, the thresholds table, the known limits, the samples, the golden and picture commands. (6) Run the whole check on Linux and read the Windows job. Ask the owner to accept the pull request.
+  - **Build:** (1) Write section 9 "Notes for the next stage" of this plan: what stages 6 to 12 take from `ingest`: the `Document` shape changes (`side_text`, `schema_version` 2, the new `HiddenReason` members, the warning constants and their meaning, the page-as-shown rule, ligature glyphs sharing an index, `char_map` is `()` for Word); `cli.child_runner.read_file_in_child` and its limits, and that stage 12 must make the frozen app answer `--read-child`; the `on_page` budget; what stage 6 does with `read_file_in_child` (the runner calls it, the store keeps the raw bytes); that `links` keeps every edge and `privacy` replaces names in hidden text (question 3), and that stage 8 must never send hidden-layer text and must decide whether an edge on hidden text is covered by Rule 9; the look-alike letters reminder (stage 8, system design 15.8); the warning `word_symbol_unread` and its open words (Spec 13), and that comments, notes, headers and footers are not checked for symbols; the open words for the refused Word file with imported content, reason `word_alt_chunk` (Spec 13, stage 6 or 12); the line-end hyphen and the match-key limits; the known limits (row-wise columns, reversed streams, rotated-page order, near-white and theme colours, table fills, `1)` `A.` `I.` `01.` numbers, `OCMD` layers, chapter headers, data lines in the band, white on light grey, one dark pixel beside white text); the Atheris gap; the value of the page budget and the fact that it is a clock in `cli`; the `contrast_not_checked`, `layers_not_checked` and `word_notes` warnings and who reads them; and the owner's wish to look at footnote handling again with real contracts. (2) Section 10 of the plan sums the deviations; section 9 repeats the ones the next stage must know. (3) Update the status lines: this plan's status to Done, `AGENTS.md` "Where the project stands" (stage 5 done, stage 6 next), `src/clause_tracer/README.md`, `README.md` if it lists stages, the table of `docs/plans/README.md`, `docs/system-design.md` 15.5 (say what stage 5 built) and `docs/testing-strategy.md` 13 (the nightly job and the Windows job are in place; the gaps that remain). (4) ADR 0007: add an amendment that records action items 1 to 4 as done (the function check as a lasting test, the licence check, the limit values, the pdfplumber cross-check) with the dates. (5) `ingest/README.md` is complete: every public name (`read_file`, `read_word_file`, `read_pdf_file`, the warning constants), the limits table, the thresholds table, the known limits, the samples, the golden and picture commands. (6) Run the whole check on Linux and read the Windows job. Ask the owner to accept the pull request.
   - **Files:** `docs/plans/stage-05-ingest-word-pdf.md`, `AGENTS.md`, `README.md`, `src/clause_tracer/README.md`, `docs/plans/README.md`, `docs/system-design.md`, `docs/testing-strategy.md`, `docs/adr/0007-document-reading-stack.md`, `src/clause_tracer/ingest/README.md`.
   - **Tests first:** None. The check is `scripts/check.sh` and a read of the docs against WRITING_DOCS.md section 9.
   - **Done when:** every task is ticked, `scripts/check.sh` exits 0, the Windows job is green, branch coverage of `ingest` is at least 85%, and the owner has accepted the stage.
@@ -778,9 +778,9 @@ The docs do not settle these points. Questions 1 and 2 are the two "Not yet deci
 | 20 | **What does a `PageBox` mean on a rotated or cropped page?** `Page` has only `number`, `width` and `height`, and `PageBox` is "PDF points, top-left origin". | S5-M4-T3 | `PageBox` and `Page` are in the page as it is shown: after rotation and inside the crop box. So the one coordinate function lives in `ingest` and handles rotation and crop, and the screen only scales points to pixels. No `core` shape changes. | As recommended (owner, 26 Nov 2026): the page bounding box, not the crop box, with the rotation table of [the report](../../reports/Stage%205%20reader%20checks%20and%20limits.md); no `core` shape changes. What to do with off-page characters is a planner point. Home: [System design 15.5](../system-design.md#155-stage-5-ingest-for-word-and-pdf). |
 | 21 | **Does the Word reader flag white or tiny text?** Spec 2 names white or tiny text as hidden text. Word marks colour and size on runs. | S5-M3-T2 | Yes: a run with font colour `FFFFFF` and no shading, or with a size under 2 points, gives `LOW_CONTRAST` or `TINY_FONT`, with no boxes. A run on a dark shading is not flagged. | Partly answered (owner, 26 Nov 2026): flag hidden text after the cascade, text under 2 points and text the same colour as its fill; never flag automatic colour, web-hidden text, a hidden paragraph mark or white space. Open: near-white colours, theme colours, table fills and the 2 to 8 point band. Home: [System design 15.5](../system-design.md#155-stage-5-ingest-for-word-and-pdf). Answered on 26 Nov 2026: the simple rule (pure white, and the same colour as its own shading); near-white, theme colours and table fills are known limits; 2 to 8 points is never flagged. |
 
-### 6.1 The planner's proposals, for the owner to confirm at acceptance
+### 6.1 The planner's proposals, confirmed by the owner
 
-The owner left these points to the planner (system design 15.5, "Not yet decided"). Each is a value or a name that a task needs, so the implementer has no design choice. The owner confirms or changes each one when the plan is accepted. System design 15.5 keeps its "Not yet decided" line until then. Later milestones add rows.
+The owner left these points to the planner. Each is a value or a name that a task needs, so the implementer has no design choice. **The owner confirmed every proposal below on 26 Nov 2026**, in four groups, with the changes that the change log records.
 
 | # | Proposal | Used by |
 | --- | --- | --- |
@@ -849,6 +849,7 @@ The owner left these points to the planner (system design 15.5, "Not yet decided
 | 26 Nov 2026 | Wording of P8 (the full list of reasons), P11 and P15 (the copy permission) corrected. | A review of group 4 by the advisor. |
 | 26 Nov 2026 | `SideText` gains `span`, the commented words of a comment (S5-M1-T8, S5-M3-T5, T8, T9, S5-M6-T2, P2). | The owner's answer in chat: without it, two comments cannot be matched to their words. |
 | 26 Nov 2026 | The tracked change of the Word sample now goes from 60 to 30 (S5-M6-T2), so its accepted text matches the other samples. | The owner's answer in chat, with the acceptance. |
+| 26 Nov 2026 | **Accepted by the owner.** The owner went through the proposals of section 6.1 in four groups and accepted them, then accepted the plan. | The owner's words in chat. |
 
 ## 9. Notes for the next stage
 
