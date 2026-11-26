@@ -198,12 +198,26 @@
         <div class="notice warn" role="note" data-state="old-word">
           <svg class="icon"><use href="#i-warn"/></svg>
           <div class="notice-body">
-            <p>This is an old Word file. Open it in Word, save it as .docx, then load that.</p>
+            <p>This Word file can't be read. It is an old Word file (.doc), or it is protected by a password. Open it in Word, remove any password, save it as .docx, then load that. Or paste the text.</p>
             <div class="notice-actions">
+              <button class="btn btn-sm" type="button" data-show-paste><svg class="icon"><use href="#i-paste"/></svg>Paste text</button>
               <button class="btn btn-sm" type="button" data-pick-file><svg class="icon"><use href="#i-doc"/></svg>Choose another file</button>
             </div>
           </div>
         </div>
+
+        <div class="notice warn" role="note" data-state="locked">
+          <svg class="icon"><use href="#i-warn"/></svg>
+          <div class="notice-body">
+            <p>This PDF is locked, so its text can't be read. Open it with its password, then paste the text. Or load a copy that has no password.</p>
+            <div class="notice-actions">
+              <button class="btn btn-sm" type="button" data-show-paste><svg class="icon"><use href="#i-paste"/></svg>Paste text</button>
+              <button class="btn btn-sm" type="button" data-pick-file><svg class="icon"><use href="#i-doc"/></svg>Choose another file</button>
+            </div>
+          </div>
+        </div>
+
+        <p class="small muted" role="note" data-state="copy-off">This PDF asks for its text not to be copied. Clause Tracer reads it to check it.</p>
 
         <div class="notice warn" role="note" data-state="tracked-changes">
           <svg class="icon"><use href="#i-warn"/></svg>
@@ -238,7 +252,7 @@
             <span class="file-badge" data-file-badge data-state-hide="not-text">PDF</span><span class="file-badge" data-state="not-text">TXT</span>
             <div class="file-name">
               <strong data-state-hide="old-word not-text">Brightline_Developer_Agreement.pdf</strong><strong data-state="old-word">Brightline_Developer_Agreement.doc</strong><strong data-state="not-text">Brightline_Developer_Agreement.txt</strong>
-              <span class="small muted" data-state-hide="mixed scanned too-large too-many-words empty not-text not-english old-word">PDF · 5 pages · 929 words · real text</span>
+              <span class="small muted" data-state-hide="mixed scanned too-large too-many-words empty not-text not-english old-word locked copy-off">PDF · 5 pages · 929 words · real text</span>
               <span class="small muted" data-state="mixed">PDF · 9 pages · 929 words · pages 7 and 8 scanned</span>
               <span class="small muted" data-state="scanned">PDF · 5 pages · scanned images, no text</span>
               <span class="small muted" data-state="too-large">PDF · 48 MB</span>
@@ -246,13 +260,15 @@
               <span class="small muted" data-state="empty">PDF · 0 pages · no text</span>
               <span class="small muted" data-state="not-text">TXT · 12 KB · can't be read</span>
               <span class="small muted" data-state="not-english">PDF · 5 pages · not English</span>
-              <span class="small muted" data-state="old-word">Word 97–2003 (.doc) · can't be read</span>
+              <span class="small muted" data-state="old-word">Word · can't be read</span>
+              <span class="small muted" data-state="locked">PDF · locked</span>
+              <span class="small muted" data-state="copy-off">PDF · 9 pages · copying turned off</span>
             </div>
             <span class="spacer"></span>
             <button class="btn btn-ghost btn-sm" type="button" data-pick-file>Replace</button>
           </div>
 
-          <div class="preview" data-state-hide="scanned too-large too-many-words empty not-text old-word">
+          <div class="preview" data-state-hide="scanned too-large too-many-words empty not-text old-word locked">
             <div class="thumb" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
             <div>
               <p class="small"><strong class="muted">First page · is this the right contract?</strong></p>
@@ -353,8 +369,8 @@
 <footer class="flow-foot">
   <span class="row small muted"><svg class="icon"><use href="#i-check"/></svg>Saved as a draft</span>
   <span class="spacer"></span>
-  <a class="btn btn-primary" href="contract-check.html" data-state-hide="scanned too-large too-many-words empty not-text old-word playbook-deleted no-file">Continue<svg class="icon"><use href="#i-arrow-right"/></svg></a>
-  <button class="btn btn-primary" type="button" disabled data-state="scanned too-large too-many-words empty not-text old-word playbook-deleted no-file">Continue<svg class="icon"><use href="#i-arrow-right"/></svg></button>
+  <a class="btn btn-primary" href="contract-check.html" data-state-hide="scanned too-large too-many-words empty not-text old-word locked playbook-deleted no-file">Continue<svg class="icon"><use href="#i-arrow-right"/></svg></a>
+  <button class="btn btn-primary" type="button" disabled data-state="scanned too-large too-many-words empty not-text old-word locked playbook-deleted no-file">Continue<svg class="icon"><use href="#i-arrow-right"/></svg></button>
   <a class="btn btn-primary" href="contract-check.html" data-paste-cont="on" hidden>Continue<svg class="icon"><use href="#i-arrow-right"/></svg></a>
   <button class="btn btn-primary" type="button" disabled data-paste-cont="off" hidden>Continue<svg class="icon"><use href="#i-arrow-right"/></svg></button>
 </footer>
@@ -458,7 +474,7 @@
     var foot = document.getElementById('load-foot');
     var STATE = new URLSearchParams(location.search).get('state') || '';
     var PAGES = 5, timer = null, done = null;
-    var FILE_STATES = ['scanned', 'mixed', 'too-large', 'too-many-words', 'empty', 'not-text', 'old-word', 'tracked-changes', 'not-english', 'no-file'];
+    var FILE_STATES = ['scanned', 'mixed', 'too-large', 'too-many-words', 'empty', 'not-text', 'old-word', 'locked', 'copy-off', 'tracked-changes', 'not-english', 'no-file'];
 
     // Paste text mode: Continue stays off until the textarea holds text; the file-state buttons step aside.
     var pasteBox = document.getElementById('paste-inline');
