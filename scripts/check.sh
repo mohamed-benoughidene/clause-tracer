@@ -14,6 +14,7 @@ else
 fi
 
 run python scripts/check_owner_tables.py
+run python scripts/check_licences.py
 run ruff check
 run ruff format --check
 run mypy

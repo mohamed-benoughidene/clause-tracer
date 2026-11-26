@@ -104,7 +104,7 @@ When this is done, the three runtime libraries are installed and pinned, a licen
   - **Rules:** B4, ADR 0007.
   - **Depends on:** None
 
-- [ ] **S5-M1-T2: The licence check**
+- [x] **S5-M1-T2: The licence check**
   - **Build:** Create `scripts/check_licences.py`, with these names:
     - `ALLOWED: Final[frozenset[str]] = frozenset({"MIT", "MIT License", "BSD-2-Clause", "BSD-3-Clause", "BSD License", "Apache-2.0", "Apache Software License"})`.
     - `NAMED_EXCEPTIONS: Final[Mapping[str, str]] = {"pikepdf": "MPL-2.0", "pillow": "MIT-CMU", "typing-extensions": "PSF-2.0"}`. A named package passes only when its licence text equals the stated one, so a changed licence fails.
