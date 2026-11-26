@@ -71,7 +71,22 @@ def test_every_part_parses() -> None:
         settings="",
     )
 
-    for name, text in _texts(data).items():
+    texts = _texts(data)
+    optional_parts = {
+        f"word/{part}.xml"
+        for part in (
+            "styles",
+            "numbering",
+            "comments",
+            "footnotes",
+            "endnotes",
+            "settings",
+            "header1",
+            "footer1",
+        )
+    }
+    assert optional_parts <= set(texts)
+    for name, text in texts.items():
         if name.endswith(".xml") or name.endswith(".rels"):
             ET.fromstring(text)
 
