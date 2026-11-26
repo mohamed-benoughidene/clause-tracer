@@ -111,3 +111,21 @@ The owner asked for icons from [Remix Icon](https://remixicon.com) on 14 Nov 202
 - **A plain reading of the text, not legal advice** ([the licence](../../prototype/LICENSE-remixicon.txt)). It allows the icons in personal, commercial and client projects, and inside a software product, when they are functional or decorative parts and not the product's main value (sections 2.1 and 2.3). It allows changing them (2.2). It asks for no attribution (2.4). It forbids selling or sharing them as a stand-alone product or icon pack (3.1), using them to make a competing icon library (3.2), and using any icon, changed or not, as a logo or brand mark (3.3). Section 9 allows them inside a project under a permissive licence, with the icons still under their own licence.
 - **What follows.** Keep the licence file beside the icons. Never offer the sprite as a download or a pack. Never use one as the logo or the app icon: the butterfly is the mark ([ADR 0003](0003-walk-away-takes-the-brand-red.md)). List the icons on the third-party licences page ([ux-copy 4.18](../ux-copy.md#418-third-party-licences-licenceshtml-not-built-yet)). If a Remix path is changed, the changed file stays under the Remix licence.
 - **Still a reading, not a settled answer.** Like the `pikepdf` position, it should be confirmed by a lawyer before a release that ships the icons.
+
+## Amendment (26 Nov 2026): hostile-file limits and fixture tools
+
+The owner accepted these answers on 26 Nov 2026 (stage 5 plan, questions 7, 9 and 11; evidence in [the stage 5 reader checks and limits report](../../reports/Stage%205%20reader%20checks%20and%20limits.md)). Action item 3 is still open until the limits are measured.
+
+- **The compression ratio is not a check.** A legitimate Word file with an image gave 208 to 1, and a repetitive table gave 157 to 1, so a 100 to 1 rule rejects real files. The checks before parsing are the member count (counted from the end record), the declared and real expanded size, the size of each XML part, and the page count. System design 8.4 says the same.
+- **Time follows characters, not pages.** The reader stops at 50,000 words. A soft per-page budget in the child works inside the 60-second kill, which stays as the backstop. A page cap does not protect the time limit.
+- **Fixture tools.** ReportLab (with `invariant=1`) and `pikepdf` are dev dependencies that write test PDFs, and Pillow is a direct dev dependency for the saved pictures. The licence rule covers the runtime group only, so these do not need a named exception. `pikepdf` stays an unchanged runtime dependency as above.
+- **Measured on Linux only.** Nothing was run on Windows or Python 3.12, and no real contract was measured. The stage 5 plan repeats the timing before the limits are fixed.
+
+## Amendment (26 Nov 2026): two more named licence exceptions
+
+The owner accepted these on 26 Nov 2026 (stage 5 plan, proposal P7). Two permissive libraries that the runtime group already installs do not match the words "MIT, BSD and Apache", so the licence check names them.
+
+- **`pillow` (MIT-CMU)**, installed by `pikepdf`. **`typing-extensions` (PSF-2.0)**, installed by `pydantic`, and shipped today.
+- **A plain reading of the text, not legal advice.** Both licences allow commercial use and ask only that the copyright notice and licence text travel with copies. The third-party licences page lists them with the others.
+- **What follows.** `scripts/check_licences.py` allows each name only while its licence text stays the one named here. A changed licence fails the check.
+- **Still a reading, not a settled answer.** Like the `pikepdf` position, a lawyer should confirm it before a release.
