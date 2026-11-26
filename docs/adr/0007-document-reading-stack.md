@@ -120,3 +120,12 @@ The owner accepted these answers on 26 Nov 2026 (stage 5 plan, questions 7, 9 an
 - **Time follows characters, not pages.** The reader stops at 50,000 words. A soft per-page budget in the child works inside the 60-second kill, which stays as the backstop. A page cap does not protect the time limit.
 - **Fixture tools.** ReportLab (with `invariant=1`) and `pikepdf` are dev dependencies that write test PDFs, and Pillow is a direct dev dependency for the saved pictures. The licence rule covers the runtime group only, so these do not need a named exception. `pikepdf` stays an unchanged runtime dependency as above.
 - **Measured on Linux only.** Nothing was run on Windows or Python 3.12, and no real contract was measured. The stage 5 plan repeats the timing before the limits are fixed.
+
+## Amendment (26 Nov 2026): two more named licence exceptions
+
+The owner accepted these on 26 Nov 2026 (stage 5 plan, proposal P7). Two permissive libraries that the runtime group already installs do not match the words "MIT, BSD and Apache", so the licence check names them.
+
+- **`pillow` (MIT-CMU)**, installed by `pikepdf`. **`typing-extensions` (PSF-2.0)**, installed by `pydantic`, and shipped today.
+- **A plain reading of the text, not legal advice.** Both licences allow commercial use and ask only that the copyright notice and licence text travel with copies. The third-party licences page lists them with the others.
+- **What follows.** `scripts/check_licences.py` allows each name only while its licence text stays the one named here. A changed licence fails the check.
+- **Still a reading, not a settled answer.** Like the `pikepdf` position, a lawyer should confirm it before a release.
