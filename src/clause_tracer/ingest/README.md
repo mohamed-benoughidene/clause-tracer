@@ -195,5 +195,5 @@ Runtime libraries (stage 5), each imported in one file of `ingest` only (B4):
 Test-only tools (stage 5), imported only in a `tests/` folder or in `scripts/`:
 
 - `reportlab` 5.1.2: builds the PDF fixtures.
-- `pillow` 13.0.0: writes the images inside those fixtures.
+- `pillow` 13.0.0: writes the images inside those fixtures. It also ships with the app, because `pikepdf` requires it.
 - `pdfplumber` 0.11.11: the cross-check of the PDF reader (ADR 0007 action item 4).
