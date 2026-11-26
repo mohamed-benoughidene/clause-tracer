@@ -180,7 +180,7 @@ When this is done, the three runtime libraries are installed and pinned, a licen
   - **Rules:** testing strategy 5 and 8, T6.
   - **Depends on:** S5-M1-T4
 
-- [ ] **S5-M1-T6: The PDF fixture builder**
+- [x] **S5-M1-T6: The PDF fixture builder**
   - **Build:** Create `builders/pdf.py` in `ingest/tests/builders/`. It writes PDFs with ReportLab (`invariant=1`, an embedded Vera font), adds what ReportLab cannot do with `pikepdf`, and returns what it placed.
     - `@dataclass(frozen=True, slots=True, kw_only=True) class Text` with `x: float`, `baseline: float` (PDF user space, origin bottom-left), `text: str`, `size: float = 10.0`, `color: tuple[float, float, float] = (0.0, 0.0, 0.0)`, `alpha: float = 1.0`, `render_mode: int = 0`, `font: str = "Vera"`.
     - `@dataclass(frozen=True, slots=True, kw_only=True) class Pic` with `x: float`, `y: float`, `width: float`, `height: float`, `grey: int = 128` (an image of one flat grey, drawn with `drawImage` from a `PIL.Image`).
