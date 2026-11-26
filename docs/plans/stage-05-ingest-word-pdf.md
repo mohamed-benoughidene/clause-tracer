@@ -152,7 +152,7 @@ When this is done, the three runtime libraries are installed and pinned, a licen
   - **Rules:** D5.
   - **Depends on:** None
 
-- [ ] **S5-M1-T10: The child reply codec (in `cli`)**
+- [x] **S5-M1-T10: The child reply codec (in `cli`)**
   - **Build:** The parent process rebuilds a `Document`, or a named error, from the bytes the child writes (question 1). Both sides of the reply are in `cli`, and `core` never imports Pydantic (ADR 0005), so the codec lives in `cli` (owner, 26 Nov 2026). Create `cli/child_reply.py`. It imports `pydantic` and `clause_tracer.core`; nothing in `core` or `ingest` imports it:
     - `MAX_CHILD_REPLY_BYTES: Final[int] = 64 * 1024 * 1024`, with the comment `# [Assumption] system design 15.5: tuned in testing.`
     - `@dataclass(frozen=True, slots=True, kw_only=True) class ChildDone` with `kind: Literal["done"] = "done"` and `document: Document`.
