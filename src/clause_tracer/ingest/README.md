@@ -18,7 +18,7 @@ another kind raises `ValueError`, which is a bug in the caller. Reads strict UTF
 Raises `InputTooLargeError` over 20 MB or 50,000 words, `NotUtf8Error` for bytes
 that are not UTF-8, `NotTextError` for a NUL character, and `EmptyInputError`
 when no character other than spaces, line breaks and byte-order marks is present.
-No side effects. `DOCUMENT_SCHEMA_VERSION` is the version it writes (1).
+No side effects. `DOCUMENT_SCHEMA_VERSION` is the version it writes (2).
 
 ### `read_pasted_text`
 
@@ -185,3 +185,15 @@ Cells are joined with one tab.
 ## Depends on
 `core`, NUPunkt (sentence starts) and Lingua (the not-English warning). Each
 library is imported in one file only.
+
+Runtime libraries (stage 5), each imported in one file of `ingest` only (B4):
+
+- `pypdfium2` 5.15.2 (PDFium 159.0.8149): `_pdfium.py`.
+- `pikepdf` 10.18.2: `_layers.py`.
+- `lxml` 6.1.3: `_xml.py`.
+
+Test-only tools (stage 5), imported only in a `tests/` folder or in `scripts/`:
+
+- `reportlab` 5.1.2: builds the PDF fixtures.
+- `pillow` 13.0.0: writes the images inside those fixtures. It also ships with the app, because `pikepdf` requires it.
+- `pdfplumber` 0.11.11: the cross-check of the PDF reader (ADR 0007 action item 4).

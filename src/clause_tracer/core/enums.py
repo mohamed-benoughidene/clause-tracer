@@ -132,6 +132,16 @@ class SegmentKind(StrEnum):
     ESCAPE = "escape"
 
 
+class SideTextKind(StrEnum):
+    """Text that sits apart from the body (system design 3.4)."""
+
+    COMMENT = "comment"
+    HEADER = "header"
+    FOOTER = "footer"
+    FOOTNOTE = "footnote"
+    ENDNOTE = "endnote"
+
+
 class HiddenReason(StrEnum):
     """Each finding names its cause. Stage 5 adds a member for any new check (D5)."""
 
@@ -144,6 +154,8 @@ class HiddenReason(StrEnum):
     COMMENT = "comment"
     ZERO_WIDTH = "zero_width"
     BIDI_CONTROL = "bidi_control"
+    TAG_CHARACTER = "tag_character"
+    WORD_PART_NEVER_SHOWN = "word_part_never_shown"
 
 
 class PiiSource(StrEnum):

@@ -56,6 +56,8 @@ from clause_tracer.core import (
     Segment,
     Sentence,
     Settings,
+    SideText,
+    SideTextKind,
     SourceFile,
     Span,
     StepInputs,
@@ -190,7 +192,9 @@ EXPECTED_FIELDS: dict[type, tuple[str, ...]] = {
         "undecodable",
         "tracked_changes",
         "warnings",
+        "side_text",
     ),
+    SideText: ("kind", "ref", "author", "text", "span"),
     MatchKey: ("text", "to_canonical"),
     Sentence: ("id", "span"),
     Clause: (
@@ -383,3 +387,36 @@ def test_doubt_holds_a_span_and_a_code() -> None:
     doubt = Doubt(span=Span(start=0, end=4), code=DoubtCode.NO_CUE_RUN)
     assert doubt.span.end == 4
     assert doubt.code is DoubtCode.NO_CUE_RUN
+
+
+def _text_document(*, side_text: tuple[SideText, ...] = ()) -> Document:
+    return Document(
+        schema_version=1,
+        source=SourceFile(name="contract.txt", kind=FileKind.TEXT, sha256="ab", size=3),
+        text="Pay in 30 days.",
+        char_map=(),
+        glyphs=(),
+        pages=(),
+        furniture=(),
+        hidden=(),
+        undecodable=(),
+        tracked_changes=(),
+        warnings=(),
+        side_text=side_text,
+    )
+
+
+def test_side_text_default_is_empty() -> None:
+    assert _text_document().side_text == ()
+
+
+def test_side_text_is_frozen() -> None:
+    side_text = SideText(kind=SideTextKind.COMMENT, ref="0", author="A", text="x")
+    with pytest.raises(dataclasses.FrozenInstanceError):
+        side_text.text = "y"  # type: ignore[misc]
+
+
+def test_document_with_side_text() -> None:
+    side_text = SideText(kind=SideTextKind.COMMENT, ref="0", author="A", text="x")
+    document = _text_document(side_text=(side_text,))
+    assert document.side_text == (side_text,)

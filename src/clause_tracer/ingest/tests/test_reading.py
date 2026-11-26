@@ -47,7 +47,7 @@ def test_document_has_no_glyphs() -> None:
     assert document.undecodable == ()
     assert document.tracked_changes == ()
     assert document.warnings == ()
-    assert document.schema_version == 1
+    assert document.schema_version == 2
 
 
 def test_not_utf8_raises() -> None:

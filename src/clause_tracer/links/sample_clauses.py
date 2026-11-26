@@ -56,6 +56,7 @@ def dump_clause_fixture(document: Document, clauses: tuple[Clause, ...]) -> str:
         or document.hidden
         or document.undecodable
         or document.tracked_changes
+        or document.side_text
     ):
         raise ValueError("links sample: text documents only")
     if document.source.kind not in _TEXT_KINDS:

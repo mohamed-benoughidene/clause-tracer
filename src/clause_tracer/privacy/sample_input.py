@@ -81,6 +81,7 @@ def dump_privacy_fixture(case: PrivacyInput) -> str:
         or document.hidden
         or document.undecodable
         or document.tracked_changes
+        or document.side_text
     ):
         raise ValueError("privacy sample: text documents only")
     if document.source.kind not in _TEXT_KINDS:
