@@ -5,11 +5,13 @@ import io
 import pdfplumber
 import pikepdf
 import pypdfium2
+import pypdfium2.raw as raw
 import pytest
 from reportlab.pdfbase import pdfmetrics
 
 from clause_tracer.ingest.tests.builders.pdf import (
     PageSpec,
+    Text,
     build_pdf,
     cropped_page,
     hidden_layer_page,
@@ -76,12 +78,51 @@ def test_hidden_layer_is_off() -> None:
         default = properties.D
         on = list(default.get("/ON", []))
         off = list(default.OFF)
+        page = pdf.pages[0]
+        named = {str(key): group.objgen for key, group in page.obj.Resources.Properties.items()}
+        expected_named = {f"/{group.Name}": group.objgen for group in groups}
+        page.contents_coalesce()
+        content = page.obj.Contents.read_bytes()
     finally:
         pdf.close()
 
     assert len(groups) == 2
     assert [str(group.Name) for group in on] == ["Visible"]
     assert [str(group.Name) for group in off] == ["Hidden"]
+    assert set(named) == {"/Visible", "/Hidden"}
+    assert named == expected_named
+    for name, words in (("Visible", b"Visible layer."), ("Hidden", b"Hidden layer.")):
+        start = content.index(f"/OC /{name} BDC".encode())
+        end = content.index(b"EMC", start)
+        assert words in content[start:end], name
+
+
+def _render_mode_of(textpage: pypdfium2.PdfTextPage, char: str) -> int:
+    """The render mode of the text object that holds the first `char`."""
+    index = next(
+        index
+        for index in range(raw.FPDFText_CountChars(textpage))
+        if chr(raw.FPDFText_GetUnicode(textpage, index)) == char
+    )
+    text_object = raw.FPDFText_GetTextObject(textpage, index)
+    assert text_object
+    return int(raw.FPDFTextObj_GetTextRenderMode(text_object))
+
+
+def test_render_mode_stays_with_its_item() -> None:
+    items = (
+        Text(x=72.0, baseline=720.0, text="aaa", render_mode=3),
+        Text(x=72.0, baseline=700.0, text="bbb"),
+    )
+    document = pypdfium2.PdfDocument(build_pdf([PageSpec(items=items)]).data)
+    try:
+        textpage = document[0].get_textpage()
+        first_a = _render_mode_of(textpage, "a")
+        first_b = _render_mode_of(textpage, "b")
+    finally:
+        document.close()
+
+    assert (first_a, first_b) == (3, 0)
 
 
 def test_copy_off_flag() -> None:

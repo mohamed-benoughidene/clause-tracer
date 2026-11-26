@@ -95,6 +95,9 @@ def _register_vera() -> None:
 
 
 def _draw_text(canvas: Canvas, item: Text, page: int, placed: list[Placed]) -> None:
+    # The saved state keeps this item's colour, alpha and render mode from
+    # reaching the next item.
+    canvas.saveState()
     canvas.setFont(item.font, item.size)
     canvas.setFillColorRGB(*item.color)
     canvas.setFillAlpha(item.alpha)
@@ -104,6 +107,7 @@ def _draw_text(canvas: Canvas, item: Text, page: int, placed: list[Placed]) -> N
     text.setTextRenderMode(item.render_mode)
     text.textOut(item.text)
     canvas.drawText(text)
+    canvas.restoreState()
     for index, char in enumerate(item.text):
         placed.append(
             Placed(
