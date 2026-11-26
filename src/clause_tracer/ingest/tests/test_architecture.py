@@ -1,13 +1,16 @@
 """The module's public shape (S2-M5-T5)."""
 
 import ast
+import shutil
 from pathlib import Path
 
 import clause_tracer.ingest
 
 MODULE = Path(__file__).parent.parent
+PACKAGE = MODULE.parent
 SRC = MODULE.parent.parent
-SCRIPTS = SRC.parent / "scripts"
+REPO = SRC.parent
+SCRIPTS = REPO / "scripts"
 
 RUNTIME_LIBRARY_FILES = {
     "pypdfium2": "ingest/_pdfium.py",
@@ -29,14 +32,39 @@ def _imported_names(path: Path) -> set[str]:
 
 
 def _python_files(root: Path) -> list[Path]:
-    return sorted(path for path in root.rglob("*.py") if "tests" not in path.parts)
+    """Return the files outside a `tests` folder, judged below `root` only."""
+    return sorted(
+        path for path in root.rglob("*.py") if "tests" not in path.relative_to(root).parts
+    )
+
+
+def _runtime_importers(package: Path) -> dict[str, list[str]]:
+    """Return, for each runtime library, the files of the package that import it."""
+    importers: dict[str, list[str]] = {name: [] for name in RUNTIME_LIBRARY_FILES}
+    for path in _python_files(package):
+        for name in _imported_names(path) & set(RUNTIME_LIBRARY_FILES):
+            importers[name].append(path.relative_to(package).as_posix())
+    return importers
+
+
+def test_importers_allow_the_stated_files(tmp_path: Path) -> None:
+    # The copy sits under a folder named `tests`, so only a `tests` folder
+    # inside the package may count.
+    package = tmp_path / "tests" / "clause_tracer"
+    shutil.copytree(PACKAGE, package, ignore=shutil.ignore_patterns("__pycache__"))
+    imports = {"pypdfium2": "pypdfium2", "pikepdf": "pikepdf", "lxml": "lxml.etree"}
+    for library, file in RUNTIME_LIBRARY_FILES.items():
+        (package / file).write_text(f"import {imports[library]}\n", encoding="utf-8")
+    in_tests = "".join(f"import {module}\n" for module in imports.values())
+    (package / "ingest" / "tests" / "imports_all.py").write_text(in_tests, encoding="utf-8")
+
+    assert _runtime_importers(package) == {
+        library: [file] for library, file in RUNTIME_LIBRARY_FILES.items()
+    }
 
 
 def test_runtime_libraries_have_one_importer() -> None:
-    importers: dict[str, list[str]] = {name: [] for name in RUNTIME_LIBRARY_FILES}
-    for path in _python_files(SRC):
-        for name in _imported_names(path) & set(RUNTIME_LIBRARY_FILES):
-            importers[name].append(path.relative_to(SRC).as_posix())
+    importers = _runtime_importers(PACKAGE)
 
     for library, allowed_file in RUNTIME_LIBRARY_FILES.items():
         found = importers[library]
@@ -49,8 +77,9 @@ def test_dev_tools_stay_in_tests() -> None:
     offenders: list[str] = []
     paths = sorted(SRC.rglob("*.py")) + sorted(SCRIPTS.rglob("*.py"))
     for path in paths:
-        in_tests = "tests" in path.parts
-        in_scripts = SCRIPTS in path.parents
+        relative = path.relative_to(REPO)
+        in_tests = "tests" in relative.parts
+        in_scripts = relative.parts[0] == SCRIPTS.name
         if in_tests or in_scripts:
             continue
         for name in _imported_names(path) & set(DEV_TOOLS):
