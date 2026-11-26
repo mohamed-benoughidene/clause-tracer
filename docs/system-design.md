@@ -813,6 +813,7 @@ The task plan of each stage is written in `docs/plans/` just before the stage is
 
 ### 15.12 Stage 12: the engine protocol, the shell and packaging
 
+- **Do not forget (from stage 5).** The words for a refused Word file with imported content (reason `word_alt_chunk`) are open (Spec 13). Ask the owner before the screen is built.
 - **Builds.**
   - **Engine protocol:** `serve --stdio` with `protocol_version` and every request and event of section 6.1.
   - **Shell:** the pywebview shell, in its own top-level folder, reusing the prototype pages. It also adds the screens the command line lacks, such as import preview, error details and the update check.
