@@ -17,6 +17,8 @@ from clause_tracer.core import (
     Party,
     Sentence,
     SentenceId,
+    SideText,
+    SideTextKind,
     SourceFile,
     Span,
 )
@@ -190,6 +192,17 @@ def test_dump_refuses_glyphs() -> None:
     document = replace(
         case.document,
         pages=(Page(number=1, width=1.0, height=1.0),),
+    )
+
+    with pytest.raises(ValueError):
+        dump_privacy_fixture(replace(case, document=document))
+
+
+def test_dump_refuses_side_text() -> None:
+    case = _case()
+    document = replace(
+        case.document,
+        side_text=(SideText(kind=SideTextKind.COMMENT, ref="0", author="A", text="x"),),
     )
 
     with pytest.raises(ValueError):

@@ -127,7 +127,7 @@ When this is done, the three runtime libraries are installed and pinned, a licen
   - **Rules:** question 9, ADR 0007 amendment of 26 Nov 2026.
   - **Depends on:** S5-M1-T1
 
-- [ ] **S5-M1-T8: `SideText` and the `Document` field (a `core` change)**
+- [x] **S5-M1-T8: `SideText` and the `Document` field (a `core` change)**
   - **Build:** The owner chose a new `Document` field outside `Document.text` for comment text, header and footer text, and footnote and endnote text (question 5). The planner's proposal P1 and P2 (section 6) fixes its shape.
     - In `core/enums.py` add `class SideTextKind(StrEnum)` with the members `COMMENT = "comment"`, `HEADER = "header"`, `FOOTER = "footer"`, `FOOTNOTE = "footnote"`, `ENDNOTE = "endnote"`, and a one-line docstring.
     - In `core/document.py` add `@dataclass(frozen=True, slots=True, kw_only=True) class SideText` with the fields `kind: SideTextKind`, `ref: str` (the comment id, the note id, or the name of the header or footer part, such as `header1.xml`), `author: str` (empty when there is none), `text: str` and, last, `span: Span | None = None` (for a `COMMENT`, the commented words in `Document.text`, so each comment stays linked to its words; `None` for every other kind and for a comment with no range). Its docstring says: text that Word shows apart from the body; never in `Document.text`; never read by the splitter, `links` or `privacy`.

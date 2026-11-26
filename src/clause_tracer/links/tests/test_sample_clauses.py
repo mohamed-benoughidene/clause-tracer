@@ -14,6 +14,8 @@ from clause_tracer.core import (
     Page,
     Sentence,
     SentenceId,
+    SideText,
+    SideTextKind,
     SourceFile,
     Span,
 )
@@ -153,6 +155,16 @@ def test_dump_refuses_glyphs() -> None:
     document = replace(
         _document(TEXT),
         pages=(Page(number=1, width=1.0, height=1.0),),
+    )
+
+    with pytest.raises(ValueError):
+        dump_clause_fixture(document, _clauses())
+
+
+def test_dump_refuses_side_text() -> None:
+    document = replace(
+        _document(TEXT),
+        side_text=(SideText(kind=SideTextKind.COMMENT, ref="0", author="A", text="x"),),
     )
 
     with pytest.raises(ValueError):

@@ -21,7 +21,7 @@ from clause_tracer.core import (
 from clause_tracer.ingest.language import WARNING_NOT_ENGLISH, looks_not_english
 from clause_tracer.ingest.limits import MAX_FILE_BYTES, MAX_WORDS, count_words
 
-DOCUMENT_SCHEMA_VERSION: Final[int] = 1
+DOCUMENT_SCHEMA_VERSION: Final[int] = 2
 
 
 def read_text_file(data: bytes, *, kind: FileKind, name: str) -> Document:

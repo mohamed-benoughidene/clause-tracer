@@ -29,6 +29,7 @@ Imported from `clause_tracer.core`, never from a file inside the package (B2).
 | `FileKind` | `PDF`, `WORD`, `TEXT`, `MARKDOWN`, `PASTED` |
 | `PlaceholderKind` | `PERSON`, `COMPANY`, `ADDRESS`, `EMAIL`, `PHONE`, `ID`, `BANK` |
 | `SegmentKind` | `COPY`, `ENTITY`, `ESCAPE` |
+| `SideTextKind` | `COMMENT`, `HEADER`, `FOOTER`, `FOOTNOTE`, `ENDNOTE` |
 | `HiddenReason` | `LOW_CONTRAST`, `TINY_FONT`, `OFF_PAGE`, `INVISIBLE_TEXT`, `HIDDEN_LAYER`, `WORD_HIDDEN_RUN`, `COMMENT`, `ZERO_WIDTH`, `BIDI_CONTROL` |
 | `PiiSource` | `PARTY_DETAILS`, `PATTERN`, `RULE`, `NER`, `USER` |
 | `DoubtCode` | `SHORT_NAME`, `NEAR_DUPLICATE`, `TWO_KINDS`, `SKIPPED_COMMON`, `NO_CUE_RUN` |
@@ -96,7 +97,8 @@ arguments, with exactly the fields of system design 3.4 in that order (ADR 0005)
 | `HiddenText` | `span: Span \| None, reason: HiddenReason, boxes: tuple[PageBox, ...]` | Flagged, never removed (D1); no span when the text is not in the canonical text |
 | `TrackedChange` | `earlier: str, new: str, author: str, span: Span \| None` | Listed at the contract check; the accepted view is the contract (ADR 0012) |
 | `InputWarning` | `code: str, page: int \| None` | Undecodable pages, scanned pages in a mixed file, not English (Spec 9) |
-| `Document` | `schema_version: int, source: SourceFile, text: str, char_map: tuple[int \| None, ...], glyphs: tuple[Glyph, ...], pages: tuple[Page, ...], furniture: tuple[Span, ...], hidden: tuple[HiddenText, ...], undecodable: tuple[Span, ...], tracked_changes: tuple[TrackedChange, ...], warnings: tuple[InputWarning, ...]` | The one canonical text (section 4.2). A document without glyphs has `glyphs == ()`, `char_map == ()` and `pages == ()` |
+| `SideText` | `kind: SideTextKind, ref: str, author: str, text: str, span: Span \| None` | Text that Word shows apart from the body (a comment, a header or footer, a footnote or endnote). Never in `Document.text`, so the splitter, `links` and `privacy` never read it. `ref` is the comment id, the note id, or the name of the header or footer part. `span` is the commented words for a `COMMENT`, and `None` for every other kind and for a comment with no range |
+| `Document` | `schema_version: int, source: SourceFile, text: str, char_map: tuple[int \| None, ...], glyphs: tuple[Glyph, ...], pages: tuple[Page, ...], furniture: tuple[Span, ...], hidden: tuple[HiddenText, ...], undecodable: tuple[Span, ...], tracked_changes: tuple[TrackedChange, ...], warnings: tuple[InputWarning, ...], side_text: tuple[SideText, ...]` | The one canonical text (section 4.2). A document without glyphs has `glyphs == ()`, `char_map == ()` and `pages == ()`. A document without side text has `side_text == ()` |
 | `MatchKey` | `text: str, to_canonical: tuple[int, ...]` | Folded copy with its index map (section 4.2) |
 | `Sentence` | `id: SentenceId, span: Span` | Stable ids such as `4.2.s3`, which the AI points at |
 | `Clause` | `id: ClauseId, number: str \| None, heading: str \| None, level: int, parent_id: ClauseId \| None, span: Span, numbering_source: str, sentences: tuple[Sentence, ...]` | One clause, or one paragraph when the contract has no numbers (Spec 6.1 step 2) |

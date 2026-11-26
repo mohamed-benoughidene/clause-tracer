@@ -20,6 +20,7 @@ from clause_tracer.core import (
     ReviewStatus,
     ScanFinding,
     SegmentKind,
+    SideTextKind,
     TextSlot,
     Unit,
     WrittenBy,
@@ -59,6 +60,7 @@ EXPECTED_MEMBERS: dict[type[enum.StrEnum], tuple[str, ...]] = {
     FileKind: ("PDF", "WORD", "TEXT", "MARKDOWN", "PASTED"),
     PlaceholderKind: ("PERSON", "COMPANY", "ADDRESS", "EMAIL", "PHONE", "ID", "BANK"),
     SegmentKind: ("COPY", "ENTITY", "ESCAPE"),
+    SideTextKind: ("COMMENT", "HEADER", "FOOTER", "FOOTNOTE", "ENDNOTE"),
     HiddenReason: (
         "LOW_CONTRAST",
         "TINY_FONT",

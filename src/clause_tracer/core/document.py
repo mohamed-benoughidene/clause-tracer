@@ -3,12 +3,13 @@
 Offsets are half-open, count code points, and point into Document.text.
 The raw file bytes are kept unchanged (D1). A document without glyphs
 (text, Markdown, pasted text, Word) has glyphs == (), char_map == ()
-and pages == () (decided 14 Nov 2026).
+and pages == () (decided 14 Nov 2026). A document without side text
+has side_text == ().
 """
 
 from dataclasses import dataclass
 
-from clause_tracer.core.enums import FileKind, HiddenReason
+from clause_tracer.core.enums import FileKind, HiddenReason, SideTextKind
 from clause_tracer.core.ids import ClauseId, SentenceId
 from clause_tracer.core.wording import Span
 
@@ -79,6 +80,22 @@ class InputWarning:
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
+class SideText:
+    """Text that Word shows apart from the body: never in Document.text.
+
+    It is never read by the splitter, links or privacy. For a COMMENT,
+    span is the commented words in Document.text; it is None for every
+    other kind and for a comment with no range.
+    """
+
+    kind: SideTextKind
+    ref: str
+    author: str
+    text: str
+    span: Span | None = None
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
 class Document:
     """The one canonical text; offsets point into text (section 4.2)."""
 
@@ -93,6 +110,7 @@ class Document:
     undecodable: tuple[Span, ...]
     tracked_changes: tuple[TrackedChange, ...]
     warnings: tuple[InputWarning, ...]
+    side_text: tuple[SideText, ...] = ()
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)

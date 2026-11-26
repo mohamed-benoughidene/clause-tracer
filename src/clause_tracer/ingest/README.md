@@ -18,7 +18,7 @@ another kind raises `ValueError`, which is a bug in the caller. Reads strict UTF
 Raises `InputTooLargeError` over 20 MB or 50,000 words, `NotUtf8Error` for bytes
 that are not UTF-8, `NotTextError` for a NUL character, and `EmptyInputError`
 when no character other than spaces, line breaks and byte-order marks is present.
-No side effects. `DOCUMENT_SCHEMA_VERSION` is the version it writes (1).
+No side effects. `DOCUMENT_SCHEMA_VERSION` is the version it writes (2).
 
 ### `read_pasted_text`
 
