@@ -6,7 +6,7 @@ Segments tile both texts, so a quote maps back exactly (section 4.2).
 
 from dataclasses import dataclass
 
-from clause_tracer.core.enums import PiiSource, PlaceholderKind, SegmentKind
+from clause_tracer.core.enums import DoubtCode, PiiSource, PlaceholderKind, SegmentKind
 from clause_tracer.core.wording import Span
 
 
@@ -26,6 +26,14 @@ class PiiSuggestion:
     span: Span
     kind: PlaceholderKind
     source: PiiSource
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class Doubt:
+    """A place where a finder could not be sure. It never changes what is replaced."""
+
+    span: Span
+    code: DoubtCode
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
