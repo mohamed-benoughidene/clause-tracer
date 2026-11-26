@@ -1,4 +1,4 @@
-"""The pinned PDFium build has every function the stage uses (S5-M1-T3)."""
+"""The pinned PDFium build has every function the stage uses (S5-M1-T10)."""
 
 import ctypes
 from collections.abc import Iterator

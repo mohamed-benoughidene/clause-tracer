@@ -1,4 +1,4 @@
-"""The hostile fixtures promise what their names say (S5-M1-T7).
+"""The hostile fixtures promise what their names say (S5-M1-T9).
 
 These tests never read an entity file with a parser: they only look at
 the bytes, as the reading tests of M2 and M4 will do the reading.

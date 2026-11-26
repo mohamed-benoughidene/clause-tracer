@@ -1,4 +1,4 @@
-"""The test-only tools build and read the files the tests need (S5-M1-T4)."""
+"""The test-only tools build and read the files the tests need (S5-M1-T3)."""
 
 import io
 

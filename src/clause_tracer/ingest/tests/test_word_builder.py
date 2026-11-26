@@ -1,4 +1,4 @@
-"""The Word fixture builder writes a package a test can state exactly (S5-M1-T5)."""
+"""The Word fixture builder writes a package a test can state exactly (S5-M1-T7)."""
 
 import io
 import xml.etree.ElementTree as ET

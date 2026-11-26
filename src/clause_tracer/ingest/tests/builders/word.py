@@ -1,7 +1,7 @@
 """Build Word packages from XML strings, so a test states what it relies on.
 
 The same input always gives the same bytes: every member gets a fixed
-timestamp (S5-M1-T5).
+timestamp (S5-M1-T7).
 """
 
 import io

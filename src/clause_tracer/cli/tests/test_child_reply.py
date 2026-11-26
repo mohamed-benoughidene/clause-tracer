@@ -1,4 +1,4 @@
-"""The codec for the reply the child process writes (S5-M1-T10)."""
+"""The codec for the reply the child process writes (S5-M1-T6)."""
 
 from pathlib import Path
 

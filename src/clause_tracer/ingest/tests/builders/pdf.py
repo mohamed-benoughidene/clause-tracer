@@ -1,4 +1,4 @@
-"""Build PDFs with known glyph positions for the tests (S5-M1-T6).
+"""Build PDFs with known glyph positions for the tests (S5-M1-T8).
 
 ReportLab draws the pages with `invariant=1`; pikepdf adds what
 ReportLab cannot do: rotation, a crop box, optional-content layers and

@@ -1,4 +1,4 @@
-"""The PDF fixture builder places what it says it places (S5-M1-T6)."""
+"""The PDF fixture builder places what it says it places (S5-M1-T8)."""
 
 import io
 

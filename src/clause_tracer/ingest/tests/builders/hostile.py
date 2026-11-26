@@ -1,4 +1,4 @@
-"""Build files that are small on disk and expensive to read (S5-M1-T7).
+"""Build files that are small on disk and expensive to read (S5-M1-T9).
 
 Every function returns bytes and touches no file. The cases come from
 ADR 0007 action item 3 and testing strategy section 8.
