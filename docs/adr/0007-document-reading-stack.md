@@ -129,3 +129,12 @@ The owner accepted these on 26 Nov 2026 (stage 5 plan, proposal P7). Two permiss
 - **A plain reading of the text, not legal advice.** Both licences allow commercial use and ask only that the copyright notice and licence text travel with copies. The third-party licences page lists them with the others.
 - **What follows.** `scripts/check_licences.py` allows each name only while its licence text stays the one named here. A changed licence fails the check.
 - **Still a reading, not a settled answer.** Like the `pikepdf` position, a lawyer should confirm it before a release.
+
+## Amendment (26 Nov 2026): how the licence check reads a compound licence
+
+The owner accepted this on 26 Nov 2026, after the review of stage 5 milestone 1. The first check passed a text when any one piece was allowed, so `MIT AND GPL-3.0-only` passed.
+
+- **The reading.** For `OR`, one allowed choice is enough. For `AND`, commas and semicolons, every piece must be allowed. A text with brackets is refused.
+- **`pypdfium2` is a named exception.** Its licence text is `BSD-3-Clause, Apache-2.0, dependency licenses`. The check allows it only while the text stays exactly that.
+- **What the check cannot see.** "dependency licenses" stands for the third-party code inside the PDFium binary. The check does not read those licences. Their notices still have to be on the third-party licences page.
+

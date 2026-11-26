@@ -1,8 +1,10 @@
 """The licence check: the runtime group must be MIT, BSD or Apache.
 
 A named package may use another licence when its text equals the stated
-one, so a changed licence fails. See ADR 0007 action item 2 and
-docs/testing-strategy.md section 8.
+one, so a changed licence fails. In any other text one choice of an `OR`
+is enough, and every piece of an `AND` or of a list must be allowed. See
+ADR 0007 action item 2 and its amendments, and docs/testing-strategy.md
+section 8.
 """
 
 import importlib.metadata
@@ -30,9 +32,10 @@ NAMED_EXCEPTIONS: Final[Mapping[str, str]] = {
     "pikepdf": "MPL-2.0",
     "pillow": "MIT-CMU",
     "typing-extensions": "PSF-2.0",
+    "pypdfium2": "BSD-3-Clause, Apache-2.0, dependency licenses",
 }
 
-_SPLIT_PATTERN: Final[re.Pattern[str]] = re.compile(r",|;| OR | AND ")
+_LIST_PATTERN: Final[re.Pattern[str]] = re.compile(r"[,;]")
 
 
 def _normalise(name: str) -> str:
@@ -40,37 +43,40 @@ def _normalise(name: str) -> str:
     return name.lower().replace("_", "-")
 
 
-def _keep_requirement(requirement: Requirement) -> bool:
-    """True when the requirement applies here and is not an extra."""
+def _applies(requirement: Requirement, extras: frozenset[str]) -> bool:
+    """True when the requirement applies on this system.
+
+    `extras` holds the extras that the parent requirement asked for.
+    """
     marker = requirement.marker
     if marker is None:
         return True
-    if "extra ==" in str(marker):
-        return False
-    return marker.evaluate()
+    return any(marker.evaluate({"extra": extra}) for extra in ("", *extras))
 
 
 def runtime_packages(pyproject: Path) -> tuple[str, ...]:
     """Return the installed runtime packages, with their dependencies, sorted."""
     with pyproject.open("rb") as handle:
         project = tomllib.load(handle)["project"]
-    pending = [Requirement(text).name for text in project["dependencies"]]
-    found: set[str] = set()
+    direct = [Requirement(text) for text in project["dependencies"]]
+    pending = [requirement for requirement in direct if _applies(requirement, frozenset())]
+    walked: set[tuple[str, frozenset[str]]] = set()
     while pending:
-        name = pending.pop()
-        normalised = _normalise(name)
-        if normalised in found:
+        requirement = pending.pop()
+        extras = frozenset(requirement.extras)
+        key = (_normalise(requirement.name), extras)
+        if key in walked:
             continue
-        found.add(normalised)
+        walked.add(key)
         try:
-            distribution = importlib.metadata.distribution(name)
+            distribution = importlib.metadata.distribution(requirement.name)
         except importlib.metadata.PackageNotFoundError:
-            raise SystemExit(f"licences: {name} is not installed") from None
+            raise SystemExit(f"licences: {requirement.name} is not installed") from None
         for text in distribution.requires or ():
-            requirement = Requirement(text)
-            if _keep_requirement(requirement):
-                pending.append(requirement.name)
-    return tuple(sorted(found))
+            child = Requirement(text)
+            if _applies(child, extras):
+                pending.append(child)
+    return tuple(sorted({name for name, _extras in walked}))
 
 
 def licence_text(name: str) -> str:
@@ -98,7 +104,17 @@ def is_allowed(name: str, text: str) -> bool:
     stated = NAMED_EXCEPTIONS.get(name)
     if stated is not None:
         return text == stated
-    return any(piece.strip() in ALLOWED for piece in _SPLIT_PATTERN.split(text))
+    if "(" in text or ")" in text:
+        return False
+    return all(_part_is_allowed(part) for part in _LIST_PATTERN.split(text))
+
+
+def _part_is_allowed(part: str) -> bool:
+    """True when at least one `OR` choice has only allowed `AND` pieces."""
+    return any(
+        all(piece.strip() in ALLOWED for piece in choice.split(" AND "))
+        for choice in part.split(" OR ")
+    )
 
 
 def main() -> int:
