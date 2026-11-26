@@ -19,6 +19,8 @@ _CENTRAL = b"PK\x01\x02"
 _REL_TYPE: Final[str] = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/"
 _DOCUMENT = "word/document.xml"
 _DATE_TIME: Final[tuple[int, int, int, int, int, int]] = (1980, 1, 1, 0, 0, 0)
+_DENSE_LINE_CHARS: Final[int] = 600
+_DENSE_PAGE_CHARS: Final[int] = 180_000
 
 
 def _rezip(members: list[tuple[str, bytes]]) -> bytes:
@@ -101,7 +103,8 @@ def entity_docx(kind: Literal["internal", "external_file", "external_url", "para
         "external_url": '<!ENTITY e SYSTEM "http://127.0.0.1:9/x">',
         "parameter": '<!ENTITY % e SYSTEM "http://127.0.0.1:9/x">%e;',
     }
-    body = r("x") if kind == "parameter" else r("&e;")
+    # The reference is raw XML: `r` would escape it into plain words.
+    body = r("x") if kind == "parameter" else "<w:r><w:t>&e;</w:t></w:r>"
     data = build_docx(p(body))
     return _with_doctype(data, f"<!DOCTYPE w:document [{declarations[kind]}]>")
 
@@ -162,9 +165,9 @@ def lying_low_docx() -> bytes:
 
 
 def _flat_flate(pixels: int) -> bytes:
-    """Deflate `pixels` zero bytes without holding them in memory."""
+    """Deflate `pixels` bytes of value 128 without holding them in memory."""
     compressor = zlib.compressobj(9)
-    chunk = bytes(1 << 20)
+    chunk = b"\x80" * (1 << 20)
     parts: list[bytes] = []
     remaining = pixels
     while remaining:
@@ -209,15 +212,28 @@ def pdf_image_bomb(width: int, height: int, pages: int = 1) -> bytes:
     return output.getvalue()
 
 
-def pdf_dense_text(pages: int, chars_per_page: int) -> bytes:
-    """A PDF with `pages` pages of small characters."""
-    lines = max(1, chars_per_page // 100)
+def _dense_line(length: int, word_length: int) -> str:
+    """Words of `word_length` letters, cut to `length`, never ending in a space."""
+    unit = "x" * word_length + " "
+    line = (unit * (length // len(unit) + 1))[:length]
+    return line[:-1] + "x" if line.endswith(" ") else line
+
+
+def pdf_dense_text(pages: int, chars_per_page: int, *, word_length: int = 99) -> bytes:
+    """A PDF with `pages` pages of exactly `chars_per_page` small characters."""
+    if chars_per_page > _DENSE_PAGE_CHARS:
+        raise ValueError("ingest: too many characters for one page")
+    lines = [
+        _dense_line(min(_DENSE_LINE_CHARS, chars_per_page - start), word_length)
+        for start in range(0, chars_per_page, _DENSE_LINE_CHARS)
+    ]
     buffer = io.BytesIO()
     canvas = Canvas(buffer, pagesize=(612, 792), invariant=1)
-    canvas.setFont("Helvetica", 5)
     for _ in range(pages):
-        for line in range(lines):
-            canvas.drawString(10, 780 - 5 * line, "x" * 100)
+        # `showPage` resets the font, so each page sets it again.
+        canvas.setFont("Helvetica", 2.0)
+        for number, line in enumerate(lines):
+            canvas.drawString(10, 780 - 2.5 * number, line)
         canvas.showPage()
     canvas.save()
     return buffer.getvalue()
