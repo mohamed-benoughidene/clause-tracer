@@ -31,6 +31,7 @@ Imported from `clause_tracer.core`, never from a file inside the package (B2).
 | `SegmentKind` | `COPY`, `ENTITY`, `ESCAPE` |
 | `HiddenReason` | `LOW_CONTRAST`, `TINY_FONT`, `OFF_PAGE`, `INVISIBLE_TEXT`, `HIDDEN_LAYER`, `WORD_HIDDEN_RUN`, `COMMENT`, `ZERO_WIDTH`, `BIDI_CONTROL` |
 | `PiiSource` | `PARTY_DETAILS`, `PATTERN`, `RULE`, `NER`, `USER` |
+| `DoubtCode` | `SHORT_NAME`, `NEAR_DUPLICATE`, `TWO_KINDS`, `SKIPPED_COMMON`, `NO_CUE_RUN` |
 | `TextSlot` | `REASON`, `READING`, `QUESTION`, `MESSAGE`, `REWRITE` |
 | `ScanFinding` | `TOO_LONG`, `LAW_WORD`, `ADVICE`, `INJECTION_TELL`, `CONTACT_WORD`, `WEB_ADDRESS`, `EMAIL_ADDRESS`, `WRONG_LABEL_WORD`, `ACCEPTABLE_LIMIT`, `NUMBER_NOT_ALLOWED`, `UNKNOWN_PLACEHOLDER`, `PERSONAL_DATA`, `FIRST_PERSON`, `FILLER_PHRASE`, `EVALUATIVE_WORD`, `NO_ANCHOR`, `ADDED_SENTENCE` |
 | `DrawFailure` | `CLAUSE_MISMATCH`, `SENTENCE_UNKNOWN`, `EMPTY_QUOTE`, `SPAN_OUTSIDE_SENTENCES`, `QUOTE_NOT_FOUND`, `QUOTE_NOT_UNIQUE`, `SPAN_MISMATCH`, `CHAR_MAP_LENGTH`, `GLYPH_MISSING`, `PAGE_UNKNOWN`, `PAGE_MISMATCH`, `BOX_OUTSIDE_PAGE` |
@@ -106,6 +107,7 @@ arguments, with exactly the fields of system design 3.4 in that order (ADR 0005)
 | `LinkMap` | `references: tuple[CrossReference, ...], terms: tuple[DefinedTerm, ...], overrides: tuple[Override, ...], outside_documents: tuple[OutsideDocument, ...], undefined_terms: tuple[Span, ...]` | What `links` returns; `cli` passes `terms` into `privacy` |
 | `Party` | `name: str, address: str \| None, yours: bool` | Typed party details: raw data, and the first privacy finder |
 | `PiiSuggestion` | `span: Span, kind: PlaceholderKind, source: PiiSource` | What the `PiiDetector` port and the code finders return (ADR 0008) |
+| `Doubt` | `span: Span, code: DoubtCode` | A place where a finder could not be sure. It never changes what is replaced |
 | `PlaceholderEntity` | `id: str, kind: PlaceholderKind, number: int, spans: tuple[Span, ...]` | One placeholder, such as Person 1, for every variant of one name |
 | `Segment` | `kind: SegmentKind, sent: Span, original: Span, entity_id: str \| None` | Tiles both texts, so a quote maps back exactly |
 | `PlaceholderText` | `text: str, entities: tuple[PlaceholderEntity, ...], segments: tuple[Segment, ...]` | The only contract text that leaves the computer |

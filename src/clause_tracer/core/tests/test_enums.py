@@ -6,6 +6,7 @@ import clause_tracer.core as core
 from clause_tracer.core import (
     Answer,
     Direction,
+    DoubtCode,
     DrawFailure,
     FileKind,
     HiddenReason,
@@ -70,6 +71,7 @@ EXPECTED_MEMBERS: dict[type[enum.StrEnum], tuple[str, ...]] = {
         "BIDI_CONTROL",
     ),
     PiiSource: ("PARTY_DETAILS", "PATTERN", "RULE", "NER", "USER"),
+    DoubtCode: ("SHORT_NAME", "NEAR_DUPLICATE", "TWO_KINDS", "SKIPPED_COMMON", "NO_CUE_RUN"),
     TextSlot: ("REASON", "READING", "QUESTION", "MESSAGE", "REWRITE"),
     ScanFinding: (
         "TOO_LONG",

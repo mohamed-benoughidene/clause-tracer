@@ -19,6 +19,8 @@ from clause_tracer.core import (
     CrossReference,
     DefinedTerm,
     Document,
+    Doubt,
+    DoubtCode,
     DrawAllowed,
     DrawRefused,
     Evidence,
@@ -214,6 +216,7 @@ EXPECTED_FIELDS: dict[type, tuple[str, ...]] = {
     ),
     Party: ("name", "address", "yours"),
     PiiSuggestion: ("span", "kind", "source"),
+    Doubt: ("span", "code"),
     PlaceholderEntity: ("id", "kind", "number", "spans"),
     Segment: ("kind", "sent", "original", "entity_id"),
     PlaceholderText: ("text", "entities", "segments"),
@@ -369,3 +372,14 @@ def test_draw_results_are_unrelated() -> None:
     # Two types, so a refusal cannot pass as an approval (I4).
     assert not issubclass(DrawAllowed, DrawRefused)
     assert not issubclass(DrawRefused, DrawAllowed)
+
+
+def test_doubt_needs_keywords() -> None:
+    with pytest.raises(TypeError):
+        Doubt(Span(start=0, end=1), DoubtCode.SHORT_NAME)  # type: ignore[call-arg]
+
+
+def test_doubt_holds_a_span_and_a_code() -> None:
+    doubt = Doubt(span=Span(start=0, end=4), code=DoubtCode.NO_CUE_RUN)
+    assert doubt.span.end == 4
+    assert doubt.code is DoubtCode.NO_CUE_RUN
