@@ -435,7 +435,7 @@ Each item has a decision record (ADR). Ticked items were decided on 12 Nov 2026.
 - [ ] The oldest supported Windows version.
 - [ ] The reply from the EU's AI Act Service Desk, to the provider question sent on 13 Nov 2026. The working position of [ADR 0016](adr/0016-legal-positions-without-a-lawyer.md) stands until it arrives (section 10).
 - [ ] Presidio's speed on a real 60,000-character contract on an ordinary laptop.
-- [ ] The words the user sees when a Word file is refused because it holds imported content (`w:altChunk`, reason `word_alt_chunk`; owner, 27 Nov 2026). Chosen before the screen that shows it is built (build stage 6 for the command line, stage 12 for the app).
+- [ ] The words the user sees when a Word file is refused because it holds imported content (`w:altChunk`, reason `word_alt_chunk`; owner, 26 Nov 2026). Chosen before the screen that shows it is built (build stage 6 for the command line, stage 12 for the app).
 - [ ] The playbook file format, how page pictures reach the app window, how CI drives the Windows window, the uninstall flow and what the running screen's first stage shows ([`system-design.md`](system-design.md) section 13).
 - [ ] The release page address for the "Check for updates" link in Settings. The prototype points to github.com for now. Set it when the first version is released.
 - [ ] Move the repo to a GitHub organisation before the landing page goes live. The Error screen, the README and `SECURITY.md` show the address `github.com/<owner's account>/clause-tracer`, which carries the owner's account name. Then update those links and the git remote, and check which lines in `LICENSE`, `CLA.md` and `COMMERCIAL_LICENSE.md` are a copyright owner and which are links (owner, 15 Nov 2026: left as it is for now).

@@ -727,7 +727,7 @@ The task plan of each stage is written in `docs/plans/` just before the stage is
   - **Word colours** (question 21). The rule is simple: pure white on a white page, and text with exactly the colour of its own shading. Near-white, theme colours and table-style fills are known limits. Text of 2 to 8 points is never flagged.
   - **Parts that never show** (question 5). Besides `TAG_CHARACTER`, one new `HiddenReason` marks a Word part that never shows: a header or footer that no section uses or that can never appear, an unreferenced note, and an alternate-content branch that differs from the one read.
   - **A PDF that forbids copying** (question 18). It is read, with a notice.
-- **Decided 27 Nov 2026** (two points of the stage 5 plan):
+- **Decided 26 Nov 2026** (two points of the stage 5 plan):
   - **The count of notes.** The warning for Word notes carries no count. The count is the number of footnote and endnote entries in the side text, referenced or not, and the warning is raised even when no note is referenced.
   - **Imported content.** A Word file with a `w:altChunk` that Word would show is not read: it raises `UnreadableFileError` with the reason `word_alt_chunk`. One inside deleted content or an unread alternate branch raises nothing. The words the user sees are open.
 - **Not yet decided** (stage 5, the rest): the exact name, type and content of the new `Document` field; the names of the new warning codes and the new `HiddenReason`; the exact caps of question 11.
