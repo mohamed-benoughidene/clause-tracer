@@ -196,7 +196,7 @@ When this is done, the three runtime libraries are installed and pinned, a licen
   - **Rules:** questions 9 and 19, testing strategy 5.
   - **Depends on:** S5-M1-T4
 
-- [ ] **S5-M1-T7: The hostile fixture builder**
+- [x] **S5-M1-T7: The hostile fixture builder**
   - **Build:** Create `builders/hostile.py` in `ingest/tests/builders/`. Each function returns `bytes`. A function builds a file that is small on disk and expensive to read, from the cases of ADR 0007 and testing strategy 8. No function reads or writes a file.
     - `def zip_bomb_docx(expanded_bytes: int) -> bytes`: a Word package whose `word/document.xml` is `expanded_bytes` bytes of repeated valid XML (a valid `w:p` repeated), deflated.
     - `def many_members_docx(count: int) -> bytes`: a Word package plus `count - 4` empty members (the base package has four members) named `word/media/m<i>.bin`.
