@@ -185,3 +185,9 @@ Cells are joined with one tab.
 ## Depends on
 `core`, NUPunkt (sentence starts) and Lingua (the not-English warning). Each
 library is imported in one file only.
+
+Runtime libraries (stage 5), each imported in one file of `ingest` only (B4):
+
+- `pypdfium2` 5.15.2 (PDFium 159.0.8149): `_pdfium.py`.
+- `pikepdf` 10.18.2: `_layers.py`.
+- `lxml` 6.1.3: `_xml.py`.
