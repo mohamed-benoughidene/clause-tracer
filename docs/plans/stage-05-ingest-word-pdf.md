@@ -277,7 +277,7 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
   - **Rules:** question 17, Spec 9.
   - **Depends on:** S5-M2-T1, S5-M1-T9
 
-- [ ] **S5-M2-T3: The zip checks**
+- [x] **S5-M2-T3: The zip checks**
   - **Build:** Create `ingest/_zip.py`. It imports only the standard library.
     - `class WordPackage` (a plain class with `__slots__ = ("_zip", "_infos", "_parsed_bytes")`, no public field) with `names() -> tuple[str, ...]` (member names in file order), `has(name: str) -> bool` and `read_part(name: str) -> bytes`.
     - `def open_package(data: bytes) -> WordPackage`. In order: (1) read the member count from the end-of-central-directory record before `zipfile` opens the data: find the last `b"PK\x05\x06"` in the last 65,557 bytes; when none, raise `UnreadableFileError({"reason": "zip_invalid"})`; read the total entries as a little-endian 16-bit integer at offset 10 of the record; a value of 65,535 raises `UnreadableFileError({"reason": "zip64"})`; a value over `MAX_ZIP_MEMBERS` raises `UnreadableFileError({"reason": "too_many_members", "members": count, "limit": MAX_ZIP_MEMBERS})`. (2) Open `zipfile.ZipFile(io.BytesIO(data))` inside `warnings.catch_warnings()` with `warnings.simplefilter("error")`; a `zipfile.BadZipFile` or a `UserWarning` (an overlapping member) raises `UnreadableFileError({"reason": "zip_invalid"})` or `{"reason": "zip_overlap"}`. (3) A duplicate member name raises `UnreadableFileError({"reason": "duplicate_member"})`. (4) A member with the encryption bit (`info.flag_bits & 0x1`) raises `UnreadableFileError({"reason": "zip_encrypted"})`. (5) `[Content_Types].xml` or `word/document.xml` missing raises `UnreadableFileError({"reason": "not_a_word_file"})`.
