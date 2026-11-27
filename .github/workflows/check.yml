@@ -22,3 +22,20 @@ jobs:
       - run: scripts/check.sh
       - if: github.event_name == 'pull_request'
         run: uv run python scripts/check_owner_tables.py --commits origin/${{ github.base_ref }}
+  windows:
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v7
+        with:
+          python-version: "3.12"
+      - run: uv sync --locked --group dev
+      - run: scripts/check.sh
+        shell: bash
+        env:
+          CLAUSE_TRACER_SKIP_PICTURES: "1"
