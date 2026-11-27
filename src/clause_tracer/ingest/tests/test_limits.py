@@ -19,3 +19,13 @@ def test_count_words_empty() -> None:
 
 def test_count_words_keeps_punctuation_inside_a_word() -> None:
     assert count_words("don't re-use 2.5") == 3
+
+
+def test_stage_5_limits() -> None:
+    from clause_tracer.ingest import limits
+
+    assert limits.MAX_ZIP_MEMBERS == 2_000
+    assert limits.MAX_XML_PART_BYTES == 33_554_432
+    assert limits.MAX_PARSED_TOTAL_BYTES == 50_331_648
+    assert limits.MAX_XML_DEPTH == 256
+    assert limits.MAX_PDF_PAGES == 1_000

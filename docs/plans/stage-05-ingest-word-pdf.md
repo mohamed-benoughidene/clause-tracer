@@ -244,7 +244,7 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
 
 **Rules for M2.** The error for a file that is hostile in structure (not a zip, too many members, a size that lies, a `DOCTYPE`, deep nesting, invalid XML, a missing part) is `UnreadableFileError` with a `reason` in its context. The error for a file that is only too large (a part over the cap, or a total over the cap) is `InputTooLargeError` with the part name and the limit. A reason is a short snake_case word and is part of the contract: tests assert it. A context holds names, counts and limits, never contract text.
 
-- [ ] **S5-M2-T1: The limit values**
+- [x] **S5-M2-T1: The limit values**
   - **Build:** Add these constants to `src/clause_tracer/ingest/limits.py`, after `MAX_WORDS`, each with the comment line shown. Add each to the `ingest` README "Limits" table.
     ```python
     MAX_ZIP_MEMBERS: Final[int] = 2_000

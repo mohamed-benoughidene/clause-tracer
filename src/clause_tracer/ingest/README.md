@@ -41,6 +41,20 @@ id, number, heading, level, parent, span and sentences. A blank text gives no
 clauses. When no marker is accepted, the text is split by paragraph. No errors
 and no side effects.
 
+## Limits
+`ingest/limits.py` holds the input limits of Spec 9 and the caps of stage 5.
+Each value marked `[Assumption]` is tuned in testing.
+
+| Name | Value | What it caps |
+| --- | --- | --- |
+| `MAX_FILE_BYTES` | 20 MiB | The bytes of one input file |
+| `MAX_WORDS` | 50,000 | The words of the text |
+| `MAX_ZIP_MEMBERS` | 2,000 | The members of a Word package |
+| `MAX_XML_PART_BYTES` | 32 MiB | One parsed XML part |
+| `MAX_PARSED_TOTAL_BYTES` | 48 MiB | All parsed XML parts of one file |
+| `MAX_XML_DEPTH` | 256 | The nesting depth of one XML part |
+| `MAX_PDF_PAGES` | 1,000 | The pages of one PDF |
+
 ## Shapes it returns
 A `Document` (from `core`) with no glyphs: `glyphs`, `char_map`, `pages`,
 `furniture`, `hidden`, `undecodable` and `tracked_changes` are empty in stage 2.
