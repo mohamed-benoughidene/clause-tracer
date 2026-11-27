@@ -269,7 +269,7 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
   - **Rules:** question 11, D4.
   - **Depends on:** S5-M1-T1
 
-- [ ] **S5-M2-T2: File kind from the bytes**
+- [x] **S5-M2-T2: File kind from the bytes**
   - **Build:** Create `ingest/_kind.py` with `OLE2_SIGNATURE: Final[bytes] = bytes.fromhex("D0CF11E0A1B11AE1")` and `def detect_kind(data: bytes, name: str) -> FileKind`. In this order: (1) `data[:8] == OLE2_SIGNATURE` raises `OldWordFileError()` (one message for an old `.doc` and for a password-protected `.docx`, questions 17; the name is not read); (2) `b"%PDF-"` inside the first 1,024 bytes returns `FileKind.PDF`; (3) `data[:4]` equal to `b"PK\x03\x04"` or `b"PK\x05\x06"` returns `FileKind.WORD`; (4) otherwise a `name` whose lower-case form ends with `.md` or `.markdown` returns `FileKind.MARKDOWN`, else `FileKind.TEXT`. The function never reads the name for the first three rules. It does not check that a zip is a Word package: that is `open_package` (S5-M2-T3).
   - **Files:** `src/clause_tracer/ingest/_kind.py`, `src/clause_tracer/ingest/tests/test_kind.py`.
   - **Tests first:** `test_ole2_raises_old_word` for `ole2_bytes()` with the names `"a.doc"`, `"a.docx"` and `"a.pdf"` (all raise `OldWordFileError`), `test_pdf_signature` (`b"%PDF-1.7\n..."` is PDF; `b"x" * 1000 + b"%PDF-"` is PDF; `b"x" * 1100 + b"%PDF-"` is TEXT), `test_zip_is_word` (a `build_docx` result and `b"PK\x05\x06" + bytes(18)` are WORD, whatever the name), `test_text_and_markdown_by_name` (`"a.md"`, `"A.MARKDOWN"` are MARKDOWN; `"a.txt"`, `""`, `"a.docx"` on plain text are TEXT), `test_empty_is_text`.
