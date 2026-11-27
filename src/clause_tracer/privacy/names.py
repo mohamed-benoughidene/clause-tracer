@@ -202,14 +202,16 @@ def name_forms(name: str, kind: PlaceholderKind) -> tuple[str, ...]:
         if company_tokens and suffix is None:
             raw.append(" ".join(company_tokens))
         elif company_tokens and suffix is not None:
-            core = company_tokens[:-1]
-            if core:
-                joined = " ".join(core)
-                raw.append(joined)
-                raw.append(joined + " " + suffix)
+            joined = " ".join(company_tokens[:-1])
+            short_core = joined.rstrip(", ")
+            core_is_left = bool(short_core)
+            if core_is_left:
+                raw.append(short_core)
                 swap = SUFFIX_SWAPS.get(suffix)
-                if swap is not None:
-                    raw.append(joined + " " + swap)
+                for core in (joined, short_core):
+                    raw.append(core + " " + suffix)
+                    if swap is not None:
+                        raw.append(core + " " + swap)
 
     forms = {fold_text(form) for form in raw}
     return tuple(sorted(forms, key=lambda form: (-len(form), form)))

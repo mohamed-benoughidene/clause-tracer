@@ -65,6 +65,28 @@ def test_company_without_suffix() -> None:
     assert name_forms("Acme", PlaceholderKind.COMPANY) == ("acme",)
 
 
+def test_company_comma_before_suffix_is_not_part_of_the_short_form() -> None:
+    assert name_forms("Northwind, Inc.", PlaceholderKind.COMPANY) == (
+        "northwind, inc",
+        "northwind inc",
+        "northwind",
+    )
+
+
+def test_company_comma_before_suffix_keeps_both_swaps() -> None:
+    assert name_forms("Northwind, Ltd.", PlaceholderKind.COMPANY) == (
+        "northwind, limited",
+        "northwind limited",
+        "northwind, ltd",
+        "northwind ltd",
+        "northwind",
+    )
+
+
+def test_company_of_only_a_comma_and_a_suffix_has_no_forms() -> None:
+    assert name_forms(", Inc.", PlaceholderKind.COMPANY) == ()
+
+
 def test_empty_forms() -> None:
     assert name_forms("", PlaceholderKind.PERSON) == ()
     assert name_forms("Ltd", PlaceholderKind.COMPANY) == ()

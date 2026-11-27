@@ -13,6 +13,7 @@ from clause_tracer.core import (
 from clause_tracer.privacy.party import find_party_details
 
 BRIGHTLINE = Party(name="Brightline Studio Ltd", address=None, yours=False)
+NORTHWIND = Party(name="Northwind, Inc.", address=None, yours=False)
 COMPANY = PlaceholderKind.COMPANY
 PERSON = PlaceholderKind.PERSON
 ADDRESS = PlaceholderKind.ADDRESS
@@ -36,6 +37,18 @@ def test_finds_a_company_and_its_forms() -> None:
         (26, 43),
         (26, 51),
     ]
+
+
+def test_finds_a_company_typed_with_a_comma() -> None:
+    assert spans("Northwind, Inc. signs. Northwind pays.", (NORTHWIND,)) == [
+        (0, 9),
+        (0, 14),
+        (23, 32),
+    ]
+
+
+def test_a_comma_after_a_short_company_name_is_outside_the_span() -> None:
+    assert spans("Ask Northwind, then pay.", (NORTHWIND,)) == [(4, 13)]
 
 
 def test_a_name_split_by_a_line_break_is_found() -> None:
