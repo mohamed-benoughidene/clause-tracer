@@ -76,6 +76,8 @@ COMPANY: Final[str] = (
     rf"(?:,(?!{H}+NV(?![-\w])))?{H}+{SUFFIX}"
 )
 COMPANY_RE: Final[re.Pattern[str]] = re.compile(COMPANY)
+LAST_ENDING: Final[str] = rf",?[ \t]+(?:{SUFFIX})\.?$"
+LAST_ENDING_RE: Final[re.Pattern[str]] = re.compile(LAST_ENDING)
 ENDING_AFTER: Final[str] = rf"(?:,(?!{H}+NV(?![-\w])))?{H}+{SUFFIX}"
 ENDING_AFTER_RE: Final[re.Pattern[str]] = re.compile(ENDING_AFTER)
 CAP: Final[str] = rf"(?:[{UPPER}][{LOWER}'’-]+|UK|USA|UAE)"

@@ -1,6 +1,7 @@
 """`find_personal_data`, the step 3 call (S4-M3-T6).
 
-A fixed series of steps (P3): the code finders and the detector, the check,
+A fixed series of steps (P3): the code finders (with the short names of found
+companies) and the detector, the check,
 the allow-list, the governing-law place, the overlap resolve, the join of a
 left-over company ending and the sentence split. The detector is passed in
 (T2) and its error is never caught.
@@ -28,6 +29,7 @@ from clause_tracer.privacy.resolve import (
     trim_suggestions,
 )
 from clause_tracer.privacy.sample_input import PrivacyInput
+from clause_tracer.privacy.short_names import find_short_names
 
 
 def find_personal_data(case: PrivacyInput, detector: PiiDetector) -> tuple[PiiSuggestion, ...]:
@@ -41,10 +43,12 @@ def find_personal_data(case: PrivacyInput, detector: PiiDetector) -> tuple[PiiSu
 
     text = case.document.text
     key = fold_for_matching(text)
+    companies = find_companies(text)
     raw = (
         *find_party_details(text, case.parties, case.terms, key=key),
         *find_patterns(text),
-        *find_companies(text),
+        *companies,
+        *find_short_names(text, companies, case.parties, case.terms, key=key),
         *find_addresses(text),
         *find_people(text, key=key),
         *detector.find(text),
