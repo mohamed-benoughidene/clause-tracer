@@ -1,8 +1,9 @@
 """`find_personal_data`, the step 3 call (S4-M3-T6).
 
 A fixed series of steps (P3): the code finders and the detector, the check,
-the allow-list, the governing-law place, the overlap resolve and the sentence
-split. The detector is passed in (T2) and its error is never caught.
+the allow-list, the governing-law place, the overlap resolve, the join of a
+left-over company ending and the sentence split. The detector is passed in
+(T2) and its error is never caught.
 """
 
 from clause_tracer.core import (
@@ -20,6 +21,7 @@ from clause_tracer.privacy.resolve import (
     allowed_term_texts,
     cut_in_places,
     drop_allowed,
+    join_left_endings,
     resolve_overlaps,
     sentence_starts,
     split_at_sentences,
@@ -52,4 +54,5 @@ def find_personal_data(case: PrivacyInput, detector: PiiDetector) -> tuple[PiiSu
     kept = drop_allowed(text, checked, allowed)
     kept = cut_in_places(text, kept, governing_law_places(text))
     resolved = resolve_overlaps(text, kept)
-    return split_at_sentences(text, resolved, sentence_starts(case.clauses))
+    joined = join_left_endings(text, resolved)
+    return split_at_sentences(text, joined, sentence_starts(case.clauses))

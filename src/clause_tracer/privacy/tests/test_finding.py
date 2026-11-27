@@ -6,9 +6,11 @@ from clause_tracer.core import (
     Party,
     PiiSource,
     PiiSuggestion,
+    PlaceholderEntity,
     PlaceholderKind,
     Span,
 )
+from clause_tracer.privacy.entities import group_entities
 from clause_tracer.privacy.finding import find_personal_data
 from clause_tracer.privacy.tests.case_builder import make_case, span_of, suggestion
 
@@ -264,3 +266,69 @@ def test_every_sarah_jones_is_hidden() -> None:
         ("Sarah Jones", 50, 61, PERSON),
         ("Sarah Jones", 79, 90, PERSON),
     ]
+
+
+def test_a_leftover_ending_joins_a_typed_company() -> None:
+    case = make_case(
+        ["Beta Gadgets, Inc. signs.", "Pay Beta Gadgets now."],
+        parties=(Party(name="Beta Gadgets Inc.", address=None, yours=False),),
+    )
+
+    result = find_personal_data(case, FakePiiDetector({}))
+
+    assert _read5(case.document.text, result) == [
+        ("Beta Gadgets, Inc", 0, 17, COMPANY, PARTY_DETAILS),
+        ("Beta Gadgets", 30, 42, COMPANY, PARTY_DETAILS),
+    ]
+    assert group_entities(case.document, result) == (
+        PlaceholderEntity(
+            id="company-1",
+            kind=COMPANY,
+            number=1,
+            spans=(Span(start=0, end=17), Span(start=30, end=42)),
+        ),
+    )
+
+
+def test_a_leftover_ending_joins_a_company_typed_with_another_ending() -> None:
+    case = make_case(
+        ["Beta Gadgets, Inc. signs.", "Pay Beta Gadgets now."],
+        parties=(Party(name="Beta Gadgets Ltd", address=None, yours=False),),
+    )
+
+    result = find_personal_data(case, FakePiiDetector({}))
+
+    assert _read5(case.document.text, result) == [
+        ("Beta Gadgets, Inc", 0, 17, COMPANY, PARTY_DETAILS),
+        ("Beta Gadgets", 30, 42, COMPANY, PARTY_DETAILS),
+    ]
+    assert group_entities(case.document, result) == (
+        PlaceholderEntity(
+            id="company-1",
+            kind=COMPANY,
+            number=1,
+            spans=(Span(start=0, end=17), Span(start=30, end=42)),
+        ),
+    )
+
+
+def test_a_leftover_ending_joins_a_party_read_as_a_person() -> None:
+    case = make_case(
+        ["Beta Gadgets, Inc. signs.", "Pay Beta Gadgets now."],
+        parties=(Party(name="Beta Gadgets", address=None, yours=False),),
+    )
+
+    result = find_personal_data(case, FakePiiDetector({}))
+
+    assert _read5(case.document.text, result) == [
+        ("Beta Gadgets, Inc", 0, 17, PERSON, PARTY_DETAILS),
+        ("Beta Gadgets", 30, 42, PERSON, PARTY_DETAILS),
+    ]
+    assert group_entities(case.document, result) == (
+        PlaceholderEntity(
+            id="person-1",
+            kind=PERSON,
+            number=1,
+            spans=(Span(start=0, end=17), Span(start=30, end=42)),
+        ),
+    )
