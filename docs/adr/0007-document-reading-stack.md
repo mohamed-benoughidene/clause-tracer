@@ -138,3 +138,11 @@ The owner accepted this on 26 Nov 2026, after the review of stage 5 milestone 1.
 - **`pypdfium2` is a named exception.** Its licence text is `BSD-3-Clause, Apache-2.0, dependency licenses`. The check allows it only while the text stays exactly that.
 - **What the check cannot see.** "dependency licenses" stands for the third-party code inside the PDFium binary. The check does not read those licences. Their notices still have to be on the third-party licences page.
 
+## Amendment (27 Nov 2026): a DOCTYPE is refused before lxml reads the part
+
+The owner accepted this on 27 Nov 2026, while stage 5 milestone 2 was built. It adds to the parser settings named in the trade-off analysis.
+
+- **The settings are not enough.** With `resolve_entities=False`, `no_network=True`, `load_dtd=False` and `huge_tree` off, `lxml` 6.1.3 (libxml2 2.14.6) on Linux still opened a local file that a DOCTYPE named, as a parameter entity or as the external subset. A refusal after the parse comes too late.
+- **The check.** Before `lxml` gets a part, the standard library's `expat` reads it up to the first element. A DOCTYPE is refused there. An encoding label other than UTF-8 or UTF-16 is refused as unreadable: the Word package standard allows only those two (ECMA-376 Part 2, XML usage). The refusal after the parse stays as a second guard. This adds no dependency.
+- **Not tested.** Windows, where a file path can name another computer, and tricks beyond the hostile parts that were tried.
+
