@@ -9,6 +9,19 @@ with sentence ids.
 
 ## Public calls
 
+### `read_file`
+
+`read_file(data: bytes, *, name: str) -> Document`
+
+Reads a file of any kind. The bytes decide the kind first: an OLE2 file
+raises `OldWordFileError`, a PDF header in the first 1,024 bytes gives PDF,
+and a zip gives WORD; only then does the name decide between Markdown and
+text. Raises `InputTooLargeError` over 20 MB. Text and Markdown go to
+`read_text_file`, with the same errors. A Word package is opened, and every
+`.xml` and `.rels` part is parsed with the hardened parser, and then the
+reader stops with `NotImplementedError` until stage 5 milestone 3. A PDF
+stops with `NotImplementedError` until milestone 4. No side effects.
+
 ### `read_text_file`
 
 `read_text_file(data: bytes, *, kind: FileKind, name: str) -> Document`

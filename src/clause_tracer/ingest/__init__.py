@@ -8,6 +8,7 @@ from clause_tracer.ingest.clauses import (
     NUMBERING_PARAGRAPHS,
     split_clauses,
 )
+from clause_tracer.ingest.files import read_file
 from clause_tracer.ingest.language import WARNING_NOT_ENGLISH
 from clause_tracer.ingest.reading import (
     DOCUMENT_SCHEMA_VERSION,
@@ -20,6 +21,7 @@ __all__: list[str] = [
     "NUMBERING_NUMBERS",
     "NUMBERING_PARAGRAPHS",
     "WARNING_NOT_ENGLISH",
+    "read_file",
     "read_pasted_text",
     "read_text_file",
     "split_clauses",

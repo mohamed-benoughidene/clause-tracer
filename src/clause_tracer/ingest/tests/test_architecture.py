@@ -94,6 +94,7 @@ def test_public_names() -> None:
         "NUMBERING_NUMBERS",
         "NUMBERING_PARAGRAPHS",
         "WARNING_NOT_ENGLISH",
+        "read_file",
         "read_pasted_text",
         "read_text_file",
         "split_clauses",
