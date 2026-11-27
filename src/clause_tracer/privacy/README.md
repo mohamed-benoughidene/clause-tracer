@@ -95,6 +95,11 @@ unless it is the name of a party, or all of its words belong to a person or
 company name inside its own definition (the Mercury rule). A term that only the
 detector flags stays readable.
 
+**A name before a company ending.** A name found by a signature line, an
+honorific or a job title is a company, not a person, when a company ending
+stands right after it (`Signed by Beta Gadgets, Inc.`). Its other forms are
+companies too, unless the same place is also found as a person.
+
 **The governing-law place.** A place on the owner's closed list stays readable.
 A suggestion that runs into the place is cut at its edges, except a person or
 company span, which stays whole.
@@ -200,6 +205,10 @@ The caller reads and writes the fixture. `privacy` code reads no file (T1).
   an address (owner decision of 22 Nov 2026).
 - An honorific before a company name stays inside the company span (`Mr
   Brightline Studio Ltd`).
+- An ending in capitals (`INC`) is not read after a signature line, so
+  `Signed by Beta Gadgets, INC.` gives a person.
+- `Signed by Jane Roe, Limited Partner` reads as a company, because the company
+  rule already reads `Jane Roe, Limited` as one. The name stays hidden.
 - A company name with a comma before `NV` (`Delta, NV`) is not found, because
   `NV` is also the US state Nevada. `Delta, N.V.` and `Delta NV` are found.
 - Non-UK bank formats and national ID numbers other than the NINO are left to

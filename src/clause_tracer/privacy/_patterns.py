@@ -76,6 +76,8 @@ COMPANY: Final[str] = (
     rf"(?:,(?!{H}+NV(?![-\w])))?{H}+{SUFFIX}"
 )
 COMPANY_RE: Final[re.Pattern[str]] = re.compile(COMPANY)
+ENDING_AFTER: Final[str] = rf"(?:,(?!{H}+NV(?![-\w])))?{H}+{SUFFIX}"
+ENDING_AFTER_RE: Final[re.Pattern[str]] = re.compile(ENDING_AFTER)
 CAP: Final[str] = rf"(?:[{UPPER}][{LOWER}'’-]+|UK|USA|UAE)"
 STREET_PLAIN: Final[str] = r"(?:Street|St|Road|Rd|Avenue|Ave|Lane|Terrace|Gardens|Boulevard)"
 STREET_AMBIG: Final[str] = r"(?:Way|Place|Court|Row|Hill|Close|Drive|Square)"
