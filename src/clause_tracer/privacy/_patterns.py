@@ -71,7 +71,10 @@ SUFFIX: Final[str] = (
 CONNECTOR: Final[str] = (
     rf"(?:GmbH(?={H}+&{H}+Co\b)|(?!(?:{SUFFIX_WORDS}|Limited)(?![-\w])){WORD}|&|of|and)"
 )
-COMPANY: Final[str] = rf"(?<![\w]){WORD}(?:{H}+{CONNECTOR}){{0,5}}{H}+{SUFFIX}"
+COMPANY: Final[str] = (
+    rf"(?<![\w]){WORD}(?:{H}+{CONNECTOR}){{0,5}}"
+    rf"(?:,(?!{H}+NV(?![-\w])))?{H}+{SUFFIX}"
+)
 COMPANY_RE: Final[re.Pattern[str]] = re.compile(COMPANY)
 CAP: Final[str] = rf"(?:[{UPPER}][{LOWER}'’-]+|UK|USA|UAE)"
 STREET_PLAIN: Final[str] = r"(?:Street|St|Road|Rd|Avenue|Ave|Lane|Terrace|Gardens|Boulevard)"

@@ -194,6 +194,8 @@ The caller reads and writes the fixture. `privacy` code reads no file (T1).
   an address (owner decision of 22 Nov 2026).
 - An honorific before a company name stays inside the company span (`Mr
   Brightline Studio Ltd`).
+- A company name with a comma before `NV` (`Delta, NV`) is not found, because
+  `NV` is also the US state Nevada. `Delta, N.V.` and `Delta NV` are found.
 - Non-UK bank formats and national ID numbers other than the NINO are left to
   the detector.
 - A bare 8-digit company number needs a keyword, and only the 15 prefixes of
