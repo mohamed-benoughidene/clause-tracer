@@ -155,3 +155,45 @@ def test_capital_outside_latin_1_is_a_known_limit() -> None:
 
 def test_underscore_inside_a_word() -> None:
     assert found("Foo_Bar Ltd pays.") == [("Foo_Bar Ltd", 0, 11)]
+
+
+def test_a_comma_before_the_suffix() -> None:
+    assert found("Pay Beta Gadgets, Inc. now.") == [("Beta Gadgets, Inc", 4, 21)]
+
+
+def test_other_suffixes_after_a_comma() -> None:
+    assert found("Acme, Ltd. and Foo Bar, L.L.C. agree.") == [
+        ("Acme, Ltd", 0, 9),
+        ("Foo Bar, L.L.C.", 15, 30),
+    ]
+
+
+def test_the_is_dropped_before_a_comma_name() -> None:
+    assert found("The Beta, Inc pays.") == [("Beta, Inc", 4, 13)]
+
+
+def test_comma_names_joined_by_and_stay_two() -> None:
+    assert found("Acme, LLC and Foo LLC sign.") == [
+        ("Acme, LLC", 0, 9),
+        ("Foo LLC", 14, 21),
+    ]
+
+
+def test_a_comma_before_nv_is_no_company() -> None:
+    assert found("Office in Las Vegas, NV 89101.") == []
+
+
+def test_dotted_nv_after_a_comma() -> None:
+    assert found("Delta, N.V. signs.") == [("Delta, N.V.", 0, 11)]
+
+
+def test_nv_without_a_comma_is_still_a_company() -> None:
+    assert found("Delta NV signs.") == [("Delta NV", 0, 8)]
+
+
+def test_a_line_break_after_the_comma_ends_the_name() -> None:
+    assert found("Beta,\nInc") == []
+
+
+def test_a_comma_between_name_words_does_not_join_them() -> None:
+    assert found("Alpha, Beta and Gamma Ltd sign.") == [("Beta and Gamma Ltd", 7, 25)]

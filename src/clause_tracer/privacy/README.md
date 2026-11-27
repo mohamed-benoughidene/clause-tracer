@@ -86,6 +86,9 @@ nothing.
 the earlier start and the kind rank of `TIE_RANK`. A lower-priority suggestion
 is cut around the kept span, never dropped whole, so the part outside a kept
 span may be a fragment. A fragment with no letter or digit is dropped.
+One fragment joins instead: a `RULE` company piece that is only a comma and a
+company ending (`, Inc`), and that starts where a person or company span stops,
+becomes part of that span, which keeps its kind and source.
 
 **The allow-list and question 11.** A defined term stays readable. It is kept
 unless it is the name of a party, or all of its words belong to a person or
@@ -174,6 +177,9 @@ The caller reads and writes the fixture. `privacy` code reads no file (T1).
   finder only.
 - A lower-priority suggestion is cut, so the part outside a kept span may be a
   fragment; punctuation-only fragments are dropped.
+- A company ending left over after a space, not a comma, is not joined: with the
+  typed party `Beta Gadgets Inc.`, the text `Beta Gadgets Limited` gives a second
+  company placeholder over `Limited`.
 - An `NER` match does not remove a defined term from the allow-list.
 - Only `Ltd` and `Limited` swap.
 - The address rule reads UK, US, Canadian and street-word styles. An address
@@ -194,6 +200,8 @@ The caller reads and writes the fixture. `privacy` code reads no file (T1).
   an address (owner decision of 22 Nov 2026).
 - An honorific before a company name stays inside the company span (`Mr
   Brightline Studio Ltd`).
+- A company name with a comma before `NV` (`Delta, NV`) is not found, because
+  `NV` is also the US state Nevada. `Delta, N.V.` and `Delta NV` are found.
 - Non-UK bank formats and national ID numbers other than the NINO are left to
   the detector.
 - A bare 8-digit company number needs a keyword, and only the 15 prefixes of

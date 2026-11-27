@@ -4,6 +4,7 @@ The detector's output is checked once, where it enters (D4, I9). Every later
 step keeps the rule that a flagged span is cut and never dropped whole.
 """
 
+import re
 from bisect import bisect_left, bisect_right
 from collections.abc import Iterable, Mapping, Sequence
 from types import MappingProxyType
@@ -17,6 +18,7 @@ from clause_tracer.core import (
     PlaceholderKind,
     Span,
 )
+from clause_tracer.privacy._patterns import SUFFIX, H
 from clause_tracer.privacy._spans import (
     KINDS,
     overlaps,
@@ -286,6 +288,41 @@ def resolve_overlaps(text: str, suggestions: Iterable[PiiSuggestion]) -> tuple[P
             kept.insert(position, added)
             starts.insert(position, trimmed.start)
     return tuple(sorted(kept, key=lambda item: (item.span.start, item.span.end)))
+
+
+LEFT_ENDING_RE: Final[re.Pattern[str]] = re.compile(rf",{H}*{SUFFIX}")
+
+
+def join_left_endings(text: str, suggestions: Iterable[PiiSuggestion]) -> tuple[PiiSuggestion, ...]:
+    """Join a company ending left over after a cut to the name before it.
+
+    Input:   the contract text and suggestions with no overlap.
+    Output:  the suggestions, sorted. A `RULE` company span that is only a comma
+             and an ending, and that starts where a person or company span stops,
+             becomes part of that span, which keeps its kind and source.
+    Raises:  none.
+    Effects: none (T1).
+    """
+
+    joined: list[PiiSuggestion] = []
+    for item in unique_sorted(suggestions):
+        is_left_over_ending = (
+            item.source == PiiSource.RULE
+            and item.kind == PlaceholderKind.COMPANY
+            and LEFT_ENDING_RE.fullmatch(text, item.span.start, item.span.end) is not None
+        )
+        follows_a_name = (
+            bool(joined)
+            and joined[-1].kind in (PlaceholderKind.PERSON, PlaceholderKind.COMPANY)
+            and joined[-1].span.end == item.span.start
+        )
+        if is_left_over_ending and follows_a_name:
+            name = joined[-1]
+            span = Span(start=name.span.start, end=item.span.end)
+            joined[-1] = PiiSuggestion(span=span, kind=name.kind, source=name.source)
+        else:
+            joined.append(item)
+    return tuple(joined)
 
 
 def sentence_starts(clauses: Sequence[Clause]) -> tuple[int, ...]:
