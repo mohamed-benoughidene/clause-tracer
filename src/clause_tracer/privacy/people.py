@@ -18,6 +18,7 @@ from clause_tracer.core import (
 )
 from clause_tracer.privacy._match import find_name_form
 from clause_tracer.privacy._patterns import (
+    ENDING_AFTER_RE,
     HONORIFIC_PERSON_CAPS_RE,
     HONORIFIC_PERSON_RE,
     NAME_BEFORE_TITLE_RE,
@@ -140,33 +141,32 @@ def find_people(text: str, *, key: MatchKey | None = None) -> tuple[PiiSuggestio
 
     key = fold_for_matching(text) if key is None else key
     suggestions: list[PiiSuggestion] = []
-    seeds: list[str] = []
-    seen: set[str] = set()
+    seeds: list[tuple[str, PlaceholderKind]] = []
+    seen: set[tuple[str, PlaceholderKind]] = set()
     for pattern, honorific in _SEEDS:
         for match in pattern.finditer(text):
             cleaned = _clean_seed(match, honorific)
             if cleaned is None:
                 continue
             start, end, seed = cleaned
-            suggestions.append(
-                PiiSuggestion(
-                    span=Span(start=start, end=end),
-                    kind=PlaceholderKind.PERSON,
-                    source=PiiSource.RULE,
-                )
-            )
-            folded = fold_text(seed)
-            if folded not in seen:
-                seen.add(folded)
-                seeds.append(folded)
-    for seed in seeds:
-        for form in name_forms(seed, PlaceholderKind.PERSON):
+            has_a_company_ending = ENDING_AFTER_RE.match(text, end) is not None
+            kind = PlaceholderKind.COMPANY if has_a_company_ending else PlaceholderKind.PERSON
+            suggestions.append(_rule_suggestion(Span(start=start, end=end), kind))
+            found = (fold_text(seed), kind)
+            if found not in seen:
+                seen.add(found)
+                seeds.append(found)
+    for folded, kind in seeds:
+        for form in name_forms(folded, PlaceholderKind.PERSON):
             for span in find_name_form(text, key, form, NAME_STOP_WORDS, COMMON_WORD_NAMES):
-                suggestions.append(
-                    PiiSuggestion(
-                        span=span,
-                        kind=PlaceholderKind.PERSON,
-                        source=PiiSource.RULE,
-                    )
-                )
-    return unique_sorted(suggestions)
+                suggestions.append(_rule_suggestion(span, kind))
+    person_spans = {item.span for item in suggestions if item.kind == PlaceholderKind.PERSON}
+    return unique_sorted(
+        item
+        for item in suggestions
+        if item.kind == PlaceholderKind.PERSON or item.span not in person_spans
+    )
+
+
+def _rule_suggestion(span: Span, kind: PlaceholderKind) -> PiiSuggestion:
+    return PiiSuggestion(span=span, kind=kind, source=PiiSource.RULE)

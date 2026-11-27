@@ -242,3 +242,44 @@ def test_a_given_key_gives_the_same_result() -> None:
 def test_legal_stop_words_hold_every_role_word() -> None:
     assert COMPANY_ROLE_WORDS <= LEGAL_STOP_WORDS
     assert len(LEGAL_STOP_WORDS) == 51
+
+
+def found_kinds(text: str) -> list[tuple[str, int, int, PlaceholderKind]]:
+    result = find_people(text)
+    assert all(item.source == PiiSource.RULE for item in result)
+    return [(text[s.span.start : s.span.end], s.span.start, s.span.end, s.kind) for s in result]
+
+
+def test_a_name_before_a_company_ending_is_a_company() -> None:
+    company = PlaceholderKind.COMPANY
+    assert found_kinds("Signed by Beta Gadgets, Inc.") == [
+        ("Beta", 10, 14, company),
+        ("Beta Gadgets", 10, 22, company),
+        ("Gadgets", 15, 22, company),
+    ]
+
+
+def test_the_same_place_found_as_a_person_stays_a_person() -> None:
+    person = PlaceholderKind.PERSON
+    assert found_kinds("Signed by Beta Gadgets, Inc. Signed by Beta Gadgets, Director.") == [
+        ("Beta", 10, 14, person),
+        ("Beta Gadgets", 10, 22, person),
+        ("Gadgets", 15, 22, person),
+        ("Beta", 39, 43, person),
+        ("Beta Gadgets", 39, 51, person),
+        ("Gadgets", 44, 51, person),
+    ]
+
+
+def test_a_capital_ending_leaves_the_name_a_person() -> None:
+    person = PlaceholderKind.PERSON
+    assert found_kinds("Signed by Beta Gadgets, INC.") == [
+        ("Beta", 10, 14, person),
+        ("Beta Gadgets", 10, 22, person),
+        ("Gadgets", 15, 22, person),
+    ]
+
+
+def test_a_person_before_a_company_name_stays_a_person() -> None:
+    kinds = found_kinds("Signed by Jane Roe, Director of Beta Gadgets, Inc.")
+    assert {kind for _, _, _, kind in kinds} == {PlaceholderKind.PERSON}

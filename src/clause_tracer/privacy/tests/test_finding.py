@@ -198,7 +198,8 @@ def test_bare_mercury_from_the_detector_is_replaced_and_the_role_is_not() -> Non
 
     assert _read5(text, result) == [
         ("Mercury Logistics Ltd", 0, 21, COMPANY, RULE),
-        ("Mercury", 56, 63, COMPANY, NER),
+        ("Mercury", 24, 31, COMPANY, RULE),
+        ("Mercury", 56, 63, COMPANY, RULE),
     ]
 
 
@@ -332,3 +333,38 @@ def test_a_leftover_ending_joins_a_party_read_as_a_person() -> None:
             spans=(Span(start=0, end=17), Span(start=30, end=42)),
         ),
     )
+
+
+def test_a_short_name_shares_the_company_placeholder() -> None:
+    case = make_case(["Beta Gadgets, Inc. signs.", "Pay Beta Gadgets now."])
+
+    result = find_personal_data(case, FakePiiDetector({}))
+
+    assert _read5(case.document.text, result) == [
+        ("Beta Gadgets, Inc", 0, 17, COMPANY, RULE),
+        ("Beta Gadgets", 30, 42, COMPANY, RULE),
+    ]
+    assert [entity.id for entity in group_entities(case.document, result)] == ["company-1"]
+
+
+def test_a_signed_company_has_one_placeholder() -> None:
+    case = make_case(["Signed by Beta Gadgets, Inc.", "Beta Gadgets delivers."])
+
+    result = find_personal_data(case, FakePiiDetector({}))
+
+    assert _read5(case.document.text, result) == [
+        ("Beta Gadgets, Inc", 10, 27, COMPANY, RULE),
+        ("Beta Gadgets", 29, 41, COMPANY, RULE),
+    ]
+    assert [entity.id for entity in group_entities(case.document, result)] == ["company-1"]
+
+
+def test_a_one_word_short_name_is_hidden() -> None:
+    case = make_case(["Gizmotron, Inc. signs.", "Gizmotron pays."])
+
+    result = find_personal_data(case, FakePiiDetector({}))
+
+    assert _read5(case.document.text, result) == [
+        ("Gizmotron, Inc", 0, 14, COMPANY, RULE),
+        ("Gizmotron", 23, 32, COMPANY, RULE),
+    ]

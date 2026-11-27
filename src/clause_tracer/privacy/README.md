@@ -95,6 +95,25 @@ unless it is the name of a party, or all of its words belong to a person or
 company name inside its own definition (the Mercury rule). A term that only the
 detector flags stays readable.
 
+**A name before a company ending.** A name found by a signature line, an
+honorific or a job title is a company, not a person, when a company ending
+stands right after it (`Signed by Beta Gadgets, Inc.`). Its other forms are
+companies too, unless the same place is also found as a person.
+
+**Short names of found companies.** A company that nobody typed is found where
+its ending is written. The same name without its last ending is then hidden too,
+where it starts with a capital (`Beta Gadgets` after `Beta Gadgets, Inc.`).
+
+1. A one-word short name is not hidden when the contract also writes the word in
+   small letters outside a web or mail address.
+2. These are never a short name: role and legal words (with `the`, `and`, `of`
+   and `&`), company endings only, and a place on the owner's list.
+3. A short name whose words are all inside a typed party that is read as a person
+   is left alone.
+4. A defined term made only of words of the short name, whose definition holds
+   the full name (or the short name, when it has several words), is a nickname.
+   Its capital copies are hidden, also when rule 1 stops the short name itself.
+
 **The governing-law place.** A place on the owner's closed list stays readable.
 A suggestion that runs into the place is cut at its edges, except a person or
 company span, which stays whole.
@@ -195,11 +214,27 @@ The caller reads and writes the fixture. `privacy` code reads no file (T1).
 - A company name, a person name or a street word that starts with a capital
   outside Latin-1, such as `Łukasz` or a Greek or Cyrillic name, is not found:
   the patterns read A to Z and the Latin-1 capitals.
+- A one-word company name that the contract also writes in small letters stays
+  readable.
+- A nickname with a word that is not in the company name (`BetaG`) stays
+  readable.
+- With a typed party that is read as a person, such as
+  `Beta Gadgets Corporation`, the short name is left alone, so `Gadgets` can stay
+  readable. This follows from question 2 of the stage 4 plan.
+- A role word that is not on the list and is also a short name is hidden
+  (`Purchaser` for `Purchaser LLC`). The user can untick it.
+- A short name that fits two longer names gets its own placeholder.
+- A word that the company rule reads as an ending can make a wrong short name
+  (`Acme-related SAS`).
 - A US state code that is also a word (`ID`, `OK`, `OR`, `IN`, `ME`, `HI`, `LA`,
   `DE`) before five digits is replaced as a ZIP, so `Employee ID 12345` becomes
   an address (owner decision of 22 Nov 2026).
 - An honorific before a company name stays inside the company span (`Mr
   Brightline Studio Ltd`).
+- An ending in capitals (`INC`) is not read. A company written that way gets no
+  short name, and `Signed by Beta Gadgets, INC.` gives a person.
+- `Signed by Jane Roe, Limited Partner` reads as a company, because the company
+  rule already reads `Jane Roe, Limited` as one. The name stays hidden.
 - A company name with a comma before `NV` (`Delta, NV`) is not found, because
   `NV` is also the US state Nevada. `Delta, N.V.` and `Delta NV` are found.
 - Non-UK bank formats and national ID numbers other than the NINO are left to
