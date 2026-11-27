@@ -3,12 +3,12 @@
 | | |
 | --- | --- |
 | Stage | 5, `ingest` (Word and PDF) |
-| Status | Accepted |
+| Status | In progress |
 | Branch | One branch for each milestone, cut from `main`: `feat/ingest-m1-tools-and-fixtures`, `feat/ingest-m2-limits-and-child`, `feat/ingest-m3-word`, `feat/ingest-m4-pdf-text`, `feat/ingest-m5-hidden-text`, `feat/ingest-m6-sample-and-close`. See [the README](README.md), "Branches and pull requests" |
 | Accepted on | 26 Nov 2026 |
 | Stage outline | [System design section 15.5](../system-design.md#155-stage-5-ingest-for-word-and-pdf) |
 
-**State (26 Nov 2026).** The owner accepted the plan. All questions in section 6 are answered, all six milestones are written in full, and the owner confirmed the proposals of section 6.1. Work may start once the docs are on `main`.
+**State (26 Nov 2026).** The owner accepted the plan. All questions in section 6 are answered, all six milestones are written in full, and the owner confirmed the proposals of section 6.1. M1 is built and merged (`999e16e`, pull request 240). M2 has not started.
 
 ## 1. Goal
 
@@ -65,13 +65,13 @@
 ## 4. Checks before starting
 
 - [x] **The plan is Accepted.** The questions in section 6 are answered, and every task is written in full to the answers.
-- [ ] **The baseline passes.** Run `.venv/bin/uv sync`, then `scripts/check.sh`. It must exit 0 before any change.
-- [ ] **The pinned libraries are still the checked ones.** ADR 0007 checked `pypdfium2` 5.15.2 (PDFium 159.0.8149) on Linux and Windows. The planner pins that version, or records in section 8 why a newer one is pinned and re-runs the nine-function check.
+- [x] **The baseline passes.** Run `.venv/bin/uv sync`, then `scripts/check.sh`. It must exit 0 before any change. Run on 27 Nov 2026 on `8f4b970`, before the first M2 change (Linux): exit 0, 2438 tests. Run again on `196b7c7`, after the company-name fixes of stage 4: exit 0, 2473 tests.
+- [x] **The pinned libraries are still the checked ones.** ADR 0007 checked `pypdfium2` 5.15.2 (PDFium 159.0.8149) on Linux and Windows. The planner pins that version, or records in section 8 why a newer one is pinned and re-runs the nine-function check. Checked on 26 Nov 2026: `pyproject.toml` pins 5.15.2, and on Linux it reports PDFium 159.0.8149.0.
 - [ ] **The wheels exist for the Pythons in use.** `pypdfium2`, `pikepdf` and `lxml` install from wheels on Python 3.12 (CI) and 3.13 (the local `.venv`), on Linux and on Windows.
 - [x] **PDFium and hidden layers.** Checked on 26 Nov 2026 (`pypdfium2` 5.15.2, a file written with `pikepdf`): PDFium returns the text of a layer that is switched off, and the text object of each character carries an `OC` mark whose parameter `Name` is the layer's name. So a hidden-layer finding has a span (S5-M5-T3 repeats the measurement as a test).
 - [x] **The Q11 timings are re-run.** Run on 26 Nov 2026 (`pypdfium2` 5.15.2, Debian 13, Python 3.13): ten raw calls for each character of a page of 24,318 characters took 9.7 microseconds a character, so a dense page of 8,000 characters costs about 78 ms and 1,000 such pages about 78 s. This agrees with the 83 s figure and not with the 62 s figure. S5-M4-T3 repeats the measurement as a timing test.
 - [ ] **PDFium's line order is re-checked.** The notes of questions 15 and 19 disagree on whether PDFium returns lines in stream order or in height order. The line builder of S5-M4-T4 uses baselines, so it does not depend on the answer, but the order of the text does. `test_records_follow_stream_order` (S5-M4-T3) measures it on fixtures. Tick this line when that test is written and its observed order is in the change log.
-- [ ] **The docs are on `main`.** The `docs/` branch that holds this plan, with any spec or system design change the answers need, is merged. Milestone 1 is cut from that `main`.
+- [x] **The docs are on `main`.** The `docs/` branch that holds this plan, with any spec or system design change the answers need, is merged. Milestone 1 is cut from that `main`. Checked on 26 Nov 2026: `f66a8e7` (pull request 239) put the plan on `main`, and M1 merged after it.
 
 ## 5. Milestones and tasks
 
@@ -467,6 +467,8 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
 - **The page is the page as shown** (question 20). `Page(number, width, height)` and every `PageBox` are in the shown page: after rotation and inside the bounding box that PDFium gives (`FPDF_GetPageBoundingBox`), top-left origin, PDF points. A character outside that box keeps its box, and is flagged `OFF_PAGE` in M5. A page whose shown width or height is not above 0 raises `UnreadableFileError({"reason": "page_size_invalid", "page": n})`.
 - **Every number is finite** (owner, 26 Nov 2026). Stacked scales make PDFium return `NaN` boxes (measured). A page frame value, or a character box value, origin value or drawn size, that is not finite (`math.isfinite`) raises `UnreadableFileError({"reason": "pdf_geometry_invalid", "page": n})`. The check runs on the values as PDFium returns them, and on the result of `drawn_size`, before any conversion (a `min` or `max` can drop a `NaN`). Generated characters are checked too: on the normal fixtures they are finite (measured).
 
+**Text drawn twice at one place (measured 26 Nov 2026, `pypdfium2` 5.15.2).** PDFium returns the characters of the first copy in the content stream only, whatever its colour. On `duplicate_glyph_page()` the page holds two text objects, and the text page gives ten characters with white fill: they belong to the white copy, and the black copy on top gives none. With the black copy first, the ten characters have black fill. So the `fill`, `render_mode` and `obj` of a `CharRecord` describe the first copy only, which may not be what the reader of the page sees. This measurement covers two copies at exactly the same place. For copies with an offset (such as fake bold), see [the reader checks and limits report](../../reports/Stage%205%20reader%20checks%20and%20limits.md), question 14: up to 5 points gave one copy, and 10 points or more kept both. The planned test `test_duplicate_glyph_under_black_is_a_known_miss` (M5) agrees with this. Consider it before the owner tables of M4 and M5 are written (S5-M4-T12, S5-M5-T7). If a task needs the second copy, stop and ask the owner.
+
 **Build order.** Build in number order.
 
 **File layout of M4 (P6).** `_pdf_model.py` (`CharRecord`, `PageFrame`), `_pdf_geometry.py` (the one coordinate function, pure), `_pdfium.py` (all `pypdfium2` calls), `_pdf_text.py` (the canonical text, pure), `_pdf_pages.py` (undecodable, scanned and furniture rules, pure), `pdf.py` (the public call).
@@ -585,6 +587,8 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
 Every hostile fixture raises its hidden-text finding, and every innocent look-alike raises none.
 
 **Build order.** Build in number order, with one exception: T7 (owner) can be done at any time after T5.
+
+**Read first.** The note "Text drawn twice at one place" at the head of M4: a check that reads a record's fill or render mode sees the first copy only.
 
 **What the research settled (26 Nov 2026).** The check in section 4 ("PDFium and hidden layers") is answered. PDFium returns the text of a layer that is switched off, so the characters are in `Document.text` and a finding has a span. The text object of each character carries a mark named `OC` whose parameter `Name` is the layer's name (measured with `pypdfium2` 5.15.2 on a file written with `pikepdf`: `FPDFPageObj_GetMark`, `FPDFPageObjMark_GetName` gave `OC`, and `FPDFPageObjMark_GetParamStringValue` for the key `Name` gave the layer name). The type of the layer reads as a name that cannot be read as a string, which does not matter. `pikepdf` supplies which names are switched off. S5-M5-T3 builds on this and repeats the measurement as a test.
 
@@ -860,6 +864,7 @@ The owner left these points to the planner. Each is a value or a name that a tas
 | 26 Nov 2026 | S5-M2-T8 carries a reminder that the licences of Windows-only packages are unchecked until its job runs, and its "Done when" asks for the licence line in the Windows log. | The owner's request in chat, so that M2 does not forget it. |
 | 26 Nov 2026 | PDF text and numbers (S5-M4-T3, T4, the M4 model, P8, P14): two surrogate halves become one character, a lone half is undecodable, and a number that is not finite raises `pdf_geometry_invalid`. Three builders join T3. Two expected values change: `test_astral_character` expected one record for a character above U+FFFF, and PDFium returns two; `test_astral_is_one_character` now starts from the two halves. S5-M2-T6 names an unwritable reply `child_reply_unencodable`. | Measured after the M1 review: an emoji arrives as two halves with no map error, and stacked scales give `NaN` boxes. The owner's answer in chat: "Yes, add it". |
 | 26 Nov 2026 | The owner accepted the three changed expected values of the M1 review: the compound licence text of `pypdfium2` passes for `pypdfium2` only; the two emoji tests of M4 start from the two surrogate halves; the two word-limit tests of M4 call `pdf_dense_text(pages=2, chars_per_page=60_000, word_length=1)`. | The owner's answer in chat, "yes", given from a plain explanation of each change and not from the diff (T11). |
+| 26 Nov 2026 | Status set to In progress, three section 4 checks ticked after checking them (the baseline, the pinned libraries, the docs on `main`), and a note on text drawn twice added to M4 and M5. The Windows wheels and PDFium's line order stay unticked. | M1 is merged. The owner asked for these updates before M2 starts. |
 
 ## 9. Notes for the next stage
 
