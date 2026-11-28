@@ -8,7 +8,7 @@
 | Accepted on | 26 Nov 2026 |
 | Stage outline | [System design section 15.5](../system-design.md#155-stage-5-ingest-for-word-and-pdf) |
 
-**State (28 Nov 2026).** The owner accepted the plan. All questions in section 6 are answered, all six milestones are written in full, and the owner confirmed the proposals of section 6.1. M1 is built and merged (`999e16e`, pull request 240). M2 is merged (`f3c35ec`, pull request 245), and its Linux and Windows jobs were green on `78c1f63`. A review found faults, and S5-M2-T11 to T13 fixed them before the merge. M3 is in progress (S5-M3-T1 and T2 are built).
+**State (28 Nov 2026).** The owner accepted the plan. All questions in section 6 are answered, all six milestones are written in full, and the owner confirmed the proposals of section 6.1. M1 is built and merged (`999e16e`, pull request 240). M2 is merged (`f3c35ec`, pull request 245), and its Linux and Windows jobs were green on `78c1f63`. A review found faults, and S5-M2-T11 to T13 fixed them before the merge. M3 is built (S5-M3-T1 to T8), and S5-M3-T9 is the owner's table.
 
 ## 1. Goal
 
@@ -810,7 +810,7 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
   - **Rules:** system design 8.4, D4.
   - **Depends on:** S5-M3-T6
 
-- [ ] **S5-M3-T8: The public call**
+- [x] **S5-M3-T8: The public call**
   - **Build:** In `ingest/word.py` add `def read_word_file(data: bytes, *, name: str) -> Document`.
     - Steps, in order: the size check (`len(data) > MAX_FILE_BYTES` raises `InputTooLargeError`); `detect_kind` must give `WORD` (any other kind raises `ValueError("ingest: read_word_file reads Word files only")`, a caller bug; an OLE2 file raises `OldWordFileError`); `open_package`; parse `word/document.xml` (required), `word/styles.xml`, `word/numbering.xml`, `word/settings.xml`, `word/comments.xml`, `word/footnotes.xml`, `word/endnotes.xml`, `word/_rels/document.xml.rels` and every header and footer part of the rels, each only when present, each through `package.read_part` and `parse_part` (so the caps and the parser apply); build `Styles` and `Numbering`; `build_body`; the comments, notes, headers and footers; then the checks of stage 2 on the text: a NUL raises `NotTextError`, no visible character raises `EmptyInputError`, over 50,000 words raises `InputTooLargeError`, and `looks_not_english` adds `WARNING_NOT_ENGLISH`.
     - The `Document`: `schema_version=DOCUMENT_SCHEMA_VERSION`, `source=SourceFile(name=name, kind=FileKind.WORD, sha256=<of data>, size=len(data))`, `text`, `char_map=()`, `glyphs=()`, `pages=()`, `furniture=()`, `hidden` (the body's hidden runs, the comments, and the never-shown parts, ordered by span start with `None` spans last and a stable order), `undecodable=()`, `tracked_changes`, `warnings`, `side_text` (comments after `link_comments`, then notes, then headers, then footers, each in its own order).
@@ -1271,3 +1271,4 @@ None yet. Filled in when the stage is done.
 | 28 Nov 2026 | S5-M3-T5 | `_word_side.py` also has the private `_flow_text` and the function `hidden_comments`, which returns the ids of the comments that hold a hidden or tiny run. | `comment_hidden` takes only the spans and the comments, so the hidden-run test needs the ids from the comments part. | No |
 | 28 Nov 2026 | S5-M3-T6 | The private `_flow`, `_read_note_part` and `_is_shown` helpers, and the test `test_sections_are_read_in_document_order`. | One walk for side text and one predicate for a shown part; the section order is part of the task's `sections` field. | No |
 | 28 Nov 2026 | S5-M3-T7 | The private `_is_relative_part`, with `urlsplit` from the standard library. | One predicate names the four ways a target is refused. | No |
+| 28 Nov 2026 | S5-M3-T8 | The private `_part`, `_has_even_and_odd` and `_order_hidden` helpers. `warnings.py` holds the three new Word codes; `WARNING_NOT_ENGLISH` stays in `language.py`. | One place to read an optional part, one predicate for the settings flag, and one stable order for the findings. The not-English code already had its home. | No |

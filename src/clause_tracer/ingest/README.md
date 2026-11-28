@@ -1,8 +1,8 @@
 # ingest
 
 ## Purpose
-Read a text file, a Markdown file or pasted text, and split it into clauses
-with sentence ids.
+Read a text file, a Markdown file, pasted text or a Word file, and split it
+into clauses with sentence ids.
 
 ## Spec
 `docs/spec.md` section 6.1, steps 1–2.
@@ -17,12 +17,9 @@ Reads a file of any kind. The bytes decide the kind first: an OLE2 file
 raises `OldWordFileError`, a PDF header in the first 1,024 bytes gives PDF,
 and a zip gives WORD; only then does the name decide between Markdown and
 text. Raises `InputTooLargeError` over 20 MB. Text and Markdown go to
-`read_text_file`, with the same errors. A Word package is opened, and every
-`.xml` and `.rels` part is parsed with the hardened parser, and then the
-reader stops with `NotImplementedError` until stage 5 milestone 3. A package
-member must be stored or deflated. Any other method, and a package that
-Python cannot read, gives `UnreadableFileError` with reason `zip_invalid`.
-A PDF stops with `NotImplementedError` until milestone 4. No side effects.
+`read_text_file`, with the same errors. A Word package goes to
+`read_word_file`, with the same errors. A PDF stops with
+`NotImplementedError` until milestone 4. No side effects.
 
 ### `read_text_file`
 
@@ -46,6 +43,74 @@ breaks and byte-order marks is present. The character count is checked before
 the text is encoded. For a text with too many characters the error's context
 holds `size_chars`; for one with too many bytes it holds `size_bytes`. Both hold
 `limit_bytes`. No side effects.
+
+### `read_word_file`
+
+`read_word_file(data: bytes, *, name: str) -> Document`
+
+Reads a Word file. The bytes must be a Word package: another kind raises
+`ValueError`, which is a bug in the caller, and an OLE2 file raises
+`OldWordFileError`. Raises `InputTooLargeError` over 20 MB or 50,000 words,
+`NotTextError` for a NUL character, `EmptyInputError` when the body has no
+visible character, and `UnreadableFileError` when the package or a part is
+refused. The reasons are `zip_invalid`, `zip64`, `too_many_members`,
+`duplicate_member`, `zip_encrypted`, `not_a_word_file`, `size_mismatch`,
+`zip_overlap`, `doctype`, `xml_invalid`, `word_alt_chunk` and `memory`. Every
+part is read inside the size caps and parsed with the hardened parser. No
+side effects.
+
+The text is the body as Word draws it:
+
+- one line for each paragraph, each ended by `\n`;
+- one line for each table row, its cells joined by `\t`; the paragraphs of
+  one cell are joined by one space, and a nested table is flattened with
+  `\t` between its cells and one space between its rows;
+- a list number at the start of its paragraph, followed by exactly one space;
+- `\t` for `w:tab` and `w:ptab`, `\n` for `w:br` and `w:cr`, `‑` for
+  `w:noBreakHyphen`, and nothing for `w:softHyphen`;
+- the cached result of a field, never its instruction;
+- the accepted view of the tracked changes: the content of `w:del` and
+  `w:moveFrom` is dropped, the content of `w:ins` and `w:moveTo` is read, and
+  a deleted paragraph mark joins the next paragraph with no separator;
+- a text box after the paragraph that holds it, read once;
+- `mc:AlternateContent` once: the `Choice` branch when there is one, else the
+  `Fallback` branch.
+
+What it flags, in `Document.hidden`:
+
+| Finding | Reason | Span |
+| --- | --- | --- |
+| A hidden run | `WORD_HIDDEN_RUN` | Over its words |
+| White text on white, or text in the colour of its fill | `LOW_CONTRAST` | Over its words |
+| Print under 2 points (`WORD_TINY_HALF_POINTS`) | `TINY_FONT` | Over its words |
+| A comment on words | `COMMENT` | Over the commented words |
+| A part Word never shows | `WORD_PART_NEVER_SHOWN` | None |
+
+A comment's words, a note's words, and a header or footer stay out of
+`Document.text`. They are in `Document.side_text`, in this order: comments
+with their span, then the referenced notes, then the others, then headers,
+then footers. Tracked changes are in `Document.tracked_changes`, in document
+order, with the earlier wording, the new wording, the author and the span of
+the new wording.
+
+The warnings, in this order, are `WARNING_WORD_NUMBERING_UNKNOWN`
+(`word_numbering_unknown`) when a list format cannot be rebuilt,
+`WARNING_WORD_SYMBOL_UNREAD` (`word_symbol_unread`) when a symbol or a symbol
+font may show a missing or wrong character, `WARNING_WORD_NOTES`
+(`word_notes`) when the file has a footnote or an endnote, and
+`WARNING_NOT_ENGLISH` (`not_english`) when the text does not look English.
+
+Known limits:
+
+- Near-white colours such as `FEFEFE`, and theme colours, are not flagged.
+- Table cell fills and table styles are not read.
+- The labels `1)`, `A.`, `I.`, `a.` and `i.` are rebuilt in the text, but
+  `split_clauses` does not read them as clause numbers.
+- The last explicit `w:vanish` value wins; Word's toggle rule is not used.
+- A text box is placed after its paragraph, not where the box sits.
+- Only the body is checked for symbols; comments, notes, headers and footers
+  are not.
+- A Word file has no glyphs and no pages.
 
 ### `split_clauses`
 
@@ -72,9 +137,12 @@ Each value marked `[Assumption]` is tuned in testing.
 | `MAX_PDF_PAGES` | 1,000 | The pages of one PDF |
 
 ## Shapes it returns
-A `Document` (from `core`) with no glyphs: `glyphs`, `char_map`, `pages`,
-`furniture`, `hidden`, `undecodable` and `tracked_changes` are empty in stage 2.
-Its `warnings` hold `not_english` when the text does not look English.
+A `Document` (from `core`) with no glyphs. A text, Markdown or pasted input
+leaves `hidden`, `undecodable`, `tracked_changes` and `side_text` empty. A Word
+file fills `hidden`, `tracked_changes` and `side_text`, and leaves `glyphs`,
+`char_map`, `pages`, `furniture` and `undecodable` empty. Its `warnings` hold
+`not_english` when the text does not look English, and the three Word codes
+above when the file calls for them.
 
 `split_clauses` returns `Clause` shapes, each with `Sentence` shapes in
 `sentences`. `numbering_source` is `NUMBERING_NUMBERS` (`"numbers"`) when a
@@ -156,11 +224,10 @@ The clauses cover the whole text: each starts where the one before ends.
 
 It does not read, in this stage:
 
-- Word and PDF files, glyphs, page boxes, furniture, tracked changes, the
-  hostile-file limits and the child process: stage 5.
-- Any hidden text, including zero-width and bidi characters in a text file:
-  stage 5.
-- Confusable letters and line-end hyphen joins in the match key: stage 5.
+- PDF files, glyphs, page boxes and furniture: the rest of stage 5.
+- PDF hidden text, and zero-width and bidi characters in a text file:
+  milestone 5.
+- Confusable letters and line-end hyphen joins in the match key: stage 8.
 - Cross-references, defined terms and schedule references: stage 3.
 - `A)` and `1)` without an opening bracket; "Section 5" and other keywords; a
   keyword with a decimal number ("Clause 5.1"); Roman numbers without a

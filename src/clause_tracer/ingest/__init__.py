@@ -15,14 +15,24 @@ from clause_tracer.ingest.reading import (
     read_pasted_text,
     read_text_file,
 )
+from clause_tracer.ingest.warnings import (
+    WARNING_WORD_NOTES,
+    WARNING_WORD_NUMBERING_UNKNOWN,
+    WARNING_WORD_SYMBOL_UNREAD,
+)
+from clause_tracer.ingest.word import read_word_file
 
 __all__: list[str] = [
     "DOCUMENT_SCHEMA_VERSION",
     "NUMBERING_NUMBERS",
     "NUMBERING_PARAGRAPHS",
     "WARNING_NOT_ENGLISH",
+    "WARNING_WORD_NOTES",
+    "WARNING_WORD_NUMBERING_UNKNOWN",
+    "WARNING_WORD_SYMBOL_UNREAD",
     "read_file",
     "read_pasted_text",
     "read_text_file",
+    "read_word_file",
     "split_clauses",
 ]
