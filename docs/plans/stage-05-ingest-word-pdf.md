@@ -743,7 +743,7 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
   - **Rules:** questions 4, 5, 16, 11; D1 (nothing is removed except what the accepted view drops); T1.
   - **Depends on:** S5-M2-T4, S5-M1-T7
 
-- [ ] **S5-M3-T2: Styles and hidden runs**
+- [x] **S5-M3-T2: Styles and hidden runs**
   - **Build:** Create `ingest/_word_styles.py`.
     - `@dataclass(frozen=True, slots=True, kw_only=True) class RunProps` with `vanish: bool = False`, `color: str | None = None` (six hex digits in upper case, or `None` for none or `auto`), `size_half_points: int | None = None`, `fill: str | None = None` (the `w:shd` `w:fill`, upper case, `None` for none or `auto`) `highlight: str | None = None` (the six hex digits of the named highlight, `None` for `none`) and `font: str | None = None` (`w:rFonts/@w:ascii`, else `@w:hAnsi`, as written).
     - `HIGHLIGHT_COLOURS: Final[Mapping[str, str]]` with the sixteen Word names and their hex values: `black` 000000, `blue` 0000FF, `cyan` 00FFFF, `green` 00FF00, `magenta` FF00FF, `red` FF0000, `yellow` FFFF00, `white` FFFFFF, `darkBlue` 000080, `darkCyan` 008080, `darkGreen` 008000, `darkMagenta` 800080, `darkRed` 800000, `darkYellow` 808000, `darkGray` 808080, `lightGray` C0C0C0.

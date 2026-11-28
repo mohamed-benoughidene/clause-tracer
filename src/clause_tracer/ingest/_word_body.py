@@ -1,16 +1,26 @@
-"""The body walk of the Word reader (S5-M3-T1).
+"""The body walk of the Word reader (S5-M3-T1, S5-M3-T2).
 
 The walk reads `word/document.xml` as Word draws it: the accepted view of
 the tracked changes, the cached result of a field, a table row as one line
 and a text box after the paragraph that holds it. Content that Word does
 not show is never read, and nothing is removed from the text it does show
-(D1).
+(D1). A hidden run, low contrast and tiny print are flagged with a span
+over their words.
 """
 
+from dataclasses import replace
 from typing import Final
 
-from clause_tracer.core import HiddenReason, HiddenText, InputTooLargeError, UnreadableFileError
+from clause_tracer.core import (
+    HiddenReason,
+    HiddenText,
+    InputTooLargeError,
+    Span,
+    UnreadableFileError,
+)
+from clause_tracer.ingest._thresholds import WORD_TINY_HALF_POINTS
 from clause_tracer.ingest._word_model import BodyResult, Mark, Text
+from clause_tracer.ingest._word_styles import RunProps, Styles
 from clause_tracer.ingest._xml import W_NS, Element, qname
 from clause_tracer.ingest.limits import MAX_WORDS
 
@@ -26,6 +36,8 @@ _P: Final[str] = _tag("p")
 _PPR: Final[str] = _tag("pPr")
 _R: Final[str] = _tag("r")
 _RPR: Final[str] = _tag("rPr")
+_RSTYLE: Final[str] = _tag("rStyle")
+_PSTYLE: Final[str] = _tag("pStyle")
 _T: Final[str] = _tag("t")
 _TAB: Final[str] = _tag("tab")
 _PTAB: Final[str] = _tag("ptab")
@@ -92,6 +104,14 @@ _IGNORED_TAGS: Final[frozenset[str]] = frozenset(
     }
 )
 
+SYMBOL_FONTS: Final[frozenset[str]] = frozenset(
+    {"symbol", "wingdings", "wingdings 2", "wingdings 3", "webdings"}
+)
+
+_REASON_ORDER: Final[dict[HiddenReason, int]] = {
+    reason: index for index, reason in enumerate(HiddenReason)
+}
+
 _MAX_PARAGRAPHS: Final[int] = 200_000
 # [Assumption] question 11: a hostile body ends early.
 
@@ -146,11 +166,14 @@ def _assemble(paragraphs: list[_Paragraph]) -> tuple[str, list[tuple[Text | Mark
 class _Walker:
     """Walk one part of a Word document, in the order Word draws it."""
 
-    def __init__(self, *, quiet: bool = False) -> None:
+    def __init__(self, *, styles: Styles | None = None, quiet: bool = False) -> None:
         self.paragraphs: list[_Paragraph] = []
         self.hidden: list[HiddenText] = []
         self.symbol_unread = False
         self._quiet = quiet
+        self._styles = styles if styles is not None else Styles.from_xml(None)
+        self._paragraph_style: str | None = None
+        self._paragraph_fill: str | None = None
         self._fields: list[str] = []
         self._word_count = 0
         self._in_word = False
@@ -226,9 +249,21 @@ class _Walker:
 
     def _read_paragraph(self, element: Element, out: list[_Paragraph]) -> None:
         paragraph = _Paragraph(number=None, pieces=[], mark_deleted=self._is_mark_deleted(element))
+        properties = self._child_for(element, _PPR)
+        paragraph_style: str | None = None
+        if properties is not None:
+            style = self._child_for(properties, _PSTYLE)
+            if style is not None:
+                paragraph_style = style.get(qname(W_NS, "val"))
         boxes: list[_Paragraph] = []
         saved = self._boxes
+        saved_style = self._paragraph_style
+        saved_fill = self._paragraph_fill
         self._boxes = boxes
+        self._paragraph_style = paragraph_style
+        self._paragraph_fill = self._styles.paragraph_fill(
+            paragraph_style=paragraph_style, ppr=properties
+        )
         try:
             for child in element:
                 if child.tag == _PPR:
@@ -236,6 +271,8 @@ class _Walker:
                 self._walk_inline(child, paragraph.pieces)
         finally:
             self._boxes = saved
+            self._paragraph_style = saved_style
+            self._paragraph_fill = saved_fill
         self._count_words("\n")
         self._count_paragraph()
         out.append(paragraph)
@@ -265,6 +302,7 @@ class _Walker:
                 self._walk_inline(child, pieces)
 
     def _read_run(self, element: Element, pieces: list[Text | Mark]) -> None:
+        local: list[Text | Mark] = []
         for child in element:
             tag = child.tag
             if tag == _FLD_CHAR:
@@ -273,24 +311,45 @@ class _Walker:
                 continue
             elif tag == _T:
                 if self._is_readable() and child.text:
-                    pieces.append(self._text(child.text))
+                    local.append(self._text(child.text))
             elif tag in (_TAB, _PTAB):
                 if self._is_readable():
-                    pieces.append(self._text("\t"))
+                    local.append(self._text("\t"))
             elif tag in (_BR, _CR):
                 if self._is_readable():
-                    pieces.append(self._text("\n"))
+                    local.append(self._text("\n"))
             elif tag == _NO_BREAK_HYPHEN:
                 if self._is_readable():
-                    pieces.append(self._text("\u2011"))
+                    local.append(self._text("\u2011"))
             elif tag == _SOFT_HYPHEN:
                 continue
             elif tag == _SYM:
-                self._read_symbol(child, pieces)
+                self._read_symbol(child, local)
             else:
-                self._walk_inline(child, pieces)
+                self._walk_inline(child, local)
+
+        properties = self._child_for(element, _RPR)
+        run_style: str | None = None
+        if properties is not None:
+            style = self._child_for(properties, _RSTYLE)
+            if style is not None:
+                run_style = style.get(qname(W_NS, "val"))
+        props = self._styles.run_props(
+            paragraph_style=self._paragraph_style, run_style=run_style, rpr=properties
+        )
+        run_text = "".join(piece.text for piece in local if isinstance(piece, Text))
+        has_visible_text = run_text != "" and not run_text.isspace()
+        hidden = _run_reasons(props, self._paragraph_fill) if has_visible_text else ()
+        is_symbol_font = props.font is not None and props.font.lower() in SYMBOL_FONTS
+        if has_visible_text and is_symbol_font:
+            self.symbol_unread = True
+        for piece in local:
+            pieces.append(replace(piece, hidden=hidden) if isinstance(piece, Text) else piece)
 
     def _read_symbol(self, element: Element, pieces: list[Text | Mark]) -> None:
+        font = element.get(qname(W_NS, "font"))
+        if font is not None and font.lower() in SYMBOL_FONTS:
+            self.symbol_unread = True
         value = element.get(qname(W_NS, "char"))
         code = int(value, 16) if value is not None else None
         if code is None or not 0x20 <= code <= 0xD7FF:
@@ -435,10 +494,59 @@ class _Walker:
         return pieces
 
 
+def _run_reasons(props: RunProps, paragraph_fill: str | None) -> tuple[HiddenReason, ...]:
+    """Return the hidden reasons of one run's words, each at most once."""
+
+    reasons: list[HiddenReason] = []
+    if props.vanish:
+        reasons.append(HiddenReason.WORD_HIDDEN_RUN)
+    is_tiny = props.size_half_points is not None and props.size_half_points < WORD_TINY_HALF_POINTS
+    if is_tiny:
+        reasons.append(HiddenReason.TINY_FONT)
+    fill = props.highlight if props.highlight is not None else props.fill
+    if fill is None:
+        fill = paragraph_fill
+    if props.color is not None:
+        is_white_on_white = fill is None and props.color == "FFFFFF"
+        is_same_colour = fill is not None and props.color == fill
+        if is_white_on_white or is_same_colour:
+            reasons.append(HiddenReason.LOW_CONTRAST)
+    return tuple(reasons)
+
+
+def _hidden_from_positions(
+    positions: list[tuple[Text | Mark, int, int]],
+) -> tuple[HiddenText, ...]:
+    """Merge touching spans of one reason, then order them by place."""
+
+    by_reason: dict[HiddenReason, list[tuple[int, int]]] = {}
+    for piece, start, end in positions:
+        if not isinstance(piece, Text):
+            continue
+        for reason in piece.hidden:
+            by_reason.setdefault(reason, []).append((start, end))
+    entries: list[tuple[int, int, HiddenReason]] = []
+    for reason, spans in by_reason.items():
+        spans.sort()
+        current_start, current_end = spans[0]
+        for start, end in spans[1:]:
+            if start == current_end:
+                current_end = end
+            else:
+                entries.append((current_start, current_end, reason))
+                current_start, current_end = start, end
+        entries.append((current_start, current_end, reason))
+    entries.sort(key=lambda entry: (entry[0], _REASON_ORDER[entry[2]]))
+    return tuple(
+        HiddenText(span=Span(start=start, end=end), reason=reason, boxes=())
+        for start, end, reason in entries
+    )
+
+
 def build_body(
     root: Element,
     *,
-    styles: object | None = None,
+    styles: Styles | None = None,
     numbering: object | None = None,
 ) -> BodyResult:
     """Walk the body of a parsed `word/document.xml`.
@@ -453,11 +561,11 @@ def build_body(
     Effects: none.
     """
 
-    walker = _Walker()
+    walker = _Walker(styles=styles)
     walker.walk(root)
-    text, _positions = _assemble(walker.paragraphs)
+    text, positions = _assemble(walker.paragraphs)
     return BodyResult(
         text=text,
-        hidden=tuple(walker.hidden),
+        hidden=(*walker.hidden, *_hidden_from_positions(positions)),
         symbol_unread=walker.symbol_unread,
     )
