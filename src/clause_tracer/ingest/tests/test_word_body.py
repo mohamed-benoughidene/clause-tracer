@@ -240,3 +240,11 @@ def test_word_limit_stops_early() -> None:
 
     assert raised.value.context["limit_words"] == 50_000
     assert elapsed < 5
+
+
+def test_deeply_nested_wrappers_are_read() -> None:
+    inner = r("x")
+    for _ in range(250):
+        inner = f"<w:foo>{inner}</w:foo>"
+
+    assert _body(p(inner)).text == "x\n"

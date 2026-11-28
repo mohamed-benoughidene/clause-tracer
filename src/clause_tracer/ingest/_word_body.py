@@ -490,7 +490,9 @@ class _Walker:
 
     def _walk_inline(self, element: Element, pieces: list[Text | Mark]) -> None:
         tag = element.tag
-        if tag == _R:
+        if tag in _CHANGE_TAGS and self._insertion_depth == 0:
+            self._read_change_group([element], pieces)
+        elif tag == _R:
             self._read_run(element, pieces)
         elif tag in _DELETED_TAGS:
             if self._insertion_depth > 0:
@@ -629,8 +631,7 @@ class _Walker:
                 HiddenText(span=None, reason=HiddenReason.WORD_PART_NEVER_SHOWN, boxes=())
             )
         if pieces is not None:
-            for child in shown:
-                self._walk_inline(child, pieces)
+            self._walk_children(list(shown), pieces)
         elif out is not None:
             self._walk_blocks(shown, out)
 

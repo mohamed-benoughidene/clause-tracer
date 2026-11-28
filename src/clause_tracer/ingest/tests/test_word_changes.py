@@ -274,3 +274,35 @@ def test_changes_in_document_order() -> None:
     body = p(ins("A", r("one"))) + p(ins("B", r("two")))
 
     assert [change.author for change in _body(body).tracked_changes] == ["A", "B"]
+
+
+_MC_NS = "http://schemas.openxmlformats.org/markup-compatibility/2006"
+
+
+def test_changes_in_alternate_content_are_listed() -> None:
+    alternate = (
+        f'<mc:AlternateContent xmlns:mc="{_MC_NS}">'
+        f'<mc:Choice Requires="wps">{delete("B", "not ")}{ins("B", r("never "))}'
+        "</mc:Choice></mc:AlternateContent>"
+    )
+    body = p(r("We "), alternate, r("pay"))
+
+    result = _body(body)
+
+    assert result.text == "We never pay\n"
+    assert result.tracked_changes == (
+        TrackedChange(earlier="not ", new="never ", author="B", span=Span(start=3, end=9)),
+    )
+
+
+def test_deletion_held_by_a_run_is_listed() -> None:
+    run = (
+        '<w:r><w:del w:id="1" w:author="B" w:date="2026-01-01T00:00:00Z">'
+        '<w:delText xml:space="preserve">gone</w:delText></w:del>'
+        '<w:t xml:space="preserve">kept</w:t></w:r>'
+    )
+
+    result = _body(p(run))
+
+    assert result.text == "kept\n"
+    assert result.tracked_changes == (TrackedChange(earlier="gone", new="", author="B", span=None),)

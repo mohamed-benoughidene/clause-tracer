@@ -8,7 +8,7 @@
 | Accepted on | 26 Nov 2026 |
 | Stage outline | [System design section 15.5](../system-design.md#155-stage-5-ingest-for-word-and-pdf) |
 
-**State (28 Nov 2026).** The owner accepted the plan. All questions in section 6 are answered, all six milestones are written in full, and the owner confirmed the proposals of section 6.1. M1 is built and merged (`999e16e`, pull request 240). M2 is merged (`f3c35ec`, pull request 245), and its Linux and Windows jobs were green on `78c1f63`. A review found faults, and S5-M2-T11 to T13 fixed them before the merge. M3 is built (S5-M3-T1 to T10, and S5-M3-T11 to T15, which fix ten faults that a review found): the owner's Word reading table is in `f88ec42`, and every row passes. A check of those fixes found one more path that drops a change; S5-M3-T16 fixes it and is not built. M3 is not merged.
+**State (28 Nov 2026).** The owner accepted the plan. All questions in section 6 are answered, all six milestones are written in full, and the owner confirmed the proposals of section 6.1. M1 is built and merged (`999e16e`, pull request 240). M2 is merged (`f3c35ec`, pull request 245), and its Linux and Windows jobs were green on `78c1f63`. A review found faults, and S5-M2-T11 to T13 fixed them before the merge. M3 is built (S5-M3-T1 to T10, and S5-M3-T11 to T15, which fix ten faults that a review found): the owner's Word reading table is in `f88ec42`, and every row passes. A check of those fixes found one more path that drops a change; S5-M3-T16 fixed it. M3 is not merged.
 
 ## 1. Goal
 
@@ -922,7 +922,7 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
   - **Rules:** question 11, D4.
   - **Depends on:** S5-M3-T14
 
-- [ ] **S5-M3-T16: A change that is read without grouping (added 28 Nov 2026)**
+- [x] **S5-M3-T16: A change that is read without grouping (added 28 Nov 2026)**
   - **Why:** a deletion directly inside the shown branch of an `mc:AlternateContent` in a paragraph is not listed, because `_read_alternate` calls `_walk_inline` on each child. S5-M3-T11 did not name that path.
   - **Build:** in `ingest/_word_body.py`.
     - In `_read_alternate`, when `pieces` is not `None`, call `self._walk_children(list(shown), pieces)` instead of the loop over `shown`.
