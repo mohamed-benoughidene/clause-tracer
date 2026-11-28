@@ -8,7 +8,7 @@
 | Accepted on | 26 Nov 2026 |
 | Stage outline | [System design section 15.5](../system-design.md#155-stage-5-ingest-for-word-and-pdf) |
 
-**State (28 Nov 2026).** The owner accepted the plan. All questions in section 6 are answered, all six milestones are written in full, and the owner confirmed the proposals of section 6.1. M1 is built and merged (`999e16e`, pull request 240). M2 is built (S5-M2-T1 to T10, pull request 245), and the Linux and Windows jobs are green on `97472e4`. A review then found faults; S5-M2-T11 to T13 fix them before the merge. M3 has not started.
+**State (28 Nov 2026).** The owner accepted the plan. All questions in section 6 are answered, all six milestones are written in full, and the owner confirmed the proposals of section 6.1. M1 is built and merged (`999e16e`, pull request 240). M2 is built (S5-M2-T1 to T13, pull request 245), and the Linux and Windows jobs are green on `78c1f63`. A review found faults, and S5-M2-T11 to T13 fixed them. M3 has not started.
 
 ## 1. Goal
 
