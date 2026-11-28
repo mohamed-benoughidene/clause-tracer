@@ -9,7 +9,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Annotated, Final, Literal
 
-from pydantic import Field, TypeAdapter, ValidationError
+from pydantic import ConfigDict, Field, TypeAdapter, ValidationError
 
 from clause_tracer.core import (
     Document,
@@ -24,6 +24,7 @@ from clause_tracer.core import (
     ScannedPdfError,
     UnreadableFileError,
 )
+from clause_tracer.ingest import DOCUMENT_SCHEMA_VERSION
 
 MAX_CHILD_REPLY_BYTES: Final[int] = 64 * 1024 * 1024
 # [Assumption] system design 15.5: tuned in testing.
@@ -59,7 +60,9 @@ class ChildFailed:
 
 
 ChildReply = Annotated[ChildDone | ChildFailed, Field(discriminator="kind")]
-_ADAPTER: Final[TypeAdapter[ChildReply]] = TypeAdapter(ChildReply)
+_ADAPTER: Final[TypeAdapter[ChildReply]] = TypeAdapter(
+    ChildReply, config=ConfigDict(extra="forbid", allow_inf_nan=False)
+)
 
 
 def encode_child_reply(reply: ChildDone | ChildFailed) -> bytes:
@@ -76,9 +79,17 @@ def decode_child_reply(data: bytes) -> ChildDone | ChildFailed:
     if len(data) > MAX_CHILD_REPLY_BYTES:
         raise UnreadableFileError({"reason": "child_reply_too_large"})
     try:
-        return _ADAPTER.validate_json(data, strict=True)
+        reply = _ADAPTER.validate_json(data, strict=True)
     except ValidationError:
         raise UnreadableFileError({"reason": "child_reply_invalid"}) from None
+
+    is_other_schema = (
+        isinstance(reply, ChildDone) and reply.document.schema_version != DOCUMENT_SCHEMA_VERSION
+    )
+    if is_other_schema:
+        raise UnreadableFileError({"reason": "child_reply_invalid"})
+
+    return reply
 
 
 def input_error_for_code(code: str, context: Mapping[str, str | int]) -> InputError:

@@ -315,7 +315,7 @@ These are the project's own targets, anchored on a common industry guide (60% ac
 | No saved AI replies | 8 and 9 |
 | No test set or answer keys | 10. Start writing the ten contracts during stage 1, because they take the longest |
 | No interface, protocol or installer tests | 12 |
-| CI runs on Linux only | Add Windows at stage 5 or 6 |
+| CI runs on Linux only | 5: the Windows job runs from stage 5 |
 
 Each stage leaves `scripts/check.sh` passing, as the build plan already requires.
 

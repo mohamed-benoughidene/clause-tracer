@@ -1,5 +1,6 @@
-"""The codec for the reply the child process writes (S5-M1-T6)."""
+"""The codec for the reply the child process writes (S5-M1-T6, S5-M2-T6)."""
 
+import json
 from pathlib import Path
 
 import pytest
@@ -140,6 +141,48 @@ def test_decode_is_strict() -> None:
 
     with pytest.raises(UnreadableFileError) as raised:
         decode_child_reply(changed)
+
+    assert _reason(raised.value) == "child_reply_invalid"
+
+
+def test_decode_refuses_extra_field() -> None:
+    reply = ChildDone(document=_document())
+    payload = json.loads(encode_child_reply(reply))
+    payload["extra"] = 1
+
+    with pytest.raises(UnreadableFileError) as raised:
+        decode_child_reply(json.dumps(payload).encode())
+
+    assert _reason(raised.value) == "child_reply_invalid"
+
+    payload = json.loads(encode_child_reply(reply))
+    payload["document"]["extra"] = 1
+
+    with pytest.raises(UnreadableFileError) as raised:
+        decode_child_reply(json.dumps(payload).encode())
+
+    assert _reason(raised.value) == "child_reply_invalid"
+
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf")])
+def test_decode_refuses_non_finite_float(value: float) -> None:
+    reply = ChildDone(document=_document())
+    payload = json.loads(encode_child_reply(reply))
+    payload["document"]["pages"][0]["width"] = value
+
+    with pytest.raises(UnreadableFileError) as raised:
+        decode_child_reply(json.dumps(payload).encode())
+
+    assert _reason(raised.value) == "child_reply_invalid"
+
+
+def test_decode_refuses_other_schema_version() -> None:
+    reply = ChildDone(document=_document())
+    payload = json.loads(encode_child_reply(reply))
+    payload["document"]["schema_version"] = 999
+
+    with pytest.raises(UnreadableFileError) as raised:
+        decode_child_reply(json.dumps(payload).encode())
 
     assert _reason(raised.value) == "child_reply_invalid"
 

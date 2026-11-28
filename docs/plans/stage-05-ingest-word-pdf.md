@@ -3,12 +3,12 @@
 | | |
 | --- | --- |
 | Stage | 5, `ingest` (Word and PDF) |
-| Status | Accepted |
+| Status | In progress |
 | Branch | One branch for each milestone, cut from `main`: `feat/ingest-m1-tools-and-fixtures`, `feat/ingest-m2-limits-and-child`, `feat/ingest-m3-word`, `feat/ingest-m4-pdf-text`, `feat/ingest-m5-hidden-text`, `feat/ingest-m6-sample-and-close`. See [the README](README.md), "Branches and pull requests" |
 | Accepted on | 26 Nov 2026 |
 | Stage outline | [System design section 15.5](../system-design.md#155-stage-5-ingest-for-word-and-pdf) |
 
-**State (26 Nov 2026).** The owner accepted the plan. All questions in section 6 are answered, all six milestones are written in full, and the owner confirmed the proposals of section 6.1. Work may start once the docs are on `main`.
+**State (28 Nov 2026).** The owner accepted the plan. All questions in section 6 are answered, all six milestones are written in full, and the owner confirmed the proposals of section 6.1. M1 is built and merged (`999e16e`, pull request 240). M2 is built (S5-M2-T1 to T13, pull request 245), and the Linux and Windows jobs are green on `78c1f63`. A review found faults, and S5-M2-T11 to T13 fixed them. M3 has not started.
 
 ## 1. Goal
 
@@ -65,13 +65,13 @@
 ## 4. Checks before starting
 
 - [x] **The plan is Accepted.** The questions in section 6 are answered, and every task is written in full to the answers.
-- [ ] **The baseline passes.** Run `.venv/bin/uv sync`, then `scripts/check.sh`. It must exit 0 before any change.
-- [ ] **The pinned libraries are still the checked ones.** ADR 0007 checked `pypdfium2` 5.15.2 (PDFium 159.0.8149) on Linux and Windows. The planner pins that version, or records in section 8 why a newer one is pinned and re-runs the nine-function check.
+- [x] **The baseline passes.** Run `.venv/bin/uv sync`, then `scripts/check.sh`. It must exit 0 before any change. Run on 27 Nov 2026 on `8f4b970`, before the first M2 change (Linux): exit 0, 2438 tests. Run again on `196b7c7`, after the company-name fixes of stage 4: exit 0, 2473 tests.
+- [x] **The pinned libraries are still the checked ones.** ADR 0007 checked `pypdfium2` 5.15.2 (PDFium 159.0.8149) on Linux and Windows. The planner pins that version, or records in section 8 why a newer one is pinned and re-runs the nine-function check. Checked on 26 Nov 2026: `pyproject.toml` pins 5.15.2, and on Linux it reports PDFium 159.0.8149.0.
 - [ ] **The wheels exist for the Pythons in use.** `pypdfium2`, `pikepdf` and `lxml` install from wheels on Python 3.12 (CI) and 3.13 (the local `.venv`), on Linux and on Windows.
 - [x] **PDFium and hidden layers.** Checked on 26 Nov 2026 (`pypdfium2` 5.15.2, a file written with `pikepdf`): PDFium returns the text of a layer that is switched off, and the text object of each character carries an `OC` mark whose parameter `Name` is the layer's name. So a hidden-layer finding has a span (S5-M5-T3 repeats the measurement as a test).
 - [x] **The Q11 timings are re-run.** Run on 26 Nov 2026 (`pypdfium2` 5.15.2, Debian 13, Python 3.13): ten raw calls for each character of a page of 24,318 characters took 9.7 microseconds a character, so a dense page of 8,000 characters costs about 78 ms and 1,000 such pages about 78 s. This agrees with the 83 s figure and not with the 62 s figure. S5-M4-T3 repeats the measurement as a timing test.
 - [ ] **PDFium's line order is re-checked.** The notes of questions 15 and 19 disagree on whether PDFium returns lines in stream order or in height order. The line builder of S5-M4-T4 uses baselines, so it does not depend on the answer, but the order of the text does. `test_records_follow_stream_order` (S5-M4-T3) measures it on fixtures. Tick this line when that test is written and its observed order is in the change log.
-- [ ] **The docs are on `main`.** The `docs/` branch that holds this plan, with any spec or system design change the answers need, is merged. Milestone 1 is cut from that `main`.
+- [x] **The docs are on `main`.** The `docs/` branch that holds this plan, with any spec or system design change the answers need, is merged. Milestone 1 is cut from that `main`. Checked on 26 Nov 2026: `f66a8e7` (pull request 239) put the plan on `main`, and M1 merged after it.
 
 ## 5. Milestones and tasks
 
@@ -240,11 +240,11 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
 
 **How a test gets a slow or greedy input with no hook in shipped code.** The runner takes its limits as arguments, with the production values as defaults. A test passes a small time limit or memory limit and a real file that is heavy to parse: `big_xml_docx(MAX_XML_PART_BYTES - 1 MiB)` takes about 0.8 s and about 400 MB to parse on the research machine. Production code has no test switch.
 
-**Memory floor.** Importing `clause_tracer.ingest` with `lingua`, `lxml`, `pypdfium2` and `pikepdf` needs about 360 MB of address space (measured 26 Nov 2026 on Linux, Python 3.13). Parsing a part of 32 MiB peaked at about 760 MB in all. So the child limit of 1 GiB fits a part at the cap. Measured again on 26 Nov 2026 with a body of many tiny paragraphs, the worst case: parts of 54 MiB in all fit inside 1 GiB and 60 MiB do not, and `libxml2` reports the lack of memory as an `XMLSyntaxError`, so such a file ends with reason `xml_invalid` and not `memory`. The total cap of 48 MiB stops it first. A limit below about 450 MB fails at import, not in the parse: a test never sets one.
+**Memory floor.** Importing `clause_tracer.ingest` with `lingua`, `lxml`, `pypdfium2` and `pikepdf` needs about 360 MB of address space (measured 26 Nov 2026 on Linux, Python 3.13). Parsing a part of 32 MiB peaked at about 760 MB in all. So the child limit of 1 GiB fits a part at the cap. Measured again on 26 Nov 2026 with a body of many tiny paragraphs, the worst case: parts of 54 MiB in all fit inside 1 GiB and 60 MiB do not, and `libxml2` reports the lack of memory as an `XMLSyntaxError`, so such a file ends with reason `xml_invalid` and not `memory`. The total cap of 48 MiB stops it first. S5-M2-T13 (28 Nov 2026) changes this: such a file ends with reason `memory`. A limit below about 450 MB fails at import, not in the parse: a test never sets one.
 
 **Rules for M2.** The error for a file that is hostile in structure (not a zip, too many members, a size that lies, a `DOCTYPE`, deep nesting, invalid XML, a missing part) is `UnreadableFileError` with a `reason` in its context. The error for a file that is only too large (a part over the cap, or a total over the cap) is `InputTooLargeError` with the part name and the limit. A reason is a short snake_case word and is part of the contract: tests assert it. A context holds names, counts and limits, never contract text.
 
-- [ ] **S5-M2-T1: The limit values**
+- [x] **S5-M2-T1: The limit values**
   - **Build:** Add these constants to `src/clause_tracer/ingest/limits.py`, after `MAX_WORDS`, each with the comment line shown. Add each to the `ingest` README "Limits" table.
     ```python
     MAX_ZIP_MEMBERS: Final[int] = 2_000
@@ -269,7 +269,7 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
   - **Rules:** question 11, D4.
   - **Depends on:** S5-M1-T1
 
-- [ ] **S5-M2-T2: File kind from the bytes**
+- [x] **S5-M2-T2: File kind from the bytes**
   - **Build:** Create `ingest/_kind.py` with `OLE2_SIGNATURE: Final[bytes] = bytes.fromhex("D0CF11E0A1B11AE1")` and `def detect_kind(data: bytes, name: str) -> FileKind`. In this order: (1) `data[:8] == OLE2_SIGNATURE` raises `OldWordFileError()` (one message for an old `.doc` and for a password-protected `.docx`, questions 17; the name is not read); (2) `b"%PDF-"` inside the first 1,024 bytes returns `FileKind.PDF`; (3) `data[:4]` equal to `b"PK\x03\x04"` or `b"PK\x05\x06"` returns `FileKind.WORD`; (4) otherwise a `name` whose lower-case form ends with `.md` or `.markdown` returns `FileKind.MARKDOWN`, else `FileKind.TEXT`. The function never reads the name for the first three rules. It does not check that a zip is a Word package: that is `open_package` (S5-M2-T3).
   - **Files:** `src/clause_tracer/ingest/_kind.py`, `src/clause_tracer/ingest/tests/test_kind.py`.
   - **Tests first:** `test_ole2_raises_old_word` for `ole2_bytes()` with the names `"a.doc"`, `"a.docx"` and `"a.pdf"` (all raise `OldWordFileError`), `test_pdf_signature` (`b"%PDF-1.7\n..."` is PDF; `b"x" * 1000 + b"%PDF-"` is PDF; `b"x" * 1100 + b"%PDF-"` is TEXT), `test_zip_is_word` (a `build_docx` result and `b"PK\x05\x06" + bytes(18)` are WORD, whatever the name), `test_text_and_markdown_by_name` (`"a.md"`, `"A.MARKDOWN"` are MARKDOWN; `"a.txt"`, `""`, `"a.docx"` on plain text are TEXT), `test_empty_is_text`.
@@ -277,7 +277,7 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
   - **Rules:** question 17, Spec 9.
   - **Depends on:** S5-M2-T1, S5-M1-T9
 
-- [ ] **S5-M2-T3: The zip checks**
+- [x] **S5-M2-T3: The zip checks**
   - **Build:** Create `ingest/_zip.py`. It imports only the standard library.
     - `class WordPackage` (a plain class with `__slots__ = ("_zip", "_infos", "_parsed_bytes")`, no public field) with `names() -> tuple[str, ...]` (member names in file order), `has(name: str) -> bool` and `read_part(name: str) -> bytes`.
     - `def open_package(data: bytes) -> WordPackage`. In order: (1) read the member count from the end-of-central-directory record before `zipfile` opens the data: find the last `b"PK\x05\x06"` in the last 65,557 bytes; when none, raise `UnreadableFileError({"reason": "zip_invalid"})`; read the total entries as a little-endian 16-bit integer at offset 10 of the record; a value of 65,535 raises `UnreadableFileError({"reason": "zip64"})`; a value over `MAX_ZIP_MEMBERS` raises `UnreadableFileError({"reason": "too_many_members", "members": count, "limit": MAX_ZIP_MEMBERS})`. (2) Open `zipfile.ZipFile(io.BytesIO(data))` inside `warnings.catch_warnings()` with `warnings.simplefilter("error")`; a `zipfile.BadZipFile` or a `UserWarning` (an overlapping member) raises `UnreadableFileError({"reason": "zip_invalid"})` or `{"reason": "zip_overlap"}`. (3) A duplicate member name raises `UnreadableFileError({"reason": "duplicate_member"})`. (4) A member with the encryption bit (`info.flag_bits & 0x1`) raises `UnreadableFileError({"reason": "zip_encrypted"})`. (5) `[Content_Types].xml` or `word/document.xml` missing raises `UnreadableFileError({"reason": "not_a_word_file"})`.
@@ -289,15 +289,15 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
   - **Rules:** question 11, system design 8.4, D4.
   - **Depends on:** S5-M2-T1, S5-M1-T9
 
-- [ ] **S5-M2-T4: The hardened XML parser**
-  - **Build:** Create `ingest/_xml.py`, the only file of `src/` that imports `lxml`. `def parse_part(data: bytes) -> etree._Element` parses with one module-level parser built once: `etree.XMLParser(resolve_entities=False, no_network=True, load_dtd=False, dtd_validation=False, huge_tree=False, remove_comments=True, remove_pis=True, collect_ids=False)`. After the parse, when `root.getroottree().docinfo.doctype` is not an empty string, raise `UnreadableFileError({"reason": "doctype"})`. An `etree.XMLSyntaxError` or any other `etree.LxmlError` raises `UnreadableFileError({"reason": "xml_invalid"})`. A `MemoryError` is not caught. The parser is shared and must not be modified. Add `def qname(namespace: str, local: str) -> str` returning `f"{{{namespace}}}{local}"` and `W_NS: Final[str] = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"` for the Word tasks. Never call `etree.parse` with a file name or a URL.
-  - **Files:** `src/clause_tracer/ingest/_xml.py`, `src/clause_tracer/ingest/tests/test_xml.py`.
-  - **Tests first:** `test_parses_a_plain_part` (a `w:document` with one paragraph parses; the root tag is `qname(W_NS, "document")`), `test_doctype_is_refused` (`doctype_docx()`'s `word/document.xml` gives reason `doctype`), `test_every_entity_kind_is_refused` (for the four kinds of `entity_docx`, the part gives `doctype`, and nothing was fetched: the test also asserts that no socket opens by patching `socket.socket.connect` to fail the test), `test_billion_laughs_is_refused_fast` (a part with ten nested internal entities, built in the test, gives `doctype` in under 1 s), `test_depth_256_parses_and_257_fails` (`deep_xml_docx(254)` parses; `deep_xml_docx(255)` gives `xml_invalid`; `w:document` and `w:body` add two levels to the `w:sdt` elements; `MAX_XML_DEPTH` equals 256), `test_huge_text_node` (`huge_text_node_docx(11 * 1024 * 1024)` gives `xml_invalid`; `huge_text_node_docx(5 * 1024 * 1024)` parses), `test_bad_xml` (`b"<a>"` gives `xml_invalid`), `test_comments_and_pis_are_dropped` (a part with a comment and a processing instruction parses to a tree that has neither).
+- [x] **S5-M2-T4: The hardened XML parser**
+  - **Build:** Create `ingest/_xml.py`, the only file of `src/` that imports `lxml`. `def parse_part(data: bytes) -> etree._Element` parses with one module-level parser built once: `etree.XMLParser(resolve_entities=False, no_network=True, load_dtd=False, dtd_validation=False, huge_tree=False, remove_comments=True, remove_pis=True, collect_ids=False)`. **Before the parse** (owner, 27 Nov 2026; ADR 0007 amendment): the parser settings alone still let `lxml` open a file that a DOCTYPE names, so `parse_part` first calls a private `def _check_prolog(data: bytes) -> None`, and only then gives the bytes to `lxml`. It uses `from xml.parsers import expat` (standard library), makes a new reader on each call with `expat.ParserCreate()` and sets three handlers: `XmlDeclHandler`, with the signature `(version: str, encoding: str | None, standalone: int) -> None`, raises `ValueError` when `encoding` is not `None` and `encoding.upper()` is neither `"UTF-8"` nor `"UTF-16"`; `StartDoctypeDeclHandler` raises `UnreadableFileError({"reason": "doctype"})`; `StartElementHandler` raises a private `class _RootReached(Exception)`. It then calls `reader.Parse(data, True)` in a `try`: `except _RootReached` returns, and `except (expat.ExpatError, ValueError, LookupError)` raises `UnreadableFileError({"reason": "xml_invalid"}) from None`. The doctype error and a `MemoryError` are not caught. A part with no element raises `ExpatError` in that call, so it needs no code of its own. After the parse, as a second guard, when `root.getroottree().docinfo.doctype` is not an empty string, raise `UnreadableFileError({"reason": "doctype"})`. An `etree.XMLSyntaxError` or any other `etree.LxmlError` raises `UnreadableFileError({"reason": "xml_invalid"})`. A `MemoryError` is not caught. The parser is shared and must not be modified. Add `def qname(namespace: str, local: str) -> str` returning `f"{{{namespace}}}{local}"` and `W_NS: Final[str] = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"` for the Word tasks. Never call `etree.parse` with a file name or a URL. `mypy` reports no stub for `lxml` once this file imports it: add the override block that S5-M1-T1 allows, for `["lxml", "lxml.*"]`, and say so in the commit.
+  - **Files:** `src/clause_tracer/ingest/_xml.py`, `src/clause_tracer/ingest/tests/test_xml.py`, `pyproject.toml` (the `mypy` override only).
+  - **Tests first:** `test_parses_a_plain_part` (a `w:document` with one paragraph parses; the root tag is `qname(W_NS, "document")`), `test_doctype_is_refused` (`doctype_docx()`'s `word/document.xml` gives reason `doctype`), `test_every_entity_kind_is_refused` (for the four kinds of `entity_docx`, the part gives `doctype`, and nothing was fetched: the test also asserts that no socket opens by patching `socket.socket.connect` to fail the test), `test_billion_laughs_is_refused_fast` (a part with ten nested internal entities, built in the test, gives `doctype` in under 1 s), `test_depth_256_parses_and_257_fails` (`deep_xml_docx(254)` parses; `deep_xml_docx(255)` gives `xml_invalid`; `w:document` and `w:body` add two levels to the `w:sdt` elements; `MAX_XML_DEPTH` equals 256), `test_huge_text_node` (`huge_text_node_docx(11 * 1024 * 1024)` gives `xml_invalid`; `huge_text_node_docx(5 * 1024 * 1024)` parses), `test_bad_xml` (`b"<a>"` gives `xml_invalid`), `test_comments_and_pis_are_dropped` (a part with a comment and a processing instruction parses to a tree that has neither), `test_only_utf8_and_utf16_labels` (`'<?xml version="1.0" encoding="UTF-16"?><a/>'.encode("utf-16")` parses; `b'<?xml version="1.0" encoding="ISO-8859-1"?><a/>'` gives `xml_invalid`), `test_a_named_dtd_file_is_not_read` (write `"not a DTD <<<"` to `tmp_path / "outside.dtd"`; the part `f'<!DOCTYPE w:document SYSTEM "{dtd.as_uri()}"><w:document xmlns:w="{W_NS}"/>'.encode()` gives `doctype`; `xml_invalid` here means `lxml` read the file).
   - **Done when:** `scripts/check.sh` exits 0, and `test_runtime_libraries_have_one_importer` (S5-M1-T1) passes with `_xml.py` in use.
-  - **Rules:** D4, B4, system design 8.4.
+  - **Rules:** D4, B4, system design 8.4, ADR 0007.
   - **Depends on:** S5-M2-T3
 
-- [ ] **S5-M2-T5: The entry function `read_file`**
+- [x] **S5-M2-T5: The entry function `read_file`**
   - **Build:** Create `ingest/files.py` with `def read_file(data: bytes, *, name: str) -> Document`. It runs the size check (`len(data) > MAX_FILE_BYTES` raises `InputTooLargeError` as `read_text_file` does), calls `detect_kind(data, name)` (S5-M2-T2), and then: `TEXT` or `MARKDOWN` returns `read_text_file(data, kind=kind, name=name)`; `WORD` calls `open_package(data)` and then calls `parse_part` on every member whose name ends in `.xml` or `.rels`, in file order, through `package.read_part`, and then `raise NotImplementedError("S5-M3")`; `PDF` raises `NotImplementedError("S5-M4")`. Export `read_file` from `ingest/__init__.py`, add it to `test_public_names` and `test_readme_names_every_public_name` in `test_architecture.py`, and add a README section "`read_file`" (input, output, raises, effects: none). The two `NotImplementedError` lines are marked with the comment `# Temporary: removed by S5-M3-T8` and `# Temporary: removed by S5-M4-T8`.
   - **Files:** `src/clause_tracer/ingest/files.py`, `src/clause_tracer/ingest/__init__.py`, `src/clause_tracer/ingest/README.md`, `src/clause_tracer/ingest/tests/test_files.py`, `src/clause_tracer/ingest/tests/test_architecture.py`.
   - **Tests first:** `test_text_goes_to_the_text_reader` (`read_file(b"Hello world.\n", name="a.txt")` equals `read_text_file(b"Hello world.\n", kind=FileKind.TEXT, name="a.txt")`), `test_markdown_by_name`, `test_ole2_raises_old_word`, `test_word_package_stops_at_the_stub` (a `build_docx` file raises `NotImplementedError`), `test_pdf_stops_at_the_stub`, `test_hostile_word_files_raise_named_errors` (a table of builder call, error class and reason for `many_members_docx(MAX_ZIP_MEMBERS + 1)`, `doctype_docx()`, `deep_xml_docx(255)` and `zip_bomb_docx(100 MiB)`, each raising the class and reason of the rules above), `test_too_large_file` (`MAX_FILE_BYTES + 1` bytes raises `InputTooLargeError`).
@@ -305,12 +305,12 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
   - **Rules:** D4, T1.
   - **Depends on:** S5-M2-T2, S5-M2-T3, S5-M2-T4
 
-- [ ] **S5-M2-T6: The child process**
+- [x] **S5-M2-T6: The child process**
   - **Build:** First, tighten `cli/child_reply.py` (owner, 26 Nov 2026): `_ADAPTER` is `TypeAdapter(ChildReply, config=ConfigDict(extra="forbid", allow_inf_nan=False))`, which reaches the nested `core` shapes (measured), and `decode_child_reply` raises `UnreadableFileError({"reason": "child_reply_invalid"})` when a `ChildDone` document has a `schema_version` other than `DOCUMENT_SCHEMA_VERSION` (from `clause_tracer.ingest`). In `test_child_reply.py` add `test_decode_refuses_extra_field` (an extra key at the top, and one in the document), `test_decode_refuses_non_finite_float` (`NaN` and `Infinity` as a page width) and `test_decode_refuses_other_schema_version` (999), each expecting `child_reply_invalid`. Then: `cli` owns the child, and stage 5 adds these four `cli` files, with `child_reply.py` (S5-M1-T6) and `child_limits.py` (S5-M2-T1), and no other `cli` behaviour (question 1). The child is not a security sandbox: a parser exploit can lift a limit that the process set on itself, and the README says so.
     - `cli/_limits.py`: `def apply_limits(memory_bytes: int) -> None`. On `sys.platform.startswith("linux")`: `resource.setrlimit(resource.RLIMIT_AS, (memory_bytes, memory_bytes))`. On `sys.platform == "win32"`: call `_limits_windows.limit_committed_memory(memory_bytes)`. On any other system: raise `OSError("cli: no memory limit on this system")`. It never catches an error: a failure must stop the child (fail closed).
     - `cli/_limits_windows.py` (importable on every system, so a test can read it): ctypes structures `IO_COUNTERS` (six `c_ulonglong`), `JOBOBJECT_BASIC_LIMIT_INFORMATION` (`PerProcessUserTimeLimit` and `PerJobUserTimeLimit` as `wintypes.LARGE_INTEGER`, `LimitFlags` as `wintypes.DWORD`, `MinimumWorkingSetSize` and `MaximumWorkingSetSize` as `ctypes.c_size_t`, `ActiveProcessLimit` as `wintypes.DWORD`, `Affinity` as `ctypes.c_size_t`, `PriorityClass` and `SchedulingClass` as `wintypes.DWORD`), and `JOBOBJECT_EXTENDED_LIMIT_INFORMATION` (`BasicLimitInformation`, `IoInfo`, `ProcessMemoryLimit`, `JobMemoryLimit`, `PeakProcessMemoryUsed` and `PeakJobMemoryUsed`, the last four `ctypes.c_size_t`). Constants: `JOB_OBJECT_EXTENDED_LIMIT_INFORMATION_CLASS = 9`, `JOB_OBJECT_LIMIT_PROCESS_MEMORY = 0x00000100`, `JOB_OBJECT_LIMIT_DIE_ON_UNHANDLED_EXCEPTION = 0x00000400`. `def limit_committed_memory(memory_bytes: int) -> None` loads `kernel32` with `ctypes.WinDLL("kernel32", use_last_error=True)`, calls `CreateJobObjectW(None, None)`, `SetInformationJobObject(job, 9, byref(info), sizeof(info))` with `LimitFlags = PROCESS_MEMORY | DIE_ON_UNHANDLED_EXCEPTION` and `ProcessMemoryLimit = memory_bytes`, then `AssignProcessToJobObject(job, GetCurrentProcess())`. A call that returns 0 raises `ctypes.WinError(ctypes.get_last_error())`. The Windows limit counts committed memory, and the Linux limit counts address space, so the same figure differs by system. Set the `argtypes` and `restype` of each call.
     - `cli/_child.py`: `def main(argv: Sequence[str] | None = None, *, stdin: BinaryIO | None = None, stdout: BinaryIO | None = None) -> int`. The arguments are `--memory-bytes <int>` and `--name <str>` (both required). Its first action after parsing is `apply_limits(memory_bytes)`. The module `_child.py` imports only the standard library and `clause_tracer.cli._limits` at the top. It imports `clause_tracer.core`, `clause_tracer.cli.child_reply` and `clause_tracer.ingest` inside `main()`, after `apply_limits` has run, so the libraries that `ingest` loads (about 360 MB of address space) are counted by the limit (system design 15.5: the limit is the child's first action). `cli/__init__.py` imports nothing but defines `__all__` (it holds no import today). It reads standard input to the end (at most `MAX_FILE_BYTES + 1` bytes), calls `ingest.read_file(data, name=name)`, and writes `encode_child_reply(ChildDone(document=document))` to standard output and returns 0. An `InputError` writes `ChildFailed(code=error.code, context=dict(error.context))` and returns 0. A `MemoryError` writes `ChildFailed(code="unreadable_file", context={"reason": "memory"})` and returns 0. A `ValueError` from `encode_child_reply` (`PydanticSerializationError` is one; a lone surrogate in the text raises it) writes `ChildFailed(code="unreadable_file", context={"reason": "child_reply_unencodable"})` and returns 0; the `try` holds the `encode_child_reply` call only, and the exception text is never put into the context or printed. A number that is not finite does not raise: it is written as `null`, and the parent refuses it with `child_reply_invalid`. Any other exception is not caught (the process ends with exit code 1). `if __name__ == "__main__": raise SystemExit(main())`. It prints nothing else.
-    - `cli/child_runner.py`: `@dataclass(frozen=True, slots=True, kw_only=True) class ChildLimits` with `timeout_s: float = CHILD_TIMEOUT_S` and `memory_bytes: int = CHILD_MEMORY_BYTES`. `def child_command(*, name: str, memory_bytes: int, frozen: bool | None = None) -> list[str]`: when `frozen` is `None` it reads `getattr(sys, "frozen", False)`. Not frozen: `[sys.executable, "-I", "-m", "clause_tracer.cli._child", "--memory-bytes", str(memory_bytes), "--name", name]`. Frozen: `[sys.executable, "--read-child", "--memory-bytes", str(memory_bytes), "--name", name]` (the app's own executable dispatches on `--read-child` in stage 12; stage 5 builds only the command, and records the gap). `def classify_child_outcome(*, returncode: int, stdout: bytes, timed_out: bool) -> Document`, a pure function with this table: `timed_out` raises `UnreadableFileError({"reason": "too_slow"})`; a non-zero `returncode` raises `UnreadableFileError({"reason": "child_crashed", "exit_code": returncode})`; otherwise `decode_child_reply(stdout)` (S5-M1-T6): a `ChildDone` returns its document, a `ChildFailed` raises `input_error_for_code(code, context)`. `def read_file_in_child(data: bytes, *, name: str, limits: ChildLimits | None = None) -> Document`: starts the child with `subprocess.Popen(command, stdin=PIPE, stdout=PIPE, stderr=DEVNULL)` (a list of arguments, no shell); writes `data` to its standard input in a daemon thread and closes it; starts a `threading.Timer(limits.timeout_s, kill)` where `kill` sets a flag and calls `process.kill()`; reads at most `MAX_CHILD_REPLY_BYTES + 1` bytes of standard output; when the read is longer than `MAX_CHILD_REPLY_BYTES` it kills the child and raises `UnreadableFileError({"reason": "child_reply_too_large"})`; waits for the child; cancels the timer; and returns `classify_child_outcome(...)`. It always waits for the child, so none is left running. Never use a process pool, `fork`, `shell=True` or `pickle`.
+    - `cli/child_runner.py`: `@dataclass(frozen=True, slots=True, kw_only=True) class ChildLimits` with `timeout_s: float = CHILD_TIMEOUT_S` and `memory_bytes: int = CHILD_MEMORY_BYTES`. `def child_command(*, name: str, memory_bytes: int, frozen: bool | None = None) -> list[str]`: when `frozen` is `None` it reads `getattr(sys, "frozen", False)`. Not frozen: `[sys.executable, "-I", "-m", "clause_tracer.cli._child", "--memory-bytes", str(memory_bytes), "--name", name]`. Frozen: `[sys.executable, "--read-child", "--memory-bytes", str(memory_bytes), "--name", name]` (S5-M2-T12 changes how both commands pass the name; the app's own executable dispatches on `--read-child` in stage 12; stage 5 builds only the command, and records the gap). `def classify_child_outcome(*, returncode: int, stdout: bytes, timed_out: bool) -> Document`, a pure function with this table: `timed_out` raises `UnreadableFileError({"reason": "too_slow"})`; a non-zero `returncode` raises `UnreadableFileError({"reason": "child_crashed", "exit_code": returncode})`; otherwise `decode_child_reply(stdout)` (S5-M1-T6): a `ChildDone` returns its document, a `ChildFailed` raises `input_error_for_code(code, context)`. `def read_file_in_child(data: bytes, *, name: str, limits: ChildLimits | None = None) -> Document`: starts the child with `subprocess.Popen(command, stdin=PIPE, stdout=PIPE, stderr=DEVNULL)` (a list of arguments, no shell); writes `data` to its standard input in a daemon thread and closes it; starts a `threading.Timer(limits.timeout_s, kill)` where `kill` sets a flag and calls `process.kill()`; reads at most `MAX_CHILD_REPLY_BYTES + 1` bytes of standard output; when the read is longer than `MAX_CHILD_REPLY_BYTES` it kills the child and raises `UnreadableFileError({"reason": "child_reply_too_large"})`; waits for the child; cancels the timer; and returns `classify_child_outcome(...)`. It always waits for the child, so none is left running. Never use a process pool, `fork`, `shell=True` or `pickle`.
     - Update `src/clause_tracer/cli/README.md` (S5-M1-T6 created it) with these sections: the four files, the reply protocol, the outcome table, the memory difference between Linux and Windows, "not a sandbox", and the gap "the frozen build does not dispatch `--read-child` yet (stage 12)".
   - **Files:** `src/clause_tracer/cli/_limits.py`, `src/clause_tracer/cli/_limits_windows.py`, `src/clause_tracer/cli/_child.py`, `src/clause_tracer/cli/child_runner.py`, `src/clause_tracer/cli/README.md`, `src/clause_tracer/cli/tests/test_child_command.py`, `src/clause_tracer/cli/tests/test_child_outcome.py`, `src/clause_tracer/cli/tests/test_child_main.py`, `src/clause_tracer/cli/tests/test_limits.py`, `src/clause_tracer/cli/child_reply.py`, `src/clause_tracer/cli/tests/test_child_reply.py`.
   - **Tests first:** `test_child_command_installed` and `test_child_command_frozen` (the exact lists above, with `name="a.docx"` and `memory_bytes=5`), `test_outcome_table` (six rows: timed out gives `too_slow`; exit code 1 gives `child_crashed` with `exit_code` 1; exit code -11 gives `child_crashed` with `exit_code` -11; a `ChildDone` reply returns the document; a `ChildFailed` reply with code `scanned_pdf` raises `ScannedPdfError`; empty stdout with code 0 gives `child_reply_invalid`), `test_child_main_text` (call `main(["--memory-bytes", "1", "--name", "a.txt"], stdin=BytesIO(b"Hello world.\n"), stdout=out)` with `apply_limits` replaced by a no-op through `monkeypatch`: the reply decodes to a `ChildDone` whose document text is `"Hello world.\n"`), `test_child_main_input_error` (empty input gives a `ChildFailed` with code `empty_input`), `test_child_main_memory_error` (`monkeypatch` `read_file` to raise `MemoryError`: reason `memory`), `test_child_main_other_error_propagates` (a `RuntimeError` propagates), `test_child_main_unencodable_reply` (`monkeypatch` `read_file` to return the document of `Hello world.` with its `text` replaced by `"\ud800"`: the reply decodes to a `ChildFailed` with code `unreadable_file` and the context `{"reason": "child_reply_unencodable"}`, and `main` returns 0), `test_limits_unknown_system` (`monkeypatch` `sys.platform` to `"darwin"`: `OSError`), `test_limits_linux_sets_rlimit_as` (on Linux only: call `apply_limits` in a child started by `subprocess.run([sys.executable, "-I", "-c", ...])` and read `resource.getrlimit(RLIMIT_AS)`; skip on other systems), `test_child_has_no_heavy_top_level_import` (parse `_child.py` with `ast`: no top-level `import` or `from` names `clause_tracer.ingest`, `clause_tracer.core`, `clause_tracer.cli.child_reply`, `pydantic`, `lxml`, `pypdfium2`, `pikepdf` or `lingua`; and `cli/__init__.py` holds no import), `test_apply_limits_runs_before_the_libraries_load` (run the child in a real process with `-X importtime` on a clean text file with `--memory-bytes` 1 GiB and assert in its standard error that `clause_tracer.ingest` is imported after `clause_tracer.cli._limits`; skip on `win32` with the reason that the order is checked on Linux), `test_no_pickle_no_shell` (the source of `child_runner.py` holds none of `pickle`, `shell=True`, `ProcessPoolExecutor`, `os.fork`).
@@ -318,21 +318,400 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
   - **Rules:** question 1, T2, I5, system design 15.5 and 8.4.
   - **Depends on:** S5-M1-T6, S5-M2-T5
 
-- [ ] **S5-M2-T7: The hostile-file tests**
+- [x] **S5-M2-T7: The hostile-file tests**
   - **Build:** Add `tests/test_child_hostile.py` in the root `tests/` folder (it may import `cli` and `ingest`). Every test calls `read_file_in_child` and starts a real child. A helper `_reason(error)` returns `error.context["reason"]`.
   - **Files:** `tests/test_child_hostile.py`, `tests/test_child_clean.py`.
-  - **Tests first:** `test_ole2_is_old_word` (`ole2_bytes()` raises `OldWordFileError`), `test_not_a_zip` (`not_a_zip()` raises `UnreadableFileError`, reason `zip_invalid`), `test_too_many_members` (`many_members_docx(MAX_ZIP_MEMBERS + 1)` raises `UnreadableFileError`, reason `too_many_members`), `test_zip_bomb_is_input_too_large` (`zip_bomb_docx(100 MiB)` raises `InputTooLargeError`), `test_lying_low` (`lying_low_docx()` raises `UnreadableFileError`), `test_doctype` and `test_each_entity_kind` (reason `doctype`, for `doctype_docx()` and each `entity_docx(kind)`), `test_deep_xml` (`deep_xml_docx(255)`, reason `xml_invalid`), `test_huge_text_node` (`huge_text_node_docx(11 MiB)`, reason `xml_invalid`), `test_too_slow` (`big_xml_docx(MAX_XML_PART_BYTES - 1 MiB)` with `ChildLimits(timeout_s=0.4)` raises `UnreadableFileError`, reason `too_slow`), `test_too_greedy` (the same file with `ChildLimits(memory_bytes=600 MiB)` raises `UnreadableFileError`; no reason is asserted; skipped on `win32` with the reason "committed memory differs: S5-M6-T6 tests Windows"), `test_no_child_left_running` (wrap `subprocess.Popen` with `monkeypatch` so the test keeps the process object; after `test_too_slow`'s call returns, assert `process.poll() is not None`), `test_a_clean_text_file_round_trips` in `test_child_clean.py` (`read_file_in_child(text_bytes, name="a.txt")` equals `read_file(text_bytes, name="a.txt")` for the stage 2 sample text `developer-agreement.txt`), `test_child_start_up_is_fast_enough` (the clean round trip takes under 10 s; the report measured about 0.1 s start-up).
+  - **Tests first:** `test_ole2_is_old_word` (`ole2_bytes()` raises `OldWordFileError`), `test_not_a_zip` (`not_a_zip()` raises `UnreadableFileError`, reason `zip_invalid`), `test_too_many_members` (`many_members_docx(MAX_ZIP_MEMBERS + 1)` raises `UnreadableFileError`, reason `too_many_members`), `test_zip_bomb_is_input_too_large` (`zip_bomb_docx(100 MiB)` raises `InputTooLargeError`), `test_lying_low` (`lying_low_docx()` raises `UnreadableFileError`), `test_doctype` and `test_each_entity_kind` (reason `doctype`, for `doctype_docx()` and each `entity_docx(kind)`), `test_deep_xml` (`deep_xml_docx(255)`, reason `xml_invalid`), `test_huge_text_node` (`huge_text_node_docx(11 MiB)`, reason `xml_invalid`), `test_too_slow` (`big_xml_docx(MAX_XML_PART_BYTES - 1 MiB)` with `ChildLimits(timeout_s=0.4)` raises `UnreadableFileError`, reason `too_slow`), `test_too_greedy` (the same file with `ChildLimits(memory_bytes=600 MiB)` raises `UnreadableFileError`; no reason is asserted until S5-M2-T13; skipped on `win32` with the reason "committed memory differs: S5-M6-T6 tests Windows"), `test_no_child_left_running` (wrap `subprocess.Popen` with `monkeypatch` so the test keeps the process object; after `test_too_slow`'s call returns, assert `process.poll() is not None`), `test_a_clean_text_file_round_trips` in `test_child_clean.py` (`read_file_in_child(text_bytes, name="a.txt")` equals `read_file(text_bytes, name="a.txt")` for the stage 2 sample text `developer-agreement.txt`), `test_child_start_up_is_fast_enough` (the clean round trip takes under 10 s; the report measured about 0.1 s start-up).
   - **Done when:** `scripts/check.sh` exits 0, and each test ends inside its limit (the slowest is under 15 s on the research machine).
   - **Rules:** question 11, testing strategy 8, T13.
   - **Depends on:** S5-M2-T6
 
-- [ ] **S5-M2-T8: The Windows job and `.gitattributes`**
+- [x] **S5-M2-T8: The Windows job and `.gitattributes`**
   - **Build:** (1) Create `.gitattributes` with exactly these lines: `* -text`, `*.pdf binary`, `*.docx binary`, `*.png binary`, `*.zip binary`. `-text` turns off every line-ending change on every system, so the raw bytes of samples and goldens are the same on Linux and Windows (D1). Run `git add --renormalize .` and `git status`: no file may change. Run `git ls-files --eol` and check that no file would change. (2) In `.github/workflows/check.yml` add a second job `windows` beside `check`: `runs-on: windows-2025`; steps `actions/checkout@v7` (`fetch-depth: 0`), `actions/setup-python@v7` (`python-version: "3.12"`), `astral-sh/setup-uv@v7` (`python-version: "3.12"`), `run: uv sync --locked --group dev`, and `run: scripts/check.sh` with `shell: bash` and `env: CLAUSE_TRACER_SKIP_PICTURES: "1"`. The `windows` job has no owner-table step. `check.sh` runs the licence check, so this job checks the Windows dependency list. **Do not forget (owner, 26 Nov 2026):** until this job runs, nothing checks the licences of the packages that only Windows installs. If the licence check fails on Windows, stop and ask the owner. (3) In `scripts/README.md` and `docs/testing-strategy.md` section 13 mark that the Windows job runs from stage 5. (4) Run the job on the branch (a push runs it). Fix a failure that is a portability fault of a test or a script (a path separator, a file encoding, a shell call, a line ending). If a failure needs a change to what the product does, stop and ask the owner. Record each fix in section 10 of this plan if it differs from the plan.
   - **Files:** `.gitattributes`, `.github/workflows/check.yml`, `scripts/README.md`, `docs/testing-strategy.md`.
   - **Tests first:** None. The check is the job itself. Add `test_gitattributes` in `tests/test_gitattributes.py`: the file exists, holds the line `* -text`, and holds `*.pdf binary`.
   - **Done when:** the `windows` job is green on the milestone branch and its log shows the `licences: ok (` line, and the Linux job is still green. If the Windows job cannot be made green without a product change, the milestone is not done: report it to the owner.
   - **Rules:** question 7, D1, testing strategy 13.
-  - **Depends on:** S5-M2-T7
+  - **Depends on:** S5-M2-T7. It is ticked only after S5-M2-T9: the `windows` job is green only with that task.
+
+- [x] **S5-M2-T9: Own depth and size limits for XML parts (added 28 Nov 2026)**
+  - **Build:** The `expat` check of S5-M2-T4 now reads the whole part and applies the product's own limits, because the limits of `lxml` differ between systems (ADR 0007, amendment of 28 Nov 2026). The `lxml` parser, its settings and the check after the parse do not change.
+    - `ingest/limits.py`: replace the comment under `MAX_XML_DEPTH` with `# The code checks it (_xml.py): the depth limit of lxml differs between systems.` Add after it `MAX_XML_TEXT_BYTES: Final[int] = 9_000_000` with the comment `# The code checks it (_xml.py), below lxml's own limits on Linux, which differ between systems.`
+    - `ingest/_xml.py`: import `MAX_XML_DEPTH` and `MAX_XML_TEXT_BYTES` from `clause_tracer.ingest.limits`. Delete `_RootReached` and `_on_start_element`.
+    - Add `class _PartScan` with `__slots__ = ("_depth", "_run_bytes")`; `__init__(self) -> None` sets both to 0. `start_element(self, name: str, attrs: dict[str, str]) -> None` adds 1 to `_depth`, sets `_run_bytes` to 0, and, when `is_too_deep = self._depth > MAX_XML_DEPTH`, raises `UnreadableFileError({"reason": "xml_invalid"})`; then, only `if attrs:` (this keeps a large part fast), it calls `_check_size(sum(_utf8_size(key) + _utf8_size(value) for key, value in attrs.items()))`. `end_element(self, name: str) -> None` subtracts 1 from `_depth` and sets `_run_bytes` to 0. `characters(self, data: str) -> None` adds `_utf8_size(data)` to `_run_bytes` and calls `_check_size(self._run_bytes)`.
+    - Add `def _utf8_size(text: str) -> int` returning `len(text.encode("utf-8"))`, and `def _check_size(size: int) -> None`, which, when `is_too_long = size > MAX_XML_TEXT_BYTES`, raises `UnreadableFileError({"reason": "xml_invalid"})`.
+    - Add `def _on_comment(data: str) -> None`, which calls `_check_size(_utf8_size(data))`, and `def _on_processing_instruction(target: str, data: str) -> None`, which calls `_check_size(_utf8_size(target) + _utf8_size(data))`. Neither changes the count of the text run.
+    - Rename `_check_prolog` to `_check_part`, same signature. It makes a `_PartScan` and a new reader, sets `reader.buffer_text = True`, keeps `XmlDeclHandler` and `StartDoctypeDeclHandler`, and sets `StartElementHandler = scan.start_element`, `EndElementHandler = scan.end_element`, `CharacterDataHandler = scan.characters`, `CommentHandler = _on_comment` and `ProcessingInstructionHandler = _on_processing_instruction`. `reader.Parse(data, True)` stays in a `try` whose only `except` is the one for `(expat.ExpatError, ValueError, LookupError)`. `parse_part` calls `_check_part` first.
+    - So a run of text is all character data (CDATA included) between two tags: only a start tag or an end tag restarts its count.
+    - The module docstring says that `expat` reads all of the part and names what it refuses.
+    - `ingest/README.md`: add the table row ``| `MAX_XML_TEXT_BYTES` | 9,000,000 | The UTF-8 bytes of one run of text, one comment, one processing instruction, or the attributes of one tag |`` after the row of `MAX_XML_DEPTH`.
+  - **Files:** `src/clause_tracer/ingest/limits.py`, `src/clause_tracer/ingest/_xml.py`, `src/clause_tracer/ingest/README.md`, `src/clause_tracer/ingest/tests/test_limits.py`, `src/clause_tracer/ingest/tests/test_xml.py`.
+  - **Tests first:** add `assert limits.MAX_XML_TEXT_BYTES == 9_000_000` to `test_stage_5_limits`. In `test_xml.py`, `CAP` below is `MAX_XML_TEXT_BYTES`, "parses" means that `parse_part` returns a root, and "is refused" means that it raises `UnreadableFileError` with reason `xml_invalid`; a helper `_assert_refused(data: bytes) -> None` checks that. No existing test or expected value changes.
+    - `test_own_check_refuses_depth_257`: `_check_part` returns for `_document(deep_xml_docx(254))` and raises reason `xml_invalid` for `_document(deep_xml_docx(255))`.
+    - `test_long_text_is_refused`: `b"<a>" + b"x" * CAP + b"</a>"` parses; with `CAP + 1` it is refused.
+    - `test_text_limit_counts_utf8_bytes`: `("<a>" + "\u00e9" * 4_500_000 + "</a>").encode("utf-8")` parses; with `4_500_001` it is refused.
+    - `test_long_cdata_is_refused`: `b"<a><![CDATA[" + b"x" * CAP + b"]]></a>"` parses; with `CAP + 1` it is refused.
+    - `test_long_comment_is_refused`: `b"<a><!--" + b"x" * CAP + b"--></a>"` parses; with `CAP + 1` it is refused.
+    - `test_long_processing_instruction_is_refused`: `b"<a><?t " + b"x" * (CAP - 1) + b"?></a>"` parses; with `CAP` characters it is refused (the target `t` counts).
+    - `test_long_attributes_are_refused`: with `one = b"x" * (CAP - 1)` and `half = b"x" * (CAP // 2 - 1)`, `b'<a b="' + one + b'"/>'` and `b'<a b="' + half + b'" c="' + half + b'"/>'` parse; `b'<a b="' + one + b'x"/>'` and `b'<a b="' + half + b'" c="' + half + b'x"/>'` are refused.
+    - `test_only_a_tag_restarts_the_text_count`: with `first = b"x" * (CAP // 2)` and `second = b"x" * (CAP // 2 + 1)`, `b"<a>" + first + b"<b/>" + second + b"</a>"` parses; `b"<a>" + first + b"<!--c-->" + second + b"</a>"` is refused.
+  - **Done when:** `scripts/check.sh` exits 0, and the `windows` job on the milestone branch is green.
+  - **Rules:** D4, system design 8.4, ADR 0007.
+  - **Depends on:** S5-M2-T4
+
+- [x] **S5-M2-T10: The overlap refusal in `read_part` (added 28 Nov 2026)**
+  - **Build:** Python gives its overlap warning from `ZipFile.open()`, not from `ZipFile(...)`, so the `zip_overlap` refusal of S5-M2-T3 step (2) never runs. In `ingest/_zip.py`:
+    - `read_part`: put the `try` that opens and reads the member inside `with warnings.catch_warnings():`, with `warnings.simplefilter("error")` as its first line. Keep the clause for `(zipfile.BadZipFile, zlib.error)` (reason `zip_invalid`). Add after it `except UserWarning:`, which raises `UnreadableFileError({"reason": "zip_overlap", "part": name}) from None`.
+    - `open_package`: remove the `with warnings.catch_warnings():` block and its `except UserWarning` clause. The `try` around `zipfile.ZipFile(io.BytesIO(data))` stays, with its `zipfile.BadZipFile` clause (reason `zip_invalid`).
+    - Docstrings: remove `zip_overlap` from the Raises text of `open_package`, and in the Raises text of `read_part` replace the words about `UnreadableFileError` with `UnreadableFileError when the member is corrupt, overlaps another member, or its real size differs from the declared size.`
+  - **Files:** `src/clause_tracer/ingest/_zip.py`, `src/clause_tracer/ingest/tests/test_zip.py`.
+  - **Tests first:** replace the body of `test_overlap_is_an_error`, with no `pytest.skip`: `package = open_package(_overlapping_zip())` returns; `package.read_part("[Content_Types].xml")` raises `UnreadableFileError`; its reason is `zip_overlap` and `raised.value.context["part"]` is `"[Content_Types].xml"`. `_overlapping_zip` does not change. Before the code change the test fails, because `read_part` returns the bytes.
+  - **Done when:** `scripts/check.sh` exits 0, `pytest -rs src/clause_tracer/ingest/tests/test_zip.py` reports no skipped test, and the `windows` job on the milestone branch is green.
+  - **Rules:** P8, question 11, T13.
+  - **Depends on:** S5-M2-T3
+
+- [x] **S5-M2-T11: The zip reader refuses what it cannot bound (added 28 Nov 2026)**
+  - **Build:** A review of pull request 245 found five faults in `ingest/_zip.py`. No new reason word is added.
+    - Add `import copy`. Add these two constants after `_ENCRYPTED_FLAG`:
+    ```python
+    _ALLOWED_COMPRESSION: Final[frozenset[int]] = frozenset({zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED})
+    # Word writes only these two. With any other, one read step is not bounded by the declared size.
+
+    _ZIP_ERRORS: Final[tuple[type[Exception], ...]] = (
+        zipfile.BadZipFile,
+        zlib.error,
+        EOFError,
+        NotImplementedError,
+        OSError,
+        ValueError,
+    )
+    # What zipfile raises for a damaged or hostile package. MemoryError is never in this list.
+    ```
+    - `read_part`: after the two size caps and before `with warnings.catch_warnings():`, add the three lines below. Open `probe` (not `info`) with `self._zip.open`, and keep `stream.read(info.file_size + 1)`. Replace `except (zipfile.BadZipFile, zlib.error):` by `except _ZIP_ERRORS:`. Keep the `except UserWarning:` clause. Change the size test to `is_size_mismatch = len(data) != info.file_size`. The caps keep the declared size `info.file_size`.
+    ```python
+    # zipfile stops at the declared size: one extra byte lets a longer part show.
+    probe = copy.copy(info)
+    probe.file_size = info.file_size + 1
+    ```
+    - `open_package`: replace `except zipfile.BadZipFile:` by `except _ZIP_ERRORS:`. Directly after `names = package.namelist()`, when `has_too_many_names = len(names) > MAX_ZIP_MEMBERS`, raise `UnreadableFileError({"reason": "too_many_members", "members": len(names), "limit": MAX_ZIP_MEMBERS})`. The check of the count in the end record stays. In the loop over `infolist()`, after the encryption check, when `is_other_compression = info.compress_type not in _ALLOWED_COMPRESSION`, raise `UnreadableFileError({"reason": "zip_invalid"})`.
+    - Replace the module docstring by exactly:
+    ```python
+    """The zip checks of the Word reader (S5-M2-T3, S5-M2-T11).
+
+    This file imports only the standard library. It refuses a package before
+    `zipfile` opens it when the count in the end record is too high. That count
+    can be false, so the names are counted again after the open. A member that
+    is not stored or deflated is refused, and media is never read. A part's
+    declared size is checked before the part is inflated.
+    """
+    ```
+    - `ingest/README.md`, section `read_file`: add the sentence ``A package member must be stored or deflated. Any other method, and a package that Python cannot read, gives `UnreadableFileError` with reason `zip_invalid`.``
+  - **Files:** `src/clause_tracer/ingest/_zip.py`, `src/clause_tracer/ingest/tests/test_zip.py`, `src/clause_tracer/ingest/README.md`.
+  - **Tests first:** in `test_zip.py` add the imports `random`, `tracemalloc` and `zlib`, add `InputError` to the import from `clause_tracer.core`, and add the code below at the end. No existing test or expected value changes. `test_a_deflate_bomb_stays_small` passes before the code change (it guards the claim that deflate is bounded); the other new tests fail before it.
+    ```python
+    def _two_part_zip(document: bytes, method: int = zipfile.ZIP_DEFLATED) -> bytearray:
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as package:
+            package.writestr("[Content_Types].xml", b"<Types/>")
+            package.writestr(_DOCUMENT, document, compress_type=method)
+        return bytearray(buffer.getvalue())
+
+
+    def _second_central(data: bytearray) -> int:
+        first = data.find(b"PK\x01\x02")
+        return data.find(b"PK\x01\x02", first + 4)
+
+
+    def _declare(data: bytearray, *, size: int, crc: int) -> bytes:
+        """Change the declared size and CRC of the second member."""
+        central = _second_central(data)
+        data[central + 16 : central + 20] = crc.to_bytes(4, "little")
+        data[central + 24 : central + 28] = size.to_bytes(4, "little")
+        return bytes(data)
+
+
+    @pytest.mark.parametrize("method", [zipfile.ZIP_BZIP2, zipfile.ZIP_LZMA])
+    def test_other_compression_is_refused(method: int) -> None:
+        with pytest.raises(UnreadableFileError) as raised:
+            open_package(bytes(_two_part_zip(b"<a/>", method)))
+
+        assert _reason(raised.value) == "zip_invalid"
+
+
+    def test_too_many_members_when_the_count_lies() -> None:
+        data = bytearray(many_members_docx(MAX_ZIP_MEMBERS + 1))
+        end = data.rfind(b"PK\x05\x06")
+        data[end + 8 : end + 12] = (3).to_bytes(2, "little") * 2
+
+        with pytest.raises(UnreadableFileError) as raised:
+            open_package(bytes(data))
+
+        assert raised.value.context == {
+            "reason": "too_many_members",
+            "members": MAX_ZIP_MEMBERS + 1,
+            "limit": MAX_ZIP_MEMBERS,
+        }
+
+
+    @pytest.mark.parametrize(
+        "patches",
+        [
+            pytest.param([(6, 99)], id="extract-version"),
+            pytest.param([(10, 99)], id="compression-method"),
+            pytest.param([(9, 0x08), (46, 0xFF)], id="bad-utf8-name"),
+        ],
+    )
+    def test_raw_zipfile_errors_are_zip_invalid(patches: list[tuple[int, int]]) -> None:
+        data = bytearray(build_docx(p(r("Hello"))))
+        central = data.find(b"PK\x01\x02")
+        for offset, value in patches:
+            data[central + offset] = value
+
+        with pytest.raises(UnreadableFileError) as raised:
+            open_package(bytes(data))
+
+        assert _reason(raised.value) == "zip_invalid"
+
+
+    @pytest.mark.parametrize(("covered", "reason"), [(4, "zip_invalid"), (5, "size_mismatch")])
+    def test_a_cut_part_is_refused(covered: int, reason: str) -> None:
+        real = b"<a/>" + b" " * 10 + b"<hidden-rest/>"
+        data = _declare(_two_part_zip(real), size=4, crc=zlib.crc32(real[:covered]))
+        package = open_package(data)
+
+        with pytest.raises(UnreadableFileError) as raised:
+            package.read_part(_DOCUMENT)
+
+        assert _reason(raised.value) == reason
+
+
+    def test_a_declared_size_longer_than_the_data_is_refused() -> None:
+        data = _declare(_two_part_zip(b"<a/>"), size=40, crc=zlib.crc32(b"<a/>"))
+        package = open_package(data)
+
+        with pytest.raises(UnreadableFileError) as raised:
+            package.read_part(_DOCUMENT)
+
+        assert _reason(raised.value) == "size_mismatch"
+
+
+    def test_a_deflate_bomb_stays_small() -> None:
+        data = _declare(_two_part_zip(bytes(100 * _MIB)), size=100, crc=0)
+        package = open_package(data)
+
+        tracemalloc.start()
+        with pytest.raises(UnreadableFileError):
+            package.read_part(_DOCUMENT)
+        peak = tracemalloc.get_traced_memory()[1]
+        tracemalloc.stop()
+
+        assert peak < _MIB
+
+
+    def _stored_copy(data: bytes) -> bytes:
+        buffer = io.BytesIO()
+        with (
+            zipfile.ZipFile(io.BytesIO(data)) as source,
+            zipfile.ZipFile(buffer, "w", zipfile.ZIP_STORED) as target,
+        ):
+            for name in source.namelist():
+                target.writestr(name, source.read(name))
+        return buffer.getvalue()
+
+
+    def _mutated(base: bytes, rng: random.Random) -> bytes:
+        """Change one to four bytes, mostly inside the zip records."""
+        data = bytearray(base)
+        signatures = (b"PK\x01\x02", b"PK\x03\x04", b"PK\x05\x06")
+        records = [index for index in range(len(base)) if base.startswith(signatures, index)]
+        for _ in range(rng.randint(1, 4)):
+            if rng.random() < 0.7:
+                position = rng.choice(records) + rng.randrange(4, 46)
+            else:
+                position = rng.randrange(len(base))
+            if position < len(data):
+                data[position] = rng.randrange(256)
+        return bytes(data)
+
+
+    def test_mutated_packages_raise_only_input_errors() -> None:
+        rng = random.Random(1)
+        deflated = build_docx(p(r("Hello " * 50)))
+        bases = (deflated, _stored_copy(deflated))
+
+        for index in range(4_000):
+            data = _mutated(bases[index % 2], rng)
+            try:
+                package = open_package(data)
+                for name in package.names():
+                    package.read_part(name)
+            except InputError:
+                pass
+    ```
+  - **Done when:** `scripts/check.sh` exits 0, and both CI jobs on the milestone branch are green. If `test_mutated_packages_raise_only_input_errors` shows an error class that is not in `_ZIP_ERRORS`, stop and ask the owner.
+  - **Rules:** D4, P8, question 11, T13, ADR 0007 amendment of 28 Nov 2026 on zip members.
+  - **Depends on:** S5-M2-T10
+
+- [x] **S5-M2-T12: The runner, the file name and the child left running (added 28 Nov 2026)**
+  - **Build:** In `cli/child_runner.py`:
+    - `child_command`: in both lists, replace the two items `"--name", name` by the one item `f"--name={name}"`. Without this, `argparse` reads a name that starts with `-` as an option. `_child.py` does not change.
+    - `feed`: replace `except BrokenPipeError:` by `except OSError:`, with the comment `# The child ended early. Windows reports this as EINVAL, not BrokenPipeError.` above `pass`.
+    - Replace the line `timed_out = False` and the function `kill` by:
+    ```python
+    timer_fired = False
+
+    def kill() -> None:
+        nonlocal timer_fired
+        timer_fired = True
+        is_still_running = process.poll() is None
+        if is_still_running:
+            process.kill()
+    ```
+    - Replace the last line of `read_file_in_child` (the `return`) by:
+    ```python
+    # A timer that fired after the child ended well does not discard its reply.
+    timed_out = timer_fired and returncode != 0
+    return classify_child_outcome(returncode=returncode, stdout=reply, timed_out=timed_out)
+    ```
+    - Replace the `finally` block of the read by:
+    ```python
+    finally:
+        timer.cancel()
+        is_left_running = process.poll() is None
+        if is_left_running:
+            process.kill()
+            process.wait()
+    ```
+    - `cli/README.md`: in the command of "The reply protocol", write `--name=<name>`.
+  - **Files:** `src/clause_tracer/cli/child_runner.py`, `src/clause_tracer/cli/README.md`, `src/clause_tracer/cli/tests/test_child_command.py`, `tests/test_child_runner.py` (new).
+  - **Tests first:** in `test_child_command.py`, in both expected lists, replace `"--name", "a.docx"` by `"--name=a.docx"` (the owner approves this change of an expected value, T11). Create `tests/test_child_runner.py` with exactly:
+    ```python
+    """The runner when a name, a child or a read is unusual (S5-M2-T12)."""
+
+    import errno
+    import subprocess
+    import threading
+    from collections.abc import Callable
+    from typing import Any
+
+    import pytest
+
+    from clause_tracer.cli.child_runner import read_file_in_child
+    from clause_tracer.core import InputError
+
+    _TEXT = b"Hello world.\n"
+
+
+    def _keep(
+        monkeypatch: pytest.MonkeyPatch, tweak: Callable[[subprocess.Popen[Any]], None]
+    ) -> list[subprocess.Popen[Any]]:
+        """Keep each child the runner starts, after `tweak` has changed it."""
+        started: list[subprocess.Popen[Any]] = []
+        real_popen = subprocess.Popen
+
+        def start(*args: Any, **kwargs: Any) -> subprocess.Popen[Any]:
+            process = real_popen(*args, **kwargs)
+            tweak(process)
+            started.append(process)
+            return process
+
+        monkeypatch.setattr(subprocess, "Popen", start)
+        return started
+
+
+    @pytest.mark.parametrize("name", ["-draft.txt", "--x.txt", ""])
+    def test_any_file_name_reaches_the_child(name: str) -> None:
+        assert read_file_in_child(_TEXT, name=name).source.name == name
+
+
+    def test_child_is_killed_when_the_read_raises(monkeypatch: pytest.MonkeyPatch) -> None:
+        def break_read(process: subprocess.Popen[Any]) -> None:
+            def read(*args: object) -> bytes:
+                raise RuntimeError("read failed")
+
+            monkeypatch.setattr(process.stdout, "read", read)
+
+        started = _keep(monkeypatch, break_read)
+
+        with pytest.raises(RuntimeError):
+            read_file_in_child(_TEXT, name="a.txt")
+
+        assert started[0].poll() is not None
+
+
+    def test_closed_pipe_error_of_windows_is_ignored(monkeypatch: pytest.MonkeyPatch) -> None:
+        def break_write(process: subprocess.Popen[Any]) -> None:
+            assert process.stdin is not None
+            close = process.stdin.close
+
+            def write(data: bytes) -> int:
+                close()
+                raise OSError(errno.EINVAL, "closed pipe")
+
+            monkeypatch.setattr(process.stdin, "write", write)
+
+        _keep(monkeypatch, break_write)
+        uncaught: list[object] = []
+        monkeypatch.setattr(threading, "excepthook", uncaught.append)
+        before = set(threading.enumerate())
+
+        with pytest.raises(InputError) as raised:
+            read_file_in_child(_TEXT, name="a.txt")
+        for thread in set(threading.enumerate()) - before:
+            thread.join(timeout=5)
+
+        assert raised.value.code == "empty_input"
+        assert uncaught == []
+
+
+    def test_a_timer_that_fires_late_keeps_the_result(monkeypatch: pytest.MonkeyPatch) -> None:
+        class LateTimer:
+            def __init__(self, interval: float, function: Callable[[], None]) -> None:
+                self._function = function
+
+            def start(self) -> None:
+                pass
+
+            def cancel(self) -> None:
+                self._function()
+
+        monkeypatch.setattr(threading, "Timer", LateTimer)
+
+        assert read_file_in_child(_TEXT, name="a.txt").text == "Hello world.\n"
+    ```
+  - **Done when:** `scripts/check.sh` exits 0, and both CI jobs on the milestone branch are green.
+  - **Rules:** question 1, system design 15.5, T11, T13.
+  - **Depends on:** S5-M2-T6
+
+- [x] **S5-M2-T13: Out of memory in lxml is reason `memory` (added 28 Nov 2026)**
+  - **Build:** `libxml2` reports a lack of memory as an `XMLSyntaxError` with code `ERR_NO_MEMORY` (measured on Linux). In `ingest/_xml.py`, in `parse_part`, replace the `except etree.LxmlError:` clause by the code below. In the docstring of `parse_part`, replace the sentence `A MemoryError is not caught.` by `MemoryError when lxml runs out of memory; no MemoryError is caught.` `_child.py` does not change: it already turns a `MemoryError` into reason `memory`.
+    ```python
+    except etree.LxmlError as error:
+        is_out_of_memory = getattr(error, "code", None) == etree.ErrorTypes.ERR_NO_MEMORY
+        if is_out_of_memory:
+            raise MemoryError from None
+        raise UnreadableFileError({"reason": "xml_invalid"}) from None
+    ```
+  - **Files:** `src/clause_tracer/ingest/_xml.py`, `src/clause_tracer/ingest/tests/test_xml.py`, `tests/test_child_hostile.py`.
+  - **Tests first:** in `test_xml.py` add `from clause_tracer.ingest import _xml` and the test below. In `test_child_hostile.py`, in `test_too_greedy`, name the raised error `raised` and add `assert _reason(raised.value) == "memory"` (the owner approves this change of an expected value, T11). Before this task the test passes even when no memory limit is set.
+    ```python
+    @pytest.mark.parametrize(("code", "error_type"), [(2, MemoryError), (4, UnreadableFileError)])
+    def test_lxml_out_of_memory_is_a_memory_error(
+        monkeypatch: pytest.MonkeyPatch, code: int, error_type: type[BaseException]
+    ) -> None:
+        etree = vars(_xml)["etree"]  # No test imports lxml: _xml.py is its one importer.
+
+        def fail(*args: object, **kwargs: object) -> None:
+            raise etree.XMLSyntaxError("unknown error", code, 0, 0)
+
+        monkeypatch.setattr(etree, "fromstring", fail)
+
+        with pytest.raises(error_type):
+            parse_part(b"<a/>")
+    ```
+  - **Done when:** `scripts/check.sh` exits 0, and both CI jobs on the milestone branch are green. If the Linux job gives a reason other than `memory` in `test_too_greedy`, stop and ask the owner.
+  - **Rules:** D4, P8, T11, T13.
+  - **Depends on:** S5-M2-T4, S5-M2-T6
 
 ### M3: The Word reader
 
@@ -467,6 +846,8 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
 - **The page is the page as shown** (question 20). `Page(number, width, height)` and every `PageBox` are in the shown page: after rotation and inside the bounding box that PDFium gives (`FPDF_GetPageBoundingBox`), top-left origin, PDF points. A character outside that box keeps its box, and is flagged `OFF_PAGE` in M5. A page whose shown width or height is not above 0 raises `UnreadableFileError({"reason": "page_size_invalid", "page": n})`.
 - **Every number is finite** (owner, 26 Nov 2026). Stacked scales make PDFium return `NaN` boxes (measured). A page frame value, or a character box value, origin value or drawn size, that is not finite (`math.isfinite`) raises `UnreadableFileError({"reason": "pdf_geometry_invalid", "page": n})`. The check runs on the values as PDFium returns them, and on the result of `drawn_size`, before any conversion (a `min` or `max` can drop a `NaN`). Generated characters are checked too: on the normal fixtures they are finite (measured).
 
+**Text drawn twice at one place (measured 26 Nov 2026, `pypdfium2` 5.15.2).** PDFium returns the characters of the first copy in the content stream only, whatever its colour. On `duplicate_glyph_page()` the page holds two text objects, and the text page gives ten characters with white fill: they belong to the white copy, and the black copy on top gives none. With the black copy first, the ten characters have black fill. So the `fill`, `render_mode` and `obj` of a `CharRecord` describe the first copy only, which may not be what the reader of the page sees. This measurement covers two copies at exactly the same place. For copies with an offset (such as fake bold), see [the reader checks and limits report](../../reports/Stage%205%20reader%20checks%20and%20limits.md), question 14: up to 5 points gave one copy, and 10 points or more kept both. The planned test `test_duplicate_glyph_under_black_is_a_known_miss` (M5) agrees with this. Consider it before the owner tables of M4 and M5 are written (S5-M4-T12, S5-M5-T7). If a task needs the second copy, stop and ask the owner.
+
 **Build order.** Build in number order.
 
 **File layout of M4 (P6).** `_pdf_model.py` (`CharRecord`, `PageFrame`), `_pdf_geometry.py` (the one coordinate function, pure), `_pdfium.py` (all `pypdfium2` calls), `_pdf_text.py` (the canonical text, pure), `_pdf_pages.py` (undecodable, scanned and furniture rules, pure), `pdf.py` (the public call).
@@ -585,6 +966,8 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
 Every hostile fixture raises its hidden-text finding, and every innocent look-alike raises none.
 
 **Build order.** Build in number order, with one exception: T7 (owner) can be done at any time after T5.
+
+**Read first.** The note "Text drawn twice at one place" at the head of M4: a check that reads a record's fill or render mode sees the first copy only.
 
 **What the research settled (26 Nov 2026).** The check in section 4 ("PDFium and hidden layers") is answered. PDFium returns the text of a layer that is switched off, so the characters are in `Document.text` and a finding has a span. The text object of each character carries a mark named `OC` whose parameter `Name` is the layer's name (measured with `pypdfium2` 5.15.2 on a file written with `pikepdf`: `FPDFPageObj_GetMark`, `FPDFPageObjMark_GetName` gave `OC`, and `FPDFPageObjMark_GetParamStringValue` for the key `Name` gave the layer name). The type of the layer reads as a name that cannot be read as a string, which does not matter. `pikepdf` supplies which names are switched off. S5-M5-T3 builds on this and repeats the measurement as a test.
 
@@ -794,7 +1177,7 @@ The owner left these points to the planner. Each is a value or a name that a tas
 | P6 | The files of `ingest` are: `_kind.py`, `_zip.py`, `_xml.py` (the only `lxml` file), `_word_*.py`, `word.py`, `_pdfium.py` (the only `pypdfium2` file), `_pdf_*.py`, `pdf.py`, `_layers.py` (the only `pikepdf` file), `_unicode_checks.py`, `_thresholds.py`. Fixture builders live in `ingest/tests/builders/`. | all |
 | P7 | **Confirmed by the owner, 26 Nov 2026.** The licence check allows two names beside `pikepdf` (MPL-2.0): `pillow` (MIT-CMU) and `typing-extensions` (PSF-2.0). Recorded in the ADR 0007 amendment of 26 Nov 2026 and in Spec 13. A fourth name, `pypdfium2`, followed the M1 review (change log). | S5-M1-T2 |
 | P8 | A hostile file maps to `UnreadableFileError` with a `reason` in its context (`zip_invalid`, `zip_overlap`, `zip64`, `too_many_members`, `duplicate_member`, `zip_encrypted`, `not_a_word_file`, `size_mismatch`, `doctype`, `xml_invalid`, `word_alt_chunk`, `too_slow`, `child_crashed`, `child_reply_too_large`, `child_reply_invalid`, `memory`, `child_error_code_unknown`, `pdf_invalid`, `pdf_open_failed`, `page_size_invalid`, `page_too_slow`, `pdf_geometry_invalid`, `child_reply_unencodable`). The owner added the last two after the M1 review (change log). A part or total over its cap maps to `InputTooLargeError`. Whether the user sees one message or several for these is a copy question for stage 6 or 12. | S5-M1 to S5-M4 |
-| P9 | The caps: 2,000 zip members; 32 MiB for each parsed part; 48 MiB parsed in all (lowered from 128 MiB by the owner, 26 Nov 2026, so that the total is reached before the memory limit); depth 256 (lxml's fixed limit); 1,000 PDF pages; 60 s and 1 GiB for the child. The 1 GiB figure counts address space on Linux and committed memory on Windows. | S5-M2-T1 |
+| P9 | The caps: 2,000 zip members; 32 MiB for each parsed part; 48 MiB parsed in all (lowered from 128 MiB by the owner, 26 Nov 2026, so that the total is reached before the memory limit); depth 256 (checked by the product's own code since S5-M2-T9); 9,000,000 bytes for one run of text, comment, processing instruction or the attributes of one tag (S5-M2-T9); 1,000 PDF pages; 60 s and 1 GiB for the child. The 1 GiB figure counts address space on Linux and committed memory on Windows. | S5-M2-T1, S5-M2-T9 |
 | P10 | `.gitattributes` is `* -text` plus `binary` for `*.pdf`, `*.docx`, `*.png` and `*.zip`, so no file changes its line endings on any system (D1). | S5-M2-T8 |
 | P11 | `ingest.read_file(data, *, name) -> Document` is the one entry the child calls. It stops with a `NotImplementedError` for a Word package (until S5-M3-T8) and for a PDF (until S5-M4-T8); only the tests of S5-M2-T5 reach those two temporary lines. | S5-M2-T5 |
 | P12 | The model of the Word text is the list at the head of M3: one line for each paragraph, a table row on one line with its cells joined by a tab, one space after a list number, the accepted view, only current properties, and a text box read after its paragraph. | S5-M3 |
@@ -860,6 +1243,11 @@ The owner left these points to the planner. Each is a value or a name that a tas
 | 26 Nov 2026 | S5-M2-T8 carries a reminder that the licences of Windows-only packages are unchecked until its job runs, and its "Done when" asks for the licence line in the Windows log. | The owner's request in chat, so that M2 does not forget it. |
 | 26 Nov 2026 | PDF text and numbers (S5-M4-T3, T4, the M4 model, P8, P14): two surrogate halves become one character, a lone half is undecodable, and a number that is not finite raises `pdf_geometry_invalid`. Three builders join T3. Two expected values change: `test_astral_character` expected one record for a character above U+FFFF, and PDFium returns two; `test_astral_is_one_character` now starts from the two halves. S5-M2-T6 names an unwritable reply `child_reply_unencodable`. | Measured after the M1 review: an emoji arrives as two halves with no map error, and stacked scales give `NaN` boxes. The owner's answer in chat: "Yes, add it". |
 | 26 Nov 2026 | The owner accepted the three changed expected values of the M1 review: the compound licence text of `pypdfium2` passes for `pypdfium2` only; the two emoji tests of M4 start from the two surrogate halves; the two word-limit tests of M4 call `pdf_dense_text(pages=2, chars_per_page=60_000, word_length=1)`. | The owner's answer in chat, "yes", given from a plain explanation of each change and not from the diff (T11). |
+| 26 Nov 2026 | Status set to In progress, three section 4 checks ticked after checking them (the baseline, the pinned libraries, the docs on `main`), and a note on text drawn twice added to M4 and M5. The Windows wheels and PDFium's line order stay unticked. | M1 is merged. The owner asked for these updates before M2 starts. |
+| 27 Nov 2026 | S5-M2-T4 gains a check of the part's opening with the standard library's `expat`, before `lxml`: a DOCTYPE is refused there, and so is an encoding label other than UTF-8 or UTF-16. Two tests are added (`test_only_utf8_and_utf16_labels`, `test_a_named_dtd_file_is_not_read`), the task names the `mypy` override for `lxml`, and ADR 0007 has a new amendment. No expected value changes. The socket patch in `test_every_entity_kind_is_refused` cannot see what `lxml` does itself; what shows that `lxml` never read the DOCTYPE is that the `parameter` kind gives `doctype`. | The implementer stopped: with the planned settings the `parameter` entity and the billion-laughs part gave `xml_invalid`, not `doctype`. A test on Linux then showed that those settings still open a local file named in a DOCTYPE. The owner's answer in chat, "Yes, add check", after a plain explanation. |
+| 28 Nov 2026 | New task S5-M2-T9: the `expat` check of S5-M2-T4 reads the whole part, no longer stops at the first element, and applies the product's own depth limit (256) and size limit (9,000,000 bytes). S5-M2-T8 is ticked only after it. P9 and ADR 0007 (new amendment) are updated. No existing test or expected value changes. | The implementer stopped at S5-M2-T8: five Windows tests failed, because the Windows wheel of `lxml` 6.1.3 uses libxml2 2.11.9 and Linux uses 2.14.6. The owner's answer in chat, "Yes, add check", to an own check of depth and text at 10,000,000 bytes. A measurement on Linux then showed that `lxml` refuses some kinds of content below that number, so the planner lowered it to 9,000,000 and added comments, processing instructions and attributes. The owner approved these two changes in chat, "yes", after a plain explanation of both. |
+| 28 Nov 2026 | New task S5-M2-T10: the `zip_overlap` refusal moves from `open_package` to `read_part`, where Python gives the warning. The body of `test_overlap_is_an_error` changes: it no longer skips, and it expects the same reason, `zip_overlap`, from `read_part`. For the file of that test, `read_file` now gives `zip_overlap` where it gave `zip_invalid`. P8 does not change. M2 is not merged before this task. | A review of the finished M2 found that the test skipped on both CI jobs, so it could not fail, and that the reason was never raised. The test file was still refused, as `zip_invalid`, after one of its two members was read. The owner's answer in chat, "Yes, fix first". |
+| 28 Nov 2026 | New tasks S5-M2-T11, T12 and T13, from a review of pull request 245. T11: only stored and deflated members, the member count is checked again after the open, errors of `zipfile` become `zip_invalid`, and a part whose size differs from the declared size is refused. T12: the child gets the file name as `--name=<name>` (the expected command lists of two tests change), is never left running, and a late timer no longer discards a result. T13: out of memory in `lxml` is reason `memory`, not `xml_invalid` (`test_too_greedy` now asserts the reason). P8 does not change. M2 is not merged before these tasks. |
 
 ## 9. Notes for the next stage
 
@@ -874,3 +1262,6 @@ None yet. Filled in when the stage is done.
 | 26 Nov 2026 | S5-M1-T3 | `pyproject.toml` has a `mypy` override for `reportlab`, a test-only tool; T1 allowed overrides for the three runtime libraries. | `reportlab` ships no type information, and `mypy` checks the test builders that import it. | No |
 | 26 Nov 2026 | S5-M1-T8 | The test helper `_render_mode_of`. | It reads one character through the raw API. | No |
 | 26 Nov 2026 | S5-M1-T9 | The private helper `_dense_line`, the constants `_DENSE_LINE_CHARS` and `_DENSE_PAGE_CHARS`, the test helper `_dense_text`, and the font is set on every page. | `showPage` resets the font, so the first builder drew only page 1 at its size. | No |
+| 28 Nov 2026 | S5-M2-T4 | The private `_ALLOWED_ENCODINGS`, `_on_xml_decl`, `_on_doctype` and `_PARSER`. | Named values and expat handlers keep the settings and the callback signatures in one place. | No |
+| 28 Nov 2026 | S5-M2-T3 | The private `_central_directory_entries`, `_ENCRYPTED_FLAG`, `_EOCD_ENTRIES_OFFSET`, `_EOCD_SEARCH_BYTES`, `_EOCD_SIGNATURE`, `_REQUIRED_PARTS` and `_ZIP64_ENTRIES`. | Named values for the zip records, and one helper for the end record, keep the checks readable. | No |
+| 28 Nov 2026 | S5-M2-T5 | The private `_XML_PART_SUFFIXES`. | One tuple names the two part suffixes that the Word reader parses. | No |

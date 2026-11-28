@@ -4,6 +4,8 @@ Scripts that check or run the repo itself. They are not part of the app.
 
 Run `scripts/check.sh` before you finish a change: it runs every check below, in order, and stops at the first failure.
 
+From stage 5, GitHub Actions runs this script on `ubuntu-latest` and on `windows-2025`, the Windows job in `bash` with `CLAUSE_TRACER_SKIP_PICTURES=1`. The Windows job has no owner-table step of its own; the working-tree check inside this script still runs.
+
 | File | What it is |
 | --- | --- |
 | `check.sh` | The one command for agents and CI: the owner-table guard, the licence check, ruff, format, mypy, import rules, the copy lint, then the tests under `coverage`, with a 95% branch-coverage floor for `core` and an 85% floor for `ingest`, `links` and `privacy`. |

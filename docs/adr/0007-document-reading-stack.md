@@ -138,3 +138,29 @@ The owner accepted this on 26 Nov 2026, after the review of stage 5 milestone 1.
 - **`pypdfium2` is a named exception.** Its licence text is `BSD-3-Clause, Apache-2.0, dependency licenses`. The check allows it only while the text stays exactly that.
 - **What the check cannot see.** "dependency licenses" stands for the third-party code inside the PDFium binary. The check does not read those licences. Their notices still have to be on the third-party licences page.
 
+## Amendment (27 Nov 2026): a DOCTYPE is refused before lxml reads the part
+
+The owner accepted this on 27 Nov 2026, while stage 5 milestone 2 was built. It adds to the parser settings named in the trade-off analysis.
+
+- **The settings are not enough.** With `resolve_entities=False`, `no_network=True`, `load_dtd=False` and `huge_tree` off, `lxml` 6.1.3 (libxml2 2.14.6) on Linux still opened a local file that a DOCTYPE named, as a parameter entity or as the external subset. A refusal after the parse comes too late.
+- **The check.** Before `lxml` gets a part, the standard library's `expat` reads it up to the first element. A DOCTYPE is refused there. An encoding label other than UTF-8 or UTF-16 is refused as unreadable: the Word package standard allows only those two (ECMA-376 Part 2, XML usage). The refusal after the parse stays as a second guard. This adds no dependency.
+- **Not tested.** Windows, where a file path can name another computer, and tricks beyond the hostile parts that were tried.
+
+## Amendment (28 Nov 2026): the code checks the depth and size limits of an XML part
+
+The owner accepted this on 28 Nov 2026, while stage 5 milestone 2 was built. It changes one point of the 27 Nov amendment: the `expat` check now reads the whole part, not only up to the first element.
+
+- **The cause.** `lxml` 6.1.3 uses libxml2 2.14.6 in its Linux wheel and 2.11.9 in its Windows wheel. In the Windows job, a part with 257 nested elements and a part with an 11 MiB text node both parsed. Linux refuses both.
+- **The check.** The `expat` check refuses a part as unreadable when elements nest deeper than 256, or when more than 9,000,000 UTF-8 bytes are in one run of text, one comment, one processing instruction, or the attributes of one tag. This adds no dependency.
+- **Why 9,000,000.** On Linux, `lxml` refuses a CDATA section over 9,999,986 bytes, an attribute value over 9,999,991 and a processing instruction over 9,999,993, while it takes 10,000,000 bytes of plain text. A limit well below these means that the product's check decides first.
+- **Cost.** On a 31 MiB part on Linux, the check took about 3 seconds for ordinary paragraphs and about 6 seconds for the heaviest case tried.
+- **Still decided by lxml.** The length of a name, a start tag whose markup takes it over lxml's limit while its attributes stay under ours, and any other libxml2 limit. These may differ between systems, and no test of the Windows job covers them.
+- **Not proven yet.** On Linux, lxml's limits were switched off (`huge_tree`) to stand in for the Windows library, and the new check refused the test parts. Only the Windows job proves it on Windows. The check was compared with `lxml` alone only on the parts of the repo's test builders, not on files saved by Word or LibreOffice.
+
+## Amendment (28 Nov 2026): only stored and deflated members, and a second member count
+
+The owner accepted this on 28 Nov 2026. It adds to the zip checks and comes from a review of stage 5 milestone 2.
+
+- **Compression.** A package with a member that is neither stored nor deflated is refused. These are the two methods that Word writes. For bzip2, one read step of Python is not bounded by the declared size: a file of 591 bytes, whose part declared 100 bytes, took about 800 MiB of memory before it was refused (measured on Linux, Python 3.13).
+- **Member count.** The count in the end record is written by the file's author and can be false: a package with 20,002 members whose record said 3 passed. The members are now counted again after the open. The early check of the record stays.
+

@@ -13,3 +13,22 @@ def count_words(text: str) -> int:
     """Count the runs of characters between spaces and line breaks."""
 
     return len(text.split())
+
+
+MAX_ZIP_MEMBERS: Final[int] = 2_000
+# [Assumption] ADR 0007 action item 3: tuned in testing.
+
+MAX_XML_PART_BYTES: Final[int] = 32 * 1024 * 1024
+# [Assumption] system design 8.4: tuned in testing.
+
+MAX_PARSED_TOTAL_BYTES: Final[int] = 48 * 1024 * 1024
+# [Assumption] system design 8.4: tuned in testing.
+
+MAX_XML_DEPTH: Final[int] = 256
+# The code checks it (_xml.py): the depth limit of lxml differs between systems.
+
+MAX_XML_TEXT_BYTES: Final[int] = 9_000_000
+# The code checks it (_xml.py), below lxml's own limits on Linux, which differ between systems.
+
+MAX_PDF_PAGES: Final[int] = 1_000
+# [Assumption] ADR 0007 action item 3: tuned in testing.
