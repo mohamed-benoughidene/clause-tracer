@@ -95,7 +95,8 @@ A comment's words, a note's words, and a header or footer stay out of
 with their span, then the referenced notes, then the others, then headers,
 then footers. Tracked changes are in `Document.tracked_changes`, in document
 order, with the earlier wording, the new wording, the author and the span of
-the new wording.
+the new wording. A change inside a content control, a hyperlink or any other
+wrapper is listed too, and one change never crosses the edge of a wrapper.
 
 The warnings, in this order, are `WARNING_WORD_NUMBERING_UNKNOWN`
 (`word_numbering_unknown`) when a list format cannot be rebuilt,

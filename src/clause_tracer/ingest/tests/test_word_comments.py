@@ -92,6 +92,60 @@ def test_range_in_table_cell() -> None:
     assert _body(body, comment(0, "Ann", "note")).comment_spans["0"] == Span(start=0, end=4)
 
 
+def test_end_between_paragraphs() -> None:
+    body = (
+        '<w:commentRangeStart w:id="0"/>'
+        + p(r("Pay all fees"))
+        + '<w:commentRangeEnd w:id="0"/>'
+        + p('<w:r><w:commentReference w:id="0"/></w:r>', r("Next"))
+    )
+
+    assert _body(body).comment_spans["0"] == Span(start=0, end=12)
+
+
+def test_start_between_paragraphs() -> None:
+    body = (
+        p(r("A")) + '<w:commentRangeStart w:id="0"/>' + p(r("B"), '<w:commentRangeEnd w:id="0"/>')
+    )
+
+    assert _body(body).comment_spans["0"] == Span(start=2, end=3)
+
+
+def test_marks_around_a_table() -> None:
+    body = (
+        '<w:commentRangeStart w:id="0"/>' + tbl((r("x"), r("y"))) + '<w:commentRangeEnd w:id="0"/>'
+    )
+
+    assert _body(body).comment_spans["0"] == Span(start=0, end=3)
+
+
+def test_marks_between_cells() -> None:
+    body = (
+        f"<w:tbl><w:tr><w:tc>{p(r('x'))}</w:tc>"
+        '<w:commentRangeStart w:id="0"/>'
+        f"<w:tc>{p(r('y'))}</w:tc>"
+        '<w:commentRangeEnd w:id="0"/>'
+        "</w:tr></w:tbl>"
+    )
+
+    assert _body(body).comment_spans["0"] == Span(start=2, end=3)
+
+
+def test_end_between_paragraphs_of_a_cell() -> None:
+    body = (
+        "<w:tbl><w:tr><w:tc>"
+        + p('<w:commentRangeStart w:id="0"/>', r("x"))
+        + '<w:commentRangeEnd w:id="0"/>'
+        + p(r("y"))
+        + "</w:tc></w:tr></w:tbl>"
+    )
+
+    result = _body(body)
+
+    assert result.text == "x y\n"
+    assert result.comment_spans["0"] == Span(start=0, end=1)
+
+
 def test_missing_end_gives_none() -> None:
     body = p('<w:commentRangeStart w:id="0"/>', r("A"))
 

@@ -851,7 +851,7 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
 
 **Fixes after the review of M3 (added 28 Nov 2026).** A review of `37be9e2` found ten faults, each shown with a small invented file. S5-M3-T11 to T15 fix them, in this order. Every test below reads with `read_word_file(build_docx(...), name="t.docx")` unless it says otherwise. The expected values come from the rules of the task: write them first, and never copy them from the output of the code. The Word reading table (S5-M3-T9) is the owner's: no row changes, and a row that a fix would change goes to the owner. If any other existing expected value must change, stop and report.
 
-- [ ] **S5-M3-T11: Changes in wrappers, cells in custom XML and comment marks between blocks (added 28 Nov 2026)**
+- [x] **S5-M3-T11: Changes in wrappers, cells in custom XML and comment marks between blocks (added 28 Nov 2026)**
   - **Why:** a deletion inside a content control or a hyperlink is not listed; a cell inside `w:customXml` is dropped; a comment mark between two blocks is ignored.
   - **Build:** in `ingest/_word_body.py`.
     - Move the child loop of `_read_paragraph` (the loop that builds change groups) into `_Walker._walk_children(self, children: list[Element], pieces: list[Text | Mark]) -> None`. `_read_paragraph` calls it with the paragraph's children without `w:pPr`.

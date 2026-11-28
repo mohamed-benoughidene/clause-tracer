@@ -46,6 +46,7 @@ def _flow(element: Element, styles: Styles | None) -> tuple[str, bool]:
     walker = _Walker(styles=styles)
     paragraphs: list[_Paragraph] = []
     walker._walk_blocks(element, paragraphs)
+    walker._flush_pending(paragraphs)
     text, positions = _assemble(paragraphs)
     has_hidden_run = any(
         isinstance(piece, Text) and piece.hidden for piece, _start, _end in positions
@@ -116,6 +117,7 @@ def hidden_comments(root: Element | None, styles: Styles | None) -> tuple[str, .
         walker = _Walker(styles=styles)
         paragraphs: list[_Paragraph] = []
         walker._walk_blocks(element, paragraphs)
+        walker._flush_pending(paragraphs)
         _, positions = _assemble(paragraphs)
         has_hidden_run = any(
             isinstance(piece, Text) and piece.hidden for piece, _start, _end in positions
@@ -213,6 +215,7 @@ def note_comment_refs(
             walker = _Walker(styles=styles)
             paragraphs: list[_Paragraph] = []
             walker._walk_blocks(element, paragraphs)
+            walker._flush_pending(paragraphs)
             _, positions = _assemble(paragraphs)
             shown.update(_comment_spans(positions, walker.comment_refs))
     return frozenset(shown)

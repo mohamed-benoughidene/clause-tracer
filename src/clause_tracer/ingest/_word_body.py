@@ -220,6 +220,8 @@ class _Walker:
         self._in_word = False
         self._paragraph_count = 0
         self._boxes: list[_Paragraph] | None = None
+        self._insertion_depth = 0
+        self._pending: list[Mark] = []
 
     def walk(self, root: Element) -> None:
         """Walk the body of a parsed `word/document.xml`."""
@@ -227,6 +229,7 @@ class _Walker:
         body = root.find(_BODY)
         if body is not None:
             self._walk_blocks(body, self.paragraphs)
+        self._flush_pending(self.paragraphs)
 
     def _is_readable(self) -> bool:
         return all(state == "result" for state in self._fields)
@@ -323,11 +326,15 @@ class _Walker:
         author = _author(element)
         local: list[Text | Mark] = []
         before = len(self.changes)
-        for child in element:
-            if child.tag in _DELETED_TAGS:
-                self._register(_deleted_text(child), "", _author(child))
-                continue
-            self._walk_inline(child, local)
+        self._insertion_depth += 1
+        try:
+            for child in element:
+                if child.tag in _DELETED_TAGS:
+                    self._register(_deleted_text(child), "", _author(child))
+                    continue
+                self._walk_inline(child, local)
+        finally:
+            self._insertion_depth -= 1
         new = "".join(piece.text for piece in local if isinstance(piece, Text))
         if new == "":
             if earlier != "":
@@ -349,6 +356,8 @@ class _Walker:
             self._read_paragraph(element, out)
         elif tag == _TBL:
             self._read_table(element, out)
+        elif tag in (_COMMENT_START, _COMMENT_END):
+            self._block_mark(element, out)
         elif tag == _ALT_CHUNK:
             self._reach_alt_chunk()
         elif tag in _IGNORED_TAGS:
@@ -357,6 +366,51 @@ class _Walker:
             self._read_alternate(element, out=out)
         else:
             self._walk_blocks(element, out)
+
+    def _comment_mark(self, element: Element) -> Mark | None:
+        ref = element.get(_ID)
+        if ref is None:
+            return None
+        kind: Literal["comment_start", "comment_end"] = (
+            "comment_start" if element.tag == _COMMENT_START else "comment_end"
+        )
+        return Mark(kind=kind, ref=ref)
+
+    def _block_mark(self, element: Element, out: list[_Paragraph]) -> None:
+        mark = self._comment_mark(element)
+        if mark is None:
+            return
+        if mark.kind == "comment_start" or not out:
+            self._pending.append(mark)
+        else:
+            out[-1].pieces.append(mark)
+
+    def _flush_pending(self, out: list[_Paragraph]) -> None:
+        if not self._pending:
+            return
+        if out:
+            out[-1].pieces.extend(self._pending)
+        self._pending.clear()
+
+    def _walk_children(self, children: list[Element], pieces: list[Text | Mark]) -> None:
+        if self._insertion_depth > 0:
+            for child in children:
+                self._walk_inline(child, pieces)
+            return
+        index = 0
+        while index < len(children):
+            child = children[index]
+            if child.tag in _CHANGE_TAGS:
+                group: list[Element] = []
+                while index < len(children) and (
+                    children[index].tag in _CHANGE_TAGS or _is_separator(children[index])
+                ):
+                    group.append(children[index])
+                    index += 1
+                self._read_change_group(group, pieces)
+                continue
+            self._walk_inline(child, pieces)
+            index += 1
 
     def _reach_alt_chunk(self) -> None:
         if not self._quiet:
@@ -387,21 +441,10 @@ class _Walker:
             paragraph_style=paragraph_style, ppr=properties
         )
         children = [child for child in element if child.tag != _PPR]
+        paragraph.pieces.extend(self._pending)
+        self._pending.clear()
         try:
-            index = 0
-            while index < len(children):
-                child = children[index]
-                if child.tag in _CHANGE_TAGS:
-                    group: list[Element] = []
-                    while index < len(children) and (
-                        children[index].tag in _CHANGE_TAGS or _is_separator(children[index])
-                    ):
-                        group.append(children[index])
-                        index += 1
-                    self._read_change_group(group, paragraph.pieces)
-                    continue
-                self._walk_inline(child, paragraph.pieces)
-                index += 1
+            self._walk_children(children, paragraph.pieces)
         finally:
             self._boxes = saved
             self._paragraph_style = saved_style
@@ -441,7 +484,8 @@ class _Walker:
         if tag == _R:
             self._read_run(element, pieces)
         elif tag in _DELETED_TAGS:
-            return
+            if self._insertion_depth > 0:
+                self._register(_deleted_text(element), "", _author(element))
         elif tag == _ALT_CHUNK:
             self._reach_alt_chunk()
         elif tag in _IGNORED_TAGS:
@@ -451,22 +495,17 @@ class _Walker:
         elif tag == _TXBX_CONTENT:
             self._collect_text_box(element)
         elif tag in (_COMMENT_START, _COMMENT_END):
-            ref = element.get(_ID)
-            if ref is not None:
-                kind: Literal["comment_start", "comment_end"] = (
-                    "comment_start" if tag == _COMMENT_START else "comment_end"
-                )
-                pieces.append(Mark(kind=kind, ref=ref))
+            mark = self._comment_mark(element)
+            if mark is not None:
+                pieces.append(mark)
         elif tag == _COMMENT_REFERENCE:
             ref = element.get(_ID)
             if ref is not None:
                 self.comment_refs.append(ref)
         elif tag in _WALK_TAGS:
-            for child in element:
-                self._walk_inline(child, pieces)
+            self._walk_children(list(element), pieces)
         else:
-            for child in element:
-                self._walk_inline(child, pieces)
+            self._walk_children(list(element), pieces)
 
     def _read_run(self, element: Element, pieces: list[Text | Mark]) -> None:
         local: list[Text | Mark] = []
@@ -545,7 +584,12 @@ class _Walker:
 
     def _collect_text_box(self, element: Element) -> None:
         sink = self._boxes if self._boxes is not None else self.paragraphs
-        self._walk_blocks(element, sink)
+        saved = self._insertion_depth
+        self._insertion_depth = 0
+        try:
+            self._walk_blocks(element, sink)
+        finally:
+            self._insertion_depth = saved
 
     def _read_alternate(
         self,
@@ -595,6 +639,8 @@ class _Walker:
                 self._read_row(child, out)
             elif child.tag in (_TBL_PR, _TBL_GRID):
                 continue
+            elif child.tag in (_COMMENT_START, _COMMENT_END):
+                self._block_mark(child, out)
             else:
                 self._walk_table_rows(child, out)
 
@@ -604,6 +650,8 @@ class _Walker:
                 self._read_row(child, out)
             elif child.tag in (_SDT, _SDT_CONTENT, _CUSTOM_XML):
                 self._walk_table_rows(child, out)
+            elif child.tag in (_COMMENT_START, _COMMENT_END):
+                self._block_mark(child, out)
 
     def _row_deleted(self, row: Element) -> bool:
         properties = self._child_for(row, _TR_PR)
@@ -617,11 +665,20 @@ class _Walker:
             return
         pieces: list[Text | Mark] = []
         is_first = True
-        for cell in self._cells(row):
+        for item in self._row_items(row):
+            if item.tag in (_COMMENT_START, _COMMENT_END):
+                mark = self._comment_mark(item)
+                if mark is None:
+                    continue
+                if mark.kind == "comment_start":
+                    self._pending.append(mark)
+                else:
+                    pieces.append(mark)
+                continue
             if not is_first:
                 pieces.append(self._text("\t"))
             is_first = False
-            pieces.extend(self._cell_pieces(cell))
+            pieces.extend(self._cell_pieces(item))
         insertion = self._child_for(properties, _INS) if properties is not None else None
         if insertion is not None:
             new = "".join(piece.text for piece in pieces if isinstance(piece, Text))
@@ -644,14 +701,19 @@ class _Walker:
             parts.append("".join(p.text for p in cell_pieces if isinstance(p, Text)))
         return "".join(parts)
 
-    def _cells(self, row: Element) -> list[Element]:
-        cells: list[Element] = []
+    def _row_items(self, row: Element) -> list[Element]:
+        items: list[Element] = []
         for child in row:
             if child.tag == _TC:
-                cells.append(child)
-            elif child.tag in (_SDT, _SDT_CONTENT):
-                cells.extend(self._cells(child))
-        return cells
+                items.append(child)
+            elif child.tag in (_SDT, _SDT_CONTENT, _CUSTOM_XML):
+                items.extend(self._row_items(child))
+            elif child.tag in (_COMMENT_START, _COMMENT_END):
+                items.append(child)
+        return items
+
+    def _cells(self, row: Element) -> list[Element]:
+        return [item for item in self._row_items(row) if item.tag == _TC]
 
     def _is_merged_continuation(self, cell: Element) -> bool:
         properties = self._child_for(cell, _TC_PR)
@@ -675,7 +737,7 @@ class _Walker:
             elif child.tag == _TBL:
                 self._read_table(child, blocks)
             else:
-                self._walk_blocks(child, blocks)
+                self._walk_block(child, blocks)
         pieces: list[Text | Mark] = []
         carried: list[Text | Mark] = []
         for block in blocks:

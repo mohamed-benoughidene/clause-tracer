@@ -3,6 +3,8 @@
 import io
 import zipfile
 
+import pytest
+
 from clause_tracer.core import Span, TrackedChange
 from clause_tracer.ingest._word_body import build_body
 from clause_tracer.ingest._word_model import BodyResult
@@ -157,6 +159,55 @@ def test_nested_ins_del() -> None:
     assert result.tracked_changes == (
         TrackedChange(earlier="", new="new", author="A", span=Span(start=0, end=3)),
         TrackedChange(earlier="old", new="", author="B", span=None),
+    )
+
+
+_WRAPPERS = {
+    "sdt": "<w:sdt><w:sdtPr/><w:sdtContent>{}</w:sdtContent></w:sdt>",
+    "hyperlink": '<w:hyperlink r:id="rId9">{}</w:hyperlink>',
+    "smartTag": "<w:smartTag>{}</w:smartTag>",
+    "customXml": "<w:customXml>{}</w:customXml>",
+    "fldSimple": '<w:fldSimple w:instr=" PAGE ">{}</w:fldSimple>',
+    "dir": '<w:dir w:val="ltr">{}</w:dir>',
+    "unknown": "<w:foo>{}</w:foo>",
+}
+
+
+@pytest.mark.parametrize("wrapper", sorted(_WRAPPERS))
+def test_changes_in_each_wrapper(wrapper: str) -> None:
+    inner = delete("B", "not ") + ins("B", r("never "))
+    body = p(r("We "), _WRAPPERS[wrapper].format(inner), r("pay"))
+
+    result = _body(body)
+
+    assert result.text == "We never pay\n"
+    assert result.tracked_changes == (
+        TrackedChange(earlier="not ", new="never ", author="B", span=Span(start=3, end=9)),
+    )
+
+
+def test_deletion_inside_a_wrapper_inside_an_insertion_is_listed() -> None:
+    inner = '<w:hyperlink r:id="rId9">' + r("a") + delete("B", "b", id=2) + "</w:hyperlink>"
+    body = p(ins("A", inner))
+
+    result = _body(body)
+
+    assert result.text == "a\n"
+    assert result.tracked_changes == (
+        TrackedChange(earlier="", new="a", author="A", span=Span(start=0, end=1)),
+        TrackedChange(earlier="b", new="", author="B", span=None),
+    )
+
+
+def test_nested_insertion_in_a_wrapper_is_listed_once() -> None:
+    inner = '<w:hyperlink r:id="rId9">' + ins("B", r("x"), id=2) + "</w:hyperlink>"
+    body = p(ins("A", inner))
+
+    result = _body(body)
+
+    assert result.text == "x\n"
+    assert result.tracked_changes == (
+        TrackedChange(earlier="", new="x", author="A", span=Span(start=0, end=1)),
     )
 
 

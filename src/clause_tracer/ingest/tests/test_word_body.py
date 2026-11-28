@@ -84,6 +84,17 @@ def test_nested_table_is_flattened() -> None:
     assert _body(body).text == "A\tB C\tD\n"
 
 
+def test_custom_xml_cell_is_read() -> None:
+    body = (
+        "<w:tbl><w:tr>"
+        f"<w:tc>{p(r('Fee'))}</w:tc>"
+        f"<w:customXml><w:tc>{p(r('Cap 5000'))}</w:tc></w:customXml>"
+        "</w:tr></w:tbl>"
+    )
+
+    assert _body(body).text == "Fee\tCap 5000\n"
+
+
 def test_merged_cells_are_one_cell() -> None:
     body = (
         "<w:tbl>"
