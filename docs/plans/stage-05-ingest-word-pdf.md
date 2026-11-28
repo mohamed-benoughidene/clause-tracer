@@ -8,7 +8,7 @@
 | Accepted on | 26 Nov 2026 |
 | Stage outline | [System design section 15.5](../system-design.md#155-stage-5-ingest-for-word-and-pdf) |
 
-**State (28 Nov 2026).** The owner accepted the plan. All questions in section 6 are answered, all six milestones are written in full, and the owner confirmed the proposals of section 6.1. M1 is built and merged (`999e16e`, pull request 240). M2 is merged (`f3c35ec`, pull request 245), and its Linux and Windows jobs were green on `78c1f63`. A review found faults, and S5-M2-T11 to T13 fixed them before the merge. M3 is built (S5-M3-T1 to T10, and the fixes S5-M3-T11 to T15): the owner's Word reading table is in `f88ec42`, and every row passes. A review of M3 found ten faults; S5-M3-T11 to T15 fixed them. M3 is not merged.
+**State (28 Nov 2026).** The owner accepted the plan. All questions in section 6 are answered, all six milestones are written in full, and the owner confirmed the proposals of section 6.1. M1 is built and merged (`999e16e`, pull request 240). M2 is merged (`f3c35ec`, pull request 245), and its Linux and Windows jobs were green on `78c1f63`. A review found faults, and S5-M2-T11 to T13 fixed them before the merge. M3 is built (S5-M3-T1 to T10, and S5-M3-T11 to T15, which fix ten faults that a review found): the owner's Word reading table is in `f88ec42`, and every row passes. A check of those fixes found one more path that drops a change; S5-M3-T16 fixes it and is not built. M3 is not merged.
 
 ## 1. Goal
 
@@ -922,6 +922,17 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
   - **Rules:** question 11, D4.
   - **Depends on:** S5-M3-T14
 
+- [ ] **S5-M3-T16: A change that is read without grouping (added 28 Nov 2026)**
+  - **Why:** a deletion directly inside the shown branch of an `mc:AlternateContent` in a paragraph is not listed, because `_read_alternate` calls `_walk_inline` on each child. S5-M3-T11 did not name that path.
+  - **Build:** in `ingest/_word_body.py`.
+    - In `_read_alternate`, when `pieces` is not `None`, call `self._walk_children(list(shown), pieces)` instead of the loop over `shown`.
+    - In `_walk_inline`, add a first branch for a tag in `_CHANGE_TAGS` met while `self._insertion_depth == 0`: it calls `self._read_change_group([element], pieces)`. So no caller can drop a change, also a `w:del` that a `w:r` holds directly. The branches after it do not change.
+  - **Files:** `src/clause_tracer/ingest/_word_body.py`, `src/clause_tracer/ingest/tests/test_word_changes.py`, `src/clause_tracer/ingest/tests/test_word_body.py`.
+  - **Tests first:** `test_changes_in_alternate_content_are_listed` (`r("We ")`, then an `mc:AlternateContent` with only an `mc:Choice` that holds a `w:del` by B of `"not "` and a `w:ins` by B of `"never "`, then `r("pay")`: the text is `"We never pay\n"` and the changes are one `TrackedChange(earlier="not ", new="never ", author="B", span=Span(start=3, end=9))`), `test_deletion_held_by_a_run_is_listed` (one `w:r` that holds a `w:del` by B with the `w:delText` `"gone"`, then the `w:t` `"kept"`: the text is `"kept\n"` and the changes are one `TrackedChange(earlier="gone", new="", author="B", span=None)`), `test_deeply_nested_wrappers_are_read` (250 nested `w:foo` elements around `r("x")` in a paragraph: the text is `"x\n"`; this test passes before the change and guards the recursion depth on every system).
+  - **Done when:** `scripts/check.sh` exits 0 and every row of the Word reading table passes unchanged. In the State line of this plan, say that S5-M3-T16 is built.
+  - **Rules:** question 16, D4, T13.
+  - **Depends on:** S5-M3-T15
+
 ### M4: The PDF text
 
 `read_pdf_file` returns a `Document` whose text is built from glyphs, with `char_map`, boxes, furniture, undecodable spans and the scanned and encrypted cases handled. The hidden-text findings come in M5: `Document.hidden` is `()` in this milestone.
@@ -1341,6 +1352,7 @@ The owner left these points to the planner. Each is a value or a name that a tas
 | 28 Nov 2026 | New task S5-M3-T10. A comment on a footnote or an endnote that the body references is no longer flagged as never shown (it changes a rule of S5-M3-T5). A check with a file made by WordCraft found the false alarm. A comment on an unreferenced note, a header or a footer stays flagged. | The owner's answer in chat: Word shows a comment on a note, so the app must not say that it is never shown. |
 | 28 Nov 2026 | S5-M3-T9 changes for this table only: the lead drafts the rows by hand from the plan rules, without running the reader, and the owner approves each row in everyday words. | The owner could not write the rows in the technical form, also with a helper page, and answered "Yes" in chat to this way. The check is weaker than rows the owner writes alone. |
 | 28 Nov 2026 | New tasks S5-M3-T11 to T15 fix ten faults that a review of M3 found. They change rules of S5-M3-T2 (default styles), T3 (a `w:numPr` with only a level; bounds on list values; `w:isLgl` with `w:val="0"` is off) and T6 (`w:titlePg` with `w:val="0"` is off). T5 is not changed: the code did not follow it for a comment with no span. | A high-effort review of `37be9e2` with invented files; the owner answered "Yes, plan fixes" in chat. No file saved by Word was checked. |
+| 28 Nov 2026 | New task S5-M3-T16: a change inside an `mc:AlternateContent` in a paragraph, or held directly by a run, is listed. | A check of the fixes with the same invented files; the S5-M3-T11 text did not name these paths. |
 
 ## 9. Notes for the next stage
 
@@ -1368,3 +1380,4 @@ Filled in fully when the stage is done. The notes so far:
 | 28 Nov 2026 | S5-M3-T6 | The private `_flow`, `_read_note_part` and `_is_shown` helpers, and the test `test_sections_are_read_in_document_order`. | One walk for side text and one predicate for a shown part; the section order is part of the task's `sections` field. | No |
 | 28 Nov 2026 | S5-M3-T7 | The private `_is_relative_part`, with `urlsplit` from the standard library. | One predicate names the four ways a target is refused. | No |
 | 28 Nov 2026 | S5-M3-T8 | The private `_part`, `_has_even_and_odd` and `_order_hidden` helpers. `warnings.py` holds the three new Word codes; `WARNING_NOT_ENGLISH` stays in `language.py`. | One place to read an optional part, one predicate for the settings flag, and one stable order for the findings. The not-English code already had its home. | No |
+| 28 Nov 2026 | S5-M3-T14 | `Styles` gains `has_style`. | The task did not say how the reader tells a named style from a missing one. | No |
