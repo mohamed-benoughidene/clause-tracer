@@ -16,8 +16,7 @@ def test_child_command_installed() -> None:
         "clause_tracer.cli._child",
         "--memory-bytes",
         "5",
-        "--name",
-        "a.docx",
+        "--name=a.docx",
     ]
 
 
@@ -27,8 +26,7 @@ def test_child_command_frozen() -> None:
         "--read-child",
         "--memory-bytes",
         "5",
-        "--name",
-        "a.docx",
+        "--name=a.docx",
     ]
 
 

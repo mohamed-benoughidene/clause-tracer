@@ -39,8 +39,7 @@ def child_command(*, name: str, memory_bytes: int, frozen: bool | None = None) -
             "--read-child",
             "--memory-bytes",
             str(memory_bytes),
-            "--name",
-            name,
+            f"--name={name}",
         ]
 
     return [
@@ -50,8 +49,7 @@ def child_command(*, name: str, memory_bytes: int, frozen: bool | None = None) -
         "clause_tracer.cli._child",
         "--memory-bytes",
         str(memory_bytes),
-        "--name",
-        name,
+        f"--name={name}",
     ]
 
 
@@ -86,18 +84,21 @@ def read_file_in_child(data: bytes, *, name: str, limits: ChildLimits | None = N
         try:
             process.stdin.write(data)
             process.stdin.close()
-        except BrokenPipeError:
+        except OSError:
+            # The child ended early. Windows reports this as EINVAL, not BrokenPipeError.
             pass
 
     thread = threading.Thread(target=feed, daemon=True)
     thread.start()
 
-    timed_out = False
+    timer_fired = False
 
     def kill() -> None:
-        nonlocal timed_out
-        timed_out = True
-        process.kill()
+        nonlocal timer_fired
+        timer_fired = True
+        is_still_running = process.poll() is None
+        if is_still_running:
+            process.kill()
 
     timer = threading.Timer(limits.timeout_s, kill)
     timer.start()
@@ -112,10 +113,16 @@ def read_file_in_child(data: bytes, *, name: str, limits: ChildLimits | None = N
         process.wait()
     finally:
         timer.cancel()
+        is_left_running = process.poll() is None
+        if is_left_running:
+            process.kill()
+            process.wait()
 
     if is_too_large:
         raise UnreadableFileError({"reason": "child_reply_too_large"})
 
     returncode = process.returncode
     assert returncode is not None
+    # A timer that fired after the child ended well does not discard its reply.
+    timed_out = timer_fired and returncode != 0
     return classify_child_outcome(returncode=returncode, stdout=reply, timed_out=timed_out)

@@ -552,7 +552,7 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
   - **Rules:** D4, P8, question 11, T13, ADR 0007 amendment of 28 Nov 2026 on zip members.
   - **Depends on:** S5-M2-T10
 
-- [ ] **S5-M2-T12: The runner, the file name and the child left running (added 28 Nov 2026)**
+- [x] **S5-M2-T12: The runner, the file name and the child left running (added 28 Nov 2026)**
   - **Build:** In `cli/child_runner.py`:
     - `child_command`: in both lists, replace the two items `"--name", name` by the one item `f"--name={name}"`. Without this, `argparse` reads a name that starts with `-` as an option. `_child.py` does not change.
     - `feed`: replace `except BrokenPipeError:` by `except OSError:`, with the comment `# The child ended early. Windows reports this as EINVAL, not BrokenPipeError.` above `pass`.

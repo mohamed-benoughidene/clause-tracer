@@ -20,7 +20,7 @@ The parent never reads a contract in its own process. It starts a child, gives i
 The parent starts the child with a list of arguments, never a shell:
 
 ```
-python -I -m clause_tracer.cli._child --memory-bytes <bytes> --name <name>
+python -I -m clause_tracer.cli._child --memory-bytes <bytes> --name=<name>
 ```
 
 It writes the file bytes to the child's standard input in a daemon thread and closes it. The child reads at most `MAX_FILE_BYTES + 1` bytes. Its first action after parsing the arguments is `apply_limits`; only then does it import `core`, `child_reply` and `ingest`, so the memory that those libraries use counts against the limit.
