@@ -142,7 +142,7 @@ _MAX_PARAGRAPHS: Final[int] = 200_000
 class _Paragraph:
     """One line before it is assembled, or one cell of a table row."""
 
-    __slots__ = ("mark_deleted", "num_id", "num_level", "number", "pieces")
+    __slots__ = ("mark_deleted", "number", "pieces")
 
     def __init__(
         self,
@@ -150,14 +150,10 @@ class _Paragraph:
         number: str | None,
         pieces: list[Text | Mark],
         mark_deleted: bool,
-        num_id: str | None = None,
-        num_level: int = 0,
     ) -> None:
         self.number = number
         self.pieces = pieces
         self.mark_deleted = mark_deleted
-        self.num_id = num_id
-        self.num_level = num_level
 
 
 def _assemble(paragraphs: list[_Paragraph]) -> tuple[str, list[tuple[Text | Mark, int, int]]]:
@@ -222,6 +218,7 @@ class _Walker:
         self._boxes: list[_Paragraph] | None = None
         self._insertion_depth = 0
         self._pending: list[Mark] = []
+        self.numbering_unknown = False
 
     def walk(self, root: Element) -> None:
         """Walk the body of a parsed `word/document.xml`."""
@@ -424,12 +421,12 @@ class _Walker:
             if style is not None:
                 paragraph_style = style.get(qname(W_NS, "val"))
         num_id, num_level = self._numbering_of(properties, paragraph_style)
+        mark_deleted = self._is_mark_deleted(element)
+        number = self._label(num_id, num_level, mark_deleted)
         paragraph = _Paragraph(
-            number=None,
+            number=number,
             pieces=[],
-            mark_deleted=self._is_mark_deleted(element),
-            num_id=num_id,
-            num_level=num_level,
+            mark_deleted=mark_deleted,
         )
         boxes: list[_Paragraph] = []
         saved = self._boxes
@@ -456,28 +453,38 @@ class _Walker:
             self._count_paragraph()
             out.append(box)
 
+    def _label(self, num_id: str | None, num_level: int, mark_deleted: bool) -> str | None:
+        """Count one paragraph and return its label, with one space."""
+
+        if self._numbering is None or num_id is None or mark_deleted:
+            return None
+        label = self._numbering.label(num_id=num_id, ilvl=num_level)
+        if label.unknown:
+            self.numbering_unknown = True
+        return f"{label.text} " if label.text is not None else None
+
     def _numbering_of(
         self, properties: Element | None, paragraph_style: str | None
     ) -> tuple[str | None, int]:
         num_pr = self._child_for(properties, _NUMPR) if properties is not None else None
-        if num_pr is None:
-            if self._numbering is None:
-                return None, 0
-            styled = self._styles.numbering(paragraph_style=paragraph_style)
-            if styled is None:
-                return None, 0
-            num_id, ilvl_text, style_id = styled
-            if ilvl_text is not None:
-                return num_id, _level_of(ilvl_text)
-            level = self._numbering.level_for_style(num_id=num_id, style_id=style_id)
-            return num_id, level if level is not None else 0
-        num_id_element = self._child_for(num_pr, _NUMID)
+        num_id_element = self._child_for(num_pr, _NUMID) if num_pr is not None else None
         direct_num_id = num_id_element.get(_VAL) if num_id_element is not None else None
-        if direct_num_id is None:
+        ilvl_element = self._child_for(num_pr, _ILVL) if num_pr is not None else None
+        own_level = ilvl_element.get(_VAL) if ilvl_element is not None else None
+        if direct_num_id is not None:
+            return direct_num_id, _level_of(own_level)
+        if self._numbering is None:
             return None, 0
-        ilvl_element = self._child_for(num_pr, _ILVL)
-        ilvl = ilvl_element.get(_VAL) if ilvl_element is not None else None
-        return direct_num_id, _level_of(ilvl)
+        styled = self._styles.numbering(paragraph_style=paragraph_style)
+        if styled is None:
+            return None, 0
+        num_id, style_level, style_id = styled
+        if own_level is not None:
+            return num_id, _level_of(own_level)
+        if style_level is not None:
+            return num_id, _level_of(style_level)
+        level = self._numbering.level_for_style(num_id=num_id, style_id=style_id)
+        return num_id, level if level is not None else 0
 
     def _walk_inline(self, element: Element, pieces: list[Text | Mark]) -> None:
         tag = element.tag
@@ -566,7 +573,10 @@ class _Walker:
         if font is not None and font.lower() in SYMBOL_FONTS:
             self.symbol_unread = True
         value = element.get(qname(W_NS, "char"))
-        code = int(value, 16) if value is not None else None
+        try:
+            code = int(value, 16) if value is not None else None
+        except ValueError:
+            code = None
         if code is None or not 0x20 <= code <= 0xD7FF:
             self.symbol_unread = True
             return
@@ -681,11 +691,15 @@ class _Walker:
             pieces.extend(self._cell_pieces(item))
         insertion = self._child_for(properties, _INS) if properties is not None else None
         if insertion is not None:
-            new = "".join(piece.text for piece in pieces if isinstance(piece, Text))
+            new = "".join(
+                piece.text for piece in pieces if isinstance(piece, Text) and not piece.is_number
+            )
             index = self._register("", new, _author(insertion))
             if index is not None:
                 pieces = [
-                    replace(piece, change=index) if isinstance(piece, Text) else piece
+                    replace(piece, change=index)
+                    if isinstance(piece, Text) and not piece.is_number
+                    else piece
                     for piece in pieces
                 ]
         self._count_paragraph()
@@ -749,6 +763,8 @@ class _Walker:
             carried = []
             if pieces:
                 pieces.append(self._text(" "))
+            if block.number is not None:
+                pieces.append(Text(text=block.number, is_number=True))
             pieces.extend(block_pieces)
         pieces.extend(carried)
         return pieces
@@ -814,20 +830,6 @@ def _level_of(value: str | None) -> int:
         return int(value)
     except ValueError:
         return 0
-
-
-def _number_paragraphs(paragraphs: list[_Paragraph], numbering: Numbering) -> bool:
-    """Write each kept paragraph's number and say whether any was unknown."""
-
-    is_unknown = False
-    for paragraph in paragraphs:
-        if paragraph.mark_deleted or paragraph.num_id is None:
-            continue
-        label = numbering.label(num_id=paragraph.num_id, ilvl=paragraph.num_level)
-        is_unknown = is_unknown or label.unknown
-        if label.text is not None:
-            paragraph.number = f"{label.text} "
-    return is_unknown
 
 
 def _run_reasons(props: RunProps, paragraph_fill: str | None) -> tuple[HiddenReason, ...]:
@@ -977,9 +979,6 @@ def build_body(
 
     walker = _Walker(styles=styles, numbering=numbering)
     walker.walk(root)
-    numbering_unknown = (
-        _number_paragraphs(walker.paragraphs, numbering) if numbering is not None else False
-    )
     text, positions = _assemble(walker.paragraphs)
     return BodyResult(
         text=text,
@@ -988,6 +987,6 @@ def build_body(
         comment_spans=_comment_spans(positions, walker.comment_refs),
         note_refs=_note_refs(walker.note_refs),
         sections=_sections(root),
-        numbering_unknown=numbering_unknown,
+        numbering_unknown=walker.numbering_unknown,
         symbol_unread=walker.symbol_unread,
     )

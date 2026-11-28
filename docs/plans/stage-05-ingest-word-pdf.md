@@ -868,7 +868,7 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
   - **Rules:** question 5, question 16, T13, D1.
   - **Depends on:** S5-M3-T9
 
-- [ ] **S5-M3-T12: List numbers (added 28 Nov 2026)**
+- [x] **S5-M3-T12: List numbers (added 28 Nov 2026)**
   - **Why:** a numbered paragraph in a table cell loses its number and later numbers are wrong; a `w:numPr` with only a level loses or changes the number; a number in the file that is not checked can hang or crash the reader.
   - **Build:**
     - Numbers in cells. In `_word_body.py`, `_read_paragraph` calls `Numbering.label` itself, before it reads the children, when the walker has a numbering, the paragraph has a list id and its mark is not deleted; it sets `_Paragraph.number = f"{label.text} "` only when `label.text` is not `None` and, for an unknown label, `self.numbering_unknown = True`. Remove `_number_paragraphs` and the fields `num_id` and `num_level` of `_Paragraph`. So labels are counted in text order, and a paragraph is counted before its text boxes. The walkers of `_row_text`, `_branch_text` and the side parts have no numbering, so they count nothing.

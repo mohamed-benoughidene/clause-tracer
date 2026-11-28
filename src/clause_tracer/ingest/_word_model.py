@@ -14,6 +14,7 @@ class Text:
     text: str
     hidden: tuple[HiddenReason, ...] = ()
     change: int | None = None
+    is_number: bool = False
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)

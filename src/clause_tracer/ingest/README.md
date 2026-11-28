@@ -66,6 +66,8 @@ The text is the body as Word draws it:
   one cell are joined by one space, and a nested table is flattened with
   `\t` between its cells and one space between its rows;
 - a list number at the start of its paragraph, followed by exactly one space;
+  a numbered paragraph in a table cell is counted in text order, like one in
+  the body;
 - `\t` for `w:tab` and `w:ptab`, `\n` for `w:br` and `w:cr`, `‑` for
   `w:noBreakHyphen`, and nothing for `w:softHyphen`;
 - the cached result of a field, never its instruction;
@@ -111,6 +113,8 @@ Known limits:
 - Table cell fills and table styles are not read.
 - The labels `1)`, `A.`, `I.`, `a.` and `i.` are rebuilt in the text, but
   `split_clauses` does not read them as clause numbers.
+- A list start over `WORD_MAX_LIST_START` (32,767) is read as 1, and a letter
+  list past 780 (30 repeats of `z`, `WORD_MAX_LETTER_REPEATS`) is unknown.
 - The last explicit `w:vanish` value wins; Word's toggle rule is not used.
 - A text box is placed after its paragraph, not where the box sits.
 - Only the body is checked for symbols; comments, notes, headers and footers

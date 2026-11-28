@@ -14,6 +14,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Final
 
+from clause_tracer.ingest._thresholds import WORD_MAX_LETTER_REPEATS, WORD_MAX_LIST_START
 from clause_tracer.ingest._word_styles import Styles
 from clause_tracer.ingest._xml import W_NS, Element, qname
 
@@ -81,20 +82,36 @@ def _value(element: Element | None) -> str | None:
     return element.get(_VAL) if element is not None else None
 
 
-def _read_level(element: Element) -> tuple[int, _Level]:
+def _read_level(element: Element) -> tuple[int, _Level] | None:
     ilvl_value = element.get(_ILVL)
-    ilvl = int(ilvl_value) if ilvl_value is not None else 0
-    start = _value(_child(element, "start"))
-    restart = _value(_child(element, "lvlRestart"))
+    ilvl = _whole(ilvl_value, 0, _MAX_LEVEL) if ilvl_value is not None else 0
+    if ilvl is None:
+        return None
+    start = _whole(_value(_child(element, "start")), 0, WORD_MAX_LIST_START)
+    restart = _whole(_value(_child(element, "lvlRestart")), 0, 9)
     level = _Level(
-        start=int(start) if start is not None else 1,
+        start=start if start is not None else 1,
         num_fmt=_value(_child(element, "numFmt")) or "decimal",
         lvl_text=_value(_child(element, "lvlText")) or "",
-        restart=int(restart) if restart is not None else None,
+        restart=restart,
         is_lgl=_child(element, "isLgl") is not None,
         pstyle=_value(_child(element, "pStyle")),
     )
     return ilvl, level
+
+
+def _whole(value: str | None, low: int, high: int) -> int | None:
+    """Return a whole number inside the bounds, or `None` when it is not one."""
+
+    if value is None:
+        return None
+    try:
+        number = int(value)
+    except ValueError:
+        return None
+    if low <= number <= high:
+        return number
+    return None
 
 
 def _format(value: int, number_format: str) -> tuple[str | None, bool]:
@@ -105,7 +122,7 @@ def _format(value: int, number_format: str) -> tuple[str | None, bool]:
     if number_format == "decimalZero":
         return f"{value:02d}", False
     if number_format in ("upperLetter", "lowerLetter"):
-        if value < 1:
+        if value < 1 or value > 26 * WORD_MAX_LETTER_REPEATS:
             return None, True
         letter = chr(ord("a") + (value - 1) % 26)
         if number_format == "upperLetter":
@@ -190,8 +207,9 @@ class Numbering:
                     levels: dict[int, _Level] = {}
                     for child in element:
                         if child.tag == _LVL:
-                            ilvl, level = _read_level(child)
-                            levels[ilvl] = level
+                            read = _read_level(child)
+                            if read is not None:
+                                levels[read[0]] = read[1]
                     abstracts[abstract_id] = _Abstract(
                         style_link=_value(_child(element, "numStyleLink")),
                         levels=levels,
@@ -207,14 +225,19 @@ class Numbering:
                         if child.tag != _LVL_OVERRIDE:
                             continue
                         ilvl_value = child.get(_ILVL)
-                        ilvl = int(ilvl_value) if ilvl_value is not None else 0
+                        ilvl = _whole(ilvl_value, 0, _MAX_LEVEL) if ilvl_value is not None else 0
+                        if ilvl is None:
+                            continue
                         override = _child(child, "lvl")
                         if override is not None:
-                            _, level = _read_level(override)
-                            levels[ilvl] = level
-                        start = _value(_child(child, "startOverride"))
+                            read = _read_level(override)
+                            if read is not None:
+                                levels[ilvl] = read[1]
+                        start = _whole(
+                            _value(_child(child, "startOverride")), 0, WORD_MAX_LIST_START
+                        )
                         if start is not None:
-                            starts[ilvl] = int(start)
+                            starts[ilvl] = start
                     nums[num_id] = _Num(abstract_id=abstract_id, levels=levels, starts=starts)
         return cls(abstracts=abstracts, nums=nums, styles=styles)
 
@@ -330,9 +353,9 @@ class Numbering:
             return Label(text=None, unknown=True)
         abstract_id, abstract, num = resolved
         self._enter_num(abstract_id, num_id, num)
-        self._advance(abstract_id, abstract, num, ilvl)
         if ilvl < 0 or ilvl > _MAX_LEVEL:
             return Label(text=None, unknown=True)
+        self._advance(abstract_id, abstract, num, ilvl)
         level = num.levels.get(ilvl, abstract.levels.get(ilvl))
         if level is None:
             return Label(text=None, unknown=True)
@@ -342,6 +365,8 @@ class Numbering:
             return Label(text=None, unknown=True)
         text, is_unknown = self._resolve_text(abstract_id, abstract, num, ilvl, level)
         if is_unknown:
+            return Label(text=None, unknown=True)
+        if len(text) > _MAX_LVL_TEXT:
             return Label(text=None, unknown=True)
         if text == "":
             return Label(text=None)

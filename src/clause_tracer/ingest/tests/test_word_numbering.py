@@ -1,10 +1,17 @@
 """The list numbers of a Word body (S5-M3-T3)."""
 
 import io
+import time
 import zipfile
 from typing import Final
 
-from clause_tracer.ingest import read_pasted_text, split_clauses
+from clause_tracer.core import Span
+from clause_tracer.ingest import (
+    WARNING_WORD_SYMBOL_UNREAD,
+    read_pasted_text,
+    read_word_file,
+    split_clauses,
+)
 from clause_tracer.ingest._word_body import build_body
 from clause_tracer.ingest._word_model import BodyResult
 from clause_tracer.ingest._word_numbering import Label, Numbering
@@ -300,6 +307,144 @@ def test_typed_number_stays() -> None:
     numbering = numbering_xml([_level()], [_num(1)])
 
     assert _result(p(r("1.1 Fees"), num=(1, 0)), numbering).text == "1. 1.1 Fees\n"
+
+
+def _multilevel() -> str:
+    return numbering_xml([_level(0, text="%1."), _level(1, text="%1.%2")], [_num(1)])
+
+
+def test_number_in_a_table_cell() -> None:
+    cell = f"<w:tbl><w:tr><w:tc>{p(r('In cell'), num=(1, 0))}</w:tc></w:tr></w:tbl>"
+    body = p(r("One"), num=(1, 0)) + cell + p(r("Three"), num=(1, 0))
+
+    assert _result(body, _multilevel()).text == "1. One\n2. In cell\n3. Three\n"
+
+
+def test_numbers_in_two_cells() -> None:
+    row = (
+        "<w:tbl><w:tr>"
+        f"<w:tc>{p(r('A'), num=(1, 0))}</w:tc>"
+        f"<w:tc>{p(r('B'), num=(1, 0))}</w:tc>"
+        "</w:tr></w:tbl>"
+    )
+
+    assert _result(row, _multilevel()).text == "1. A\t2. B\n"
+
+
+def test_number_in_an_inserted_row_is_outside_the_change() -> None:
+    row = (
+        "<w:tbl><w:tr>"
+        '<w:trPr><w:ins w:id="1" w:author="A"/></w:trPr>'
+        f"<w:tc>{p(r('x'), num=(1, 0))}</w:tc>"
+        "</w:tr></w:tbl>"
+    )
+
+    result = _result(row, _multilevel())
+
+    assert result.text == "1. x\n"
+    assert result.tracked_changes[0].new == "x"
+    assert result.tracked_changes[0].span == Span(start=3, end=4)
+
+
+def test_own_level_with_the_list_of_the_style() -> None:
+    styles = (
+        '<w:style w:type="paragraph" w:styleId="L1">'
+        '<w:pPr><w:numPr><w:numId w:val="1"/></w:numPr></w:pPr></w:style>'
+    )
+    sub = (
+        '<w:p><w:pPr><w:pStyle w:val="L1"/>'
+        '<w:numPr><w:ilvl w:val="1"/></w:numPr></w:pPr>'
+        f"{r('Sub')}</w:p>"
+    )
+    body = p(r("Top"), style="L1") + sub
+
+    assert _result(body, _multilevel(), styles=styles).text == "1. Top\n1.1 Sub\n"
+
+
+def test_child_style_sets_only_the_level() -> None:
+    styles = (
+        '<w:style w:type="paragraph" w:styleId="L1">'
+        '<w:pPr><w:numPr><w:numId w:val="1"/></w:numPr></w:pPr></w:style>'
+        '<w:style w:type="paragraph" w:styleId="L2"><w:basedOn w:val="L1"/>'
+        '<w:pPr><w:numPr><w:ilvl w:val="1"/></w:numPr></w:pPr></w:style>'
+    )
+    body = p(r("Top"), style="L1") + p(r("Sub"), style="L2")
+
+    assert _result(body, _multilevel(), styles=styles).text == "1. Top\n1.1 Sub\n"
+
+
+def test_negative_level_is_unknown_and_fast() -> None:
+    start = time.monotonic()
+
+    result = _result(p(r("A"), num=(1, -40_000_000)), _multilevel())
+
+    elapsed = time.monotonic() - start
+
+    assert result.text == "A\n"
+    assert result.numbering_unknown is True
+    assert elapsed < 1
+
+
+def test_start_over_the_bound_is_one() -> None:
+    numbering = numbering_xml([_level(fmt="lowerLetter", start=26_000_000)], [_num(1)])
+
+    assert _result(p(r("A"), num=(1, 0)), numbering).text == "a. A\n"
+
+
+def test_letter_over_the_bound_is_unknown() -> None:
+    over = numbering_xml([_level(fmt="lowerLetter", start=781)], [_num(1)])
+    at = numbering_xml([_level(fmt="lowerLetter", start=780)], [_num(1)])
+
+    result = _result(p(r("A"), num=(1, 0)), over)
+
+    assert result.text == "A\n"
+    assert result.numbering_unknown is True
+    assert _result(p(r("A"), num=(1, 0)), at).text == "z" * 30 + ". A\n"
+
+
+def test_values_that_are_not_numbers_raise_nothing() -> None:
+    bad_start = (
+        '<w:abstractNum w:abstractNumId="0"><w:lvl w:ilvl="0">'
+        '<w:start w:val="x"/><w:numFmt w:val="decimal"/><w:lvlText w:val="%1."/>'
+        "</w:lvl></w:abstractNum>" + _num(1)
+    )
+    bad_level = (
+        '<w:abstractNum w:abstractNumId="0">'
+        '<w:lvl w:ilvl="x"><w:start w:val="1"/><w:numFmt w:val="decimal"/>'
+        '<w:lvlText w:val="%1."/></w:lvl>'
+        '<w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="decimal"/>'
+        '<w:lvlText w:val="%1."/></w:lvl>'
+        "</w:abstractNum>" + _num(1)
+    )
+    bad_override = numbering_xml(
+        [_level()],
+        [
+            _num(
+                1,
+                overrides=(
+                    '<w:lvlOverride w:ilvl="0"><w:startOverride w:val="x"/></w:lvlOverride>'
+                ),
+            )
+        ],
+    )
+    bad_restart = (
+        '<w:abstractNum w:abstractNumId="0">'
+        '<w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="decimal"/>'
+        '<w:lvlText w:val="%1."/></w:lvl>'
+        '<w:lvl w:ilvl="1"><w:start w:val="1"/><w:numFmt w:val="decimal"/>'
+        '<w:lvlText w:val="%1.%2"/><w:lvlRestart w:val="x"/></w:lvl>'
+        "</w:abstractNum>" + _num(1)
+    )
+
+    for numbering in (bad_start, bad_level, bad_override, bad_restart):
+        document = read_word_file(
+            build_docx(p(r("A"), num=(1, 0)), numbering=numbering), name="t.docx"
+        )
+        assert document.text == "1. A\n", numbering
+
+    symbol = read_word_file(build_docx(p(r("A"), '<w:r><w:sym w:char="zz"/></w:r>')), name="t.docx")
+
+    assert [warning.code for warning in symbol.warnings] == [WARNING_WORD_SYMBOL_UNREAD]
 
 
 def _clause_numbers(text: str) -> list[str | None]:

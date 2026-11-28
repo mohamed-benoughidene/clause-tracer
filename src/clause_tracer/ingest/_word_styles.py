@@ -196,8 +196,15 @@ class Styles:
         return ids
 
     def numbering(self, *, paragraph_style: str | None) -> tuple[str, str | None, str] | None:
-        """Return the list, level and style id of the nearest numbering style."""
+        """Return the list id, the level and the style that gave the list.
 
+        The list and the level come from the nearest style that sets each,
+        so a child style can set only one of them.
+        """
+
+        num_id: str | None = None
+        ilvl: str | None = None
+        num_style: str | None = None
         for style_id in reversed(self._chain_ids(paragraph_style)):
             style = self._styles[style_id]
             if style.ppr is None:
@@ -205,16 +212,20 @@ class Styles:
             num_pr = _child(style.ppr, "numPr")
             if num_pr is None:
                 continue
-            num_id_element = _child(num_pr, "numId")
-            if num_id_element is None:
-                continue
-            num_id = num_id_element.get(_VAL)
             if num_id is None:
-                continue
-            ilvl_element = _child(num_pr, "ilvl")
-            ilvl = ilvl_element.get(_VAL) if ilvl_element is not None else None
-            return num_id, ilvl, style_id
-        return None
+                num_id_element = _child(num_pr, "numId")
+                value = num_id_element.get(_VAL) if num_id_element is not None else None
+                if value is not None:
+                    num_id = value
+                    num_style = style_id
+            if ilvl is None:
+                ilvl_element = _child(num_pr, "ilvl")
+                value = ilvl_element.get(_VAL) if ilvl_element is not None else None
+                if value is not None:
+                    ilvl = value
+        if num_id is None or num_style is None:
+            return None
+        return num_id, ilvl, num_style
 
     def _chain(self, style_id: str | None) -> list[_Style]:
         chain: list[_Style] = []
