@@ -1273,6 +1273,7 @@ The owner left these points to the planner. Each is a value or a name that a tas
 Filled in fully when the stage is done. The notes so far:
 
 - **Word list levels are not shown as indents (owner, 28 Nov 2026).** `Document.text` holds a list number, one space and the words, with no indent, so the typeset pages of stage 12 would show every level at the left edge. Stage 12 must show the levels as Word does. Word keeps its indent settings (`w:ind` in the paragraph, the style and the list level) in the file, and the reader does not read them yet. `Clause.level` gives nesting only where `split_clauses` reads the numbers, which it does not for `1)`, `A.`, `I.`, `a.` and `i.`.
+- **Word tables are not shown as tables (owner, 28 Nov 2026).** `Document.text` holds a table row as one line with the cells joined by a tab, so the typeset pages of stage 12 cannot tell a table from a line that holds tabs. Stage 12 must show a Word table as a table, also where a tracked change removed or added a row. The table stays in the file (`w:tbl`), and `Document` keeps no mark of it yet.
 
 ## 10. Deviations from the plan
 
