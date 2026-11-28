@@ -683,7 +683,7 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
   - **Rules:** question 1, system design 15.5, T11, T13.
   - **Depends on:** S5-M2-T6
 
-- [ ] **S5-M2-T13: Out of memory in lxml is reason `memory` (added 28 Nov 2026)**
+- [x] **S5-M2-T13: Out of memory in lxml is reason `memory` (added 28 Nov 2026)**
   - **Build:** `libxml2` reports a lack of memory as an `XMLSyntaxError` with code `ERR_NO_MEMORY` (measured on Linux). In `ingest/_xml.py`, in `parse_part`, replace the `except etree.LxmlError:` clause by the code below. In the docstring of `parse_part`, replace the sentence `A MemoryError is not caught.` by `MemoryError when lxml runs out of memory; no MemoryError is caught.` `_child.py` does not change: it already turns a `MemoryError` into reason `memory`.
     ```python
     except etree.LxmlError as error:

@@ -104,8 +104,10 @@ def test_too_slow() -> None:
     sys.platform == "win32", reason="committed memory differs: S5-M6-T6 tests Windows"
 )
 def test_too_greedy() -> None:
-    with pytest.raises(UnreadableFileError):
+    with pytest.raises(UnreadableFileError) as raised:
         read_file_in_child(_big_part(), name="a.docx", limits=ChildLimits(memory_bytes=600 * _MIB))
+
+    assert _reason(raised.value) == "memory"
 
 
 def test_no_child_left_running(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -8,6 +8,7 @@ from typing import Literal
 import pytest
 
 from clause_tracer.core import UnreadableFileError
+from clause_tracer.ingest import _xml
 from clause_tracer.ingest._xml import W_NS, _check_part, parse_part, qname
 from clause_tracer.ingest._zip import open_package
 from clause_tracer.ingest.limits import MAX_XML_DEPTH, MAX_XML_TEXT_BYTES
@@ -209,3 +210,18 @@ def test_only_a_tag_restarts_the_text_count() -> None:
     assert parse_part(b"<a>" + first + b"<b/>" + second + b"</a>") is not None
 
     _assert_refused(b"<a>" + first + b"<!--c-->" + second + b"</a>")
+
+
+@pytest.mark.parametrize(("code", "error_type"), [(2, MemoryError), (4, UnreadableFileError)])
+def test_lxml_out_of_memory_is_a_memory_error(
+    monkeypatch: pytest.MonkeyPatch, code: int, error_type: type[BaseException]
+) -> None:
+    etree = vars(_xml)["etree"]  # No test imports lxml: _xml.py is its one importer.
+
+    def fail(*args: object, **kwargs: object) -> None:
+        raise etree.XMLSyntaxError("unknown error", code, 0, 0)
+
+    monkeypatch.setattr(etree, "fromstring", fail)
+
+    with pytest.raises(error_type):
+        parse_part(b"<a/>")

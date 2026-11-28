@@ -124,8 +124,9 @@ def parse_part(data: bytes) -> etree._Element:
     Input:   the part's bytes.
     Output:  the root element, without comments or processing instructions.
     Raises:  UnreadableFileError with reason `doctype` when the part has a
-             DOCTYPE, or `xml_invalid` when the part is not accepted. A
-             MemoryError is not caught.
+             DOCTYPE, or `xml_invalid` when the part is not accepted.
+             MemoryError when lxml runs out of memory; no MemoryError is
+             caught.
     Effects: none.
     """
 
@@ -133,7 +134,10 @@ def parse_part(data: bytes) -> etree._Element:
 
     try:
         root = etree.fromstring(data, parser=_PARSER)
-    except etree.LxmlError:
+    except etree.LxmlError as error:
+        is_out_of_memory = getattr(error, "code", None) == etree.ErrorTypes.ERR_NO_MEMORY
+        if is_out_of_memory:
+            raise MemoryError from None
         raise UnreadableFileError({"reason": "xml_invalid"}) from None
 
     has_doctype = root.getroottree().docinfo.doctype != ""
