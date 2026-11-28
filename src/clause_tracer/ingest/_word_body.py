@@ -420,6 +420,8 @@ class _Walker:
             style = self._child_for(properties, _PSTYLE)
             if style is not None:
                 paragraph_style = style.get(qname(W_NS, "val"))
+        if not self._styles.has_style(paragraph_style):
+            paragraph_style = self._styles.default_paragraph_style
         num_id, num_level = self._numbering_of(properties, paragraph_style)
         mark_deleted = self._is_mark_deleted(element)
         number = self._label(num_id, num_level, mark_deleted)
@@ -556,6 +558,8 @@ class _Walker:
             style = self._child_for(properties, _RSTYLE)
             if style is not None:
                 run_style = style.get(qname(W_NS, "val"))
+        if not self._styles.has_style(run_style):
+            run_style = self._styles.default_character_style
         props = self._styles.run_props(
             paragraph_style=self._paragraph_style, run_style=run_style, rpr=properties
         )

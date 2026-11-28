@@ -901,7 +901,7 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
   - **Rules:** question 5, Spec 2, T13.
   - **Depends on:** S5-M3-T12
 
-- [ ] **S5-M3-T14: The default styles (added 28 Nov 2026)**
+- [x] **S5-M3-T14: The default styles (added 28 Nov 2026)**
   - **Why:** Word applies the default style to a paragraph or a run that names none. The reader does not, so white or hidden text in the default style passes. This changes a rule of S5-M3-T2.
   - **Build:** (`[Assumption]`: the rule follows the file format; no file saved by Word was checked.)
     - `Styles.from_xml` keeps the id of the default paragraph style and of the default character style: a `w:style` whose `w:default` is present and not `false`, `off` or `0`, with `w:type` `paragraph` (a missing `w:type` is `paragraph`) or `character`. When several qualify, the last one wins. Add the properties `default_paragraph_style` and `default_character_style`, each `str | None`.

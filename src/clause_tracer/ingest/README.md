@@ -78,6 +78,10 @@ The text is the body as Word draws it:
 - `mc:AlternateContent` once: the `Choice` branch when there is one, else the
   `Fallback` branch.
 
+The default paragraph style and the default character style apply to a
+paragraph or a run that names none, or that names a style the file does
+not hold.
+
 What it flags, in `Document.hidden`:
 
 | Finding | Reason | Span |

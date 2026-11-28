@@ -172,3 +172,54 @@ def test_ordinary_font_does_not_warn() -> None:
 
 def test_near_white_is_a_known_limit() -> None:
     assert _body(p(r("near", color="FEFEFE"))).hidden == ()
+
+
+_DEFAULT_HIDDEN = (
+    '<w:style w:type="paragraph" w:styleId="Normal" w:default="1">'
+    '<w:rPr><w:color w:val="FFFFFF"/><w:vanish/></w:rPr></w:style>'
+)
+
+
+def test_default_paragraph_style_hides() -> None:
+    result = _body(p(r("Secret term")), styles=_DEFAULT_HIDDEN)
+
+    assert result.hidden == (
+        _hidden(0, 11, HiddenReason.LOW_CONTRAST),
+        _hidden(0, 11, HiddenReason.WORD_HIDDEN_RUN),
+    )
+
+
+def test_default_character_style_hides() -> None:
+    styles = (
+        '<w:style w:type="character" w:styleId="NormalChar" w:default="1">'
+        "<w:rPr><w:vanish/></w:rPr></w:style>"
+    )
+
+    result = _body(p(r("secret")), styles=styles)
+
+    assert result.hidden == (_hidden(0, 6, HiddenReason.WORD_HIDDEN_RUN),)
+
+
+def test_named_style_does_not_take_the_default() -> None:
+    styles = _DEFAULT_HIDDEN + '<w:style w:type="paragraph" w:styleId="Plain"/>'
+
+    result = _body(p(r("shown"), style="Plain"), styles=styles)
+
+    assert result.hidden == ()
+
+
+def test_style_without_the_default_flag_is_not_applied() -> None:
+    styles = '<w:style w:type="paragraph" w:styleId="Normal"><w:rPr><w:vanish/></w:rPr></w:style>'
+
+    result = _body(p(r("shown")), styles=styles)
+
+    assert result.hidden == ()
+
+
+def test_missing_style_takes_the_default() -> None:
+    result = _body(p(r("Secret term"), style="Nope"), styles=_DEFAULT_HIDDEN)
+
+    assert result.hidden == (
+        _hidden(0, 11, HiddenReason.LOW_CONTRAST),
+        _hidden(0, 11, HiddenReason.WORD_HIDDEN_RUN),
+    )

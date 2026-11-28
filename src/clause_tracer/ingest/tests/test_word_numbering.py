@@ -313,6 +313,15 @@ def _multilevel() -> str:
     return numbering_xml([_level(0, text="%1."), _level(1, text="%1.%2")], [_num(1)])
 
 
+def test_default_style_numbers_the_paragraph() -> None:
+    styles = (
+        '<w:style w:type="paragraph" w:styleId="Normal" w:default="1">'
+        '<w:pPr><w:numPr><w:numId w:val="1"/></w:numPr></w:pPr></w:style>'
+    )
+
+    assert _result(p(r("A")), _multilevel(), styles=styles).text == "1. A\n"
+
+
 def test_number_in_a_table_cell() -> None:
     cell = f"<w:tbl><w:tr><w:tc>{p(r('In cell'), num=(1, 0))}</w:tc></w:tr></w:tbl>"
     body = p(r("One"), num=(1, 0)) + cell + p(r("Three"), num=(1, 0))

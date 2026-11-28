@@ -33,6 +33,8 @@ _BASED_ON: Final[str] = qname(W_NS, "basedOn")
 _DOC_DEFAULTS: Final[str] = qname(W_NS, "docDefaults")
 _RPR_DEFAULT: Final[str] = qname(W_NS, "rPrDefault")
 _STYLE: Final[str] = qname(W_NS, "style")
+_DEFAULT: Final[str] = qname(W_NS, "default")
+_TYPE: Final[str] = qname(W_NS, "type")
 
 _OFF_VALUES: Final[frozenset[str]] = frozenset({"false", "off", "0"})
 _NONE_VALUES: Final[frozenset[str]] = frozenset({"auto", "none"})
@@ -143,16 +145,25 @@ def _fill_of(ppr: Element, current: str | None) -> str | None:
 class Styles:
     """The styles of one `word/styles.xml`, read once."""
 
-    __slots__ = ("_default_rpr", "_styles")
+    __slots__ = (
+        "_default_rpr",
+        "_styles",
+        "default_character_style",
+        "default_paragraph_style",
+    )
 
     def __init__(
         self,
         *,
         default_rpr: Element | None = None,
         styles: Mapping[str, _Style] | None = None,
+        default_paragraph_style: str | None = None,
+        default_character_style: str | None = None,
     ) -> None:
         self._default_rpr = default_rpr
         self._styles: Mapping[str, _Style] = styles or {}
+        self.default_paragraph_style = default_paragraph_style
+        self.default_character_style = default_character_style
 
     @classmethod
     def from_xml(cls, root: Element | None) -> Styles:
@@ -167,6 +178,8 @@ class Styles:
             if run_default is not None:
                 default_rpr = _child(run_default, "rPr")
         styles: dict[str, _Style] = {}
+        default_paragraph_style: str | None = None
+        default_character_style: str | None = None
         for element in root:
             if element.tag != _STYLE:
                 continue
@@ -180,7 +193,25 @@ class Styles:
                 rpr=_child(element, "rPr"),
                 ppr=_child(element, "pPr"),
             )
-        return cls(default_rpr=default_rpr, styles=styles)
+            default = element.get(_DEFAULT)
+            if default is None or default in _OFF_VALUES:
+                continue
+            style_type = element.get(_TYPE) or "paragraph"
+            if style_type == "paragraph":
+                default_paragraph_style = style_id
+            elif style_type == "character":
+                default_character_style = style_id
+        return cls(
+            default_rpr=default_rpr,
+            styles=styles,
+            default_paragraph_style=default_paragraph_style,
+            default_character_style=default_character_style,
+        )
+
+    def has_style(self, style_id: str | None) -> bool:
+        """Say whether the file holds this style id."""
+
+        return style_id is not None and style_id in self._styles
 
     def _chain_ids(self, style_id: str | None) -> list[str]:
         ids: list[str] = []
