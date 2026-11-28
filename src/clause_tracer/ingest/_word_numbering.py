@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from typing import Final
 
 from clause_tracer.ingest._thresholds import WORD_MAX_LETTER_REPEATS, WORD_MAX_LIST_START
-from clause_tracer.ingest._word_styles import Styles
+from clause_tracer.ingest._word_styles import Styles, is_on
 from clause_tracer.ingest._xml import W_NS, Element, qname
 
 _VAL: Final[str] = qname(W_NS, "val")
@@ -89,12 +89,13 @@ def _read_level(element: Element) -> tuple[int, _Level] | None:
         return None
     start = _whole(_value(_child(element, "start")), 0, WORD_MAX_LIST_START)
     restart = _whole(_value(_child(element, "lvlRestart")), 0, 9)
+    is_lgl_element = _child(element, "isLgl")
     level = _Level(
         start=start if start is not None else 1,
         num_fmt=_value(_child(element, "numFmt")) or "decimal",
         lvl_text=_value(_child(element, "lvlText")) or "",
         restart=restart,
-        is_lgl=_child(element, "isLgl") is not None,
+        is_lgl=is_lgl_element is not None and is_on(is_lgl_element),
         pstyle=_value(_child(element, "pStyle")),
     )
     return ilvl, level

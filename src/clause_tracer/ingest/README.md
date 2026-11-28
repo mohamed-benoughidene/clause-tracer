@@ -82,22 +82,28 @@ What it flags, in `Document.hidden`:
 
 | Finding | Reason | Span |
 | --- | --- | --- |
-| A hidden run | `WORD_HIDDEN_RUN` | Over its words |
+| A hidden run | `WORD_HIDDEN_RUN` | Over its words, or none in side text |
 | White text on white, or text in the colour of its fill | `LOW_CONTRAST` | Over its words |
 | Print under 2 points (`WORD_TINY_HALF_POINTS`) | `TINY_FONT` | Over its words |
-| A comment on words | `COMMENT` | Over the commented words |
+| A comment | `COMMENT` | Over the commented words, or none |
 | A part Word never shows | `WORD_PART_NEVER_SHOWN` | None |
 
 A comment on a footnote or an endnote that the body references is not
 flagged. It is in `Document.side_text` with no span. A comment on a header
-or a footer is flagged as never shown.
+or a footer is flagged as never shown. A comment whose words are not marked
+at all is flagged `COMMENT` with no span.
+
+A hidden or tiny run inside a note is flagged `WORD_HIDDEN_RUN` with no
+span.
 
 A comment's words, a note's words, and a header or footer stay out of
 `Document.text`. They are in `Document.side_text`, in this order: comments
 with their span, then the referenced notes, then the others, then headers,
-then footers. Tracked changes are in `Document.tracked_changes`, in document
-order, with the earlier wording, the new wording, the author and the span of
-the new wording. A change inside a content control, a hyperlink or any other
+then footers.
+
+Tracked changes are in `Document.tracked_changes`, in document order, with
+the earlier wording, the new wording, the author and the span of the new
+wording. A change inside a content control, a hyperlink or any other
 wrapper is listed too, and one change never crosses the edge of a wrapper.
 
 The warnings, in this order, are `WARNING_WORD_NUMBERING_UNKNOWN`

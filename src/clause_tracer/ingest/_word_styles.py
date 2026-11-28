@@ -92,7 +92,7 @@ def _colour(value: str) -> str | None:
     return value.upper()
 
 
-def _is_on(element: Element) -> bool:
+def is_on(element: Element) -> bool:
     value = element.get(_VAL)
     return value is None or value not in _OFF_VALUES
 
@@ -101,7 +101,7 @@ def _apply_rpr(props: RunProps, rpr: Element) -> RunProps:
     for child in rpr:
         tag = child.tag
         if tag == _VANISH:
-            props = replace(props, vanish=_is_on(child))
+            props = replace(props, vanish=is_on(child))
         elif tag == _COLOR:
             value = child.get(_VAL)
             if value is not None:

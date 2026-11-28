@@ -95,8 +95,7 @@ def comment_hidden(
 
     hidden: list[HiddenText] = []
     for span in spans.values():
-        if span is not None:
-            hidden.append(HiddenText(span=span, reason=HiddenReason.COMMENT, boxes=()))
+        hidden.append(HiddenText(span=span, reason=HiddenReason.COMMENT, boxes=()))
     for comment in comments:
         if comment.ref not in spans and comment.ref not in shown_in_notes:
             hidden.append(
@@ -129,20 +128,20 @@ def hidden_comments(root: Element | None, styles: Styles | None) -> tuple[str, .
 
 def _read_note_part(
     root: Element | None, kind: SideTextKind, styles: Styles | None
-) -> list[tuple[str, str]]:
+) -> list[tuple[str, str, bool]]:
     if root is None:
         return []
     tag = _FOOTNOTE if kind is SideTextKind.FOOTNOTE else _ENDNOTE
-    notes: list[tuple[str, str]] = []
+    notes: list[tuple[str, str, bool]] = []
     for element in root:
         if element.tag != tag:
             continue
         if "separator" in (element.get(_TYPE) or ""):
             continue
-        text = _flow_text(element, styles)
+        text, has_hidden_run = _flow(element, styles)
         if text == "":
             continue
-        notes.append((element.get(_ID) or "", text))
+        notes.append((element.get(_ID) or "", text, has_hidden_run))
     return notes
 
 
@@ -154,7 +153,7 @@ def read_notes(
 ) -> tuple[tuple[SideText, ...], tuple[HiddenText, ...]]:
     """Read the notes, referenced ones first and then the others."""
 
-    found: dict[tuple[SideTextKind, str], SideText] = {}
+    found: dict[tuple[SideTextKind, str], tuple[SideText, bool]] = {}
     file_order: dict[SideTextKind, list[str]] = {
         SideTextKind.FOOTNOTE: [],
         SideTextKind.ENDNOTE: [],
@@ -163,8 +162,11 @@ def read_notes(
         (SideTextKind.FOOTNOTE, footnotes),
         (SideTextKind.ENDNOTE, endnotes),
     ):
-        for ref, text in _read_note_part(root, kind, styles):
-            found[(kind, ref)] = SideText(kind=kind, ref=ref, author="", text=text)
+        for ref, text, has_hidden_run in _read_note_part(root, kind, styles):
+            found[(kind, ref)] = (
+                SideText(kind=kind, ref=ref, author="", text=text),
+                has_hidden_run,
+            )
             file_order[kind].append(ref)
 
     side: list[SideText] = []
@@ -176,18 +178,24 @@ def read_notes(
             continue
         seen.add(key)
         note = found.get(key)
-        if note is not None:
-            side.append(note)
+        if note is None:
+            continue
+        side.append(note[0])
+        if note[1]:
+            hidden.append(HiddenText(span=None, reason=HiddenReason.WORD_HIDDEN_RUN, boxes=()))
     for kind in (SideTextKind.FOOTNOTE, SideTextKind.ENDNOTE):
         for ref in file_order[kind]:
             key = (kind, ref)
             if key in seen:
                 continue
             seen.add(key)
-            side.append(found[key])
+            note = found[key]
+            side.append(note[0])
             hidden.append(
                 HiddenText(span=None, reason=HiddenReason.WORD_PART_NEVER_SHOWN, boxes=())
             )
+            if note[1]:
+                hidden.append(HiddenText(span=None, reason=HiddenReason.WORD_HIDDEN_RUN, boxes=()))
     return tuple(side), tuple(hidden)
 
 

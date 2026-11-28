@@ -888,7 +888,7 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
   - **Rules:** question 4, question 11, D4, T13.
   - **Depends on:** S5-M3-T11
 
-- [ ] **S5-M3-T13: Hidden notes, comments with no span and switched-off settings (added 28 Nov 2026)**
+- [x] **S5-M3-T13: Hidden notes, comments with no span and switched-off settings (added 28 Nov 2026)**
   - **Why:** hidden text in a note is not flagged, against the model of the text; a comment with no span is not flagged, against S5-M3-T5; a setting with `w:val="0"` counts as on.
   - **Build:**
     - In `_word_side.py`, `read_notes` adds one `HiddenText(span=None, reason=WORD_HIDDEN_RUN, boxes=())` for each listed note that holds a hidden or tiny run (use `_flow`). For a note with no reference, the `WORD_PART_NEVER_SHOWN` entry comes first.

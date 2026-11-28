@@ -284,6 +284,89 @@ def _note_reference(kind: str, note_id: int) -> str:
     return f'<w:r><w:{kind}Reference w:id="{note_id}"/></w:r>'
 
 
+def test_hidden_run_in_a_footnote_is_flagged() -> None:
+    footnotes = _SEPARATOR + _note("footnote", 1, p(r("secret", hidden=True)))
+    body = p(r("A"), _note_reference("footnote", 1))
+
+    document = _read(body, footnotes=footnotes)
+
+    assert document.hidden == (
+        HiddenText(span=None, reason=HiddenReason.WORD_HIDDEN_RUN, boxes=()),
+    )
+
+
+def test_hidden_run_in_an_endnote_is_flagged() -> None:
+    endnotes = _note("endnote", 1, p(r("secret", hidden=True)))
+    body = p(r("A"), _note_reference("endnote", 1))
+
+    document = _read(body, endnotes=endnotes)
+
+    assert document.hidden == (
+        HiddenText(span=None, reason=HiddenReason.WORD_HIDDEN_RUN, boxes=()),
+    )
+
+
+def test_comment_with_a_reference_only_is_flagged() -> None:
+    body = p('<w:r><w:commentReference w:id="0"/></w:r>', r("A"))
+
+    document = _read(body, comments=comment(0, "Ann", "check"))
+
+    assert document.hidden == (HiddenText(span=None, reason=HiddenReason.COMMENT, boxes=()),)
+
+
+def test_comment_with_no_end_mark_is_flagged() -> None:
+    body = p('<w:commentRangeStart w:id="0"/>', r("A"))
+
+    document = _read(body, comments=comment(0, "Ann", "check"))
+
+    assert document.hidden == (HiddenText(span=None, reason=HiddenReason.COMMENT, boxes=()),)
+
+
+def test_title_page_set_to_off() -> None:
+    section = (
+        '<w:sectPr><w:headerReference w:type="first" r:id="rId1"/><w:titlePg w:val="0"/></w:sectPr>'
+    )
+    body = p(r("A")) + section
+
+    document = _read(body, headers={"header1.xml": p(r("Head"))})
+
+    assert document.hidden == (
+        HiddenText(span=None, reason=HiddenReason.WORD_PART_NEVER_SHOWN, boxes=()),
+    )
+
+
+def test_even_and_odd_set_to_off() -> None:
+    section = '<w:sectPr><w:headerReference w:type="even" r:id="rId2"/></w:sectPr>'
+    body = p(r("A")) + section
+
+    document = _read(
+        body,
+        headers={"header1.xml": p(r("Head"))},
+        settings='<w:evenAndOddHeaders w:val="0"/>',
+    )
+
+    assert document.hidden == (
+        HiddenText(span=None, reason=HiddenReason.WORD_PART_NEVER_SHOWN, boxes=()),
+    )
+
+
+def test_is_lgl_set_to_off() -> None:
+    numbering = (
+        '<w:abstractNum w:abstractNumId="0">'
+        '<w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="upperRoman"/>'
+        '<w:lvlText w:val="%1."/></w:lvl>'
+        '<w:lvl w:ilvl="1"><w:start w:val="1"/><w:numFmt w:val="decimal"/>'
+        '<w:lvlText w:val="%1.%2"/></w:lvl>'
+        '<w:lvl w:ilvl="2"><w:start w:val="1"/><w:numFmt w:val="decimal"/>'
+        '<w:lvlText w:val="%1.%2.%3"/><w:isLgl w:val="0"/></w:lvl>'
+        "</w:abstractNum>"
+        '<w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num>'
+    )
+    body = p(r("A"), num=(1, 0)) + p(r("B"), num=(1, 1)) + p(r("C"), num=(1, 2))
+
+    assert _read(body, numbering=numbering).text == "I. A\nI.1 B\nI.1.1 C\n"
+
+
 def test_comment_on_a_referenced_footnote_is_not_flagged() -> None:
     footnotes = _SEPARATOR + _note("footnote", 1, p(comment_range(0, r("Note"))))
     body = p(r("A"), _note_reference("footnote", 1))

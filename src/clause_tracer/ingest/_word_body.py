@@ -23,7 +23,7 @@ from clause_tracer.core import (
 from clause_tracer.ingest._thresholds import WORD_TINY_HALF_POINTS
 from clause_tracer.ingest._word_model import BodyResult, Mark, SectionRefs, Text
 from clause_tracer.ingest._word_numbering import Numbering
-from clause_tracer.ingest._word_styles import RunProps, Styles
+from clause_tracer.ingest._word_styles import RunProps, Styles, is_on
 from clause_tracer.ingest._xml import W_NS, Element, qname
 from clause_tracer.ingest.limits import MAX_WORDS
 
@@ -879,7 +879,7 @@ def _sections(root: Element) -> tuple[SectionRefs, ...]:
             SectionRefs(
                 headers=tuple(headers),
                 footers=tuple(footers),
-                title_page=any(child.tag == _TITLE_PG for child in element),
+                title_page=any(child.tag == _TITLE_PG and is_on(child) for child in element),
             )
         )
     return tuple(sections)

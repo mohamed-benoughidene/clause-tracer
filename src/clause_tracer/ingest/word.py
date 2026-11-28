@@ -32,7 +32,7 @@ from clause_tracer.ingest._word_side import (
     read_notes,
     read_relationships,
 )
-from clause_tracer.ingest._word_styles import Styles
+from clause_tracer.ingest._word_styles import Styles, is_on
 from clause_tracer.ingest._xml import W_NS, Element, parse_part, qname
 from clause_tracer.ingest._zip import WordPackage, open_package
 from clause_tracer.ingest.limits import MAX_FILE_BYTES
@@ -62,7 +62,10 @@ def _part(package: WordPackage, name: str) -> Element | None:
 
 
 def _has_even_and_odd(root: Element | None) -> bool:
-    return root is not None and root.find(_EVEN_AND_ODD) is not None
+    if root is None:
+        return False
+    element = root.find(_EVEN_AND_ODD)
+    return element is not None and is_on(element)
 
 
 def _order_hidden(hidden: tuple[HiddenText, ...]) -> tuple[HiddenText, ...]:
