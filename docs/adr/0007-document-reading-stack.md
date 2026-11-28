@@ -157,3 +157,10 @@ The owner accepted this on 28 Nov 2026, while stage 5 milestone 2 was built. It 
 - **Still decided by lxml.** The length of a name, a start tag whose markup takes it over lxml's limit while its attributes stay under ours, and any other libxml2 limit. These may differ between systems, and no test of the Windows job covers them.
 - **Not proven yet.** On Linux, lxml's limits were switched off (`huge_tree`) to stand in for the Windows library, and the new check refused the test parts. Only the Windows job proves it on Windows. The check was compared with `lxml` alone only on the parts of the repo's test builders, not on files saved by Word or LibreOffice.
 
+## Amendment (28 Nov 2026): only stored and deflated members, and a second member count
+
+The owner accepted this on 28 Nov 2026. It adds to the zip checks and comes from a review of stage 5 milestone 2.
+
+- **Compression.** A package with a member that is neither stored nor deflated is refused. These are the two methods that Word writes. For bzip2, one read step of Python is not bounded by the declared size: a file of 591 bytes, whose part declared 100 bytes, took about 800 MiB of memory before it was refused (measured on Linux, Python 3.13).
+- **Member count.** The count in the end record is written by the file's author and can be false: a package with 20,002 members whose record said 3 passed. The members are now counted again after the open. The early check of the record stays.
+
