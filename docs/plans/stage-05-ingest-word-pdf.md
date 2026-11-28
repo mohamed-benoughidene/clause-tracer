@@ -918,3 +918,6 @@ None yet. Filled in when the stage is done.
 | 26 Nov 2026 | S5-M1-T3 | `pyproject.toml` has a `mypy` override for `reportlab`, a test-only tool; T1 allowed overrides for the three runtime libraries. | `reportlab` ships no type information, and `mypy` checks the test builders that import it. | No |
 | 26 Nov 2026 | S5-M1-T8 | The test helper `_render_mode_of`. | It reads one character through the raw API. | No |
 | 26 Nov 2026 | S5-M1-T9 | The private helper `_dense_line`, the constants `_DENSE_LINE_CHARS` and `_DENSE_PAGE_CHARS`, the test helper `_dense_text`, and the font is set on every page. | `showPage` resets the font, so the first builder drew only page 1 at its size. | No |
+| 28 Nov 2026 | S5-M2-T4 | The private `_ALLOWED_ENCODINGS`, `_on_xml_decl`, `_on_doctype` and `_PARSER`. | Named values and expat handlers keep the settings and the callback signatures in one place. | No |
+| 28 Nov 2026 | S5-M2-T3 | The private `_central_directory_entries`, `_ENCRYPTED_FLAG`, `_EOCD_ENTRIES_OFFSET`, `_EOCD_SEARCH_BYTES`, `_EOCD_SIGNATURE`, `_REQUIRED_PARTS` and `_ZIP64_ENTRIES`. | Named values for the zip records, and one helper for the end record, keep the checks readable. | No |
+| 28 Nov 2026 | S5-M2-T5 | The private `_XML_PART_SUFFIXES`. | One tuple names the two part suffixes that the Word reader parses. | No |
