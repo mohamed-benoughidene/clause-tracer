@@ -1,13 +1,16 @@
-"""The zip checks of the Word reader (S5-M2-T3)."""
+"""The zip checks of the Word reader (S5-M2-T3, S5-M2-T11)."""
 
 import io
+import random
 import time
+import tracemalloc
 import warnings
 import zipfile
+import zlib
 
 import pytest
 
-from clause_tracer.core import InputTooLargeError, UnreadableFileError
+from clause_tracer.core import InputError, InputTooLargeError, UnreadableFileError
 from clause_tracer.ingest._zip import open_package
 from clause_tracer.ingest.limits import (
     MAX_PARSED_TOTAL_BYTES,
@@ -203,3 +206,143 @@ def test_corrupt_central_directory_is_refused() -> None:
         open_package(data)
 
     assert _reason(raised.value) == "zip_invalid"
+
+
+def _two_part_zip(document: bytes, method: int = zipfile.ZIP_DEFLATED) -> bytearray:
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as package:
+        package.writestr("[Content_Types].xml", b"<Types/>")
+        package.writestr(_DOCUMENT, document, compress_type=method)
+    return bytearray(buffer.getvalue())
+
+
+def _second_central(data: bytearray) -> int:
+    first = data.find(b"PK\x01\x02")
+    return data.find(b"PK\x01\x02", first + 4)
+
+
+def _declare(data: bytearray, *, size: int, crc: int) -> bytes:
+    """Change the declared size and CRC of the second member."""
+    central = _second_central(data)
+    data[central + 16 : central + 20] = crc.to_bytes(4, "little")
+    data[central + 24 : central + 28] = size.to_bytes(4, "little")
+    return bytes(data)
+
+
+@pytest.mark.parametrize("method", [zipfile.ZIP_BZIP2, zipfile.ZIP_LZMA])
+def test_other_compression_is_refused(method: int) -> None:
+    with pytest.raises(UnreadableFileError) as raised:
+        open_package(bytes(_two_part_zip(b"<a/>", method)))
+
+    assert _reason(raised.value) == "zip_invalid"
+
+
+def test_too_many_members_when_the_count_lies() -> None:
+    data = bytearray(many_members_docx(MAX_ZIP_MEMBERS + 1))
+    end = data.rfind(b"PK\x05\x06")
+    data[end + 8 : end + 12] = (3).to_bytes(2, "little") * 2
+
+    with pytest.raises(UnreadableFileError) as raised:
+        open_package(bytes(data))
+
+    assert raised.value.context == {
+        "reason": "too_many_members",
+        "members": MAX_ZIP_MEMBERS + 1,
+        "limit": MAX_ZIP_MEMBERS,
+    }
+
+
+@pytest.mark.parametrize(
+    "patches",
+    [
+        pytest.param([(6, 99)], id="extract-version"),
+        pytest.param([(10, 99)], id="compression-method"),
+        pytest.param([(9, 0x08), (46, 0xFF)], id="bad-utf8-name"),
+    ],
+)
+def test_raw_zipfile_errors_are_zip_invalid(patches: list[tuple[int, int]]) -> None:
+    data = bytearray(build_docx(p(r("Hello"))))
+    central = data.find(b"PK\x01\x02")
+    for offset, value in patches:
+        data[central + offset] = value
+
+    with pytest.raises(UnreadableFileError) as raised:
+        open_package(bytes(data))
+
+    assert _reason(raised.value) == "zip_invalid"
+
+
+@pytest.mark.parametrize(("covered", "reason"), [(4, "zip_invalid"), (5, "size_mismatch")])
+def test_a_cut_part_is_refused(covered: int, reason: str) -> None:
+    real = b"<a/>" + b" " * 10 + b"<hidden-rest/>"
+    data = _declare(_two_part_zip(real), size=4, crc=zlib.crc32(real[:covered]))
+    package = open_package(data)
+
+    with pytest.raises(UnreadableFileError) as raised:
+        package.read_part(_DOCUMENT)
+
+    assert _reason(raised.value) == reason
+
+
+def test_a_declared_size_longer_than_the_data_is_refused() -> None:
+    data = _declare(_two_part_zip(b"<a/>"), size=40, crc=zlib.crc32(b"<a/>"))
+    package = open_package(data)
+
+    with pytest.raises(UnreadableFileError) as raised:
+        package.read_part(_DOCUMENT)
+
+    assert _reason(raised.value) == "size_mismatch"
+
+
+def test_a_deflate_bomb_stays_small() -> None:
+    data = _declare(_two_part_zip(bytes(100 * _MIB)), size=100, crc=0)
+    package = open_package(data)
+
+    tracemalloc.start()
+    with pytest.raises(UnreadableFileError):
+        package.read_part(_DOCUMENT)
+    peak = tracemalloc.get_traced_memory()[1]
+    tracemalloc.stop()
+
+    assert peak < _MIB
+
+
+def _stored_copy(data: bytes) -> bytes:
+    buffer = io.BytesIO()
+    with (
+        zipfile.ZipFile(io.BytesIO(data)) as source,
+        zipfile.ZipFile(buffer, "w", zipfile.ZIP_STORED) as target,
+    ):
+        for name in source.namelist():
+            target.writestr(name, source.read(name))
+    return buffer.getvalue()
+
+
+def _mutated(base: bytes, rng: random.Random) -> bytes:
+    """Change one to four bytes, mostly inside the zip records."""
+    data = bytearray(base)
+    signatures = (b"PK\x01\x02", b"PK\x03\x04", b"PK\x05\x06")
+    records = [index for index in range(len(base)) if base.startswith(signatures, index)]
+    for _ in range(rng.randint(1, 4)):
+        if rng.random() < 0.7:
+            position = rng.choice(records) + rng.randrange(4, 46)
+        else:
+            position = rng.randrange(len(base))
+        if position < len(data):
+            data[position] = rng.randrange(256)
+    return bytes(data)
+
+
+def test_mutated_packages_raise_only_input_errors() -> None:
+    rng = random.Random(1)
+    deflated = build_docx(p(r("Hello " * 50)))
+    bases = (deflated, _stored_copy(deflated))
+
+    for index in range(4_000):
+        data = _mutated(bases[index % 2], rng)
+        try:
+            package = open_package(data)
+            for name in package.names():
+                package.read_part(name)
+        except InputError:
+            pass

@@ -1,10 +1,13 @@
-"""The zip checks of the Word reader (S5-M2-T3).
+"""The zip checks of the Word reader (S5-M2-T3, S5-M2-T11).
 
 This file imports only the standard library. It refuses a package before
-`zipfile` opens it when the member count is too high, and it never reads
-media. A part's declared size is checked before the part is inflated.
+`zipfile` opens it when the count in the end record is too high. That count
+can be false, so the names are counted again after the open. A member that
+is not stored or deflated is refused, and media is never read. A part's
+declared size is checked before the part is inflated.
 """
 
+import copy
 import io
 import warnings
 import zipfile
@@ -25,6 +28,19 @@ _EOCD_SEARCH_BYTES: Final[int] = 65_557
 _EOCD_ENTRIES_OFFSET: Final[int] = 10
 _ZIP64_ENTRIES: Final[int] = 65_535
 _ENCRYPTED_FLAG: Final[int] = 0x1
+
+_ALLOWED_COMPRESSION: Final[frozenset[int]] = frozenset({zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED})
+# Word writes only these two. With any other, one read step is not bounded by the declared size.
+
+_ZIP_ERRORS: Final[tuple[type[Exception], ...]] = (
+    zipfile.BadZipFile,
+    zlib.error,
+    EOFError,
+    NotImplementedError,
+    OSError,
+    ValueError,
+)
+# What zipfile raises for a damaged or hostile package. MemoryError is never in this list.
 
 _REQUIRED_PARTS: Final[tuple[str, ...]] = (
     "[Content_Types].xml",
@@ -77,17 +93,21 @@ class WordPackage:
         if is_total_over_cap:
             raise InputTooLargeError({"part": name, "limit_bytes": MAX_PARSED_TOTAL_BYTES})
 
+        # zipfile stops at the declared size: one extra byte lets a longer part show.
+        probe = copy.copy(info)
+        probe.file_size = info.file_size + 1
+
         with warnings.catch_warnings():
             warnings.simplefilter("error")
             try:
-                with self._zip.open(info) as stream:
+                with self._zip.open(probe) as stream:
                     data = stream.read(info.file_size + 1)
-            except (zipfile.BadZipFile, zlib.error):
+            except _ZIP_ERRORS:
                 raise UnreadableFileError({"reason": "zip_invalid"}) from None
             except UserWarning:
                 raise UnreadableFileError({"reason": "zip_overlap", "part": name}) from None
 
-        is_size_mismatch = len(data) > info.file_size
+        is_size_mismatch = len(data) != info.file_size
         if is_size_mismatch:
             raise UnreadableFileError({"reason": "size_mismatch", "part": name})
 
@@ -120,10 +140,16 @@ def open_package(data: bytes) -> WordPackage:
 
     try:
         package = zipfile.ZipFile(io.BytesIO(data))
-    except zipfile.BadZipFile:
+    except _ZIP_ERRORS:
         raise UnreadableFileError({"reason": "zip_invalid"}) from None
 
     names = package.namelist()
+    has_too_many_names = len(names) > MAX_ZIP_MEMBERS
+    if has_too_many_names:
+        raise UnreadableFileError(
+            {"reason": "too_many_members", "members": len(names), "limit": MAX_ZIP_MEMBERS}
+        )
+
     has_duplicate = len(names) != len(set(names))
     if has_duplicate:
         raise UnreadableFileError({"reason": "duplicate_member"})
@@ -133,6 +159,9 @@ def open_package(data: bytes) -> WordPackage:
         is_encrypted = bool(info.flag_bits & _ENCRYPTED_FLAG)
         if is_encrypted:
             raise UnreadableFileError({"reason": "zip_encrypted"})
+        is_other_compression = info.compress_type not in _ALLOWED_COMPRESSION
+        if is_other_compression:
+            raise UnreadableFileError({"reason": "zip_invalid"})
         infos[info.filename] = info
 
     has_required_parts = all(part in infos for part in _REQUIRED_PARTS)

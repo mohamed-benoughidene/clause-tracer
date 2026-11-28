@@ -370,7 +370,7 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
   - **Rules:** P8, question 11, T13.
   - **Depends on:** S5-M2-T3
 
-- [ ] **S5-M2-T11: The zip reader refuses what it cannot bound (added 28 Nov 2026)**
+- [x] **S5-M2-T11: The zip reader refuses what it cannot bound (added 28 Nov 2026)**
   - **Build:** A review of pull request 245 found five faults in `ingest/_zip.py`. No new reason word is added.
     - Add `import copy`. Add these two constants after `_ENCRYPTED_FLAG`:
     ```python
