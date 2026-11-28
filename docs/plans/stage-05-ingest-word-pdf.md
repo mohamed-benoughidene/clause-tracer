@@ -8,7 +8,7 @@
 | Accepted on | 26 Nov 2026 |
 | Stage outline | [System design section 15.5](../system-design.md#155-stage-5-ingest-for-word-and-pdf) |
 
-**State (28 Nov 2026).** The owner accepted the plan. All questions in section 6 are answered, all six milestones are written in full, and the owner confirmed the proposals of section 6.1. M1 is built and merged (`999e16e`, pull request 240). M2 is built (S5-M2-T1 to T13, pull request 245), and the Linux and Windows jobs are green on `78c1f63`. A review found faults, and S5-M2-T11 to T13 fixed them. M3 has not started.
+**State (28 Nov 2026).** The owner accepted the plan. All questions in section 6 are answered, all six milestones are written in full, and the owner confirmed the proposals of section 6.1. M1 is built and merged (`999e16e`, pull request 240). M2 is merged (`f3c35ec`, pull request 245), and its Linux and Windows jobs were green on `78c1f63`. A review found faults, and S5-M2-T11 to T13 fixed them before the merge. M3 is in progress (S5-M3-T1 and T2 are built).
 
 ## 1. Goal
 
@@ -755,7 +755,7 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
   - **Rules:** question 21, question 10 (the constant as an `[Assumption]`), D1.
   - **Depends on:** S5-M3-T1
 
-- [ ] **S5-M3-T3: List numbers**
+- [x] **S5-M3-T3: List numbers**
   - **Build:** Create `ingest/_word_numbering.py` and use it in `_word_body.py` (change the `numbering` parameter to `Numbering | None`; `build_body` also takes `styles`).
     - `@dataclass(frozen=True, slots=True, kw_only=True) class Label` with `text: str | None` and `unknown: bool = False`.
     - `class Numbering` with `@classmethod from_xml(cls, root: etree._Element | None, styles: Styles) -> Numbering` and `def label(self, *, num_id: str, ilvl: int) -> Label`, which is stateful: it keeps one counter for each (abstractNum id, level) and advances it on each call (the caller calls it once for each numbered paragraph, in text order, and not for a dropped paragraph).
@@ -1266,3 +1266,4 @@ None yet. Filled in when the stage is done.
 | 28 Nov 2026 | S5-M2-T3 | The private `_central_directory_entries`, `_ENCRYPTED_FLAG`, `_EOCD_ENTRIES_OFFSET`, `_EOCD_SEARCH_BYTES`, `_EOCD_SIGNATURE`, `_REQUIRED_PARTS` and `_ZIP64_ENTRIES`. | Named values for the zip records, and one helper for the end record, keep the checks readable. | No |
 | 28 Nov 2026 | S5-M2-T5 | The private `_XML_PART_SUFFIXES`. | One tuple names the two part suffixes that the Word reader parses. | No |
 | 28 Nov 2026 | S5-M3-T1 | `_xml.py` gains `type Element = etree._Element`, and `_word_body.py` annotates with `Element` instead of importing lxml. | B4 and the architecture test allow lxml in `_xml.py` only. | No |
+| 28 Nov 2026 | S5-M3-T3 | `Styles` gains `_chain_ids` and `numbering`, `Numbering` gains `level_for_style`, and `_Paragraph` gains `num_id` and `num_level`. | The style's `w:numPr` and the level whose `w:pStyle` names it must be found, and the label is computed after the carry and drop pass. | No |

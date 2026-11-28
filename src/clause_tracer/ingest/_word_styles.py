@@ -182,6 +182,40 @@ class Styles:
             )
         return cls(default_rpr=default_rpr, styles=styles)
 
+    def _chain_ids(self, style_id: str | None) -> list[str]:
+        ids: list[str] = []
+        seen: set[str] = set()
+        current = style_id
+        while current is not None and current not in seen and len(ids) < _MAX_CHAIN_STEPS:
+            seen.add(current)
+            if current not in self._styles:
+                break
+            ids.append(current)
+            current = self._styles[current].based_on
+        ids.reverse()
+        return ids
+
+    def numbering(self, *, paragraph_style: str | None) -> tuple[str, str | None, str] | None:
+        """Return the list, level and style id of the nearest numbering style."""
+
+        for style_id in reversed(self._chain_ids(paragraph_style)):
+            style = self._styles[style_id]
+            if style.ppr is None:
+                continue
+            num_pr = _child(style.ppr, "numPr")
+            if num_pr is None:
+                continue
+            num_id_element = _child(num_pr, "numId")
+            if num_id_element is None:
+                continue
+            num_id = num_id_element.get(_VAL)
+            if num_id is None:
+                continue
+            ilvl_element = _child(num_pr, "ilvl")
+            ilvl = ilvl_element.get(_VAL) if ilvl_element is not None else None
+            return num_id, ilvl, style_id
+        return None
+
     def _chain(self, style_id: str | None) -> list[_Style]:
         chain: list[_Style] = []
         seen: set[str] = set()

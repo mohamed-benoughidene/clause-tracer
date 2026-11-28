@@ -20,6 +20,7 @@ from clause_tracer.core import (
 )
 from clause_tracer.ingest._thresholds import WORD_TINY_HALF_POINTS
 from clause_tracer.ingest._word_model import BodyResult, Mark, Text
+from clause_tracer.ingest._word_numbering import Numbering
 from clause_tracer.ingest._word_styles import RunProps, Styles
 from clause_tracer.ingest._xml import W_NS, Element, qname
 from clause_tracer.ingest.limits import MAX_WORDS
@@ -34,6 +35,10 @@ def _tag(local: str) -> str:
 _BODY: Final[str] = _tag("body")
 _P: Final[str] = _tag("p")
 _PPR: Final[str] = _tag("pPr")
+_NUMPR: Final[str] = _tag("numPr")
+_NUMID: Final[str] = _tag("numId")
+_ILVL: Final[str] = _tag("ilvl")
+_VAL: Final[str] = qname(W_NS, "val")
 _R: Final[str] = _tag("r")
 _RPR: Final[str] = _tag("rPr")
 _RSTYLE: Final[str] = _tag("rStyle")
@@ -119,14 +124,22 @@ _MAX_PARAGRAPHS: Final[int] = 200_000
 class _Paragraph:
     """One line before it is assembled, or one cell of a table row."""
 
-    __slots__ = ("mark_deleted", "number", "pieces")
+    __slots__ = ("mark_deleted", "num_id", "num_level", "number", "pieces")
 
     def __init__(
-        self, *, number: str | None, pieces: list[Text | Mark], mark_deleted: bool
+        self,
+        *,
+        number: str | None,
+        pieces: list[Text | Mark],
+        mark_deleted: bool,
+        num_id: str | None = None,
+        num_level: int = 0,
     ) -> None:
         self.number = number
         self.pieces = pieces
         self.mark_deleted = mark_deleted
+        self.num_id = num_id
+        self.num_level = num_level
 
 
 def _assemble(paragraphs: list[_Paragraph]) -> tuple[str, list[tuple[Text | Mark, int, int]]]:
@@ -166,12 +179,19 @@ def _assemble(paragraphs: list[_Paragraph]) -> tuple[str, list[tuple[Text | Mark
 class _Walker:
     """Walk one part of a Word document, in the order Word draws it."""
 
-    def __init__(self, *, styles: Styles | None = None, quiet: bool = False) -> None:
+    def __init__(
+        self,
+        *,
+        styles: Styles | None = None,
+        numbering: Numbering | None = None,
+        quiet: bool = False,
+    ) -> None:
         self.paragraphs: list[_Paragraph] = []
         self.hidden: list[HiddenText] = []
         self.symbol_unread = False
         self._quiet = quiet
         self._styles = styles if styles is not None else Styles.from_xml(None)
+        self._numbering = numbering
         self._paragraph_style: str | None = None
         self._paragraph_fill: str | None = None
         self._fields: list[str] = []
@@ -248,13 +268,20 @@ class _Walker:
             raise UnreadableFileError({"reason": "word_alt_chunk"})
 
     def _read_paragraph(self, element: Element, out: list[_Paragraph]) -> None:
-        paragraph = _Paragraph(number=None, pieces=[], mark_deleted=self._is_mark_deleted(element))
         properties = self._child_for(element, _PPR)
         paragraph_style: str | None = None
         if properties is not None:
             style = self._child_for(properties, _PSTYLE)
             if style is not None:
                 paragraph_style = style.get(qname(W_NS, "val"))
+        num_id, num_level = self._numbering_of(properties, paragraph_style)
+        paragraph = _Paragraph(
+            number=None,
+            pieces=[],
+            mark_deleted=self._is_mark_deleted(element),
+            num_id=num_id,
+            num_level=num_level,
+        )
         boxes: list[_Paragraph] = []
         saved = self._boxes
         saved_style = self._paragraph_style
@@ -279,6 +306,29 @@ class _Walker:
         for box in boxes:
             self._count_paragraph()
             out.append(box)
+
+    def _numbering_of(
+        self, properties: Element | None, paragraph_style: str | None
+    ) -> tuple[str | None, int]:
+        num_pr = self._child_for(properties, _NUMPR) if properties is not None else None
+        if num_pr is None:
+            if self._numbering is None:
+                return None, 0
+            styled = self._styles.numbering(paragraph_style=paragraph_style)
+            if styled is None:
+                return None, 0
+            num_id, ilvl_text, style_id = styled
+            if ilvl_text is not None:
+                return num_id, _level_of(ilvl_text)
+            level = self._numbering.level_for_style(num_id=num_id, style_id=style_id)
+            return num_id, level if level is not None else 0
+        num_id_element = self._child_for(num_pr, _NUMID)
+        direct_num_id = num_id_element.get(_VAL) if num_id_element is not None else None
+        if direct_num_id is None:
+            return None, 0
+        ilvl_element = self._child_for(num_pr, _ILVL)
+        ilvl = ilvl_element.get(_VAL) if ilvl_element is not None else None
+        return direct_num_id, _level_of(ilvl)
 
     def _walk_inline(self, element: Element, pieces: list[Text | Mark]) -> None:
         tag = element.tag
@@ -494,6 +544,29 @@ class _Walker:
         return pieces
 
 
+def _level_of(value: str | None) -> int:
+    if value is None:
+        return 0
+    try:
+        return int(value)
+    except ValueError:
+        return 0
+
+
+def _number_paragraphs(paragraphs: list[_Paragraph], numbering: Numbering) -> bool:
+    """Write each kept paragraph's number and say whether any was unknown."""
+
+    is_unknown = False
+    for paragraph in paragraphs:
+        if paragraph.mark_deleted or paragraph.num_id is None:
+            continue
+        label = numbering.label(num_id=paragraph.num_id, ilvl=paragraph.num_level)
+        is_unknown = is_unknown or label.unknown
+        if label.text is not None:
+            paragraph.number = f"{label.text} "
+    return is_unknown
+
+
 def _run_reasons(props: RunProps, paragraph_fill: str | None) -> tuple[HiddenReason, ...]:
     """Return the hidden reasons of one run's words, each at most once."""
 
@@ -547,7 +620,7 @@ def build_body(
     root: Element,
     *,
     styles: Styles | None = None,
-    numbering: object | None = None,
+    numbering: Numbering | None = None,
 ) -> BodyResult:
     """Walk the body of a parsed `word/document.xml`.
 
@@ -561,11 +634,15 @@ def build_body(
     Effects: none.
     """
 
-    walker = _Walker(styles=styles)
+    walker = _Walker(styles=styles, numbering=numbering)
     walker.walk(root)
+    numbering_unknown = (
+        _number_paragraphs(walker.paragraphs, numbering) if numbering is not None else False
+    )
     text, positions = _assemble(walker.paragraphs)
     return BodyResult(
         text=text,
         hidden=(*walker.hidden, *_hidden_from_positions(positions)),
+        numbering_unknown=numbering_unknown,
         symbol_unread=walker.symbol_unread,
     )
