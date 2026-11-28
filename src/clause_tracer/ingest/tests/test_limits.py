@@ -28,4 +28,5 @@ def test_stage_5_limits() -> None:
     assert limits.MAX_XML_PART_BYTES == 33_554_432
     assert limits.MAX_PARSED_TOTAL_BYTES == 50_331_648
     assert limits.MAX_XML_DEPTH == 256
+    assert limits.MAX_XML_TEXT_BYTES == 9_000_000
     assert limits.MAX_PDF_PAGES == 1_000

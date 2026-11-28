@@ -8,9 +8,9 @@ from typing import Literal
 import pytest
 
 from clause_tracer.core import UnreadableFileError
-from clause_tracer.ingest._xml import W_NS, parse_part, qname
+from clause_tracer.ingest._xml import W_NS, _check_part, parse_part, qname
 from clause_tracer.ingest._zip import open_package
-from clause_tracer.ingest.limits import MAX_XML_DEPTH
+from clause_tracer.ingest.limits import MAX_XML_DEPTH, MAX_XML_TEXT_BYTES
 from clause_tracer.ingest.tests.builders.hostile import (
     deep_xml_docx,
     doctype_docx,
@@ -21,6 +21,7 @@ from clause_tracer.ingest.tests.builders.word import build_docx, p, r
 
 _DOCUMENT = "word/document.xml"
 _MIB = 1024 * 1024
+CAP = MAX_XML_TEXT_BYTES
 
 
 def _document(data: bytes) -> bytes:
@@ -142,3 +143,69 @@ def test_a_named_dtd_file_is_not_read(tmp_path: Path) -> None:
         parse_part(part.encode())
 
     assert _reason(raised.value) == "doctype"
+
+
+def _assert_refused(data: bytes) -> None:
+    with pytest.raises(UnreadableFileError) as raised:
+        parse_part(data)
+
+    assert _reason(raised.value) == "xml_invalid"
+
+
+def test_own_check_refuses_depth_257() -> None:
+    _check_part(_document(deep_xml_docx(254)))
+
+    with pytest.raises(UnreadableFileError) as raised:
+        _check_part(_document(deep_xml_docx(255)))
+
+    assert _reason(raised.value) == "xml_invalid"
+
+
+def test_long_text_is_refused() -> None:
+    assert parse_part(b"<a>" + b"x" * CAP + b"</a>") is not None
+
+    _assert_refused(b"<a>" + b"x" * (CAP + 1) + b"</a>")
+
+
+def test_text_limit_counts_utf8_bytes() -> None:
+    assert parse_part(("<a>" + "\u00e9" * 4_500_000 + "</a>").encode()) is not None
+
+    _assert_refused(("<a>" + "\u00e9" * 4_500_001 + "</a>").encode())
+
+
+def test_long_cdata_is_refused() -> None:
+    assert parse_part(b"<a><![CDATA[" + b"x" * CAP + b"]]></a>") is not None
+
+    _assert_refused(b"<a><![CDATA[" + b"x" * (CAP + 1) + b"]]></a>")
+
+
+def test_long_comment_is_refused() -> None:
+    assert parse_part(b"<a><!--" + b"x" * CAP + b"--></a>") is not None
+
+    _assert_refused(b"<a><!--" + b"x" * (CAP + 1) + b"--></a>")
+
+
+def test_long_processing_instruction_is_refused() -> None:
+    assert parse_part(b"<a><?t " + b"x" * (CAP - 1) + b"?></a>") is not None
+
+    _assert_refused(b"<a><?t " + b"x" * CAP + b"?></a>")
+
+
+def test_long_attributes_are_refused() -> None:
+    one = b"x" * (CAP - 1)
+    half = b"x" * (CAP // 2 - 1)
+
+    assert parse_part(b'<a b="' + one + b'"/>') is not None
+    assert parse_part(b'<a b="' + half + b'" c="' + half + b'"/>') is not None
+
+    _assert_refused(b'<a b="' + one + b'x"/>')
+    _assert_refused(b'<a b="' + half + b'" c="' + half + b'x"/>')
+
+
+def test_only_a_tag_restarts_the_text_count() -> None:
+    first = b"x" * (CAP // 2)
+    second = b"x" * (CAP // 2 + 1)
+
+    assert parse_part(b"<a>" + first + b"<b/>" + second + b"</a>") is not None
+
+    _assert_refused(b"<a>" + first + b"<!--c-->" + second + b"</a>")

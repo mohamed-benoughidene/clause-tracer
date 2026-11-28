@@ -334,7 +334,7 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
   - **Rules:** question 7, D1, testing strategy 13.
   - **Depends on:** S5-M2-T7. It is ticked only after S5-M2-T9: the `windows` job is green only with that task.
 
-- [ ] **S5-M2-T9: Own depth and size limits for XML parts (added 28 Nov 2026)**
+- [x] **S5-M2-T9: Own depth and size limits for XML parts (added 28 Nov 2026)**
   - **Build:** The `expat` check of S5-M2-T4 now reads the whole part and applies the product's own limits, because the limits of `lxml` differ between systems (ADR 0007, amendment of 28 Nov 2026). The `lxml` parser, its settings and the check after the parse do not change.
     - `ingest/limits.py`: replace the comment under `MAX_XML_DEPTH` with `# The code checks it (_xml.py): the depth limit of lxml differs between systems.` Add after it `MAX_XML_TEXT_BYTES: Final[int] = 9_000_000` with the comment `# The code checks it (_xml.py), below lxml's own limits on Linux, which differ between systems.`
     - `ingest/_xml.py`: import `MAX_XML_DEPTH` and `MAX_XML_TEXT_BYTES` from `clause_tracer.ingest.limits`. Delete `_RootReached` and `_on_start_element`.

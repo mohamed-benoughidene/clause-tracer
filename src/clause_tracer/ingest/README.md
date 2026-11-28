@@ -66,6 +66,7 @@ Each value marked `[Assumption]` is tuned in testing.
 | `MAX_XML_PART_BYTES` | 32 MiB | One parsed XML part |
 | `MAX_PARSED_TOTAL_BYTES` | 48 MiB | All parsed XML parts of one file |
 | `MAX_XML_DEPTH` | 256 | The nesting depth of one XML part |
+| `MAX_XML_TEXT_BYTES` | 9,000,000 | The UTF-8 bytes of one run of text, one comment, one processing instruction, or the attributes of one tag |
 | `MAX_PDF_PAGES` | 1,000 | The pages of one PDF |
 
 ## Shapes it returns
