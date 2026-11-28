@@ -58,7 +58,8 @@ class WordPackage:
         Raises:  ValueError when the member does not exist (a caller bug);
                  InputTooLargeError when the part or the running total is
                  over its cap; UnreadableFileError when the member is
-                 corrupt or its real size differs from the declared size.
+                 corrupt, overlaps another member, or its real size differs
+                 from the declared size.
         Effects: none.
         """
 
@@ -76,11 +77,15 @@ class WordPackage:
         if is_total_over_cap:
             raise InputTooLargeError({"part": name, "limit_bytes": MAX_PARSED_TOTAL_BYTES})
 
-        try:
-            with self._zip.open(info) as stream:
-                data = stream.read(info.file_size + 1)
-        except (zipfile.BadZipFile, zlib.error):
-            raise UnreadableFileError({"reason": "zip_invalid"}) from None
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            try:
+                with self._zip.open(info) as stream:
+                    data = stream.read(info.file_size + 1)
+            except (zipfile.BadZipFile, zlib.error):
+                raise UnreadableFileError({"reason": "zip_invalid"}) from None
+            except UserWarning:
+                raise UnreadableFileError({"reason": "zip_overlap", "part": name}) from None
 
         is_size_mismatch = len(data) > info.file_size
         if is_size_mismatch:
@@ -96,8 +101,8 @@ def open_package(data: bytes) -> WordPackage:
     Input:   the bytes of a .docx file.
     Output:  a WordPackage.
     Raises:  UnreadableFileError with a reason: zip_invalid, zip64,
-             too_many_members, zip_overlap, duplicate_member, zip_encrypted
-             or not_a_word_file.
+             too_many_members, duplicate_member, zip_encrypted or
+             not_a_word_file.
     Effects: none.
     """
 
@@ -113,14 +118,10 @@ def open_package(data: bytes) -> WordPackage:
             {"reason": "too_many_members", "members": entries, "limit": MAX_ZIP_MEMBERS}
         )
 
-    with warnings.catch_warnings():
-        warnings.simplefilter("error")
-        try:
-            package = zipfile.ZipFile(io.BytesIO(data))
-        except zipfile.BadZipFile:
-            raise UnreadableFileError({"reason": "zip_invalid"}) from None
-        except UserWarning:
-            raise UnreadableFileError({"reason": "zip_overlap"}) from None
+    try:
+        package = zipfile.ZipFile(io.BytesIO(data))
+    except zipfile.BadZipFile:
+        raise UnreadableFileError({"reason": "zip_invalid"}) from None
 
     names = package.namelist()
     has_duplicate = len(names) != len(set(names))

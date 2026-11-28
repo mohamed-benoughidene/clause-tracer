@@ -359,7 +359,7 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
   - **Rules:** D4, system design 8.4, ADR 0007.
   - **Depends on:** S5-M2-T4
 
-- [ ] **S5-M2-T10: The overlap refusal in `read_part` (added 28 Nov 2026)**
+- [x] **S5-M2-T10: The overlap refusal in `read_part` (added 28 Nov 2026)**
   - **Build:** Python gives its overlap warning from `ZipFile.open()`, not from `ZipFile(...)`, so the `zip_overlap` refusal of S5-M2-T3 step (2) never runs. In `ingest/_zip.py`:
     - `read_part`: put the `try` that opens and reads the member inside `with warnings.catch_warnings():`, with `warnings.simplefilter("error")` as its first line. Keep the clause for `(zipfile.BadZipFile, zlib.error)` (reason `zip_invalid`). Add after it `except UserWarning:`, which raises `UnreadableFileError({"reason": "zip_overlap", "part": name}) from None`.
     - `open_package`: remove the `with warnings.catch_warnings():` block and its `except UserWarning` clause. The `try` around `zipfile.ZipFile(io.BytesIO(data))` stays, with its `zipfile.BadZipFile` clause (reason `zip_invalid`).

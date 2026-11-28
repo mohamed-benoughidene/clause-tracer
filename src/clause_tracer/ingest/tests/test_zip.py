@@ -154,12 +154,13 @@ def _overlapping_zip() -> bytes:
 
 
 def test_overlap_is_an_error() -> None:
-    try:
-        open_package(_overlapping_zip())
-    except UnreadableFileError as error:
-        assert _reason(error) == "zip_overlap"
-    else:
-        pytest.skip("this CPython does not warn about overlapping members")
+    package = open_package(_overlapping_zip())
+
+    with pytest.raises(UnreadableFileError) as raised:
+        package.read_part("[Content_Types].xml")
+
+    assert _reason(raised.value) == "zip_overlap"
+    assert raised.value.context["part"] == "[Content_Types].xml"
 
 
 def test_read_part_unknown_name_raises_value_error() -> None:
