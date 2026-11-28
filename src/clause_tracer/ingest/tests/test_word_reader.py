@@ -276,6 +276,60 @@ def test_text_files_unchanged() -> None:
     assert document.side_text == ()
 
 
+def _note(kind: str, note_id: int, *paragraphs: str) -> str:
+    return f'<w:{kind} w:id="{note_id}">{"".join(paragraphs)}</w:{kind}>'
+
+
+def _note_reference(kind: str, note_id: int) -> str:
+    return f'<w:r><w:{kind}Reference w:id="{note_id}"/></w:r>'
+
+
+def test_comment_on_a_referenced_footnote_is_not_flagged() -> None:
+    footnotes = _SEPARATOR + _note("footnote", 1, p(comment_range(0, r("Note"))))
+    body = p(r("A"), _note_reference("footnote", 1))
+
+    document = _read(body, comments=comment(0, "Ann", "check"), footnotes=footnotes)
+
+    assert document.hidden == ()
+    comments = [item for item in document.side_text if item.kind is SideTextKind.COMMENT]
+    assert len(comments) == 1
+    assert comments[0].span is None
+
+
+def test_comment_on_a_referenced_endnote_is_not_flagged() -> None:
+    endnotes = _note("endnote", 1, p(comment_range(0, r("Note"))))
+    body = p(r("A"), _note_reference("endnote", 1))
+
+    document = _read(body, comments=comment(0, "Ann", "check"), endnotes=endnotes)
+
+    assert document.hidden == ()
+    comments = [item for item in document.side_text if item.kind is SideTextKind.COMMENT]
+    assert comments[0].span is None
+
+
+def test_comment_on_an_unreferenced_note_stays_flagged() -> None:
+    footnotes = _SEPARATOR + _note("footnote", 1, p(comment_range(0, r("Note"))))
+
+    document = _read(p(r("A")), comments=comment(0, "Ann", "check"), footnotes=footnotes)
+
+    assert document.hidden == (
+        HiddenText(span=None, reason=HiddenReason.WORD_PART_NEVER_SHOWN, boxes=()),
+        HiddenText(span=None, reason=HiddenReason.WORD_PART_NEVER_SHOWN, boxes=()),
+    )
+
+
+def test_deleted_comment_reference_in_a_note_stays_flagged() -> None:
+    deleted = '<w:del w:id="2" w:author="Ann"><w:r><w:commentReference w:id="0"/></w:r></w:del>'
+    footnotes = _SEPARATOR + _note("footnote", 1, p(r("Note"), deleted))
+    body = p(r("A"), _note_reference("footnote", 1))
+
+    document = _read(body, comments=comment(0, "Ann", "check"), footnotes=footnotes)
+
+    assert document.hidden == (
+        HiddenText(span=None, reason=HiddenReason.WORD_PART_NEVER_SHOWN, boxes=()),
+    )
+
+
 def test_public_names_and_readme() -> None:
     for name in ("read_word_file", "WARNING_WORD_NOTES", "WARNING_WORD_NUMBERING_UNKNOWN"):
         assert name in clause_tracer.ingest.__all__

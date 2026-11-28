@@ -86,6 +86,10 @@ What it flags, in `Document.hidden`:
 | A comment on words | `COMMENT` | Over the commented words |
 | A part Word never shows | `WORD_PART_NEVER_SHOWN` | None |
 
+A comment on a footnote or an endnote that the body references is not
+flagged. It is in `Document.side_text` with no span. A comment on a header
+or a footer is flagged as never shown.
+
 A comment's words, a note's words, and a header or footer stay out of
 `Document.text`. They are in `Document.side_text`, in this order: comments
 with their span, then the referenced notes, then the others, then headers,

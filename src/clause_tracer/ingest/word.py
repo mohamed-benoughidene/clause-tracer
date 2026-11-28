@@ -26,6 +26,7 @@ from clause_tracer.ingest._word_side import (
     comment_hidden,
     hidden_comments,
     link_comments,
+    note_comment_refs,
     read_comments,
     read_headers_and_footers,
     read_notes,
@@ -105,9 +106,11 @@ def read_word_file(data: bytes, *, name: str) -> Document:
     comments_root = _part(package, _COMMENTS_PART)
     comments = read_comments(comments_root, styles)
     linked_comments = link_comments(comments, body.comment_spans)
+    footnotes_root = _part(package, _FOOTNOTES_PART)
+    endnotes_root = _part(package, _ENDNOTES_PART)
     notes, notes_hidden = read_notes(
-        _part(package, _FOOTNOTES_PART),
-        _part(package, _ENDNOTES_PART),
+        footnotes_root,
+        endnotes_root,
         body.note_refs,
         styles,
     )
@@ -119,7 +122,11 @@ def read_word_file(data: bytes, *, name: str) -> Document:
         _has_even_and_odd(_part(package, _SETTINGS_PART)),
         styles,
     )
-    comment_hidden_texts = comment_hidden(body.comment_spans, comments)
+    comment_hidden_texts = comment_hidden(
+        body.comment_spans,
+        comments,
+        note_comment_refs(footnotes_root, endnotes_root, body.note_refs, styles),
+    )
     comment_runs = tuple(
         HiddenText(span=None, reason=HiddenReason.WORD_HIDDEN_RUN, boxes=())
         for _ref in hidden_comments(comments_root, styles)

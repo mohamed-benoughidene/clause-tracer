@@ -15,7 +15,7 @@ from typing import Final
 from urllib.parse import urlsplit
 
 from clause_tracer.core import HiddenReason, HiddenText, SideText, SideTextKind, Span
-from clause_tracer.ingest._word_body import _assemble, _Paragraph, _Walker
+from clause_tracer.ingest._word_body import _assemble, _comment_spans, _Paragraph, _Walker
 from clause_tracer.ingest._word_model import SectionRefs, Text
 from clause_tracer.ingest._word_styles import Styles
 from clause_tracer.ingest._xml import W_NS, Element, parse_part, qname
@@ -86,7 +86,9 @@ def link_comments(
 
 
 def comment_hidden(
-    spans: Mapping[str, Span | None], comments: tuple[SideText, ...]
+    spans: Mapping[str, Span | None],
+    comments: tuple[SideText, ...],
+    shown_in_notes: frozenset[str] = frozenset(),
 ) -> tuple[HiddenText, ...]:
     """Return the comment marks and the comments that never show."""
 
@@ -95,7 +97,7 @@ def comment_hidden(
         if span is not None:
             hidden.append(HiddenText(span=span, reason=HiddenReason.COMMENT, boxes=()))
     for comment in comments:
-        if comment.ref not in spans:
+        if comment.ref not in spans and comment.ref not in shown_in_notes:
             hidden.append(
                 HiddenText(span=None, reason=HiddenReason.WORD_PART_NEVER_SHOWN, boxes=())
             )
@@ -185,6 +187,35 @@ def read_notes(
                 HiddenText(span=None, reason=HiddenReason.WORD_PART_NEVER_SHOWN, boxes=())
             )
     return tuple(side), tuple(hidden)
+
+
+def note_comment_refs(
+    footnotes: Element | None,
+    endnotes: Element | None,
+    referenced: tuple[tuple[SideTextKind, str], ...],
+    styles: Styles | None,
+) -> frozenset[str]:
+    """Return the ids of the comments that Word shows inside a referenced note."""
+
+    shown: set[str] = set()
+    for kind, root in (
+        (SideTextKind.FOOTNOTE, footnotes),
+        (SideTextKind.ENDNOTE, endnotes),
+    ):
+        if root is None:
+            continue
+        tag = _FOOTNOTE if kind is SideTextKind.FOOTNOTE else _ENDNOTE
+        for element in root:
+            if element.tag != tag:
+                continue
+            if (kind, element.get(_ID) or "") not in referenced:
+                continue
+            walker = _Walker(styles=styles)
+            paragraphs: list[_Paragraph] = []
+            walker._walk_blocks(element, paragraphs)
+            _, positions = _assemble(paragraphs)
+            shown.update(_comment_spans(positions, walker.comment_refs))
+    return frozenset(shown)
 
 
 def _is_shown(ref_type: str, section: SectionRefs, even_and_odd: bool) -> bool:

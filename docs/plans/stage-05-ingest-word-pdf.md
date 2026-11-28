@@ -8,7 +8,7 @@
 | Accepted on | 26 Nov 2026 |
 | Stage outline | [System design section 15.5](../system-design.md#155-stage-5-ingest-for-word-and-pdf) |
 
-**State (28 Nov 2026).** The owner accepted the plan. All questions in section 6 are answered, all six milestones are written in full, and the owner confirmed the proposals of section 6.1. M1 is built and merged (`999e16e`, pull request 240). M2 is merged (`f3c35ec`, pull request 245), and its Linux and Windows jobs were green on `78c1f63`. A review found faults, and S5-M2-T11 to T13 fixed them before the merge. M3 is built (S5-M3-T1 to T8). S5-M3-T10 is added and not built, and S5-M3-T9 is the owner's table, written after T10.
+**State (28 Nov 2026).** The owner accepted the plan. All questions in section 6 are answered, all six milestones are written in full, and the owner confirmed the proposals of section 6.1. M1 is built and merged (`999e16e`, pull request 240). M2 is merged (`f3c35ec`, pull request 245), and its Linux and Windows jobs were green on `78c1f63`. A review found faults, and S5-M2-T11 to T13 fixed them before the merge. M3 is built (S5-M3-T1 to T8 and T10), and S5-M3-T9 is the owner's table.
 
 ## 1. Goal
 
@@ -824,7 +824,7 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
   - **Rules:** question 4, 5, 16, 17, 21; D1; D4; T1; S3.
   - **Depends on:** S5-M3-T7, S5-M2-T5
 
-- [ ] **S5-M3-T10: A comment on a note is shown**
+- [x] **S5-M3-T10: A comment on a note is shown**
   - **Why:** Word shows a comment that sits on a footnote or an endnote. T5 and T8 flag it `WORD_PART_NEVER_SHOWN`, because they look for comments in the body only.
   - **Build:** This task changes this rule of T5: "each `SideText` comment whose id has no reference in the body gives `HiddenText(span=None, reason=WORD_PART_NEVER_SHOWN, boxes=())`". It comes before the rows of T9.
     - In `ingest/_word_side.py` add `def note_comment_refs(footnotes: Element | None, endnotes: Element | None, referenced: tuple[tuple[SideTextKind, str], ...], styles: Styles | None) -> frozenset[str]`. It looks at `footnotes` with `SideTextKind.FOOTNOTE` and `w:footnote`, and at `endnotes` with `SideTextKind.ENDNOTE` and `w:endnote`; a `None` part is skipped. For each such child `element` of the part with `(kind, element.get(_ID) or "")` in `referenced`, it walks the note as `_flow` does (`walker = _Walker(styles=styles)`, `walker._walk_blocks(element, paragraphs)`, `_, positions = _assemble(paragraphs)`) and adds the keys of `_comment_spans(positions, walker.comment_refs)`. Import `_comment_spans` from `_word_body.py`. So a note counts a comment by the same marks as the body does, and a mark in deleted content does not count.
