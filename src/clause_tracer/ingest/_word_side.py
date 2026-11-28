@@ -12,6 +12,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import replace
 from typing import Final
+from urllib.parse import urlsplit
 
 from clause_tracer.core import HiddenReason, HiddenText, SideText, SideTextKind, Span
 from clause_tracer.ingest._word_body import _assemble, _Paragraph, _Walker
@@ -26,6 +27,13 @@ _ENDNOTE: Final[str] = qname(W_NS, "endnote")
 _ID: Final[str] = qname(W_NS, "id")
 _AUTHOR: Final[str] = qname(W_NS, "author")
 _TYPE: Final[str] = qname(W_NS, "type")
+
+_REL_NS: Final[str] = "http://schemas.openxmlformats.org/package/2006/relationships"
+_RELATIONSHIP: Final[str] = qname(_REL_NS, "Relationship")
+# The attributes of a relationship have no prefix, so they have no namespace.
+_REL_ID: Final[str] = "Id"
+_REL_TARGET: Final[str] = "Target"
+_REL_MODE: Final[str] = "TargetMode"
 
 _HEADER_PREFIX: Final[str] = "word/header"
 _FOOTER_PREFIX: Final[str] = "word/footer"
@@ -250,3 +258,32 @@ def read_headers_and_footers(
             if has_hidden_run:
                 hidden.append(HiddenText(span=None, reason=HiddenReason.WORD_HIDDEN_RUN, boxes=()))
     return tuple(side), tuple(hidden)
+
+
+def _is_relative_part(target: str) -> bool:
+    if target == "" or target.startswith(("/", "\\")):
+        return False
+    if urlsplit(target).scheme:
+        return False
+    return ".." not in target.replace("\\", "/").split("/")
+
+
+def read_relationships(root: Element | None) -> Mapping[str, str]:
+    """Return the part name of each relationship that may be opened."""
+
+    if root is None:
+        return {}
+    relationships: dict[str, str] = {}
+    for element in root:
+        if element.tag != _RELATIONSHIP:
+            continue
+        if element.get(_REL_MODE) == "External":
+            continue
+        rel_id = element.get(_REL_ID)
+        target = element.get(_REL_TARGET)
+        if rel_id is None or target is None:
+            continue
+        if not _is_relative_part(target):
+            continue
+        relationships[rel_id] = f"word/{target}"
+    return relationships
