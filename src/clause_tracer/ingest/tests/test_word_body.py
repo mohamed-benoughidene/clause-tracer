@@ -169,6 +169,20 @@ def test_alternate_content_is_read_once() -> None:
     assert _body(body).text == "Host\nBox\n"
 
 
+def test_nested_alternate_content_is_fast() -> None:
+    inner = r("x")
+    for _ in range(30):
+        inner = _alternate(choice=inner, fallback="")
+
+    start = time.monotonic()
+    result = _body(p(inner))
+    elapsed = time.monotonic() - start
+
+    assert result.text == "x\n"
+    assert [item.reason for item in result.hidden] == [HiddenReason.WORD_PART_NEVER_SHOWN] * 30
+    assert elapsed < 1
+
+
 def test_alternate_content_difference_is_flagged() -> None:
     body = p(
         r("Host"),

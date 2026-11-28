@@ -8,7 +8,7 @@
 | Accepted on | 26 Nov 2026 |
 | Stage outline | [System design section 15.5](../system-design.md#155-stage-5-ingest-for-word-and-pdf) |
 
-**State (28 Nov 2026).** The owner accepted the plan. All questions in section 6 are answered, all six milestones are written in full, and the owner confirmed the proposals of section 6.1. M1 is built and merged (`999e16e`, pull request 240). M2 is merged (`f3c35ec`, pull request 245), and its Linux and Windows jobs were green on `78c1f63`. A review found faults, and S5-M2-T11 to T13 fixed them before the merge. M3 is built (S5-M3-T1 to T10): the owner's Word reading table is in `f88ec42`, and every row passes. A review of M3 then found ten faults; S5-M3-T11 to T15 fix them and are not built. M3 is not merged.
+**State (28 Nov 2026).** The owner accepted the plan. All questions in section 6 are answered, all six milestones are written in full, and the owner confirmed the proposals of section 6.1. M1 is built and merged (`999e16e`, pull request 240). M2 is merged (`f3c35ec`, pull request 245), and its Linux and Windows jobs were green on `78c1f63`. A review found faults, and S5-M2-T11 to T13 fixed them before the merge. M3 is built (S5-M3-T1 to T10, and the fixes S5-M3-T11 to T15): the owner's Word reading table is in `f88ec42`, and every row passes. A review of M3 found ten faults; S5-M3-T11 to T15 fixed them. M3 is not merged.
 
 ## 1. Goal
 
@@ -913,7 +913,7 @@ A file that is too large, too deep, too slow, encrypted or an old Word file ends
   - **Rules:** question 21, Spec 2, T13.
   - **Depends on:** S5-M3-T13
 
-- [ ] **S5-M3-T15: Nested alternate content (added 28 Nov 2026)**
+- [x] **S5-M3-T15: Nested alternate content (added 28 Nov 2026)**
   - **Why:** the time to read nested `mc:AlternateContent` doubles with each level: a file of 1,290 bytes with 20 levels takes 17 s.
   - **Build:** In `_read_alternate` in `_word_body.py`, compare the two branches only when the walker is not quiet (`not self._quiet`). A quiet walker reads the shown branch and nothing else of that element. The findings of the main walker do not change.
   - **Files:** `src/clause_tracer/ingest/_word_body.py`, `src/clause_tracer/ingest/tests/test_word_body.py`.

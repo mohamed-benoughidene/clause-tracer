@@ -619,8 +619,11 @@ class _Walker:
         if shown is None:
             return
         is_inline = pieces is not None
-        if other is not None and self._branch_text(shown, inline=is_inline) != self._branch_text(
-            other, inline=is_inline
+        if (
+            other is not None
+            and not self._quiet
+            and self._branch_text(shown, inline=is_inline)
+            != self._branch_text(other, inline=is_inline)
         ):
             self.hidden.append(
                 HiddenText(span=None, reason=HiddenReason.WORD_PART_NEVER_SHOWN, boxes=())
