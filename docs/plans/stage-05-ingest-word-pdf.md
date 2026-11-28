@@ -1270,7 +1270,9 @@ The owner left these points to the planner. Each is a value or a name that a tas
 
 ## 9. Notes for the next stage
 
-None yet. Filled in when the stage is done.
+Filled in fully when the stage is done. The notes so far:
+
+- **Word list levels are not shown as indents (owner, 28 Nov 2026).** `Document.text` holds a list number, one space and the words, with no indent, so the typeset pages of stage 12 would show every level at the left edge. Stage 12 must show the levels as Word does. Word keeps its indent settings (`w:ind` in the paragraph, the style and the list level) in the file, and the reader does not read them yet. `Clause.level` gives nesting only where `split_clauses` reads the numbers, which it does not for `1)`, `A.`, `I.`, `a.` and `i.`.
 
 ## 10. Deviations from the plan
 
