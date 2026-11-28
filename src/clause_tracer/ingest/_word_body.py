@@ -16,6 +16,7 @@ from clause_tracer.core import (
     HiddenText,
     InputTooLargeError,
     Span,
+    TrackedChange,
     UnreadableFileError,
 )
 from clause_tracer.ingest._thresholds import WORD_TINY_HALF_POINTS
@@ -77,12 +78,16 @@ _TXBX_CONTENT: Final[str] = _tag("txbxContent")
 _ALT_CHUNK: Final[str] = _tag("altChunk")
 _SECT_PR: Final[str] = _tag("sectPr")
 _LAST_RENDERED_PAGE_BREAK: Final[str] = _tag("lastRenderedPageBreak")
+_PROOF_ERR: Final[str] = _tag("proofErr")
+_BOOKMARK_START: Final[str] = _tag("bookmarkStart")
+_BOOKMARK_END: Final[str] = _tag("bookmarkEnd")
 
 _MC_ALTERNATE: Final[str] = qname(_MC_NS, "AlternateContent")
 _MC_CHOICE: Final[str] = qname(_MC_NS, "Choice")
 _MC_FALLBACK: Final[str] = qname(_MC_NS, "Fallback")
 
 _DELETED_TAGS: Final[frozenset[str]] = frozenset({_DEL, _MOVE_FROM})
+_CHANGE_TAGS: Final[frozenset[str]] = frozenset({_DEL, _MOVE_FROM, _INS, _MOVE_TO})
 _WALK_TAGS: Final[frozenset[str]] = frozenset(
     {
         _SDT,
@@ -99,9 +104,9 @@ _WALK_TAGS: Final[frozenset[str]] = frozenset(
 
 _IGNORED_TAGS: Final[frozenset[str]] = frozenset(
     {
-        qname(W_NS, "bookmarkStart"),
-        qname(W_NS, "bookmarkEnd"),
-        qname(W_NS, "proofErr"),
+        _BOOKMARK_START,
+        _BOOKMARK_END,
+        _PROOF_ERR,
         qname(W_NS, "permStart"),
         qname(W_NS, "permEnd"),
         _SECT_PR,
@@ -188,6 +193,7 @@ class _Walker:
     ) -> None:
         self.paragraphs: list[_Paragraph] = []
         self.hidden: list[HiddenText] = []
+        self.changes: list[tuple[str, str, str]] = []
         self.symbol_unread = False
         self._quiet = quiet
         self._styles = styles if styles is not None else Styles.from_xml(None)
@@ -244,6 +250,80 @@ class _Walker:
         run_properties = self._child_for(properties, _RPR)
         return run_properties is not None and self._child_for(run_properties, _DEL) is not None
 
+    def _register(self, earlier: str, new: str, author: str) -> int | None:
+        if earlier == "" and new == "":
+            return None
+        self.changes.append((earlier, new, author))
+        return len(self.changes) - 1
+
+    def _read_change_group(self, group: list[Element], pieces: list[Text | Mark]) -> None:
+        segment: list[Element] = []
+        author: str | None = None
+        for child in group:
+            if child.tag in _CHANGE_TAGS:
+                child_author = _author(child)
+                if author is not None and child_author != author:
+                    self._emit_segment(segment, pieces)
+                    segment = []
+                author = child_author
+            segment.append(child)
+        self._emit_segment(segment, pieces)
+
+    def _emit_segment(self, segment: list[Element], pieces: list[Text | Mark]) -> None:
+        changes = [child for child in segment if child.tag in _CHANGE_TAGS]
+        plan: dict[int, tuple[str, str]] = {}
+        index = 0
+        while index < len(changes):
+            current = changes[index]
+            following = changes[index + 1] if index + 1 < len(changes) else None
+            is_pair = (
+                following is not None
+                and not _is_move(current)
+                and not _is_move(following)
+                and _kind(current) != _kind(following)
+            )
+            if is_pair and _kind(current) == "del":
+                plan[id(current)] = ("skip", "")
+                plan[id(following)] = ("replace", _deleted_text(current))
+            elif is_pair:
+                plan[id(current)] = ("insert", "")
+                plan[id(following)] = ("delete", "")
+            else:
+                action = "delete" if _kind(current) == "del" else "insert"
+                plan[id(current)] = (action, "")
+            index += 2 if is_pair else 1
+        for child in segment:
+            if child.tag not in _CHANGE_TAGS:
+                self._walk_inline(child, pieces)
+                continue
+            action, earlier = plan[id(child)]
+            if action == "skip":
+                continue
+            if action == "delete":
+                self._register(_deleted_text(child), "", _author(child))
+            else:
+                self._read_insertion(child, pieces, earlier=earlier)
+
+    def _read_insertion(self, element: Element, pieces: list[Text | Mark], *, earlier: str) -> None:
+        author = _author(element)
+        local: list[Text | Mark] = []
+        before = len(self.changes)
+        for child in element:
+            if child.tag in _DELETED_TAGS:
+                self._register(_deleted_text(child), "", _author(child))
+                continue
+            self._walk_inline(child, local)
+        new = "".join(piece.text for piece in local if isinstance(piece, Text))
+        if new == "":
+            if earlier != "":
+                self.changes.insert(before, (earlier, "", author))
+            pieces.extend(local)
+            return
+        self.changes.insert(before, (earlier, new, author))
+        index = before
+        for piece in local:
+            pieces.append(replace(piece, change=index) if isinstance(piece, Text) else piece)
+
     def _walk_blocks(self, container: Element, out: list[_Paragraph]) -> None:
         for child in container:
             self._walk_block(child, out)
@@ -291,11 +371,22 @@ class _Walker:
         self._paragraph_fill = self._styles.paragraph_fill(
             paragraph_style=paragraph_style, ppr=properties
         )
+        children = [child for child in element if child.tag != _PPR]
         try:
-            for child in element:
-                if child.tag == _PPR:
+            index = 0
+            while index < len(children):
+                child = children[index]
+                if child.tag in _CHANGE_TAGS:
+                    group: list[Element] = []
+                    while index < len(children) and (
+                        children[index].tag in _CHANGE_TAGS or _is_separator(children[index])
+                    ):
+                        group.append(children[index])
+                        index += 1
+                    self._read_change_group(group, paragraph.pieces)
                     continue
                 self._walk_inline(child, paragraph.pieces)
+                index += 1
         finally:
             self._boxes = saved
             self._paragraph_style = saved_style
@@ -484,7 +575,10 @@ class _Walker:
         return properties is not None and self._child_for(properties, _DEL) is not None
 
     def _read_row(self, row: Element, out: list[_Paragraph]) -> None:
-        if self._row_deleted(row):
+        properties = self._child_for(row, _TR_PR)
+        deletion = self._child_for(properties, _DEL) if properties is not None else None
+        if deletion is not None:
+            self._register(self._row_text(row), "", _author(deletion))
             return
         pieces: list[Text | Mark] = []
         is_first = True
@@ -493,8 +587,27 @@ class _Walker:
                 pieces.append(self._text("\t"))
             is_first = False
             pieces.extend(self._cell_pieces(cell))
+        insertion = self._child_for(properties, _INS) if properties is not None else None
+        if insertion is not None:
+            new = "".join(piece.text for piece in pieces if isinstance(piece, Text))
+            index = self._register("", new, _author(insertion))
+            if index is not None:
+                pieces = [
+                    replace(piece, change=index) if isinstance(piece, Text) else piece
+                    for piece in pieces
+                ]
         self._count_paragraph()
         out.append(_Paragraph(number=None, pieces=pieces, mark_deleted=False))
+
+    def _row_text(self, row: Element) -> str:
+        walker = _Walker(quiet=True, styles=self._styles)
+        parts: list[str] = []
+        for cell in self._cells(row):
+            if parts:
+                parts.append("\t")
+            cell_pieces = walker._cell_pieces(cell)
+            parts.append("".join(p.text for p in cell_pieces if isinstance(p, Text)))
+        return "".join(parts)
 
     def _cells(self, row: Element) -> list[Element]:
         cells: list[Element] = []
@@ -544,6 +657,59 @@ class _Walker:
         return pieces
 
 
+def _author(element: Element) -> str:
+    return element.get(qname(W_NS, "author")) or ""
+
+
+def _kind(element: Element) -> str:
+    return "del" if element.tag in _DELETED_TAGS else "ins"
+
+
+def _is_move(element: Element) -> bool:
+    return element.tag in (_MOVE_FROM, _MOVE_TO)
+
+
+def _run_text(element: Element) -> str:
+    parts: list[str] = []
+    for child in element:
+        if child.tag == _T:
+            parts.append(child.text or "")
+        elif child.tag in (_TAB, _PTAB):
+            parts.append("\t")
+        elif child.tag in (_BR, _CR):
+            parts.append("\n")
+        elif child.tag == _NO_BREAK_HYPHEN:
+            parts.append("\u2011")
+    return "".join(parts)
+
+
+def _is_separator(element: Element) -> bool:
+    if element.tag in (_PROOF_ERR, _BOOKMARK_START, _BOOKMARK_END):
+        return True
+    if element.tag == _R:
+        return _run_text(element).strip() == ""
+    return False
+
+
+def _deleted_text(element: Element) -> str:
+    parts: list[str] = []
+
+    def walk(node: Element) -> None:
+        for child in node:
+            tag = child.tag
+            if tag in (_T, _DEL_TEXT):
+                parts.append(child.text or "")
+            elif tag in (_TAB, _PTAB):
+                parts.append("\t")
+            elif tag in (_INSTR_TEXT, _DEL_INSTR_TEXT):
+                continue
+            else:
+                walk(child)
+
+    walk(element)
+    return "".join(parts)
+
+
 def _level_of(value: str | None) -> int:
     if value is None:
         return 0
@@ -585,6 +751,26 @@ def _run_reasons(props: RunProps, paragraph_fill: str | None) -> tuple[HiddenRea
         if is_white_on_white or is_same_colour:
             reasons.append(HiddenReason.LOW_CONTRAST)
     return tuple(reasons)
+
+
+def _tracked_changes(
+    changes: list[tuple[str, str, str]],
+    positions: list[tuple[Text | Mark, int, int]],
+) -> tuple[TrackedChange, ...]:
+    by_change: dict[int, list[tuple[int, int]]] = {}
+    for piece, start, end in positions:
+        if isinstance(piece, Text) and piece.change is not None:
+            by_change.setdefault(piece.change, []).append((start, end))
+    result: list[TrackedChange] = []
+    for index, (earlier, new, author) in enumerate(changes):
+        extents = by_change.get(index, [])
+        span = None
+        if new != "" and extents:
+            span = Span(
+                start=min(start for start, _ in extents), end=max(end for _, end in extents)
+            )
+        result.append(TrackedChange(earlier=earlier, new=new, author=author, span=span))
+    return tuple(result)
 
 
 def _hidden_from_positions(
@@ -643,6 +829,7 @@ def build_body(
     return BodyResult(
         text=text,
         hidden=(*walker.hidden, *_hidden_from_positions(positions)),
+        tracked_changes=_tracked_changes(walker.changes, positions),
         numbering_unknown=numbering_unknown,
         symbol_unread=walker.symbol_unread,
     )
