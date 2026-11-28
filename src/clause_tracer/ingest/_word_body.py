@@ -9,7 +9,7 @@ over their words.
 """
 
 from dataclasses import replace
-from typing import Final
+from typing import Final, Literal
 
 from clause_tracer.core import (
     HiddenReason,
@@ -81,6 +81,10 @@ _LAST_RENDERED_PAGE_BREAK: Final[str] = _tag("lastRenderedPageBreak")
 _PROOF_ERR: Final[str] = _tag("proofErr")
 _BOOKMARK_START: Final[str] = _tag("bookmarkStart")
 _BOOKMARK_END: Final[str] = _tag("bookmarkEnd")
+_COMMENT_START: Final[str] = _tag("commentRangeStart")
+_COMMENT_END: Final[str] = _tag("commentRangeEnd")
+_COMMENT_REFERENCE: Final[str] = _tag("commentReference")
+_ID: Final[str] = qname(W_NS, "id")
 
 _MC_ALTERNATE: Final[str] = qname(_MC_NS, "AlternateContent")
 _MC_CHOICE: Final[str] = qname(_MC_NS, "Choice")
@@ -194,6 +198,7 @@ class _Walker:
         self.paragraphs: list[_Paragraph] = []
         self.hidden: list[HiddenText] = []
         self.changes: list[tuple[str, str, str]] = []
+        self.comment_refs: list[str] = []
         self.symbol_unread = False
         self._quiet = quiet
         self._styles = styles if styles is not None else Styles.from_xml(None)
@@ -435,6 +440,17 @@ class _Walker:
             self._read_alternate(element, pieces=pieces)
         elif tag == _TXBX_CONTENT:
             self._collect_text_box(element)
+        elif tag in (_COMMENT_START, _COMMENT_END):
+            ref = element.get(_ID)
+            if ref is not None:
+                kind: Literal["comment_start", "comment_end"] = (
+                    "comment_start" if tag == _COMMENT_START else "comment_end"
+                )
+                pieces.append(Mark(kind=kind, ref=ref))
+        elif tag == _COMMENT_REFERENCE:
+            ref = element.get(_ID)
+            if ref is not None:
+                self.comment_refs.append(ref)
         elif tag in _WALK_TAGS:
             for child in element:
                 self._walk_inline(child, pieces)
@@ -753,6 +769,31 @@ def _run_reasons(props: RunProps, paragraph_fill: str | None) -> tuple[HiddenRea
     return tuple(reasons)
 
 
+def _comment_spans(
+    positions: list[tuple[Text | Mark, int, int]], references: list[str]
+) -> dict[str, Span | None]:
+    starts: dict[str, int] = {}
+    ends: dict[str, int] = {}
+    for piece, start, end in positions:
+        if not isinstance(piece, Mark):
+            continue
+        if piece.kind == "comment_start":
+            starts.setdefault(piece.ref, start)
+        else:
+            ends.setdefault(piece.ref, end)
+    refs = [*starts, *(ref for ref in ends if ref not in starts)]
+    refs.extend(ref for ref in references if ref not in refs)
+    spans: dict[str, Span | None] = {}
+    for ref in refs:
+        first = starts.get(ref)
+        last = ends.get(ref)
+        if first is None or last is None or last <= first:
+            spans[ref] = None
+        else:
+            spans[ref] = Span(start=first, end=last)
+    return spans
+
+
 def _tracked_changes(
     changes: list[tuple[str, str, str]],
     positions: list[tuple[Text | Mark, int, int]],
@@ -830,6 +871,7 @@ def build_body(
         text=text,
         hidden=(*walker.hidden, *_hidden_from_positions(positions)),
         tracked_changes=_tracked_changes(walker.changes, positions),
+        comment_spans=_comment_spans(positions, walker.comment_refs),
         numbering_unknown=numbering_unknown,
         symbol_unread=walker.symbol_unread,
     )
