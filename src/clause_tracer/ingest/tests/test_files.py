@@ -11,7 +11,7 @@ from clause_tracer.core import (
     OldWordFileError,
     UnreadableFileError,
 )
-from clause_tracer.ingest import read_file, read_text_file
+from clause_tracer.ingest import read_file, read_text_file, read_word_file
 from clause_tracer.ingest.limits import MAX_FILE_BYTES, MAX_ZIP_MEMBERS
 from clause_tracer.ingest.tests.builders.hostile import (
     deep_xml_docx,
@@ -42,9 +42,10 @@ def test_ole2_raises_old_word() -> None:
         read_file(ole2_bytes(), name="a.doc")
 
 
-def test_word_package_stops_at_the_stub() -> None:
-    with pytest.raises(NotImplementedError):
-        read_file(build_docx(p(r("Hello"))), name="a.docx")
+def test_word_package_goes_to_the_word_reader() -> None:
+    data = build_docx(p(r("Hello")))
+
+    assert read_file(data, name="a.docx") == read_word_file(data, name="a.docx")
 
 
 def test_pdf_stops_at_the_stub() -> None:

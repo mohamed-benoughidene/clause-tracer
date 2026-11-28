@@ -12,11 +12,14 @@ from clause_tracer.core import (
     Document,
     EmptyInputError,
     FileKind,
+    HiddenText,
     InputTooLargeError,
     InputWarning,
     NotTextError,
     NotUtf8Error,
+    SideText,
     SourceFile,
+    TrackedChange,
 )
 from clause_tracer.ingest.language import WARNING_NOT_ENGLISH, looks_not_english
 from clause_tracer.ingest.limits import MAX_FILE_BYTES, MAX_WORDS, count_words
@@ -70,7 +73,17 @@ def read_pasted_text(text: str) -> Document:
     return _build_document(data, text, kind=FileKind.PASTED, name="")
 
 
-def _build_document(data: bytes, text: str, *, kind: FileKind, name: str) -> Document:
+def _build_document(
+    data: bytes,
+    text: str,
+    *,
+    kind: FileKind,
+    name: str,
+    hidden: tuple[HiddenText, ...] = (),
+    tracked_changes: tuple[TrackedChange, ...] = (),
+    side_text: tuple[SideText, ...] = (),
+    extra_warnings: tuple[InputWarning, ...] = (),
+) -> Document:
     """Run the NUL, blank and word checks (steps 4, 5 and 6), then build (7)."""
 
     nul_offset = text.find("\x00")
@@ -83,7 +96,8 @@ def _build_document(data: bytes, text: str, *, kind: FileKind, name: str) -> Doc
     if words > MAX_WORDS:
         raise InputTooLargeError({"words": words, "limit_words": MAX_WORDS})
     warnings = (
-        (InputWarning(code=WARNING_NOT_ENGLISH, page=None),) if looks_not_english(text) else ()
+        *extra_warnings,
+        *((InputWarning(code=WARNING_NOT_ENGLISH, page=None),) if looks_not_english(text) else ()),
     )
     return Document(
         schema_version=DOCUMENT_SCHEMA_VERSION,
@@ -98,8 +112,9 @@ def _build_document(data: bytes, text: str, *, kind: FileKind, name: str) -> Doc
         glyphs=(),
         pages=(),
         furniture=(),
-        hidden=(),
+        hidden=hidden,
         undecodable=(),
-        tracked_changes=(),
+        tracked_changes=tracked_changes,
         warnings=warnings,
+        side_text=side_text,
     )

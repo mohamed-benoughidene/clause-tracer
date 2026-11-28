@@ -22,6 +22,9 @@ from clause_tracer.ingest.limits import MAX_XML_DEPTH, MAX_XML_TEXT_BYTES
 
 W_NS: Final[str] = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 
+type Element = etree._Element
+# The one name other modules use for a parsed part, so lxml has one importer (B4).
+
 _ALLOWED_ENCODINGS: Final[frozenset[str]] = frozenset({"UTF-8", "UTF-16"})
 
 _PARSER: Final[etree.XMLParser] = etree.XMLParser(

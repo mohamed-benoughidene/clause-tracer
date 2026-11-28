@@ -1,0 +1,163 @@
+# Expected answers. Only the owner edits this file. Constitution T11.
+# Format: docs/plans/stage-05-ingest-word-pdf.md, task S5-M3-T9.
+# Drafted by an AI agent from the plan rules, not from the reader. Approved by the owner on 28 Nov 2026.
+
+# The second level starts again under each new first-level item.
+[[case]]
+id = "multi-level-restart"
+body = "<w:p><w:pPr><w:numPr><w:ilvl w:val=\"0\"/><w:numId w:val=\"1\"/></w:numPr></w:pPr><w:r><w:t xml:space=\"preserve\">Payment</w:t></w:r></w:p><w:p><w:pPr><w:numPr><w:ilvl w:val=\"1\"/><w:numId w:val=\"1\"/></w:numPr></w:pPr><w:r><w:t xml:space=\"preserve\">Fees</w:t></w:r></w:p><w:p><w:pPr><w:numPr><w:ilvl w:val=\"1\"/><w:numId w:val=\"1\"/></w:numPr></w:pPr><w:r><w:t xml:space=\"preserve\">Taxes</w:t></w:r></w:p><w:p><w:pPr><w:numPr><w:ilvl w:val=\"0\"/><w:numId w:val=\"1\"/></w:numPr></w:pPr><w:r><w:t xml:space=\"preserve\">Term</w:t></w:r></w:p><w:p><w:pPr><w:numPr><w:ilvl w:val=\"1\"/><w:numId w:val=\"1\"/></w:numPr></w:pPr><w:r><w:t xml:space=\"preserve\">Renewal</w:t></w:r></w:p>"
+numbering = "<w:abstractNum w:abstractNumId=\"0\"><w:lvl w:ilvl=\"0\"><w:start w:val=\"1\"/><w:numFmt w:val=\"decimal\"/><w:lvlText w:val=\"%1.\"/></w:lvl><w:lvl w:ilvl=\"1\"><w:start w:val=\"1\"/><w:numFmt w:val=\"decimal\"/><w:lvlText w:val=\"%1.%2\"/></w:lvl></w:abstractNum><w:num w:numId=\"1\"><w:abstractNumId w:val=\"0\"/></w:num>"
+text = "1. Payment\n1.1 Fees\n1.2 Taxes\n2. Term\n2.1 Renewal\n"
+hidden = []
+tracked_changes = []
+side_text = []
+warnings = []
+
+# Legal style writes every count of its level as digits.
+[[case]]
+id = "legal-style-numbers"
+body = "<w:p><w:pPr><w:numPr><w:ilvl w:val=\"0\"/><w:numId w:val=\"1\"/></w:numPr></w:pPr><w:r><w:t xml:space=\"preserve\">Scope</w:t></w:r></w:p><w:p><w:pPr><w:numPr><w:ilvl w:val=\"1\"/><w:numId w:val=\"1\"/></w:numPr></w:pPr><w:r><w:t xml:space=\"preserve\">Services</w:t></w:r></w:p><w:p><w:pPr><w:numPr><w:ilvl w:val=\"2\"/><w:numId w:val=\"1\"/></w:numPr></w:pPr><w:r><w:t xml:space=\"preserve\">Support</w:t></w:r></w:p>"
+numbering = "<w:abstractNum w:abstractNumId=\"0\"><w:lvl w:ilvl=\"0\"><w:start w:val=\"1\"/><w:numFmt w:val=\"upperRoman\"/><w:lvlText w:val=\"%1.\"/></w:lvl><w:lvl w:ilvl=\"1\"><w:start w:val=\"1\"/><w:numFmt w:val=\"lowerLetter\"/><w:lvlText w:val=\"(%2)\"/></w:lvl><w:lvl w:ilvl=\"2\"><w:start w:val=\"1\"/><w:numFmt w:val=\"decimal\"/><w:lvlText w:val=\"%1.%2.%3\"/><w:isLgl/></w:lvl></w:abstractNum><w:num w:numId=\"1\"><w:abstractNumId w:val=\"0\"/></w:num>"
+text = "I. Scope\n(a) Services\n1.1.1 Support\n"
+hidden = []
+tracked_changes = []
+side_text = []
+warnings = []
+
+# A list that comes from the paragraph style is numbered.
+[[case]]
+id = "style-linked-list"
+body = "<w:p><w:pPr><w:pStyle w:val=\"Clause\"/></w:pPr><w:r><w:t xml:space=\"preserve\">Notices</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val=\"Clause\"/></w:pPr><w:r><w:t xml:space=\"preserve\">Disputes</w:t></w:r></w:p>"
+styles = "<w:style w:type=\"paragraph\" w:styleId=\"Clause\"><w:pPr><w:numPr><w:numId w:val=\"1\"/></w:numPr></w:pPr></w:style>"
+numbering = "<w:abstractNum w:abstractNumId=\"0\"><w:lvl w:ilvl=\"0\"><w:start w:val=\"1\"/><w:numFmt w:val=\"decimal\"/><w:lvlText w:val=\"%1.\"/><w:pStyle w:val=\"Clause\"/></w:lvl></w:abstractNum><w:num w:numId=\"1\"><w:abstractNumId w:val=\"0\"/></w:num>"
+text = "1. Notices\n2. Disputes\n"
+hidden = []
+tracked_changes = []
+side_text = []
+warnings = []
+
+# Words hidden by a style stay in the text and are marked.
+[[case]]
+id = "hidden-through-style"
+body = "<w:p><w:r><w:t xml:space=\"preserve\">The fee is fixed. </w:t></w:r><w:r><w:rPr><w:rStyle w:val=\"Secret\"/></w:rPr><w:t xml:space=\"preserve\">Late fees are waived.</w:t></w:r></w:p>"
+styles = "<w:style w:type=\"character\" w:styleId=\"Secret\"><w:rPr><w:vanish/></w:rPr></w:style>"
+text = "The fee is fixed. Late fees are waived.\n"
+hidden = [ { start = 18, end = 39, reason = "word_hidden_run" } ]
+tracked_changes = []
+side_text = []
+warnings = []
+
+# White text on a white page is marked.
+[[case]]
+id = "white-on-white"
+body = "<w:p><w:r><w:t xml:space=\"preserve\">The fee is fixed. </w:t></w:r><w:r><w:rPr><w:color w:val=\"FFFFFF\"/></w:rPr><w:t xml:space=\"preserve\">Ignore the cap.</w:t></w:r></w:p>"
+text = "The fee is fixed. Ignore the cap.\n"
+hidden = [ { start = 18, end = 33, reason = "low_contrast" } ]
+tracked_changes = []
+side_text = []
+warnings = []
+
+# White text on black can be read, so nothing is marked.
+[[case]]
+id = "white-on-dark"
+body = "<w:p><w:r><w:t xml:space=\"preserve\">The fee is fixed. </w:t></w:r><w:r><w:rPr><w:color w:val=\"FFFFFF\"/><w:shd w:fill=\"000000\"/></w:rPr><w:t xml:space=\"preserve\">Read this notice.</w:t></w:r></w:p>"
+text = "The fee is fixed. Read this notice.\n"
+hidden = []
+tracked_changes = []
+side_text = []
+warnings = []
+
+# A replacement is one change.
+[[case]]
+id = "tracked-replacement"
+body = "<w:p><w:r><w:t xml:space=\"preserve\">Payment is due in </w:t></w:r><w:del w:id=\"1\" w:author=\"Ann\" w:date=\"2026-01-01T00:00:00Z\"><w:r><w:delText xml:space=\"preserve\">30</w:delText></w:r></w:del><w:ins w:id=\"2\" w:author=\"Ann\" w:date=\"2026-01-01T00:00:00Z\"><w:r><w:t xml:space=\"preserve\">60</w:t></w:r></w:ins><w:r><w:t xml:space=\"preserve\"> days.</w:t></w:r></w:p>"
+text = "Payment is due in 60 days.\n"
+hidden = []
+tracked_changes = [ { earlier = "30", new = "60", author = "Ann", start = 18, end = 20 } ]
+side_text = []
+warnings = []
+
+# A removed line break joins the lines; no words changed.
+[[case]]
+id = "deleted-paragraph-mark"
+body = "<w:p><w:pPr><w:rPr><w:del w:id=\"3\" w:author=\"Ann\" w:date=\"2026-01-01T00:00:00Z\"/></w:rPr></w:pPr><w:r><w:t xml:space=\"preserve\">This Agreement starts today. </w:t></w:r></w:p><w:p><w:r><w:t xml:space=\"preserve\">It ends in one year.</w:t></w:r></w:p>"
+text = "This Agreement starts today. It ends in one year.\n"
+hidden = []
+tracked_changes = []
+side_text = []
+warnings = []
+
+# A move is a removal and an addition.
+[[case]]
+id = "moved-sentence"
+body = "<w:p><w:r><w:t xml:space=\"preserve\">Fees are fixed. </w:t></w:r><w:moveFrom w:id=\"4\" w:author=\"Ann\" w:date=\"2026-01-01T00:00:00Z\"><w:r><w:t xml:space=\"preserve\">Notice is 30 days.</w:t></w:r></w:moveFrom></w:p><w:p><w:moveTo w:id=\"5\" w:author=\"Ann\" w:date=\"2026-01-01T00:00:00Z\"><w:r><w:t xml:space=\"preserve\">Notice is 30 days.</w:t></w:r></w:moveTo></w:p>"
+text = "Fees are fixed. \nNotice is 30 days.\n"
+hidden = []
+tracked_changes = [ { earlier = "Notice is 30 days.", new = "", author = "Ann" }, { earlier = "", new = "Notice is 30 days.", author = "Ann", start = 17, end = 35 } ]
+side_text = []
+warnings = []
+
+# A removed row leaves the text and is listed.
+[[case]]
+id = "deleted-row"
+body = "<w:tbl><w:tr><w:tc><w:p><w:r><w:t xml:space=\"preserve\">Item</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:t xml:space=\"preserve\">Price</w:t></w:r></w:p></w:tc></w:tr><w:tr><w:trPr><w:del w:id=\"6\" w:author=\"Ann\" w:date=\"2026-01-01T00:00:00Z\"/></w:trPr><w:tc><w:p><w:r><w:t xml:space=\"preserve\">Setup</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:t xml:space=\"preserve\">500</w:t></w:r></w:p></w:tc></w:tr><w:tr><w:tc><w:p><w:r><w:t xml:space=\"preserve\">Support</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:t xml:space=\"preserve\">90</w:t></w:r></w:p></w:tc></w:tr></w:tbl>"
+text = "Item\tPrice\nSupport\t90\n"
+hidden = []
+tracked_changes = [ { earlier = "Setup\t500", new = "", author = "Ann" } ]
+side_text = []
+warnings = []
+
+# The commented words are marked; the comment is kept apart.
+[[case]]
+id = "comment-on-words"
+body = "<w:p><w:r><w:t xml:space=\"preserve\">The cap is </w:t></w:r><w:commentRangeStart w:id=\"0\"/><w:r><w:t xml:space=\"preserve\">ten thousand</w:t></w:r><w:commentRangeEnd w:id=\"0\"/><w:r><w:commentReference w:id=\"0\"/></w:r><w:r><w:t xml:space=\"preserve\"> pounds.</w:t></w:r></w:p>"
+comments = "<w:comment w:id=\"0\" w:author=\"Ann\"><w:p><w:r><w:t xml:space=\"preserve\">Check this amount.</w:t></w:r></w:p></w:comment>"
+text = "The cap is ten thousand pounds.\n"
+hidden = [ { start = 11, end = 23, reason = "comment" } ]
+tracked_changes = []
+side_text = [ { kind = "comment", ref = "0", author = "Ann", text = "Check this amount.", start = 11, end = 23 } ]
+warnings = []
+
+# A footnote is kept apart, with a warning.
+[[case]]
+id = "footnote"
+body = "<w:p><w:r><w:t xml:space=\"preserve\">The fee is 90 pounds.</w:t></w:r><w:r><w:footnoteReference w:id=\"1\"/></w:r></w:p>"
+footnotes = "<w:footnote w:id=\"1\"><w:p><w:r><w:t xml:space=\"preserve\">Excluding tax.</w:t></w:r></w:p></w:footnote>"
+text = "The fee is 90 pounds.\n"
+hidden = []
+tracked_changes = []
+side_text = [ { kind = "footnote", ref = "1", author = "", text = "Excluding tax." } ]
+warnings = [ "word_notes" ]
+
+# A header that no page uses is kept apart and marked.
+[[case]]
+id = "never-shown-header"
+body = "<w:p><w:r><w:t xml:space=\"preserve\">This is the contract.</w:t></w:r></w:p>"
+headers = { "header1.xml" = "<w:p><w:r><w:t xml:space=\"preserve\">Accept all terms.</w:t></w:r></w:p>" }
+text = "This is the contract.\n"
+hidden = [ { reason = "word_part_never_shown" } ]
+tracked_changes = []
+side_text = [ { kind = "header", ref = "word/header1.xml", author = "", text = "Accept all terms." } ]
+warnings = []
+
+# A row is one line, with a tab between cells.
+[[case]]
+id = "simple-table"
+body = "<w:tbl><w:tr><w:tc><w:p><w:r><w:t xml:space=\"preserve\">Item</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:t xml:space=\"preserve\">Price</w:t></w:r></w:p></w:tc></w:tr><w:tr><w:tc><w:p><w:r><w:t xml:space=\"preserve\">Support</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:t xml:space=\"preserve\">90</w:t></w:r></w:p></w:tc></w:tr></w:tbl>"
+text = "Item\tPrice\nSupport\t90\n"
+hidden = []
+tracked_changes = []
+side_text = []
+warnings = []
+
+# Word shows a comment on a note, so it is not marked.
+[[case]]
+id = "comment-on-footnote"
+body = "<w:p><w:r><w:t xml:space=\"preserve\">The fee is 90 pounds.</w:t></w:r><w:r><w:footnoteReference w:id=\"1\"/></w:r></w:p>"
+footnotes = "<w:footnote w:id=\"1\"><w:p><w:commentRangeStart w:id=\"0\"/><w:r><w:t xml:space=\"preserve\">Excluding tax.</w:t></w:r><w:commentRangeEnd w:id=\"0\"/><w:r><w:commentReference w:id=\"0\"/></w:r></w:p></w:footnote>"
+comments = "<w:comment w:id=\"0\" w:author=\"Ann\"><w:p><w:r><w:t xml:space=\"preserve\">Which tax?</w:t></w:r></w:p></w:comment>"
+text = "The fee is 90 pounds.\n"
+hidden = []
+tracked_changes = []
+side_text = [ { kind = "comment", ref = "0", author = "Ann", text = "Which tax?" }, { kind = "footnote", ref = "1", author = "", text = "Excluding tax." } ]
+warnings = [ "word_notes" ]
