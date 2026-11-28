@@ -25,6 +25,15 @@ class Mark:
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
+class SectionRefs:
+    """The headers and footers one section references."""
+
+    headers: tuple[tuple[str, str], ...]
+    footers: tuple[tuple[str, str], ...]
+    title_page: bool
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
 class BodyResult:
     """Everything the body walk finds, before it becomes a Document."""
 
@@ -33,5 +42,6 @@ class BodyResult:
     tracked_changes: tuple[TrackedChange, ...] = ()
     comment_spans: Mapping[str, Span | None] = field(default_factory=dict)
     note_refs: tuple[tuple[SideTextKind, str], ...] = ()
+    sections: tuple[SectionRefs, ...] = ()
     numbering_unknown: bool = False
     symbol_unread: bool = False

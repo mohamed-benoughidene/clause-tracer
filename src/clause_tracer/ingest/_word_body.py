@@ -15,12 +15,13 @@ from clause_tracer.core import (
     HiddenReason,
     HiddenText,
     InputTooLargeError,
+    SideTextKind,
     Span,
     TrackedChange,
     UnreadableFileError,
 )
 from clause_tracer.ingest._thresholds import WORD_TINY_HALF_POINTS
-from clause_tracer.ingest._word_model import BodyResult, Mark, Text
+from clause_tracer.ingest._word_model import BodyResult, Mark, SectionRefs, Text
 from clause_tracer.ingest._word_numbering import Numbering
 from clause_tracer.ingest._word_styles import RunProps, Styles
 from clause_tracer.ingest._xml import W_NS, Element, qname
@@ -85,6 +86,14 @@ _COMMENT_START: Final[str] = _tag("commentRangeStart")
 _COMMENT_END: Final[str] = _tag("commentRangeEnd")
 _COMMENT_REFERENCE: Final[str] = _tag("commentReference")
 _ID: Final[str] = qname(W_NS, "id")
+_TYPE: Final[str] = qname(W_NS, "type")
+_R_NS: Final[str] = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+_R_ID: Final[str] = qname(_R_NS, "id")
+_FOOTNOTE_REFERENCE: Final[str] = _tag("footnoteReference")
+_ENDNOTE_REFERENCE: Final[str] = _tag("endnoteReference")
+_HEADER_REFERENCE: Final[str] = _tag("headerReference")
+_FOOTER_REFERENCE: Final[str] = _tag("footerReference")
+_TITLE_PG: Final[str] = _tag("titlePg")
 
 _MC_ALTERNATE: Final[str] = qname(_MC_NS, "AlternateContent")
 _MC_CHOICE: Final[str] = qname(_MC_NS, "Choice")
@@ -199,6 +208,7 @@ class _Walker:
         self.hidden: list[HiddenText] = []
         self.changes: list[tuple[str, str, str]] = []
         self.comment_refs: list[str] = []
+        self.note_refs: list[tuple[SideTextKind, str]] = []
         self.symbol_unread = False
         self._quiet = quiet
         self._styles = styles if styles is not None else Styles.from_xml(None)
@@ -480,6 +490,15 @@ class _Walker:
                     local.append(self._text("\u2011"))
             elif tag == _SOFT_HYPHEN:
                 continue
+            elif tag in (_FOOTNOTE_REFERENCE, _ENDNOTE_REFERENCE):
+                ref = child.get(_ID)
+                if ref is not None:
+                    kind = (
+                        SideTextKind.FOOTNOTE
+                        if tag == _FOOTNOTE_REFERENCE
+                        else SideTextKind.ENDNOTE
+                    )
+                    self.note_refs.append((kind, ref))
             elif tag == _SYM:
                 self._read_symbol(child, local)
             else:
@@ -769,6 +788,39 @@ def _run_reasons(props: RunProps, paragraph_fill: str | None) -> tuple[HiddenRea
     return tuple(reasons)
 
 
+def _note_refs(
+    refs: list[tuple[SideTextKind, str]],
+) -> tuple[tuple[SideTextKind, str], ...]:
+    seen: set[tuple[SideTextKind, str]] = set()
+    result: list[tuple[SideTextKind, str]] = []
+    for kind, ref in refs:
+        if (kind, ref) in seen:
+            continue
+        seen.add((kind, ref))
+        result.append((kind, ref))
+    return tuple(result)
+
+
+def _sections(root: Element) -> tuple[SectionRefs, ...]:
+    sections: list[SectionRefs] = []
+    for element in root.iter(_SECT_PR):
+        headers: list[tuple[str, str]] = []
+        footers: list[tuple[str, str]] = []
+        for child in element:
+            if child.tag == _HEADER_REFERENCE:
+                headers.append((child.get(_TYPE) or "default", child.get(_R_ID) or ""))
+            elif child.tag == _FOOTER_REFERENCE:
+                footers.append((child.get(_TYPE) or "default", child.get(_R_ID) or ""))
+        sections.append(
+            SectionRefs(
+                headers=tuple(headers),
+                footers=tuple(footers),
+                title_page=any(child.tag == _TITLE_PG for child in element),
+            )
+        )
+    return tuple(sections)
+
+
 def _comment_spans(
     positions: list[tuple[Text | Mark, int, int]], references: list[str]
 ) -> dict[str, Span | None]:
@@ -872,6 +924,8 @@ def build_body(
         hidden=(*walker.hidden, *_hidden_from_positions(positions)),
         tracked_changes=_tracked_changes(walker.changes, positions),
         comment_spans=_comment_spans(positions, walker.comment_refs),
+        note_refs=_note_refs(walker.note_refs),
+        sections=_sections(root),
         numbering_unknown=numbering_unknown,
         symbol_unread=walker.symbol_unread,
     )
